@@ -1,0 +1,26 @@
+{
+    "src": [
+        "pages/LoginPage",
+        "pages/MainPage",
+        "pages/conversation/ConversationPage",
+        "pages/conversation/SingleConversationInfoPage",
+        "pages/conversation/GroupConversationInfoPage",
+        "pages/conversation/ChannelConversationInfoPage",
+        "pages/conversation/forward/ForwardMessagePage",
+        "pages/picker/PickContactPage",
+        "pages/contact/FriendRequestListPage",
+        "pages/search/SearchUserPage",
+        "pages/search/SearchPortalPage",
+        "pages/user/UserInfoPage",
+        "pages/user/PickUserPage",
+        "pages/group/FavGroupListPage",
+        "pages/group/GroupMemberListPage",
+        "pages/group/AddGroupMemberPage",
+        "pages/group/RemoveGroupMemberPage",
+        "pages/channel/ChannelListPage",
+        "pages/channel/ChannelInfoPage",
+        "pages/mm/MMMessagePreviewPage",
+        "pages/mm/MMPreviewPage",
+        "pages/TestPage"
+    ]
+}

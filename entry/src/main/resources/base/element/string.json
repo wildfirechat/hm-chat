@@ -1,0 +1,20 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "module description"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "description"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "野火IM"
+    },
+      {
+          "name": "refresh_text",
+          "value": "正在刷新"
+      }
+  ]
+}

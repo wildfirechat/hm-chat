@@ -1,0 +1,13 @@
+{
+    "name": "marswrapper",
+    "version": "1.0.0",
+    "description": "Please describe the basic information.",
+    "main": "./src/main/ets/Index.ets",
+    "author": "",
+    "license": "Apache-2.0",
+    "dependencies": {
+    },
+    "devDependencies": {
+        "@types/libmarswrapper.so": "file:./src/main/types/libmarswrapper"
+    }
+}

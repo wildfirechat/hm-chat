@@ -1,0 +1,220 @@
+import hilog from '@ohos.hilog'
+import common from '@ohos.app.ability.common'
+import wfc from '../wfc/client/wfc'
+import ConversationType from '../wfc/model/conversationType'
+import UserInfo from '../wfc/model/userInfo'
+import EventType from '../wfc/client/wfcEvent'
+import Message from '../wfc/messages/message'
+import TextMessageContent from '../wfc/messages/textMessageContent'
+import ConversationInfo from '../wfc/model/conversationInfo'
+import GroupInfo from '../wfc/model/groupInfo'
+import ChannelInfo from '../wfc/model/channelInfo'
+import helper from '../util/helper'
+import router from '@ohos.router'
+import ConnectionStatus from '../wfc/client/connectionStatus'
+import UnreadCount from '../wfc/model/unreadCount'
+import ConversationInfoItemView from '../view/ConversationInfoItemView'
+
+@Component
+@Preview
+export default struct ConversationListTab {
+    @State conversationInfos: ConversationInfo[] = [];
+    @Link conversationListTabUnreadCount: number
+
+    aboutToAppear() {
+        console.log('conversationList', 'aboutToAppear')
+        console.log('conversationList status', wfc.getConnectionStatus())
+
+        this.loadConversationList()
+        getContext(this).eventHub.on(EventType.ReceiveMessage, this.onSendMessage)
+        getContext(this).eventHub.on(EventType.SendMessage, this.onReceiveMessage)
+        getContext(this).eventHub.on(EventType.RecallMessage, this.onRecallMessage)
+        getContext(this).eventHub.on(EventType.ConnectionStatusChanged, this.onConnectionStatusChange)
+        getContext(this).eventHub.on(EventType.ConversationInfoUpdate, this.onConversationInfoUpdate)
+    }
+
+    aboutToDisappear() {
+        getContext(this).eventHub.off(EventType.ReceiveMessage, this.onReceiveMessage)
+        getContext(this).eventHub.on(EventType.SendMessage, this.onSendMessage)
+        getContext(this).eventHub.on(EventType.RecallMessage, this.onRecallMessage)
+        getContext(this).eventHub.off(EventType.ConnectionStatusChanged, this.onConnectionStatusChange)
+        getContext(this).eventHub.off(EventType.ConversationInfoUpdate, this.onConversationInfoUpdate)
+    }
+
+    onPageShow() {
+    }
+
+    loadConversationList() {
+        this.conversationInfos = wfc.getConversationInfoList([0, 1, 2, 3], [0, 1]);
+        let totalUnreadCount = 0
+        this.conversationInfos.forEach(info => {
+            if (!info.isSilent) {
+                let unreadCount: UnreadCount = info.unreadCount
+                totalUnreadCount += unreadCount.unread + unreadCount.unreadMention + unreadCount.unreadMentionAll
+            }
+        })
+        this.conversationListTabUnreadCount = totalUnreadCount
+    }
+
+    onConnectionStatusChange = status => {
+        if (status === ConnectionStatus.ConnectionStatusConnected) {
+            this.loadConversationList();
+        } else {
+            // TODO
+        }
+    }
+    onConversationInfoUpdate = (info: ConversationInfo) => {
+        this.loadConversationList()
+    }
+
+    // why？
+    // 不用箭头函数的话，evenHub 里面调用时，this 并不是当前组件
+    onReceiveMessage = (msg: Message) => {
+        this.loadConversationList();
+    }
+    onRecallMessage = (operator: string, messageUid: object) => {
+        this.loadConversationList();
+    }
+    onSendMessage = (msg: Message) => {
+        this.loadConversationList();
+    }
+
+    conversationKey(conversationInfo: ConversationInfo): string {
+        let conversation = conversationInfo.conversation;
+        let key = conversation.type + '-' + conversation.target + '-' + conversation.line
+        key += '-' + conversationInfo.timestamp
+        // @ts-ignore
+        let unreadCount = conversationInfo.unreadCount
+        if (unreadCount) {
+            key += '-' + (unreadCount.unreadMentionAll + unreadCount.unread + unreadCount.unreadMention)
+        } else {
+            key += '-0'
+        }
+        key += '-' + conversationInfo.top
+        if (conversationInfo.lastMessage) {
+            key += '-' + conversationInfo.lastMessage.messageContent.type
+        }
+        return key
+    }
+
+    build() {
+        Column() {
+            List() {
+                // TODO lazyForEach https://developer.huawei.com/consumer/cn/doc/harmonyos-guides-V2/ui-ts-performance-improvement-recommendation-0000001477981001-V2
+                ForEach(this.conversationInfos, (info: ConversationInfo, index: number) => {
+                    ListItem() {
+                        ConversationInfoItemView({ conversationInfo: info, conversationInfos: $conversationInfos })
+                            .onClick(() => {
+                                wfc.clearConversationUnreadStatus(info.conversation)
+                                router.pushUrl({
+                                    url: "pages/conversation/ConversationPage",
+                                    // url: "pages/Login",
+                                    params: {
+                                        conversation: info.conversation
+                                    }
+                                }, router.RouterMode.Standard)
+                            })
+                            .bindContextMenu(this.MenuBuilder(info), ResponseType.LongPress)
+                    }
+                    .stateStyles({
+                        pressed: {
+                            .backgroundColor('#E5E5E5')
+                        },
+                        normal: {
+                            .backgroundColor(Color.White)
+                        }
+                    })
+                }, info => this.conversationKey(info))
+            }
+            .width('100%')
+            .divider({
+                strokeWidth: 1,
+                startMargin: 60
+
+            })
+        }
+        .width('100%')
+        .height('100%')
+        .padding({ top: 5 })
+    }
+
+    conversationItemContextMenus(conversationInfo: ConversationInfo): {
+        title: string,
+        action: () => void
+    }[] {
+        let menuItems = [
+            {
+                title: '删除会话',
+                action: () => {
+                    wfc.removeConversation(conversationInfo.conversation, false);
+                    this.conversationInfos = this.conversationInfos.filter(info =>!info.conversation.equal(conversationInfo.conversation))
+                }
+            }
+        ]
+        if (conversationInfo.top) {
+            menuItems.push({
+                title: '取消置顶',
+                action: () => {
+                    wfc.setConversationTop(conversationInfo.conversation, 0, () => {
+                        // this.conversationInfo.top = 0
+                    }, null)
+                }
+            })
+        } else {
+            menuItems.push({
+                title: '置顶',
+                action: () => {
+                    wfc.setConversationTop(conversationInfo.conversation, 1, () => {
+                        // this.conversationInfo.top = 1
+                    }, null)
+                }
+            })
+        }
+
+        // if (this.conversationInfo.isSilent) {
+        //     menuItems.push({
+        //         title: '取消免打扰',
+        //         func: () => {
+        //         }
+        //     })
+        // } else {
+        //     menuItems.push({
+        //         title: '会话免打扰',
+        //         func: () => {
+        //         }
+        //     })
+        // }
+
+
+        let unreadCount = conversationInfo.unreadCount
+        if (UnreadCount && (unreadCount.unread || unreadCount.unreadMention || unreadCount.unreadMentionAll)) {
+            menuItems.push({
+                title: '标为已读',
+                action: () => {
+                    wfc.clearConversationUnreadStatus(conversationInfo.conversation)
+                }
+            })
+        } else {
+            menuItems.push({
+                title: '标为未读',
+                action: () => {
+                    wfc.markConversationAsUnread(conversationInfo.conversation, true)
+                }
+            })
+        }
+
+        return menuItems
+    }
+
+    @Builder
+    MenuBuilder(conversationInfo: ConversationInfo) {
+        Menu() {
+            ForEach(this.conversationItemContextMenus(conversationInfo), menuItem => {
+                MenuItem({ content: menuItem.title })
+                    .onClick(menuItem.action)
+
+            }, menuItem => menuItem.title)
+        }
+    }
+}
+

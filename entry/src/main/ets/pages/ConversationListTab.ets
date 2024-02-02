@@ -147,7 +147,7 @@ export default struct ConversationListTab {
                 // TODO lazyForEach https://developer.huawei.com/consumer/cn/doc/harmonyos-guides-V2/ui-ts-performance-improvement-recommendation-0000001477981001-V2
                 LazyForEach(this.conversationInfosDataSource, (info: ConversationInfo, index: number) => {
                     ListItem() {
-                        ConversationInfoItemView({ conversationInfo: info})
+                        ConversationInfoItemView({ conversationInfo: info })
                             .onClick(() => {
                                 wfc.clearConversationUnreadStatus(info.conversation)
                                 router.pushUrl({

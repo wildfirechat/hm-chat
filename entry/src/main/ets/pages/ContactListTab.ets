@@ -11,6 +11,7 @@ import EventType from '../wfc/client/wfcEvent'
 import ConnectionStatus from '../wfc/client/connectionStatus'
 import { pinyin4js } from '@ohos/pinyin4js/src/main/ets/components'
 import { UIUserInfo } from '../common/Types'
+import BasicDataSource from '../common/BasicDataSource'
 
 declare type ContactListHeader = {
     title: string,
@@ -23,8 +24,7 @@ declare type ContactListHeader = {
 
 @Component
 export default struct ContactListTab {
-    @State groupedFavContactUserInfos: UIUserInfo[] = []
-    @State groupedContactUserInfos: UIUserInfo[] = []
+    private contactDataSource: ContactDataSource = new ContactDataSource()
     @Link contactTabUnreadCount: number
     private contactCategories = [
         '↑', '☆', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
@@ -94,18 +94,20 @@ export default struct ContactListTab {
         let favUserIds = wfc.getFavUsers()
         if (favUserIds.length > 0) {
             favUserInfos = wfc.getUserInfos(favUserIds, '')
-            this.groupedFavContactUserInfos = []
+            let groupedFavContactUserInfos: UIUserInfo[] = []
             for (let i = 0; i < favUserInfos.length; i++) {
-                this.groupedFavContactUserInfos.push({
+                groupedFavContactUserInfos.push({
                     showCategory: i === 0,
                     category: '☆',
                     userInfo: favUserInfos[i]
                 })
             }
+            this.contactDataSource.setFavContactInfos(groupedFavContactUserInfos)
         }
         let friendUserIds = wfc.getMyFriendList()
         let userInfos = wfc.getUserInfos(friendUserIds, '')
-        this.groupedContactUserInfos = this.groupUserInfos(userInfos)
+        let groupedContactUserInfos = this.groupUserInfos(userInfos)
+        this.contactDataSource.setContactInfos(groupedContactUserInfos)
     }
 
     onPageShow() {
@@ -172,10 +174,10 @@ export default struct ContactListTab {
             listIndex = this.contactListHeaders.length
         } else {
             listIndex = -1
-            for (let i = 0; i < this.groupedContactUserInfos.length; i++) {
-                let gu = this.groupedContactUserInfos[i]
+            for (let i = 0; i < this.contactDataSource.groupedContactUserInfos.length; i++) {
+                let gu = this.contactDataSource.groupedContactUserInfos[i]
                 if (gu.category === category) {
-                    listIndex = this.contactListHeaders.length + this.groupedFavContactUserInfos.length + i
+                    listIndex = this.contactListHeaders.length + this.contactDataSource.groupedFavContactUserInfos.length + i
                     break
                 }
             }
@@ -242,7 +244,7 @@ export default struct ContactListTab {
                     )
 
                     // fav contact && contact
-                    ForEach(this.groupedFavContactUserInfos.concat(this.groupedContactUserInfos), (groupedUserInfo: UIUserInfo) => {
+                    LazyForEach(this.contactDataSource, (groupedUserInfo: UIUserInfo) => {
                         ListItem() {
                             Column() {
                                 if (groupedUserInfo.showCategory) {
@@ -342,5 +344,32 @@ export default struct ContactListTab {
         .alignContent(Alignment.End)
         .width('100%')
         .height('100%')
+    }
+}
+
+class ContactDataSource extends BasicDataSource<UIUserInfo> {
+    groupedFavContactUserInfos: UIUserInfo[] = []
+    groupedContactUserInfos: UIUserInfo[] = []
+
+    setContactInfos(userInfos: UIUserInfo[]): void {
+        this.groupedContactUserInfos = userInfos
+        this.notifyDataReload()
+    }
+
+    setFavContactInfos(userInfos: UIUserInfo[]): void {
+        this.groupedFavContactUserInfos = userInfos
+        this.notifyDataReload()
+    }
+
+    public totalCount(): number {
+        return this.groupedFavContactUserInfos.length + this.groupedContactUserInfos.length
+    }
+
+    public getData(index: number): UIUserInfo {
+        if (index < this.groupedFavContactUserInfos.length) {
+            return this.groupedFavContactUserInfos[index]
+        } else {
+            return this.groupedContactUserInfos[index - this.groupedFavContactUserInfos.length]
+        }
     }
 }

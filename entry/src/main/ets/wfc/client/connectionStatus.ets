@@ -16,7 +16,7 @@ export default class ConnectionStatus {
     static ConnectionStatusConnected = 1;
     static ConnectionStatusReceiveing = 2;
 
-    static desc(status) {
+    static desc(status: number) {
         const desc = {
             '-9': '客户端和IM 服务端时间不同步，请进行时钟同步',
             '-8': 'IM 服务未授权或已过期，专业版IM-Server 是绑定域名或者 ip 的，只能通过所绑定的域名去连接',

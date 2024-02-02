@@ -14,11 +14,14 @@ import router from '@ohos.router'
 import ConnectionStatus from '../wfc/client/connectionStatus'
 import UnreadCount from '../wfc/model/unreadCount'
 import ConversationInfoItemView from '../view/ConversationInfoItemView'
+import { showToast } from '../common/utils/Toast'
 
 @Component
 @Preview
 export default struct ConversationListTab {
-    @State conversationInfos: ConversationInfo[] = [];
+    @State conversationInfos: ConversationInfo[] = []
+    @State connectionStatus: number = -1
+    @State connectionStatusHeader: string = ''
     @Link conversationListTabUnreadCount: number
 
     aboutToAppear() {
@@ -57,10 +60,15 @@ export default struct ConversationListTab {
     }
 
     onConnectionStatusChange = status => {
+        this.connectionStatus = status
+        this.computeConnectionStatusHeader()
         if (status === ConnectionStatus.ConnectionStatusConnected) {
             this.loadConversationList();
         } else {
             // TODO
+        }
+        if (status === ConnectionStatus.ConnectionStatusTimeInconsistent) {
+            showToast(ConnectionStatus.desc(status))
         }
     }
     onConversationInfoUpdate = (info: ConversationInfo) => {
@@ -97,9 +105,42 @@ export default struct ConversationListTab {
         return key
     }
 
+    computeConnectionStatusHeader() {
+        let text: string
+        switch (this.connectionStatus) {
+            case ConnectionStatus.ConnectionStatusConnecting:
+                text = '正在连接...'
+                break
+            case ConnectionStatus.ConnectionStatusReceiveing:
+                text = '正在同步...'
+                break
+            case ConnectionStatus.ConnectionStatusConnected:
+                break
+            case ConnectionStatus.ConnectionStatusUnconnected:
+                break
+            default:
+                break;
+
+        }
+        this.connectionStatusHeader = text
+    }
+
     build() {
         Column() {
             List() {
+                // headers
+                if (this.connectionStatusHeader) {
+                    ListItem() {
+                        Text(this.connectionStatusHeader)
+                            .height(40)
+                            .width('100%')
+                            .backgroundColor('#F7F7F7')
+                            .textAlign(TextAlign.Center)
+
+                    }
+                    .width('100%')
+                }
+
                 // TODO lazyForEach https://developer.huawei.com/consumer/cn/doc/harmonyos-guides-V2/ui-ts-performance-improvement-recommendation-0000001477981001-V2
                 ForEach(this.conversationInfos, (info: ConversationInfo, index: number) => {
                     ListItem() {

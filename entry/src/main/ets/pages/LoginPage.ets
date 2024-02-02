@@ -14,6 +14,7 @@ struct LoginPage {
     @State message: string = '野火 IM'
     @State phoneNumber: string = ''
     @State authCode: string = ''
+    @State isLogin: boolean = false
     controller: TextInputController = new TextInputController()
 
     build() {
@@ -88,36 +89,49 @@ struct LoginPage {
             .margin({ top: 20 })
 
             Row() {
-                Button('登录')
-                    .enabled(this.phoneNumber.length === 11 && this.authCode.length > 0)
-                    .type(ButtonType.Normal)
-                    .width('100%')
-                    .borderRadius(4)
-                    .onClick(() => {
-                        console.info('login', this.phoneNumber, this.authCode, appServer)
-                        appServer.loginWithAuthCode(this.phoneNumber, this.authCode)
-                            .then(async res => {
-                                console.log('login success', res);
-                                let context = getContext(this) as common.UIAbilityContext;
-                                let preference = await data_preferences.getPreferences(context, 'wfcstore')
-                                // @ts-ignore
-                                preference.put('userId', <string> res.userId);
-                                // @ts-ignore
-                                preference.put('token', <string> res.token);
-                                preference.flush()
+                Button({ type: ButtonType.Normal, stateEffect: true }) {
+                    Row() {
+                        if (this.isLogin) {
+                            LoadingProgress().width(20).height(20).margin({ left: 12 }).color(0xFFFFFF)
+                        }
+                        Text(this.isLogin ? '登录中...' : '登录').fontColor(0xffffff).margin({ left: 5 })
+                    }.alignItems(VerticalAlign.Center)
+                }
+                .borderRadius(8)
+                .backgroundColor(0x317aff)
+                .width(90)
+                .height(40)
+                .enabled(this.phoneNumber.length === 11 && this.authCode.length > 0)
+                .type(ButtonType.Normal)
+                .width('100%')
+                .borderRadius(4)
+                .onClick(() => {
+                    this.isLogin = true
+                    console.info('login', this.phoneNumber, this.authCode, appServer)
+                    appServer.loginWithAuthCode(this.phoneNumber, this.authCode)
+                        .then(async res => {
+                            this.isLogin = false
+                            console.log('login success', res);
+                            let context = getContext(this) as common.UIAbilityContext;
+                            let preference = await data_preferences.getPreferences(context, 'wfcstore')
+                            // @ts-ignore
+                            preference.put('userId', <string> res.userId);
+                            // @ts-ignore
+                            preference.put('token', <string> res.token);
+                            preference.flush()
 
-                                // @ts-ignore
-                                wfc.connect(res.userId, res.token);
-                                router.replaceUrl({
-                                    url: "pages/MainPage",
-                                    params: {}
-                                }, router.RouterMode.Standard)
-                            })
-                            .catch(reason => {
-                                console.error('login failed', reason)
-                            })
-                        console.log('ooo end11')
-                    })
+                            // @ts-ignore
+                            wfc.connect(res.userId, res.token);
+                            router.replaceUrl({
+                                url: "pages/MainPage",
+                                params: {}
+                            }, router.RouterMode.Standard)
+                        })
+                        .catch(reason => {
+                            this.isLogin = false
+                            console.error('login failed', reason)
+                        })
+                })
 
             }
             .justifyContent(FlexAlign.Center)

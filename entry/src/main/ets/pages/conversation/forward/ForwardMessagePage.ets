@@ -188,7 +188,6 @@ export default struct ForwardMessagePage {
                                 ListItem() {
                                     ConversationInfoItemView({
                                         conversationInfo: info,
-                                        conversationInfos: $recentConversationInfos,
                                         basicMode: true
                                     })
                                         .onClick(() => {

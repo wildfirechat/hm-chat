@@ -13,7 +13,6 @@ export default struct ConversationInfoItemView {
     @State conversationInfo: ConversationInfo = null
     @State conversationItemPortrait: string = ''
     @State conversationItemName: string = ''
-    @Link conversationInfos: ConversationInfo[]
     /**
      * 仅显示头像和名称
      */

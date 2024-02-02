@@ -15,14 +15,15 @@ import ConnectionStatus from '../wfc/client/connectionStatus'
 import UnreadCount from '../wfc/model/unreadCount'
 import ConversationInfoItemView from '../view/ConversationInfoItemView'
 import { showToast } from '../common/utils/Toast'
+import BasicDataSource from '../common/BasicDataSource'
 
 @Component
 @Preview
 export default struct ConversationListTab {
-    @State conversationInfos: ConversationInfo[] = []
     @State connectionStatus: number = -1
     @State connectionStatusHeader: string = ''
     @Link conversationListTabUnreadCount: number
+    private conversationInfosDataSource: ConversationInfosDataSource = new ConversationInfosDataSource()
 
     aboutToAppear() {
         console.log('conversationList', 'aboutToAppear')
@@ -48,14 +49,16 @@ export default struct ConversationListTab {
     }
 
     loadConversationList() {
-        this.conversationInfos = wfc.getConversationInfoList([0, 1, 2, 3], [0, 1]);
+        let conversationInfos = wfc.getConversationInfoList([0, 1, 2, 3], [0, 1]);
+        this.conversationInfosDataSource.setConversationInfos(conversationInfos)
         let totalUnreadCount = 0
-        this.conversationInfos.forEach(info => {
+        conversationInfos.forEach(info => {
             if (!info.isSilent) {
                 let unreadCount: UnreadCount = info.unreadCount
                 totalUnreadCount += unreadCount.unread + unreadCount.unreadMention + unreadCount.unreadMentionAll
             }
         })
+
         this.conversationListTabUnreadCount = totalUnreadCount
     }
 
@@ -142,9 +145,9 @@ export default struct ConversationListTab {
                 }
 
                 // TODO lazyForEach https://developer.huawei.com/consumer/cn/doc/harmonyos-guides-V2/ui-ts-performance-improvement-recommendation-0000001477981001-V2
-                ForEach(this.conversationInfos, (info: ConversationInfo, index: number) => {
+                LazyForEach(this.conversationInfosDataSource, (info: ConversationInfo, index: number) => {
                     ListItem() {
-                        ConversationInfoItemView({ conversationInfo: info, conversationInfos: $conversationInfos })
+                        ConversationInfoItemView({ conversationInfo: info})
                             .onClick(() => {
                                 wfc.clearConversationUnreadStatus(info.conversation)
                                 router.pushUrl({
@@ -173,6 +176,7 @@ export default struct ConversationListTab {
                 startMargin: 60
 
             })
+            .cachedCount(5)
         }
         .width('100%')
         .height('100%')
@@ -188,7 +192,7 @@ export default struct ConversationListTab {
                 title: '删除会话',
                 action: () => {
                     wfc.removeConversation(conversationInfo.conversation, false);
-                    this.conversationInfos = this.conversationInfos.filter(info =>!info.conversation.equal(conversationInfo.conversation))
+                    this.conversationInfosDataSource.removeConversationInfo(conversationInfo)
                 }
             }
         ]
@@ -256,6 +260,45 @@ export default struct ConversationListTab {
 
             }, menuItem => menuItem.title)
         }
+    }
+}
+
+class ConversationInfosDataSource extends BasicDataSource<ConversationInfo> {
+    private conversationInfos: ConversationInfo[] = [];
+
+    public setConversationInfos(conversationInfos: ConversationInfo[]): void {
+        this.conversationInfos = conversationInfos
+        this.notifyDataReload()
+    }
+
+    public removeConversationInfo(conversationInfo: ConversationInfo): void {
+        let index = this.conversationInfos.findIndex((info: ConversationInfo) => info.conversation.equal(conversationInfo.conversation))
+        if (index >= 0) {
+            this.conversationInfos.splice(index, 1)
+            this.notifyDataDelete(index)
+        }
+    }
+
+    public update(index: number, data: ConversationInfo): void {
+        this.notifyDataChange(index)
+    }
+
+    public totalCount(): number {
+        return this.conversationInfos.length;
+    }
+
+    public getData(index: number): ConversationInfo {
+        return this.conversationInfos[index];
+    }
+
+    public addData(index: number, data: ConversationInfo): void {
+        this.conversationInfos.splice(index, 0, data);
+        this.notifyDataAdd(index);
+    }
+
+    public pushData(data: ConversationInfo): void {
+        this.conversationInfos.push(data);
+        this.notifyDataAdd(this.conversationInfos.length - 1);
     }
 }
 

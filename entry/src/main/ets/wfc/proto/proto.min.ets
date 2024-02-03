@@ -1896,19 +1896,19 @@ class WfcImpl {
         return matchMsgs;
     }
 
-    async sendConversationMessage(conversation, messageContent, toUsers = [], preparedCB, progressCB, successCB, failCB) {
+    async sendConversationMessage(conversation, messageContent, toUsers = [], preparedCB, progressCB, uploadedCB, successCB, failCB) {
         let message = new Message();
         message.conversation = conversation;
         message.messageContent = messageContent;
-        self.sendMessageEx(message, toUsers, preparedCB, progressCB, successCB, failCB);
+        self.sendMessageEx(message, toUsers, preparedCB, progressCB, uploadedCB, successCB, failCB);
     }
 
-    async sendMessage(message, preparedCB, progressCB, successCB, failCB) {
-        self.sendMessageEx(message, [], preparedCB, progressCB, successCB, failCB);
+    async sendMessage(message, preparedCB, progressCB, uploadedCB, successCB, failCB) {
+        self.sendMessageEx(message, [], preparedCB, progressCB, uploadedCB, successCB, failCB);
     }
 
     // toUsers 用来实现定向消息
-    async sendMessageEx(message, toUsers = [], preparedCB, progressCB, successCB, failCB) {
+    async sendMessageEx(message, toUsers = [], preparedCB, progressCB, uploadedCB, successCB, failCB) {
         let strConv = JSON.stringify(message.conversation);
         message.content = message.messageContent.encode();
         message.from = this.userId;
@@ -1955,6 +1955,7 @@ class WfcImpl {
             }, (remoteUrl) => {
                 insertedMsg.messageContent.remotePath = remoteUrl;
                 this.updateMessageContent(insertedMsg.messageId, insertedMsg.messageContent);
+                uploadedCB && uploadedCB(remoteUrl);
                 protoProxy.sendSavedMessage(insertedMsg.messageId, 0, (messageUid, timestamp) => {
                     messageUid = Long.fromValue(messageUid);
                     insertedMsg.messageUid = messageUid;
@@ -1997,6 +1998,11 @@ class WfcImpl {
                     progressCB(uploaded, total, message.messageId);
                 }
                 // upload progress update
+            },
+            (mediaUrl) => {
+                if (uploadedCB && typeof uploadedCB === 'function') {
+                    uploadedCB(mediaUrl);
+                }
             },
             (messageUid, timestamp) => { //successCB
                 message.status = MessageStatus.Sent;

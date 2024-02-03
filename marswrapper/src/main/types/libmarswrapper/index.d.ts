@@ -80,7 +80,7 @@ export const searchMessageByTypes: (conversationStr: string, keyword: string, co
 export const searchMessageByTypesAndTimes: (conversationStr: string, keyword: string, contTypes: number[], startTime: number, endTime: number, desc: boolean, limit: number, offset: number, withUser: string) => string;
 export const searchMessageEx2: (conversationTypes: number[], lines: number[], contTypes: number[], keyword: string, fromIndex: number, before: number, count: number, withUser: string) => string;
 export const searchMentionedMessagesEx: (conversationTypes: number[], lines: number[], keyword: string, desc: boolean, count: number, offset: number) => string;
-export const sendMessage: (conversationStr: string, messagePayload: string, toUsers: string[], expireDuration: number, preparedCB: Function, progressCB: Function, successCB: Function, errorCB: Function) => string;
+export const sendMessage: (conversationStr: string, messagePayload: string, toUsers: string[], expireDuration: number, preparedCB: Function, progressCB: Function, uploadedCB: Function, successCB: Function, errorCB: Function) => string;
 export const sendSavedMessage: (messageId: number, expireDuration: number, successCB: Function, errorCB: Function) => number;
 export const cancelSendingMessage: (messageId: number) => number;
 export const sendConferenceRequest: (strSessionId: string, roomId: string, request: string, data: string, successCB: Function, errorCB: Function) => void;

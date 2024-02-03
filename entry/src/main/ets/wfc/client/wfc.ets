@@ -1847,12 +1847,13 @@ export class WfcManager {
      * @param {[string]} toUsers 定向发送给会话中的某些用户；为空，则发给所有人；另外对单聊会话，本参数无效
      * @param {function (number, number)} preparedCB 消息已插入本地数据的回调，回调的两个参数表示：messageId, timestamp
      * @param {function (number, number)} progressCB 媒体上传进度回调，针对媒体消息，且媒体大于100K时有效，回调参数表示：uploaded, total
+     * @param {function (string)} uploadedCB 媒体上传成功回调，针对媒体消息
      * @param {function (long, number)} successCB 发送成功回调，回调参数表示：messageUid, timestamp
      * @param {function (number)} failCB
      * @returns {Promise<void>}
      */
-    async sendConversationMessage(conversation: Conversation, messageContent: MessageContent, toUsers: string[] = [], preparedCB: (messageId: number) => void = null, progressCB: (progress: number, total: number) => void = null, successCB: (messageUid: object, timestamp: number) => void = null, failCB: (err: number) => void = null) {
-        impl.sendConversationMessage(conversation, messageContent, toUsers, preparedCB, progressCB, successCB, failCB);
+    async sendConversationMessage(conversation: Conversation, messageContent: MessageContent, toUsers: string[] = [], preparedCB: (messageId: number) => void = null, progressCB: (progress: number, total: number) => void = null, uploadedCB: (mediaUrl: string) => void = null, successCB: (messageUid: object, timestamp: number) => void = null, failCB: (err: number) => void = null) {
+        impl.sendConversationMessage(conversation, messageContent, toUsers, preparedCB, progressCB, uploadedCB, successCB, failCB);
     }
 
     /**
@@ -1860,12 +1861,13 @@ export class WfcManager {
      * @param {Message} message 一定要求是{@link Message}类型
      * @param preparedCB
      * @param progressCB
+     * @param uploadedCB 媒体上传成功回调，针对媒体消息
      * @param successCB
      * @param failCB
      * @returns {Promise<void>}
      */
-    async sendMessage(message, preparedCB, progressCB, successCB, failCB) {
-        impl.sendMessage(message, preparedCB, progressCB, successCB, failCB);
+    async sendMessage(message, preparedCB, progressCB, uploadedCB, successCB, failCB) {
+        impl.sendMessage(message, preparedCB, progressCB, uploadedCB, successCB, failCB);
     }
 
     /**
@@ -1874,12 +1876,13 @@ export class WfcManager {
      * @param toUsers
      * @param preparedCB
      * @param progressCB
+     * @param uploadedCB
      * @param successCB
      * @param failCB
      * @returns {Promise<void>}
      */
-    async sendMessageEx(message, toUsers = [], preparedCB, progressCB, successCB, failCB) {
-        impl.sendMessageEx(message, toUsers, preparedCB, progressCB, successCB, failCB);
+    async sendMessageEx(message, toUsers = [], preparedCB, progressCB, uploadedCB, successCB, failCB) {
+        impl.sendMessageEx(message, toUsers, preparedCB, progressCB, uploadedCB, successCB, failCB);
     }
 
     /**

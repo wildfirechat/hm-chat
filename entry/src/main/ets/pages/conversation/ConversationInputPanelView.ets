@@ -50,6 +50,7 @@ export default struct ConversationInputPanelView {
     @Link showAudioRecorderView: boolean
     @Link showCancelRecordIndicator: boolean
     @Link recordCountDown: number
+    @Link @Watch('onCollapseConversationInputPanelView') collapseConversationInputPanelViewTimestamp: number
     // 取消多选时，需要先将 enableMultiCheck 置为 false，在清空 checkedMessages
     @Link enableMultiCheck: boolean
     @Link checkedMessages: Message[]
@@ -253,6 +254,11 @@ export default struct ConversationInputPanelView {
             }
         }
     ]
+
+    onCollapseConversationInputPanelView(propName: string) {
+        this.showEmojiPanel = false
+        this.showExtPanel = false
+    }
 
     aboutToAppear() {
         this.checkKeyboardHeightInternal = setInterval(() => {

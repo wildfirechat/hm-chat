@@ -50,6 +50,7 @@ struct ConversationPage {
         key: string,
         value: number
     }[] = null
+    @State collapseConversationInputPanelViewTimestamp: number = 0
     @State enableMultiCheck: boolean = false
     @State checkedMessages: Message[] = []
     private checkValueChangeTriggerByClick = false
@@ -519,6 +520,7 @@ struct ConversationPage {
             .backgroundColor('#F3F3F3')
             .onTouch((event?: TouchEvent) => {
                 this.putDownRefresh(event);
+                this.collapseConversationInputPanelViewTimestamp = new Date().getTime()
             })
 
             if (this.conversation) {
@@ -529,7 +531,8 @@ struct ConversationPage {
                     recordCountDown: $recordCountDown,
                     enableMultiCheck: $enableMultiCheck,
                     messages: $messages,
-                    checkedMessages: $checkedMessages
+                    checkedMessages: $checkedMessages,
+                    collapseConversationInputPanelViewTimestamp: $collapseConversationInputPanelViewTimestamp
                 })
             }
         }

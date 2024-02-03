@@ -136,6 +136,14 @@ export class WfcManager {
     }
 
     /**
+     * 设置平台类型
+     * @param {number} platform 平台类型，10是鸿蒙手机，11是鸿蒙pad，12是鸿蒙电脑.
+     */
+    setPlatform(platform) {
+        impl.setPlatform(platform);
+    }
+
+    /**
      * 连接服务器
      * @param {string} userId 用户id
      * @param {string} token 用户token，生成token时，所使用的clientId，一定要通过{@link getClientId}获取
@@ -164,10 +172,8 @@ export class WfcManager {
      * @param {String} token 设备token
      */
     setDeviceToken(pushType, token) {
-        // fixme
-        // impl.setDeviceToken(pushType, token);
+        impl.setDeviceToken(pushType, token);
     }
-
 
     /**
      * 主动断开连接
@@ -176,7 +182,7 @@ export class WfcManager {
      * @param cleanSession 是否清除会话session，清除之后，所有之前的会话信息会被删除
      */
     disconnect(disablePush: boolean, cleanSession: boolean) {
-        impl.disconnect(true, cleanSession);
+        impl.disconnect(disablePush, cleanSession);
     }
 
     setPackageName(packageName) {

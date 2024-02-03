@@ -369,6 +369,10 @@ class WfcImpl {
         return protoProxy.isTcpShortLink();
     }
 
+    setPlatform(platform) {
+        protoProxy.setPlatform(platform);
+    }
+
     connect(userId, token) {
         if (!self.userId) {
             self.userId = userId;
@@ -399,9 +403,13 @@ class WfcImpl {
         protoProxy.setPackageName(packageName);
     }
 
+    setDeviceToken(pushType, token) {
+        protoProxy.setDeviceToken(pushType, token);
+    }
+
     disconnect(disablePush, cleanSession) {
         self.userId = '';
-        protoProxy.disconnect(disablePush);
+        protoProxy.disconnect(disablePush, cleanSession);
 
 
         //sleep 1 second wait disconnect with im server

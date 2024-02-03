@@ -256,8 +256,14 @@ export default struct ConversationInputPanelView {
     ]
 
     onCollapseConversationInputPanelView(propName: string) {
+        if (!this.collapseConversationInputPanelViewTimestamp) {
+            return
+        }
         this.showEmojiPanel = false
         this.showExtPanel = false
+        setTimeout(() => {
+            this.collapseConversationInputPanelViewTimestamp = 0
+        }, 100)
     }
 
     aboutToAppear() {
@@ -380,6 +386,7 @@ export default struct ConversationInputPanelView {
                                 // this.showEmojiPanel = false
                                 this.textInputFocused = true
                             })
+                            .focusable(this.collapseConversationInputPanelViewTimestamp === 0)
                             .onBlur(() => {
                                 this.textInputFocused = false
                             })

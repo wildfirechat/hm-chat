@@ -10,6 +10,7 @@ import CheckableUserItemView from '../view/CheckableUserItemView'
 import UserInfo from '../wfc/model/userInfo'
 import { pinyin4js } from '@ohos/pinyin4js'
 import { UIUserInfo } from '../common/Types'
+import BasicDataSource from '../common/BasicDataSource'
 
 @Component
 export default struct CheckableUserListView {
@@ -17,6 +18,7 @@ export default struct CheckableUserListView {
     @State filteredUserInfos: UserInfo[] = []
     @State searchInputViewMaxWidth: string = '100%'
     private userInfos: UserInfo[]
+    private userInfoDataSource: UserInfoDataSource = new UserInfoDataSource()
     private showCategory: boolean
     private uncheckableUserIds: string[] = []
     private showSearchView: boolean = false
@@ -24,6 +26,7 @@ export default struct CheckableUserListView {
 
     aboutToAppear() {
         this.filteredUserInfos = this.userInfos
+        this.userInfoDataSource.setUserInfos(this.groupUserInfos(this.filteredUserInfos))
     }
 
     onCheckUser = (info: UserInfo, checked?: boolean) => {
@@ -58,8 +61,8 @@ export default struct CheckableUserListView {
             })
         } else {
             this.filteredUserInfos = this.userInfos
-
         }
+        this.userInfoDataSource.setUserInfos(this.groupUserInfos(this.filteredUserInfos))
     }
 
     isChecked(userInfo: UserInfo): boolean {
@@ -171,7 +174,7 @@ export default struct CheckableUserListView {
                 .alignListItem(ListItemAlign.Center)
             }
             List() {
-                ForEach(this.groupUserInfos(this.filteredUserInfos), (info: UIUserInfo) => {
+                LazyForEach(this.userInfoDataSource, (info: UIUserInfo) => {
                     ListItem() {
                         CheckableUserItemView({
                             checkedUsers: $checkedUsers,
@@ -194,5 +197,22 @@ export default struct CheckableUserListView {
         }
         .width('100%')
         .height('100%')
+    }
+}
+
+class UserInfoDataSource extends BasicDataSource<UIUserInfo> {
+    private userInfos: UIUserInfo[] = []
+
+    setUserInfos(userInfos: UIUserInfo[]): void {
+        this.userInfos = userInfos
+        this.notifyDataReload()
+    }
+
+    public totalCount(): number {
+        return this.userInfos.length
+    }
+
+    public getData(index: number): UIUserInfo {
+        return this.userInfos[index]
     }
 }

@@ -23,7 +23,7 @@ export default struct ConversationListTab {
     @State connectionStatus: number = -1
     @State connectionStatusHeader: string = ''
     @Link conversationListTabUnreadCount: number
-    private conversationInfosDataSource: ConversationInfosDataSource = new ConversationInfosDataSource()
+    private conversationInfoDataSource: ConversationInfoDataSource = new ConversationInfoDataSource()
 
     aboutToAppear() {
         console.log('conversationList', 'aboutToAppear')
@@ -50,7 +50,7 @@ export default struct ConversationListTab {
 
     loadConversationList() {
         let conversationInfos = wfc.getConversationInfoList([0, 1, 2, 3], [0, 1]);
-        this.conversationInfosDataSource.setConversationInfos(conversationInfos)
+        this.conversationInfoDataSource.setConversationInfos(conversationInfos)
         let totalUnreadCount = 0
         conversationInfos.forEach(info => {
             if (!info.isSilent) {
@@ -145,7 +145,7 @@ export default struct ConversationListTab {
                 }
 
                 // TODO lazyForEach https://developer.huawei.com/consumer/cn/doc/harmonyos-guides-V2/ui-ts-performance-improvement-recommendation-0000001477981001-V2
-                LazyForEach(this.conversationInfosDataSource, (info: ConversationInfo, index: number) => {
+                LazyForEach(this.conversationInfoDataSource, (info: ConversationInfo, index: number) => {
                     ListItem() {
                         ConversationInfoItemView({ conversationInfo: info })
                             .onClick(() => {
@@ -192,7 +192,7 @@ export default struct ConversationListTab {
                 title: '删除会话',
                 action: () => {
                     wfc.removeConversation(conversationInfo.conversation, false);
-                    this.conversationInfosDataSource.removeConversationInfo(conversationInfo)
+                    this.conversationInfoDataSource.removeConversationInfo(conversationInfo)
                 }
             }
         ]
@@ -263,7 +263,7 @@ export default struct ConversationListTab {
     }
 }
 
-class ConversationInfosDataSource extends BasicDataSource<ConversationInfo> {
+class ConversationInfoDataSource extends BasicDataSource<ConversationInfo> {
     private conversationInfos: ConversationInfo[] = [];
 
     public setConversationInfos(conversationInfos: ConversationInfo[]): void {

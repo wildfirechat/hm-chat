@@ -19,7 +19,6 @@ import Message from '../../wfc/messages/message'
 import router from '@ohos.router'
 import ActionSheetDialog from '../../view/ActionSheetDialog'
 import EmojiInputPanelView from './emoji/EmojiInputPanelView'
-import inputMethodEngine from '@ohos.inputMethodEngine';
 
 
 const INPUT_ICON_WIDTH = 30
@@ -66,8 +65,6 @@ export default struct ConversationInputPanelView {
     private recordAudioStartMillis: number = 0
     private forwardMessageDialogController: CustomDialogController
     private deleteMessageDialogController: CustomDialogController
-    private keyboardController: inputMethodEngine.KeyboardController
-    private textInputClient: inputMethodEngine.TextInputClient
     private conversationExts: ConversationExt[] = [
         {
             title: '照片',
@@ -278,24 +275,8 @@ export default struct ConversationInputPanelView {
             }
         }, 100)
 
-        console.log('xxxxxxxxxx ts inputStart')
-        inputMethodEngine.getInputMethodEngine().on('inputStart', (kbController, textClient) => {
-            this.keyboardController = kbController;
-            this.textInputClient = textClient;
-            console.log('xxxxxxxxxxxxxx inputStart')
-            textClient.insertText('hello world', (err, data) => {
-                console.log('xxxxxxxx inserted', err, data)
-            })
-        });
-
-        inputMethodEngine.getInputMethodAbility().on('inputStart', (kbController, textClient) => {
-            // this.keyboardController = kbController;
-            // this.textInputClient = textClient;
-            console.log('xxxxxxxxxxxxxx inputStart 00')
-            textClient.insertText('hello world', (err, data) => {
-                console.log('xxxxxxxx inserted', err, data)
-            })
-        });
+        // TODO 输入法将页面网上顶的问题，追踪下面链接
+        // https://developer.huawei.com/consumer/cn/forum/topic/0204139962705742016?fid=0102683795438680754
     }
 
     async startRecordAudio() {

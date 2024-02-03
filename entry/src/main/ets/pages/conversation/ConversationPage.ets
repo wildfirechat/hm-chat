@@ -343,6 +343,10 @@ struct ConversationPage {
                                 .fontSize(13)
                         }
 
+                        Blank()
+                        .width('100%')
+                        .layoutWeight(1)
+
                         List({ scroller: this.scroller }) {
                             ForEach(this.messages,
                                 (msg: Message, index: number) => {
@@ -491,10 +495,11 @@ struct ConversationPage {
                         .onScrollIndex((star, end) => {
                             this.currentMessageIndex = star;
                         })
+                        .listDirection(Axis.Vertical)
                         .width('100%')
-                        .layoutWeight(1)
 
                     }
+                    .justifyContent(FlexAlign.End)
                     .width('100%')
                     .height('100%')
 

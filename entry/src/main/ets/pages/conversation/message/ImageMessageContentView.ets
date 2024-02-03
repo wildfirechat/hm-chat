@@ -38,7 +38,7 @@ export default struct ImageMessageContentView {
             .alt(this.thumbnail())
             .objectFit(ImageFit.Contain)
             .width(this.imageWidth())
-            .constraintSize({ maxWidth: 200 })
+            .constraintSize({ minWidth: 100, maxWidth: 200 })
             .borderRadius(4)
             .onClick(event => {
                 router.pushUrl({

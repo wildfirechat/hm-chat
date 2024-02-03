@@ -5,6 +5,7 @@ import ImageMessageContent from '../../wfc/messages/imageMessageContent';
 import Message from '../../wfc/messages/message';
 import MessageContentType from '../../wfc/messages/messageContentType';
 import VideoMessageContent from '../../wfc/messages/videoMessageContent';
+import { exist } from '../../common/utils/FileUtil'
 
 @Entry
 @Component
@@ -44,7 +45,7 @@ export default struct MMMessagePreviewPage {
             let imageMessageContent = message.messageContent as ImageMessageContent
             return {
                 type: 'image',
-                url: imageMessageContent.remotePath,
+                url: imageMessageContent.localPath && exist(imageMessageContent.localPath) ? 'file://' + imageMessageContent.localPath : imageMessageContent.remotePath,
                 thumbnail: 'data:image/jpeg;base64,' + imageMessageContent.thumbnail
             } as MediaEntry
 
@@ -52,7 +53,7 @@ export default struct MMMessagePreviewPage {
             let videoMessageContent = message.messageContent as VideoMessageContent
             return {
                 type: 'video',
-                url: videoMessageContent.remotePath,
+                url: videoMessageContent.localPath && exist(videoMessageContent.localPath) ? 'file://' + videoMessageContent.localPath : videoMessageContent.remotePath,
                 thumbnail: 'data:image/jpeg;base64,' + videoMessageContent.thumbnail
             } as MediaEntry
         }

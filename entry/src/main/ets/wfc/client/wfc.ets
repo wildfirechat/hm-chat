@@ -2409,12 +2409,28 @@ export class WfcManager {
 
     // 兼容 web 端
     unescape(str) {
-        return decodeURIComponent(str)
+        return decodeURIComponent(str.replace(/\+/g, " "));
     }
 
     // 兼容 web 端
     escape(str) {
-        return encodeURIComponent(str)
+        let encodedString = "";
+        for (var i = 0; i < str.length; i++) {
+            var code = str.charCodeAt(i);
+            if (
+                code === 0x40 ||
+                (code >= 0x30 && code <= 0x39) ||
+                (code >= 0x41 && code <= 0x5A) ||
+                (code >= 0x61 && code <= 0x7A)
+            ) {
+                encodedString += str.charAt(i);
+            } else if (code < 256) {
+                encodedString += "%" + ("00" + code.toString(16)).slice(-2).toUpperCase();
+            } else {
+                encodedString += "%" + ("0000" + code.toString(16)).slice(-4).toUpperCase();
+            }
+        }
+        return encodedString;
     }
 
     defaultUserPortrait(userInfo) {

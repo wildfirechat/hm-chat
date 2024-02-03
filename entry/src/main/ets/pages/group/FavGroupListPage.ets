@@ -17,10 +17,9 @@ struct FavGroupListPage {
         Navigation() {
             Text('保存到通讯录的群组')
                 .width('100%')
-                .height(24)
                 .fontSize(13)
                 .fontColor('#989898')
-                .padding({ left: 10 })
+                .padding(10)
                 .backgroundColor('#E5E5E5')
 
             List() {

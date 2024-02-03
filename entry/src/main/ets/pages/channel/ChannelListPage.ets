@@ -9,7 +9,7 @@ import GroupInfo from '../../wfc/model/groupInfo'
 
 @Entry
 @Component
-struct FavGroupListPage {
+struct ChannelListPage {
     @State channelList: ChannelInfo[] = []
 
     aboutToAppear() {
@@ -47,10 +47,9 @@ struct FavGroupListPage {
         Navigation() {
             Text('我订阅的频道')
                 .width('100%')
-                .height(24)
                 .fontSize(13)
                 .fontColor('#989898')
-                .padding({ left: 10 })
+                .padding(10)
                 .backgroundColor('#E5E5E5')
 
             List() {

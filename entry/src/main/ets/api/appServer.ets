@@ -3,9 +3,10 @@
 import http from '@ohos.net.http';
 import data_preferences from '@ohos.data.preferences';
 import wfc from 'marswrapper'
+import Config from '../config';
 
 class AppServer {
-    baseUrl = 'https://app.wildfirechat.net'
+    baseUrl = Config.APP_SERVER
     authToken = ''
 
     requestAuthCode(mobile: string) {
@@ -16,7 +17,7 @@ class AppServer {
         let obj = {
             'mobile': phone,
             'code': authCode,
-            'platform': 2,
+            'platform': Config.CURRENT_PLATFORM,
             'clientId': wfc.getClientId(),
         }
         return this._post('/login', obj)

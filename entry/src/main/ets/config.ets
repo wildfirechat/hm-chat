@@ -40,6 +40,12 @@ export default class Config {
     static SDK_PLATFORM_OSX = 4;
     static SDK_PLATFORM_WEB = 5;
     static SDK_PLATFORM_WX = 6;
+    static SDK_PLATFORM_HARMONY = 10;
+    static SDK_PLATFORM_HARMONYPAD = 11;
+    static SDK_PLATFORM_HARMONYPC = 12;
+
+    //当前的平台，只能是 SDK_PLATFORM_HARMONY SDK_PLATFORM_HARMONYPAD 和 SDK_PLATFORM_HARMONYPC中的一个
+    static CURRENT_PLATFORM = Config.SDK_PLATFORM_HARMONY;
 
     // html5 audio 标签不能播放amr格式的音频，需要将amr格式转换为mp3格式
     // 本服务传入amr音频文件的地址，将音频文件转换为mp3格式，并以application/octet-stream的格式返回

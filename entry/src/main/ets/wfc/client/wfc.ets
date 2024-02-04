@@ -73,6 +73,8 @@ export class WfcManager {
      */
     init(context, eventHub, dbPath) {
         impl.init(context, eventHub, dbPath);
+        //Todo 配置文件里的平台这里设置。
+        // self.setPlatform(9);
         // if (Config.ENABLE_PTT) {
         //     pttClient.init();
         // }

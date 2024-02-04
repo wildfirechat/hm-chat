@@ -16,6 +16,7 @@ import UnreadCount from '../wfc/model/unreadCount'
 import ConversationInfoItemView from '../view/ConversationInfoItemView'
 import { showToast } from '../common/utils/Toast'
 import BasicDataSource from '../common/BasicDataSource'
+import data_preferences from '@ohos.data.preferences';
 
 @Component
 @Preview
@@ -24,25 +25,27 @@ export default struct ConversationListTab {
     @State connectionStatusHeader: string = ''
     @Link conversationListTabUnreadCount: number
     private conversationInfoDataSource: ConversationInfoDataSource = new ConversationInfoDataSource()
+    private context: Context
 
     aboutToAppear() {
         console.log('conversationList', 'aboutToAppear')
         console.log('conversationList status', wfc.getConnectionStatus())
 
         this.loadConversationList()
-        getContext(this).eventHub.on(EventType.ReceiveMessage, this.onSendMessage)
-        getContext(this).eventHub.on(EventType.SendMessage, this.onReceiveMessage)
-        getContext(this).eventHub.on(EventType.RecallMessage, this.onRecallMessage)
-        getContext(this).eventHub.on(EventType.ConnectionStatusChanged, this.onConnectionStatusChange)
-        getContext(this).eventHub.on(EventType.ConversationInfoUpdate, this.onConversationInfoUpdate)
+        this.context = getContext(this)
+        this.context.eventHub.on(EventType.ReceiveMessage, this.onSendMessage)
+        this.context.eventHub.on(EventType.SendMessage, this.onReceiveMessage)
+        this.context.eventHub.on(EventType.RecallMessage, this.onRecallMessage)
+        this.context.eventHub.on(EventType.ConnectionStatusChanged, this.onConnectionStatusChange)
+        this.context.eventHub.on(EventType.ConversationInfoUpdate, this.onConversationInfoUpdate)
     }
 
     aboutToDisappear() {
-        getContext(this).eventHub.off(EventType.ReceiveMessage, this.onReceiveMessage)
-        getContext(this).eventHub.on(EventType.SendMessage, this.onSendMessage)
-        getContext(this).eventHub.on(EventType.RecallMessage, this.onRecallMessage)
-        getContext(this).eventHub.off(EventType.ConnectionStatusChanged, this.onConnectionStatusChange)
-        getContext(this).eventHub.off(EventType.ConversationInfoUpdate, this.onConversationInfoUpdate)
+        this.context.eventHub.off(EventType.ReceiveMessage, this.onReceiveMessage)
+        this.context.eventHub.on(EventType.SendMessage, this.onSendMessage)
+        this.context.eventHub.on(EventType.RecallMessage, this.onRecallMessage)
+        this.context.eventHub.off(EventType.ConnectionStatusChanged, this.onConnectionStatusChange)
+        this.context.eventHub.off(EventType.ConversationInfoUpdate, this.onConversationInfoUpdate)
     }
 
     onPageShow() {
@@ -64,14 +67,36 @@ export default struct ConversationListTab {
 
     onConnectionStatusChange = status => {
         this.connectionStatus = status
+        if (status === ConnectionStatus.ConnectionStatusTokenIncorrect
+        || status === ConnectionStatus.ConnectionStatusSecretKeyMismatch
+        || status === ConnectionStatus.ConnectionStatusRejected
+        || status === ConnectionStatus.ConnectionStatusLogout
+        || status === ConnectionStatus.ConnectionStatusKickedOff) {
+            showToast(ConnectionStatus.desc(status))
+
+            data_preferences.deletePreferences(this.context, 'wfcstore')
+            if (status === ConnectionStatus.ConnectionStatusLogout) {
+                router.replaceUrl({ url: 'pages/LoginPage' }, router.RouterMode.Standard)
+            } else {
+                wfc.disconnect(true, false)
+                if (status === ConnectionStatus.ConnectionStatusKickedOff) {
+                    router.replaceUrl({ url: 'pages/LoginPage' }, router.RouterMode.Standard)
+                }
+            }
+
+            return
+        }
+
+        if (status === ConnectionStatus.ConnectionStatusTimeInconsistent) {
+            showToast(ConnectionStatus.desc(status))
+            return
+        }
+
         this.computeConnectionStatusHeader()
         if (status === ConnectionStatus.ConnectionStatusConnected) {
             this.loadConversationList();
         } else {
             // TODO
-        }
-        if (status === ConnectionStatus.ConnectionStatusTimeInconsistent) {
-            showToast(ConnectionStatus.desc(status))
         }
     }
     onConversationInfoUpdate = (info: ConversationInfo) => {

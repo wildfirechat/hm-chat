@@ -57,7 +57,6 @@ export default struct ConversationInfoItemView {
                                 .padding(2)
                                 .borderRadius(4)
                         }
-                        .backgroundColor(Color.Green)
                     } else {
                         Badge({
                             count: this.conversationUnreadCount(),

@@ -87,8 +87,8 @@ export default struct MeTab {
             Column() {
                 OptionItemView({ icon: $r('app.media.ic_settings_file'), title: '文件' })
                 Divider()
-                    .height(0.4)
                     .margin({ left: 40 })
+                    .color('#F7F7F7')
                 OptionItemView({ icon: $r('app.media.ic_star'), title: '收藏' })
             }
             .margin({ top: 10, bottom: 10 })
@@ -97,8 +97,8 @@ export default struct MeTab {
             Column() {
                 OptionItemView({ icon: $r('app.media.ic_theme'), title: '主题' })
                 Divider()
-                    .height(0.4)
                     .margin({ left: 40 })
+                    .color('#F7F7F7')
                 OptionItemView({ icon: $r('app.media.ic_setting'), title: '设置' })
             }
             .margin({ top: 10, bottom: 10 })

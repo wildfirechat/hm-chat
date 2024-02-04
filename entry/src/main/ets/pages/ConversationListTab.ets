@@ -171,11 +171,6 @@ export default struct ConversationListTab {
                 }, info => this.conversationKey(info))
             }
             .width('100%')
-            .divider({
-                strokeWidth: 1,
-                startMargin: 60
-
-            })
             .cachedCount(5)
         }
         .width('100%')

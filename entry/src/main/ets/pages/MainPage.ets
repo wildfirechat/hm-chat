@@ -183,7 +183,7 @@ struct MainPage {
     @Builder
     SubMoreMenus() {
         Menu() {
-            MenuItem({ startIcon: $r('app.media.ic_create_group_chat'), content: "创建群聊" })
+            MenuItem({ startIcon: $r('app.media.faqiqunliao_iconfont'), content: "创建群聊" })
                 .onClick(() => {
                     this.isNewPickContact = true
                     router.pushUrl({
@@ -191,19 +191,19 @@ struct MainPage {
                     }, router.RouterMode.Standard).then(() => {
                     })
                 })
-            MenuItem({ startIcon: $r('app.media.ic_create_group_chat'), content: "发起密聊" })
+            MenuItem({ startIcon: $r('app.media.faqiqunliao_iconfont'), content: "发起密聊" })
                 .enabled(false)
                 .onClick(() => {
                     showToast('发起密聊')
                 })
-            MenuItem({ startIcon: $r('app.media.ic_add'), content: "添加朋友" })
+            MenuItem({ startIcon: $r('app.media.tianjiapengyou_iconfont'), content: "添加朋友" })
                 .onClick(() => {
                     router.pushUrl({
                         url: "pages/search/SearchUserPage",
                     }, router.RouterMode.Standard).then(() => {
                     })
                 })
-            MenuItem({ startIcon: $r('app.media.qr_code'), content: "扫一扫" })
+            MenuItem({ startIcon: $r('app.media.saoyisao1_iconfont'), content: "扫一扫" })
                 .onClick(() => {
                     showToast('扫一扫')
                 })

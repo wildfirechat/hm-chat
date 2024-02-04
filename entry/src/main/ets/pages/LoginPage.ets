@@ -101,7 +101,7 @@ struct LoginPage {
                 .backgroundColor(0x317aff)
                 .width(90)
                 .height(40)
-                .enabled(this.phoneNumber.length === 11 && this.authCode.length > 0)
+                .enabled(!this.isLogin && this.phoneNumber.length === 11 && this.authCode.length > 0)
                 .type(ButtonType.Normal)
                 .width('100%')
                 .borderRadius(4)

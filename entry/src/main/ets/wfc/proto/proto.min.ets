@@ -1410,7 +1410,7 @@ class WfcImpl {
     }
 
     setConversationSlient(conversation, silent, successCB, failCB) {
-        protoProxy.setConversationSlient(JSON.stringify(conversation), silent, () => {
+        protoProxy.setConversationSilent(JSON.stringify(conversation), silent, () => {
             let conversationInfo = self.getConversationInfo(conversation);
             self.eventEmitter.emit(EventType.ConversationInfoUpdate, conversationInfo);
 

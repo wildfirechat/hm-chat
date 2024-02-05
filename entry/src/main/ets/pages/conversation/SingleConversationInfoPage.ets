@@ -46,8 +46,10 @@ export default struct SingleConversationInfoPage {
                     Row() {
                         Text('消息免打扰')
                         Toggle({ type: ToggleType.Switch, isOn: this.conversationInfo.isSilent })
-                            .onChange(() => {
-
+                            .onChange(isOn => {
+                                wfc.setConversationSlient(this.conversationInfo.conversation, isOn, null, err => {
+                                    showToast('设置消息免打扰失败 ' + err)
+                                })
                             })
                     }
                     .justifyContent(FlexAlign.SpaceBetween)

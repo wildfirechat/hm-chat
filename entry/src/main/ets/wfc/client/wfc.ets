@@ -1301,7 +1301,7 @@ export class WfcManager {
      * @param {function ()} successCB
      * @param {function (number)} failCB
      */
-    setConversationSlient(conversation, silent, successCB, failCB) {
+    setConversationSlient(conversation: Conversation, silent: boolean, successCB: () => void, failCB: (err: number) => void) {
         impl.setConversationSlient(conversation, silent, successCB, failCB);
     }
 

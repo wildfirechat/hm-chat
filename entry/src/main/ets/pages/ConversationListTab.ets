@@ -38,6 +38,7 @@ export default struct ConversationListTab {
         this.context.eventHub.on(EventType.RecallMessage, this.onRecallMessage)
         this.context.eventHub.on(EventType.ConnectionStatusChanged, this.onConnectionStatusChange)
         this.context.eventHub.on(EventType.ConversationInfoUpdate, this.onConversationInfoUpdate)
+        this.context.eventHub.on(EventType.SettingUpdate, this.onSettingUpdate)
     }
 
     aboutToDisappear() {
@@ -46,6 +47,7 @@ export default struct ConversationListTab {
         this.context.eventHub.on(EventType.RecallMessage, this.onRecallMessage)
         this.context.eventHub.off(EventType.ConnectionStatusChanged, this.onConnectionStatusChange)
         this.context.eventHub.off(EventType.ConversationInfoUpdate, this.onConversationInfoUpdate)
+        this.context.eventHub.on(EventType.SettingUpdate, this.onSettingUpdate)
     }
 
     onPageShow() {
@@ -106,13 +108,16 @@ export default struct ConversationListTab {
     // why？
     // 不用箭头函数的话，evenHub 里面调用时，this 并不是当前组件
     onReceiveMessage = (msg: Message) => {
-        this.loadConversationList();
+        this.loadConversationList()
     }
     onRecallMessage = (operator: string, messageUid: object) => {
-        this.loadConversationList();
+        this.loadConversationList()
     }
     onSendMessage = (msg: Message) => {
-        this.loadConversationList();
+        this.loadConversationList()
+    }
+    onSettingUpdate = () => {
+        this.loadConversationList()
     }
 
     conversationKey(conversationInfo: ConversationInfo): string {
@@ -127,6 +132,7 @@ export default struct ConversationListTab {
             key += '-0'
         }
         key += '-' + conversationInfo.top
+        key += '-' + conversationInfo.isSilent
         if (conversationInfo.lastMessage) {
             key += '-' + conversationInfo.lastMessage.messageContent.type
         }

@@ -376,6 +376,7 @@ export default struct ConversationInputPanelView {
                                 // this.showEmojiPanel = false
                             })
                             .margin({ left: 10, right: 10 })
+                            .height(40)
                             .borderRadius(4)
                             .layoutWeight(1)
                     } else {
@@ -383,9 +384,17 @@ export default struct ConversationInputPanelView {
                             .layoutWeight(1)
                             .margin({ left: 10, right: 10 })
                             .borderRadius(4)
-                                //.fontColor(Color.Black)
+                                .fontColor('#7E7E7E')
                                 // .backgroundColor('#F3F3F3')
                             .type(ButtonType.Normal)
+                            .stateStyles({
+                                pressed: {
+                                    .backgroundColor('#E5E5E5')
+                                },
+                                normal: {
+                                    .backgroundColor(Color.White)
+                                }
+                            })
                             .onTouch(event => {
                                 event.stopPropagation()
                                 if (event.type === TouchType.Down) {
@@ -417,6 +426,7 @@ export default struct ConversationInputPanelView {
                         .onClick(() => {
                             this.showExtPanel = false
                             this.showEmojiPanel = !this.textInputFocused
+                            this.showAudioRecorderButton = false
                         })
                     if (this.text.trim().length > 0) {
                         Button('发送')
@@ -440,6 +450,7 @@ export default struct ConversationInputPanelView {
                             .onClick(() => {
                                 this.showExtPanel = true
                                 this.showEmojiPanel = false
+                                this.showAudioRecorderButton = false
                             })
                     }
                 }
@@ -491,6 +502,7 @@ export default struct ConversationInputPanelView {
                         .height(this.keyboardHeight)
                 }
             }
+            .backgroundColor('#F7F7F7')
         }
     }
 }

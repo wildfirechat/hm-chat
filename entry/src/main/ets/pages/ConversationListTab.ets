@@ -155,6 +155,8 @@ export default struct ConversationListTab {
 
     build() {
         Column() {
+            Divider()
+                .color('#F7F7F7')
             List() {
                 // headers
                 if (this.connectionStatusHeader) {
@@ -200,7 +202,6 @@ export default struct ConversationListTab {
         }
         .width('100%')
         .height('100%')
-        .padding({ top: 5 })
     }
 
     conversationItemContextMenus(conversationInfo: ConversationInfo): {

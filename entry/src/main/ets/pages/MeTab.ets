@@ -106,10 +106,13 @@ export default struct MeTab {
 
             OptionItemView({ title: 'API测试页' })
                 .onClick(() => {
-                    // router.pushUrl({ url: 'pages/user/PickUserPage' }, router.RouterMode.Standard)
-                    router.pushUrl({
-                        url: 'pages/conversation/forward/ForwardMessagePage'
-                    })
+                    router.pushUrl({ url: 'pages/misc/WebViewPage', params: {
+                        url: 'https://baidu.com',
+                        title: '百度。。'
+                    } }, router.RouterMode.Standard)
+                    // router.pushUrl({
+                    //     url: 'pages/conversation/forward/ForwardMessagePage'
+                    // })
                 })
 
             Button('退出')

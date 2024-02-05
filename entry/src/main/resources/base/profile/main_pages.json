@@ -21,6 +21,7 @@
         "pages/channel/ChannelInfoPage",
         "pages/mm/MMMessagePreviewPage",
         "pages/mm/MMPreviewPage",
+        "pages/misc/WebViewPage",
         "pages/TestPage"
     ]
 }

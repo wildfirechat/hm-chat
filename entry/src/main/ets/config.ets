@@ -41,8 +41,8 @@ export default class Config {
     static SDK_PLATFORM_WEB = 5;
     static SDK_PLATFORM_WX = 6;
     static SDK_PLATFORM_HARMONY = 10;
-    static SDK_PLATFORM_HARMONYPAD = 11;
-    static SDK_PLATFORM_HARMONYPC = 12;
+    static SDK_PLATFORM_HARMONY_PAD = 11;
+    static SDK_PLATFORM_HARMONY_PC = 12;
 
     //当前的平台，只能是 SDK_PLATFORM_HARMONY SDK_PLATFORM_HARMONYPAD 和 SDK_PLATFORM_HARMONYPC中的一个
     static CURRENT_PLATFORM = Config.SDK_PLATFORM_HARMONY;
@@ -79,7 +79,7 @@ export default class Config {
     static SEND_LOG_COMMAND = '*#marslog#';
 
     static getWFCPlatform() {
-        return 2;
+        return 10;
     }
 
     static config(options) {

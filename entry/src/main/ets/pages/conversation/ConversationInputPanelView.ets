@@ -35,6 +35,8 @@ declare type MultiCheckAction = {
     action: () => void
 }
 
+const MAX_RECORDER_DURATION_IN_SECOND = 60
+
 @Component
 export default struct ConversationInputPanelView {
     @Link conversation: Conversation
@@ -62,9 +64,10 @@ export default struct ConversationInputPanelView {
     private recorder: AudioRecordManager
     private recordOutputAudioFile: string = ''
     private recordOutputAudioFileFd: number = 0
-    private recordAudioStartMillis: number = 0
     private forwardMessageDialogController: CustomDialogController
     private deleteMessageDialogController: CustomDialogController
+    private recordStartTimestamp: number = 0
+    private recordTimerInternal: number = 0
     private conversationExts: ConversationExt[] = [
         {
             title: '照片',
@@ -299,20 +302,50 @@ export default struct ConversationInputPanelView {
 
         }
 
-        this.recordAudioStartMillis = new Date().getTime()
+        this.recordStartTimestamp = new Date().getTime()
 
-        this.recordOutputAudioFile = audioDir + '/' + this.recordAudioStartMillis + '.m4a'
+        this.recordOutputAudioFile = audioDir + '/' + this.recordStartTimestamp + '.m4a'
         console.log('record audioFile', this.recordOutputAudioFile)
 
-        let fd = await fs.openSync(this.recordOutputAudioFile, fs.OpenMode.READ_WRITE | fs.OpenMode.CREATE)
+        let fd = fs.openSync(this.recordOutputAudioFile, fs.OpenMode.READ_WRITE | fs.OpenMode.CREATE)
         this.recorder.start(`fd://${fd}`);
+
+
+        this.recordTimerInternal = setInterval(() => {
+            let now = new Date().getTime()
+            let duration = now - this.recordStartTimestamp
+
+            let countDown = MAX_RECORDER_DURATION_IN_SECOND * 1000 - duration
+            if (countDown <= 0) {
+                this.stopRecordAudio()
+            } else if (countDown < 10 * 1000) {
+                this.recordCountDown = Math.round(countDown / 1000)
+            }
+        }, 1000)
     }
 
     stopRecordAudio() {
+        if (this.recordStartTimestamp === 0) {
+            return
+        }
+
         this.recorder.finish()
+
+        this.recordCountDown = 0
+        this.recordStartTimestamp = 0
+        this.showAudioRecorderView = false
+        clearInterval(this.recordTimerInternal)
+
+        if (this.showCancelRecordIndicator) {
+            this.showCancelRecordIndicator = false
+            return
+        }
+
         fs.closeSync(this.recordOutputAudioFileFd)
         this.recordOutputAudioFileFd = 0
-        let audioMessageContent = new SoundMessageContent(this.recordOutputAudioFile, '', Math.round((new Date().getTime() - this.recordAudioStartMillis) / 1000))
+        let durationInSecond = Math.round((new Date().getTime() - this.recordStartTimestamp) / 1000)
+        durationInSecond = Math.min(durationInSecond, MAX_RECORDER_DURATION_IN_SECOND)
+        let audioMessageContent = new SoundMessageContent(this.recordOutputAudioFile, '', durationInSecond)
         wfc.sendConversationMessage(this.conversation, audioMessageContent)
         this.recordOutputAudioFile = null
     }
@@ -384,7 +417,7 @@ export default struct ConversationInputPanelView {
                             .layoutWeight(1)
                             .margin({ left: 10, right: 10 })
                             .borderRadius(4)
-                                .fontColor('#7E7E7E')
+                            .fontColor('#7E7E7E')
                                 // .backgroundColor('#F3F3F3')
                             .type(ButtonType.Normal)
                             .stateStyles({
@@ -403,8 +436,6 @@ export default struct ConversationInputPanelView {
                                     this.showCancelRecordIndicator = false
                                     this.recordTouchDownY = event.touches[0].screenY
                                 } else if (event.type === TouchType.Up) {
-                                    this.showAudioRecorderView = false
-                                    this.showCancelRecordIndicator = false
                                     this.stopRecordAudio()
                                 } else if (event.type === TouchType.Move) {
                                     let y = event.touches[0].screenY;

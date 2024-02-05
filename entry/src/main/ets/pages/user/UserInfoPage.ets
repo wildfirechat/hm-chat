@@ -88,7 +88,7 @@ export default struct UserInfoPage {
                 .justifyContent(FlexAlign.Start)
                 .backgroundColor(Color.White)
 
-                if (this.isMyFriend) {
+                if (this.isMyFriend || this.userInfo.uid === wfc.getUserId()) {
                     Text('发消息')
                         .width('100%')
                         .padding(15)

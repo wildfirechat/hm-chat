@@ -242,10 +242,12 @@ export default struct GroupConversationInfoPage {
 
                         Row() {
                             Text('保存到通讯录')
-                            Toggle({ type: ToggleType.Switch })
+                            Toggle({ type: ToggleType.Switch, isOn: wfc.isFavGroup(this.groupInfo.target) })
                                 // .select(this.conversationInfo.top > 0)
                                 .onChange((value: boolean) => {
-                                    showToast('TODO')
+                                    wfc.setFavGroup(this.conversationInfo.conversation.target, value, null, err => {
+                                        showToast('保存到通讯录失败' + err)
+                                    })
                                 })
                         }
                         .justifyContent(FlexAlign.SpaceBetween)

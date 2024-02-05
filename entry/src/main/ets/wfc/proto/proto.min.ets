@@ -366,7 +366,7 @@ class WfcImpl {
      * @return {*}
      */
     isTcpShortLink() {
-        return protoProxy.isTcpShortLink();
+        return protoProxy.isTcpShortLink() === 1;
     }
 
     setPlatform(platform) {
@@ -640,7 +640,7 @@ class WfcImpl {
     }
 
     isFavUser(userId) {
-        return protoProxy.isFavUser(userId);
+        return protoProxy.isFavUser(userId) === 1;
     }
 
     setFavUser(userId, fav, successCB, failCB) {
@@ -730,7 +730,7 @@ class WfcImpl {
     }
 
     isBlackListed(userId) {
-        return protoProxy.isBlackListed(userId);
+        return protoProxy.isBlackListed(userId) === 1;
     }
 
     getBlackList() {
@@ -1054,7 +1054,7 @@ class WfcImpl {
     }
 
     isFavGroup(groupId) {
-        return protoProxy.isFavGroup(groupId);
+        return protoProxy.isFavGroup(groupId) === 1;
     }
 
     async setFavGroup(groupId, fav, successCB, failCB) {
@@ -1127,7 +1127,7 @@ class WfcImpl {
     }
 
     isGlobalSlient() {
-        return protoProxy.isGlobalSlient();
+        return protoProxy.isGlobalSlient() === 1;
     }
 
     setGlobalSlient(silent, successCB, failCB) {
@@ -1143,7 +1143,7 @@ class WfcImpl {
     }
 
     isHiddenNotificationDetail() {
-        return protoProxy.isHiddenNotificationDetail();
+        return protoProxy.isHiddenNotificationDetail() === 1;
     }
 
     async setHiddenNotificationDetail(hide, successCB, failCB) {
@@ -1159,7 +1159,7 @@ class WfcImpl {
     }
 
     isHiddenGroupMemberName(groupId) {
-        return protoProxy.isHiddenGroupMemberName(groupId);
+        return protoProxy.isHiddenGroupMemberName(groupId) === 1;
     }
 
     async setHiddenGroupMemberName(groupId, hide, successCB, failCB) {
@@ -1171,7 +1171,7 @@ class WfcImpl {
     }
 
     isUserReceiptEnabled() {
-        return protoProxy.isUserReceiptEnabled();
+        return protoProxy.isUserReceiptEnabled() === 1;
     }
 
     async setUserEnableReceipt(enable, successCB, failCB) {
@@ -2313,23 +2313,23 @@ class WfcImpl {
     }
 
     isCommercialServer() {
-        return protoProxy.isCommercialServer();
+        return protoProxy.isCommercialServer() === 1;
     }
 
     isReceiptEnabled() {
-        return protoProxy.isReceiptEnabled()
+        return protoProxy.isReceiptEnabled() === 1
     }
 
     isGroupReceiptEnabled() {
-        return protoProxy.isGroupReceiptEnabled();
+        return protoProxy.isGroupReceiptEnabled() === 1;
     }
 
     isGlobalDisableSyncDraft() {
-        return protoProxy.isGlobalDisableSyncDraft()
+        return protoProxy.isGlobalDisableSyncDraft() === 1
     }
 
     isUserOnlineStateEnabled() {
-        return protoProxy.isEnableUserOnlineState();
+        return protoProxy.isEnableUserOnlineState() === 1;
     }
 
     setDisableSyncDraft(disable, successCB, failCB) {
@@ -2646,7 +2646,7 @@ class WfcImpl {
     }
 
     isEnableSecretChat() {
-        return protoProxy.isEnableSecretChat();
+        return protoProxy.isEnableSecretChat() === 1;
     }
 
     getAppPath() {
@@ -2654,7 +2654,7 @@ class WfcImpl {
     }
 
     isUserEnableSecretChat() {
-        return protoProxy.isUserEnableSecretChat();
+        return protoProxy.isUserEnableSecretChat() === 1;
     }
 
     async setUserEnableSecretChat(enable, successCB, failCB) {

@@ -875,7 +875,7 @@ export class WfcManager {
      * @param {string} groupId
      * @returns {boolean}
      */
-    isFavGroup(groupId) {
+    isFavGroup(groupId): boolean {
         return impl.isFavGroup(groupId);
     }
 
@@ -887,7 +887,7 @@ export class WfcManager {
      * @param {function (number)} failCB
      * @returns {Promise<void>}
      */
-    async setFavGroup(groupId, fav, successCB, failCB) {
+    async setFavGroup(groupId: string, fav: boolean, successCB: () => void, failCB: (err: number) => void) {
         impl.setFavGroup(groupId, fav, successCB, failCB);
     }
 

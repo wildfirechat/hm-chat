@@ -39,6 +39,7 @@ struct LoginPage {
                     .fontSize(14)
                     .borderRadius(4)
                     .type(InputType.Number)
+                    .enabled(!this.isLogin)
                     .fontColor(Color.Black)
                     .borderStyle(BorderStyle.Dashed)
                     .inputFilter('[a-zA-Z0-9]', (e) => {
@@ -63,6 +64,7 @@ struct LoginPage {
                     .fontSize(14)
                     .borderRadius(4)
                     .fontColor(Color.Black)
+                    .enabled(!this.isLogin)
                     .inputFilter('[a-zA-Z0-9]', (e) => {
                         console.log(JSON.stringify(e))
                     })
@@ -74,7 +76,7 @@ struct LoginPage {
                     .fontSize(12)
                     .type(ButtonType.Normal)
                     .borderRadius(4)
-                    .enabled(this.phoneNumber.length === 11)
+                    .enabled(!this.isLogin && this.phoneNumber.length === 11)
                     .onClick(() => {
                         appServer.requestAuthCode(this.phoneNumber)
                             .then(res => {
@@ -101,6 +103,8 @@ struct LoginPage {
                 .backgroundColor(0x317aff)
                 .width(90)
                 .height(40)
+                .focusable(true)
+                .focusOnTouch(true)
                 .enabled(!this.isLogin && this.phoneNumber.length === 11 && this.authCode.length > 0)
                 .type(ButtonType.Normal)
                 .width('100%')
@@ -136,6 +140,37 @@ struct LoginPage {
             }
             .justifyContent(FlexAlign.Center)
             .margin({ top: 40 })
+            .width('100%')
+
+            Blank()
+                .layoutWeight(1)
+
+            Row() {
+                Text('登录即代表同意')
+                    .fontSize(12)
+                Text('《野火IM用户协议》')
+                    .fontColor(Color.Blue)
+                    .fontSize(12)
+                    .onClick(() => {
+                        router.pushUrl({ url: 'pages/misc/WebViewPage', params: {
+                            url: 'https://www.wildfirechat.net/wildfirechat_user_agreement.html',
+                            title: '野火IM用户协议'
+                        } }, router.RouterMode.Standard)
+                    })
+                Text('和')
+                    .fontSize(12)
+                Text('《野火IM隐私政策》')
+                    .fontColor(Color.Blue)
+                    .fontSize(12)
+                    .onClick(() => {
+                        router.pushUrl({ url: 'pages/misc/WebViewPage', params: {
+                            url: 'https://www.wildfirechat.net/wildfirechat_user_privacy.html',
+                            title: '野火IM个人信息保护政策'
+                        } }, router.RouterMode.Standard)
+                    })
+            }
+            .justifyContent(FlexAlign.Center)
+            .padding({ bottom: 10 })
             .width('100%')
         }
         .alignItems(HorizontalAlign.Start)

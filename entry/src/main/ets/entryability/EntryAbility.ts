@@ -3,6 +3,7 @@ import hilog from '@ohos.hilog';
 import window from '@ohos.window';
 import data_preferences from '@ohos.data.preferences';
 import wfc from '../wfc/client/wfc'
+import Config from '../config'
 
 export default class EntryAbility extends UIAbility {
     private windowStage: window.WindowStage
@@ -10,7 +11,7 @@ export default class EntryAbility extends UIAbility {
     onCreate(want, launchParam) {
         hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onCreate');
 
-        wfc.init(this.context.getApplicationContext(), this.context.eventHub, this.context.filesDir);
+        wfc.init(this.context.getApplicationContext(), this.context.eventHub, this.context.filesDir, Config.getWFCPlatform());
         // wfc.setConnectionStatusListener(async (status) => {
         //     console.log('connectionStatus changed', status);
         //     // TODO 有的状态码时，需要清 session

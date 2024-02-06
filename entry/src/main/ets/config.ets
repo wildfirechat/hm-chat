@@ -79,7 +79,7 @@ export default class Config {
     static SEND_LOG_COMMAND = '*#marslog#';
 
     static getWFCPlatform() {
-        return 10;
+        return Config.CURRENT_PLATFORM;
     }
 
     static config(options) {

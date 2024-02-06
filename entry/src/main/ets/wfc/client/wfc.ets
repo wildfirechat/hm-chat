@@ -71,10 +71,9 @@ export class WfcManager {
      * 只可以在主窗口调用，其他窗口调用应当调用{@link attach}
      * @param {[]} args，pc 时，传入[node实例]; web 时，可以传入Config配置对象，配置项，请参考{@link Config}
      */
-    init(context, eventHub, dbPath) {
+    init(context, eventHub, dbPath, platform) {
         impl.init(context, eventHub, dbPath);
-        //Todo 配置文件里的平台这里设置。
-        // self.setPlatform(9);
+        impl.setPlatform(platform);
         // if (Config.ENABLE_PTT) {
         //     pttClient.init();
         // }
@@ -135,14 +134,6 @@ export class WfcManager {
      */
     isTcpShortLink() {
         return impl.isTcpShortLink();
-    }
-
-    /**
-     * 设置平台类型
-     * @param {number} platform 平台类型，10是鸿蒙手机，11是鸿蒙pad，12是鸿蒙电脑.
-     */
-    setPlatform(platform) {
-        impl.setPlatform(platform);
     }
 
     /**

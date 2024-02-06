@@ -17,7 +17,7 @@ class AppServer {
         let obj = {
             'mobile': phone,
             'code': authCode,
-            'platform': Config.CURRENT_PLATFORM,
+            'platform': Config.getWFCPlatform(),
             'clientId': wfc.getClientId(),
         }
         return this._post('/login', obj)

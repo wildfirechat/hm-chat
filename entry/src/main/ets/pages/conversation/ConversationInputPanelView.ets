@@ -331,6 +331,9 @@ export default struct ConversationInputPanelView {
 
         this.recorder.finish()
 
+        let durationInSecond = Math.round((new Date().getTime() - this.recordStartTimestamp) / 1000)
+        durationInSecond = Math.min(durationInSecond, MAX_RECORDER_DURATION_IN_SECOND)
+
         this.recordCountDown = 0
         this.recordStartTimestamp = 0
         this.showAudioRecorderView = false
@@ -343,8 +346,6 @@ export default struct ConversationInputPanelView {
 
         fs.closeSync(this.recordOutputAudioFileFd)
         this.recordOutputAudioFileFd = 0
-        let durationInSecond = Math.round((new Date().getTime() - this.recordStartTimestamp) / 1000)
-        durationInSecond = Math.min(durationInSecond, MAX_RECORDER_DURATION_IN_SECOND)
         let audioMessageContent = new SoundMessageContent(this.recordOutputAudioFile, '', durationInSecond)
         wfc.sendConversationMessage(this.conversation, audioMessageContent)
         this.recordOutputAudioFile = null

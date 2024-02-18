@@ -46,14 +46,14 @@
 
 ## 截图
 
-![](./screenshot/1_login_view.png)
-![](./screenshot/2_conversation_list_view.png)
-![](./screenshot/3_message_view.png)
-![](./screenshot/4_message_audio_record.png)
-![](./screenshot/5_message_view_plus.png)
-![](./screenshot/6_group_settingview.png)
-![](./screenshot/7_contact_view.png)
-![](./screenshot/8_settings_view.png)
+<img src="http://static.wildfirechat.cn/1_login_view.png" width = 50% height = 50% />
+<img src="http://static.wildfirechat.cn/2_conversation_list_view.png" width = 50% height = 50% />
+<img src="http://static.wildfirechat.cn/3_message_view.png" width = 50% height = 50% />
+<img src="http://static.wildfirechat.cn/4_message_audio_record.png" width = 50% height = 50% />
+<img src="http://static.wildfirechat.cn/5_message_view_plus.png" width = 50% height = 50% />
+<img src="http://static.wildfirechat.cn/6_group_settingview.png" width = 50% height = 50% />
+<img src="http://static.wildfirechat.cn/7_contact_view.png" width = 50% height = 50% />
+<img src="http://static.wildfirechat.cn/8_settings_view.png" width = 50% height = 50% />
 
 ## 遗留问题
 目前还不支持实时音视频，我们还在寻找对接鸿蒙原生WebRTC的办法。demo上一些功能也不够完善。

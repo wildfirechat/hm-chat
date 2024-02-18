@@ -505,9 +505,8 @@ struct ConversationPage {
 
                     if (this.showAudioRecorderView) {
                         AudioRecorderView({
-                            showAudioRecorderView: $showAudioRecorderView,
-                            showCancelRecordIndicator: $showCancelRecordIndicator,
-                            recordCountDown: $recordCountDown
+                            showCancelRecordIndicator: this.showCancelRecordIndicator,
+                            recordCountDown: this.recordCountDown
                         })
                             .width('100%')
                             .height('100%')

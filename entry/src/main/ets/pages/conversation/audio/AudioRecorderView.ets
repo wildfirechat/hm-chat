@@ -4,7 +4,6 @@ import client from 'marswrapper'
 
 @Component
 export default struct AudioRecorderView {
-    @Prop showAudioRecorderView: boolean
     @Prop showCancelRecordIndicator: boolean
     @Prop recordCountDown: number
     @State audioVolumeIndicatorImageUrl: Resource = $r('app.media.ic_volume_3')

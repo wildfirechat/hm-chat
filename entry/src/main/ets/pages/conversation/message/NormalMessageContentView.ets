@@ -78,7 +78,7 @@ export default struct NormaMessageContentView {
             {
                 title: '删除',
                 tag: 'delete',
-                action: (message: Message) => {
+                action: () => {
                     this.deleteMessageDialogController = new CustomDialogController({
                         builder: ActionSheetDialog({
                             title: '删除消息?',
@@ -114,12 +114,15 @@ export default struct NormaMessageContentView {
             {
                 title: '转发',
                 tag: 'forward',
-                action: (message: Message) => {
+                action: () => {
+                    // bug
+                    // FYI: https://developer.huawei.com/consumer/cn/forum/topic/0201116784950653536?fid=0101610563345550409
                     showToast('bug! 无法显示转发页面')
                     router.pushUrl({
                         url: 'pages/conversation/forward/ForwardMessagePage',
                         params: {
-                            message: message
+                            messages: [this.message],
+                            forwardType: 'oneByOne'
                         } })
                         .then(value => {
                             console.log('xxxxxxxxxxxx th', value)
@@ -130,7 +133,7 @@ export default struct NormaMessageContentView {
             {
                 title: '多选',
                 tag: 'multiCheck',
-                action: (message: Message) => {
+                action: () => {
                     this.enableMultiCheck = true
                 }
             }

@@ -186,6 +186,7 @@ export default struct EmojiInputPanelView {
             .layoutWeight(1)
             .alignContent(Alignment.BottomEnd)
         }
+        .backgroundColor(Color.White)
         .padding(10)
         .width('100%')
         .height('100%')

@@ -33,8 +33,8 @@ export default struct ConversationListTab {
 
         this.loadConversationList()
         this.context = getContext(this)
-        this.context.eventHub.on(EventType.ReceiveMessage, this.onSendMessage)
-        this.context.eventHub.on(EventType.SendMessage, this.onReceiveMessage)
+        this.context.eventHub.on(EventType.ReceiveMessage, this.onReceiveMessage)
+        this.context.eventHub.on(EventType.SendMessage, this.onSendMessage)
         this.context.eventHub.on(EventType.RecallMessage, this.onRecallMessage)
         this.context.eventHub.on(EventType.ConnectionStatusChanged, this.onConnectionStatusChange)
         this.context.eventHub.on(EventType.ConversationInfoUpdate, this.onConversationInfoUpdate)

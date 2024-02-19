@@ -30,6 +30,7 @@ import KickoffGroupMemberNotification from '../messages/notification/kickoffGrou
 import Message from '../messages/message';
 import ChatRoomInfo from '../model/chatRoomInfo';
 import MessageContent from '../messages/messageContent';
+import UnreadCount from '../model/unreadCount';
 
 declare type SuccessCallback = () => void
 
@@ -588,7 +589,7 @@ export class WfcManager {
      * @param {boolean} refresh 是否刷新，如果刷新，且有更新的话，会通过{@link eventEmitter}通知
      * @returns {GroupInfo}
      */
-    getGroupInfo(groupId, refresh = false) {
+    getGroupInfo(groupId: string, refresh = false): GroupInfo {
         let info = impl.getGroupInfo(groupId, refresh);
         if (!info.portrait || info.portrait.startsWith(Config.APP_SERVER)) {
             info.portrait = this.defaultGroupPortrait(info);
@@ -1329,7 +1330,7 @@ export class WfcManager {
      * @param {Conversation} conversation 目标会话
      * @returns {UnreadCount}
      */
-    getConversationUnreadCount(conversation) {
+    getConversationUnreadCount(conversation: Conversation): UnreadCount {
         return impl.getConversationUnreadCount(conversation);
     }
 

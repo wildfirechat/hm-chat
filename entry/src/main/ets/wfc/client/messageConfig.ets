@@ -93,13 +93,13 @@ export default class MessageConfig {
         return flag;
     }
 
-    static getMessageContentPersitFlag(type) {
+    static getMessageContentPersistFlag(type) {
         for (const content of MessageConfig.MessageContents) {
             if (content.type === type) {
                 return content.flag;
             }
         }
-        return -1;
+        return PersistFlag.No_Persist;
     }
 
     static getMessageContentType(messageContent) {

@@ -100,7 +100,7 @@ export default class Message {
                     }
                 } catch (error) {
                     console.error('decode message payload failed, fallback to unkownMessage', msg.content, error);
-                    let flag = MessageConfig.getMessageContentPersitFlag(msg.content.type);
+                    let flag = MessageConfig.getMessageContentPersistFlag(msg.content.type);
                     if (PersistFlag.Persist === flag || PersistFlag.Persist_And_Count === flag) {
                         content = new UnknownMessageContent(msg.content);
                     } else {
@@ -143,7 +143,7 @@ export default class Message {
                         }
                     } catch (error) {
                         console.error('decode message payload failed, fallback to unkownMessage', obj.content, error);
-                        let flag = MessageConfig.getMessageContentPersitFlag(obj.content.type);
+                        let flag = MessageConfig.getMessageContentPersistFlag(obj.content.type);
                         if (PersistFlag.Persist === flag || PersistFlag.Persist_And_Count === flag) {
                             content = new UnknownMessageContent(obj.content);
                         } else {

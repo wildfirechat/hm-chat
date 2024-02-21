@@ -19,6 +19,7 @@ import Message from '../../wfc/messages/message'
 import router from '@ohos.router'
 import ActionSheetDialog from '../../view/ActionSheetDialog'
 import EmojiInputPanelView from './emoji/EmojiInputPanelView'
+import image from '@ohos.multimedia.image'
 
 
 const INPUT_ICON_WIDTH = 30
@@ -119,6 +120,7 @@ export default struct ConversationInputPanelView {
                     let file = getContext(this).cacheDir + '/' + new Date().getTime() + '.jpg'
                     copyFileUri(fileUri, file);
                     let size = fileSize(file);
+                    // TODO 缩略图、图片大小等
                     let content = new ImageMessageContent(file, '', '')
                     wfc.sendConversationMessage(this.conversation, content);
                 } catch (reason) {

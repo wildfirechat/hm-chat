@@ -79,6 +79,7 @@ export class MediaHelper {
     public async takePhoto(context: common.UIAbilityContext): Promise<string> {
         let want = {
             'uri': '',
+            // TODO 录制视频 ACTION_VIDEO_CAPTURE
             'action': wantConstant.Action.ACTION_IMAGE_CAPTURE,
             'parameters': {},
         };

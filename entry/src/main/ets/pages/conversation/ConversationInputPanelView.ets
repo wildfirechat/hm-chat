@@ -291,10 +291,10 @@ export default struct ConversationInputPanelView {
         }
         if (!this.recorder) {
             this.recorder = new AudioRecordManager()
-            this.recorder.init()
+            await this.recorder.init()
         }
 
-        let cacheDir = getContext(this).cacheDir;
+        let cacheDir = getContext(this).tempDir;
         let audioDir = `${cacheDir}/audio`
         try {
             fs.mkdirSync(audioDir)
@@ -305,11 +305,11 @@ export default struct ConversationInputPanelView {
         this.recordStartTimestamp = new Date().getTime()
 
         this.recordOutputAudioFile = audioDir + '/' + this.recordStartTimestamp + '.m4a'
-        console.log('record audioFile', this.recordOutputAudioFile)
+        console.log('AudioRecordManager record audioFile', this.recordOutputAudioFile)
 
-        let fd = fs.openSync(this.recordOutputAudioFile, fs.OpenMode.READ_WRITE | fs.OpenMode.CREATE)
-        this.recorder.start(`fd://${fd}`);
-
+        let f = fs.openSync(this.recordOutputAudioFile, fs.OpenMode.READ_WRITE | fs.OpenMode.CREATE)
+        this.recordOutputAudioFileFd = f.fd
+        this.recorder.start(`fd://${this.recordOutputAudioFileFd}`);
 
         this.recordTimerInternal = setInterval(() => {
             let now = new Date().getTime()
@@ -324,12 +324,12 @@ export default struct ConversationInputPanelView {
         }, 1000)
     }
 
-    stopRecordAudio() {
+    async stopRecordAudio() {
         if (this.recordStartTimestamp === 0) {
             return
         }
 
-        this.recorder.finish()
+        await this.recorder.finish()
 
         let durationInSecond = Math.round((new Date().getTime() - this.recordStartTimestamp) / 1000)
         durationInSecond = Math.min(durationInSecond, MAX_RECORDER_DURATION_IN_SECOND)
@@ -345,6 +345,7 @@ export default struct ConversationInputPanelView {
         }
 
         fs.closeSync(this.recordOutputAudioFileFd)
+        console.log('AudioRecordManager', 'closeSync', this.recordOutputAudioFileFd);
         this.recordOutputAudioFileFd = 0
         let audioMessageContent = new SoundMessageContent(this.recordOutputAudioFile, '', durationInSecond)
         wfc.sendConversationMessage(this.conversation, audioMessageContent)

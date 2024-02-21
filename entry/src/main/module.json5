@@ -57,6 +57,12 @@
                 "usedScene": {
                     "when": "inuse"
                 }
+            },
+            {
+                "name": "ohos.permission.MEDIA_LOCATION",
+                "usedScene": {
+                    "when": "inuse"
+                }
             }
         ]
     }

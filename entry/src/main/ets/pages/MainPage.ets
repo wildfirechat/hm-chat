@@ -23,7 +23,8 @@ const permissions: Array<Permissions> = [
     'ohos.permission.INTERNET',
     'ohos.permission.READ_MEDIA',
     'ohos.permission.WRITE_MEDIA',
-    'ohos.permission.MICROPHONE'
+    'ohos.permission.MICROPHONE',
+    'ohos.permission.MEDIA_LOCATION'
 ];
 
 @Entry
@@ -121,7 +122,7 @@ struct MainPage {
                 let context: common.UIAbilityContext = getContext(this) as common.UIAbilityContext;
                 promptAction.showDialog({
                     title: '警告',
-                    message: '没有权限，请自行去<设置>添加权限'
+                    message: '没有权限，请自行去<设置>添加权限' + permissions[i]
                 })
                 setTimeout(() => context.terminateSelf(), 1000);
             }

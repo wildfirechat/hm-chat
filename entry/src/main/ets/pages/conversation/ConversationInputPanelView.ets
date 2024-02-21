@@ -98,17 +98,16 @@ export default struct ConversationInputPanelView {
             title: '拍摄',
             icon: $r('app.media.ic_func_shot'),
             action: async () => {
-                showToast('TODO')
-                // try {
-                //     let imgUri = await this.mediaHelper.takePhoto(getContext() as common.UIAbilityContext)
-                //     let file = getContext(this).cacheDir + '/' + new Date().getTime() + '.jpg'
-                //     copyFileUri(imgUri, file);
-                //     let size = fileSize(file);
-                //     let content = new ImageMessageContent(file, '', '')
-                //     wfc.sendConversationMessage(this.conversationInfo.conversation, content);
-                // } catch (reason) {
-                //     showToast('拍摄照片失败: ' + reason)
-                // }
+                try {
+                    let imgUri = await this.mediaHelper.takePhoto(getContext() as common.UIAbilityContext)
+                    let file = getContext(this).cacheDir + '/' + new Date().getTime() + '.jpg'
+                    copyFileUri(imgUri, file);
+                    let size = fileSize(file);
+                    let content = new ImageMessageContent(file, '', '')
+                    wfc.sendConversationMessage(this.conversation, content);
+                } catch (reason) {
+                    showToast('拍摄照片失败: ' + reason)
+                }
             }
         },
         {

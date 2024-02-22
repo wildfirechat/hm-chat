@@ -98,6 +98,29 @@ export class MediaHelper {
     }
 
     /**
+     * 拍照
+     */
+    public async recordVideo(context: common.UIAbilityContext): Promise<string> {
+        let want = {
+            'uri': '',
+            'action': wantConstant.Action.ACTION_VIDEO_CAPTURE,
+            'parameters': {},
+        };
+        return context.startAbilityForResult(want)
+            .then((result) => {
+                console.info(this.TAG, `startAbility call back , ${JSON.stringify(result)}`);
+                if (result.resultCode === 0 && result.want && !this.isNullOrEmpty(result.want.uri)) {
+                    //录制视频
+                    console.info(this.TAG, 'recordVideo successfully, recordVideoResult uri: ' + result.want.uri);
+                    return result.want.uri;
+                }
+            }).catch((error) => {
+                console.info(this.TAG, `startAbility error , ${JSON.stringify(error)}`);
+                return error;
+            });
+    }
+
+    /**
      * 封装多媒体实体类
      *
      * @param uri 文件路径

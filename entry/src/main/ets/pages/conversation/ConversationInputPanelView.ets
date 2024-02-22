@@ -20,6 +20,7 @@ import router from '@ohos.router'
 import ActionSheetDialog from '../../view/ActionSheetDialog'
 import EmojiInputPanelView from './emoji/EmojiInputPanelView'
 import image from '@ohos.multimedia.image'
+import VideoMessageContent from '../../wfc/messages/videoMessageContent'
 
 
 const INPUT_ICON_WIDTH = 30
@@ -108,6 +109,22 @@ export default struct ConversationInputPanelView {
                     wfc.sendConversationMessage(this.conversation, content);
                 } catch (reason) {
                     showToast('拍摄照片失败: ' + reason)
+                }
+            }
+        },
+        {
+            title: '录制',
+            icon: $r('app.media.ic_func_shot'),
+            action: async () => {
+                try {
+                    let imgUri = await this.mediaHelper.recordVideo(getContext() as common.UIAbilityContext)
+                    let file = getContext(this).cacheDir + '/' + new Date().getTime() + '.mp4'
+                    copyFileUri(imgUri, file);
+                    let size = fileSize(file);
+                    let content = new VideoMessageContent(file, '', '')
+                    wfc.sendConversationMessage(this.conversation, content);
+                } catch (reason) {
+                    showToast('录制视频失败: ' + reason)
                 }
             }
         },

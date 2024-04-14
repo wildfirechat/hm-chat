@@ -1,4 +1,5 @@
 const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+const charsArr = chars.split('')
 
 // Use a lookup table to find the index.
 const lookup = typeof Uint8Array === 'undefined' ? [] : new Uint8Array(256);
@@ -8,15 +9,15 @@ for (let i = 0; i < chars.length; i++) {
 
 export const encode = (arraybuffer: ArrayBuffer): string => {
     let bytes = new Uint8Array(arraybuffer),
-        i,
+        i:number,
         len = bytes.length,
         base64 = '';
 
     for (i = 0; i < len; i += 3) {
-        base64 += chars[bytes[i] >> 2];
-        base64 += chars[((bytes[i] & 3) << 4) | (bytes[i + 1] >> 4)];
-        base64 += chars[((bytes[i + 1] & 15) << 2) | (bytes[i + 2] >> 6)];
-        base64 += chars[bytes[i + 2] & 63];
+        base64 += charsArr[bytes[i] >> 2];
+        base64 += charsArr[((bytes[i] & 3) << 4) | (bytes[i + 1] >> 4)];
+        base64 += charsArr[((bytes[i + 1] & 15) << 2) | (bytes[i + 2] >> 6)];
+        base64 += charsArr[bytes[i + 2] & 63];
     }
 
     if (len % 3 === 2) {
@@ -31,12 +32,12 @@ export const encode = (arraybuffer: ArrayBuffer): string => {
 export const decode = (base64: string): ArrayBuffer => {
     let bufferLength = base64.length * 0.75,
         len = base64.length,
-        i,
+        i:number,
         p = 0,
-        encoded1,
-        encoded2,
-        encoded3,
-        encoded4;
+        encoded1:number,
+        encoded2:number,
+        encoded3:number,
+        encoded4:number;
 
     if (base64[base64.length - 1] === '=') {
         bufferLength--;

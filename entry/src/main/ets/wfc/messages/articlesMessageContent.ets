@@ -2,37 +2,39 @@ import MessageContent from "./messageContent";
 import MessageContentType from "./messageContentType";
 import wfc from "../client/wfc";
 import LinkMessageContent from "./linkMessageContent";
+import Message from './message';
+import MessagePayload from './messagePayload';
 
 export default class ArticlesMessageContent extends MessageContent {
-    topArticle;
-    subArticles;
+    topArticle?: Article;
+    subArticles = [] as Article[];
 
     constructor() {
         super(MessageContentType.Articles);
     }
 
-    digest(message) {
-        return this.topArticle.title;
+    digest(message: Message) {
+        return this.topArticle ? this.topArticle.title : 'no top article';
     }
 
     encode() {
         let payload = super.encode();
         let obj = {
-            top: this.topArticle.toJson(),
-        }
+            top: this.topArticle!.toJson(),
+        } as Data
         if (this.subArticles) {
-            obj['subArticles'] = this.subArticles.map(article => article.toJson());
+            obj.subArticles = this.subArticles.map(article => article.toJson());
         }
         payload.binaryContent = wfc.utf8_to_b64(JSON.stringify(obj));
 
         return payload;
     }
 
-    decode(payload) {
+    decode(payload: MessagePayload) {
         super.decode(payload);
-        let obj = JSON.parse(wfc.b64_to_utf8(payload.binaryContent));
+        let obj = JSON.parse(wfc.b64_to_utf8(payload.binaryContent)) as Data;
         this.topArticle = new Article();
-        this.topArticle.fromJson(obj.top);
+        this.topArticle.fromJson(obj.top!);
         if (obj.subArticles) {
             this.subArticles = [];
             obj.subArticles.forEach(article => {
@@ -44,8 +46,8 @@ export default class ArticlesMessageContent extends MessageContent {
     }
 
     toLinkMessageContent() {
-        let contents = [];
-        contents.push(this.topArticle.toLinkMessageContent())
+        let contents = [] as LinkMessageContent[];
+        contents.push(this.topArticle!.toLinkMessageContent())
         if (this.subArticles) {
             this.subArticles.forEach(article => {
                 contents.push(article.toLinkMessageContent())
@@ -56,14 +58,14 @@ export default class ArticlesMessageContent extends MessageContent {
 }
 
 class Article {
-    articleId;
-    cover;
-    title;
-    digest;
-    url;
-    readReport;
+    articleId = '';
+    cover = '';
+    title = '';
+    digest = '';
+    url = '';
+    readReport = false;
 
-    toJson() {
+    toJson(): ArticleData {
         let obj = {
             id: this.articleId,
             cover: this.cover,
@@ -71,11 +73,11 @@ class Article {
             url: this.url,
             digest: this.digest,
             rr: this.readReport
-        }
+        } as ArticleData
         return obj;
     }
 
-    fromJson(obj) {
+    fromJson(obj: ArticleData) {
         this.articleId = obj.id;
         this.cover = obj.cover;
         this.title = obj.title;
@@ -93,5 +95,18 @@ class Article {
 
         return content;
     }
+}
 
+class ArticleData {
+    id = ''
+    cover = ''
+    title = ''
+    url = ''
+    digest = ''
+    rr = false
+}
+
+class Data {
+    top?: ArticleData
+    subArticles = [] as ArticleData[]
 }

@@ -13,7 +13,7 @@ import Config from "../../../config";
  4. 修改下面的```icons```数据，为类别添加一个```icon```
  5. 修改下面的```customCategories```数组，添加类别
 */
-export function config() {
+export function config(): Record<string, Object> {
     // 动态表情的category约定以Sticker-开头
     let baseUrl = Config.stickerBaseUrl();
     if (!baseUrl.endsWith('/')) {
@@ -93,13 +93,13 @@ export function config() {
         new Emoji(`${baseUrl}p/%E5%9B%9E%E5%8E%BB%E5%86%99%E4%BB%A3%E7%A0%81%EF%BC%8C%E8%B0%81%E8%AE%A9%E4%BD%A0%E8%B7%91%E5%87%BA%E6%9D%A5%E8%A3%85%E9%80%BC%E7%9A%84%EF%BC%8C%E7%9C%8B%E6%88%91%E4%B8%8D%E6%89%93%E6%AD%BB%E4%BD%A0.jpg`, 'Sticker-p', ['sticker']),
     ];
     const icons = {
-        peoples: `
+        'peoples': `
           <svg style="max-height:18px"
             xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 106.059 106.059" fill="gray">
             <path d="M90.544 90.542c20.687-20.684 20.685-54.341.002-75.024-20.688-20.689-54.347-20.689-75.031-.006-20.688 20.687-20.686 54.346.002 75.034 20.682 20.684 54.341 20.684 75.027-.004zM21.302 21.3c17.494-17.493 45.959-17.495 63.457.002 17.494 17.494 17.492 45.963-.002 63.455-17.494 17.494-45.96 17.496-63.455.003-17.498-17.498-17.496-45.966 0-63.46zM27 69.865s-2.958-11.438 6.705-8.874c0 0 17.144 9.295 38.651 0 9.662-2.563 6.705 8.874 6.705 8.874C73.539 86.824 53.03 85.444 53.03 85.444S32.521 86.824 27 69.865zm6.24-31.194a6.202 6.202 0 1 1 12.399.001 6.202 6.202 0 0 1-12.399-.001zm28.117 0a6.202 6.202 0 1 1 12.403.001 6.202 6.202 0 0 1-12.403-.001z"/>
           </svg>
           `,
-        sticker_b: `
+        'sticker_b': `
             <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="24px" height="24px" viewBox="0 0 24 24" enable-background="new 0 0 24 24" xml:space="preserve">  <image id="image0" width="24" height="24" x="0" y="0"
                 href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAIAAABvFaqvAAAABGdBTUEAALGPC/xhBQAAACBjSFJN
             AAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAABmJLR0QA/wD/AP+gvaeTAAAA
@@ -126,7 +126,7 @@ export function config() {
             AABJRU5ErkJggg==" />
             </svg>
           `,
-        sticker_p: `
+        'sticker_p': `
             <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="24px" height="24px" viewBox="0 0 24 24" enable-background="new 0 0 24 24" xml:space="preserve">  <image id="image0" width="24" height="24" x="0" y="0"
                 href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAIAAABvFaqvAAAABGdBTUEAALGPC/xhBQAAACBjSFJN
             AAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAABmJLR0QA/wD/AP+gvaeTAAAA
@@ -162,7 +162,7 @@ export function config() {
             </svg>
 
           `,
-    };
+    } as Record<string, string>;
 
     // 需要显示那些类别的表情
     let customCategories = [
@@ -178,8 +178,8 @@ export function config() {
 
     return {
         // 显示那些类别的表情，比如：只包含 Peoples  类别时，那么将只显示默认表情里面，类别为 Peoples 的表情
-        emojiCategories: customCategories,
+        'emojiCategories': customCategories,
         //  表情列表，如果包含的表情的类别不在 emojiCategories 里面，则会被过滤掉
-        emojis: emojis,
-    }
+        'emojis': emojis,
+    } as Record<string, Object>
 }

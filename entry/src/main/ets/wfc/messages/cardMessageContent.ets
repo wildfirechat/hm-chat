@@ -11,19 +11,20 @@ import MessageContent from './messageContent'
 import MessageContentType from './messageContentType'
 import wfc from '../client/wfc'
 import Config from '../../config'
+import MessagePayload from './messagePayload'
 
 export default class CardMessageContent extends MessageContent {
     /**
      * 0，用户；1，群组；2，聊天室；3，频道
      */
-    cardType;
-    target;
-    name;
-    displayName;
-    portrait;
-    from;
+    cardType = 0;
+    target = '';
+    name = '';
+    displayName = '';
+    portrait = '';
+    from = '';
 
-    constructor(cardType, target, displayName, portrait, from) {
+    constructor(cardType: number = 0, target: string = '', displayName: string = '', portrait: string = '', from: string = '') {
         super(MessageContentType.UserCard);
         this.cardType = cardType;
         this.target = target;
@@ -41,20 +42,20 @@ export default class CardMessageContent extends MessageContent {
             d: this.displayName,
             p: this.portrait,
             f: this.from,
-        };
+        } as Data;
         payload.binaryContent = wfc.utf8_to_b64(JSON.stringify(obj));
         return payload;
     }
 
-    decode(payload) {
+    decode(payload: MessagePayload) {
         super.decode(payload)
         this.target = payload.content;
-        let obj = JSON.parse(wfc.b64_to_utf8(payload.binaryContent));
+        let obj = JSON.parse(wfc.b64_to_utf8(payload.binaryContent)) as Data;
         this.cardType = obj.t;
         this.name = obj.n;
         this.displayName = obj.d;
         this.portrait = obj.p;
-        if (Config.urlRedirect){
+        if (Config.urlRedirect) {
             this.portrait = Config.urlRedirect(obj.p);
         }
         this.from = obj.f;
@@ -80,4 +81,12 @@ export default class CardMessageContent extends MessageContent {
         }
         return msg + this.displayName;
     }
+}
+
+class Data {
+    t = 0
+    n = ''
+    d = ''
+    p = ''
+    f = ''
 }

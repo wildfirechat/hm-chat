@@ -1,16 +1,17 @@
 import Utils from '../common/Utils';
-import helper from '../util/helper';
+import { timeFormat } from '../util/helper';
 import wfc from '../wfc/client/wfc';
 import ChannelInfo from '../wfc/model/channelInfo';
 import ChatRoomInfo from '../wfc/model/chatRoomInfo';
 import ConversationInfo from '../wfc/model/conversationInfo';
 import ConversationType from '../wfc/model/conversationType';
 import GroupInfo from '../wfc/model/groupInfo';
+import { ifaa } from '@kit.OnlineAuthenticationKit';
 
 @Component
 @Preview
 export default struct ConversationInfoItemView {
-    @State conversationInfo: ConversationInfo = null
+    @State conversationInfo?: ConversationInfo = undefined
     @State conversationItemPortrait: string = ''
     @State conversationItemName: string = ''
     /**
@@ -19,16 +20,17 @@ export default struct ConversationInfoItemView {
     private basicMode: boolean = false
 
     aboutToAppear() {
-        Utils.computeConversationItemPortraitAndName(this.conversationInfo.conversation)
-            .then(value => {
-                this.conversationItemPortrait = value.portrait
-                this.conversationItemName = value.name
-            })
-
+        if (this.conversationInfo!.conversation) {
+            Utils.computeConversationItemPortraitAndName(this.conversationInfo!.conversation)
+                .then(value => {
+                    this.conversationItemPortrait = value.portrait
+                    this.conversationItemName = value.name
+                })
+        }
     }
 
     conversationUnreadCount() {
-        return this.conversationInfo.unreadCount ? (this.conversationInfo.unreadCount.unreadMention + this.conversationInfo.unreadCount.unread + this.conversationInfo.unreadCount.unreadMentionAll) : 0
+        return this.conversationInfo!.unreadCount ? (this.conversationInfo!.unreadCount.unreadMention + this.conversationInfo!.unreadCount.unread + this.conversationInfo!.unreadCount.unreadMentionAll) : 0
     }
 
     build() {
@@ -42,9 +44,9 @@ export default struct ConversationInfoItemView {
                             .width(44)
                             .padding(2)
                             .borderRadius(4)
-                    } else if (this.conversationInfo.isSilent && this.conversationUnreadCount() > 0) {
+                    } else if (this.conversationInfo!.isSilent && this.conversationUnreadCount() > 0) {
                         Badge({
-                            // count: this.conversationInfo.unreadCount ? (this.conversationInfo.unreadCount.unreadMention + this.conversationInfo.unreadCount.unread + this.conversationInfo.unreadCount.unreadMentionAll) : 0,
+                            // count: this.conversationInfo!.unreadCount ? (this.conversationInfo!.unreadCount.unreadMention + this.conversationInfo!.unreadCount.unread + this.conversationInfo!.unreadCount.unreadMentionAll) : 0,
                             // maxCount: 99,
                             value: '',
                             position: BadgePosition.RightTop,
@@ -87,7 +89,7 @@ export default struct ConversationInfoItemView {
                             .layoutWeight(1)
                             .textOverflow({ overflow: TextOverflow.Ellipsis })
                         if (!this.basicMode) {
-                            Text(helper.timeFormat(this.conversationInfo.timestamp))
+                            Text(timeFormat(this.conversationInfo!.timestamp))
                                 .fontSize(12)
                                 .fontColor('#b3b3b3')
                         }
@@ -95,14 +97,14 @@ export default struct ConversationInfoItemView {
 
                     if (!this.basicMode) {
                         Row() {
-                            Text(`${this.conversationInfo.lastMessage ? this.conversationInfo.lastMessage.messageContent.digest(this.conversationInfo.lastMessage) : ''}`)
+                            Text(`${this.conversationInfo!.lastMessage ? this.conversationInfo!.lastMessage.messageContent!.digest(this.conversationInfo!.lastMessage) : ''}`)
                                 .textOverflow({ overflow: TextOverflow.Ellipsis })
                                 .fontSize(13)
                                 .fontColor('#b3b3b3')
                                 .margin({ right: 10 })
                                 .maxLines(1)
                                 .layoutWeight(1)
-                            if (this.conversationInfo.isSilent) {
+                            if (this.conversationInfo!.isSilent) {
                                 Image($r('app.media.block_notification'))
                                     .width(14)
                                     .height(14)
@@ -124,9 +126,9 @@ export default struct ConversationInfoItemView {
 
             Divider()
                 .margin({ left: 60 })
-                .color(!this.basicMode && this.conversationInfo.top ? '#E5E5E5' : '#F7F7F7')
+                .color(!this.basicMode && this.conversationInfo!.top ? '#E5E5E5' : '#F7F7F7')
         }
         .width('100%')
-        .backgroundColor(!this.basicMode && this.conversationInfo.top ? 0xEBEBEB : '')
+        .backgroundColor(!this.basicMode && this.conversationInfo!.top ? 0xEBEBEB : '')
     }
 }

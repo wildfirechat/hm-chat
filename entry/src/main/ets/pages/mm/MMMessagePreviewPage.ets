@@ -6,31 +6,23 @@ import Message from '../../wfc/messages/message';
 import MessageContentType from '../../wfc/messages/messageContentType';
 import VideoMessageContent from '../../wfc/messages/videoMessageContent';
 import { exist } from '../../common/utils/FileUtil'
-import HashMap from '@ohos.util.HashMap';
 
 @Entry
 @Component
 export default struct MMMessagePreviewPage {
-    @State mediaMessages: Message[] = null
-    private message: Message
-    @State index: number = -1
-    private isLoadingOldMessage: boolean
-    private isLoadingNewMessage: boolean
-    private videoControllerMap: HashMap<number, VideoController> = new HashMap()
+    @State mediaMessages: Message[] = []
+    private message?: Message
+    @State index: number = 0
+    private isLoadingOldMessage: boolean = false
+    private isLoadingNewMessage: boolean = false
 
     async aboutToAppear() {
-        const params = router.getParams();
-        this.message = params['message']
-        this.mediaMessages = []
+        const params = router.getParams() as Record<string, Object>;
+        this.message = params['message'] as Message
+        this.mediaMessages = [this.message]
         let oldMsgs = await this.loadMoreMessages(this.message, true)
         let newMsgs = await this.loadMoreMessages(this.message, false)
         this.mediaMessages = oldMsgs.concat(this.mediaMessages, this.message, newMsgs)
-        this.mediaMessages.forEach(msg => {
-            if (msg.messageContent.type === MessageContentType.Video) {
-                this.videoControllerMap.set(msg.messageId, new VideoController())
-            }
-        })
-
         this.index = oldMsgs.length
     }
 
@@ -70,7 +62,7 @@ export default struct MMMessagePreviewPage {
     build() {
         Navigation() {
             Swiper() {
-                ForEach(this.mediaMessages, (message: Message, index: number) => {
+                ForEach(this.mediaMessages, (message: Message) => {
                     if (this.isImageMessageContent(message)) {
                         Image(this.mediaEntry(message).url)
                             .alt(this.mediaEntry(message).thumbnail)
@@ -82,19 +74,14 @@ export default struct MMMessagePreviewPage {
                     } else {
                         Video({
                             previewUri: this.mediaEntry(message).thumbnail,
-                            src: this.mediaEntry(message).url,
-                            controller: this.videoControllerMap.get(message.messageId)
+                            src: this.mediaEntry(message).url
                         })
-                            .autoPlay(false)
-                            .controls(true)
+                            .autoPlay(true)
+                            .controls(false)
                             .objectFit(ImageFit.Contain)
                             .width('100%')
                             .height('100%')
                             .backgroundColor('#EDEDED')
-                            .onStart(() => {
-                            })
-                            .onPause(() => {
-                            })
                     }
                 }, (message: Message) => message.messageId + '')
             }
@@ -104,13 +91,6 @@ export default struct MMMessagePreviewPage {
             .loop(false)
             .cachedCount(3)
             .onChange((index: number) => {
-                if (this.index >= 0) {
-                    let msg = this.mediaMessages[this.index]
-                    let videoController = this.videoControllerMap.get(msg.messageId)
-                    if (videoController) {
-                        videoController.pause()
-                    }
-                }
                 this.index = index
                 if (index < 3) {
                     if (this.isLoadingOldMessage) {

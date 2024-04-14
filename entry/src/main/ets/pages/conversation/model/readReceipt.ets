@@ -1,9 +1,9 @@
 import ConversationType from '../../../wfc/model/conversationType'
 
 export default class ReadReceipt {
-    conversationType: ConversationType
-    readCount: number
+    conversationType = 0
+    readCount = 0
     // 群会话时有效
-    unreadCount: number
-    desc: string
+    unreadCount = 0
+    desc = ''
 }

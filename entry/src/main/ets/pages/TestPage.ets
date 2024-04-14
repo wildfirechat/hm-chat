@@ -12,7 +12,7 @@ struct TestPage {
         'O', 'P', 'Q', 'R', 'S', 'T', 'U',
         'V', 'W', 'X', 'Y', 'Z']
 
-    onPageShow(){
+    onPageShow() {
         console.info("00773-" + pinyin4js.convertToPinyinString('厦门你好大厦厦门', '', pinyin4js.FIRST_LETTER));
         console.info("00773-" + pinyin4js.convertToPinyinString('1厦门你好大厦厦门', '', pinyin4js.FIRST_LETTER));
         console.info("00773-" + pinyin4js.convertToPinyinString('2厦门你好大厦厦门', '', pinyin4js.FIRST_LETTER));
@@ -23,7 +23,7 @@ struct TestPage {
     build() {
         Row() {
             List({ space: 20, initialIndex: 0 }) {
-                ForEach(this.arrayA, (item) => {
+                ForEach(this.arrayA, (item: string) => {
                     ListItem() {
                         Text(item)
                             .width('80%')
@@ -31,9 +31,9 @@ struct TestPage {
                             .fontSize(30)
                             .textAlign(TextAlign.Center)
                     }
-                }, item => item)
+                }, (item: string) => item)
 
-                ForEach(this.arrayB, (item) => {
+                ForEach(this.arrayB, (item: string) => {
                     ListItem() {
                         Text(item)
                             .width('80%')
@@ -42,9 +42,9 @@ struct TestPage {
                             .textAlign(TextAlign.Center)
                     }
                     .selectable(false)
-                }, item => item)
+                }, (item: string) => item)
 
-                ForEach(this.arrayC, (item) => {
+                ForEach(this.arrayC, (item: string) => {
                     ListItem() {
                         Text(item)
                             .width('80%')
@@ -52,9 +52,9 @@ struct TestPage {
                             .fontSize(30)
                             .textAlign(TextAlign.Center)
                     }.selectable(true)
-                }, item => item)
+                }, (item: string) => item)
 
-                ForEach(this.arrayL, (item) => {
+                ForEach(this.arrayL, (item: string) => {
                     ListItem() {
                         Text(item)
                             .width('80%')
@@ -62,22 +62,22 @@ struct TestPage {
                             .fontSize(30)
                             .textAlign(TextAlign.Center)
                     }.editable(true)
-                }, item => item)
+                }, (item: string) => item)
             }
             .layoutWeight(1)
             // .width('50%')
             .height('100%')
 
             AlphabetIndexer({ arrayValue: this.value, selected: 0 })
-                .selectedColor(0xFFFFFF) // 选中项文本颜色
-                .popupColor(0xFFFAF0) // 弹出框文本颜色
-                .selectedBackgroundColor(0xCCCCCC) // 选中项背景颜色
-                .popupBackground(0xD2B48C) // 弹出框背景颜色
-                .usingPopup(true) // 是否显示弹出框
-                .selectedFont({ size: 16, weight: FontWeight.Bolder }) // 选中项字体样式
-                .popupFont({ size: 30, weight: FontWeight.Bolder }) // 弹出框内容的字体样式
-                .itemSize(28) // 每一项的尺寸大小
-                .alignStyle(IndexerAlign.Left) // 弹出框在索引条右侧弹出
+                .selectedColor(0xFFFFFF)// 选中项文本颜色
+                .popupColor(0xFFFAF0)// 弹出框文本颜色
+                .selectedBackgroundColor(0xCCCCCC)// 选中项背景颜色
+                .popupBackground(0xD2B48C)// 弹出框背景颜色
+                .usingPopup(true)// 是否显示弹出框
+                .selectedFont({ size: 16, weight: FontWeight.Bolder })// 选中项字体样式
+                .popupFont({ size: 30, weight: FontWeight.Bolder })// 弹出框内容的字体样式
+                .itemSize(28)// 每一项的尺寸大小
+                .alignStyle(IndexerAlign.Left)// 弹出框在索引条右侧弹出
                 .onSelect((index: number) => {
                     console.info(this.value[index] + ' Selected!')
                 })

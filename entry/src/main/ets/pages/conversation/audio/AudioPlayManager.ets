@@ -15,6 +15,7 @@
 
 import media from '@ohos.multimedia.media';
 import Logger from '../../../common/utils/Logger';
+import common from '@ohos.app.ability.common';
 
 const TAG = 'AudioPlayManager';
 
@@ -23,16 +24,16 @@ export default class AudioPlayManager {
     private playCompleteCallbackMap?: Map<string, (err: Error) => void>
     private playCompleteCallback?: (err: Error) => void
 
-    init(context) {
+    init(context:common.Context) {
         this.release();
         media.createAVPlayer((err, player: media.AVPlayer) => {
             if (player !== null) {
                 this.audioPlayer = player;
                 this.audioPlayer.on('timeUpdate', (time: number) => {
-                    context.loader = time;
+                    // context.loader = time;
                 });
                 this.audioPlayer.on('durationUpdate', (duration: number) => {
-                    context.total = duration;
+                    // context.total = duration;
                 });
                 this.audioPlayer.on('stateChange', async (state: media.AVPlayerState) => {
                     switch (state.toString()) {
@@ -70,7 +71,7 @@ export default class AudioPlayManager {
                             break;
                         case 'completed':
                             Logger.info(TAG, `The AVPlayer state is: ${this.audioPlayer!.state}`);
-                            context.isCompleted = true;
+                            // context.isCompleted = true;
                             break;
                         case 'stopped':
                             Logger.info(TAG, `The AVPlayer state is: ${this.audioPlayer!.state}`);

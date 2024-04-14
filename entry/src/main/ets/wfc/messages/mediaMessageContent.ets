@@ -4,9 +4,10 @@
 
 import MessageContent from './messageContent'
 import Config from '../../config'
+import MessagePayload from './messagePayload';
 
 export default class MediaMessageContent extends MessageContent {
-    file;
+    // file: File;
     remotePath = '';
     localPath = '';
     mediaType = 0;
@@ -18,7 +19,7 @@ export default class MediaMessageContent extends MessageContent {
      * @param {File | string} fileOrLocalPath File类型，或者dataUri或者本地路径，本地路径是必须是绝对路径
      * @param {string} remotePath 远端地址
      */
-    constructor(messageType, mediaType = 0, fileOrLocalPath, remotePath) {
+    constructor(messageType: number, mediaType = 0, fileOrLocalPath = '', remotePath = '') {
         super(messageType);
         this.mediaType = mediaType;
         if (!fileOrLocalPath) {
@@ -28,15 +29,16 @@ export default class MediaMessageContent extends MessageContent {
             this.localPath = fileOrLocalPath;
             this.remotePath = remotePath;
         } else {
-            this.file = fileOrLocalPath;
-            if (fileOrLocalPath && fileOrLocalPath.path) {
-                this.localPath = fileOrLocalPath.path;
-                // attention: 粘贴的时候，path是空字符串，故采用了这个trick
-                if (this.localPath.indexOf(fileOrLocalPath.name) < 0) {
-                    this.localPath += fileOrLocalPath.name;
-                }
-            }
-
+            throw new Error('invalid parameter')
+            // this.file = fileOrLocalPath;
+            // if (fileOrLocalPath && fileOrLocalPath.path) {
+            //     this.localPath = fileOrLocalPath.path;
+            //     // attention: 粘贴的时候，path是空字符串，故采用了这个trick
+            //     if (this.localPath.indexOf(fileOrLocalPath.name) < 0) {
+            //         this.localPath += fileOrLocalPath.name;
+            //     }
+            // }
+            //
         }
     }
 
@@ -48,13 +50,13 @@ export default class MediaMessageContent extends MessageContent {
         return payload;
     }
 
-    decode(payload) {
+    decode(payload: MessagePayload) {
         super.decode(payload);
         this.localPath = payload.localMediaPath;
         this.remotePath = payload.remoteMediaUrl;
-        if (Config.urlRedirect){
+        if (Config.urlRedirect) {
             this.remotePath = Config.urlRedirect(payload.remoteMediaUrl);
-    }
+        }
 
         this.mediaType = payload.mediaType;
     }

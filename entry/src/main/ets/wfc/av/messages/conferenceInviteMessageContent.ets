@@ -1,20 +1,21 @@
 import MessageContent from "../../messages/messageContent";
 import MessageContentType from "../../messages/messageContentType";
 import wfc from "../../client/wfc";
+import Message from '../../messages/message';
+import MessagePayload from '../../messages/messagePayload';
 
 export default class ConferenceInviteMessageContent extends MessageContent {
-    callId;
-    host;
-    title;
-    desc;
+    callId = '';
+    host = '';
+    title = '';
+    desc = '';
+    startTime = 0;
+    audioOnly = false;
+    audience = false;
+    pin = '';
+    advanced = false;
 
-    startTime;
-    audioOnly;
-    audience;
-    pin;
-    advanced;
-
-    constructor(callId, host, title, desc, startTime, audioOnly, audience, advance, pin) {
+    constructor(callId: string = '', host: string = '', title: string = '', desc: string = '', startTime: number = 0, audioOnly: boolean = false, audience: boolean = false, advance: boolean = false, pin: string = '') {
         super(MessageContentType.CONFERENCE_CONTENT_TYPE_INVITE);
         this.callId = callId;
         this.host = host;
@@ -27,7 +28,7 @@ export default class ConferenceInviteMessageContent extends MessageContent {
         this.pin = pin;
     }
 
-    digest(message) {
+    digest(message: Message) {
         let str = '[会议邀请]'
         return str;
     }
@@ -45,16 +46,16 @@ export default class ConferenceInviteMessageContent extends MessageContent {
             advanced: this.advanced ? 1 : 0,
             a: this.audioOnly ? 1 : 0,
             p: this.pin,
-        };
+        } as Data;
         payload.binaryContent = wfc.utf8_to_b64(JSON.stringify(obj));
         return payload;
     }
 
-    decode(payload) {
+    decode(payload: MessagePayload) {
         super.decode(payload);
         if (payload.binaryContent) {
             let json = wfc.b64_to_utf8(payload.binaryContent);
-            let obj = JSON.parse(json);
+            let obj = JSON.parse(json) as Data;
             this.host = obj.h;
             this.startTime = obj.s;
             this.title = obj.t;
@@ -66,4 +67,15 @@ export default class ConferenceInviteMessageContent extends MessageContent {
         }
         this.callId = payload.content;
     }
+}
+
+class Data {
+    h = ''
+    s = 0
+    t = ''
+    d = ''
+    audience = 0
+    advanced = 0
+    a = 0
+    p = ''
 }

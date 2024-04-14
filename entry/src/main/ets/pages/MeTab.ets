@@ -13,8 +13,8 @@ import OptionItemView from '../view/OptionItemView'
 @Component
 export default struct MeTab {
     @State message: string = 'Hello Me'
-    @State userInfo: UserInfo = null
-    private userId: string
+    @State userInfo?: UserInfo = undefined
+    private userId: string = ''
     @Link meTabUnreadCount: number
 
     aboutToAppear() {
@@ -23,13 +23,13 @@ export default struct MeTab {
         getContext(this).eventHub.on(EventType.ConnectionStatusChanged, this.onConnectionStatusChange)
     }
 
-    onUserInfosUpdate = usersInfo => {
+    onUserInfosUpdate = (usersInfo: UserInfo[]) => {
         for (const userinfo of usersInfo) {
             if (userinfo.uid === this.userId)
                 this.userInfo = userinfo
         }
     }
-    onConnectionStatusChange = status => {
+    onConnectionStatusChange = (status: number) => {
         if (status === ConnectionStatus.ConnectionStatusConnected) {
             this.loadSelfUserInfo()
         }
@@ -48,15 +48,15 @@ export default struct MeTab {
     build() {
         Column() {
             Row() {
-                Image(this.userInfo.portrait)
+                Image(this.userInfo!.portrait)
                     .width(60)
                     .height(60)
                     .borderRadius(4)
                 Column() {
-                    Text(this.userInfo.displayName)
+                    Text(this.userInfo!.displayName)
                         .fontSize(20)
                         .maxLines(1)
-                    Text(`野火号:${this.userInfo.name}`)
+                    Text(`野火号:${this.userInfo!.name}`)
                         .maxLines(1)
                         .fontSize(14)
                         .fontColor(Color.Gray)
@@ -106,10 +106,12 @@ export default struct MeTab {
 
             OptionItemView({ title: 'API测试页' })
                 .onClick(() => {
-                    router.pushUrl({ url: 'pages/misc/WebViewPage', params: {
-                        url: 'https://baidu.com',
-                        title: '百度。。'
-                    } }, router.RouterMode.Standard)
+                    router.pushUrl({
+                        url: 'pages/misc/WebViewPage', params: {
+                            url: 'https://baidu.com',
+                            title: '百度。。'
+                        }
+                    }, router.RouterMode.Standard)
                     // router.pushUrl({
                     //     url: 'pages/conversation/forward/ForwardMessagePage'
                     // })

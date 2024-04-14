@@ -13,25 +13,19 @@ import FriendRequest from '../../wfc/model/friendRequest'
 @Preview
 export default struct FriendRequestList {
     @State message: string = 'Hello Discovery'
-    @State computedRequests: {
-        request: FriendRequest,
-        userInfo: UserInfo
-    }[] = []
+    @State computedRequests: FriendRequestAndUserInfo[] = []
 
     async onPageShow() {
         let requests = wfc.getIncommingFriendRequest()
         let ids = requests.map(req => req.target)
         let userInfos = wfc.getUserInfos(ids, '')
 
-        let tmpArray: {
-            request: FriendRequest,
-            userInfo: UserInfo
-        }[] = requests.map(req => {
+        let tmpArray: FriendRequestAndUserInfo[] = requests.map(req => {
             let userInfo = userInfos.find(info => info.uid)
             return {
                 request: req,
                 userInfo: userInfo
-            }
+            } as FriendRequestAndUserInfo
         })
 
         this.computedRequests = tmpArray
@@ -50,10 +44,7 @@ export default struct FriendRequestList {
                     .height('100%')
                 } else {
                     List() {
-                        ForEach(this.computedRequests, (req: {
-                            request: FriendRequest,
-                            userInfo: UserInfo
-                        }) => {
+                        ForEach(this.computedRequests, (req: FriendRequestAndUserInfo) => {
                             ListItem() {
                                 Row() {
                                     Image(req.userInfo.portrait)
@@ -106,10 +97,7 @@ export default struct FriendRequestList {
                                     }
                                 }, router.RouterMode.Standard)
                             })
-                        }, (req: {
-                            request: FriendRequest,
-                            userInfo: UserInfo
-                        }) => req.request.target)
+                        }, (req: FriendRequestAndUserInfo) => req.request.target)
                     }
                     .width('100%')
                     .layoutWeight(1)
@@ -136,4 +124,9 @@ export default struct FriendRequestList {
             }
         ])
     }
+}
+
+interface FriendRequestAndUserInfo {
+    request: FriendRequest,
+    userInfo: UserInfo
 }

@@ -19,25 +19,22 @@ import Message from '../../wfc/messages/message'
 import router from '@ohos.router'
 import ActionSheetDialog from '../../view/ActionSheetDialog'
 import EmojiInputPanelView from './emoji/EmojiInputPanelView'
-import image from '@ohos.multimedia.image'
-import VideoMessageContent from '../../wfc/messages/videoMessageContent'
+import { CallbackWithValue_1_Default, CallbackWithValue_2_Default, FailCallbackDefault } from '../../wfc/type/types'
 
 
 const INPUT_ICON_WIDTH = 30
 
-declare type ConversationExt = {
+interface ConversationExt {
     title: string,
     icon: ResourceStr,
     action: () => void
 }
 
-declare type MultiCheckAction = {
+interface MultiCheckAction {
     title: string,
     icon: ResourceStr,
     action: () => void
 }
-
-const MAX_RECORDER_DURATION_IN_SECOND = 60
 
 @Component
 export default struct ConversationInputPanelView {
@@ -48,7 +45,6 @@ export default struct ConversationInputPanelView {
     @State showExtPanel: boolean = false
     @State keyboardHeight: number = 300
     @State showAudioRecorderButton: boolean = false
-
     // for audioRecorderView
     @Link showAudioRecorderView: boolean
     @Link showCancelRecordIndicator: boolean
@@ -62,14 +58,13 @@ export default struct ConversationInputPanelView {
     private textInputBottomWhenBlur: number = 0
     private textInputController: TextInputController = new TextInputController()
     private mediaHelper: MediaHelper = new MediaHelper(getContext())
-    private recordTouchDownY: number
-    private recorder: AudioRecordManager
+    private recordTouchDownY: number = 0
+    private recorder?: AudioRecordManager
     private recordOutputAudioFile: string = ''
     private recordOutputAudioFileFd: number = 0
-    private forwardMessageDialogController: CustomDialogController
-    private deleteMessageDialogController: CustomDialogController
-    private recordStartTimestamp: number = 0
-    private recordTimerInternal: number = 0
+    private recordAudioStartMillis: number = 0
+    private forwardMessageDialogController?: CustomDialogController
+    private deleteMessageDialogController?: CustomDialogController
     private conversationExts: ConversationExt[] = [
         {
             title: '照片',
@@ -82,7 +77,7 @@ export default struct ConversationInputPanelView {
                         copyFileUri(imgUri, file);
                         let size = fileSize(file);
                         let content = new ImageMessageContent(file, '', '')
-                        wfc.sendConversationMessage(this.conversation, content);
+                        wfc.sendConversationMessage(this.conversation, content, [], null, null, null, null, null);
                     })
                 } catch (reason) {
                     showToast('选取照片失败: ' + reason)
@@ -100,6 +95,7 @@ export default struct ConversationInputPanelView {
             title: '拍摄',
             icon: $r('app.media.ic_func_shot'),
             action: async () => {
+                showToast('TODO')
                 try {
                     let imgUri = await this.mediaHelper.takePhoto(getContext() as common.UIAbilityContext)
                     let file = getContext(this).cacheDir + '/' + new Date().getTime() + '.jpg'
@@ -113,22 +109,6 @@ export default struct ConversationInputPanelView {
             }
         },
         {
-            title: '录制',
-            icon: $r('app.media.ic_func_shot'),
-            action: async () => {
-                try {
-                    let imgUri = await this.mediaHelper.recordVideo(getContext() as common.UIAbilityContext)
-                    let file = getContext(this).cacheDir + '/' + new Date().getTime() + '.mp4'
-                    copyFileUri(imgUri, file);
-                    let size = fileSize(file);
-                    let content = new VideoMessageContent(file, '', '')
-                    wfc.sendConversationMessage(this.conversation, content);
-                } catch (reason) {
-                    showToast('录制视频失败: ' + reason)
-                }
-            }
-        },
-        {
             title: '文件',
             icon: $r('app.media.ic_func_file'),
             action: async () => {
@@ -137,7 +117,6 @@ export default struct ConversationInputPanelView {
                     let file = getContext(this).cacheDir + '/' + new Date().getTime() + '.jpg'
                     copyFileUri(fileUri, file);
                     let size = fileSize(file);
-                    // TODO 缩略图、图片大小等
                     let content = new ImageMessageContent(file, '', '')
                     wfc.sendConversationMessage(this.conversation, content);
                 } catch (reason) {
@@ -240,7 +219,8 @@ export default struct ConversationInputPanelView {
                                         params: {
                                             messages: this.checkedMessages,
                                             forwardType: 'oneByOne',
-                                        } })
+                                        }
+                                    })
                                     // TODO 转发完成之后，再重置
                                     this.enableMultiCheck = false
                                     this.checkedMessages = []
@@ -254,7 +234,8 @@ export default struct ConversationInputPanelView {
                                         params: {
                                             messages: this.checkedMessages,
                                             forwardType: 'compose',
-                                        } })
+                                        }
+                                    })
                                     // TODO 转发完成之后，再重置
                                     this.enableMultiCheck = false
                                     this.checkedMessages = []
@@ -288,7 +269,8 @@ export default struct ConversationInputPanelView {
         this.checkKeyboardHeightInternal = setInterval(() => {
             let rect = Utils.getComponentRect('textInput')
             if (rect) {
-                let {top, bottom} = rect
+                rect.values
+                let bottom = rect['bottom'];
                 this.textInputBottomWhenBlur = bottom
                 console.log('textInputBottomWhenBlur', bottom)
                 clearInterval(this.checkKeyboardHeightInternal)
@@ -301,18 +283,18 @@ export default struct ConversationInputPanelView {
     }
 
     async startRecordAudio() {
-        let audioStreamInfo = {
-            samplingRate: audio.AudioSamplingRate.SAMPLE_RATE_44100,
-            channels: audio.AudioChannel.CHANNEL_1,
-            sampleFormat: audio.AudioSampleFormat.SAMPLE_FORMAT_S16LE,
-            encodingType: audio.AudioEncodingType.ENCODING_TYPE_RAW
-        }
+        // let audioStreamInfo = {
+        //     samplingRate: audio.AudioSamplingRate.SAMPLE_RATE_44100,
+        //     channels: audio.AudioChannel.CHANNEL_1,
+        //     sampleFormat: audio.AudioSampleFormat.SAMPLE_FORMAT_S16LE,
+        //     encodingType: audio.AudioEncodingType.ENCODING_TYPE_RAW
+        // }
         if (!this.recorder) {
             this.recorder = new AudioRecordManager()
-            await this.recorder.init()
+            this.recorder.init()
         }
 
-        let cacheDir = getContext(this).tempDir;
+        let cacheDir = getContext(this).cacheDir;
         let audioDir = `${cacheDir}/audio`
         try {
             fs.mkdirSync(audioDir)
@@ -320,54 +302,22 @@ export default struct ConversationInputPanelView {
 
         }
 
-        this.recordStartTimestamp = new Date().getTime()
+        this.recordAudioStartMillis = new Date().getTime()
 
-        this.recordOutputAudioFile = audioDir + '/' + this.recordStartTimestamp + '.m4a'
-        console.log('AudioRecordManager record audioFile', this.recordOutputAudioFile)
+        this.recordOutputAudioFile = audioDir + '/' + this.recordAudioStartMillis + '.m4a'
+        console.log('record audioFile', this.recordOutputAudioFile)
 
-        let f = fs.openSync(this.recordOutputAudioFile, fs.OpenMode.READ_WRITE | fs.OpenMode.CREATE)
-        this.recordOutputAudioFileFd = f.fd
-        this.recorder.start(`fd://${this.recordOutputAudioFileFd}`);
-
-        this.recordTimerInternal = setInterval(() => {
-            let now = new Date().getTime()
-            let duration = now - this.recordStartTimestamp
-
-            let countDown = MAX_RECORDER_DURATION_IN_SECOND * 1000 - duration
-            if (countDown <= 0) {
-                this.stopRecordAudio()
-            } else if (countDown < 10 * 1000) {
-                this.recordCountDown = Math.round(countDown / 1000)
-            }
-        }, 1000)
+        let fd = fs.openSync(this.recordOutputAudioFile, fs.OpenMode.READ_WRITE | fs.OpenMode.CREATE)
+        this.recorder.start(`fd://${fd}`);
     }
 
-    async stopRecordAudio() {
-        if (this.recordStartTimestamp === 0) {
-            return
-        }
-
-        await this.recorder.finish()
-
-        let durationInSecond = Math.round((new Date().getTime() - this.recordStartTimestamp) / 1000)
-        durationInSecond = Math.min(durationInSecond, MAX_RECORDER_DURATION_IN_SECOND)
-
-        this.recordCountDown = 0
-        this.recordStartTimestamp = 0
-        this.showAudioRecorderView = false
-        clearInterval(this.recordTimerInternal)
-
-        if (this.showCancelRecordIndicator) {
-            this.showCancelRecordIndicator = false
-            return
-        }
-
+    stopRecordAudio() {
+        this.recorder!.finish()
         fs.closeSync(this.recordOutputAudioFileFd)
-        console.log('AudioRecordManager', 'closeSync', this.recordOutputAudioFileFd);
         this.recordOutputAudioFileFd = 0
-        let audioMessageContent = new SoundMessageContent(this.recordOutputAudioFile, '', durationInSecond)
-        wfc.sendConversationMessage(this.conversation, audioMessageContent)
-        this.recordOutputAudioFile = null
+        let audioMessageContent = new SoundMessageContent(this.recordOutputAudioFile, '', Math.round((new Date().getTime() - this.recordAudioStartMillis) / 1000))
+        wfc.sendConversationMessage(this.conversation, audioMessageContent, [], null, null, null, null, null)
+        this.recordOutputAudioFile = ''
     }
 
     build() {
@@ -407,11 +357,15 @@ export default struct ConversationInputPanelView {
 
                                 if (!this.keyboardHeight) {
                                     let inputRect = Utils.getComponentRect('textInput')
-                                    const {bottom} = inputRect
-                                    if (bottom < this.textInputBottomWhenBlur) {
-                                        let audioIconRect = Utils.getComponentRect('audio')
-                                        this.keyboardHeight = (this.textInputBottomWhenBlur - inputRect['bottom']) * INPUT_ICON_WIDTH / (audioIconRect['bottom'] - audioIconRect['top'])
-                                        console.log('keyboardHeight', this.keyboardHeight)
+                                    if (inputRect) {
+                                        const bottom = inputRect['bottom']
+                                        if (bottom < this.textInputBottomWhenBlur) {
+                                            let audioIconRect = Utils.getComponentRect('audio')
+                                            if (audioIconRect) {
+                                                this.keyboardHeight = (this.textInputBottomWhenBlur - inputRect['bottom']) * INPUT_ICON_WIDTH / (audioIconRect['bottom'] - audioIconRect['top'])
+                                                console.log('keyboardHeight', this.keyboardHeight)
+                                            }
+                                        }
                                     }
                                 }
                             })
@@ -437,8 +391,7 @@ export default struct ConversationInputPanelView {
                             .layoutWeight(1)
                             .margin({ left: 10, right: 10 })
                             .borderRadius(4)
-                            .fontColor('#7E7E7E')
-                                // .backgroundColor('#F3F3F3')
+                            .fontColor('#7E7E7E')// .backgroundColor('#F3F3F3')
                             .type(ButtonType.Normal)
                             .stateStyles({
                                 pressed: {
@@ -456,6 +409,8 @@ export default struct ConversationInputPanelView {
                                     this.showCancelRecordIndicator = false
                                     this.recordTouchDownY = event.touches[0].screenY
                                 } else if (event.type === TouchType.Up) {
+                                    this.showAudioRecorderView = false
+                                    this.showCancelRecordIndicator = false
                                     this.stopRecordAudio()
                                 } else if (event.type === TouchType.Move) {
                                     let y = event.touches[0].screenY;
@@ -487,7 +442,7 @@ export default struct ConversationInputPanelView {
                             .borderRadius(4)
                             .onClick(() => {
                                 let textMessageContent = new TextMessageContent(this.text);
-                                wfc.sendConversationMessage(this.conversation, textMessageContent, []);
+                                wfc.sendConversationMessage(this.conversation, textMessageContent, [], null, null, null, null, null);
                                 this.text = '';
 
                             })
@@ -518,13 +473,13 @@ export default struct ConversationInputPanelView {
                             Column() {
                                 Image(ext.icon)
                                     .width(60)
+                                    .draggable(false)
                                     .height(60)
                                 Text(ext.title)
                                     .margin({ top: 8 })
                                     .fontSize(12)
                             }
                             .borderRadius(4)
-                            .width('20%')
                             .margin(10)
                             .padding(4)
                             .onClick(ext.action)

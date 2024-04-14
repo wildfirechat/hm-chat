@@ -4,13 +4,14 @@
 
 import wfc from '../../client/wfc'
 import MessageContentType from '../messageContentType';
+import MessagePayload from '../messagePayload';
 
 import GroupNotificationContent from './groupNotification';
 
 export default class QuitVisiableGroupNotification extends GroupNotificationContent {
     operator = '';
 
-    constructor(operator) {
+    constructor(operator: string = '') {
         super(MessageContentType.QuitGroup_Visible_Notification);
         this.operator = operator;
     }
@@ -28,16 +29,21 @@ export default class QuitVisiableGroupNotification extends GroupNotificationCont
         let obj = {
             g: this.groupId,
             o: this.operator,
-        };
+        } as Data;
         payload.binaryContent = wfc.utf8_to_b64(JSON.stringify(obj));
         return payload;
     }
 
-    decode(payload) {
+    decode(payload: MessagePayload) {
         super.decode(payload);
         let json = wfc.b64_to_utf8(payload.binaryContent)
-        let obj = JSON.parse(json);
+        let obj = JSON.parse(json) as Data;
         this.groupId = obj.g;
         this.operator = obj.o;
     }
+}
+
+class Data {
+    g = '';
+    o = '';
 }

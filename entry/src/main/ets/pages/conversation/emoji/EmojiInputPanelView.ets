@@ -12,10 +12,10 @@ import wfc from '../../../wfc/client/wfc'
 @Preview
 @Component
 export default struct EmojiInputPanelView {
-    private emojis: Emoji[]
-    private emojiAndStickers: Emoji[]
-    private emojiCategories: Category[]
-    private conversation: Conversation
+    private emojis: Emoji[] = []
+    private emojiAndStickers: Emoji[] = []
+    private emojiCategories: Category[] = []
+    private conversation?: Conversation
     @State currentCategoryIndex: number = 0
     @Link text: string
 
@@ -23,10 +23,10 @@ export default struct EmojiInputPanelView {
         let config = emojiConfig();
         // if (this.conversation.type === ConversationType.SecretChat) {
         // } else {
-        this.emojiCategories = config.emojiCategories;
-        this.emojiAndStickers = config.emojis
-        this.emojis = config.emojis
-            .filter(emoji => config.emojiCategories.findIndex(category => category.name === emoji.category) >= 0)
+        this.emojiCategories = config.emojiCategories as Category[];
+        this.emojiAndStickers = config.emojis as Emoji[]
+        this.emojis = this.emojiAndStickers
+            .filter(emoji => this.emojiCategories.findIndex((category: Category) => category.name === emoji.category) >= 0)
             .filter(emoji => emoji.category === 'Peoples')
         // }
 
@@ -142,7 +142,7 @@ export default struct EmojiInputPanelView {
                                         })
                                         .onClick(() => {
                                             let stickerMessageContent = new StickerMessageContent('', emoji.data, 200, 200)
-                                            wfc.sendConversationMessage(this.conversation, stickerMessageContent)
+                                            wfc.sendConversationMessage(this.conversation!, stickerMessageContent)
                                         })
                                     }, (emoji: Emoji, index: number) => index + '')
                                 }
@@ -186,7 +186,6 @@ export default struct EmojiInputPanelView {
             .layoutWeight(1)
             .alignContent(Alignment.BottomEnd)
         }
-        .backgroundColor(Color.White)
         .padding(10)
         .width('100%')
         .height('100%')

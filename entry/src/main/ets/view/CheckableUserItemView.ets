@@ -7,9 +7,9 @@ let isChangeTriggeredByClick: boolean = false
 @Component
 export default struct CheckableUserItemView {
     private enable?: boolean = true
-    private paddingLeft?: number = 10
-    private paddingRight?: number = 10
-    private uiUserInfo: UIUserInfo;
+    private paddingLeft: number = 10
+    private paddingRight: number = 10
+    private uiUserInfo: UIUserInfo = {} as UIUserInfo;
     private onCheckUser?: (userInfo: UserInfo, checked: boolean) => void
     @State _checked: boolean = false
     @Link checkedUsers: UserInfo[]

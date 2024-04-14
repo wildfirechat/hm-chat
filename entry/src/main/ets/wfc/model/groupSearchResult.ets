@@ -8,14 +8,17 @@ import GroupMember from './groupMember';
 export default class GroupSearchResult {
     groupInfo: GroupInfo;
     //0 march group name, 1 march group member name, 2 both
-    matchType: number;
+    matchType = 0
     matchMembers: GroupMember[] = [];
 
-    static fromProtoGroupSearchResult(obj) {
-        let groupSearchResult = new GroupSearchResult();
-        groupSearchResult.groupInfo = Object.assign(new GroupInfo(), obj.groupInfo)
-        groupSearchResult.matchType = obj.marchedType;
-        groupSearchResult.matchMembers = obj.marchedMemberNames;
+    constructor(groupInfo: GroupInfo) {
+        this.groupInfo = groupInfo
+    }
+
+    static fromProtoGroupSearchResult(obj: Record<string, Object>) {
+        let groupSearchResult = new GroupSearchResult(obj.groupInfo as GroupInfo);
+        groupSearchResult.matchType = obj.marchedType as number;
+        groupSearchResult.matchMembers = obj.marchedMemberNames as GroupMember[];
         return groupSearchResult;
 
     }

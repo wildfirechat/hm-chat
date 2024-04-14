@@ -1,10 +1,11 @@
+import ChannelMenu from '../model/channelMenu';
 import MessageContent from "./messageContent";
 import MessageContentType from "./messageContentType";
 
 export default class ChannelMenuEventMessageContent extends MessageContent {
-    menu
+    menu?: ChannelMenu
 
-    constructor(menu) {
+    constructor(menu?: ChannelMenu) {
         super(MessageContentType.Channel_Menu_Event);
         this.menu = menu;
     }

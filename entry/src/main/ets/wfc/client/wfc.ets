@@ -9,7 +9,7 @@
 
 import impl from '../proto/proto.min';
 import Config from "../../config";
-import Long, { LongType } from '../util/long'
+import Long from '../util/long'
 import { atob, btoa } from '../util/base64.min'
 // import avenginekit from "../av/engine/avenginekitproxy";
 // import pttClient from "../ptt/client/pttClient";
@@ -30,14 +30,32 @@ import KickoffGroupMemberNotification from '../messages/notification/kickoffGrou
 import Message from '../messages/message';
 import ChatRoomInfo from '../model/chatRoomInfo';
 import MessageContent from '../messages/messageContent';
+import { HashMap, util } from '@kit.ArkTS';
+import common from '@ohos.app.ability.common';
+import ModifyMyInfoEntry from '../model/modifyMyInfoEntry';
+import {
+    FailCallback,
+    SuccessCallback,
+    CallbackWithValue_1,
+    CallbackWithValue_2,
+    numberArray,
+    CallbackWithValue_1_OrNull,
+    CallbackWithValue_2_OrNull,
+    stringArray,
+    FailCallbackOrNull,
+} from '../type/types';
+import SecretChatInfo from '../model/secretChatInfo';
+import ConversationSearchResult from '../model/conversationSearchResult';
 import UnreadCount from '../model/unreadCount';
+import FileRecord from '../model/fileRecord';
+import UserOnlineState from '../model/userOnlineState';
 
-declare type SuccessCallback = () => void
+const textEncoder = new util.TextEncoder('utf-8')
 
-declare type FailCallback = (err: number) => void
+const textDecoder = util.TextDecoder.create('utf-8')
+
 
 export class WfcManager {
-
     /**
      * 事件通知，{@link EventType}中定义的事件，都会采用本{@link eventEmitter} 通知
      * @type {module:events.internal.EventEmitter}
@@ -72,7 +90,7 @@ export class WfcManager {
      * 只可以在主窗口调用，其他窗口调用应当调用{@link attach}
      * @param {[]} args，pc 时，传入[node实例]; web 时，可以传入Config配置对象，配置项，请参考{@link Config}
      */
-    init(context, eventHub, dbPath, platform) {
+    init(context: common.ApplicationContext, eventHub: common.EventHub, dbPath: string, platform: number) {
         impl.init(context, eventHub, dbPath);
         impl.setPlatform(platform);
         // if (Config.ENABLE_PTT) {
@@ -89,22 +107,22 @@ export class WfcManager {
      * @param {number} type 消息类型，{@link MessageContentType}
      * @param {class} clazz 消息对应的class
      */
-    registerMessageContent(name, flag, type, clazz) {
-        impl.registerMessageContent(name, flag, type, clazz);
+    registerMessageContent(name: string, flag: number, type: number) {
+        impl.registerMessageContent(name, flag, type);
     }
 
     /**
      * 获取clientId，获取用户token时，一定要通过调用此方法获取clientId，否则会连接失败。
      * @returns {string} clientId
      */
-    getClientId() {
+    getClientId(): string {
         return impl.getClientId();
     }
 
     /**
      * 获取协议栈版本号
      */
-    getProtoRevision() {
+    getProtoRevision(): string {
         return impl.getProtoRevision();
     }
 
@@ -133,7 +151,7 @@ export class WfcManager {
      * 是否启动 TCP 短连接
      * @return {*}
      */
-    isTcpShortLink() {
+    isTcpShortLink(): boolean {
         return impl.isTcpShortLink();
     }
 
@@ -143,7 +161,7 @@ export class WfcManager {
      * @param {string} token 用户token，生成token时，所使用的clientId，一定要通过{@link getClientId}获取
      * @return {number} 返回上一次活动时间。如果间隔时间较长，可以加个第一次登录的等待提示界面，在等待时同步所有的用户信息/群组信息/频道信息等。
      */
-    connect(userId, token) {
+    connect(userId: string, token: string): number {
         return impl.connect(userId, token);
     }
 
@@ -156,7 +174,7 @@ export class WfcManager {
      * @param {String} username   username
      * @param {String} password   password
      */
-    setProxyInfo(host, ip, port, username, password) {
+    setProxyInfo(host: string, ip: string, port: number, username: string, password: string) {
         impl.setProxyInfo(host, ip, port, username, password);
     }
 
@@ -165,9 +183,10 @@ export class WfcManager {
      * @param {number} pushType 推送类型，0-5 移动端已经使用了。
      * @param {String} token 设备token
      */
-    setDeviceToken(pushType, token) {
+    setDeviceToken(pushType: number, token: string) {
         impl.setDeviceToken(pushType, token);
     }
+
 
     /**
      * 主动断开连接
@@ -179,7 +198,7 @@ export class WfcManager {
         impl.disconnect(disablePush, cleanSession);
     }
 
-    setPackageName(packageName) {
+    setPackageName(packageName: string) {
         impl.setPackageName(packageName);
     }
 
@@ -196,7 +215,7 @@ export class WfcManager {
      * 服务器时间和本地时间的差值
      * @returns {number} 服务器时间和本地时间的差值
      */
-    getServerDeltaTime() {
+    getServerDeltaTime(): number {
         return impl.getServerDeltaTime();
     }
 
@@ -204,7 +223,7 @@ export class WfcManager {
      * 是否成功登录
      * @returns {boolean}
      */
-    isLogin() {
+    isLogin(): boolean {
         return impl.isLogin();
     }
 
@@ -212,7 +231,7 @@ export class WfcManager {
      * 获取连接状态
      * @returns {number} 连接状态，参考{@link ConnectionStatus}
      */
-    getConnectionStatus() {
+    getConnectionStatus(): number {
         return impl.getConnectionStatus();
     }
 
@@ -221,7 +240,7 @@ export class WfcManager {
      * @param {int} strategy 网络策略。0 是自动选择；1 选择主网络；2选择备用网络
      *
      */
-    setBackupAddressStrategy(strategy) {
+    setBackupAddressStrategy(strategy: number) {
         impl.setBackupAddressStrategy(strategy);
     }
 
@@ -230,7 +249,7 @@ export class WfcManager {
      * @param {String} backupHost 备选网络主机地址
      * @param {int} backupPort 备选网络主机端口
      */
-    setBackupAddress(backupHost, backupPort) {
+    setBackupAddress(backupHost: string, backupPort: number) {
         impl.setBackupAddress(backupHost, backupPort);
     }
 
@@ -239,7 +258,7 @@ export class WfcManager {
      *
      * @param {string} userAgent 协议栈短连接使用的UA
      */
-    setProtoUserAgent(userAgent) {
+    setProtoUserAgent(userAgent: string) {
         impl.setProtoUserAgent(userAgent);
     }
 
@@ -249,7 +268,7 @@ export class WfcManager {
      * @param {string} header 协议栈短连接使用的UA
      * @param {string} value 协议栈短连接使用的UA
      */
-    addHttpHeader(header, value) {
+    addHttpHeader(header: string, value: string) {
         impl.addHttpHeader(header, value)
     }
 
@@ -303,7 +322,7 @@ export class WfcManager {
      * @param {string} userId 用户id
      * @returns {string} 用户在群里面的displayName
      */
-    getGroupMemberDisplayName(groupId, userId) {
+    getGroupMemberDisplayName(groupId: string, userId: string) {
         let userInfo = this.getUserInfo(userId, false, groupId);
         if (!userInfo) {
             return '<' + userId + '>';
@@ -312,11 +331,11 @@ export class WfcManager {
         return userInfo.groupAlias ? userInfo.groupAlias : (userInfo.friendAlias ? userInfo.friendAlias : (userInfo.displayName ? userInfo.displayName : '<' + userId + '>'))
     }
 
-    getUserDisplayNameEx(userInfo) {
+    getUserDisplayNameEx(userInfo: UserInfo) {
         return userInfo.friendAlias ? userInfo.friendAlias : (userInfo.displayName ? userInfo.displayName : '<' + userInfo.uid + '>');
     }
 
-    getGroupMemberDisplayNameEx(userInfo) {
+    getGroupMemberDisplayNameEx(userInfo: UserInfo) {
         return userInfo.groupAlias ? userInfo.groupAlias : (userInfo.friendAlias ? userInfo.friendAlias : (userInfo.displayName ? userInfo.displayName : '<' + userInfo.uid + '>'))
     }
 
@@ -343,7 +362,7 @@ export class WfcManager {
      * @param {function (number)} fail 失败回调
      */
     getUserInfoEx(userId: string, refresh: boolean, success: (userInfo: UserInfo) => void, fail: (err: number) => void) {
-        impl.getUserInfoEx(userId, refresh, (info) => {
+        impl.getUserInfoEx(userId, refresh, (info: UserInfo) => {
             if (!info.portrait || info.portrait.startsWith(Config.APP_SERVER)) {
                 info.portrait = this.defaultUserPortrait(info);
             }
@@ -376,8 +395,8 @@ export class WfcManager {
      * @param {function (number)}failCB
      * @returns {Promise<void>}
      */
-    async searchUser(keyword: string, searchType: SearchType, page: number, successCB: (keyword: string, userInfos: UserInfo[]) => void, failCB: (err: number) => void) {
-        impl.searchUser(keyword, searchType, page, (keyword, userInfos) => {
+    async searchUser(keyword: string, searchType: number, page: number, successCB: (keyword: string, userInfos: UserInfo[]) => void, failCB: (err: number) => void) {
+        impl.searchUser(keyword, searchType, page, (keyword: string, userInfos: UserInfo[]) => {
             userInfos.forEach((u) => {
                 if (!u.portrait || u.portrait.startsWith(Config.APP_SERVER)) {
                     u.portrait = this.defaultUserPortrait(u)
@@ -392,7 +411,7 @@ export class WfcManager {
      * @param keyword 搜索关键字
      * @returns {[UserInfo]}
      */
-    searchFriends(keyword): UserInfo[] {
+    searchFriends(keyword: string): UserInfo[] {
         return impl.searchFriends(keyword);
     }
 
@@ -417,7 +436,7 @@ export class WfcManager {
      * 获取发送出去的好友请求
      * @returns {[FriendRequest]}
      */
-    getOutgoingFriendRequest() {
+    getOutgoingFriendRequest(): FriendRequest[] {
         return impl.getOutgoingFriendRequest();
     }
 
@@ -427,7 +446,7 @@ export class WfcManager {
      * @param {boolean} incoming 是否是收到的好友请求
      * @return {FriendRequest|null}
      */
-    getOneFriendRequest(userId, incoming = true) {
+    getOneFriendRequest(userId: string, incoming = true): FriendRequest | null {
         return impl.getOneFriendRequest(userId, incoming);
     }
 
@@ -442,7 +461,7 @@ export class WfcManager {
      * 获取未读的好友请求数
      * @returns {number}
      */
-    getUnreadFriendRequestCount() {
+    getUnreadFriendRequestCount(): number {
         return impl.getUnreadFriendRequestCount();
     }
 
@@ -460,7 +479,7 @@ export class WfcManager {
      * @param {function (number) }failCB
      * @returns {Promise<void>}
      */
-    async deleteFriend(userId, successCB, failCB) {
+    async deleteFriend(userId: string, successCB: SuccessCallback, failCB: FailCallback) {
         impl.deleteFriend(userId, successCB, failCB);
     }
 
@@ -482,7 +501,7 @@ export class WfcManager {
      * @param userId
      * @returns {boolean}
      */
-    isBlackListed(userId) {
+    isBlackListed(userId: string): boolean {
         return impl.isBlackListed(userId);
     }
 
@@ -490,7 +509,7 @@ export class WfcManager {
      * 获取黑名单
      * @returns {[string]}
      */
-    getBlackList() {
+    getBlackList(): string[] {
         return impl.getBlackList();
     }
 
@@ -501,7 +520,7 @@ export class WfcManager {
      * @param {function ()} successCB
      * @param {function (number)} failCB
      */
-    setBlackList(userId, block, successCB, failCB) {
+    setBlackList(userId: string, block: boolean, successCB: SuccessCallback, failCB: FailCallback) {
         impl.setBlackList(userId, block, successCB, failCB);
     }
 
@@ -527,11 +546,11 @@ export class WfcManager {
      * @param {string} userId
      * @returns {string}
      */
-    getFriendAlias(userId) {
+    getFriendAlias(userId: string) {
         return impl.getFriendAlias(userId);
     }
 
-    getFriendExtra(userId) {
+    getFriendExtra(userId: string) {
         // fixme
         // return impl.getFriendExtra(userId);
     }
@@ -545,7 +564,7 @@ export class WfcManager {
      * @returns {Promise<void>}
      */
 
-    async setFriendAlias(userId, alias, successCB, failCB) {
+    async setFriendAlias(userId: string, alias: string, successCB: SuccessCallback, failCB: FailCallback) {
         impl.setFriendAlias(userId, alias, successCB, failCB);
     }
 
@@ -564,7 +583,7 @@ export class WfcManager {
      * @param {function (number)} failCB
      * @returns {Promise<void>}
      */
-    async createGroup(groupId, groupType, name, portrait, groupExtra, memberIds = [], memberExtra = '', lines = [0], notifyContent, successCB, failCB) {
+    async createGroup(groupId: string, groupType: number, name: string, portrait: string, groupExtra: string, memberIds: string[] = [], memberExtra = '', lines: numberArray = [0], notifyContent: MessageContent | null, successCB: CallbackWithValue_1<string>, failCB: FailCallback) {
         impl.createGroup(groupId, groupType, name, portrait == null ? "" : portrait, groupExtra, memberIds, memberExtra, lines, notifyContent, successCB, failCB);
     }
 
@@ -579,7 +598,7 @@ export class WfcManager {
      * @param {function (number)} failCB
      * @returns {Promise<void>}
      */
-    async setGroupManager(groupId, isSet, memberIds, lines, notifyContent, successCB, failCB) {
+    async setGroupManager(groupId: string, isSet: boolean, memberIds: string[], lines: numberArray, notifyContent: MessageContent | null, successCB: SuccessCallback, failCB: FailCallback) {
         impl.setGroupManager(groupId, isSet, memberIds, lines, notifyContent, successCB, failCB);
     }
 
@@ -604,7 +623,7 @@ export class WfcManager {
      * @param {boolean} refresh 是否刷新，如果刷新，且有更新的话，会通过{@link eventEmitter}通知
      * @returns {[GroupInfo]}
      */
-    getGroupInfos(groupIds, refresh = false) {
+    getGroupInfos(groupIds: string[], refresh = false) {
         let infos = impl.getGroupInfos(groupIds, refresh);
         infos.forEach(info => {
             if (!info.portrait || info.portrait.startsWith(Config.APP_SERVER)) {
@@ -621,8 +640,8 @@ export class WfcManager {
      * @param {function (GroupInfo)} successCB 成功回调
      * @param {function (number)} failCB 失败回调
      */
-    getGroupInfoEx(groupId, refresh = false, successCB, failCB) {
-        impl.getGroupInfoEx(groupId, refresh, info => {
+    getGroupInfoEx(groupId: string, refresh: boolean, successCB: Function, failCB: FailCallback) {
+        impl.getGroupInfoEx(groupId, refresh, (info: GroupInfo) => {
             if (!info.portrait || info.portrait.startsWith(Config.APP_SERVER)) {
                 info.portrait = this.defaultGroupPortrait(info);
             }
@@ -640,7 +659,7 @@ export class WfcManager {
      * @param successCB
      * @param failCB
      */
-    addGroupMembers(groupId: string, memberIds: string[], extra: string, notifyLines: number[], notifyMessageContent: AddGroupMemberNotification, successCB: () => void, failCB: (err: number) => void) {
+    addGroupMembers(groupId: string, memberIds: string[], extra: string, notifyLines: numberArray, notifyMessageContent: MessageContent | null, successCB: () => void, failCB: (err: number) => void) {
         impl.addGroupMembers(groupId, memberIds, extra, notifyLines, notifyMessageContent, successCB, failCB);
     }
 
@@ -670,7 +689,7 @@ export class WfcManager {
      * @param {number} memberType，可选值参考{@link GroupMemberType}
      * @return {[GroupMember]} 群成员列表
      */
-    getGroupMembersByType(groupId, memberType) {
+    getGroupMembersByType(groupId: string, memberType: number): GroupMember[] {
         return impl.getGroupMembersByType(groupId, memberType);
     }
 
@@ -681,7 +700,7 @@ export class WfcManager {
      * @param {function ([GroupMember])} successCB
      * @param {function (number)} failCB
      */
-    getGroupMembersEx(groupId, fresh = false, successCB, failCB) {
+    getGroupMembersEx(groupId: string, fresh: boolean, successCB: CallbackWithValue_1<GroupMember[]>, failCB: FailCallback) {
         impl.getGroupMembersEx(groupId, fresh, successCB, failCB);
     }
 
@@ -704,7 +723,7 @@ export class WfcManager {
      * @param {function ()} successCB
      * @param {function (number)} failCB
      */
-    kickoffGroupMembers(groupId: string, memberIds: string[], notifyLines: number[], notifyMsg: KickoffGroupMemberNotification, successCB: () => void, failCB: (err: number) => void) {
+    kickoffGroupMembers(groupId: string, memberIds: string[], notifyLines: numberArray, notifyMsg: MessageContent | null, successCB: () => void, failCB: (err: number) => void) {
         impl.kickoffGroupMembers(groupId, memberIds, notifyLines, notifyMsg, successCB, failCB);
     }
 
@@ -718,7 +737,7 @@ export class WfcManager {
      * @param {function ()} successCB 成功回调
      * @param {function (number)} failCB 失败回调
      */
-    muteGroupMembers(groupId, isSet, memberIds = [], notifyLines = [], notifyMsg, successCB, failCB) {
+    muteGroupMembers(groupId: string, isSet: boolean, memberIds: string[], notifyLines: numberArray, notifyMsg: MessageContent | null, successCB: SuccessCallback, failCB: FailCallback) {
         impl.muteOrAllowGroupMembers(groupId, isSet, false, memberIds, notifyLines, notifyMsg, successCB, failCB);
     }
 
@@ -732,7 +751,7 @@ export class WfcManager {
      * @param {function ()} successCB 成功回调
      * @param {function (number)} failCB 失败回调
      */
-    allowGroupMembers(groupId, isSet, memberIds = [], notifyLines = [], notifyMsg, successCB, failCB) {
+    allowGroupMembers(groupId: string, isSet: boolean, memberIds: string[], notifyLines: numberArray, notifyMsg: MessageContent | null, successCB: SuccessCallback, failCB: FailCallback) {
         impl.muteOrAllowGroupMembers(groupId, isSet, true, memberIds, notifyLines, notifyMsg, successCB, failCB);
     }
 
@@ -745,7 +764,7 @@ export class WfcManager {
      * @param failCB
      * @returns {Promise<void>}
      */
-    async quitGroup(groupId, lines, notifyMessageContent, successCB, failCB) {
+    async quitGroup(groupId: string, lines: numberArray, notifyMessageContent: MessageContent | null, successCB: SuccessCallback, failCB: FailCallback) {
         impl.quitGroup(groupId, lines, notifyMessageContent, successCB, failCB);
     }
 
@@ -758,7 +777,7 @@ export class WfcManager {
      * @param {function (number)} failCB
      * @returns {Promise<void>}
      */
-    async dismissGroup(groupId, lines, notifyMessageContent, successCB, failCB) {
+    async dismissGroup(groupId: string, lines: numberArray, notifyMessageContent: MessageContent | null, successCB: SuccessCallback, failCB: FailCallback) {
         impl.dismissGroup(groupId, lines, notifyMessageContent, successCB, failCB);
     }
 
@@ -773,7 +792,7 @@ export class WfcManager {
      * @param failCB
      * @returns {Promise<void>}
      */
-    async modifyGroupInfo(groupId, type, newValue, lines, notifyMessageContent, successCB, failCB) {
+    async modifyGroupInfo(groupId: string, type: number, newValue: string, lines: numberArray, notifyMessageContent: MessageContent | null, successCB: SuccessCallback, failCB: FailCallback) {
         impl.modifyGroupInfo(groupId, type, newValue, lines, notifyMessageContent, successCB, failCB);
     }
 
@@ -787,7 +806,7 @@ export class WfcManager {
      * @param failCB
      * @returns {Promise<void>}
      */
-    async modifyGroupAlias(groupId, alias, lines, notifyMessageContent, successCB, failCB) {
+    async modifyGroupAlias(groupId: string, alias: string, lines: numberArray, notifyMessageContent: MessageContent, successCB: SuccessCallback, failCB: FailCallback) {
         impl.modifyGroupAlias(groupId, alias, lines, notifyMessageContent, successCB, failCB);
     }
 
@@ -802,7 +821,7 @@ export class WfcManager {
      * @param failCB
      * @returns {Promise<void>}
      */
-    async modifyGroupMemberAlias(groupId, memberId, alias, lines, notifyMessageContent, successCB, failCB) {
+    async modifyGroupMemberAlias(groupId: string, memberId: string, alias: string, lines: numberArray, notifyMessageContent: MessageContent | null, successCB: SuccessCallback, failCB: FailCallback) {
         impl.modifyGroupMemberAlias(groupId, memberId, alias, lines, notifyMessageContent, successCB, failCB);
     }
 
@@ -817,7 +836,7 @@ export class WfcManager {
      * @param failCB
      * @returns {Promise<void>}
      */
-    async modifyGroupMemberExtra(groupId, memberId, extra, lines, notifyMessageContent, successCB, failCB) {
+    async modifyGroupMemberExtra(groupId: string, memberId: string, extra: string, lines: numberArray, notifyMessageContent: MessageContent | null, successCB: SuccessCallback, failCB: FailCallback) {
         impl.modifyGroupMemberExtra(groupId, memberId, extra, lines, notifyMessageContent, successCB, failCB);
     }
 
@@ -830,7 +849,7 @@ export class WfcManager {
      * @param successCB
      * @param failCB
      */
-    transferGroup(groupId, newOwner, lines, notifyMessageContent, successCB, failCB) {
+    transferGroup(groupId: string, newOwner: string, lines: numberArray, notifyMessageContent: MessageContent | null, successCB: SuccessCallback, failCB: FailCallback) {
         impl.transferGroup(groupId, newOwner, lines, notifyMessageContent, successCB, failCB);
     }
 
@@ -841,7 +860,7 @@ export class WfcManager {
      * @param successCB
      * @param failCB
      */
-    async setGroupRemark(groupId, remark, successCB, failCB) {
+    async setGroupRemark(groupId: string, remark: string, successCB: SuccessCallback, failCB: FailCallback) {
         impl.setGroupRemark(groupId, remark, successCB, failCB);
     }
 
@@ -850,7 +869,7 @@ export class WfcManager {
      * @param {string} groupId 群id
      * @return 群备注
      */
-    getGroupRemark(groupId) {
+    getGroupRemark(groupId: string): string {
         return impl.getGroupRemark(groupId);
     }
 
@@ -858,7 +877,7 @@ export class WfcManager {
      * 获取保存到通讯录的群id列表
      * @returns {[string]}
      */
-    getFavGroups() {
+    getFavGroups(): string[] {
         return impl.getFavGroups();
     }
 
@@ -867,7 +886,7 @@ export class WfcManager {
      * @param {string} groupId
      * @returns {boolean}
      */
-    isFavGroup(groupId): boolean {
+    isFavGroup(groupId: string): boolean {
         return impl.isFavGroup(groupId);
     }
 
@@ -879,7 +898,7 @@ export class WfcManager {
      * @param {function (number)} failCB
      * @returns {Promise<void>}
      */
-    async setFavGroup(groupId: string, fav: boolean, successCB: () => void, failCB: (err: number) => void) {
+    async setFavGroup(groupId: string, fav: boolean, successCB: SuccessCallback | null = null, failCB: FailCallback | null = null) {
         impl.setFavGroup(groupId, fav, successCB, failCB);
     }
 
@@ -890,7 +909,7 @@ export class WfcManager {
      * @param {function (number)} failCB
      * @returns {Promise<void>}
      */
-    async getMyGroups(successCB, failCB) {
+    async getMyGroups(successCB: CallbackWithValue_1<string[]>, failCB: FailCallback) {
         impl.getMyGroups(successCB, failCB);
     }
 
@@ -902,7 +921,7 @@ export class WfcManager {
      * @param {function (number)} failCB
      * @returns {Promise<void>}
      */
-    async getCommonGroups(userId, successCB, failCB) {
+    async getCommonGroups(userId: string, successCB: CallbackWithValue_1<string[]>, failCB: FailCallback) {
         impl.getCommonGroups(userId, successCB, failCB);
     }
 
@@ -912,7 +931,7 @@ export class WfcManager {
      * @param {string} key key
      * @returns {string} 设置的key对应的value
      */
-    getUserSetting(scope, key) {
+    getUserSetting(scope: number, key: string): string {
         return impl.getUserSetting(scope, key);
     }
 
@@ -921,7 +940,7 @@ export class WfcManager {
      * @param scope 命名空间，可选值参考{@link UserSettingScope}
      * @returns {Map} key-value
      */
-    getUserSettings(scope) {
+    getUserSettings(scope: number): Record<string, string>[] {
         return impl.getUserSettings(scope);
     }
 
@@ -934,7 +953,7 @@ export class WfcManager {
      * @param {function (number)} failCB 失败回调
      * @returns {Promise<void>}
      */
-    async setUserSetting(scope, key, value, successCB, failCB) {
+    async setUserSetting(scope: number, key: string, value: string, successCB: SuccessCallback, failCB: FailCallback) {
         impl.setUserSetting(scope, key, value, successCB, failCB);
     }
 
@@ -944,7 +963,7 @@ export class WfcManager {
      * @param successCB
      * @param failCB
      */
-    modifyMyInfo(modifyMyInfoEntries, successCB, failCB) {
+    modifyMyInfo(modifyMyInfoEntries: ModifyMyInfoEntry[], successCB: SuccessCallback, failCB: FailCallback) {
         impl.modifyMyInfo(modifyMyInfoEntries, successCB, failCB);
     }
 
@@ -952,7 +971,7 @@ export class WfcManager {
      * 是否全局免打扰
      * @returns {boolean}
      */
-    isGlobalSlient() {
+    isGlobalSlient(): boolean {
         return impl.isGlobalSlient();
     }
 
@@ -962,7 +981,7 @@ export class WfcManager {
      * @param {function ()} successCB
      * @param failCB
      */
-    setGlobalSlient(silent, successCB, failCB) {
+    setGlobalSlient(silent: boolean, successCB: SuccessCallback, failCB: FailCallback) {
         impl.setGlobalSlient(silent, successCB, failCB);
     }
 
@@ -970,7 +989,7 @@ export class WfcManager {
      * 是否隐藏通知详情
      * @returns {boolean}
      */
-    isHiddenNotificationDetail() {
+    isHiddenNotificationDetail(): boolean {
         return impl.isHiddenNotificationDetail();
     }
 
@@ -981,7 +1000,7 @@ export class WfcManager {
      * @param {function (number)} failCB
      * @returns {Promise<void>}
      */
-    async setHiddenNotificationDetail(hide, successCB, failCB) {
+    async setHiddenNotificationDetail(hide: boolean, successCB: SuccessCallback | null = null, failCB: FailCallback | null = null) {
         impl.setHiddenNotificationDetail(hide, successCB, failCB);
     }
 
@@ -990,7 +1009,7 @@ export class WfcManager {
      * @param {string} groupId 群id
      * @returns {boolean}
      */
-    isHiddenGroupMemberName(groupId) {
+    isHiddenGroupMemberName(groupId: string): boolean {
         return impl.isHiddenGroupMemberName(groupId);
     }
 
@@ -1002,7 +1021,7 @@ export class WfcManager {
      * @param {function (number)} failCB
      * @returns {Promise<void>}
      */
-    async setHiddenGroupMemberName(groupId, hide, successCB, failCB) {
+    async setHiddenGroupMemberName(groupId: string, hide: boolean, successCB: SuccessCallback, failCB: FailCallback) {
         impl.setHiddenGroupMemberName(groupId, hide, successCB, failCB);
     }
 
@@ -1013,7 +1032,7 @@ export class WfcManager {
      * @param {function (number)} failCB
      * @returns {Promise<void>}
      */
-    async joinChatroom(chatroomId, successCB, failCB) {
+    async joinChatroom(chatroomId: string, successCB: () => void, failCB: (err: number) => void) {
         impl.joinChatroom(chatroomId, successCB, failCB);
     }
 
@@ -1024,7 +1043,7 @@ export class WfcManager {
      * @param {function (number)} failCB
      * @returns {Promise<void>}
      */
-    async quitChatroom(chatroomId, successCB, failCB) {
+    async quitChatroom(chatroomId: string, successCB: (() => void) | null = null, failCB: ((err: number) => void) | null = null) {
         impl.quitChatroom(chatroomId, successCB, failCB);
     }
 
@@ -1037,7 +1056,7 @@ export class WfcManager {
      * @returns {Promise<void>}
      */
     async getChatroomInfo(chatroomId: string, updateDt: number, successCB: (chatroomInfo: ChatRoomInfo) => void, failCB: (err: number) => void) {
-        return impl.getChatroomInfo(chatroomId, updateDt, successCB, failCB);
+        impl.getChatroomInfo(chatroomId, updateDt, successCB, failCB);
     }
 
     /**
@@ -1048,7 +1067,8 @@ export class WfcManager {
      * @param {function (number)} failCB
      * @returns {Promise<void>}
      */
-    async getChatroomMemberInfo(chatroomId, maxCount, successCB, failCB) {
+
+    async getChatroomMemberInfo(chatroomId: string, maxCount: number, successCB: SuccessCallback, failCB: FailCallback) {
         impl.getChatroomMemberInfo(chatroomId, maxCount, successCB, failCB);
     }
 
@@ -1061,7 +1081,7 @@ export class WfcManager {
      * @param {function (string)} successCB 创建成功，会回调通知channelId
      * @param {function (number)} failCB
      */
-    createChannel(name, portrait, desc, extra, successCB, failCB) {
+    createChannel(name: string, portrait: string, desc: string, extra: string, successCB: CallbackWithValue_1<ChannelInfo>, failCB: FailCallback) {
         impl.createChannel(name, portrait, desc, extra, successCB, failCB);
     }
 
@@ -1080,39 +1100,39 @@ export class WfcManager {
      * @param {string} targetId
      * @returns {SecretChatInfo}
      */
-    getSecretChatInfo(targetId) {
+    getSecretChatInfo(targetId: string): SecretChatInfo | null {
         return impl.getSecretChatInfo(targetId);
     }
 
-    destroySecretChat(targetId, successCB, failCB) {
+    destroySecretChat(targetId: string, successCB: SuccessCallback | null = null, failCB: FailCallback | null = null) {
         impl.destroySecretChat(targetId, successCB, failCB);
     }
 
-    encodeSecretChatMediaData(targetId, mediaDataBuffer) {
+    encodeSecretChatMediaData(targetId: string, mediaDataBuffer: string): string {
         return impl.encodeSecretChatMediaData(targetId, mediaDataBuffer);
     }
 
-    decodeSecretChatMediaData(targetId, mediaDataBuffer) {
+    decodeSecretChatMediaData(targetId: string, mediaDataBuffer: string): string {
         return impl.decodeSecretChatMediaData(targetId, mediaDataBuffer);
     }
 
-    setSecretChatBurnTime(targetId, ms) {
+    setSecretChatBurnTime(targetId: string, ms: number) {
         impl.setSecretChatBurnTime(targetId, ms);
     }
 
-    isEnableSecretChat() {
+    isEnableSecretChat(): boolean {
         return impl.isEnableSecretChat();
     }
 
-    getAppPath() {
+    getAppPath(): string {
         return impl.getAppPath();
     }
 
-    isUserEnableSecretChat() {
+    isUserEnableSecretChat(): boolean {
         return impl.isUserEnableSecretChat();
     }
 
-    setUserEnableSecretChat(enable, successCB, failCB) {
+    setUserEnableSecretChat(enable: boolean, successCB: SuccessCallback, failCB: FailCallback) {
         impl.setUserEnableSecretChat(enable, successCB, failCB);
     }
 
@@ -1125,7 +1145,7 @@ export class WfcManager {
      * @param {function (number)} failCB
      * @returns {Promise<void>}
      */
-    async modifyChannelInfo(channelId, type, newValue, successCB, failCB) {
+    async modifyChannelInfo(channelId: string, type: number, newValue: string, successCB: SuccessCallback, failCB: FailCallback) {
         impl.modifyChannelInfo(channelId, type, newValue, successCB, failCB);
     }
 
@@ -1145,7 +1165,7 @@ export class WfcManager {
      * @param {string} channelId 频道id
      * @returns {boolean}
      */
-    isListenedChannel(channelId) {
+    isListenedChannel(channelId: string): boolean {
         return impl.isListenedChannel(channelId);
     }
 
@@ -1157,7 +1177,7 @@ export class WfcManager {
      * @param {function (number)} failCB
      * @returns {Promise<void>}
      */
-    async listenChannel(channelId, listen, successCB, failCB) {
+    async listenChannel(channelId: string, listen: boolean, successCB: SuccessCallback | null, failCB: FailCallback | null) {
         impl.listenChannel(channelId, listen, successCB, failCB);
     }
 
@@ -1174,7 +1194,7 @@ export class WfcManager {
      * 获取所收听的频道id列表
      * @returns {[string]}
      */
-    getListenedChannels() {
+    getListenedChannels(): string[] {
         return impl.getListenedChannels();
     }
 
@@ -1184,7 +1204,7 @@ export class WfcManager {
      * @param {function (number)} failCB
      *
      */
-    getRemoteListenedChannels(successCB, failCB) {
+    getRemoteListenedChannels(successCB: CallbackWithValue_1<string[]>, failCB: FailCallback) {
         impl.getRemoteListenedChannels(successCB, failCB);
     }
 
@@ -1195,7 +1215,7 @@ export class WfcManager {
      * @param {function (number)} failCB
      * @returns {Promise<void>}
      */
-    async destoryChannel(channelId, successCB, failCB) {
+    async destoryChannel(channelId: string, successCB: SuccessCallback, failCB: FailCallback) {
         impl.destoryChannel(channelId, successCB, failCB);
     }
 
@@ -1205,7 +1225,7 @@ export class WfcManager {
      * @param {[0]} lines 想获取哪些会话线路的会话，默认传[0]即可
      * @returns {[ConversationInfo]}
      */
-    getConversationInfoList(types, lines) {
+    getConversationInfoList(types: numberArray, lines: numberArray): ConversationInfo[] {
         return impl.getConversationInfoList(types, lines);
     }
 
@@ -1225,7 +1245,7 @@ export class WfcManager {
      * @param {[number]} lines 从哪些会话线路进行搜索，默认传[0]即可
      * @returns {[ConversationSearchResult]}
      */
-    searchConversation(keyword, types = [0, 1, 2], lines = [0, 1, 2]) {
+    searchConversation(keyword: string, types = [0, 1, 2], lines = [0, 1, 2]): ConversationSearchResult[] {
         return impl.searchConversation(keyword, types, lines);
     }
 
@@ -1242,7 +1262,7 @@ export class WfcManager {
      * @param {int} offset offset
      * @returns {[ConversationSearchResult]}
      */
-    searchConversationEx(keyword, types, lines, startTime, endTime, desc, limit, offset) {
+    searchConversationEx(keyword: string, types: numberArray, lines: numberArray, startTime: number, endTime: number, desc = false, limit = 20, offset = 0): ConversationSearchResult[] {
         return impl.searchConversationEx(keyword, types, lines, startTime, endTime, desc, limit, offset);
     }
 
@@ -1261,7 +1281,7 @@ export class WfcManager {
      * @param {boolean} onlyMentionedMsg 是否只搜索提醒消息
      * @returns {[ConversationSearchResult]}
      */
-    searchConversationEx2(keyword, types, lines, cntTypes, startTime, endTime, desc, limit, offset, onlyMentionedMsg) {
+    searchConversationEx2(keyword: string, types: numberArray, lines: numberArray, cntTypes: numberArray, startTime: number, endTime: number, desc = false, limit = 20, offset = 0, onlyMentionedMsg = false): ConversationSearchResult[] {
         return impl.searchConversationEx2(keyword, types, lines, cntTypes, startTime, endTime, desc, limit, offset, onlyMentionedMsg);
     }
 
@@ -1271,7 +1291,7 @@ export class WfcManager {
      * @param {boolean} clearMsg 是否已删除的会话的消息
      * @returns {Promise<void>}
      */
-    async removeConversation(conversation, clearMsg) {
+    async removeConversation(conversation: Conversation, clearMsg = true) {
         impl.removeConversation(conversation, clearMsg);
     }
 
@@ -1282,7 +1302,7 @@ export class WfcManager {
      * @param {function ()} successCB
      * @param {function (number)} failCB
      */
-    setConversationTop(conversation: Conversation, top: number, successCB: () => void, failCB: (err: number) => void) {
+    setConversationTop(conversation: Conversation, top: number, successCB: SuccessCallback, failCB: FailCallback) {
         impl.setConversationTop(conversation, top, successCB, failCB);
     }
 
@@ -1293,7 +1313,7 @@ export class WfcManager {
      * @param {function ()} successCB
      * @param {function (number)} failCB
      */
-    setConversationSlient(conversation: Conversation, silent: boolean, successCB: () => void, failCB: (err: number) => void) {
+    setConversationSlient(conversation: Conversation, silent: boolean, successCB: SuccessCallback, failCB: FailCallback) {
         impl.setConversationSlient(conversation, silent, successCB, failCB);
     }
 
@@ -1302,7 +1322,7 @@ export class WfcManager {
      * @param {Conversation} conversation 目标会话
      * @param {string} draft 草稿，传''时，相当于清楚会话草稿
      */
-    setConversationDraft(conversation, draft = '') {
+    setConversationDraft(conversation: Conversation, draft: string) {
         impl.setConversationDraft(conversation, draft);
     }
 
@@ -1311,7 +1331,7 @@ export class WfcManager {
      * @param {Conversation} conversation
      * @param {number} timestamp
      */
-    setConversationTimestamp(conversation, timestamp) {
+    setConversationTimestamp(conversation: Conversation, timestamp: number) {
         impl.setConversationTimestamp(conversation, timestamp);
     }
 
@@ -1321,7 +1341,7 @@ export class WfcManager {
      * @param {[number]} lines 获取未读数时，包含哪些会话线路，默认传[0]即可
      * @returns {UnreadCount}
      */
-    getUnreadCount(types = [0, 1, 2], lines = [0]) {
+    getUnreadCount(types = [0, 1, 2], lines = [0]): UnreadCount {
         return impl.getUnreadCount(types, lines);
     }
 
@@ -1338,7 +1358,7 @@ export class WfcManager {
      * 清楚会话消息未读状态
      * @param {Conversation} conversation 目标会话
      */
-    clearConversationUnreadStatus(conversation) {
+    clearConversationUnreadStatus(conversation: Conversation) {
         impl.clearConversationUnreadStatus(conversation);
     }
 
@@ -1347,7 +1367,7 @@ export class WfcManager {
      * @param {Conversation} conversation 目标会话
      * @param {int} messageId 消息id
      */
-    clearUnreadStatusBeforeMessage(conversation, messageId) {
+    clearUnreadStatusBeforeMessage(conversation: Conversation, messageId: number) {
         impl.clearUnreadStatusBeforeMessage(conversation, messageId);
     }
 
@@ -1357,7 +1377,7 @@ export class WfcManager {
      * @param {boolean} syncToOtherClient 是否同步给其他端
      * @return {boolean} 是否操作成功
      */
-    markConversationAsUnread(conversation, syncToOtherClient) {
+    markConversationAsUnread(conversation: Conversation, syncToOtherClient: boolean): boolean {
         return impl.markConversationAsUnread(conversation, syncToOtherClient);
     }
 
@@ -1365,7 +1385,7 @@ export class WfcManager {
      * 清除单条消息的未读状态
      * @param messageId
      */
-    clearMessageUnreadStatus(messageId) {
+    clearMessageUnreadStatus(messageId: number) {
         impl.clearMessageUnreadStatus(messageId);
     }
 
@@ -1383,7 +1403,7 @@ export class WfcManager {
      * 设置媒体消息的状态为已播放
      * @param {number} messageId 消息id，不是消息uid!
      */
-    setMediaMessagePlayed(messageId) {
+    setMediaMessagePlayed(messageId: number) {
         impl.setMediaMessagePlayed(messageId);
     }
 
@@ -1392,7 +1412,7 @@ export class WfcManager {
      * @param {number} messageId 消息id，不是消息uid!
      * @param {string} extra 扩展信息
      */
-    setMessageLocalExtra(messageId, extra) {
+    setMessageLocalExtra(messageId: number, extra: string) {
         impl.setMessageLocalExtra(messageId, extra);
     }
 
@@ -1401,7 +1421,7 @@ export class WfcManager {
      * @param {string} userId 用户id
      * @returns {boolean}
      */
-    isMyFriend(userId): boolean {
+    isMyFriend(userId: string): boolean {
         return impl.isMyFriend(userId);
     }
 
@@ -1418,7 +1438,7 @@ export class WfcManager {
      * @param {string} userId
      * @returns {boolean}
      */
-    isFavUser(userId) {
+    isFavUser(userId: string): boolean {
         return impl.isFavUser(userId);
     }
 
@@ -1430,7 +1450,7 @@ export class WfcManager {
      * @param {function (number)} failCB
      * @returns {Promise<void>}
      */
-    async setFavUser(userId, fav, successCB, failCB) {
+    async setFavUser(userId: string, fav: boolean, successCB: SuccessCallback, failCB: FailCallback) {
         impl.setFavUser(userId, fav, successCB, failCB);
     }
 
@@ -1443,7 +1463,7 @@ export class WfcManager {
      * @param {function (number)} failCB
      * @returns {Promise<void>}
      */
-    async sendFriendRequest(userId, reason, extra, successCB, failCB) {
+    async sendFriendRequest(userId: string, reason: string, extra: string, successCB: SuccessCallback, failCB: FailCallback) {
         impl.sendFriendRequest(userId, reason, extra, successCB, failCB);
     }
 
@@ -1457,9 +1477,10 @@ export class WfcManager {
      * @param {string} withUser 只有会话类型为{@link ConversationType#Channel}时生效, channel主用来查询和某个用户的所有消息
      * @return {[Message]} 会话消息列表，参考{@link Message}
      */
-    getMessages(conversation, fromIndex = 0, before = true, count = 20, withUser = '') {
-        return impl.getMessages(conversation, fromIndex, before, count, withUser);
-    }
+    // TODO
+    // getMessages(conversation, fromIndex = 0, before = true, count = 20, withUser = '') {
+    //     return impl.getMessages(conversation, fromIndex, before, count, withUser);
+    // }
 
     /**
      * 获取消息
@@ -1473,9 +1494,10 @@ export class WfcManager {
      * @param {[number]} contentTypes 消息类型列表，可选值参考{@link MessageContentType}
      * @return {[Message]} 会话消息列表，参考{@link Message}
      */
-    getMessagesEx(conversationTypes, lines, fromIndex = 0, before = true, count = 20, withUser = '', contentTypes = []) {
-        return impl.getMessagesEx(conversationTypes, lines, contentTypes, fromIndex, before, count, withUser);
-    }
+    // TODO
+    // getMessagesEx(conversationTypes, lines, fromIndex = 0, before = true, count = 20, withUser = '', contentTypes = []) {
+    //     return impl.getMessagesEx(conversationTypes, lines, contentTypes, fromIndex, before, count, withUser);
+    // }
 
     /**
      * 获取消息
@@ -1489,9 +1511,10 @@ export class WfcManager {
      * @param {string} withUser 只有会话类型为{@link ConversationType#Channel}时生效, channel主用来查询和某个用户的所有消息
      * @return {[Message]} 会话消息列表，参考{@link Message}
      */
-    getMessagesEx2(conversationTypes, lines, messageStatus, fromIndex = 0, before = true, count = 20, withUser = '') {
-        return impl.getMessagesEx2(conversationTypes, lines, messageStatus, fromIndex, before, count, withUser);
-    }
+    // TODO
+    // getMessagesEx2(conversationTypes, lines, messageStatus, fromIndex = 0, before = true, count = 20, withUser = '') {
+    //     return impl.getMessagesEx2(conversationTypes, lines, messageStatus, fromIndex, before, count, withUser);
+    // }
 
     /**
      * 获取会话消息
@@ -1504,9 +1527,10 @@ export class WfcManager {
      * @param {string} withUser 只有会话类型为{@link ConversationType#Channel}时生效, channel主用来查询和某个用户的所有消息
      * @return {[Message]} 会话消息列表，参考{@link Message}
      */
-    getMessagesByTimestamp(conversation, contentTypes, timestamp, before = true, count = 20, withUser = '') {
-        return impl.getMessagesByTimestamp(conversation, contentTypes, timestamp, before, count, withUser);
-    }
+    // TODO
+    // getMessagesByTimestamp(conversation, contentTypes, timestamp, before = true, count = 20, withUser = '') {
+    //     return impl.getMessagesByTimestamp(conversation, contentTypes, timestamp, before, count, withUser);
+    // }
 
     /**
      * 获取用户会话消息
@@ -1518,9 +1542,10 @@ export class WfcManager {
      * @param {number} count 本参数暂时无效! 获取多少条消息
      * @return
      */
-    getUserMessages(userId, conversation, fromIndex, before = true, count = 20) {
-        return impl.getUserMessages(userId, conversation, fromIndex, before, count);
-    }
+    // TODO
+    // getUserMessages(userId, conversation, fromIndex, before = true, count = 20) {
+    //     return impl.getUserMessages(userId, conversation, fromIndex, before, count);
+    // }
 
     /**
      * 获取用户消息
@@ -1534,9 +1559,10 @@ export class WfcManager {
      * @param {[number]} contentTypes 消息类型，可选值参考{@link MessageContentType}
      * @return
      */
-    getUserMessagesEx(userId, conversationTypes, lines, fromIndex, before = true, count = 20, contentTypes = []) {
-        return impl.getUserMessagesEx(userId, conversationTypes, lines, fromIndex, before, count, contentTypes);
-    }
+    // TODO
+    // getUserMessagesEx(userId, conversationTypes, lines, fromIndex, before = true, count = 20, contentTypes = []) {
+    //     return impl.getUserMessagesEx(userId, conversationTypes, lines, fromIndex, before, count, contentTypes);
+    // }
 
     /**
      * 获取会话消息
@@ -1548,7 +1574,7 @@ export class WfcManager {
      * @param {function (Message[])} successCB
      * @param failCB
      */
-    getMessagesV2(conversation, fromIndex, before, count, withUser, successCB, failCB) {
+    getMessagesV2(conversation: Conversation, fromIndex: number, before: boolean, count: number, withUser: string, successCB: CallbackWithValue_1<Message[]>, failCB: FailCallback) {
         impl.getMessagesV2(conversation, fromIndex, before, count, withUser, successCB, failCB);
     }
 
@@ -1558,10 +1584,10 @@ export class WfcManager {
      * @param {number} fromIndex messageId，表示从那一条消息开始获取
      * @param {boolean} before true, 获取fromIndex之前的消息，即更旧的消息；false，获取fromIndex之后的消息，即更新的消息。都不包含fromIndex对应的消息
      * @param {number} count 获取多少条消息
-     * @param {function (Message)} successCB
+     * @param {function (Message[])} successCB
      * @param failCB
      */
-    getMentionedMessages(conversation, fromIndex, before, count, successCB, failCB) {
+    getMentionedMessages(conversation: Conversation, fromIndex: number, before: boolean, count: number, successCB: CallbackWithValue_1<Message[]>, failCB: FailCallback) {
         impl.getMentionedMessages(conversation, fromIndex, before, count, successCB, failCB);
     }
 
@@ -1577,7 +1603,7 @@ export class WfcManager {
      * @param {function (Message)} successCB
      * @param failCB
      */
-    getMessagesExV2(conversationTypes, lines, fromIndex, before, count, withUser, contentTypes, successCB, failCB) {
+    getMessagesExV2(conversationTypes: numberArray, lines: numberArray, fromIndex: number, before: boolean, count: number, withUser: string, contentTypes: numberArray, successCB: CallbackWithValue_1<Message[]>, failCB: FailCallback) {
         impl.getMessagesExV2(conversationTypes, lines, contentTypes, fromIndex, before, count, withUser, successCB, failCB);
     }
 
@@ -1593,7 +1619,7 @@ export class WfcManager {
      * @param {function (Message)} successCB
      * @param failCB
      */
-    getMessagesEx2V2(conversationTypes, lines, messageStatus, fromIndex, before, count, withUser, successCB, failCB) {
+    getMessagesEx2V2(conversationTypes: numberArray, lines: numberArray, messageStatus: numberArray, fromIndex: number, before: boolean, count: number, withUser: string, successCB: CallbackWithValue_1<Message[]>, failCB: FailCallback) {
         impl.getMessagesEx2V2(conversationTypes, lines, messageStatus, fromIndex, before, count, withUser, successCB, failCB);
     }
 
@@ -1608,11 +1634,11 @@ export class WfcManager {
      * @param {function ([Message])} successCB
      * @param failCB
      */
-    getMessagesByTimestampV2(conversation: Conversation, contentTypes: number[], timestamp: number, before: boolean, count: number, withUser: string, successCB: (msgs: Message[]) => void, failCB: (err: number) => void) {
+    getMessagesByTimestampV2(conversation: Conversation, contentTypes: numberArray, timestamp: number, before: boolean, count: number, withUser: string, successCB: (msgs: Message[]) => void, failCB: (err: number) => void) {
         impl.getMessagesByTimestampV2(conversation, contentTypes, timestamp, before, count, withUser, successCB, failCB);
     }
 
-    getMessagesByStatusV2(conversation, statuses, fromIndex, before, count, withUser, successCB, failCB) {
+    getMessagesByStatusV2(conversation: Conversation, statuses: numberArray, fromIndex: number, before: boolean, count: number, withUser: string, successCB: CallbackWithValue_1<Message[]>, failCB: FailCallback) {
         impl.getMessagesByStatusV2(conversation, statuses, fromIndex, before, count, withUser, successCB, failCB);
     }
 
@@ -1620,14 +1646,15 @@ export class WfcManager {
      * 获取用户会话消息
      * @param {string} userId 用户id
      * @param {Conversation} conversation 目标会话
+     * @param {number[]} contTypes 需要获取的消息类型，为空，获取所有消息类型
      * @param {number} fromIndex 本参数暂时无效！ messageId，表示从那一条消息开始获取
      * @param {boolean} before 本参数暂时无效！ true, 获取fromIndex之前的消息，即更旧的消息；false，获取fromIndex之后的消息，即更新的消息。都不包含fromIndex对应的消息
      * @param {number} count 本参数暂时无效! 获取多少条消息
      * @param {function (Message)} successCB
      * @param failCB
      */
-    getUserMessagesV2(userId, conversation, fromIndex, before, count, successCB, failCB) {
-        impl.getUserMessagesV2(userId, conversation, fromIndex, before, count, [], successCB, failCB);
+    getUserMessagesV2(userId: string, conversation: Conversation, contTypes: numberArray, fromIndex: number, before: boolean, count: number, withUser: string, successCB: CallbackWithValue_1<Message[]>, failCB: FailCallback) {
+        impl.getUserMessagesV2(userId, conversation, contTypes, fromIndex, before, count, withUser, successCB, failCB);
     }
 
     /**
@@ -1642,8 +1669,8 @@ export class WfcManager {
      * @param {function (Message)} successCB
      * @param failCB
      */
-    getUserMessagesExV2(userId, conversationTypes, lines, fromIndex, before, count, contentTypes, successCB, failCB) {
-        impl.getUserMessagesExV2(userId, conversationTypes, lines, fromIndex, before, count, contentTypes, successCB, failCB);
+    getUserMessagesExV2(userId: string, conversationTypes: numberArray, lines: numberArray, contentTypes: numberArray, fromIndex: number, before: boolean, count: number, withUser: string, successCB: CallbackWithValue_1<Message[]>, failCB: FailCallback) {
+        impl.getUserMessagesExV2(userId, conversationTypes, lines, contentTypes, fromIndex, before, count, withUser, successCB, failCB);
     }
 
     /**
@@ -1651,7 +1678,7 @@ export class WfcManager {
      * @param {Conversation} conversation
      * @return {number}
      */
-    getFirstUnreadMessageId(conversation) {
+    getFirstUnreadMessageId(conversation: Conversation) {
         // fixme
         // return impl.getFirstUnreadMessageId(conversation);
     }
@@ -1666,7 +1693,7 @@ export class WfcManager {
      * @param {function (Message)} successCB
      * @param failCB
      */
-    loadRemoteMessages(conversation, contentTypes, beforeUid, count, successCB, failCB) {
+    loadRemoteMessages(conversation: Conversation, contentTypes: numberArray, beforeUid: Long, count: number, successCB: CallbackWithValue_1<Message[]>, failCB: FailCallback) {
         impl.loadRemoteMessages(conversation, contentTypes, beforeUid, count, successCB, failCB);
     }
 
@@ -1679,23 +1706,24 @@ export class WfcManager {
      * @param {function ([Message])} successCB
      * @param failCB
      */
-    loadRemoteConversationMessages(conversation, contentTypes, beforeUid, count, successCB, failCB) {
+    loadRemoteConversationMessages(conversation: Conversation, contentTypes: numberArray, beforeUid: Long, count: number, successCB: CallbackWithValue_1<Message[]>, failCB: FailCallback) {
         impl.loadRemoteMessages(conversation, contentTypes, beforeUid, count, successCB, failCB);
     }
 
-    /**
-     * 获取会话的远程历史消息，仅 web 有效
-     * @param {Conversation} conversation 目标会话
-     * @param {[number]} contentTypes 消息类型列表，可选值参考{@link MessageContentType}
-     * @param {number | Long} beforeUid 消息uid，表示拉取本条消息之前的消息
-     * @param {number} count
-     * @param {boolean} filterLocalMessage 是否过滤本地已经存在的消息
-     * @param {function ([Message])} successCB
-     * @param failCB
-     */
-    loadRemoteConversationMessagesEx(conversation, contentTypes, beforeUid, count, filterLocalMessage, successCB, failCB) {
-        impl.loadRemoteMessages(conversation, contentTypes, beforeUid, count, successCB, failCB);
-    }
+    // /**
+    //  * 获取会话的远程历史消息，仅 web 有效
+    //  * @param {Conversation} conversation 目标会话
+    //  * @param {[number]} contentTypes 消息类型列表，可选值参考{@link MessageContentType}
+    //  * @param {number | Long} beforeUid 消息uid，表示拉取本条消息之前的消息
+    //  * @param {number} count
+    //  * @param {boolean} filterLocalMessage 是否过滤本地已经存在的消息
+    //  * @param {function ([Message])} successCB
+    //  * @param failCB
+    //  */
+    // TODO
+    // loadRemoteConversationMessagesEx(conversation:Conversation, contentTypes:number[], beforeUid:Long, count:number, filterLocalMessage:boolean, successCB, failCB) {
+    //     impl.loadRemoteMessages(conversation, contentTypes, beforeUid, count, successCB, failCB);
+    // }
 
     /**
      * 根据会话线路，获取远程历史消息，仅 web 端有效
@@ -1707,10 +1735,11 @@ export class WfcManager {
      * @param {function ([Message])} successCB
      * @param failCB
      */
-    loadRemoteLineMessages(line, contentTypes, beforeUid, count, filterLocalMessage, successCB, failCB) {
-        // fixme
-        // impl.loadRemoteLineMessages(line, contentTypes, beforeUid, count, successCB, failCB, filterLocalMessage)
-    }
+    // TODO
+    // loadRemoteLineMessages(line:number, contentTypes:number[], beforeUid:Long, count:number, filterLocalMessage, successCB, failCB) {
+    //     // fixme
+    //     // impl.loadRemoteLineMessages(line, contentTypes, beforeUid, count, successCB, failCB, filterLocalMessage)
+    // }
 
     /**
      * 根据消息 uid，获取远程消息
@@ -1718,7 +1747,7 @@ export class WfcManager {
      * @param {function ([Message])} successCB
      * @param failCB
      */
-    loadRemoteMessage(messageUid, successCB, failCB) {
+    loadRemoteMessage(messageUid: Long, successCB: CallbackWithValue_1<Message>, failCB: FailCallback) {
         impl.loadRemoteMessage(messageUid, successCB, failCB);
     }
 
@@ -1727,7 +1756,7 @@ export class WfcManager {
      * @param {number} messageId 消息id
      * @returns {null|Message}
      */
-    getMessageById(messageId) {
+    getMessageById(messageId: number): Message | null {
         return impl.getMessageById(messageId);
     }
 
@@ -1736,7 +1765,7 @@ export class WfcManager {
      * @param {Long|string|number} messageUid
      * @returns {null|Message}
      */
-    getMessageByUid(messageUid) {
+    getMessageByUid(messageUid: Long): Message | null {
         return impl.getMessageByUid(messageUid);
     }
 
@@ -1747,7 +1776,7 @@ export class WfcManager {
      * @param {string} withUser 目标用户
      * @returns {[Message]}
      */
-    searchMessage(conversation, keyword, withUser = '') {
+    searchMessage(conversation: Conversation, keyword: string, withUser = '') {
         return impl.searchMessage(conversation, keyword, withUser);
     }
 
@@ -1761,7 +1790,7 @@ export class WfcManager {
      * @param {string} withUser 目标用户
      * @returns {Message[]}
      */
-    searchMessageEx(conversation, keyword, desc, limit, offset, withUser = '') {
+    searchMessageEx(conversation: Conversation, keyword: string, desc: boolean, limit: 20, offset: 0, withUser = ''): Message[] {
         return impl.searchMessageEx(conversation, keyword, desc, limit, offset, withUser);
     }
 
@@ -1774,7 +1803,7 @@ export class WfcManager {
      * @param {int} offset 偏移
      * @returns {Message[]}
      */
-    searchMentionedMessages(conversation, keyword, desc, limit, offset) {
+    searchMentionedMessages(conversation: Conversation, keyword: string, desc: boolean, limit = 20, offset = 0): Message[] {
         return impl.searchMentionedMessages(conversation, keyword, desc, limit, offset);
     }
 
@@ -1789,7 +1818,7 @@ export class WfcManager {
      * @param {string} withUser 目标用户
      * @returns {Message[]}
      */
-    searchMessageByTypes(conversation, keyword, contentTypes, desc, limit, offset, withUser = '') {
+    searchMessageByTypes(conversation: Conversation, keyword: string, contentTypes: numberArray, desc: boolean, limit: 20, offset = 0, withUser = ''): Message[] {
         return impl.searchMessageByTypes(conversation, keyword, contentTypes, desc, limit, offset, withUser);
     }
 
@@ -1806,7 +1835,7 @@ export class WfcManager {
      * @param {string} withUser 目标用户
      * @returns {Message[]}
      */
-    searchMessageByTypesAndTimes(conversation, keyword, contentTypes, startTime, endTime, desc, limit, offset, withUser = '') {
+    searchMessageByTypesAndTimes(conversation: Conversation, keyword: string, contentTypes: numberArray, startTime: number, endTime: number, desc: boolean, limit = 20, offset = 0, withUser = ''): Message[] {
         return impl.searchMessageByTypesAndTimes(conversation, keyword, contentTypes, startTime, endTime, desc, limit, offset, withUser);
     }
 
@@ -1822,7 +1851,7 @@ export class WfcManager {
      * @param {string} withUser 目标用户
      * @returns {[Message]}
      */
-    searchMessageEx2(conversationTypes, lines, contentTypes, keyword, fromIndex, desc, count, withUser = '') {
+    searchMessageEx2(conversationTypes: numberArray, lines: numberArray, contentTypes: numberArray, keyword: string, fromIndex: number, desc: boolean, count = 20, withUser = ''): Message[] {
         return impl.searchMessageEx2(conversationTypes, lines, contentTypes, keyword, fromIndex, desc, count, withUser);
     }
 
@@ -1836,7 +1865,7 @@ export class WfcManager {
      * @param {int} offset 偏移
      * @returns {[Message]}
      */
-    searchMentionedMessageEx(conversationTypes, lines, keyword, desc, limit, offset) {
+    searchMentionedMessageEx(conversationTypes: numberArray, lines: numberArray, keyword: string, desc: boolean, limit = 20, offset = 0): Message[] {
         return impl.searchMentionedMessageEx(conversationTypes, lines, keyword, desc, limit, offset);
     }
 
@@ -1852,7 +1881,7 @@ export class WfcManager {
      * @param {function (number)} failCB
      * @returns {Promise<void>}
      */
-    async sendConversationMessage(conversation: Conversation, messageContent: MessageContent, toUsers: string[] = [], preparedCB: (messageId: number) => void = null, progressCB: (progress: number, total: number) => void = null, uploadedCB: (mediaUrl: string) => void = null, successCB: (messageUid: object, timestamp: number) => void = null, failCB: (err: number) => void = null) {
+    async sendConversationMessage(conversation: Conversation, messageContent: MessageContent, toUsers: string[] = [], preparedCB?: CallbackWithValue_1_OrNull<number>, progressCB?: CallbackWithValue_2_OrNull<number, number>, uploadedCB?: CallbackWithValue_1_OrNull<string>, successCB?: CallbackWithValue_2_OrNull<Long, number>, failCB?: FailCallbackOrNull) {
         impl.sendConversationMessage(conversation, messageContent, toUsers, preparedCB, progressCB, uploadedCB, successCB, failCB);
     }
 
@@ -1866,7 +1895,7 @@ export class WfcManager {
      * @param failCB
      * @returns {Promise<void>}
      */
-    async sendMessage(message, preparedCB, progressCB, uploadedCB, successCB, failCB) {
+    async sendMessage(message: Message, preparedCB: CallbackWithValue_1_OrNull<number>, progressCB: CallbackWithValue_2<number, number>, uploadedCB: CallbackWithValue_1_OrNull<string>, successCB: CallbackWithValue_2<Long, number>, failCB: FailCallback) {
         impl.sendMessage(message, preparedCB, progressCB, uploadedCB, successCB, failCB);
     }
 
@@ -1881,7 +1910,7 @@ export class WfcManager {
      * @param failCB
      * @returns {Promise<void>}
      */
-    async sendMessageEx(message, toUsers = [], preparedCB, progressCB, uploadedCB, successCB, failCB) {
+    async sendMessageEx(message: Message, toUsers = [], preparedCB: CallbackWithValue_1<number>, progressCB: CallbackWithValue_2_OrNull<number, number>, uploadedCB: CallbackWithValue_1_OrNull<string>, successCB: CallbackWithValue_2<Long, number>, failCB: FailCallback) {
         impl.sendMessageEx(message, toUsers, preparedCB, progressCB, uploadedCB, successCB, failCB);
     }
 
@@ -1893,7 +1922,7 @@ export class WfcManager {
      * @param failCB
      * @returns {Promise<void>}
      */
-    async sendSavedMessage(message, expireDuration, successCB, failCB) {
+    async sendSavedMessage(message: Message, expireDuration: number, successCB: CallbackWithValue_2<Long, number>, failCB: FailCallback) {
         impl.sendSavedMessage(message, expireDuration, successCB, failCB);
     }
 
@@ -1902,7 +1931,7 @@ export class WfcManager {
      * @param messageId 消息ID
      * @returns 是否取消成功
      */
-    cancelSendingMessage(messageId) {
+    cancelSendingMessage(messageId: number): boolean {
         return impl.cancelSendingMessage(messageId);
     }
 
@@ -1914,7 +1943,7 @@ export class WfcManager {
      * @param {function (number)} failCB
      * @returns {Promise<void>}
      */
-    async recallMessage(messageUid, successCB, failCB) {
+    async recallMessage(messageUid: Long, successCB: SuccessCallback, failCB: FailCallback) {
         impl.recallMessage(messageUid, successCB, failCB);
     }
 
@@ -1923,7 +1952,7 @@ export class WfcManager {
      * @param {number} messageId 消息id
      * @returns {*}
      */
-    deleteMessage(messageId) {
+    deleteMessage(messageId: number): boolean {
         return impl.deleteMessageById(messageId);
     }
 
@@ -1932,7 +1961,7 @@ export class WfcManager {
      * @param {[string]} messageUids 消息uid列表
      * @returns {*}
      */
-    batchDeleteMessages(messageUids) {
+    batchDeleteMessages(messageUids: Long[]): boolean {
         return impl.batchDeleteMessages(messageUids);
     }
 
@@ -1942,7 +1971,7 @@ export class WfcManager {
      * @param {function ()} successCB
      * @param {function (number)} failCB
      */
-    deleteRemoteMessageByUid(msgUid: string | LongType, successCB: () => void, failCB: (err: number) => void) {
+    deleteRemoteMessageByUid(msgUid: Long, successCB: SuccessCallback, failCB: FailCallback) {
         impl.deleteRemoteMessage(msgUid, successCB, failCB);
     }
 
@@ -1955,7 +1984,7 @@ export class WfcManager {
      * @param {function ()} successCB
      * @param {function (number)} failCB
      */
-    updateRemoteMessageContent(msgUid, messageContent, distribute, updateLocal, successCB, failCB) {
+    updateRemoteMessageContent(msgUid: Long, messageContent: MessageContent, distribute: boolean, updateLocal: boolean, successCB: SuccessCallback, failCB: FailCallback) {
         impl.updateRemoteMessageContent(msgUid, messageContent, distribute, updateLocal, successCB, failCB);
     }
 
@@ -1964,7 +1993,7 @@ export class WfcManager {
      * @param {Conversation} conversation 目标会话
      * @returns {Promise<void>}
      */
-    async clearMessages(conversation) {
+    async clearMessages(conversation: Conversation) {
         impl.clearMessages(conversation);
     }
 
@@ -1974,7 +2003,7 @@ export class WfcManager {
      * @param {long} before 时间，单位毫秒
      * @returns {Promise<void>}
      */
-    async clearMessagesBefore(conversation, before) {
+    async clearMessagesBefore(conversation: Conversation, before: number) {
         impl.clearMessagesByTime(conversation, before);
     }
 
@@ -1984,7 +2013,7 @@ export class WfcManager {
      * @param {int} count 时间，单位毫秒
      * @returns {Promise<void>}
      */
-    async clearMessagesKeepLatest(conversation, count) {
+    async clearMessagesKeepLatest(conversation: Conversation, count: number) {
         impl.clearMessagesKeepLatest(conversation, count);
     }
 
@@ -1995,7 +2024,7 @@ export class WfcManager {
      * @param {number} endTime 结束时间，如果为0忽略结束时间
      * @returns {Promise<void>}
      */
-    async clearUserMessages(userId, startTime, endTime) {
+    async clearUserMessages(userId: string, startTime: number, endTime: number) {
         impl.clearUserMessages(userId, startTime, endTime);
     }
 
@@ -2003,7 +2032,7 @@ export class WfcManager {
      * 清除所有消息
      * @param {boolean} removeConversation 是否同时删除会话
      */
-    clearAllMessages(removeConversation) {
+    clearAllMessages(removeConversation: boolean) {
         impl.clearAllMessages(removeConversation);
     }
 
@@ -2014,7 +2043,7 @@ export class WfcManager {
      * @param {function (error)} failCB
      * @return {Promise<void>}
      */
-    async clearRemoteConversationMessages(conversation, successCB, failCB) {
+    async clearRemoteConversationMessages(conversation: Conversation, successCB: SuccessCallback, failCB: FailCallback) {
         impl.clearRemoteConversationMessages(conversation, successCB, failCB);
     }
 
@@ -2029,14 +2058,13 @@ export class WfcManager {
      *
      * @return {Message} 插入的消息
      */
-    insertMessage(conversation, messageContent, status, notify = false, toUsers = [], serverTime = 0) {
+    insertMessage(conversation: Conversation, messageContent: MessageContent, status: number, notify = false, toUsers: string[] = [], serverTime = 0): Message | null {
         return impl.insertMessage(conversation, messageContent, status, notify, toUsers, serverTime);
     }
 
 
     /**
      * 插入消息
-     * @param {Long} messageUid
      * @param {Conversation} conversation 目标会话
      * @param {string} fromUser 发送者
      * @param {MessageContent} messageContent 具体的消息内容，一定要求是{@link MessageContent} 的子类，不能是普通的object
@@ -2046,8 +2074,8 @@ export class WfcManager {
      *
      * @return {Message} 插入的消息
      */
-    insertMessageEx(messageUid, conversation, fromUser, messageContent, status, serverTime, localExtra) {
-        return impl.insertMessage(messageUid, conversation, fromUser, messageContent, status, serverTime);
+    insertMessageEx(messageUid: Long, conversation: Conversation, fromUser: string, messageContent: MessageContent, status: number, serverTime: number, localExtra: string = ''): Message | null {
+        return impl.insertMessageEx(messageUid, conversation, fromUser, messageContent, status, serverTime);
     }
 
     /**
@@ -2056,7 +2084,7 @@ export class WfcManager {
      * @param {MessageContent} messageContent 具体的消息内容，一定要求是{@link MessageContent} 的子类，不能是普通的object
      * @returns {Promise<void>}
      */
-    async updateMessageContent(messageId, messageContent) {
+    async updateMessageContent(messageId: number, messageContent: MessageContent) {
         impl.updateMessageContent(messageId, messageContent);
     }
 
@@ -2065,7 +2093,7 @@ export class WfcManager {
      * @param {number} messageId 消息id
      * @param {MessageStatus} status 消息状态，可选值参考{@link MessageStatus}
      */
-    async updateMessageStatus(messageId, status) {
+    async updateMessageStatus(messageId: number, status: number) {
         impl.updateMessageStatus(messageId, status);
     }
 
@@ -2079,7 +2107,7 @@ export class WfcManager {
      * @param {function (number, number)} progressCB
      * @returns {Promise<void>}
      */
-    async uploadMedia(fileName, fileOrData, mediaType, successCB, failCB, progressCB) {
+    async uploadMedia(fileName: string, fileOrData: string, mediaType: number, successCB: CallbackWithValue_1<string>, failCB: FailCallback, progressCB: CallbackWithValue_2<number, number>) {
         impl.uploadMedia(fileName, fileOrData, mediaType, successCB, failCB, progressCB);
     }
 
@@ -2091,14 +2119,14 @@ export class WfcManager {
     /**
      * 获取经过认证的下载地址。
      */
-    getAuthorizedMediaUrl(messageUid, mediaType, mediaPath, successCB, failCB) {
+    getAuthorizedMediaUrl(messageUid: Long, mediaType: number, mediaPath: string, successCB: CallbackWithValue_1<string>, failCB: FailCallback) {
         impl.getAuthorizedMediaUrl(messageUid, mediaType, mediaPath, successCB, failCB)
     }
 
     /**
      * 是否支持上传大文件上传。只有专业版才支持此功能。当支持大文件上传时，调用getUploadMediaUrl获取上传url，然后在应用层上传
      */
-    isSupportBigFilesUpload() {
+    isSupportBigFilesUpload(): boolean {
         return impl.isSupportBigFilesUpload();
     }
 
@@ -2107,10 +2135,10 @@ export class WfcManager {
      * @param {string} fileName
      * @param {number} mediaType 媒体类型，可选值参考{@link MessageContentMediaType}
      * @param {string} contentType HTTP请求的ContentType header，为空时默认为"application/octet-stream"
-     * @param {function (string, string)} successCB 回调通知上传成功之后的url
+     * @param {function (string, string, string, number)} successCB 回调通知上传url，及成功之后的url
      * @param {function (number)} failCB
      */
-    getUploadMediaUrl(fileName, mediaType, contentType, successCB, failCB) {
+    getUploadMediaUrl(fileName: string, mediaType: number, contentType: string, successCB: (uploadUrl: string, remoteUrl: string, backUploadUrl: string, serverType: number) => void, failCB: FailCallback) {
         impl.getUploadMediaUrl(fileName, mediaType, contentType, successCB, failCB);
     }
 
@@ -2119,7 +2147,7 @@ export class WfcManager {
      * 是否开启了已读报告功能
      * @return {boolean}
      */
-    isReceiptEnabled() {
+    isReceiptEnabled(): boolean {
         return impl.isReceiptEnabled();
     }
 
@@ -2128,7 +2156,7 @@ export class WfcManager {
      * 是否开启了群组已读报告功能
      * @return {boolean}
      */
-    isGroupReceiptEnabled() {
+    isGroupReceiptEnabled(): boolean {
         return impl.isGroupReceiptEnabled();
     }
 
@@ -2136,7 +2164,7 @@ export class WfcManager {
      * 当前用户是否开启消息回执
      * @return {boolean}
      */
-    isUserReceiptEnabled() {
+    isUserReceiptEnabled(): boolean {
         return impl.isUserReceiptEnabled();
     }
 
@@ -2144,7 +2172,7 @@ export class WfcManager {
      * 判断是否是专业版IM服务
      * @return {boolean}
      */
-    isCommercialServer() {
+    isCommercialServer(): boolean {
         return impl.isCommercialServer();
     }
 
@@ -2152,7 +2180,7 @@ export class WfcManager {
      * 判断是否应用禁止草稿同步
      * @return {boolean}
      */
-    isGlobalDisableSyncDraft() {
+    isGlobalDisableSyncDraft(): boolean {
         return impl.isGlobalDisableSyncDraft();
     }
 
@@ -2163,11 +2191,11 @@ export class WfcManager {
      * @param successCB
      * @param failCB
      */
-    setDisableSyncDraft(disable, successCB, failCB) {
+    setDisableSyncDraft(disable: boolean, successCB: SuccessCallback, failCB: FailCallback) {
         impl.setDisableSyncDraft(disable, successCB, failCB)
     }
 
-    isDisableSyncDraft() {
+    isDisableSyncDraft(): boolean {
         return impl.isDisableSyncDraft();
     }
 
@@ -2177,7 +2205,7 @@ export class WfcManager {
      * @param successCB
      * @param failCB
      */
-    setUserEnableReceipt(enable, successCB, failCB) {
+    setUserEnableReceipt(enable: boolean, successCB: SuccessCallback, failCB: FailCallback) {
         impl.setUserEnableReceipt(enable, successCB, failCB);
     }
 
@@ -2186,7 +2214,7 @@ export class WfcManager {
      * @param conversation
      * @return {Map<string, Long>}
      */
-    getConversationDelivery(conversation) {
+    getConversationDelivery(conversation: Conversation): HashMap<string, number> {
         return impl.getConversationDelivery(conversation);
     }
 
@@ -2195,7 +2223,7 @@ export class WfcManager {
      * @param conversation
      * @return {Map<string, Long>}
      */
-    getConversationRead(conversation) {
+    getConversationRead(conversation: Conversation): HashMap<string, number> {
         return impl.getConversationRead(conversation);
     }
 
@@ -2209,7 +2237,7 @@ export class WfcManager {
      * @param {function (FileRecord[])} successCB 成功回调
      * @param {function (number)} failCB 失败回调
      */
-    getConversationFileRecords(conversation, fromUser, beforeMessageUid, order, count, successCB, failCB) {
+    getConversationFileRecords(conversation: Conversation, fromUser: string, beforeMessageUid: Long, order: number, count: number, successCB: CallbackWithValue_1<FileRecord[]>, failCB: FailCallback) {
         impl.getConversationFileRecords(conversation, fromUser, beforeMessageUid, order, count, successCB, failCB);
     }
 
@@ -2221,7 +2249,7 @@ export class WfcManager {
      * @param {function (FileRecord[])} successCB 成功回调
      * @param {function (number)} failCB 失败回调
      */
-    getMyFileRecords(beforeMessageUid, order, count, successCB, failCB) {
+    getMyFileRecords(beforeMessageUid: Long, order: number, count: number, successCB: CallbackWithValue_1<FileRecord[]>, failCB: FailCallback) {
         impl.getMyFileRecords(beforeMessageUid, order, count, successCB, failCB);
     }
 
@@ -2231,7 +2259,7 @@ export class WfcManager {
      * @param {function ()} successCB 成功回调
      * @param {function (number)} failCB 失败回调
      */
-    deleteFileRecord(messageUid, successCB, failCB) {
+    deleteFileRecord(messageUid: Long, successCB: SuccessCallback, failCB: FailCallback) {
         impl.deleteFileRecord(messageUid, successCB, failCB);
     }
 
@@ -2246,7 +2274,7 @@ export class WfcManager {
      * @param {function (FileRecord[])} successCB
      * @param {function (number)} failCB
      */
-    searchFiles(keyword, conversation, fromUser, beforeMessageId, order, count, successCB, failCB) {
+    searchFiles(keyword: string, conversation: Conversation, fromUser: string, beforeMessageId: number, order: number, count: number, successCB: CallbackWithValue_1<FileRecord[]>, failCB: FailCallback) {
         impl.searchFiles(keyword, conversation, fromUser, beforeMessageId, order, count, successCB, failCB)
     }
 
@@ -2259,14 +2287,14 @@ export class WfcManager {
      * @param successCB
      * @param failCB
      */
-    searchMyFiles(keyword, beforeMessageUid, order, count, successCB, failCB) {
+    searchMyFiles(keyword: string, beforeMessageUid: Long, order: number, count: number, successCB: CallbackWithValue_1<FileRecord[]>, failCB: FailCallback) {
         impl.searchMyFiles(keyword, beforeMessageUid, order, count, successCB, failCB);
     }
 
     /**
      * 获取host
      */
-    getHost() {
+    getHost(): string {
         return impl.getHost();
     }
 
@@ -2281,9 +2309,11 @@ export class WfcManager {
      * @param {string} data 将要编码的数据
      * @returns {string} 编码结果，base64格式
      */
-    encodeData(data) {
+    encodeData(data: string): string {
+        // TODO
         // fixme
         // return impl.encodeData(data);
+        return ''
     }
 
     /**
@@ -2291,9 +2321,10 @@ export class WfcManager {
      * @param {string} encodedData 将要解码的数据，base64格式
      * @returns {null | string} 解码之后的数据
      */
-    decodeData(encodedData) {
+    decodeData(encodedData: string): string {
         // fixme
         // return impl.decodeData(encodedData);
+        return ''
     }
 
     /**
@@ -2304,15 +2335,15 @@ export class WfcManager {
      * @param data
      * @param callback
      */
-    sendConferenceRequest(sessionId, roomId, request, data, callback) {
+    sendConferenceRequest(sessionId: string, roomId: string, request: string, data: string, callback: CallbackWithValue_2<number, string | null>) {
         this.sendConferenceRequestEx(sessionId, roomId, request, data, false, callback)
     }
 
-    sendConferenceRequestEx(sessionId, roomId, request, data, advance, callback) {
+    sendConferenceRequestEx(sessionId: string, roomId: string, request: string, data: string, advance: boolean, callback: CallbackWithValue_2<number, string | null>) {
         impl.sendConferenceRequest(sessionId, roomId, request, data, advance, callback);
     }
 
-    isUserOnlineStateEnabled() {
+    isUserOnlineStateEnabled(): boolean {
         return impl.isUserOnlineStateEnabled();
     }
 
@@ -2324,57 +2355,59 @@ export class WfcManager {
      * @param {function(UserOnlineState[])} successCB
      * @param {function(number)} failCB
      */
-    watchOnlineState(type, targets, duration, successCB, failCB) {
+    watchOnlineState(type: number, targets: stringArray, duration: number, successCB: CallbackWithValue_1<UserOnlineState[]>, failCB: FailCallback) {
         impl.watchOnlineState(type, targets, duration, successCB, failCB);
     }
 
-    unwatchOnlineState(type, targets, successCB, failCB) {
+    unwatchOnlineState(type: number, targets: stringArray, successCB: SuccessCallback, failCB: FailCallback) {
         impl.unwatchOnlineState(type, targets, successCB, failCB);
     }
 
-    setMyCustomState(customState, customText, successCB, failCB) {
+    setMyCustomState(customState: number, customText: string, successCB: SuccessCallback, failCB: FailCallback) {
         impl.setMyCustomState(customState, customText, successCB, failCB)
     }
 
-    getAuthCode(appId, appType, host, successCB, failCB) {
+    getAuthCode(appId: string, appType: number, host: string, successCB: CallbackWithValue_1<string>, failCB: FailCallback) {
         impl.getAuthCode(appId, appType, host, successCB, failCB);
     }
 
-    configApplication(appId, appType, timestamp, nonceStr, signature, successCB, failCB) {
+    configApplication(appId: string, appType: number, timestamp: number, nonceStr: string, signature: string, successCB: SuccessCallback, failCB: FailCallback) {
         impl.configApplication(appId, appType, timestamp, nonceStr, signature, successCB, failCB);
     }
 
-    beginTransaction() {
+    beginTransaction(): boolean {
         return impl.beginTransaction();
     }
 
-    commitTransaction() {
+    commitTransaction(): boolean {
         return impl.commitTransaction();
     }
 
-    rollbackTransaction() {
+    rollbackTransaction(): boolean {
         return impl.rollbackTransaction();
     }
 
-    requireLock(lockId, duration, successCB, failCB) {
+    requireLock(lockId: string, duration: number, successCB: SuccessCallback, failCB: FailCallback) {
         impl.requireLock(lockId, duration, successCB, failCB);
     }
 
-    releaseLock(lockId, successCB, failCB) {
+    releaseLock(lockId: string, successCB: SuccessCallback, failCB: FailCallback) {
         impl.releaseLock(lockId, successCB, failCB);
     }
 
-    _getStore() {
-        return impl._getStore();
-    }
+    // _getStore() {
+    //     return impl._getStore();
+    // }
 
     /**
      * utf8转base64
      * @param {string} str
      * @returns {string}
      */
-    utf8_to_b64(str) {
-        return btoa(this.unescape(encodeURIComponent(str)));
+    utf8_to_b64(str: string): string {
+        //return btoa(this.unescape(encodeURIComponent(str)));
+        let uint8Arr = textEncoder.encodeInto(str)
+        return btoa(uint8Arr)
     }
 
     /**
@@ -2382,73 +2415,59 @@ export class WfcManager {
      * @param {string} str
      * @returns {string}
      */
-    b64_to_utf8(str) {
-        return decodeURIComponent(this.escape(atob(str)));
+    b64_to_utf8(str: string) {
+        // return decodeURIComponent(this.escape(atob(str)));
+        return textDecoder.decodeWithStream(atob(str))
     }
 
-    b64_to_arrayBuffer(str) {
-        let binary_string = atob(str);
-        let len = binary_string.length;
-        let bytes = new Uint8Array(len);
-        for (let i = 0; i < len; i++) {
-            bytes[i] = binary_string.charCodeAt(i);
-        }
-        return bytes.buffer;
+    b64_to_arrayBuffer(str: string): ArrayBuffer {
+        // let binary_string = atob(str);
+        // let len = binary_string.length;
+        // let bytes = atob(str)
+        // for (let i = 0; i < len; i++) {
+        //     bytes[i] = binary_string.charCodeAt(i);
+        // }
+        // return bytes.buffer;
+        return atob(str).buffer
     }
 
-    arrayBuffer_to_b64(data) {
+    arrayBuffer_to_b64(data: ArrayBuffer) {
         // fixme
         //return Buffer.from(data).toString('base64');
     }
 
-    // 兼容 web 端
-    unescape(str) {
-        return decodeURIComponent(str.replace(/\+/g, " "));
-    }
+    // // 兼容 web 端
+    // unescape(str) {
+    //     return decodeURIComponent(str)
+    // }
+    //
+    // // 兼容 web 端
+    // escape(str) {
+    //     return encodeURIComponent(str)
+    // }
 
-    // 兼容 web 端
-    escape(str) {
-        let encodedString = "";
-        for (var i = 0; i < str.length; i++) {
-            var code = str.charCodeAt(i);
-            if (
-                code === 0x40 ||
-                (code >= 0x30 && code <= 0x39) ||
-                (code >= 0x41 && code <= 0x5A) ||
-                (code >= 0x61 && code <= 0x7A)
-            ) {
-                encodedString += str.charAt(i);
-            } else if (code < 256) {
-                encodedString += "%" + ("00" + code.toString(16)).slice(-2).toUpperCase();
-            } else {
-                encodedString += "%" + ("0000" + code.toString(16)).slice(-4).toUpperCase();
-            }
-        }
-        return encodedString;
-    }
-
-    defaultUserPortrait(userInfo) {
+    defaultUserPortrait(userInfo: UserInfo): string {
         return `${Config.APP_SERVER}/avatar?name=${encodeURIComponent(userInfo.displayName)}`
         // return `http://localhost:8888/avatar?name=${encodeURIComponent(userInfo.displayName)}`
     }
 
-    defaultGroupPortrait(groupInfo) {
+    defaultGroupPortrait(groupInfo: GroupInfo): string {
         let memberIds = this.getGroupMemberIds(groupInfo.target)
         memberIds = memberIds.slice(0, 9);
         // let members = this.getUserInfos(memberIds, groupInfo.target);
         let members = impl.getUserInfos(memberIds, groupInfo.target);
-        let req = {
-            members: []
+        let req: Record<string, Object> = {
+            'members': [] as Record<string, Object>[]
         }
         let pending = false;
         members.forEach(m => {
             if (m.portrait && !m.portrait.startsWith(`${Config.APP_SERVER}`)) {
-                req.members.push({
-                    avatarUrl: m.portrait
+                (req['members'] as Record<string, Object>[]).push({
+                    'avatarUrl': m.portrait
                 })
             } else {
-                req.members.push({
-                    name: m.displayName
+                (req['members'] as Record<string, Object>[]).push({
+                    'name': m.displayName
                 })
             }
             if (m instanceof NullUserInfo) {
@@ -2456,7 +2475,7 @@ export class WfcManager {
             }
         })
         if (members.length === 0 || pending) {
-            return null;
+            return '';
         }
 
         let reqStr = JSON.stringify(req, null, '');
@@ -2465,7 +2484,7 @@ export class WfcManager {
         //return `http://localhost:8888/avatar/group?request=${encodeURIComponent(req)}`
     }
 
-    connectedToMainNetwork() {
+    connectedToMainNetwork(): boolean {
         return impl.connectedToMainNetwork();
     }
 }

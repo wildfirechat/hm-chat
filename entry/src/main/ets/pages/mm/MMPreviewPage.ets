@@ -4,11 +4,11 @@ import { MediaEntry } from '../../common/Types';
 @Entry
 @Component
 export default struct MMPreviewPage {
-    @State mediaEntries: MediaEntry[] = null
+    @State mediaEntries: MediaEntry[] = []
 
     aboutToAppear() {
-        const params = router.getParams();
-        this.mediaEntries = params['mediaEntries']
+        const params = router.getParams() as Record<string, Object>;
+        this.mediaEntries = params['mediaEntries'] as MediaEntry[]
     }
 
     build() {

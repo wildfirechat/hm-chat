@@ -13,10 +13,12 @@ export class Emoji {
 }
 
 export class Category {
-    constructor(
-        public name: string,
-        public icon: string
-    ) {
+    name: string
+    icon: string
+
+    constructor(name: string, icon: string) {
+        this.name = name
+        this.icon = icon
     }
 }
 

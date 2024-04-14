@@ -7,30 +7,31 @@ import wfc from '../../client/wfc'
 import MessageContentType from '../messageContentType';
 import Long from '../../util/long';
 import ConversationType from "../../model/conversationType";
+import Message from '../message';
+import MessagePayload from '../messagePayload';
 
 export default class RecallMessageNotification extends NotificationMessageContent {
     operatorId = '';
     messageUid = Long.ZERO;
+    originalSender = '';
+    originalContentType = 0;
+    originalSearchableContent = '';
+    originalContent = '';
+    originalExtra = '';
+    originalMessageTimestamp = Long.ZERO;
 
-    originalSender;
-    originalContentType;
-    originalSearchableContent;
-    originalContent;
-    originalExtra;
-    originalMessageTimestamp;
-
-    constructor(operatorId, messageUid) {
+    constructor(operatorId: string = '', messageUid: Long = Long.ZERO) {
         super(MessageContentType.RecallMessage_Notification);
         this.operatorId = operatorId;
         this.messageUid = messageUid;
     }
 
-    formatNotification(message) {
-        if (this.operatorId === wfc.getUserId()){
+    formatNotification(message: Message) {
+        if (this.operatorId === wfc.getUserId()) {
             return "你撤回了一条消息";
         }
-        if (message.conversation.type === ConversationType.Group) {
-            return wfc.getGroupMemberDisplayName(message.conversation.target, this.operatorId) + "撤回了一条消息";
+        if (message.conversation!.type === ConversationType.Group) {
+            return wfc.getGroupMemberDisplayName(message.conversation!.target, this.operatorId) + "撤回了一条消息";
         } else {
             return wfc.getUserDisplayName(this.operatorId) + "撤回了一条消息";
         }
@@ -43,7 +44,7 @@ export default class RecallMessageNotification extends NotificationMessageConten
         return payload;
     }
 
-    decode(payload) {
+    decode(payload: MessagePayload) {
         super.decode(payload);
         this.operatorId = payload.content;
         this.messageUid = Long.fromString(wfc.b64_to_utf8(payload.binaryContent));
@@ -55,16 +56,16 @@ export default class RecallMessageNotification extends NotificationMessageConten
         }
     }
 
-    setExtra(extra) {
+    setExtra(extra: string) {
         if (extra) {
-            extra =extra.replace(/\n/g, "\\n").replace(/\r/g, "\\r").replace(/\t/g, "\\t");
-            let obj = JSON.parse(extra);
-            this.originalSender = obj["s"];
-            this.originalContentType = obj["t"];
-            this.originalSearchableContent = obj["sc"];
-            this.originalContent = obj["c"];
-            this.originalExtra = obj["e"];
-            this.originalMessageTimestamp = Long.fromValue(obj["ts"]);
+            extra = extra.replace(/\n/g, "\\n").replace(/\r/g, "\\r").replace(/\t/g, "\\t");
+            let obj = JSON.parse(extra) as Record<string, Object>;
+            this.originalSender = obj["s"] as string;
+            this.originalContentType = obj["t"] as number;
+            this.originalSearchableContent = obj["sc"] as string;
+            this.originalContent = obj["c"] as string;
+            this.originalExtra = obj["e"] as string;
+            this.originalMessageTimestamp = Long.fromValue(obj["ts"] as string);
         }
     }
 }

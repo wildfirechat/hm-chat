@@ -4,11 +4,12 @@
 
 import NotificationMessageContent from './notificationMessageContent'
 import MessageContentType from '../messageContentType';
+import MessagePayload from '../messagePayload';
 
 export default class TipNotificationMessageContent extends NotificationMessageContent {
     tip = '';
 
-    constructor(tip) {
+    constructor(tip: string = '') {
         super(MessageContentType.Tip_Notification);
         this.tip = tip;
     }
@@ -27,7 +28,7 @@ export default class TipNotificationMessageContent extends NotificationMessageCo
         return payload;
     };
 
-    decode(payload) {
+    decode(payload: MessagePayload) {
         super.decode(payload);
         this.tip = payload.content;
     }

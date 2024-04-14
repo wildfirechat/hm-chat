@@ -4,20 +4,21 @@
 
 import MessageContent from "./messageContent";
 import MessageContentType from "./messageContentType";
+import MessagePayload from './messagePayload';
 
 export default class UnknownMessageContent extends MessageContent {
-    originalPayload;
+    originalPayload?: MessagePayload;
 
-    constructor(originalPayload) {
+    constructor(originalPayload?: MessagePayload) {
         super(MessageContentType.Unknown);
         this.originalPayload = originalPayload;
     }
 
     encode() {
-        return this.originalPayload;
+        return this.originalPayload!;
     }
 
-    decode(paylaod) {
+    decode(paylaod: MessagePayload) {
         this.originalPayload = paylaod;
     }
 

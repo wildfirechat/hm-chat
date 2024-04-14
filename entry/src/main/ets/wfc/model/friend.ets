@@ -3,8 +3,8 @@
  */
 
 export default class Friend {
-    userId;
-    alias;
-    extra;
-    timestamp;
+    userId = '';
+    alias = '';
+    extra = '';
+    timestamp = 0;
 }

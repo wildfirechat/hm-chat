@@ -1,13 +1,14 @@
 /*
  * Copyright (c) 2020 WildFireChat. All rights reserved.
  */
+import MessagePayload from '../messagePayload';
 
 import NotificationMessageContent from './notificationMessageContent'
 
 export default class TemplateNotification extends NotificationMessageContent {
     tip = '';
 
-    constructor(type) {
+    constructor(type: number) {
         super(type)
         this.tip = '';
     }
@@ -26,7 +27,7 @@ export default class TemplateNotification extends NotificationMessageContent {
         return payload;
     };
 
-    decode(payload) {
+    decode(payload: MessagePayload) {
         super.decode(payload);
         this.tip = payload.content;
     }

@@ -1,14 +1,16 @@
 import wfc from "../client/wfc";
-import {stringValue} from "../util/longUtil";
+import { stringValue } from "../util/longUtil";
 import Long from "../util/long";
+import Message from '../messages/message';
+import QuoteInfoPayload from './quoteInfoPayload';
 
 export default class QuoteInfo {
-    messageUid;
-    userId;
-    userDisplayName;
-    messageDigest;
+    messageUid = Long.ZERO;
+    userId = '';
+    userDisplayName = '';
+    messageDigest = '';
 
-    static initWithMessage(message) {
+    static initWithMessage(message: Message) {
         let info = new QuoteInfo();
         if (message) {
             info.messageUid = message.messageUid;
@@ -29,22 +31,17 @@ export default class QuoteInfo {
             i: this.userId,
             n: this.userDisplayName,
             d: this.messageDigest,
-        };
+        } as QuoteInfoPayload;
         return obj;
     }
 
-    decode(obj) {
-        if (obj.messageUid) {
-            this.messageUid = Long.fromValue(obj.messageUid);
-            this.userId = obj.userId;
-            this.userDisplayName = obj.userDisplayName;
-            this.messageDigest = obj.messageDigest;
-
-        } else {
-            this.messageUid = Long.fromValue(obj.u || obj.messageUid);
-            this.userId = obj.i;
-            this.userDisplayName = obj.n;
-            this.messageDigest = obj.d;
+    decode(obj?: QuoteInfoPayload) {
+        if (!obj) {
+            return;
         }
+        this.messageUid = Long.fromValue(obj.u);
+        this.userId = obj.i;
+        this.userDisplayName = obj.n;
+        this.messageDigest = obj.d;
     }
 }

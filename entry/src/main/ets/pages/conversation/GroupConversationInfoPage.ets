@@ -21,9 +21,9 @@ export default struct GroupConversationInfoPage {
     @State isTop: boolean = false
     @State isSilent: boolean = false
     @State groupMembers: GroupMember[] = []
-    private conversationInfo: ConversationInfo
-    private enableAddMember: boolean
-    private enableRemoveMember: boolean
+    private conversationInfo?: ConversationInfo
+    private enableAddMember: boolean = false
+    private enableRemoveMember: boolean = false
     private isAddOrRemoveNewGroupMember: boolean = false
     dialogController: CustomDialogController = new CustomDialogController({
         builder: ActionSheetDialog({
@@ -40,8 +40,8 @@ export default struct GroupConversationInfoPage {
     })
 
     aboutToAppear() {
-        const params = router.getParams();
-        this.conversationInfo = params['conversationInfo']
+        const params = router.getParams() as Record<string, Object>;
+        this.conversationInfo = params['conversationInfo'] as ConversationInfo
         this.groupInfo = wfc.getGroupInfo(this.conversationInfo.conversation.target)
         this.groupMembers = wfc.getGroupMembers(this.conversationInfo.conversation.target, false)
 
@@ -64,25 +64,25 @@ export default struct GroupConversationInfoPage {
     onPageShow() {
         if (this.isAddOrRemoveNewGroupMember) {
             this.isAddOrRemoveNewGroupMember = false
-            let params = router.getParams()
+            let params = router.getParams() as Record<string, Object>
             if (params) {
                 let tag = params['tag']
                 if (tag === 'addGroupMember') {
-                    let newUsers: UserInfo[] = params['result']
+                    let newUsers: UserInfo[] = params['result'] as UserInfo[]
                     let uids = newUsers.map(info => info.uid)
 
                     wfc.addGroupMembers(this.groupInfo.target, uids, '', [0], null, () => {
-                        this.groupMembers = wfc.getGroupMembers(this.conversationInfo.conversation.target, false)
+                        this.groupMembers = wfc.getGroupMembers(this.conversationInfo!.conversation.target, false)
                         showToast('添加新群成员成功')
                     }, (err: number) => {
                         showToast('添加新成员失败：' + err)
                     })
                 } else if (tag === 'removeGroupMember') {
-                    let newUsers: UserInfo[] = params['result']
+                    let newUsers: UserInfo[] = params['result'] as UserInfo[]
                     let uids = newUsers.map(info => info.uid)
 
                     wfc.kickoffGroupMembers(this.groupInfo.target, uids, [0], null, () => {
-                        this.groupMembers = wfc.getGroupMembers(this.conversationInfo.conversation.target, false)
+                        this.groupMembers = wfc.getGroupMembers(this.conversationInfo!.conversation.target, false)
                     }, (err: number) => {
                         showToast('移除群成员失败：' + err)
                     })
@@ -212,9 +212,11 @@ export default struct GroupConversationInfoPage {
                     Column() {
                         Row() {
                             Text('消息免打扰')
-                            Toggle({ type: ToggleType.Switch, isOn: this.conversationInfo.isSilent })
+                            Toggle({ type: ToggleType.Switch, isOn: this.conversationInfo!.isSilent })
                                 .onChange(isOn => {
-                                    wfc.setConversationSlient(this.conversationInfo.conversation, isOn, null, err => {
+                                    wfc.setConversationSlient(this.conversationInfo!.conversation, isOn, () => {
+                                        // do nothing
+                                    }, err => {
                                         showToast('设置消息免打扰失败 ' + err)
                                     })
                                 })
@@ -226,9 +228,9 @@ export default struct GroupConversationInfoPage {
 
                         Row() {
                             Text('置顶聊天')
-                            Toggle({ type: ToggleType.Switch, isOn: this.conversationInfo.top > 0 })
+                            Toggle({ type: ToggleType.Switch, isOn: this.conversationInfo!.top > 0 })
                                 .onChange((value: boolean) => {
-                                    wfc.setConversationTop(this.conversationInfo.conversation, value ? 1 : 0, () => {
+                                    wfc.setConversationTop(this.conversationInfo!.conversation, value ? 1 : 0, () => {
 
                                     }, (err: number) => {
                                         showToast(value ? '会话置顶失败' : '取消置顶失败')
@@ -242,10 +244,12 @@ export default struct GroupConversationInfoPage {
 
                         Row() {
                             Text('保存到通讯录')
-                            Toggle({ type: ToggleType.Switch, isOn: wfc.isFavGroup(this.groupInfo.target) })
-                                // .select(this.conversationInfo.top > 0)
+                            Toggle({
+                                type: ToggleType.Switch,
+                                isOn: wfc.isFavGroup(this.groupInfo.target)
+                            })// .select(this.conversationInfo.top > 0)
                                 .onChange((value: boolean) => {
-                                    wfc.setFavGroup(this.conversationInfo.conversation.target, value, null, err => {
+                                    wfc.setFavGroup(this.conversationInfo!.conversation.target, value, null, err => {
                                         showToast('保存到通讯录失败' + err)
                                     })
                                 })

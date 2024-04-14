@@ -4,6 +4,7 @@
 
 import wfc from '../../client/wfc'
 import MessageContentType from '../messageContentType';
+import MessagePayload from '../messagePayload';
 
 import GroupNotificationContent from './groupNotification';
 
@@ -14,7 +15,7 @@ export default class ModifyGroupSettingNotification extends GroupNotificationCon
     //修改后的值
     settingValue = '';
 
-    constructor(settingType, settingValue) {
+    constructor(settingType: number = 0, settingValue: string = '') {
         super(MessageContentType.ModifyGroupSetting_Notification);
         this.settingType = settingType;
         this.settingValue = settingValue;
@@ -31,18 +32,25 @@ export default class ModifyGroupSettingNotification extends GroupNotificationCon
             n: this.settingType,
             o: this.operator,
             m: this.settingValue,
-        };
+        } as Data;
         payload.binaryContent = wfc.utf8_to_b64(JSON.stringify(obj));
         return payload;
     }
 
-    decode(payload) {
+    decode(payload: MessagePayload) {
         super.decode(payload);
         let json = wfc.b64_to_utf8(payload.binaryContent)
-        let obj = JSON.parse(json);
+        let obj = JSON.parse(json) as Data;
         this.groupId = obj.g;
         this.operator = obj.o;
         this.type = obj.n;
         this.settingValue = obj.m;
     }
+}
+
+class Data {
+    g = '';
+    n = 0;
+    o = '';
+    m = '';
 }

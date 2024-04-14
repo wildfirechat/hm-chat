@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2020 WildFireChat. All rights reserved.
  */
+import Message from '../message';
 
 import MessageContent from "../messageContent";
 
@@ -8,12 +9,12 @@ export default class NotificationMessageContent extends MessageContent {
     // message#protoMessageToMessage时设置
     fromSelf = false;
 
-    constructor(type) {
+    constructor(type: number) {
         super(type);
     }
 
-    digest(message) {
-        var desc = '';
+    digest(message?: Message) {
+        let desc = '';
         try {
             desc = this.formatNotification(message);
         } catch (error) {
@@ -22,7 +23,7 @@ export default class NotificationMessageContent extends MessageContent {
         return desc;
     }
 
-    formatNotification(message) {
+    formatNotification(message?: Message) {
         return '..nofication..';
     }
 }

@@ -8,15 +8,17 @@ import Conversation from '../../../wfc/model/conversation'
 @Preview
 @CustomDialog
 export default struct ForwardMessageDialog {
-    private targetConversations: Conversation[]
-    private textValue: string
+    private targetConversations: Conversation[] = []
+    private textValue: string = ''
     private forwardMessageDesc: string = ''
     private forwardMessageImageUri: string = ''
     @State targetConversationPortraitAndNames: PortraitAndName[] = []
     controller: CustomDialogController
     // 若尝试在CustomDialog中传入多个其他的Controller，以实现在CustomDialog中打开另一个或另一些CustomDialog，那么此处需要将指向自己的controller放在最后
-    cancel: () => void
-    confirm: (text: string) => void
+    cancel: () => void = () => {
+    }
+    confirm: (text: string) => void = str => {
+    }
 
     aboutToAppear() {
         this.computeState()
@@ -97,6 +99,7 @@ export default struct ForwardMessageDialog {
         .padding(20)
         .justifyContent(FlexAlign.Start)
         .alignItems(HorizontalAlign.Start)
+
         // dialog默认的borderRadius为24vp，如果需要使用border属性，请和borderRadius属性一起使用。
     }
 }

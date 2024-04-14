@@ -82,7 +82,7 @@ struct LoginPage {
                             .then(res => {
                                 showToast('发送验证码成功')
                             })
-                            .catch(reason => {
+                            .catch((reason: Error) => {
                                 showToast('发送验证码失败 ' + reason)
                             })
                     })
@@ -116,22 +116,22 @@ struct LoginPage {
                         .then(async res => {
                             this.isLogin = false
                             console.log('login success', res);
+                            let obj = res as Record<string, Object>
                             let context = getContext(this) as common.UIAbilityContext;
                             let preference = await data_preferences.getPreferences(context, 'wfcstore')
-                            // @ts-ignore
-                            preference.put('userId', <string> res.userId);
-                            // @ts-ignore
-                            preference.put('token', <string> res.token);
+                            const userId = res['userId'] as string
+                            const token = res['token'] as string
+                            preference.put('userId', userId);
+                            preference.put('token', token);
                             preference.flush()
 
-                            // @ts-ignore
-                            wfc.connect(res.userId, res.token);
+                            wfc.connect(userId, token);
                             router.replaceUrl({
                                 url: "pages/MainPage",
                                 params: {}
                             }, router.RouterMode.Standard)
                         })
-                        .catch(reason => {
+                        .catch((reason: Error) => {
                             this.isLogin = false
                             console.error('login failed', reason)
                         })
@@ -152,10 +152,12 @@ struct LoginPage {
                     .fontColor(Color.Blue)
                     .fontSize(12)
                     .onClick(() => {
-                        router.pushUrl({ url: 'pages/misc/WebViewPage', params: {
-                            url: 'https://www.wildfirechat.net/wildfirechat_user_agreement.html',
-                            title: '野火IM用户协议'
-                        } }, router.RouterMode.Standard)
+                        router.pushUrl({
+                            url: 'pages/misc/WebViewPage', params: {
+                                url: 'https://www.wildfirechat.net/wildfirechat_user_agreement.html',
+                                title: '野火IM用户协议'
+                            }
+                        }, router.RouterMode.Standard)
                     })
                 Text('和')
                     .fontSize(12)
@@ -163,10 +165,13 @@ struct LoginPage {
                     .fontColor(Color.Blue)
                     .fontSize(12)
                     .onClick(() => {
-                        router.pushUrl({ url: 'pages/misc/WebViewPage', params: {
-                            url: 'https://www.wildfirechat.net/wildfirechat_user_privacy.html',
-                            title: '野火IM个人信息保护政策'
-                        } }, router.RouterMode.Standard)
+                        router.pushUrl({
+                            url: 'pages/misc/WebViewPage',
+                            params: {
+                                url: 'https://www.wildfirechat.net/wildfirechat_user_privacy.html',
+                                title: '野火IM个人信息保护政策'
+                            }
+                        }, router.RouterMode.Standard)
                     })
             }
             .justifyContent(FlexAlign.Center)

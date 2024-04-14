@@ -1,12 +1,27 @@
 {
     "app": {
-        "signingConfigs": [],
-        "compileSdkVersion": 9,
-        "compatibleSdkVersion": 9,
+        "signingConfigs": [
+            {
+                "name": "default",
+                "type": "HarmonyOS",
+                "material": {
+                    "certpath": "/Users/jiangecho/.ohos/config/auto_debug_hm-chat_cn.wildfirechat.messenger_70086200301524461.cer",
+                    "storePassword": "0000001B885FCBABB4FBA382DDD4A901CEC9C0A7BC02151E4D92E7DC372CAC62AD9AF4A53073001F751F81",
+                    "keyAlias": "debugKey",
+                    "keyPassword": "0000001B1EB2D08A5F3D9EFEE6F1126127C6650160F611304CE543500F557FAE473E2B45EAD81A4D67B4DA",
+                    "profile": "/Users/jiangecho/.ohos/config/auto_debug_hm-chat_cn.wildfirechat.messenger_70086200301524461.p7b",
+                    "signAlg": "SHA256withECDSA",
+                    "storeFile": "/Users/jiangecho/.ohos/config/auto_debug_hm-chat_cn.wildfirechat.messenger_70086200301524461.p12"
+                }
+            }
+        ],
         "products": [
             {
                 "name": "default",
                 "signingConfig": "default",
+                "compileSdkVersion": "4.1.0(11)",
+                "compatibleSdkVersion": "4.1.0(11)",
+                "runtimeOS": "HarmonyOS",
             }
         ]
     },

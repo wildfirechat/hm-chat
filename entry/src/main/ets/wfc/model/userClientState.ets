@@ -15,12 +15,12 @@ export default class UserClientState {
      Platform_iPad = 8;
      Platform_APad = 9;
      */
-    platform;
+    platform  = 0;
 
     //设备的在线状态，0是在线，1是有session但不在线，其它不在线。
-    state;
+    state = 0;
 
     //最后可见
-    lastSeen;
+    lastSeen = 0;
 
 }

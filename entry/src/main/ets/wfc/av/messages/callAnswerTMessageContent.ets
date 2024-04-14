@@ -5,10 +5,11 @@
 import MessageContent from '../../messages/messageContent';
 import MessageContentType from '../../messages/messageContentType';
 import wfc from "../../client/wfc"
+import MessagePayload from '../../messages/messagePayload';
 
 export default class CallAnswerTMessageContent extends MessageContent {
-    callId;
-    audioOnly;
+    callId = '';
+    audioOnly = false;
 
     constructor(mentionedType = 0, mentionedTargets = []) {
         super(MessageContentType.VOIP_CONTENT_TYPE_ACCEPT_T, mentionedType, mentionedTargets);
@@ -22,7 +23,7 @@ export default class CallAnswerTMessageContent extends MessageContent {
         let payload = super.encode();
         payload.content = this.callId;
 
-        var obj;
+        let obj: string;
         if (this.audioOnly) {
             obj = '1';
         } else {
@@ -32,7 +33,7 @@ export default class CallAnswerTMessageContent extends MessageContent {
         return payload;
     };
 
-    decode(payload) {
+    decode(payload: MessagePayload) {
         super.decode(payload);
         this.callId = payload.content;
         let str = wfc.b64_to_utf8(payload.binaryContent);

@@ -9,7 +9,6 @@ import TextMessageContent from '../wfc/messages/textMessageContent'
 import ConversationInfo from '../wfc/model/conversationInfo'
 import GroupInfo from '../wfc/model/groupInfo'
 import ChannelInfo from '../wfc/model/channelInfo'
-import helper from '../util/helper'
 import router from '@ohos.router'
 import ConnectionStatus from '../wfc/client/connectionStatus'
 import UnreadCount from '../wfc/model/unreadCount'
@@ -17,6 +16,7 @@ import ConversationInfoItemView from '../view/ConversationInfoItemView'
 import { showToast } from '../common/utils/Toast'
 import BasicDataSource from '../common/BasicDataSource'
 import data_preferences from '@ohos.data.preferences';
+import Conversation from '../wfc/model/conversation'
 
 @Component
 @Preview
@@ -25,7 +25,7 @@ export default struct ConversationListTab {
     @State connectionStatusHeader: string = ''
     @Link conversationListTabUnreadCount: number
     private conversationInfoDataSource: ConversationInfoDataSource = new ConversationInfoDataSource()
-    private context: Context
+    private context?: Context
 
     aboutToAppear() {
         console.log('conversationList', 'aboutToAppear')
@@ -33,8 +33,8 @@ export default struct ConversationListTab {
 
         this.loadConversationList()
         this.context = getContext(this)
-        this.context.eventHub.on(EventType.ReceiveMessage, this.onReceiveMessage)
-        this.context.eventHub.on(EventType.SendMessage, this.onSendMessage)
+        this.context.eventHub.on(EventType.ReceiveMessage, this.onSendMessage)
+        this.context.eventHub.on(EventType.SendMessage, this.onReceiveMessage)
         this.context.eventHub.on(EventType.RecallMessage, this.onRecallMessage)
         this.context.eventHub.on(EventType.ConnectionStatusChanged, this.onConnectionStatusChange)
         this.context.eventHub.on(EventType.ConversationInfoUpdate, this.onConversationInfoUpdate)
@@ -42,12 +42,12 @@ export default struct ConversationListTab {
     }
 
     aboutToDisappear() {
-        this.context.eventHub.off(EventType.ReceiveMessage, this.onReceiveMessage)
-        this.context.eventHub.on(EventType.SendMessage, this.onSendMessage)
-        this.context.eventHub.on(EventType.RecallMessage, this.onRecallMessage)
-        this.context.eventHub.off(EventType.ConnectionStatusChanged, this.onConnectionStatusChange)
-        this.context.eventHub.off(EventType.ConversationInfoUpdate, this.onConversationInfoUpdate)
-        this.context.eventHub.on(EventType.SettingUpdate, this.onSettingUpdate)
+        this.context!.eventHub.off(EventType.ReceiveMessage, this.onReceiveMessage)
+        this.context!.eventHub.on(EventType.SendMessage, this.onSendMessage)
+        this.context!.eventHub.on(EventType.RecallMessage, this.onRecallMessage)
+        this.context!.eventHub.off(EventType.ConnectionStatusChanged, this.onConnectionStatusChange)
+        this.context!.eventHub.off(EventType.ConversationInfoUpdate, this.onConversationInfoUpdate)
+        this.context!.eventHub.on(EventType.SettingUpdate, this.onSettingUpdate)
     }
 
     onPageShow() {
@@ -67,13 +67,13 @@ export default struct ConversationListTab {
         this.conversationListTabUnreadCount = totalUnreadCount
     }
 
-    onConnectionStatusChange = status => {
+    onConnectionStatusChange = (status: number) => {
         this.connectionStatus = status
         if (status === ConnectionStatus.ConnectionStatusTokenIncorrect
-        || status === ConnectionStatus.ConnectionStatusSecretKeyMismatch
-        || status === ConnectionStatus.ConnectionStatusRejected
-        || status === ConnectionStatus.ConnectionStatusLogout
-        || status === ConnectionStatus.ConnectionStatusKickedOff) {
+            || status === ConnectionStatus.ConnectionStatusSecretKeyMismatch
+            || status === ConnectionStatus.ConnectionStatusRejected
+            || status === ConnectionStatus.ConnectionStatusLogout
+            || status === ConnectionStatus.ConnectionStatusKickedOff) {
             showToast(ConnectionStatus.desc(status))
 
             data_preferences.deletePreferences(this.context, 'wfcstore')
@@ -104,7 +104,6 @@ export default struct ConversationListTab {
     onConversationInfoUpdate = (info: ConversationInfo) => {
         this.loadConversationList()
     }
-
     // why？
     // 不用箭头函数的话，evenHub 里面调用时，this 并不是当前组件
     onReceiveMessage = (msg: Message) => {
@@ -121,10 +120,9 @@ export default struct ConversationListTab {
     }
 
     conversationKey(conversationInfo: ConversationInfo): string {
-        let conversation = conversationInfo.conversation;
+        let conversation = conversationInfo.conversation!;
         let key = conversation.type + '-' + conversation.target + '-' + conversation.line
         key += '-' + conversationInfo.timestamp
-        // @ts-ignore
         let unreadCount = conversationInfo.unreadCount
         if (unreadCount) {
             key += '-' + (unreadCount.unreadMentionAll + unreadCount.unread + unreadCount.unreadMention)
@@ -140,7 +138,7 @@ export default struct ConversationListTab {
     }
 
     computeConnectionStatusHeader() {
-        let text: string
+        let text: string = ''
         switch (this.connectionStatus) {
             case ConnectionStatus.ConnectionStatusConnecting:
                 text = '正在连接...'
@@ -182,7 +180,7 @@ export default struct ConversationListTab {
                     ListItem() {
                         ConversationInfoItemView({ conversationInfo: info })
                             .onClick(() => {
-                                wfc.clearConversationUnreadStatus(info.conversation)
+                                wfc.clearConversationUnreadStatus(info.conversation!)
                                 router.pushUrl({
                                     url: "pages/conversation/ConversationPage",
                                     // url: "pages/Login",
@@ -201,7 +199,7 @@ export default struct ConversationListTab {
                             .backgroundColor(Color.White)
                         }
                     })
-                }, info => this.conversationKey(info))
+                }, (info: ConversationInfo) => this.conversationKey(info))
             }
             .width('100%')
             .cachedCount(5)
@@ -210,15 +208,12 @@ export default struct ConversationListTab {
         .height('100%')
     }
 
-    conversationItemContextMenus(conversationInfo: ConversationInfo): {
-        title: string,
-        action: () => void
-    }[] {
-        let menuItems = [
+    conversationItemContextMenus(conversationInfo: ConversationInfo): MenuItem[] {
+        let menuItems: MenuItem[] = [
             {
                 title: '删除会话',
                 action: () => {
-                    wfc.removeConversation(conversationInfo.conversation, false);
+                    wfc.removeConversation(conversationInfo.conversation!, false);
                     this.conversationInfoDataSource.removeConversationInfo(conversationInfo)
                 }
             }
@@ -229,7 +224,9 @@ export default struct ConversationListTab {
                 action: () => {
                     wfc.setConversationTop(conversationInfo.conversation, 0, () => {
                         // this.conversationInfo.top = 0
-                    }, null)
+                    }, err => {
+                        console.log('setTop error', err)
+                    })
                 }
             })
         } else {
@@ -238,7 +235,9 @@ export default struct ConversationListTab {
                 action: () => {
                     wfc.setConversationTop(conversationInfo.conversation, 1, () => {
                         // this.conversationInfo.top = 1
-                    }, null)
+                    }, err => {
+                        console.log('setTop error', err)
+                    })
                 }
             })
         }
@@ -259,7 +258,7 @@ export default struct ConversationListTab {
 
 
         let unreadCount = conversationInfo.unreadCount
-        if (UnreadCount && (unreadCount.unread || unreadCount.unreadMention || unreadCount.unreadMentionAll)) {
+        if ((unreadCount.unread || unreadCount.unreadMention || unreadCount.unreadMentionAll)) {
             menuItems.push({
                 title: '标为已读',
                 action: () => {
@@ -281,11 +280,11 @@ export default struct ConversationListTab {
     @Builder
     MenuBuilder(conversationInfo: ConversationInfo) {
         Menu() {
-            ForEach(this.conversationItemContextMenus(conversationInfo), menuItem => {
+            ForEach(this.conversationItemContextMenus(conversationInfo), (menuItem: MenuItem) => {
                 MenuItem({ content: menuItem.title })
                     .onClick(menuItem.action)
 
-            }, menuItem => menuItem.title)
+            }, (menuItem: MenuItem) => menuItem.title)
         }
     }
 }
@@ -299,7 +298,7 @@ class ConversationInfoDataSource extends BasicDataSource<ConversationInfo> {
     }
 
     public removeConversationInfo(conversationInfo: ConversationInfo): void {
-        let index = this.conversationInfos.findIndex((info: ConversationInfo) => info.conversation.equal(conversationInfo.conversation))
+        let index = this.conversationInfos.findIndex((info: ConversationInfo) => Conversation.equal(info.conversation, conversationInfo.conversation))
         if (index >= 0) {
             this.conversationInfos.splice(index, 1)
             this.notifyDataDelete(index)
@@ -327,5 +326,10 @@ class ConversationInfoDataSource extends BasicDataSource<ConversationInfo> {
         this.conversationInfos.push(data);
         this.notifyDataAdd(this.conversationInfos.length - 1);
     }
+}
+
+interface MenuItem {
+    title: string,
+    action: () => void
 }
 

@@ -22,22 +22,24 @@ import AudioPlayManager from './audio/AudioPlayManager'
 import AudioRecorderView from './audio/AudioRecorderView'
 import NotificationMessageContent from '../../wfc/messages/notification/notificationMessageContent'
 import SimpleNotificationMessageContentView from './message/SimpleNotificationMessageContentView'
-import helper from '../../util/helper'
-import Long, { LongType } from '../../wfc/util/long'
+import { timeFormat } from '../../util/helper'
+import Long from '../../wfc/util/long'
 import ReadEntry from '../../wfc/model/readEntry'
 import ReadReceipt from './model/readReceipt'
 import GroupMember from '../../wfc/model/groupMember'
 import { showToast } from '../../common/utils/Toast'
 import UserInfo from '../../wfc/model/userInfo'
 import Utils from '../../common/Utils'
+import { FaultLogger } from '@kit.PerformanceAnalysisKit'
+import { HashMap } from '@kit.ArkTS'
 
 @Entry
 @Component
 struct ConversationPage {
     @State text: string = ''
     @State title: string = ''
-    @State conversation: Conversation = null
-    @State conversationInfo: ConversationInfo = null
+    @State conversation?: Conversation = undefined
+    @State conversationInfo?: ConversationInfo = undefined
     @State refreshStatus: boolean = false;
     @State refreshText: Resource = $r('app.string.refresh_text')
     @State messages: Message[] = []
@@ -46,10 +48,7 @@ struct ConversationPage {
     @State showAudioRecorderView: boolean = false
     @State showCancelRecordIndicator: boolean = false
     @State recordCountDown: number = 0
-    @State readEntries: {
-        key: string,
-        value: number
-    }[] = null
+    @State readEntries: HashMap<string, number> = new HashMap();
     @State collapseConversationInputPanelViewTimestamp: number = 0
     @State enableMultiCheck: boolean = false
     @State checkedMessages: Message[] = []
@@ -59,9 +58,9 @@ struct ConversationPage {
     private currentMessageIndex: number = 0
     private timer: number = 0
     private audioPlayerManager: AudioPlayManager = new AudioPlayManager()
-    private enableReceipt: boolean
-    private enableGroupReceipt: boolean
-    private groupMembers: GroupMember[] = null
+    private enableReceipt: boolean = false
+    private enableGroupReceipt: boolean = false
+    private groupMembers: GroupMember[] = []
 
     putDownRefresh(event?: TouchEvent): void {
         if (event === undefined) {
@@ -90,11 +89,11 @@ struct ConversationPage {
         setTimeout(() => {
             this.scroller.scrollEdge(Edge.Bottom)
         }, 100)
-        this.audioPlayerManager.init(getContext())
+        this.audioPlayerManager.init(getContext(this))
 
-        const params = router.getParams();
-        this.title = params['title'];
-        this.conversation = params['conversation'];
+        const params = router.getParams() as Record<string, Object>;
+        this.title = params['title'] as string;
+        this.conversation = params['conversation'] as Conversation;
         this.conversationInfo = wfc.getConversationInfo(this.conversation)
         this.readEntries = wfc.getConversationRead(this.conversation)
         this.enableReceipt = wfc.isReceiptEnabled() && wfc.isUserReceiptEnabled()
@@ -136,7 +135,7 @@ struct ConversationPage {
         getContext(this).eventHub.on(EventType.MessageDeleted, this.onRemoteDeleteMessage)
         getContext(this).eventHub.off(EventType.RecallMessage, this.onRecallMessage)
         getContext(this).eventHub.off(EventType.MessageRead, this.onReadMessage)
-        if (this.conversation.type === ConversationType.Group) {
+        if (this.conversation!.type === ConversationType.Group) {
             getContext(this).eventHub.off(EventType.GroupMembersUpdate, this.onGroupMembersUpdate)
         }
     }
@@ -146,7 +145,7 @@ struct ConversationPage {
         if (this.messages.length > 0) {
             oldestMessageId = this.messages[0].messageId
         }
-        wfc.getMessagesV2(this.conversation, oldestMessageId, true, 20, '', (messages) => {
+        wfc.getMessagesV2(this.conversation!, oldestMessageId, true, 20, '', (messages) => {
             this.messages = messages.concat(...this.messages);
             this.refreshStatus = false;
             this.scroller.scrollToIndex(messages.length - 1)
@@ -190,15 +189,15 @@ struct ConversationPage {
         }
     }
 
-    onSendMessage = (message) => {
+    onSendMessage = (message: Message) => {
         let conversation = new Conversation(message.conversation.type, message.conversation.target, message.conversation.line)
-        if (this.isDisplayMessage(message) && conversation.equal(this.conversation)) {
+        if (this.isDisplayMessage(message) && Conversation.equal(conversation, this.conversation!)) {
             this.messages.push(message);
             this.scroller.scrollEdge(Edge.Bottom)
         }
     }
     onReceiveMessage = (message: Message, hasMore: boolean) => {
-        if (this.isDisplayMessage(message) && message.conversation.equal(this.conversation)) {
+        if (this.isDisplayMessage(message) && Conversation.equal(message.conversation, this.conversation!)) {
             this.messages.push(message);
             this.scroller.scrollEdge(Edge.Bottom)
         }
@@ -207,24 +206,24 @@ struct ConversationPage {
         this.messages = this.messages.filter(msg => msg.messageId !== messageId)
         console.log('onDeleteMessage', messageId)
     }
-    onRemoteDeleteMessage = (messageUid: LongType) => {
+    onRemoteDeleteMessage = (messageUid: Long) => {
         this.messages = this.messages.filter(msg =>!eq(msg.messageUid, messageUid))
         console.log('onRemoteDeleteMessage', messageUid)
     }
-    onRecallMessage = (operator: string, messageUid: object) => {
+    onRecallMessage = (operator: string, messageUid: Long) => {
         //this.messages = this.messages.filter(msg =>!eq(msg.messageUid, messageUid))
         let index = this.messages.findIndex(msg => eq(msg.messageUid, messageUid))
         if (index >= 0) {
             let msg = wfc.getMessageByUid(messageUid)
-            this.messages[index] = msg
+            this.messages[index] = msg!
         }
         console.log('onRecallMessage', messageUid)
     }
     onReadMessage = (readEntries: ReadEntry[]) => {
-        this.readEntries = wfc.getConversationRead(this.conversation);
+        this.readEntries = wfc.getConversationRead(this.conversation!);
     }
     onGroupMembersUpdate = (groupId: string, groupMembers: GroupMember[]) => {
-        if (groupId === this.conversation.target) {
+        if (groupId === this.conversation!.target) {
             this.groupMembers = wfc.getGroupMembers(groupId, false);
         }
     }
@@ -258,13 +257,13 @@ struct ConversationPage {
 
         let key: string = message.messageContent.type + '-' + message.messageId + '-' + message.status
         if (this.enableReceipt && this.readEntries && this.readEntries.length > 0) {
-            if (this.conversation.type === ConversationType.Group) {
+            if (this.conversation!.type === ConversationType.Group) {
                 if (this.enableGroupReceipt) {
                     // TODO
                 }
-            } else if (this.conversation.type === ConversationType.Single) {
+            } else if (this.conversation!.type === ConversationType.Single) {
                 // TODO
-                let readDt = this.readEntries[0].value
+                let readDt: number = this.readEntries.get(this.conversation!.target)
                 if (readDt >= message.timestamp) {
                     key += '-1'
                 } else {
@@ -275,7 +274,7 @@ struct ConversationPage {
         return key
     }
 
-    messageReadReceipt(message: Message): ReadReceipt {
+    messageReadReceipt(message: Message): ReadReceipt | null {
         if (!this.enableReceipt) {
             return null
         }
@@ -283,7 +282,8 @@ struct ConversationPage {
             let readReceipt: ReadReceipt = new ReadReceipt()
             readReceipt.conversationType = ConversationType.Single
             if (this.readEntries.length > 0) {
-                let readDt = this.readEntries[0].value
+                //let readDt = this.readEntries[0].value
+                let readDt = this.readEntries.get(message.conversation.target)
                 if (readDt >= message.timestamp) {
                     readReceipt.readCount = 1
                     readReceipt.unreadCount = 0
@@ -298,8 +298,8 @@ struct ConversationPage {
             readReceipt.conversationType = ConversationType.Group
 
             let readCount = 0
-            this.readEntries.forEach(readEntry => {
-                if (readEntry.value >= message.timestamp) {
+            this.readEntries.forEach(readDt => {
+                if (readDt! >= message.timestamp) {
                     readCount++
                 }
             })
@@ -312,8 +312,8 @@ struct ConversationPage {
     }
 
     conversationInfoPageUrl(): string {
-        let url: string
-        switch (this.conversation.type) {
+        let url: string = ''
+        switch (this.conversation!.type) {
             case ConversationType.Single:
                 url = 'pages/conversation/SingleConversationInfoPage'
                 break
@@ -344,8 +344,8 @@ struct ConversationPage {
                         }
 
                         Blank()
-                        .width('100%')
-                        .layoutWeight(1)
+                            .width('100%')
+                            .layoutWeight(1)
 
                         List({ scroller: this.scroller }) {
                             ForEach(this.messages,
@@ -357,11 +357,12 @@ struct ConversationPage {
                                             }
                                             .width('100%')
                                             .justifyContent(FlexAlign.Center)
+
                                             // out
                                         } else if (msg.direction === 0) {
                                             Column() {
                                                 if (this.showMessageTimeInfo(index)) {
-                                                    Text(helper.timeFormat(msg.timestamp))
+                                                    Text(timeFormat(msg.timestamp))
                                                         .fontSize(12)
                                                         .padding(10)
                                                 }
@@ -391,8 +392,7 @@ struct ConversationPage {
                                                             enableMultiCheck: $enableMultiCheck,
                                                             audioPlayManager: this.audioPlayerManager,
                                                             readReceipt: this.messageReadReceipt(msg)
-                                                        })
-                                                            //.layoutWeight(1)
+                                                        })//.layoutWeight(1)
                                                             .margin({ top: 10 })
                                                             .enabled(!this.enableMultiCheck)
                                                     }
@@ -428,7 +428,7 @@ struct ConversationPage {
                                         } else {
                                             Column() {
                                                 if (this.showMessageTimeInfo(index)) {
-                                                    Text(helper.timeFormat(msg.timestamp))
+                                                    Text(timeFormat(msg.timestamp))
                                                         .fontSize(12)
                                                         .padding(10)
                                                 }
@@ -448,6 +448,7 @@ struct ConversationPage {
                                                         .margin({ top: 10 })
                                                         .height(48)
                                                         .alignItems(VerticalAlign.Center)
+
                                                         // .alignSelf(ItemAlign.Center)
                                                     }
                                                     Image(wfc.getUserInfo(msg.from).portrait)
@@ -464,8 +465,7 @@ struct ConversationPage {
                                                             message: msg,
                                                             enableMultiCheck: $enableMultiCheck,
                                                             audioPlayManager: this.audioPlayerManager
-                                                        })
-                                                            //.layoutWeight(1)
+                                                        })//.layoutWeight(1)
                                                             .margin({ top: 10 })
                                                             .enabled(!this.enableMultiCheck)
                                                     }
@@ -489,7 +489,7 @@ struct ConversationPage {
                                         }
                                     }
                                 },
-                                msg => this.messageItemKey(msg))
+                                (msg: Message) => this.messageItemKey(msg))
 
                         }
                         .onScrollIndex((star, end) => {
@@ -505,8 +505,9 @@ struct ConversationPage {
 
                     if (this.showAudioRecorderView) {
                         AudioRecorderView({
-                            showCancelRecordIndicator: this.showCancelRecordIndicator,
-                            recordCountDown: this.recordCountDown
+                            showAudioRecorderView: $showAudioRecorderView,
+                            showCancelRecordIndicator: $showCancelRecordIndicator,
+                            recordCountDown: $recordCountDown
                         })
                             .width('100%')
                             .height('100%')
@@ -565,6 +566,7 @@ struct ConversationPage {
                 }
             }
         ])
+
         //.expandSafeArea([SafeAreaType.KEYBOARD])
     }
 }

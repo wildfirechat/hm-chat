@@ -13,11 +13,11 @@ export default struct AddGroupMemberPage {
     private initialCheckedUserIds: string[] = []
     private uncheckableUserIds: string[] = []
     public static TAG: string = 'addGroupMember'
-    private groupInfo: GroupInfo
+    private groupInfo?: GroupInfo
 
     aboutToAppear() {
-        let params = router.getParams()
-        this.groupInfo = params['groupInfo']
+        let params = router.getParams() as Record<string, Object>
+        this.groupInfo = params['groupInfo'] as GroupInfo
         let groupMemberIds = wfc.getGroupMemberIds(this.groupInfo.target, false)
 
         let friendUserIds = wfc.getMyFriendList()
@@ -80,7 +80,8 @@ export default struct AddGroupMemberPage {
         .menus(this.NavigationMenus())
     }
 
-    @Builder NavigationMenus() {
+    @Builder
+    NavigationMenus() {
         Row() {
             Button('确定')
                 .type(ButtonType.Normal)
@@ -88,8 +89,7 @@ export default struct AddGroupMemberPage {
                 .width(60)
                 .enabled(this.newlyCheckedUsers().length > 0)
                 .fontSize(14)
-                .borderRadius(4)
-                    // .backgroundColor(Color.Blue)
+                .borderRadius(4)// .backgroundColor(Color.Blue)
                     // TODO
                 .onClick(() => {
                     let options: router.RouterOptions = {

@@ -1,18 +1,20 @@
 /*
  * Copyright (c) 2020 WildFireChat. All rights reserved.
  */
+import UserClientState from './userClientState';
+import UserCustomState from './userCustomState';
 
 export default class UserOnlineState {
-    userId;
-    customState;
-    clientStates;
+    userId = '';
+    customState?: UserCustomState;
+    clientStates = [] as UserClientState[];
 
     // 手机在线、web在线、pc在线
     desc() {
-        if (this.customState.state > 0) {
+        if (this.customState!.state > 0) {
             //0，未设置，1 忙碌，2 离开（主动设置），3 离开（长时间不操作），4 隐身，其它可以自主扩展。
             let cs = ['未设置', '忙碌', '离开(主动离开)', '离开(长时间未操作)', '隐身'];
-            return this.customState.text + cs[this.customState.state];
+            return this.customState!.text + cs[this.customState!.state];
         }
 
         let onlineClientDesc = '';

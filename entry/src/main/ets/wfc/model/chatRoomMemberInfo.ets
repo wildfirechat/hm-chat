@@ -3,6 +3,6 @@
  */
 
 export default class ChatRoomMemberInfo {
-    memberCount;
-    members;
+    memberCount = 0;
+    members = [] as string[];
 }

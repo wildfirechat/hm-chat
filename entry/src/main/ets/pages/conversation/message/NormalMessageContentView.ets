@@ -16,26 +16,31 @@ import VideoMessageContentView from './VideoMessageContentView'
 
 @Component
 export default struct NormaMessageContentView {
-    @State message: Message = null
+    @State message?: Message = undefined
     @Link enableMultiCheck: boolean
     private audioPlayManager?: AudioPlayManager
-    private readReceipt: ReadReceipt
-    private deleteMessageDialogController: CustomDialogController
+    private readReceipt: ReadReceipt | null = null
+    private deleteMessageDialogController?: CustomDialogController
+
+    constructor(value) {
+        super()
+        this.message = value
+    }
 
     build() {
         Column() {
-            if (this.message.messageContent.type === MessageContentType.Text) {
+            if (this.message!.messageContent.type === MessageContentType.Text) {
                 TextMessageContentView({ message: $message })
-            } else if (this.message.messageContent.type === MessageContentType.Sticker) {
+            } else if (this.message!.messageContent.type === MessageContentType.Sticker) {
                 StickerMessageContentView({ message: $message })
-            } else if (this.message.messageContent.type === MessageContentType.Image) {
+            } else if (this.message!.messageContent.type === MessageContentType.Image) {
                 ImageMessageContentView({ message: $message })
-            } else if (this.message.messageContent.type === MessageContentType.Video) {
+            } else if (this.message!.messageContent.type === MessageContentType.Video) {
                 VideoMessageContentView({ message: $message })
-            } else if (this.message.messageContent.type === MessageContentType.Voice) {
+            } else if (this.message!.messageContent.type === MessageContentType.Voice) {
                 AudioMessageContent({ message: $message, audioPlayManager: this.audioPlayManager })
             } else {
-                Text(this.message.messageContent.digest(this.message))
+                Text(this.message!.messageContent.digest(this.message))
                     .margin({ top: 4 })
                     .padding(10)
                     .onClick(() => {
@@ -43,21 +48,22 @@ export default struct NormaMessageContentView {
                             url: 'pages/conversation/forward/ForwardMessagePage',
                             params: {
                                 messages: [this.message]
-                            } })
+                            }
+                        })
                             .then(value => {
                                 console.log('xxxxxxxxxxxx th', value)
                             })
-                            .catch(r => console.log('xxxxxxxxxxxx', r))
+                            .catch((r: Error) => console.log('xxxxxxxxxxxx', r))
                     })
             }
             // out
-            if (this.message.direction === 0) {
+            if (this.message!.direction === 0) {
                 if (this.readReceipt) {
-                    if (this.message.conversation.type === ConversationType.Group) {
+                    if (this.message!.conversation.type === ConversationType.Group) {
                         Text(`已读 ${this.readReceipt.readCount}/${this.readReceipt.readCount + this.readReceipt.unreadCount}`)
                             .fontSize(12)
                             .margin({ top: 4 })
-                    } else if (this.message.conversation.type === ConversationType.Single) {
+                    } else if (this.message!.conversation.type === ConversationType.Single) {
                         Text(this.readReceipt.readCount > 0 ? '已读' : '未读')
                             .fontSize(12)
                             .margin({ top: 4 })
@@ -70,11 +76,7 @@ export default struct NormaMessageContentView {
     }
 
     messageContextMenus = () => {
-        let menus: {
-            title: string,
-            tag: string,
-            action: (message: Message) => void
-        }[] = [
+        let menus: MessageContextMenuItem[] = [
             {
                 title: '删除',
                 tag: 'delete',
@@ -87,13 +89,13 @@ export default struct NormaMessageContentView {
                                 {
                                     title: '删除本地消息',
                                     action: () => {
-                                        wfc.deleteMessage(this.message.messageId)
+                                        wfc.deleteMessage(this.message!.messageId)
                                     }
                                 },
                                 {
                                     title: '删除远程消息',
                                     action: () => {
-                                        wfc.deleteRemoteMessageByUid(this.message.messageUid, () => {
+                                        wfc.deleteRemoteMessageByUid(this.message!.messageUid, () => {
 
                                         }, (err: number) => {
                                             showToast('删除远程消息失败' + err)
@@ -115,19 +117,16 @@ export default struct NormaMessageContentView {
                 title: '转发',
                 tag: 'forward',
                 action: () => {
-                    // bug
-                    // FYI: https://developer.huawei.com/consumer/cn/forum/topic/0201116784950653536?fid=0101610563345550409
-                    showToast('bug! 无法显示转发页面')
                     router.pushUrl({
                         url: 'pages/conversation/forward/ForwardMessagePage',
                         params: {
-                            messages: [this.message],
-                            forwardType: 'oneByOne'
-                        } })
+                            messages: [this.message]
+                        }
+                    })
                         .then(value => {
                             console.log('xxxxxxxxxxxx th', value)
                         })
-                        .catch(r => console.log('xxxxxxxxxxxx', r))
+                        .catch((r: Error) => console.log('xxxxxxxxxxxx', r))
                 }
             },
             {
@@ -143,12 +142,12 @@ export default struct NormaMessageContentView {
         // recall
         if (true) {
             let enableRecall: boolean = false
-            if (this.message.conversation.type === ConversationType.Group) {
+            if (this.message!.conversation.type === ConversationType.Group) {
                 // TODO 撤回权限验证
             }
             let delta = wfc.getServerDeltaTime()
             let now = new Date().getTime()
-            if (this.message.direction === 0 && this.message.from === wfc.getUserId() && now - (this.message.timestamp - delta) < Config.RECALL_TIME_LIMIT * 1000) {
+            if (this.message!.direction === 0 && this.message!.from === wfc.getUserId() && now - (this.message!.timestamp - delta) < Config.RECALL_TIME_LIMIT * 1000) {
                 enableRecall = true
             }
 
@@ -157,7 +156,11 @@ export default struct NormaMessageContentView {
                     title: '撤回',
                     tag: 'recall',
                     action: () => {
-                        wfc.recallMessage(this.message.messageUid, null, null)
+                        wfc.recallMessage(this.message!.messageUid, () => {
+
+                        }, err => {
+                            console.error('recall error', err)
+                        })
                     }
                 })
             }
@@ -171,16 +174,23 @@ export default struct NormaMessageContentView {
     @Builder
     MessageContextMenuBuilder() {
         Menu() {
-            ForEach(this.messageContextMenus(), menuItem => {
+            ForEach(this.messageContextMenus(), (menuItem: MessageContextMenuItem) => {
                 MenuItem({ content: menuItem.title })
                     .onClick(menuItem.action)
 
-            }, menuItem => menuItem.title)
+            }, (menuItem: MessageContextMenuItem) => menuItem.title)
         }
+
         // Row() {
         //     Text('Test')
         //     Text('Hello2')
         //         .backgroundColor(Color.Red)
         // }
     }
+}
+
+interface MessageContextMenuItem {
+    title: string,
+    tag: string,
+    action: () => void
 }

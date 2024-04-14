@@ -7,7 +7,7 @@ export default class BasicDataSource<T> implements IDataSource {
     }
 
     public getData(index: number): T {
-        return null
+        return null as T
     }
 
     // 该方法为框架侧调用，为LazyForEach组件向其数据源处添加listener监听

@@ -5,7 +5,7 @@
 import GroupInfo from "./groupInfo";
 
 export default class NullGroupInfo extends GroupInfo {
-    constructor(groupId) {
+    constructor(groupId:string) {
         super();
         this.target = groupId;
         // this.name = '<' + groupId+ '>';

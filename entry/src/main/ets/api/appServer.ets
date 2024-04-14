@@ -1,4 +1,3 @@
-// @ts-nocheck
 // 引入包名
 import http from '@ohos.net.http';
 import data_preferences from '@ohos.data.preferences';
@@ -6,11 +5,11 @@ import wfc from 'marswrapper'
 import Config from '../config';
 
 class AppServer {
-    baseUrl = Config.APP_SERVER
-    authToken = ''
+    baseUrl = Config.APP_SERVER;
+    authToken = '';
 
     requestAuthCode(mobile: string) {
-        return this._post('/send_code', { mobile })
+        return this._post('/send_code', { 'mobile': mobile } as Record<string, string>)
     }
 
     loginWithAuthCode(phone: string, authCode: string) {
@@ -19,7 +18,7 @@ class AppServer {
             'code': authCode,
             'platform': Config.getWFCPlatform(),
             'clientId': wfc.getClientId(),
-        }
+        } as Record<string, Object>
         return this._post('/login', obj)
     }
 
@@ -35,8 +34,7 @@ class AppServer {
                 // }
             });
             console.log('request', path, data)
-            httpRequest.request(
-                // 填写HTTP请求的URL地址，可以带参数也可以不带参数。URL地址需要开发者自定义。请求的参数可以在extraData中指定
+            httpRequest.request(// 填写HTTP请求的URL地址，可以带参数也可以不带参数。URL地址需要开发者自定义。请求的参数可以在extraData中指定
                 this.baseUrl + path,
                 {
                     method: http.RequestMethod.POST, // 可选，默认为http.RequestMethod.GET
@@ -65,10 +63,11 @@ class AppServer {
                     // 当该请求使用完毕时，调用destroy方法主动销毁
                     httpRequest.destroy();
                     console.log('response', data)
-                    if (data.result.code === 0) {
-                        resolve(data.result.result)
+                    let result = data.result as Record<string, Object>
+                    if (result.code === 0) {
+                        resolve(result.result)
                     } else {
-                        reject(data.result.code)
+                        reject(result.code)
                     }
                 } else {
                     console.info('error:' + JSON.stringify(err));

@@ -4,26 +4,23 @@
 
 import wfc from '../../client/wfc'
 import MessageContentType from '../messageContentType';
+import MessagePayload from '../messagePayload';
 
 import NotificationMessageContent from "./notificationMessageContent";
 
 export default class RichNotificationMessageContent extends NotificationMessageContent {
-
     // 富通知消息
-    title;
-    desc;
-    remark;
-
+    title = '';
+    desc = '';
+    remark = '';
     // @[@{@"key":@"登陆账户", @"value":@"野火IM", @"color":@"#173155"}, @{@"key":@"登陆地点", @"value":@"北京", @"color":@"#173155"}]
-    datas;
-
+    datas = [] as NData[];
     // 附加信息
-    exName;
-    exPortrait;
-    exUrl;
-
+    exName = '';
+    exPortrait = '';
+    exUrl = '';
     // 应用信息
-    appId;
+    appId = '';
 
     constructor() {
         super(MessageContentType.Rich_Notification);
@@ -45,18 +42,18 @@ export default class RichNotificationMessageContent extends NotificationMessageC
             exUrl: this.exUrl,
             appId: this.appId,
             datas: this.datas,
-        }
+        } as Data
         payload.binaryContent = wfc.utf8_to_b64(JSON.stringify(obj))
 
         return payload;
     }
 
-    decode(payload) {
+    decode(payload: MessagePayload) {
         super.decode(payload);
         this.title = payload.pushContent;
         this.desc = payload.content;
         let json = wfc.b64_to_utf8(payload.binaryContent)
-        let obj = JSON.parse(json);
+        let obj = JSON.parse(json) as Data;
         this.remark = obj.remark;
         this.exName = obj.exName;
         this.exPortrait = obj.exPortrait;
@@ -64,4 +61,19 @@ export default class RichNotificationMessageContent extends NotificationMessageC
         this.appId = obj.appId;
         this.datas = obj.datas;
     }
+}
+
+class Data {
+    remark = '';
+    exName = '';
+    exPortrait = '';
+    exUrl = '';
+    appId = '';
+    datas = [] as NData[]
+}
+
+class NData {
+    key = '';
+    value = '';
+    color = ''
 }

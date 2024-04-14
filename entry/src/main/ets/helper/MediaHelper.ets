@@ -5,10 +5,15 @@
  */
 import common from '@ohos.app.ability.common';
 import picker from '@ohos.file.picker';
-import wantConstant from '@ohos.ability.wantConstant';
+import photoAccessHelper from '@ohos.file.photoAccessHelper';
+import cameraPicker from '@ohos.multimedia.cameraPicker';
+import wantConstant from '@ohos.app.ability.wantConstant';
 import MediaBean from '../bean/MediaBean';
 import mediaLibrary from '@ohos.multimedia.mediaLibrary';
 import fs from '@ohos.file.fs';
+import camera from '@ohos.multimedia.camera';
+import { BusinessError } from '@ohos.base';
+import { dataSharePredicates } from '@kit.ArkData';
 
 
 export class MediaHelper {
@@ -34,12 +39,15 @@ export class MediaHelper {
 
                     if (photoSelectResult && photoSelectResult.photoUris && photoSelectResult.photoUris.length > 0) {
                         return photoSelectResult.photoUris;
+                    } else {
+                        return []
                     }
 
-                }).catch((err) => {
-                    console.error(this.TAG, 'PhotoViewPicker.select failed with err: ' + err);
-                    return err;
-                });
+                })
+            // .catch((err: Error) => {
+            //     console.error(this.TAG, 'PhotoViewPicker.select failed with err: ' + err);
+            //     return [];
+            // });
         } catch (err) {
             console.error(this.TAG, 'PhotoViewPicker failed with err: ' + err);
             return Promise.reject(err);
@@ -61,12 +69,15 @@ export class MediaHelper {
                         let filePath = documentSelectResult[0];
                         console.info(this.TAG, 'DocumentViewPicker.select successfully, DocumentSelectResult uri: ' + filePath);
                         return filePath;
+                    } else {
+                        return ''
                     }
 
-                }).catch((err) => {
-                    console.error(this.TAG, 'PhotoViewPicker.select failed with err: ' + err);
-                    return err;
-                });
+                })
+            // .catch((err: Error) => {
+            //     console.error(this.TAG, 'PhotoViewPicker.select failed with err: ' + err);
+            //     return ''
+            // });
         } catch (err) {
             console.error(this.TAG, 'PhotoViewPicker failed with err: ' + err);
             return Promise.reject(err);
@@ -77,47 +88,56 @@ export class MediaHelper {
      * 拍照
      */
     public async takePhoto(context: common.UIAbilityContext): Promise<string> {
-        let want = {
-            'uri': '',
-            // TODO 录制视频 ACTION_VIDEO_CAPTURE
-            'action': wantConstant.Action.ACTION_IMAGE_CAPTURE,
-            'parameters': {},
-        };
-        return context.startAbilityForResult(want)
-            .then((result) => {
-                console.info(this.TAG, `startAbility call back , ${JSON.stringify(result)}`);
-                if (result.resultCode === 0 && result.want && !this.isNullOrEmpty(result.want.uri)) {
-                    //拍照成功
-                    console.info(this.TAG, 'takePhoto successfully, takePhotoResult uri: ' + result.want.uri);
-                    return result.want.uri;
-                }
-            }).catch((error) => {
-                console.info(this.TAG, `startAbility error , ${JSON.stringify(error)}`);
-                return error;
-            });
-    }
+        // let want = {
+        //     'uri': '',
+        //     'action': wantConstant.Action.ACTION_IMAGE_CAPTURE,
+        //     'parameters': {},
+        // };
+        // return context.startAbilityForResult(want)
+        //     .then((result) => {
+        //         console.info(this.TAG, `startAbility call back , ${JSON.stringify(result)}`);
+        //         if (result.resultCode === 0 && result.want && !this.isNullOrEmpty(result.want.uri)) {
+        //             //拍照成功
+        //             console.info(this.TAG, 'takePhoto successfully, takePhotoResult uri: ' + result.want.uri);
+        //             return result.want.uri;
+        //         }
+        //     }).catch((error) => {
+        //         console.info(this.TAG, `startAbility error , ${JSON.stringify(error)}`);
+        //         return error;
+        //     });
+        try {
+            let pickerProfile: cameraPicker.PickerProfile = {
+                cameraPosition: camera.CameraPosition.CAMERA_POSITION_BACK
+            };
+            let pickerResult: cameraPicker.PickerResult = await cameraPicker.pick(context,
+                [cameraPicker.PickerMediaType.PHOTO, cameraPicker.PickerMediaType.VIDEO], pickerProfile);
+            console.log("the pick pickerResult is:" + JSON.stringify(pickerResult));
+            return pickerResult.resultCode === 0 ? pickerResult.resultUri : ''
+        } catch (error) {
+            let err = error as BusinessError;
+            console.error(`the pick call failed. error code: ${err.code}`);
+            return ''
+        }
 
-    /**
-     * 拍照
-     */
-    public async recordVideo(context: common.UIAbilityContext): Promise<string> {
-        let want = {
-            'uri': '',
-            'action': wantConstant.Action.ACTION_VIDEO_CAPTURE,
-            'parameters': {},
-        };
-        return context.startAbilityForResult(want)
-            .then((result) => {
-                console.info(this.TAG, `startAbility call back , ${JSON.stringify(result)}`);
-                if (result.resultCode === 0 && result.want && !this.isNullOrEmpty(result.want.uri)) {
-                    //录制视频
-                    console.info(this.TAG, 'recordVideo successfully, recordVideoResult uri: ' + result.want.uri);
-                    return result.want.uri;
-                }
-            }).catch((error) => {
-                console.info(this.TAG, `startAbility error , ${JSON.stringify(error)}`);
-                return error;
-            });
+        // let predicates: dataSharePredicates.DataSharePredicates = new dataSharePredicates.DataSharePredicates();
+        // let fetchOptions: photoAccessHelper.FetchOptions = {
+        //     fetchColumns: [],
+        //     predicates: predicates
+        // };
+        // try {
+        //     let phAccessHelper = photoAccessHelper.getPhotoAccessHelper(context);
+        //     let fetchResult: photoAccessHelper.FetchResult<photoAccessHelper.PhotoAsset> = await phAccessHelper.getAssets(fetchOptions);
+        //     if (fetchResult !== undefined) {
+        //         console.info('fetchResult success');
+        //         let photoAsset: photoAccessHelper.PhotoAsset = await fetchResult.getFirstObject();
+        //         if (photoAsset !== undefined) {
+        //             console.info('photoAsset.displayName :' + photoAsset.displayName);
+        //         }
+        //     }
+        // } catch (err) {
+        //     console.error('getAssets failed, message = ', err);
+        // }
+        // return ""
     }
 
     /**
@@ -125,17 +145,17 @@ export class MediaHelper {
      *
      * @param uri 文件路径
      */
-    private async buildMediaBean(uri: string): Promise<MediaBean> {
-
-        if (this.isNullOrEmpty(uri)) {
-            return null;
-        }
-
-        const mediaBean: MediaBean = new MediaBean();
-        mediaBean.localUrl = uri;
-        await this.appendFileInfoToMediaBean(mediaBean, uri);
-        return mediaBean;
-    }
+    // private async buildMediaBean(uri: string): Promise<MediaBean> {
+    //
+    //     if (this.isNullOrEmpty(uri)) {
+    //         return null;
+    //     }
+    //
+    //     const mediaBean: MediaBean = new MediaBean();
+    //     mediaBean.localUrl = uri;
+    //     await this.appendFileInfoToMediaBean(mediaBean, uri);
+    //     return mediaBean;
+    // }
 
     /**
      * 通过Uri查找所选文件信息，插入到MediaBean中

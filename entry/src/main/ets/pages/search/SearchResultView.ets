@@ -176,7 +176,7 @@ export default struct SearchResultView {
         ForEach(this.expandGroupSearchResult ? this.groupSearchResults : this.groupSearchResults.slice(0, 5), (groupSearchResult: GroupSearchResult) => {
             ListItem() {
                 Row() {
-                    Image(groupSearchResult.groupInfo.portrait)
+                    Image(groupSearchResult.groupInfo!.portrait)
                         .alt($r('app.media.avatar_def'))
                         .width(40)
                         .height(40)

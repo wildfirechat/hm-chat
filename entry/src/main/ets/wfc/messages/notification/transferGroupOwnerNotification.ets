@@ -4,13 +4,14 @@
 
 import wfc from '../../client/wfc'
 import MessageContentType from '../messageContentType';
+import MessagePayload from '../messagePayload';
 import GroupNotificationContent from './groupNotification';
 
 export default class TransferGroupOwnerNotification extends GroupNotificationContent {
     operator = '';
     newOwner = '';
 
-    constructor(operator, newOwner) {
+    constructor(operator: string = '', newOwner: string = '') {
         super(MessageContentType.TransferGroupOwner_Notification);
         this.operator = operator;
         this.newOwner = newOwner;
@@ -30,17 +31,23 @@ export default class TransferGroupOwnerNotification extends GroupNotificationCon
             g: this.groupId,
             o: this.operator,
             m: this.newOwner,
-        };
+        } as Data;
         payload.binaryContent = wfc.utf8_to_b64(JSON.stringify(obj));
         return payload;
     }
 
-    decode(payload) {
+    decode(payload: MessagePayload) {
         super.decode(payload);
         let json = wfc.b64_to_utf8(payload.binaryContent)
-        let obj = JSON.parse(json);
+        let obj = JSON.parse(json) as Data;
         this.groupId = obj.g;
         this.operator = obj.o;
         this.newOwner = obj.m;
     }
+}
+
+class Data {
+    g = '';
+    o = '';
+    m = '';
 }

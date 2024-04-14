@@ -6,18 +6,18 @@ import AudioPlayManager from '../audio/AudioPlayManager'
 @Component
 export default struct AudioMessageContent {
     @Link message: Message
-    @State imageUrl: Resource = null
+    @State imageUrl: Resource = $r('app.media.audio_animation_list_right_1')
     private animatorInternal: number = 0
     private animatorImageIndex = 3;
     private outAudioPlayingImageUrl: Resource[] = [
-    $r('app.media.audio_animation_list_right_1'),
-    $r('app.media.audio_animation_list_right_2'),
-    $r('app.media.audio_animation_list_right_3')
+        $r('app.media.audio_animation_list_right_1'),
+        $r('app.media.audio_animation_list_right_2'),
+        $r('app.media.audio_animation_list_right_3')
     ]
     private inAudioPlayingImageUrl: Resource[] = [
-    $r('app.media.audio_animation_list_left_1'),
-    $r('app.media.audio_animation_list_left_2'),
-    $r('app.media.audio_animation_list_left_3')
+        $r('app.media.audio_animation_list_left_1'),
+        $r('app.media.audio_animation_list_left_2'),
+        $r('app.media.audio_animation_list_left_3')
     ]
     private audioPlayManager?: AudioPlayManager
 

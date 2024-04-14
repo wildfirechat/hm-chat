@@ -19,17 +19,17 @@
         },
  */
 export default class MessagePayload {
-    type: number;
-    searchableContent: string;
-    pushContent: string;
-    pushData: string;
-    content: string;
-    binaryContent: string; // base64 string, 图片时，不包含头部信息:data:image/png;base64,
-    localContent: string;
-    mediaType: number;
-    remoteMediaUrl: string;
-    localMediaPath: string;
-    mentionedType: number = 0;
-    mentionedTargets: number[] = [];
-    extra: string;
+    type = 0;
+    searchableContent = '';
+    pushContent = '';
+    pushData = '';
+    content = '';
+    binaryContent =''; // base64 string, 图片时，不包含头部信息:data:image/png;base64,
+    localContent = '';
+    mediaType = 0;
+    remoteMediaUrl = '';
+    localMediaPath = '';
+    mentionedType = 0;
+    mentionedTargets = [];
+    extra = '';
 }

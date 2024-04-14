@@ -5,12 +5,14 @@
 import MessageContent from '../../messages/messageContent';
 import MessageContentType from '../../messages/messageContentType';
 import wfc from "../../client/wfc"
+import MessagePayload from '../../messages/messagePayload';
+import { FaultLogger } from '@kit.PerformanceAnalysisKit';
 
 export default class CallStartMessageContent extends MessageContent {
-    callId;
-    targetIds = [];
-    connectTime;
-    endTime;
+    callId = '';
+    targetIds = [] as string[];
+    connectTime = 0;
+    endTime = 0;
     /**
      * 0, UnKnown,
      * 1, Busy,
@@ -23,8 +25,8 @@ export default class CallStartMessageContent extends MessageContent {
      * 8, AcceptByOtherClient
      */
     status = 0;
-    audioOnly;
-    pin;
+    audioOnly = false;
+    pin = '';
 
     constructor(mentionedType = 0, mentionedTargets = []) {
         super(MessageContentType.VOIP_CONTENT_TYPE_START, mentionedType, mentionedTargets);
@@ -51,24 +53,24 @@ export default class CallStartMessageContent extends MessageContent {
             ts: this.targetIds,
             t: this.targetIds[0],
             p: this.pin
-        };
+        } as Data;
         payload.binaryContent = wfc.utf8_to_b64(JSON.stringify(obj));
 
-        let pushData = {
-            callId: this.callId,
-            audioOnly: this.audioOnly,
-            participants: this.targetIds,
+        let pushData: Record<string, string | string[] | boolean> = {
+            'callId': this.callId,
+            'audioOnly': this.audioOnly,
+            'participants': this.targetIds,
         }
         payload.pushData = JSON.stringify(pushData);
 
         return payload;
     }
 
-    decode(payload) {
+    decode(payload: MessagePayload) {
         super.decode(payload);
         this.callId = payload.content;
         let json = wfc.b64_to_utf8(payload.binaryContent);
-        let obj = JSON.parse(json);
+        let obj = JSON.parse(json) as Data;
 
         this.connectTime = obj.c;
         this.endTime = obj.e;
@@ -81,3 +83,14 @@ export default class CallStartMessageContent extends MessageContent {
         this.pin = obj.p;
     }
 }
+
+class Data {
+    c = 0;
+    e = 0;
+    s = 0;
+    a = 0;
+    ts = [] as string[]
+    t = ''
+    p = '';
+}
+

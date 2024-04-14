@@ -5,10 +5,11 @@
 import MessageContent from '../../messages/messageContent';
 import MessageContentType from '../../messages/messageContentType';
 import wfc from "../../client/wfc"
+import MessagePayload from '../../messages/messagePayload';
 
 export default class CallSignalMessageContent extends MessageContent {
-    callId;
-    payload;
+    callId = '';
+    payload = '';
 
     constructor(mentionedType = 0, mentionedTargets = []) {
         super(MessageContentType.VOIP_CONTENT_TYPE_SIGNAL, mentionedType, mentionedTargets);
@@ -25,7 +26,7 @@ export default class CallSignalMessageContent extends MessageContent {
         return payload;
     };
 
-    decode(payload) {
+    decode(payload:MessagePayload) {
         super.decode(payload);
         this.callId = payload.content;
         this.payload = wfc.b64_to_utf8(payload.binaryContent);

@@ -24,7 +24,7 @@ const permissions: Array<Permissions> = [
     'ohos.permission.READ_MEDIA',
     'ohos.permission.WRITE_MEDIA',
     'ohos.permission.MICROPHONE',
-    'ohos.permission.MEDIA_LOCATION'
+    'ohos.permission.READ_IMAGEVIDEO'
 ];
 
 @Entry
@@ -39,21 +39,20 @@ struct MainPage {
     @State contactTabUnreadCount: number = 0
     @State discoveryTabUnreadCount: number = 0
     @State meTabUnreadCount: number = 0
-
     // TODO router.getParams() 一直返回 router.back 时设置的参数
     private isNewPickContact = false
 
     onPageShow() {
-        let params = router.getParams()
+        let params = router.getParams() as Record<string, Object>
         console.log('main Index Show', params)
         if (params) {
-            const tag: string = params['tag']
+            const tag: string = params['tag'] as string
             if (tag === PickContactPage.TAG) {
                 if (!this.isNewPickContact) {
                     return
                 }
                 this.isNewPickContact = false
-                let result: UserInfo[] = params['result']
+                let result: UserInfo[] = params['result'] as UserInfo[]
                 if (result.length === 1) {
                     router.pushUrl({
                         url: "pages/conversation/ConversationPage",
@@ -108,11 +107,11 @@ struct MainPage {
         }
 
         try {
-            grantStatus = await atManager.checkAccessToken(tokenID !, permission);
+            grantStatus = await atManager.checkAccessToken(tokenID!, permission);
         } catch (err) {
             console.error(`checkAccessToken failed, error: ${err}`);
         }
-        return grantStatus !;
+        return grantStatus!;
     }
 
     async checkPermissions(): Promise<void> {
@@ -122,7 +121,7 @@ struct MainPage {
                 let context: common.UIAbilityContext = getContext(this) as common.UIAbilityContext;
                 promptAction.showDialog({
                     title: '警告',
-                    message: '没有权限，请自行去<设置>添加权限' + permissions[i]
+                    message: '没有权限，请自行去<设置>添加权限'
                 })
                 setTimeout(() => context.terminateSelf(), 1000);
             }
@@ -153,7 +152,8 @@ struct MainPage {
         return unreadCount
     }
 
-    @Builder TabBuilder(title: string, targetIndex: number, selectedImg: Resource, normalImg: Resource) {
+    @Builder
+    TabBuilder(title: string, targetIndex: number, selectedImg: Resource, normalImg: Resource) {
         Column() {
             Badge({
                 count: this.tabUnreadCount(targetIndex),
@@ -211,7 +211,8 @@ struct MainPage {
         }
     }
 
-    @Builder NavigationMenus() {
+    @Builder
+    NavigationMenus() {
         Row() {
             Image($r('app.media.ic_search'))
                 .width(30)
@@ -265,6 +266,7 @@ struct MainPage {
         .titleMode(NavigationTitleMode.Mini)
         .hideBackButton(true)
         .menus(this.NavigationMenus())
+
         // .menus([
         //     { value: "", icon: "common/image/ic_search.png", action: () => {
         //         showToast('TODO search')

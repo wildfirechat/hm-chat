@@ -1,10 +1,11 @@
 import MessageContent from "../../messages/messageContent";
 import MessageContentType from "../../messages/messageContentType";
+import MessagePayload from '../../messages/messagePayload';
 
 export default class ConferenceKickoffMemberMessageContent extends MessageContent {
-    callId;
+    callId = '';
 
-    constructor(callId) {
+    constructor(callId: string = '') {
         super(MessageContentType.CONFERENCE_CONTENT_TYPE_KICKOFF_MEMBER)
         this.callId = callId;
     }
@@ -15,9 +16,8 @@ export default class ConferenceKickoffMemberMessageContent extends MessageConten
         return payload;
     }
 
-    decode(payload) {
+    decode(payload: MessagePayload) {
         super.decode(payload);
         this.callId = payload.content;
     }
-
 }

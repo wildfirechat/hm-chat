@@ -17,9 +17,9 @@ export default struct CheckableUserListView {
     @Link checkedUsers: UserInfo[]
     @State filteredUserInfos: UserInfo[] = []
     @State searchInputViewMaxWidth: string = '100%'
-    private userInfos: UserInfo[]
+    private userInfos: UserInfo[] = []
     private userInfoDataSource: UserInfoDataSource = new UserInfoDataSource()
-    private showCategory: boolean
+    private showCategory: boolean = false
     private uncheckableUserIds: string[] = []
     private showSearchView: boolean = false
     private checkedUserListScroller: Scroller = new Scroller()
@@ -81,7 +81,7 @@ export default struct CheckableUserListView {
 
     groupUserInfos(userInfos: UserInfo[]): UIUserInfo[] {
         let groupedUsers: UIUserInfo[] = []
-        let lastCategory: string = null;
+        let lastCategory: string = '';
 
         if (!this.showCategory) {
             return this.userInfos.map((info: UserInfo) => {
@@ -92,7 +92,7 @@ export default struct CheckableUserListView {
             })
         }
         userInfos.forEach(user => {
-            let category = pinyin4js.getShortPinyin(user.displayName).substring(0, 1).toUpperCase()
+            let category = pinyin4js.getShortPinyin(user.displayName).substring(0, 1).toUpperCase() as string
             if (category < 'A' || category > 'Z') {
                 category = '#'
             }
@@ -126,7 +126,7 @@ export default struct CheckableUserListView {
             }
         })
 
-        lastCategory = null
+        lastCategory = ''
         groupedUsers.forEach(gu => {
             if (!lastCategory || lastCategory !== gu.category) {
                 gu.showCategory = true

@@ -67,9 +67,11 @@ import ChannelMenuEventMessageContent from "../messages/channelMenuEventMessageC
 import EnterChannelChatMessageContent from "../messages/enterChannelChatMessageContent";
 import LeaveChannelChatMessageContent from "../messages/leaveChannelChatMessageContent";
 import ModifyGroupSettingNotification from "../messages/notification/modifyGroupSettingNotification";
+import MessageContent from '../messages/messageContent';
+import { DEFAULT } from '@ohos/hypium';
 
 export default class MessageConfig {
-    static getMessageContentClazz(type) {
+    static getMessageContentClazz(type: number) {
         for (const content of MessageConfig.MessageContents) {
             if (content.type === type) {
                 if (content.contentClazz) {
@@ -83,7 +85,7 @@ export default class MessageConfig {
         return UnknownMessageContent;
     }
 
-    static getMessageContentFlag(type) {
+    static getMessageContentFlag(type: number) {
         let flag = PersistFlag.No_Persist;
         for (const content of MessageConfig.MessageContents) {
             if (content.type === type) {
@@ -93,26 +95,26 @@ export default class MessageConfig {
         return flag;
     }
 
-    static getMessageContentPersistFlag(type) {
+    static getMessageContentPersitFlag(type: number) {
         for (const content of MessageConfig.MessageContents) {
             if (content.type === type) {
                 return content.flag;
             }
         }
-        return PersistFlag.No_Persist;
+        return -1;
     }
 
-    static getMessageContentType(messageContent) {
-        for (const content of MessageConfig.MessageContents) {
-            if (content.contentClazz && messageContent instanceof content.contentClazz) {
-                return content.type;
-            }
-        }
+    // static getMessageContentType(messageContent: MessageContent) {
+    //     for (const content of MessageConfig.MessageContents) {
+    //         if (content.contentClazz && messageContent instanceof content.contentClazz) {
+    //             return content.type;
+    //         }
+    //     }
+    //
+    //     return MessageContentType.Unknown;
+    // }
 
-        return MessageContentType.Unknown;
-    }
-
-    static registerMessageContent(name, flag, type, clazz) {
+    static registerMessageContent(name: string, flag: number, type: number, clazz: Promise<typeof import("../messages/messageContent")>) {
         // TODO validate args
 
         MessageConfig.MessageContents.push(
@@ -126,361 +128,500 @@ export default class MessageConfig {
 
     }
 
-    static MessageContents = [
+    static newMessageContent(type: number): MessageContent {
+        let content: MessageContent
+        switch (type) {
+            case MessageContentType.Unknown:
+                content = new UnknownMessageContent()
+                break
+            case MessageContentType.Text:
+                content = new TextMessageContent()
+                break
+            case MessageContentType.Image:
+                content = new ImageMessageContent()
+                break
+            case MessageContentType.P_Text:
+                content = new PTextMessageContent()
+                break
+            case MessageContentType.Voice:
+                content = new SoundMessageContent()
+                break
+            case MessageContentType.Image:
+                content = new ImageMessageContent()
+                break
+            case MessageContentType.Location:
+                content = new LocationMessageContent()
+                break
+            case MessageContentType.File:
+                content = new FileMessageContent()
+                break
+            case MessageContentType.Video:
+                content = new VideoMessageContent()
+                break
+            case MessageContentType.Sticker:
+                content = new StickerMessageContent()
+                break
+            case MessageContentType.Link:
+                content = new LinkMessageContent()
+                break
+            case MessageContentType.UserCard:
+                content = new CardMessageContent()
+                break
+            case MessageContentType.Composite_Message:
+                content = new CompositeMessageContent()
+                break
+            case MessageContentType.Tip_Notification:
+                content = new TipNotificationMessageContent()
+                break
+            case MessageContentType.Typing:
+                content = new TypingMessageContent()
+                break
+            case MessageContentType.Friend_Added:
+                content = new FriendGreetingNotification()
+                break
+            case MessageContentType.Friend_Greeting:
+                content = new FriendAddedNotification()
+                break
+            case MessageContentType.AddGroupMember_Notification:
+                content = new AddGroupMemberNotification()
+                break
+            case MessageContentType.ChangeGroupName_Notification:
+                content = new ChangeGroupNameNotification()
+                break
+            case MessageContentType.ChangeGroupPortrait_Notification:
+                content = new ChangeGroupPortraitNotification()
+                break
+            case MessageContentType.CreateGroup_Notification:
+                content = new CreateGroupNotification()
+                break
+            case MessageContentType.DismissGroup_Notification:
+                content = new DismissGroupNotification()
+                break
+            case MessageContentType.KickOffGroupMember_Notification:
+                content = new KickoffGroupMemberNotification()
+                break
+            case MessageContentType.KickOffGroupMember_Visible_Notification:
+                content = new KickoffGroupMemberVisiableNotification()
+                break
+            case MessageContentType.ModifyGroupAlias_Notification:
+                content = new ModifyGroupAliasNotification()
+                break
+            case MessageContentType.ModifyGroupExtra_Notification:
+                content = new ModifyGroupExtraNotification()
+                break
+            case MessageContentType.ModifyGroupMemberExtra_Notification:
+                content = new ModifyGroupMemberExtraNotification()
+                break
+            case MessageContentType.QuitGroup_Notification:
+                content = new QuitGroupNotification()
+                break
+            case MessageContentType.QuitGroup_Visible_Notification:
+                content = new QuitGroupVisiableNotification()
+                break
+            case MessageContentType.TransferGroupOwner_Notification:
+                content = new TransferGroupOwnerNotification()
+                break
+            case MessageContentType.ChangeJoinType_Notification:
+                content = new GroupJoinTypeNotificationContent()
+                break
+            case MessageContentType.MuteGroup_Notification:
+                content = new GroupMuteNotificationContent()
+                break
+            case MessageContentType.ChangePrivateChat_Notification:
+                content = new GroupPrivateChatNotificationContent()
+                break
+            case MessageContentType.SetGroupManager_Notification:
+                content = new GroupSetManagerNotificationContent()
+                break
+            case MessageContentType.MuteGroupMember_Notification:
+                content = new MuteGroupMemberNotification()
+                break
+            case MessageContentType.AllowGroupMember_Notification:
+                content = new AllowGroupMemberNotification()
+                break
+            case MessageContentType.ModifyGroupSetting_Notification:
+                content = new ModifyGroupSettingNotification()
+                break
+            case MessageContentType.RecallMessage_Notification:
+                content = new RecallMessageNotification()
+                break
+            case MessageContentType.DeleteMessage_Notification:
+                content = new DeleteMessageContent()
+                break
+            case MessageContentType.VOIP_CONTENT_TYPE_START:
+                content = new CallStartMessageContent()
+                break
+            case MessageContentType.VOIP_CONTENT_TYPE_ACCEPT:
+                content = new CallAnswerMessageContent()
+                break
+            case MessageContentType.VOIP_CONTENT_TYPE_ACCEPT_T:
+                content = new CallAnswerTMessageContent()
+                break
+            case MessageContentType.VOIP_CONTENT_TYPE_END:
+                content = new CallByeMessageContent()
+                break
+            case MessageContentType.VOIP_CONTENT_TYPE_SIGNAL:
+                content = new CallSignalMessageContent()
+                break
+            case MessageContentType.VOIP_CONTENT_TYPE_MODIFY:
+                content = new CallModifyMessageContent()
+                break
+            case MessageContentType.VOIP_CONTENT_TYPE_ADD_PARTICIPANT:
+                content = new AddParticipantsMessageContent()
+                break
+
+            case MessageContentType.VOIP_CONTENT_TYPE_MUTE_VIDEO:
+                content = new MuteVideoMessageContent()
+                break
+            case MessageContentType.CONFERENCE_CONTENT_TYPE_INVITE:
+                content = new ConferenceInviteMessageContent()
+                break
+            case MessageContentType.CONFERENCE_CONTENT_TYPE_CHANGE_MODE:
+                content = new ConferenceChangeModeContent()
+                break
+            case MessageContentType.CONFERENCE_CONTENT_TYPE_KICKOFF_MEMBER:
+                content = new ConferenceKickoffMemberMessageContent()
+                break
+            case MessageContentType.VOIP_Multi_Call_Ongoing:
+                content = new MultiCallOngoingMessageContent()
+                break
+            case MessageContentType.VOIP_Join_Call_Request:
+                content = new JoinCallRequestMessageContent()
+                break
+            case MessageContentType.Mark_Unread_Sync:
+                content = new MarkUnreadMessageContent()
+                break
+            case MessageContentType.StartSecretChat_Notification:
+                content = new StartSecretChatNotification()
+                break
+            case MessageContentType.Rich_Notification:
+                content = new RichNotificationMessageContent()
+                break
+            case MessageContentType.Articles:
+                content = new ArticlesMessageContent()
+                break
+            case MessageContentType.Channel_Menu_Event:
+                content = new ChannelMenuEventMessageContent()
+                break
+            case MessageContentType.Enter_Channel_Chat:
+                content = new EnterChannelChatMessageContent()
+                break
+            case MessageContentType.Leave_Channel_Chat:
+                content = new LeaveChannelChatMessageContent()
+                break
+            case MessageContentType.CONFERENCE_CONTENT_TYPE_COMMAND:
+                content = new ConferenceCommandMessageContent()
+                break
+            default:
+                content = new UnknownMessageContent()
+                break
+        }
+        return content;
+    }
+
+    static MessageContents: MessageContentConfig[] = [
         {
             name: 'unknown',
             flag: PersistFlag.Persist,
             type: MessageContentType.Unknown,
-            contentClazz: UnknownMessageContent,
         },
         {
             name: 'text',
             flag: PersistFlag.Persist_And_Count,
             type: MessageContentType.Text,
-            contentClazz: TextMessageContent,
         },
         {
             name: 'ptext',
             flag: PersistFlag.Persist,
             type: MessageContentType.P_Text,
-            contentClazz: PTextMessageContent,
         },
         {
             name: 'voice',
             flag: PersistFlag.Persist_And_Count,
             type: MessageContentType.Voice,
-            contentClazz: SoundMessageContent,
         },
         {
             name: 'image',
             flag: PersistFlag.Persist_And_Count,
             type: MessageContentType.Image,
-            contentClazz: ImageMessageContent,
         },
         {
             name: 'location',
             flag: PersistFlag.Persist_And_Count,
             type: MessageContentType.Location,
-            contentClazz: LocationMessageContent,
         },
         {
             name: 'file',
             flag: PersistFlag.Persist_And_Count,
             type: MessageContentType.File,
-            contentClazz: FileMessageContent,
         },
         {
             name: 'video',
             flag: PersistFlag.Persist_And_Count,
             type: MessageContentType.Video,
-            contentClazz: VideoMessageContent,
         },
         {
             name: 'sticker',
             flag: PersistFlag.Persist_And_Count,
             type: MessageContentType.Sticker,
-            contentClazz: StickerMessageContent,
         },
         {
             name: 'link',
             flag: PersistFlag.Persist_And_Count,
             type: MessageContentType.Link,
-            contentClazz: LinkMessageContent,
         },
         {
             name: 'userCard',
             flag: PersistFlag.Persist_And_Count,
             type: MessageContentType.UserCard,
-            contentClazz: CardMessageContent,
         },
         {
             name: 'compositeMessage',
             flag: PersistFlag.Persist_And_Count,
             type: MessageContentType.Composite_Message,
-            contentClazz: CompositeMessageContent,
         },
         {
             name: 'tip',
             flag: PersistFlag.Persist,
             type: MessageContentType.Tip_Notification,
-            contentClazz: TipNotificationMessageContent,
         },
         {
             name: 'typing',
             flag: PersistFlag.Transparent,
             type: MessageContentType.Typing,
-            contentClazz: TypingMessageContent,
         },
         {
             name: 'friendGreeting',
             flag: PersistFlag.Persist,
             type: MessageContentType.Friend_Added,
-            contentClazz: FriendGreetingNotification,
         },
         {
             name: 'friendAdded',
             flag: PersistFlag.Persist,
             type: MessageContentType.Friend_Greeting,
-            contentClazz: FriendAddedNotification,
         },
         {
             name: 'addGroupMemberNotification',
             flag: PersistFlag.Persist,
             type: MessageContentType.AddGroupMember_Notification,
-            contentClazz: AddGroupMemberNotification,
         },
         {
             name: 'changeGroupNameNotification',
             flag: PersistFlag.Persist,
             type: MessageContentType.ChangeGroupName_Notification,
-            contentClazz: ChangeGroupNameNotification,
         },
         {
             name: 'changeGroupPortraitNotification',
             flag: PersistFlag.Persist,
             type: MessageContentType.ChangeGroupPortrait_Notification,
-            contentClazz: ChangeGroupPortraitNotification,
         },
         {
             name: 'createGroupNotification',
             flag: PersistFlag.Persist,
             type: MessageContentType.CreateGroup_Notification,
-            contentClazz: CreateGroupNotification,
         },
         {
             name: 'dismissGroupNotification',
             flag: PersistFlag.Persist,
             type: MessageContentType.DismissGroup_Notification,
-            contentClazz: DismissGroupNotification,
         },
         {
             name: 'kickoffGroupMemberNotification',
             flag: PersistFlag.Persist,
             type: MessageContentType.KickOffGroupMember_Notification,
-            contentClazz: KickoffGroupMemberNotification,
         },
         {
             name: 'kickoffGroupMemberVisiableNotification',
             flag: PersistFlag.Persist,
             type: MessageContentType.KickOffGroupMember_Visible_Notification,
-            contentClazz: KickoffGroupMemberVisiableNotification,
         },
         {
             name: 'modifyGroupAliasNotification',
             flag: PersistFlag.Persist,
             type: MessageContentType.ModifyGroupAlias_Notification,
-            contentClazz: ModifyGroupAliasNotification,
         },
         {
             name: 'modifyGroupExtraNotification',
             flag: PersistFlag.Persist,
             type: MessageContentType.ModifyGroupExtra_Notification,
-            contentClazz: ModifyGroupExtraNotification,
         },
         {
             name: 'modifyGroupMemberExtraNotification',
             flag: PersistFlag.Persist,
             type: MessageContentType.ModifyGroupMemberExtra_Notification,
-            contentClazz: ModifyGroupMemberExtraNotification,
         },
         {
             name: 'quitGroupNotification',
             flag: PersistFlag.Persist,
             type: MessageContentType.QuitGroup_Notification,
-            contentClazz: QuitGroupNotification,
         },
         {
             name: 'quitGroupVisiableNotification',
             flag: PersistFlag.Persist,
             type: MessageContentType.QuitGroup_Visible_Notification,
-            contentClazz: QuitGroupVisiableNotification,
         },
         {
             name: 'transferGroupOwnerNotification',
             flag: PersistFlag.Persist,
             type: MessageContentType.TransferGroupOwner_Notification,
-            contentClazz: TransferGroupOwnerNotification,
         },
         {
             name: 'groupJoinTypeNotificationContent',
             flag: PersistFlag.Persist,
             type: MessageContentType.ChangeJoinType_Notification,
-            contentClazz: GroupJoinTypeNotificationContent,
         },
         {
             name: 'groupMuteNotificationContent',
             flag: PersistFlag.Persist,
             type: MessageContentType.MuteGroup_Notification,
-            contentClazz: GroupMuteNotificationContent,
         },
         {
             name: 'groupPrivateChatNotificationContent',
             flag: PersistFlag.Persist,
             type: MessageContentType.ChangePrivateChat_Notification,
-            contentClazz: GroupPrivateChatNotificationContent,
         },
         {
             name: 'groupSetManagerNotificationContent',
             flag: PersistFlag.Persist,
             type: MessageContentType.SetGroupManager_Notification,
-            contentClazz: GroupSetManagerNotificationContent,
         },
         {
             name: 'muteGroupMemberNotificationContent',
             flag: PersistFlag.Persist,
             type: MessageContentType.MuteGroupMember_Notification,
-            contentClazz: MuteGroupMemberNotification,
         },
         {
             name: 'allowGroupMemberNotificationContent',
             flag: PersistFlag.Persist,
             type: MessageContentType.AllowGroupMember_Notification,
-            contentClazz: AllowGroupMemberNotification,
         },
         {
             name: 'modifyGroupSettingNotificationContent',
             flag: PersistFlag.No_Persist,
             type: MessageContentType.ModifyGroupSetting_Notification,
-            contentClazz: ModifyGroupSettingNotification,
         },
         {
             name: 'recall',
             flag: PersistFlag.Persist,
             type: MessageContentType.RecallMessage_Notification,
-            contentClazz: RecallMessageNotification,
         },
         {
             name: 'delete',
             flag: PersistFlag.No_Persist,
             type: MessageContentType.DeleteMessage_Notification,
-            contentClazz: DeleteMessageContent,
         },
         {
             name: 'callStartMessageContent',
             flag: PersistFlag.Persist,
             type: MessageContentType.VOIP_CONTENT_TYPE_START,
-            contentClazz: CallStartMessageContent,
         },
         {
             name: 'callAnswerMessageContent',
             flag: PersistFlag.No_Persist,
             type: MessageContentType.VOIP_CONTENT_TYPE_ACCEPT,
-            contentClazz: CallAnswerMessageContent,
         },
         {
             name: 'callAnswerTMessageContent',
             flag: PersistFlag.Transparent,
             type: MessageContentType.VOIP_CONTENT_TYPE_ACCEPT_T,
-            contentClazz: CallAnswerTMessageContent,
         },
         {
             name: 'callByeMessageContent',
             flag: PersistFlag.No_Persist,
             type: MessageContentType.VOIP_CONTENT_TYPE_END,
-            contentClazz: CallByeMessageContent,
         },
         {
             name: 'callSignalMessageContent',
             flag: PersistFlag.Transparent,
             type: MessageContentType.VOIP_CONTENT_TYPE_SIGNAL,
-            contentClazz: CallSignalMessageContent,
         },
         {
             name: 'callModifyMessageContent',
             flag: PersistFlag.No_Persist,
             type: MessageContentType.VOIP_CONTENT_TYPE_MODIFY,
-            contentClazz: CallModifyMessageContent,
         },
         {
             name: 'callAddParticipant',
             flag: PersistFlag.Persist,
             type: MessageContentType.VOIP_CONTENT_TYPE_ADD_PARTICIPANT,
-            contentClazz: AddParticipantsMessageContent,
         },
         {
             name: 'callMuteVideo',
             flag: PersistFlag.No_Persist,
             type: MessageContentType.VOIP_CONTENT_TYPE_MUTE_VIDEO,
-            contentClazz: MuteVideoMessageContent,
         },
         {
             name: 'conferenceInvite',
             flag: PersistFlag.Persist_And_Count,
             type: MessageContentType.CONFERENCE_CONTENT_TYPE_INVITE,
-            contentClazz: ConferenceInviteMessageContent,
         },
         {
             name: 'conferenceChangeMode',
             flag: PersistFlag.Transparent,
             type: MessageContentType.CONFERENCE_CONTENT_TYPE_CHANGE_MODE,
-            contentClazz: ConferenceChangeModeContent,
         },
         {
             name: 'conferenceKickoffMember',
             flag: PersistFlag.Transparent,
             type: MessageContentType.CONFERENCE_CONTENT_TYPE_KICKOFF_MEMBER,
-            contentClazz: ConferenceKickoffMemberMessageContent,
         },
         {
             name: 'multiCallOngoing',
             flag: PersistFlag.Transparent,
             type: MessageContentType.VOIP_Multi_Call_Ongoing,
-            contentClazz: MultiCallOngoingMessageContent,
         },
         {
             name: 'joinCallRequest',
             flag: PersistFlag.Transparent,
             type: MessageContentType.VOIP_Join_Call_Request,
-            contentClazz: JoinCallRequestMessageContent,
         },
         {
             name: 'markUnreadMessage',
             flag: PersistFlag.No_Persist,
             type: MessageContentType.Mark_Unread_Sync,
-            contentClazz: MarkUnreadMessageContent,
         },
         {
             name: 'startSecretChat',
             flag: PersistFlag.Persist_And_Count,
             type: MessageContentType.StartSecretChat_Notification,
-            contentClazz: StartSecretChatNotification,
         },
         {
             name: 'richNotification',
             flag: PersistFlag.Persist_And_Count,
             type: MessageContentType.Rich_Notification,
-            contentClazz: RichNotificationMessageContent,
         },
         {
             name: 'articlesMessageContent',
             flag: PersistFlag.Persist_And_Count,
             type: MessageContentType.Articles,
-            contentClazz: ArticlesMessageContent,
         },
         {
             name: 'channelMenuEventMessageContent',
             flag: PersistFlag.Transparent,
             type: MessageContentType.Channel_Menu_Event,
-            contentClazz: ChannelMenuEventMessageContent,
         },
         {
             name: 'enterChannelChatMessageContent',
             flag: PersistFlag.Transparent,
             type: MessageContentType.Enter_Channel_Chat,
-            contentClazz: EnterChannelChatMessageContent,
         },
         {
             name: 'leaveChannelChatMessageContent',
             flag: PersistFlag.Transparent,
             type: MessageContentType.Leave_Channel_Chat,
-            contentClazz: LeaveChannelChatMessageContent,
         },
         {
             name: 'conferenceCommandMessageContent',
             flag: PersistFlag.Transparent,
             type: MessageContentType.CONFERENCE_CONTENT_TYPE_COMMAND,
-            contentClazz: ConferenceCommandMessageContent,
         }
 
     ];
+}
+
+class MessageContentConfig {
+    name = '';
+    flag = 0;
+    type = 0
+    contentClazz?: Object
 }

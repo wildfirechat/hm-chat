@@ -1,23 +1,23 @@
 import UserInfo from '../wfc/model/userInfo'
 
-export declare type UIUserInfo = {
+export interface UIUserInfo {
     showCategory: boolean,
     category: string,
     userInfo: UserInfo
 }
 
-export declare type MediaEntry = {
+export interface MediaEntry {
     type: string,
     url: string,
     thumbnail: string
 }
 
-export declare type SearchModule = {
+export interface SearchModule {
     tag: 'user' | 'contact' | 'group' | 'channel' | 'message',
     onSearchResultItemClick: (value: object) => void
 }
 
-export declare type PortraitAndName = {
+export interface PortraitAndName {
     portrait: string,
     name: string
 }

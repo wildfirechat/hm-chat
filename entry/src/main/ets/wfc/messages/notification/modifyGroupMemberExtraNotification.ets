@@ -4,6 +4,7 @@
 
 import wfc from '../../client/wfc'
 import MessageContentType from '../messageContentType';
+import MessagePayload from '../messagePayload';
 
 import GroupNotificationContent from './groupNotification';
 
@@ -12,7 +13,7 @@ export default class ModifyGroupMemberExtraNotification extends GroupNotificatio
     groupMemberExtra = '';
     memberId = '';
 
-    constructor(creator, groupMemberExtra) {
+    constructor(creator: string = '', groupMemberExtra: string = '') {
         super(MessageContentType.ModifyGroupMemberExtra_Notification);
         this.operator = creator;
         this.groupMemberExtra = groupMemberExtra;
@@ -57,18 +58,25 @@ export default class ModifyGroupMemberExtraNotification extends GroupNotificatio
             n: this.groupMemberExtra,
             o: this.operator,
             m: this.memberId,
-        };
+        } as Data;
         payload.binaryContent = wfc.utf8_to_b64(JSON.stringify(obj));
         return payload;
     }
 
-    decode(payload) {
+    decode(payload: MessagePayload) {
         super.decode(payload);
         let json = wfc.b64_to_utf8(payload.binaryContent)
-        let obj = JSON.parse(json);
+        let obj = JSON.parse(json) as Data;
         this.groupId = obj.g;
         this.operator = obj.o;
         this.groupMemberExtra = obj.n;
         this.memberId = obj.m;
     }
+}
+
+class Data {
+    g = '';
+    n = '';
+    o = '';
+    m = '';
 }

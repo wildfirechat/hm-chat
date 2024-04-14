@@ -5,22 +5,24 @@
 import GroupNotificationContent from './groupNotification'
 import MessageContentType from '../messageContentType'
 import wfc from '../../client/wfc'
+import Message from '../message'
+import MessagePayload from '../messagePayload'
 
 export default class MuteGroupMemberNotification extends GroupNotificationContent {
-    groupId
-    operator
+    groupId = ''
+    operator = ''
     // 操作类型，1禁言，0取消禁言
-    muteType
-    memberIds
+    muteType: number
+    memberIds = [] as string[]
 
-    constructor(operator, muteType, memberIds) {
+    constructor(operator: string = '', muteType: number = 0, memberIds: string[] = []) {
         super(MessageContentType.MuteGroupMember_Notification)
         this.operator = operator
         this.muteType = muteType
         this.memberIds = memberIds
     }
 
-    formatNotification(message) {
+    formatNotification(message: Message) {
         let notifyStr = ''
         if (this.fromSelf) {
             notifyStr += '您'
@@ -51,19 +53,26 @@ export default class MuteGroupMemberNotification extends GroupNotificationConten
             o: this.operator,
             n: this.muteType + '',
             ms: this.memberIds,
-        }
+        } as Data
         payload.binaryContent = wfc.utf8_to_b64(JSON.stringify(obj))
         return payload
     }
 
-    decode(payload) {
+    decode(payload: MessagePayload) {
         super.decode(payload)
 
         let json = wfc.b64_to_utf8(payload.binaryContent)
-        let obj = JSON.parse(json)
+        let obj = JSON.parse(json) as Data
         this.groupId = obj.g
         this.operator = obj.o
         this.muteType = parseInt(obj.n)
         this.memberIds = obj.ms
     }
+}
+
+class Data {
+    g = '';
+    o = '';
+    n = '';
+    ms = [] as string[]
 }

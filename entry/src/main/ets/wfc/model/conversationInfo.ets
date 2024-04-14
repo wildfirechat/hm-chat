@@ -1,4 +1,3 @@
-// @ts-nocheck
 /*
  * Copyright (c) 2020 WildFireChat. All rights reserved.
  */
@@ -10,27 +9,36 @@ import wfc from '../client/wfc'
 
 import ConversationType from "./conversationType";
 import UnreadCount from './unreadCount';
+import { eq } from '../util/longUtil';
+import assign from '../util/assign';
 
 export default class ConversationInfo {
-    conversation: Conversation = {};
-    lastMessage: Message = {};
+    conversation: Conversation;
+    lastMessage?: Message | null;
     timestamp = 0;
     draft = '';
-    unreadCount: UnreadCount = {};
+    unreadCount = new UnreadCount()
     top = 0;
     isSilent = false;
-    target;
 
-    static protoConversationToConversationInfo(obj) {
-        let conversationInfo = Object.assign(new ConversationInfo(), obj);
-        conversationInfo.top = obj.isTop;
-        delete conversationInfo.isTop;
-        if (obj.conversation) {
-            conversationInfo.conversation = new Conversation(obj.conversation.type, obj.conversation.target, obj.conversation.line);
-        } else {
-            conversationInfo.conversation = new Conversation(obj.conversationType, obj.target, obj.line);
-        }
-        conversationInfo.lastMessage = Message.fromProtoMessage(obj.lastMessage);
+    // target;
+    constructor(conversation: Conversation) {
+        this.conversation = conversation
+    }
+
+    static protoConversationToConversationInfo(obj: Record<string, Object>) {
+        // let conv = obj.conversation as Conversation
+        let conv = new Conversation(obj.conversationType as number, obj.target as string, obj.line as number);
+        let conversationInfo = assign(new ConversationInfo(conv), obj) as ConversationInfo;
+        conversationInfo.top = obj.isTop as number;
+        // delete conversationInfo.isTop;
+        // if (obj.conversation) {
+        //     let conv = obj.conversation as Conversation
+        //     conversationInfo.conversation = new Conversation(conv.type, conv.target, conv.line);
+        // } else {
+        //     // conversationInfo.conversation = new Conversation(obj.conversationType, obj.target, obj.line);
+        // }
+        conversationInfo.lastMessage = Message.fromProtoMessage(obj.lastMessage as Record<string, Object>)
         if (!conversationInfo.timestamp) {
             conversationInfo.timestamp = 0;
         }
@@ -39,13 +47,13 @@ export default class ConversationInfo {
 
     portrait() {
         let portrait = '';
-        switch (this.conversation.type) {
+        switch (this.conversation!.type) {
             case ConversationType.Single:
-                let u = wfc.getUserInfo(this.conversation.target, false);
+                let u = wfc.getUserInfo(this.conversation!.target, false);
                 portrait = u.portrait;
                 break;
             case ConversationType.Group:
-                let g = wfc.getGroupInfo(this.conversation.target, false);
+                let g = wfc.getGroupInfo(this.conversation!.target, false);
                 portrait = g.portrait;
                 break;
             case ConversationType.Channel:
@@ -60,13 +68,13 @@ export default class ConversationInfo {
     }
 
     title() {
-        let targetName = this.conversation.target;
-        switch (this.conversation.type) {
+        let targetName = this.conversation!.target;
+        switch (this.conversation!.type) {
             case ConversationType.Single:
-                targetName = wfc.getUserDisplayName(this.conversation.target);
+                targetName = wfc.getUserDisplayName(this.conversation!.target);
                 break;
             case ConversationType.Group:
-                let g = wfc.getGroupInfo(this.conversation.target, false);
+                let g = wfc.getGroupInfo(this.conversation!.target, false);
                 targetName = g.name;
                 break;
             case ConversationType.ChatRoom:
@@ -80,19 +88,19 @@ export default class ConversationInfo {
         return targetName;
     }
 
-    static equals(info1, info2) {
+    static equals(info1: ConversationInfo, info2: ConversationInfo) {
         if (!info1 || !info2) {
             return false;
         }
-        if (!info1.conversation.equal(info2.conversation)) {
+        if (Conversation.equal(info1.conversation, info2.conversation!)) {
             return false;
         }
 
         let unreadCount1 = info1.unreadCount;
         let unreadCount2 = info2.unreadCount;
         if (unreadCount1.unread !== unreadCount2.unread
-        || unreadCount1.unreadMention !== unreadCount2.unreadMention
-        || unreadCount1.unreadMentionAll !== unreadCount2.unreadMentionAll) {
+            || unreadCount1.unreadMention !== unreadCount2.unreadMention
+            || unreadCount1.unreadMentionAll !== unreadCount2.unreadMentionAll) {
             return false;
         }
 
@@ -104,7 +112,7 @@ export default class ConversationInfo {
             return false;
         }
         // 其他的应当都会反应在timestamp上
-        // return eq(info1.timestamp, info2.timestamp) && info1.draft === info2.draft;
+        return eq(info1.timestamp, info2.timestamp) && info1.draft === info2.draft;
 
     }
 }

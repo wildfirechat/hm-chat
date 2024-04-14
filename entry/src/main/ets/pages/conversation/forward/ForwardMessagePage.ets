@@ -24,18 +24,18 @@ import CompositeMessageContent from '../../../wfc/messages/compositeMessageConte
 export default struct ForwardMessagePage {
     @State keyword: string = ''
     @State recentConversationInfos: ConversationInfo[] = [];
-    private messages: Message[] = null
-    private forwardDialogController: CustomDialogController
+    private messages: Message[] = []
+    private forwardDialogController?: CustomDialogController
     private forwardType: 'oneByOne' | 'compose' = 'oneByOne'
 
     aboutToAppear() {
         this.recentConversationInfos = wfc.getConversationInfoList([0, 1, 2, 3], [0, 1]);
-        let params = router.getParams()
+        let params = router.getParams() as Record<string, Object>
         if (params) {
-            let msgs: Message[] = params['messages']
+            let msgs: Message[] = params['messages'] as Message[]
             // 通过 params 传递的对象，会丢失方法，故
-            this.messages = msgs.map(msg => wfc.getMessageById(msg.messageId))
-            this.forwardType = params['forwardType']
+            this.messages = msgs.map(msg => wfc.getMessageById(msg.messageId)!)
+            this.forwardType = params['forwardType'] as 'oneByOne' | 'compose'
         }
     }
 
@@ -202,7 +202,7 @@ export default struct ForwardMessagePage {
                                         .backgroundColor(Color.White)
                                     }
                                 })
-                            }, info => info.conversation.type + info.conversation.target + '-' + info.conversation.line)
+                            }, (info: ConversationInfo) => info.conversation.type + info.conversation.target + '-' + info.conversation.line)
                         }
                     }
                     .height('100%')

@@ -13,24 +13,25 @@ import ConversationType from "./conversationType";
  }
  */
 export default class Conversation {
-    type: ConversationType = ConversationType.Single;
-    conversationType = this.type; // 这行是为了做一个兼容处理
+    type: number = ConversationType.Single;
+    conversationType = this.type;
+    // 这行是为了做一个兼容处理
     target = '';
     line = 0;
 
-    constructor(type: ConversationType, target: string, line = 0) {
+    constructor(type: number, target: string, line = 0) {
         this.type = type;
         this.conversationType = type;
         this.target = target;
         this.line = line;
     }
 
-    equal(conversation: Conversation) {
-        if (!conversation) {
+    static equal(conv1: Conversation, conv2: Conversation): boolean {
+        if (!conv1 || !conv2) {
             return false;
         }
-        return this.type === conversation.type
-        && this.target === conversation.target
-        && this.line === conversation.line;
+        return conv1.type === conv2.type
+            && conv1.target === conv2.target
+            && conv1.line === conv2.line;
     }
 }

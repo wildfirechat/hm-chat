@@ -16,7 +16,7 @@ export default class Utils {
     static rect_value: Record<string, number>
 
     //获取组件所占矩形区域坐标
-    static getComponentRect(key: string): Record<string, number> {
+    static getComponentRect(key: string): Record<string, number> | null {
         let strJson = getInspectorByKey(key)
         if (!strJson) {
             return null
@@ -50,7 +50,7 @@ export default class Utils {
             } else if (conversation.type === ConversationType.Group) {
                 let groupInfo: GroupInfo = wfc.getGroupInfo(conversation.target)
                 resolve({
-                    portrait: groupInfo.portrait,
+                    portrait: groupInfo.portrait!,
                     name: groupInfo.name
                 })
             } else if (conversation.type === ConversationType.Channel) {
@@ -70,13 +70,5 @@ export default class Utils {
                 })
             }
         })
-    }
-
-    static hashCode(s: string) {
-        let h;
-        for (let i = 0; i < s.length; i++)
-            h = Math.imul(31, h) + s.charCodeAt(i) | 0;
-
-        return h;
     }
 }

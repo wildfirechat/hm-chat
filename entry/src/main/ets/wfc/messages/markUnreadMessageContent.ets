@@ -1,13 +1,15 @@
 import MessageContent from "./messageContent";
 import MessageContentType from "./messageContentType";
-import {_patchToJavaLong, _reverseToJsLongString, longValue, stringValue} from "../util/longUtil";
+import { _patchToJavaLong, _reverseToJsLongString, longValue, stringValue, numberValue } from "../util/longUtil";
 import wfc from "../client/wfc";
+import Long from '../util/long';
+import MessagePayload from './messagePayload';
 
 export default class MarkUnreadMessageContent extends MessageContent {
-    messageUid;
-    timestamp;
+    messageUid? = Long.ZERO;
+    timestamp = 0
 
-    constructor(messageUid) {
+    constructor(messageUid: Long = Long.ZERO) {
         super(MessageContentType.Mark_Unread_Sync);
         this.messageUid = messageUid;
     }
@@ -15,9 +17,9 @@ export default class MarkUnreadMessageContent extends MessageContent {
     encode() {
         let payload = super.encode();
         let obj = {
-            u: stringValue(this.messageUid),
-            t: stringValue(this.timestamp),
-        }
+            u: stringValue(this.messageUid!),
+            t: stringValue(this.timestamp!),
+        } as Data
         let str = JSON.stringify(obj)
         str = _patchToJavaLong(str, 'u');
         str = _patchToJavaLong(str, 't');
@@ -26,15 +28,19 @@ export default class MarkUnreadMessageContent extends MessageContent {
         return payload;
     }
 
-    decode(payload) {
+    decode(payload: MessagePayload) {
         super.decode(payload);
 
         let str = wfc.b64_to_utf8(payload.binaryContent);
         str = _reverseToJsLongString(str, 'u');
         str = _reverseToJsLongString(str, 't');
-        let obj = JSON.parse(str);
+        let obj = JSON.parse(str) as Data;
         this.messageUid = obj.u ? longValue(obj.u) : undefined;
-        this.timestamp = obj.t ? longValue(obj.t) : undefined;
+        this.timestamp = obj.t ? numberValue(obj.t) : 0;
     }
+}
 
+class Data {
+    u = ''
+    t = ''
 }

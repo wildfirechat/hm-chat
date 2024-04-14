@@ -5,7 +5,7 @@
 import ChannelInfo from "./channelInfo";
 
 export default class NullChannelInfo extends ChannelInfo {
-    constructor(channelId) {
+    constructor(channelId: string) {
         super()
         this.channelId = channelId;
         this.name = `<${channelId}>`

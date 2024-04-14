@@ -4,21 +4,22 @@
 
 import wfc from '../../client/wfc'
 import MessageContentType from "../messageContentType";
+import MessagePayload from '../messagePayload';
 
 import GroupNotificationContent from "./groupNotification";
 
 export default class KickoffGroupMemberVisiableNotification extends GroupNotificationContent {
     operator = '';
-    kickedMembers = [];
+    kickedMembers = [] as string[];
 
-    constructor(operator, kickedMembers) {
+    constructor(operator: string = '', kickedMembers: string[] = []) {
         super(MessageContentType.KickOffGroupMember_Visible_Notification);
         this.operator = operator;
         this.kickedMembers = kickedMembers;
     }
 
     formatNotification() {
-        let notifyStr;
+        let notifyStr = '';
         if (this.fromSelf) {
             notifyStr = '您把 ';
         } else {
@@ -44,17 +45,23 @@ export default class KickoffGroupMemberVisiableNotification extends GroupNotific
             g: this.groupId,
             ms: this.kickedMembers,
             o: this.operator,
-        };
+        } as Data;
         payload.binaryContent = wfc.utf8_to_b64(JSON.stringify(obj));
         return payload;
     }
 
-    decode(payload) {
+    decode(payload: MessagePayload) {
         super.decode(payload);
         let json = wfc.b64_to_utf8(payload.binaryContent)
-        let obj = JSON.parse(json);
+        let obj = JSON.parse(json) as Data;
         this.groupId = obj.g;
         this.operator = obj.o;
         this.kickedMembers = obj.ms;
     }
+}
+
+class Data {
+    g = '';
+    ms = [] as string[];
+    o = '';
 }

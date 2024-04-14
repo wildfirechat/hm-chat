@@ -4,13 +4,14 @@
 
 import MessageContent from './messageContent'
 import MessageContentType from "./messageContentType";
+import MessagePayload from './messagePayload';
 
 export default class LocationMessageContent extends MessageContent {
-    title;
+    title = '';
     // base64 encoded, 不包含头部:data:image/png;base64,
-    thumbnail;
-    lat;
-    long;
+    thumbnail = '';
+    lat = 0;
+    long = 0;
 
     constructor() {
         super(MessageContentType.Location);
@@ -27,19 +28,22 @@ export default class LocationMessageContent extends MessageContent {
         let location = {
             lat: this.lat,
             long: this.long
-        };
+        } as Data;
         payload.content = JSON.stringify(location);
         return payload;
     }
 
-    decode(payload) {
+    decode(payload: MessagePayload) {
         super.decode(payload);
         this.title = payload.searchableContent;
         this.thumbnail = payload.binaryContent;
-        let location = JSON.parse(payload.content);
+        let location = JSON.parse(payload.content) as Data;
         this.lat = location.lat;
         this.long = location.long;
     }
+}
 
-
+class Data {
+    lat = 0;
+    long = 0;
 }

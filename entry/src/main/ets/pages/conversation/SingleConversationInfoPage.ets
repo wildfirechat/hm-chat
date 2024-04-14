@@ -12,13 +12,13 @@ import UserInfo from '../../wfc/model/userInfo'
 @Component
 export default struct SingleConversationInfoPage {
     @State userInfo: UserInfo = {} as UserInfo
-    private conversationInfo: ConversationInfo
+    private conversationInfo?: ConversationInfo
     @State isTop: boolean = false
     @State isSilent: boolean = false
 
     aboutToAppear() {
-        const params = router.getParams();
-        this.conversationInfo = params['conversationInfo']
+        const params = router.getParams() as Record<string, Object>;
+        this.conversationInfo = params['conversationInfo'] as ConversationInfo
         this.userInfo = wfc.getUserInfo(this.conversationInfo.conversation.target)
     }
 
@@ -45,9 +45,11 @@ export default struct SingleConversationInfoPage {
                 Column() {
                     Row() {
                         Text('消息免打扰')
-                        Toggle({ type: ToggleType.Switch, isOn: this.conversationInfo.isSilent })
+                        Toggle({ type: ToggleType.Switch, isOn: this.conversationInfo!.isSilent })
                             .onChange(isOn => {
-                                wfc.setConversationSlient(this.conversationInfo.conversation, isOn, null, err => {
+                                wfc.setConversationSlient(this.conversationInfo!.conversation, isOn, () => {
+
+                                }, err => {
                                     showToast('设置消息免打扰失败 ' + err)
                                 })
                             })
@@ -58,9 +60,9 @@ export default struct SingleConversationInfoPage {
 
                     Row() {
                         Text('置顶聊天')
-                        Toggle({ type: ToggleType.Switch, isOn: this.conversationInfo.top > 0 })
+                        Toggle({ type: ToggleType.Switch, isOn: this.conversationInfo!.top > 0 })
                             .onChange((value: boolean) => {
-                                wfc.setConversationTop(this.conversationInfo.conversation, value ? 1 : 0, () => {
+                                wfc.setConversationTop(this.conversationInfo!.conversation, value ? 1 : 0, () => {
 
                                 }, (err: number) => {
                                     showToast(value ? '会话置顶失败' : '取消置顶失败')

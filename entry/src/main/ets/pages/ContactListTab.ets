@@ -13,12 +13,12 @@ import { pinyin4js } from '@ohos/pinyin4js/src/main/ets/components'
 import { UIUserInfo } from '../common/Types'
 import BasicDataSource from '../common/BasicDataSource'
 
-declare type ContactListHeader = {
+interface ContactListHeader {
     title: string,
     icon: ResourceStr
     // badgeValue 优先级更高
-    badgeCount?: number,
-    badgeValue?: string,
+    badgeCount: number,
+    badgeValue: string,
     action: () => void
 }
 
@@ -83,7 +83,7 @@ export default struct ContactListTab {
         getContext(this).eventHub.off(EventType.ConnectionStatusChanged, this.onConnectionStatusChange)
     }
 
-    onConnectionStatusChange = status => {
+    onConnectionStatusChange = (status: number) => {
         if (status === ConnectionStatus.ConnectionStatusConnected) {
             this.loadContact()
         }
@@ -115,10 +115,10 @@ export default struct ContactListTab {
 
     groupUserInfos(userInfos: UserInfo[]): UIUserInfo[] {
         let groupedUsers: UIUserInfo[] = []
-        let lastCategory: string = null;
+        let lastCategory: string = '';
 
         userInfos.forEach(user => {
-            let category = pinyin4js.getShortPinyin(user.displayName).substring(0, 1).toUpperCase()
+            let category:string = pinyin4js.getShortPinyin(user.displayName).substring(0, 1).toUpperCase() as string
             if (category < 'A' || category > 'Z') {
                 category = '#'
             }
@@ -152,7 +152,7 @@ export default struct ContactListTab {
             }
         })
 
-        lastCategory = null
+        lastCategory = ''
         groupedUsers.forEach(gu => {
             if (!lastCategory || lastCategory !== gu.category) {
                 gu.showCategory = true
@@ -307,15 +307,15 @@ export default struct ContactListTab {
             .padding({ top: 5 })
 
             AlphabetIndexer({ arrayValue: this.contactCategories, selected: 0 })
-                .selectedColor(0xFFFFFF) // 选中项文本颜色
-                .popupColor(0xFFFAF0) // 弹出框文本颜色
-                .selectedBackgroundColor(0xCCCCCC) // 选中项背景颜色
-                .popupBackground(0xD2B48C) // 弹出框背景颜色
-                .usingPopup(true) // 是否显示弹出框
-                .selectedFont({ size: 16, weight: FontWeight.Bolder }) // 选中项字体样式
-                .popupFont({ size: 30, weight: FontWeight.Bolder }) // 弹出框内容的字体样式
-                .itemSize(28) // 每一项的尺寸大小
-                .alignStyle(IndexerAlign.Left) // 弹出框在索引条右侧弹出
+                .selectedColor(0xFFFFFF)// 选中项文本颜色
+                .popupColor(0xFFFAF0)// 弹出框文本颜色
+                .selectedBackgroundColor(0xCCCCCC)// 选中项背景颜色
+                .popupBackground(0xD2B48C)// 弹出框背景颜色
+                .usingPopup(true)// 是否显示弹出框
+                .selectedFont({ size: 16, weight: FontWeight.Bolder })// 选中项字体样式
+                .popupFont({ size: 30, weight: FontWeight.Bolder })// 弹出框内容的字体样式
+                .itemSize(28)// 每一项的尺寸大小
+                .alignStyle(IndexerAlign.Left)// 弹出框在索引条右侧弹出
                 .onSelect((index: number) => {
                     let alphabet = this.contactCategories[index];
                     this.scrollContactListToCategory(alphabet)

@@ -11,17 +11,17 @@ import FormExtensionAbility from '@ohos.app.form.FormExtensionAbility';
 @Entry
 @Component
 export default struct UserInfoPage {
-    @State userInfo: UserInfo = null
-    private isMyFriend: boolean
+    @State userInfo?: UserInfo = undefined
+    private isMyFriend: boolean = false
 
     aboutToAppear() {
-        const params = router.getParams();
-        this.userInfo = params['userInfo'];
-        let userId = params['userId'];
+        const params = router.getParams() as Record<string, Object>;
+        this.userInfo = params['userInfo'] as UserInfo;
+        let userId = params['userId'] as string;
         if (!this.userInfo && userId) {
             this.userInfo = wfc.getUserInfo(userId);
         }
-        this.isMyFriend = wfc.isMyFriend(this.userInfo.uid)
+        this.isMyFriend = wfc.isMyFriend(this.userInfo!.uid)
 
         getContext(this).eventHub.on(EventType.UserInfosUpdate, this.onUserInfosUpdate)
     }
@@ -32,13 +32,12 @@ export default struct UserInfoPage {
 
     onUserInfosUpdate = (infos: UserInfo[]) => {
         for (let info of infos) {
-            if (info.uid === this.userInfo.uid) {
+            if (info.uid === this.userInfo!.uid) {
                 this.userInfo = info
                 break
             }
         }
     }
-
 
     // @Builder NavigationMenus() {
     //     Row() {
@@ -63,17 +62,17 @@ export default struct UserInfoPage {
         Navigation() {
             Column() {
                 Row() {
-                    Image(this.userInfo.portrait)
+                    Image(this.userInfo!.portrait)
                         .width(60)
                         .height(60)
                         .borderRadius(4)
                     Column() {
-                        Text(this.userInfo.displayName)
+                        Text(this.userInfo!.displayName)
                             .width('100%')
                             .maxLines(1)
                             .textOverflow({ overflow: TextOverflow.Ellipsis })
                             .fontSize(20)
-                        Text(`野火ID： ${this.userInfo.name}`)
+                        Text(`野火ID： ${this.userInfo!.name}`)
                             .width('100%')
                             .maxLines(1)
                             .textOverflow({ overflow: TextOverflow.Ellipsis })
@@ -88,7 +87,7 @@ export default struct UserInfoPage {
                 .justifyContent(FlexAlign.Start)
                 .backgroundColor(Color.White)
 
-                if (this.isMyFriend || this.userInfo.uid === wfc.getUserId()) {
+                if (this.isMyFriend || this.userInfo!.uid === wfc.getUserId()) {
                     Text('发消息')
                         .width('100%')
                         .padding(15)
@@ -99,7 +98,7 @@ export default struct UserInfoPage {
                             router.pushUrl({
                                 url: 'pages/conversation/ConversationPage',
                                 params: {
-                                    conversation: new Conversation(ConversationType.Single, this.userInfo.uid, 0)
+                                    conversation: new Conversation(ConversationType.Single, this.userInfo!.uid, 0)
                                 }
                             }, router.RouterMode.Standard)
                         })
@@ -112,7 +111,7 @@ export default struct UserInfoPage {
                         .backgroundColor(Color.White)
                         .onClick(() => {
                             let selfUserInfo = wfc.getUserInfo(wfc.getUserId())
-                            wfc.sendFriendRequest(this.userInfo.uid, '我是 ' + selfUserInfo.displayName, '', () => {
+                            wfc.sendFriendRequest(this.userInfo!.uid, '我是 ' + selfUserInfo.displayName, '', () => {
                                 showToast('已发送好友请求')
                             }, err => {
                                 showToast('发送好友请求失败：' + err)
@@ -131,6 +130,7 @@ export default struct UserInfoPage {
         .height('100%')
         .width('100%')
         .navBarPosition(NavBarPosition.Start)
+
         // .menus([
         //     {
         //         value: 'item1'

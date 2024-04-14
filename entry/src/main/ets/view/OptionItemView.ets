@@ -2,11 +2,11 @@
 @Component
 export default struct OptionItemView {
     // TODO 应该用 @prop，但是不允许可选，故
-    private icon: ResourceStr
-    private title: string
+    private icon: ResourceStr = ''
+    private title: string = ''
     private desc: string = ''
-    private subTitle: string
-    private imgUrl: string
+    private subTitle: string = ''
+    private imgUrl: string = ''
     private showRightArrow: boolean = true
     private paddingLeft: number = 10
     private paddingRight: number = 10

@@ -6,12 +6,14 @@ import MessageContent from './messageContent'
 import MessageContentType from './messageContentType';
 import wfc from '../client/wfc'
 import QuoteInfo from "../model/quoteInfo";
+import MessagePayload from './messagePayload';
+import QuoteInfoPayload from '../model/quoteInfoPayload';
 
 export default class TextMessageContent extends MessageContent {
-    content;
-    quoteInfo;
+    content = '';
+    quoteInfo?: QuoteInfo;
 
-    constructor(content, mentionedType = 0, mentionedTargets = []) {
+    constructor(content: string = '', mentionedType = 0, mentionedTargets = []) {
         super(MessageContentType.Text, mentionedType, mentionedTargets);
         this.content = content;
     }
@@ -24,9 +26,11 @@ export default class TextMessageContent extends MessageContent {
         let payload = super.encode();
         payload.searchableContent = this.content;
         if (this.quoteInfo) {
-            let obj = {
-                "quote": this.quoteInfo.encode()
-            }
+            let obj: Map<string, QuoteInfoPayload> = new Map<string, QuoteInfoPayload>();
+            // {
+            //     "quote": this.quoteInfo.encode()
+            // }
+            obj.set('quote', this.quoteInfo.encode())
             // JSON.parse 和 JSON.stringify 不能处理java long
             let orgStr = JSON.stringify(obj);
             let str = orgStr.replace(/"u":"([0-9]+)"/, "\"u\":$1");
@@ -36,7 +40,7 @@ export default class TextMessageContent extends MessageContent {
         return payload;
     }
 
-    decode(payload) {
+    decode(payload: MessagePayload) {
         super.decode(payload);
         this.content = payload.searchableContent;
         if (payload.binaryContent && payload.binaryContent.length > 0) {
@@ -45,15 +49,14 @@ export default class TextMessageContent extends MessageContent {
             // FIXME node 环境，decodeURIComponent 方法，有时候会在最后添加上@字符，目前尚未找到原因，先规避
             quoteInfoStr = quoteInfoStr.substring(0, quoteInfoStr.lastIndexOf('}') + 1)
             quoteInfoStr = quoteInfoStr.replace(/"u":([0-9]+),/, '"u":"$1",')
-            let obj = JSON.parse(quoteInfoStr).quote
+            let obj = JSON.parse(quoteInfoStr) as Record<string, QuoteInfoPayload>
 
             this.quoteInfo = new QuoteInfo();
-            this.quoteInfo.decode(obj);
+            this.quoteInfo.decode(obj.quote as QuoteInfoPayload);
         }
     }
 
-    setQuoteInfo(quoteInfo) {
+    setQuoteInfo(quoteInfo: QuoteInfo) {
         this.quoteInfo = quoteInfo;
     }
-
 }

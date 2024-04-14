@@ -6,15 +6,16 @@ import NotificationMessageContent from './notificationMessageContent'
 import MessageContentType from "../messageContentType";
 import wfc from "../../client/wfc";
 import SecretChatState from "../../model/secretChatState";
+import Message from '../message';
+import MessagePayload from '../messagePayload';
 
 export default class StartSecretChatNotification extends NotificationMessageContent {
-
     constructor() {
         super(MessageContentType.StartSecretChat_Notification);
     }
 
-    formatNotification(message) {
-        let state = wfc.getSecretChatInfo(message.conversation.target).state;
+    formatNotification(message: Message) {
+        let state: number = wfc.getSecretChatInfo(message.conversation.target)!.state;
         if (state === SecretChatState.Starting) {
             return "等待对方响应";
         } else if (state === SecretChatState.Accepting) {
@@ -28,11 +29,11 @@ export default class StartSecretChatNotification extends NotificationMessageCont
         }
     }
 
-    encode() {
+    encode(): MessagePayload {
         return super.encode();
     }
 
-    decode(payload) {
+    decode(payload: MessagePayload) {
         super.decode(payload);
     }
 }

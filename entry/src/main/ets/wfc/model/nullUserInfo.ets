@@ -5,7 +5,7 @@
 import UserInfo from "./userInfo";
 
 export default class NullUserInfo extends UserInfo {
-    constructor(userId) {
+    constructor(userId: string) {
         super();
         this.uid = userId;
         //this.name = '<' + userId + '>';

@@ -5,16 +5,16 @@
 import GroupNotificationContent from "./groupNotification";
 import MessageContentType from "../messageContentType";
 import wfc from "../../client/wfc";
+import Message from '../message';
+import MessagePayload from '../messagePayload';
 
 export default class GroupSetManagerNotificationContent extends GroupNotificationContent {
-    operator;
+    operator = '';
     // 1, 设置为管理员；0，取消管理员
-    setManagerType;
+    setManagerType = 0;
+    memberIds = [] as string[];
 
-    memberIds = [];
-
-
-    constructor(operator, setManagerType, memberIds) {
+    constructor(operator: string = '', setManagerType: number = 0, memberIds: string[] = []) {
         super(MessageContentType.SetGroupManager_Notification);
         this.operator = operator;
         this.setManagerType = setManagerType;
@@ -22,7 +22,7 @@ export default class GroupSetManagerNotificationContent extends GroupNotificatio
     }
 
 
-    formatNotification(message) {
+    formatNotification(message: Message) {
         let notifyStr = this.fromSelf ? '您' : wfc.getGroupMemberDisplayName(this.groupId, this.operator)
         notifyStr += '把 ';
         this.memberIds.forEach((memberId) => {
@@ -56,17 +56,24 @@ export default class GroupSetManagerNotificationContent extends GroupNotificatio
             o: this.operator,
             n: this.setManagerType + '',
             ms: this.memberIds,
-        };
+        } as Data;
         payload.binaryContent = wfc.utf8_to_b64(JSON.stringify(obj));
         return payload;
     }
 
-    decode(payload) {
+    decode(payload: MessagePayload) {
         super.decode(payload);
-        let obj = JSON.parse(wfc.b64_to_utf8(payload.binaryContent));
+        let obj = JSON.parse(wfc.b64_to_utf8(payload.binaryContent)) as Data;
         this.groupId = obj.g;
         this.operator = obj.o;
         this.setManagerType = parseInt(obj.n);
         this.memberIds = obj.ms;
     }
+}
+
+class Data {
+    g = '';
+    o = '';
+    n = '0';
+    ms = [] as string[];
 }

@@ -4,17 +4,16 @@
 import ChannelMenu from './channelMenu';
 
 export default class ChannelInfo {
-    channelId: string;
-    name: string;
-    portrait: string;
-    desc: string;
-    owner: string;
+    channelId = '';
+    name = '';
+    portrait = '';
+    desc = '';
+    owner = '';
     // 0, public; 1, private; 2, destoryed
-    status: number;
-    extra: string;
-    updateDt: number;
-    menus: ChannelMenu[];
-
+    status = 0;
+    extra = '';
+    updateDt = 0;
+    menus = [] as ChannelMenu[];
     //第0位表示是否允许查看用户所有信息，还是只允许看用户id，用户名称，用户昵称和用户头像
     static StatusMaskFullInfo = 0x01;
     //第1位表示是否允许查看非订阅用户信息
@@ -25,10 +24,8 @@ export default class ChannelInfo {
     static StatusMaskMessageUnsubscribed = 0x08;
     //第4位表示是否私有
     static StatusMaskPrivate = 0x10;
-
     //第6位表示是否删除
     static StatusMaskDeleted = 0x40;
-
     //第8位表示是否全局频道，全局平道发送消息时，会广播给系统所有人
     static StatusMaskGlobal = 0x80;
 }

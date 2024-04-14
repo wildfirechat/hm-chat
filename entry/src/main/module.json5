@@ -52,6 +52,12 @@
                     "when": "always"
                 }
             },
+     		{
+                "name": "ohos.permission.READ_IMAGEVIDEO",
+                "usedScene": {
+                    "when": "inuse"
+                }
+            },
             {
                 "name": "ohos.permission.MICROPHONE",
                 "usedScene": {

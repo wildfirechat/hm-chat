@@ -82,11 +82,6 @@ export default class Config {
         return Config.CURRENT_PLATFORM;
     }
 
-    static config(options) {
-        Object.keys(options).forEach(key => {
-            Config[key] = options[key];
-        });
-    }
 
     /**
      * 网络地址重定向
@@ -96,7 +91,7 @@ export default class Config {
      * @param {string} url
      * @return {string} newUrl
      */
-    static urlRedirect(url) {
+    static urlRedirect(url: string) {
         if (!url) {
             return url;
         }

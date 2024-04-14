@@ -4,21 +4,22 @@
 
 import wfc from '../../client/wfc'
 import MessageContentType from '../messageContentType';
+import MessagePayload from '../messagePayload';
 
 import GroupNotificationContent from './groupNotification';
 
 export default class AddGroupMemberNotification extends GroupNotificationContent {
     invitor = '';
-    invitees = [];
+    invitees = [] as string[];
 
-    constructor(invitor, invitees) {
+    constructor(invitor: string = '', invitees: string[] = []) {
         super(MessageContentType.AddGroupMember_Notification);
         this.invitor = invitor;
         this.invitees = invitees;
     }
 
     formatNotification() {
-        let notifyStr;
+        let notifyStr: string;
         if (this.invitees.length === 1 && this.invitees[0] === this.invitor) {
             if (this.fromSelf) {
                 return '您加入了群组';
@@ -48,17 +49,23 @@ export default class AddGroupMemberNotification extends GroupNotificationContent
             g: this.groupId,
             o: this.invitor,
             ms: this.invitees,
-        };
+        } as Data;
         payload.binaryContent = wfc.utf8_to_b64(JSON.stringify(obj));
         return payload;
     }
 
-    decode(payload) {
+    decode(payload: MessagePayload) {
         super.decode(payload);
         let json = wfc.b64_to_utf8(payload.binaryContent);
-        let obj = JSON.parse(json);
+        let obj = JSON.parse(json) as Data;
         this.groupId = obj.g;
         this.invitor = obj.o;
         this.invitees = obj.ms;
     }
+}
+
+class Data {
+    g = '';
+    o = '';
+    ms = [] as string[]
 }

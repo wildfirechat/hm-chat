@@ -1,21 +1,24 @@
 /**
  * 多媒体数据类
  */
-export default  class MediaBean {
+export default interface MediaBean {
     /**
      * 文件名称
      */
-    public fileName: string;
+    fileName: string;
+
     /**
      * 文件大小
      */
-    public fileSize: number;
+    fileSize: number;
+
     /**
      * 文件类型
      */
-    public fileType: string;
+    fileType: string;
+
     /**
      * 本地存储地址
      */
-    public localUrl: string;
+    localUrl: string;
 }

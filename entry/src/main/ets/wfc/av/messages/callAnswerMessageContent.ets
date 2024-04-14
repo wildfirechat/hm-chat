@@ -4,13 +4,15 @@
 
 import MessageContent from '../../messages/messageContent';
 import wfc from "../../client/wfc"
-import {_patchToJavaLong, _reverseToJsLongString, longValue, stringValue} from '../../util/longUtil'
+import { _patchToJavaLong, _reverseToJsLongString, longValue, stringValue } from '../../util/longUtil'
 import MessageContentType from '../../messages/messageContentType';
+import Long from '../../util/long';
+import MessagePayload from '../../messages/messagePayload';
 
 export default class CallAnswerMessageContent extends MessageContent {
-    callId;
-    audioOnly;
-    inviteMessageUid;
+    callId = '';
+    audioOnly = false;
+    inviteMessageUid = Long.ZERO;
 
     constructor(mentionedType = 0, mentionedTargets = []) {
         super(MessageContentType.VOIP_CONTENT_TYPE_ACCEPT, mentionedType, mentionedTargets);
@@ -24,7 +26,7 @@ export default class CallAnswerMessageContent extends MessageContent {
         let payload = super.encode();
         payload.content = this.callId;
 
-        var obj;
+        let obj: string;
         if (this.audioOnly) {
             obj = '1';
         } else {
@@ -33,14 +35,14 @@ export default class CallAnswerMessageContent extends MessageContent {
         payload.binaryContent = wfc.utf8_to_b64(obj);
         let obj2 = {
             u: stringValue(this.inviteMessageUid),
-        }
+        } as Data;
         let str = JSON.stringify(obj2);
         str = _patchToJavaLong(str, 'u');
         payload.extra = str;
         return payload;
     }
 
-    decode(payload) {
+    decode(payload: MessagePayload) {
         super.decode(payload);
         this.callId = payload.content;
         let str = wfc.b64_to_utf8(payload.binaryContent);
@@ -49,7 +51,11 @@ export default class CallAnswerMessageContent extends MessageContent {
         str = payload.extra;
         if (str) {
             str = _reverseToJsLongString(str, 'u');
-            this.inviteMessageUid = longValue(JSON.parse(str).u);
+            this.inviteMessageUid = longValue((JSON.parse(str) as Data).u);
         }
     }
+}
+
+class Data {
+    u = '';
 }

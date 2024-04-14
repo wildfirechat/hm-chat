@@ -12,7 +12,7 @@ import MessageContentMediaType from "./messageContentMediaType";
 
 export default class CompositeMessageContent extends MediaMessageContent {
     title = '';
-    messages = [];
+    messages = [] as Message[];
     // web 端有效，仅仅是用来标识 mediaCompositeMessage 是否已加载
     loaded = false;
 
@@ -21,25 +21,25 @@ export default class CompositeMessageContent extends MediaMessageContent {
     }
 
     setMessages(msgs: Message[]) {
-        this.messages = [];
-        msgs.forEach(m => {
-            if (m.messageContent instanceof ArticlesMessageContent) {
-                let linkMessageContents = m.messageContent.toLinkMessageContent();
-                linkMessageContents.forEach(lm => {
-                    let msg = Object.assign(new Message(null, null), m);
-                    msg.messageContent = lm;
-                    this.messages.push(msg);
-                })
-            } else {
-                this.messages.push(m)
-            }
-        })
-        this.messages = this.messages.sort((m1, m2) => {
-            return compare(m1.messageUid, m2.messageUid);
-        })
+        // this.messages = [];
+        // msgs.forEach(m => {
+        //     if (m.messageContent instanceof ArticlesMessageContent) {
+        //         let linkMessageContents = m.messageContent.toLinkMessageContent();
+        //         linkMessageContents.forEach(lm => {
+        //             let msg = Object.assign(new Message(null, null), m);
+        //             msg.messageContent = lm;
+        //             this.messages.push(msg);
+        //         })
+        //     } else {
+        //         this.messages.push(m)
+        //     }
+        // })
+        // this.messages = this.messages.sort((m1, m2) => {
+        //     return compare(m1.messageUid, m2.messageUid);
+        // })
     }
 
-    digest(message) {
+    digest(message: Message) {
         return '[聊天记录]' + this.title;
     }
 
@@ -135,7 +135,7 @@ export default class CompositeMessageContent extends MediaMessageContent {
         return payload;
     }
 
-    decode(payload) {
+    decode(payload: MessagePayload) {
         super.decode(payload);
 
         // fixme
@@ -169,7 +169,7 @@ export default class CompositeMessageContent extends MediaMessageContent {
         // }
     }
 
-    _decodeMessages(str) {
+    _decodeMessages(str: string) {
         // fixme
         // if (this.loaded) {
         //     return;

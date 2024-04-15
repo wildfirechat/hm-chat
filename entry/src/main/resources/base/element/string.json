@@ -1,20 +1,40 @@
 {
-  "string": [
-    {
-      "name": "module_desc",
-      "value": "module description"
-    },
-    {
-      "name": "EntryAbility_desc",
-      "value": "description"
-    },
-    {
-      "name": "EntryAbility_label",
-      "value": "野火IM"
-    },
-      {
-          "name": "refresh_text",
-          "value": "正在刷新"
-      }
-  ]
+    "string": [
+        {
+            "name": "module_desc",
+            "value": "module description"
+        },
+        {
+            "name": "EntryAbility_desc",
+            "value": "description"
+        },
+        {
+            "name": "EntryAbility_label",
+            "value": "野火IM"
+        },
+        {
+            "name": "refresh_text",
+            "value": "正在刷新"
+        },
+        {
+            "name": "reason_write_media",
+            "value": "保存媒体文件"
+        },
+        {
+            "name": "reason_read_media",
+            "value": "发送媒体文件"
+        },
+        {
+            "name": "reason_read_image_video",
+            "value": "发送媒体文件"
+        },
+        {
+            "name": "reason_microphone",
+            "value": "发送语音消息"
+        },
+        {
+            "name": "reason_media_location",
+            "value": "位置信息"
+        }
+    ]
 }

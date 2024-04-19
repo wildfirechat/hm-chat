@@ -505,10 +505,14 @@ struct ConversationPage {
                         }
                         .onScrollIndex((star, end) => {
                             this.currentMessageIndex = star;
+                            if (end == this.messages.length - 1) {
+                                // wfc.clearUnreadStatusBeforeMessage(this.conversation, )
+                                wfc.clearConversationUnreadStatus(this.conversation!);
+                            }
                         })
                         .listDirection(Axis.Vertical)
+                        .height('100%')
                         .width('100%')
-
                     }
                     .justifyContent(FlexAlign.End)
                     .width('100%')

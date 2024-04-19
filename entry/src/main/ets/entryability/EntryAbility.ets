@@ -5,6 +5,8 @@ import data_preferences from '@ohos.data.preferences';
 import wfc from '../wfc/client/wfc'
 import Config from '../config'
 import { AbilityConstant, Want } from '@kit.AbilityKit';
+import { KeyboardAvoidMode } from '@kit.ArkUI';
+import { GlobalContext } from '../globalContext';
 
 export default class EntryAbility extends UIAbility {
     private windowStage?: window.WindowStage
@@ -36,6 +38,7 @@ export default class EntryAbility extends UIAbility {
         // Main window is created, set main page for this ability
         hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onWindowStageCreate');
         this.windowStage = windowStage;
+        GlobalContext.getContext().setObject('windowStage', windowStage);
 
         let url = 'pages/LoginPage';
         data_preferences.getPreferences(this.context, 'wfcstore', async (err, val) => {

@@ -20,6 +20,8 @@ import router from '@ohos.router'
 import ActionSheetDialog from '../../view/ActionSheetDialog'
 import EmojiInputPanelView from './emoji/EmojiInputPanelView'
 import { CallbackWithValue_1_Default, CallbackWithValue_2_Default, FailCallbackDefault } from '../../wfc/type/types'
+import { GlobalContext } from '../../globalContext'
+import { KeyboardAvoidMode, window } from '@kit.ArkUI'
 
 
 const INPUT_ICON_WIDTH = 30
@@ -280,6 +282,32 @@ export default struct ConversationInputPanelView {
 
         // TODO 输入法将页面网上顶的问题，追踪下面链接
         // https://developer.huawei.com/consumer/cn/forum/topic/0204139962705742016?fid=0102683795438680754
+
+
+        // 计算软键盘高度
+        // window.getLastWindow(getContext(this)).then(currentWindow => {
+        //     let property = currentWindow.getWindowProperties();
+        //     // 初始化窗口高度
+        //     let avoidArea = currentWindow.getWindowAvoidArea(window.AvoidAreaType.TYPE_KEYBOARD);
+        //     this.scrollHeight = px2vp(property.windowRect.height - avoidArea.bottomRect.height);
+        //
+        //     // 监听软键盘的隐藏和显示
+        //     currentWindow.on('avoidAreaChange', async data => {
+        //         if (data.type !== window.AvoidAreaType.TYPE_KEYBOARD) {
+        //             // this.keyHeight = avoidArea.bottomRect.height;
+        //             return;
+        //         }
+        //         this.scrollHeight = px2vp(property.windowRect.height - data.area.bottomRect.height);
+        //         this.scrollHeight = property.windowRect.height - data.area.bottomRect.height;
+        //         if (!this.keyboardHeight) {
+        //             this.scrollHeight = this.scrollHeight;
+        //         }
+        //         this.scrollHeight = px2vp(data.area.bottomRect.height);
+        //         if (!this.keyboardHeight) {
+        //             this.keyboardHeight = data.area.bottomRect.height;
+        //         }
+        //     })
+        // })
     }
 
     async startRecordAudio() {
@@ -377,10 +405,22 @@ export default struct ConversationInputPanelView {
                             .focusable(this.collapseConversationInputPanelViewTimestamp === 0)
                             .onBlur(() => {
                                 this.textInputFocused = false
+                                let windowStage = GlobalContext.getContext()
+                                    .getObject('windowStage') as window.WindowStage;
+                                windowStage.getMainWindowSync()
+                                    .getUIContext()
+                                    .setKeyboardAvoidMode(KeyboardAvoidMode.OFFSET);
                             })
                             .onClick(() => {
                                 // this.showExtPanel = false
                                 // this.showEmojiPanel = false
+                                if (!this.showExtPanel && !this.showEmojiPanel) {
+                                    let windowStage = GlobalContext.getContext()
+                                        .getObject('windowStage') as window.WindowStage;
+                                    windowStage.getMainWindowSync()
+                                        .getUIContext()
+                                        .setKeyboardAvoidMode(KeyboardAvoidMode.RESIZE);
+                                }
                             })
                             .margin({ left: 10, right: 10 })
                             .height(40)

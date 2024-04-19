@@ -118,7 +118,12 @@ export default struct DiscoveryTab {
                                 .padding({ left: 10 })
                         }
                         .onClick(() => {
-                            showToast('TODO: 开发手册')
+                            router.pushUrl({
+                                url: 'pages/misc/WebViewPage', params: {
+                                    url: 'https://docs.wildfirechat.cn',
+                                    title: '野火IM 开发文档'
+                                }
+                            }, router.RouterMode.Standard)
                         })
                         .padding({ left: 10, right: 10 })
                         .width('100%')

@@ -32,6 +32,7 @@ import UserInfo from '../../wfc/model/userInfo'
 import Utils from '../../common/Utils'
 import { FaultLogger } from '@kit.PerformanceAnalysisKit'
 import { HashMap } from '@kit.ArkTS'
+import { ifaa } from '@kit.OnlineAuthenticationKit'
 
 @Entry
 @Component
@@ -102,6 +103,13 @@ struct ConversationPage {
 
         if (this.conversation.type === ConversationType.Group) {
             this.groupMembers = wfc.getGroupMembers(this.conversation.target, false);
+        } else if (this.conversation.type === ConversationType.ChatRoom) {
+            wfc.joinChatroom(this.conversation.target, () => {
+                console.log('join chatroom success', this.conversation!.target)
+            }, err => {
+                showToast('加入聊天室失败')
+                router.back()
+            })
         }
 
         Utils.computeConversationItemPortraitAndName(this.conversation)
@@ -138,6 +146,8 @@ struct ConversationPage {
         getContext(this).eventHub.off(EventType.MessageRead, this.onReadMessage)
         if (this.conversation!.type === ConversationType.Group) {
             getContext(this).eventHub.off(EventType.GroupMembersUpdate, this.onGroupMembersUpdate)
+        } else if (this.conversation!.type === ConversationType.ChatRoom) {
+            wfc.quitChatroom(this.conversation!.target, null, null)
         }
     }
 

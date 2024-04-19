@@ -333,10 +333,13 @@ export default struct ConversationInputPanelView {
         this.recorder.start(`fd://${fd}`);
     }
 
-    stopRecordAudio() {
+    stopRecordAudio(canceled: boolean) {
         this.recorder!.finish()
         fs.closeSync(this.recordOutputAudioFileFd)
         this.recordOutputAudioFileFd = 0
+        if (canceled) {
+            return;
+        }
         let audioMessageContent = new SoundMessageContent(this.recordOutputAudioFile, '', Math.round((new Date().getTime() - this.recordAudioStartMillis) / 1000))
         wfc.sendConversationMessage(this.conversation, audioMessageContent, [], null, null, null, null, null)
         this.recordOutputAudioFile = ''
@@ -433,12 +436,12 @@ export default struct ConversationInputPanelView {
                                     this.showCancelRecordIndicator = false
                                     this.recordTouchDownY = event.touches[0].screenY
                                 } else if (event.type === TouchType.Up) {
+                                    this.stopRecordAudio(this.showCancelRecordIndicator)
                                     this.showAudioRecorderView = false
                                     this.showCancelRecordIndicator = false
-                                    this.stopRecordAudio()
                                 } else if (event.type === TouchType.Move) {
                                     let y = event.touches[0].screenY;
-                                    if (this.recordTouchDownY - y > 200) {
+                                    if (this.recordTouchDownY - y > 100) {
                                         this.showCancelRecordIndicator = true;
                                     } else {
                                         this.showCancelRecordIndicator = false;

@@ -2,6 +2,8 @@ import hilog from '@ohos.hilog'
 import common from '@ohos.app.ability.common'
 import router from '@ohos.router'
 import { showToast } from '../common/utils/Toast'
+import Conversation from '../wfc/model/conversation'
+import ConversationType from '../wfc/model/conversationType'
 
 @Preview
 @Component
@@ -69,7 +71,11 @@ export default struct DiscoveryTab {
                                 .padding({ left: 10 })
                         }
                         .onClick(() => {
-                            showToast('TODO: 聊天室')
+                            router.pushUrl({
+                                url: "pages/chatroom/ChatroomListPage",
+                                params: {
+                                }
+                            }, router.RouterMode.Standard)
                         })
                         .padding({ left: 10, right: 10 })
                         .width('100%')
@@ -94,7 +100,13 @@ export default struct DiscoveryTab {
                                 .padding({ left: 10 })
                         }
                         .onClick(() => {
-                            showToast('TODO: 机器人')
+                            let conversation = new Conversation(ConversationType.Single, 'FireRobot', 0)
+                            router.pushUrl({
+                                url: "pages/conversation/ConversationPage",
+                                params: {
+                                    conversation: conversation
+                                }
+                            }, router.RouterMode.Standard)
                         })
                         .padding({ left: 10, right: 10 })
                         .width('100%')

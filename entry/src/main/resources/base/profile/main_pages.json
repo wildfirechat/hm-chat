@@ -22,6 +22,7 @@
         "pages/mm/MMMessagePreviewPage",
         "pages/mm/MMPreviewPage",
         "pages/misc/WebViewPage",
+        "pages/chatroom/ChatroomListPage",
         "pages/TestPage"
     ]
 }

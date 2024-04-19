@@ -231,7 +231,10 @@ struct MainPage {
                 .margin({ left: 12 })
                 .bindMenu(this.SubMoreMenus())
         }
-        .justifyContent(FlexAlign.End)
+        .margin({ right: 18 })
+        .height('100%')
+        .justifyContent(FlexAlign.Start)
+        .alignItems(VerticalAlign.Center)
     }
 
     build() {

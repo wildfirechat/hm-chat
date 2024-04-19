@@ -86,6 +86,7 @@ struct ConversationPage {
     }
 
     aboutToAppear() {
+
         setTimeout(() => {
             this.scroller.scrollEdge(Edge.Bottom)
         }, 100)
@@ -537,7 +538,8 @@ struct ConversationPage {
                     enableMultiCheck: $enableMultiCheck,
                     messages: $messages,
                     checkedMessages: $checkedMessages,
-                    collapseConversationInputPanelViewTimestamp: $collapseConversationInputPanelViewTimestamp
+                    collapseConversationInputPanelViewTimestamp: $collapseConversationInputPanelViewTimestamp,
+                    messageListScroller: this.scroller
                 })
             }
         }
@@ -566,7 +568,5 @@ struct ConversationPage {
                 }
             }
         ])
-
-        //.expandSafeArea([SafeAreaType.KEYBOARD])
     }
 }

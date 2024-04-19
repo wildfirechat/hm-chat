@@ -21,7 +21,7 @@ export default struct FriendRequestList {
         let userInfos = wfc.getUserInfos(ids, '')
 
         let tmpArray: FriendRequestAndUserInfo[] = requests.map(req => {
-            let userInfo = userInfos.find(info => info.uid)
+            let userInfo = userInfos.find(info => info.uid === req.target)
             return {
                 request: req,
                 userInfo: userInfo
@@ -100,6 +100,7 @@ export default struct FriendRequestList {
                         }, (req: FriendRequestAndUserInfo) => req.request.target)
                     }
                     .width('100%')
+                    .height('100%')
                     .layoutWeight(1)
                 }
             }

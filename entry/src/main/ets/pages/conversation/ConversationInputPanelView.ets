@@ -497,36 +497,37 @@ export default struct ConversationInputPanelView {
                 .width('100%')
 
                 if (this.showExtPanel) {
-                    Flex({
-                        justifyContent: FlexAlign.Start,
-                        alignContent: FlexAlign.SpaceAround,
-                        wrap: FlexWrap.Wrap
-                    }) {
+                    Grid() {
                         ForEach(this.conversationExts, (ext: ConversationExt) => {
-                            Column() {
-                                Image(ext.icon)
-                                    .width(60)
-                                    .draggable(false)
-                                    .height(60)
-                                Text(ext.title)
-                                    .margin({ top: 8 })
-                                    .fontSize(12)
-                            }
-                            .borderRadius(4)
-                            .margin(10)
-                            .padding(4)
-                            .onClick(ext.action)
-                            .stateStyles({
-                                pressed: {
-                                    .backgroundColor('#E5E5E5')
-                                },
-                                normal: {
-                                    .backgroundColor(Color.White)
+                            GridItem() {
+                                Column() {
+                                    Image(ext.icon)
+                                        .width(60)
+                                        .draggable(false)
+                                        .height(60)
+                                    Text(ext.title)
+                                        .margin({ top: 8 })
+                                        .fontSize(12)
                                 }
-                            })
+                                .borderRadius(4)
+                                .margin(10)
+                                .padding(4)
+                                .onClick(ext.action)
+                                .stateStyles({
+                                    pressed: {
+                                        .backgroundColor('#E5E5E5')
+                                    },
+                                    normal: {
+                                        .backgroundColor(Color.White)
+                                    }
+                                })
+                            }
 
                         }, (ext: ConversationExt) => ext.title)
                     }
+                    .columnsTemplate('1fr 1fr 1fr 1fr')
+                    .columnsGap(10)
+                    .rowsGap(10)
                     .width('100%')
                     .height(this.keyboardHeight)
                 }

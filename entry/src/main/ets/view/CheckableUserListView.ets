@@ -167,6 +167,7 @@ export default struct CheckableUserListView {
                         .constraintSize({ minWidth: '25%', maxWidth: this.searchInputViewMaxWidth })
                     }
                 }
+                .scrollBar(BarState.Off)
                 .listDirection(Axis.Horizontal)
                 .width('100%')
                 .height(60)

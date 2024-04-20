@@ -43,8 +43,8 @@ export default struct ConversationInputPanelView {
     @Link conversation: Conversation
     @State text: string = ''
     @State textInputFocused: boolean = false
-    @State showEmojiPanel: boolean = false
-    @State showExtPanel: boolean = false
+    @State @Watch('onExpandConversationInputPanelView') showEmojiPanel: boolean = false
+    @State @Watch('onExpandConversationInputPanelView') showExtPanel: boolean = false
     @State keyboardHeight: number = 300
     @State showAudioRecorderButton: boolean = false
     // for audioRecorderView
@@ -266,6 +266,12 @@ export default struct ConversationInputPanelView {
         setTimeout(() => {
             this.collapseConversationInputPanelViewTimestamp = 0
         }, 100)
+    }
+
+    onExpandConversationInputPanelView(propName: string) {
+        if (this.showEmojiPanel || this.showExtPanel) {
+            this.messageListScroller!.scrollEdge(Edge.Bottom);
+        }
     }
 
     aboutToAppear() {

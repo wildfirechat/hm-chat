@@ -510,12 +510,11 @@ class WfcImpl {
     getMyGroupList(): GroupInfo[] {
         let settings = this.getUserSettings(UserSettingScope.FavoriteGroup);
         let groupInfos = settings.filter(setting => {
-            let entry = Object.entries(setting)[0]
-            return entry[1] === '1'
+            return Object.values(setting)[1] === '1'
         })
             .map(setting => {
-                let entry = Object.entries(setting)[0]
-                return this.getGroupInfo(entry[0], false)
+                let groupId = Object.values(setting)[0]
+                return this.getGroupInfo(groupId, false)
             });
         return groupInfos;
     }
@@ -907,7 +906,7 @@ class WfcImpl {
         });
     }
 
-    addGroupMembers(groupId: string, memberIds: string[], extra: string, notifyLines: number[], notifyMessageContent: MessageContent|null, successCB: SuccessCallback, failCB: FailCallback) {
+    addGroupMembers(groupId: string, memberIds: string[], extra: string, notifyLines: number[], notifyMessageContent: MessageContent | null, successCB: SuccessCallback, failCB: FailCallback) {
         if (!notifyMessageContent) {
             notifyMessageContent = new AddGroupMemberNotification(self.getUserId(), memberIds);
         }

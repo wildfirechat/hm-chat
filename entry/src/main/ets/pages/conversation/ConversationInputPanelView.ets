@@ -57,7 +57,6 @@ export default struct ConversationInputPanelView {
     @Link checkedMessages: Message[]
     @Link messages: Message[]
     private messageListScroller?: Scroller
-    private checkKeyboardHeightInternal: number = 0
     private textInputBottomWhenBlur: number = 0
     private textInputController: TextInputController = new TextInputController()
     private mediaHelper: MediaHelper = new MediaHelper(getContext())
@@ -275,17 +274,6 @@ export default struct ConversationInputPanelView {
     }
 
     aboutToAppear() {
-        this.checkKeyboardHeightInternal = setInterval(() => {
-            let rect = Utils.getComponentRect('textInput')
-            if (rect) {
-                rect.values
-                let bottom = rect['bottom'];
-                this.textInputBottomWhenBlur = bottom
-                console.log('textInputBottomWhenBlur', bottom)
-                clearInterval(this.checkKeyboardHeightInternal)
-                this.checkKeyboardHeightInternal = 0
-            }
-        }, 100)
 
         // 计算软键盘高度
         window.getLastWindow(getContext(this)).then(currentWindow => {

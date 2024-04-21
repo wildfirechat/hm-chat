@@ -1,12 +1,7 @@
 import Utils from '../common/Utils';
 import { timeFormat } from '../util/helper';
-import wfc from '../wfc/client/wfc';
-import ChannelInfo from '../wfc/model/channelInfo';
-import ChatRoomInfo from '../wfc/model/chatRoomInfo';
+import wfc, { WfcManager } from '../wfc/client/wfc';
 import ConversationInfo from '../wfc/model/conversationInfo';
-import ConversationType from '../wfc/model/conversationType';
-import GroupInfo from '../wfc/model/groupInfo';
-import { ifaa } from '@kit.OnlineAuthenticationKit';
 
 @Component
 @Preview
@@ -31,6 +26,22 @@ export default struct ConversationInfoItemView {
 
     conversationUnreadCount() {
         return this.conversationInfo!.unreadCount ? (this.conversationInfo!.unreadCount.unreadMention + this.conversationInfo!.unreadCount.unread + this.conversationInfo!.unreadCount.unreadMentionAll) : 0
+    }
+
+    conversationInfoSpanText() {
+        let spanText = ''
+        let lastMessageContent = this.conversationInfo?.lastMessage?.messageContent
+        if (lastMessageContent) {
+            if (lastMessageContent.mentionedType === 2
+                || (lastMessageContent.mentionedType === 1 && lastMessageContent.mentionedTargets.indexOf(wfc.getUserId()))) {
+                spanText = '[有人@我] '
+                return
+            }
+        }
+        if (this.conversationInfo?.draft) {
+            spanText = '[草稿] '
+        }
+        return spanText;
     }
 
     build() {
@@ -97,6 +108,12 @@ export default struct ConversationInfoItemView {
 
                     if (!this.basicMode) {
                         Row() {
+                            if (this.conversationInfoSpanText()) {
+                                Text() {
+                                    Span(this.conversationInfoSpanText()).fontSize(13).fontColor(Color.Red)
+                                }
+                            }
+
                             Text(`${this.conversationInfo!.lastMessage ? this.conversationInfo!.lastMessage.messageContent!.digest(this.conversationInfo!.lastMessage) : ''}`)
                                 .textOverflow({ overflow: TextOverflow.Ellipsis })
                                 .fontSize(13)

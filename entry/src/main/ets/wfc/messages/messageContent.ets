@@ -10,7 +10,7 @@ export default class MessageContent {
     //0 普通消息, 1 部分提醒, 2 提醒全部
     mentionedType = 0;
     //提醒对象，mentionedType 1时有效
-    mentionedTargets = [];
+    mentionedTargets: string[] = [];
     extra = '';
     pushContent = '';
 
@@ -40,15 +40,15 @@ export default class MessageContent {
      *
      * @param {object} payload object json.parse from message#content
      */
-    decode(payload:MessagePayload) {
+    decode(payload: MessagePayload) {
         this.type = payload.type;
         this.mentionedType = payload.mentionedType;
         // if (payload.hasOwnProperty('mentionedTarget')) {
         //     // web
         //     this.mentionedTargets = payload.mentionedTarget;
         // } else {
-            // pc
-            this.mentionedTargets = payload.mentionedTargets;
+        // pc
+        this.mentionedTargets = payload.mentionedTargets;
         // }
         this.extra = payload.extra;
         this.pushContent = payload.pushContent;

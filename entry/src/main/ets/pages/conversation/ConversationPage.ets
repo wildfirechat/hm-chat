@@ -32,7 +32,6 @@ import UserInfo from '../../wfc/model/userInfo'
 import Utils from '../../common/Utils'
 import { FaultLogger } from '@kit.PerformanceAnalysisKit'
 import { HashMap } from '@kit.ArkTS'
-import { ifaa } from '@kit.OnlineAuthenticationKit'
 
 @Entry
 @Component

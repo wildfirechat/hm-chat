@@ -30,6 +30,6 @@ export default class MessagePayload {
     remoteMediaUrl = '';
     localMediaPath = '';
     mentionedType = 0;
-    mentionedTargets = [];
+    mentionedTargets:string[] = [];
     extra = '';
 }

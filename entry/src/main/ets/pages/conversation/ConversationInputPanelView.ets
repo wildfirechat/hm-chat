@@ -10,8 +10,6 @@ import FileMessageContent from '../../wfc/messages/fileMessageContent'
 import ImageMessageContent from '../../wfc/messages/imageMessageContent'
 import TextMessageContent from '../../wfc/messages/textMessageContent'
 import Conversation from '../../wfc/model/conversation'
-import ConversationInfo from '../../wfc/model/conversationInfo'
-import audio from '@ohos.multimedia.audio';
 import AudioRecordManager from './audio/AudioRecordManager'
 import fs from '@ohos.file.fs';
 import SoundMessageContent from '../../wfc/messages/soundMessageContent'
@@ -19,9 +17,11 @@ import Message from '../../wfc/messages/message'
 import router from '@ohos.router'
 import ActionSheetDialog from '../../view/ActionSheetDialog'
 import EmojiInputPanelView from './emoji/EmojiInputPanelView'
-import { CallbackWithValue_1_Default, CallbackWithValue_2_Default, FailCallbackDefault } from '../../wfc/type/types'
 import { GlobalContext } from '../../globalContext'
 import { KeyboardAvoidMode, window } from '@kit.ArkUI'
+import MentionGroupMemberView from './mention/MentionGroupMemberView'
+import UserInfo from '../../wfc/model/userInfo'
+import ConversationType from '../../wfc/model/conversationType'
 
 
 const INPUT_ICON_WIDTH = 30
@@ -45,6 +45,7 @@ export default struct ConversationInputPanelView {
     @State textInputFocused: boolean = false
     @State @Watch('onExpandConversationInputPanelView') showEmojiPanel: boolean = false
     @State @Watch('onExpandConversationInputPanelView') showExtPanel: boolean = false
+    @State showMentionSheet: boolean = false
     @State keyboardHeight: number = 300
     @State showAudioRecorderButton: boolean = false
     // for audioRecorderView
@@ -67,6 +68,8 @@ export default struct ConversationInputPanelView {
     private recordAudioStartMillis: number = 0
     private forwardMessageDialogController?: CustomDialogController
     private deleteMessageDialogController?: CustomDialogController
+    private groupId = ''
+    private mentions: MentionBlock[] = []
     private conversationExts: ConversationExt[] = [
         {
             title: '照片',
@@ -273,8 +276,17 @@ export default struct ConversationInputPanelView {
         }
     }
 
-    aboutToAppear() {
+    onMentionGroupMember = (userInfo: UserInfo) => {
+        this.showMentionSheet = false;
+        let mentionText = '@' + userInfo.displayName;
+        this.text = this.text + mentionText + ' ';
+        this.mentions.push({
+            target: userInfo.uid,
+            text: mentionText
+        })
+    }
 
+    aboutToAppear() {
         // 计算软键盘高度
         window.getLastWindow(getContext(this)).then(currentWindow => {
             let property = currentWindow.getWindowProperties();
@@ -296,6 +308,9 @@ export default struct ConversationInputPanelView {
             })
         })
 
+        if (this.conversation.type === ConversationType.Group) {
+            this.groupId = this.conversation.target;
+        }
     }
 
     async startRecordAudio() {
@@ -372,7 +387,13 @@ export default struct ConversationInputPanelView {
                         TextInput({ text: this.text, controller: this.textInputController })
                             .id('textInput')
                             .onChange(value => {
-                                this.text = value
+                                // TODO 优化，mentionview 弹出逻辑
+                                // FIXME
+                                if (this.text + "@" === value && this.conversation.type === ConversationType.Group) {
+                                    this.showMentionSheet = true;
+                                } else {
+                                    this.text = value
+                                }
                             })
                             .onFocus(() => {
                                 // this.showExtPanel = false
@@ -463,6 +484,22 @@ export default struct ConversationInputPanelView {
                             .borderRadius(4)
                             .onClick(() => {
                                 let textMessageContent = new TextMessageContent(this.text);
+                                if (this.mentions.length > 0) {
+                                    for (const mention of this.mentions) {
+                                        if (this.text.indexOf(mention.text) >= 0) {
+                                            if (mention.target === '@all') {
+                                                textMessageContent.mentionedType = 2;
+                                                break
+                                            } else {
+                                                if (textMessageContent.mentionedTargets.indexOf(mention.target) === -1) {
+                                                    textMessageContent.mentionedTargets.push(mention.target)
+                                                }
+                                            }
+                                        }
+                                    }
+                                    this.mentions = []
+                                }
+
                                 wfc.sendConversationMessage(this.conversation, textMessageContent, [], null, null, null, null, null);
                                 this.text = '';
 
@@ -532,6 +569,27 @@ export default struct ConversationInputPanelView {
             }
             .expandSafeArea([SafeAreaType.KEYBOARD])
             .backgroundColor('#F7F7F7')
+
+            .bindSheet(this.showMentionSheet, MentionGroupMemberView(this.groupId, this.onMentionGroupMember), {
+                height: '70%',
+                dragBar: false,
+                showClose: false,
+                onDisappear: () => {
+                    this.showMentionSheet = false
+                }
+            })
         }
     }
+}
+
+interface MentionBlock {
+    /**
+     * \@all 表示@所有人
+     */
+    target: string,
+
+    /**
+     * \@小火
+     */
+    text: string
 }

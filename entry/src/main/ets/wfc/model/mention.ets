@@ -1,10 +1,10 @@
 export default class Mention {
-    start;
-    end;
-    isMentionAll;
-    uid;
+    start = 0;
+    end = 0;
+    isMentionAll = false;
+    uid = '';
 
-    constructor(start, end, uid, isMentionAll) {
+    constructor(start: number, end: number, uid: string, isMentionAll: boolean) {
         this.start = start;
         this.end = end;
         this.uid = uid;

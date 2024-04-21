@@ -72,16 +72,17 @@ export default struct PickContactPage {
         .menus(this.NavigationMenus())
     }
 
-    @Builder NavigationMenus() {
+    @Builder
+    NavigationMenus() {
         Row() {
             Button('确定')
                 .type(ButtonType.Normal)
                 .height(30)
                 .width(60)
+                .margin({right: 18})
                 .enabled(this.newlyCheckedUsers().length > 0)
                 .fontSize(14)
-                .borderRadius(4)
-                    // .backgroundColor(Color.Blue)
+                .borderRadius(4)// .backgroundColor(Color.Blue)
                     // TODO
                 .onClick(() => {
                     let options: router.RouterOptions = {
@@ -94,5 +95,8 @@ export default struct PickContactPage {
                     router.back(options)
                 })
         }
+        .height('100%')
+        .justifyContent(FlexAlign.Center)
+        .alignItems(VerticalAlign.Center)
     }
 }

@@ -39,6 +39,10 @@ export default struct ConversationListTab {
         this.context.eventHub.on(EventType.ConnectionStatusChanged, this.onConnectionStatusChange)
         this.context.eventHub.on(EventType.ConversationInfoUpdate, this.onConversationInfoUpdate)
         this.context.eventHub.on(EventType.SettingUpdate, this.onSettingUpdate)
+
+        this.context.eventHub.on(EventType.UserInfosUpdate, this.onUserInfosUpdate)
+        this.context.eventHub.on(EventType.GroupInfosUpdate, this.onGroupInfosUpdate)
+        this.context.eventHub.on(EventType.ChannelInfosUpdate, this.onChannelInfosUpdate)
     }
 
     aboutToDisappear() {
@@ -48,12 +52,19 @@ export default struct ConversationListTab {
         this.context!.eventHub.off(EventType.ConnectionStatusChanged, this.onConnectionStatusChange)
         this.context!.eventHub.off(EventType.ConversationInfoUpdate, this.onConversationInfoUpdate)
         this.context!.eventHub.on(EventType.SettingUpdate, this.onSettingUpdate)
+
+        this.context!.eventHub.off(EventType.UserInfosUpdate, this.onUserInfosUpdate)
+        this.context!.eventHub.off(EventType.GroupInfosUpdate, this.onGroupInfosUpdate)
+        this.context!.eventHub.off(EventType.ChannelInfosUpdate, this.onChannelInfosUpdate)
     }
 
     onPageShow() {
     }
 
     loadConversationList() {
+        if (this.connectionStatus === ConnectionStatus.ConnectionStatusConnecting) {
+            return;
+        }
         let conversationInfos = wfc.getConversationInfoList([0, 1, 2, 3], [0, 1]);
         this.conversationInfoDataSource.setConversationInfos(conversationInfos)
         let totalUnreadCount = 0
@@ -118,6 +129,16 @@ export default struct ConversationListTab {
     onSettingUpdate = () => {
         this.loadConversationList()
     }
+    onUserInfosUpdate = () => {
+        this.loadConversationList();
+    }
+    onGroupInfosUpdate = () => {
+        this.loadConversationList();
+
+    }
+    onChannelInfosUpdate = () => {
+        this.loadConversationList();
+    }
 
     conversationKey(conversationInfo: ConversationInfo): string {
         let conversation = conversationInfo.conversation!;
@@ -133,7 +154,21 @@ export default struct ConversationListTab {
         key += '-' + conversationInfo.isSilent
         if (conversationInfo.lastMessage) {
             key += '-' + conversationInfo.lastMessage.messageContent.type
+        } else {
+            key += '-null'
         }
+
+        if (conversation.type === ConversationType.Single) {
+            let userInfo = wfc.getUserInfo(conversation.target);
+            key += '-' + userInfo.updateDt
+        } else if (conversation.type === ConversationType.Group) {
+            let groupInfo = wfc.getGroupInfo(conversation.target);
+            key += '-' + groupInfo.updateDt
+        } else if (conversation.type === ConversationType.Channel) {
+            let channelInfo = wfc.getChannelInfo(conversation.target);
+            key += '-' + channelInfo.updateDt
+        }
+
         return key
     }
 

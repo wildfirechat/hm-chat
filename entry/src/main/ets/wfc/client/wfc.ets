@@ -1091,7 +1091,7 @@ export class WfcManager {
      * @param {boolean} refresh 是否强制刷新
      * @returns {ChannelInfo|NullChannelInfo}
      */
-    getChannelInfo(channelId: string, refresh: boolean): ChannelInfo {
+    getChannelInfo(channelId: string, refresh: boolean = false): ChannelInfo {
         return impl.getChannelInfo(channelId, refresh);
     }
 

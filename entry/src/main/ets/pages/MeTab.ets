@@ -121,7 +121,7 @@ export default struct MeTab {
                 .width(100)
                 .type(ButtonType.Normal)
                 .borderRadius(4)
-                .margin({ top: 50 })
+                .margin({ top: 30 })
                 .onClick(() => {
                     data_preferences.deletePreferences(getContext(this), 'wfcstore')
                     wfc.disconnect(true, false)

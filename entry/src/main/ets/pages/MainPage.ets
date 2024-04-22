@@ -17,6 +17,9 @@ import Conversation from '../wfc/model/conversation'
 import ConversationType from '../wfc/model/conversationType'
 import { ChannelInfoPage } from './channel/ChannelInfoPage'
 
+import notificationManager from '@ohos.notificationManager';
+import Base from '@ohos.base';
+
 const TAG = 'Main';
 
 const permissions: Array<Permissions> = [
@@ -82,6 +85,8 @@ struct MainPage {
                 }
             }
         }
+
+        notificationManager.cancelAll()
     }
 
     async requestPermissions() {
@@ -92,6 +97,24 @@ struct MainPage {
         }).catch((error: Error) => {
             Logger.error(TAG, `Request permissions failed, error is: ${error}`);
         });
+
+        notificationManager.isNotificationEnabled().then((data: boolean) => {
+            console.info("isNotificationEnabled success, data: " + JSON.stringify(data));
+            if (!data) {
+                notificationManager.requestEnableNotification().then(() => {
+                    console.info(`[ANS] requestEnableNotification success`);
+                }).catch((err: Base.BusinessError) => {
+                    if (1600004 == err.code) {
+                        console.info(`[ANS] requestEnableNotification refused`);
+                    } else {
+                        console.error(`[ANS] requestEnableNotification failed, code is ${err.code}, message is ${err.message}`);
+                    }
+                });
+            }
+        }).catch((err: Base.BusinessError) => {
+            console.error(`isNotificationEnabled fail: ${JSON.stringify(err)}`);
+        });
+
     }
 
     async checkAccessToken(permission: Permissions) {

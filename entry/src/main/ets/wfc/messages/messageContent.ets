@@ -20,7 +20,11 @@ export default class MessageContent {
         this.mentionedTargets = mentionedTargets;
     }
 
-    digest(message?: Message) {
+    formatNotification(message: Message): string {
+        return this.digest(message)
+    }
+
+    digest(message?: Message): string {
         return '...digest...';
     }
 

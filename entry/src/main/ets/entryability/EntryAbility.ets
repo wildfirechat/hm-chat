@@ -8,8 +8,13 @@ import { AbilityConstant, Want } from '@kit.AbilityKit';
 import { KeyboardAvoidMode } from '@kit.ArkUI';
 import { GlobalContext } from '../globalContext';
 
+import EventType from '../wfc/client/wfcEvent';
+import Message from '../wfc/messages/message';
+import wfcNotificationManager from '../notification/wfcNotificationManager'
+
 export default class EntryAbility extends UIAbility {
     private windowStage?: window.WindowStage
+    private isInBackground: boolean = false
 
     onCreate(want: Want, launchParam: AbilityConstant.LaunchParam) {
         hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onCreate');
@@ -28,6 +33,11 @@ export default class EntryAbility extends UIAbility {
         //         this.loadContent(url)
         //     }
         // })
+        this.context.eventHub.on(EventType.ReceiveMessage, (message: Message, hasMore: boolean) => {
+            if (this.isInBackground) {
+                wfcNotificationManager.onReceiveMessage(message, hasMore);
+            }
+        })
     }
 
     onDestroy() {
@@ -74,11 +84,13 @@ export default class EntryAbility extends UIAbility {
     onForeground() {
         // Ability has brought to foreground
         hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onForeground');
+        this.isInBackground = false;
     }
 
     onBackground() {
         // Ability has back to background
         hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onBackground');
+        this.isInBackground = true;
     }
 
     private loadContent(url: string) {

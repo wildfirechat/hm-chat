@@ -570,8 +570,8 @@ export default struct ConversationInputPanelView {
                     EmojiInputPanelView({
                         text: $text,
                         caretPosition: $caretPosition,
-                        selectionStart: $selectionStart,
-                        selectionEnd: $selectionEnd,
+                        selectionStart: this.selectionStart,
+                        selectionEnd: this.selectionEnd,
                         conversation: this.conversation,
                     })
                         .focusable(true)

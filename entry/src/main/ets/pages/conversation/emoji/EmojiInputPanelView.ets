@@ -14,8 +14,8 @@ export default struct EmojiInputPanelView {
     @State currentCategoryIndex: number = 0
     @Link text: string
     @Link caretPosition: number
-    @Link selectionStart: number
-    @Link selectionEnd: number
+    @Prop selectionStart: number
+    @Prop selectionEnd: number
 
     aboutToAppear() {
         let config = emojiConfig();
@@ -102,9 +102,9 @@ export default struct EmojiInputPanelView {
                                         })
                                         .onClick(() => {
                                             this.text = this.text.slice(0, this.selectionStart) + emoji.data + this.text.slice(this.selectionEnd)
-                                            this.selectionStart = this.selectionStart + 1
+                                            this.caretPosition = this.selectionStart + emoji.data.length;
+                                            this.selectionStart = this.selectionStart + emoji.data.length
                                             this.selectionEnd = this.selectionStart;
-                                            this.caretPosition = this.selectionStart + 1
                                         })
                                     }, (emoji: Emoji, index: number) => index + '')
                                 }
@@ -180,6 +180,15 @@ export default struct EmojiInputPanelView {
                         normal: {
                             .backgroundColor(Color.White)
                         }
+                    })
+                    .onClick(() => {
+                        // TODO 不能处理 unicode 字符
+                        // FIXME
+                        // if (this.caretPosition > 0) {
+                        //     let char = this.text.charAt(this.caretPosition - 1)
+                        //     this.text = this.text.substring(0, this.caretPosition - 1) + this.text.substring(this.caretPosition);
+                        //     this.caretPosition = this.caretPosition - char.length;
+                        // }
                     })
                 }
             }

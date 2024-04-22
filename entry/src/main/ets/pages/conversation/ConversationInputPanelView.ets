@@ -42,6 +42,9 @@ interface MultiCheckAction {
 export default struct ConversationInputPanelView {
     @Link conversation: Conversation
     @State text: string = ''
+    @State caretPosition: number = 0
+    @State selectionStart: number = 0
+    @State selectionEnd: number = 0
     @State textInputFocused: boolean = false
     @State @Watch('onExpandConversationInputPanelView') showEmojiPanel: boolean = false
     @State @Watch('onExpandConversationInputPanelView') showExtPanel: boolean = false
@@ -395,6 +398,7 @@ export default struct ConversationInputPanelView {
                                     this.text = value
                                 }
                             })
+                            .caretPosition(this.caretPosition)
                             .onFocus(() => {
                                 // this.showExtPanel = false
                                 // this.showEmojiPanel = true
@@ -420,9 +424,14 @@ export default struct ConversationInputPanelView {
                             .onBlur(() => {
                                 this.textInputFocused = false
                             })
-                            .onClick(() => {
+                            .onClick((event) => {
                                 // this.showExtPanel = false
                                 // this.showEmojiPanel = false
+                            })
+                            .onTextSelectionChange((selectionStart, selectionEnd) => {
+                                this.selectionStart = selectionStart;
+                                this.selectionEnd = selectionEnd;
+                                this.caretPosition = selectionStart;
                             })
                             .margin({ left: 10, right: 10 })
                             .height(40)
@@ -560,7 +569,10 @@ export default struct ConversationInputPanelView {
                 if (this.showEmojiPanel) {
                     EmojiInputPanelView({
                         text: $text,
-                        conversation: this.conversation
+                        caretPosition: $caretPosition,
+                        selectionStart: $selectionStart,
+                        selectionEnd: $selectionEnd,
+                        conversation: this.conversation,
                     })
                         .focusable(true)
                         .width('100%')

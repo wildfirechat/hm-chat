@@ -1,11 +1,6 @@
-import hilog from '@ohos.hilog'
-import common from '@ohos.app.ability.common'
-import client from 'marswrapper'
 import { config as emojiConfig } from './EmojiAndStickerConfig'
 import { Emoji, Category } from './emojis'
 import Conversation from '../../../wfc/model/conversation'
-import ConversationType from '../../../wfc/model/conversationType'
-import { showToast } from '../../../common/utils/Toast'
 import StickerMessageContent from '../../../wfc/messages/stickerMessageContent'
 import wfc from '../../../wfc/client/wfc'
 
@@ -18,6 +13,9 @@ export default struct EmojiInputPanelView {
     private conversation?: Conversation
     @State currentCategoryIndex: number = 0
     @Link text: string
+    @Link caretPosition: number
+    @Link selectionStart: number
+    @Link selectionEnd: number
 
     aboutToAppear() {
         let config = emojiConfig();
@@ -103,8 +101,10 @@ export default struct EmojiInputPanelView {
                                             }
                                         })
                                         .onClick(() => {
-                                            // showToast('TODO ' + emoji.data)
-                                            this.text = this.text + emoji.data
+                                            this.text = this.text.slice(0, this.selectionStart) + emoji.data + this.text.slice(this.selectionEnd)
+                                            this.selectionStart = this.selectionStart + 1
+                                            this.selectionEnd = this.selectionStart;
+                                            this.caretPosition = this.selectionStart + 1
                                         })
                                     }, (emoji: Emoji, index: number) => index + '')
                                 }

@@ -28,14 +28,12 @@ export default struct ConversationInfoItemView {
         return this.conversationInfo!.unreadCount ? (this.conversationInfo!.unreadCount.unreadMention + this.conversationInfo!.unreadCount.unread + this.conversationInfo!.unreadCount.unreadMentionAll) : 0
     }
 
-    conversationInfoSpanText() {
+    conversationInfoSpanText(): string {
         let spanText = ''
-        let lastMessageContent = this.conversationInfo?.lastMessage?.messageContent
-        if (lastMessageContent) {
-            if (lastMessageContent.mentionedType === 2
-                || (lastMessageContent.mentionedType === 1 && lastMessageContent.mentionedTargets.indexOf(wfc.getUserId()))) {
+        let unreadCount = this.conversationInfo?.unreadCount
+        if (unreadCount) {
+            if (unreadCount.unreadMention + unreadCount.unreadMentionAll > 0) {
                 spanText = '[有人@我] '
-                return
             }
         }
         if (this.conversationInfo?.draft) {

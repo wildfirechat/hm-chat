@@ -45,7 +45,9 @@ class WfcNotificationManager {
                         action: '',
                         entities: [],
                         uri: '',
-                        parameters: {}
+                        parameters: {
+                            conversation: message.conversation,
+                        }
                     }
                 ],
                 operationType: wantAgent.OperationType.START_ABILITY,

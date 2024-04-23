@@ -5,18 +5,25 @@ import data_preferences from '@ohos.data.preferences';
 import wfc from '../wfc/client/wfc'
 import Config from '../config'
 import { AbilityConstant, Want } from '@kit.AbilityKit';
-import { KeyboardAvoidMode } from '@kit.ArkUI';
+import { KeyboardAvoidMode, router } from '@kit.ArkUI';
 import { GlobalContext } from '../globalContext';
+import { pushService } from '@kit.PushKit';
 
 import EventType from '../wfc/client/wfcEvent';
 import Message from '../wfc/messages/message';
 import wfcNotificationManager from '../notification/wfcNotificationManager'
+import { BusinessError } from '@ohos.base';
+import Conversation from '../wfc/model/conversation';
+
 
 export default class EntryAbility extends UIAbility {
     private windowStage?: window.WindowStage
+    private isMaiPageLoaded: boolean = false
     private isInBackground: boolean = false
+    private targetConversation?: Conversation
+    private launchParams: Record<string, Object> = {};
 
-    onCreate(want: Want, launchParam: AbilityConstant.LaunchParam) {
+    async onCreate(want: Want, launchParam: AbilityConstant.LaunchParam) {
         hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onCreate');
 
         wfc.init(this.context.getApplicationContext(), this.context.eventHub, this.context.filesDir, Config.getWFCPlatform());
@@ -38,6 +45,37 @@ export default class EntryAbility extends UIAbility {
                 wfcNotificationManager.onReceiveMessage(message, hasMore);
             }
         })
+
+        try {
+            const pushToken: string = await pushService.getToken();
+            hilog.info(0x0000, 'testTag', 'Get push token successfully: %{public}s', pushToken);
+        } catch (err) {
+            let e: BusinessError = err as BusinessError;
+            hilog.error(0x0000, 'testTag', 'Get push token catch error: %{public}d %{public}s', e.code, e.message);
+        }
+
+        let conversation = want.parameters?.conversation as Conversation
+        if (conversation) {
+            if (this.isMaiPageLoaded) {
+                this.routeToConversationPage(conversation)
+            } else {
+                this.targetConversation = conversation;
+                console.log('testTag, xxxxxxnewWant100', JSON.stringify(conversation))
+            }
+        }
+    }
+
+    onNewWant(want: Want, launchParam: AbilityConstant.LaunchParam): void {
+        console.log('testTag, xxxxxxnewWant',)
+        let conversation = want.parameters?.conversation as Conversation
+        if (conversation) {
+            if (this.isMaiPageLoaded) {
+                this.routeToConversationPage(conversation)
+            } else {
+                this.targetConversation = conversation;
+                console.log('testTag, xxxxxxnewWant100', JSON.stringify(conversation))
+            }
+        }
     }
 
     onDestroy() {
@@ -95,12 +133,36 @@ export default class EntryAbility extends UIAbility {
 
     private loadContent(url: string) {
         // this.windowStage.getMainWindowSync().setWindowBackgroundColor('#EDEDED')
-        this.windowStage!.loadContent(url, (err, data) => {
+        console.log('testTag, loadUrl', url)
+        let param: Record<string, Object> = {}
+        let storage = new LocalStorage(param);
+        if (this.targetConversation) {
+            storage.set('targetConversation', this.targetConversation);
+        }
+        this.windowStage!.loadContent(url, storage, (err, data) => {
             if (err.code) {
                 hilog.error(0x0000, 'testTag', 'Failed to load the content. Cause: %{public}s', JSON.stringify(err) ?? '');
                 return;
             }
+            if (url === 'pages/MainPage') {
+                this.isMaiPageLoaded = true;
+            }
+
             hilog.info(0x0000, 'testTag', 'Succeeded in loading the content. Data: %{public}s', JSON.stringify(data) ?? '');
         });
+    }
+
+    private parseLaunchParams() {
+
+    }
+
+    private routeToConversationPage(conversation: Conversation) {
+        wfc.clearConversationUnreadStatus(conversation!)
+        router.pushUrl({
+            url: "pages/conversation/ConversationPage",
+            params: {
+                conversation: conversation
+            }
+        }, router.RouterMode.Standard)
     }
 }

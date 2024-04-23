@@ -87,6 +87,19 @@ struct MainPage {
         }
 
         notificationManager.cancelAll()
+
+        let storage = LocalStorage.getShared()
+        let conversation = storage.get<Conversation>('targetConversation')
+        if (conversation) {
+            storage.delete('targetConversation')
+            wfc.clearConversationUnreadStatus(conversation!)
+            router.pushUrl({
+                url: "pages/conversation/ConversationPage",
+                params: {
+                    conversation: conversation
+                }
+            }, router.RouterMode.Standard)
+        }
     }
 
     async requestPermissions() {

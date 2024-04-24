@@ -38,9 +38,9 @@ struct MainPage {
     @State message: string = 'Hello World'
     @State title: string = '野火'
     @State currentIndex: number = 0
-    @State conversationListTabUnreadCount: number = 0
-    @State contactTabUnreadCount: number = 0
-    @State discoveryTabUnreadCount: number = 0
+    @State @Watch('onUnreadCountUpdated') conversationListTabUnreadCount: number = 0
+    @State @Watch('onUnreadCountUpdated') contactTabUnreadCount: number = 0
+    @State @Watch('onUnreadCountUpdated') discoveryTabUnreadCount: number = 0
     @State meTabUnreadCount: number = 0
     // TODO router.getParams() 一直返回 router.back 时设置的参数
     private isNewPickContact = false
@@ -100,6 +100,11 @@ struct MainPage {
                 }
             }, router.RouterMode.Standard)
         }
+    }
+
+    onUnreadCountUpdated() {
+        let badgeNumber = this.conversationListTabUnreadCount + this.contactTabUnreadCount + this.discoveryTabUnreadCount;
+        notificationManager.setBadgeNumber(badgeNumber, null)
     }
 
     async requestPermissions() {

@@ -33,29 +33,29 @@ export default struct ConversationListTab {
 
         this.loadConversationList()
         this.context = getContext(this)
-        this.context.eventHub.on(EventType.ReceiveMessage, this.onSendMessage)
-        this.context.eventHub.on(EventType.SendMessage, this.onReceiveMessage)
-        this.context.eventHub.on(EventType.RecallMessage, this.onRecallMessage)
-        this.context.eventHub.on(EventType.ConnectionStatusChanged, this.onConnectionStatusChange)
-        this.context.eventHub.on(EventType.ConversationInfoUpdate, this.onConversationInfoUpdate)
-        this.context.eventHub.on(EventType.SettingUpdate, this.onSettingUpdate)
+        wfc.eventEmitter!.on(EventType.ReceiveMessage, this.onSendMessage)
+        wfc.eventEmitter!.on(EventType.SendMessage, this.onReceiveMessage)
+        wfc.eventEmitter!.on(EventType.RecallMessage, this.onRecallMessage)
+        wfc.eventEmitter!.on(EventType.ConnectionStatusChanged, this.onConnectionStatusChange)
+        wfc.eventEmitter!.on(EventType.ConversationInfoUpdate, this.onConversationInfoUpdate)
+        wfc.eventEmitter!.on(EventType.SettingUpdate, this.onSettingUpdate)
 
-        this.context.eventHub.on(EventType.UserInfosUpdate, this.onUserInfosUpdate)
-        this.context.eventHub.on(EventType.GroupInfosUpdate, this.onGroupInfosUpdate)
-        this.context.eventHub.on(EventType.ChannelInfosUpdate, this.onChannelInfosUpdate)
+        wfc.eventEmitter!.on(EventType.UserInfosUpdate, this.onUserInfosUpdate)
+        wfc.eventEmitter!.on(EventType.GroupInfosUpdate, this.onGroupInfosUpdate)
+        wfc.eventEmitter!.on(EventType.ChannelInfosUpdate, this.onChannelInfosUpdate)
     }
 
     aboutToDisappear() {
-        this.context!.eventHub.off(EventType.ReceiveMessage, this.onReceiveMessage)
-        this.context!.eventHub.on(EventType.SendMessage, this.onSendMessage)
-        this.context!.eventHub.on(EventType.RecallMessage, this.onRecallMessage)
-        this.context!.eventHub.off(EventType.ConnectionStatusChanged, this.onConnectionStatusChange)
-        this.context!.eventHub.off(EventType.ConversationInfoUpdate, this.onConversationInfoUpdate)
-        this.context!.eventHub.on(EventType.SettingUpdate, this.onSettingUpdate)
+        wfc.eventEmitter!.off(EventType.ReceiveMessage, this.onReceiveMessage)
+        wfc.eventEmitter!.on(EventType.SendMessage, this.onSendMessage)
+        wfc.eventEmitter!.on(EventType.RecallMessage, this.onRecallMessage)
+        wfc.eventEmitter!.off(EventType.ConnectionStatusChanged, this.onConnectionStatusChange)
+        wfc.eventEmitter!.off(EventType.ConversationInfoUpdate, this.onConversationInfoUpdate)
+        wfc.eventEmitter!.on(EventType.SettingUpdate, this.onSettingUpdate)
 
-        this.context!.eventHub.off(EventType.UserInfosUpdate, this.onUserInfosUpdate)
-        this.context!.eventHub.off(EventType.GroupInfosUpdate, this.onGroupInfosUpdate)
-        this.context!.eventHub.off(EventType.ChannelInfosUpdate, this.onChannelInfosUpdate)
+        wfc.eventEmitter!.off(EventType.UserInfosUpdate, this.onUserInfosUpdate)
+        wfc.eventEmitter!.off(EventType.GroupInfosUpdate, this.onGroupInfosUpdate)
+        wfc.eventEmitter!.off(EventType.ChannelInfosUpdate, this.onChannelInfosUpdate)
     }
 
     onPageShow() {

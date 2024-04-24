@@ -76,11 +76,11 @@ export default struct ContactListTab {
 
 
         this.loadContact()
-        getContext(this).eventHub.on(EventType.ConnectionStatusChanged, this.onConnectionStatusChange)
+        wfc.eventEmitter!.on(EventType.ConnectionStatusChanged, this.onConnectionStatusChange)
     }
 
     aboutToDisappear() {
-        getContext(this).eventHub.off(EventType.ConnectionStatusChanged, this.onConnectionStatusChange)
+        wfc.eventEmitter!.off(EventType.ConnectionStatusChanged, this.onConnectionStatusChange)
     }
 
     onConnectionStatusChange = (status: number) => {

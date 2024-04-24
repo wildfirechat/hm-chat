@@ -122,14 +122,14 @@ struct ConversationPage {
             console.error('getMessageV2 error', err)
         })
 
-        getContext(this).eventHub.on(EventType.SendMessage, this.onSendMessage)
-        getContext(this).eventHub.on(EventType.ReceiveMessage, this.onReceiveMessage)
-        getContext(this).eventHub.on(EventType.DeleteMessage, this.onDeleteMessage)
-        getContext(this).eventHub.on(EventType.MessageDeleted, this.onRemoteDeleteMessage)
-        getContext(this).eventHub.on(EventType.RecallMessage, this.onRecallMessage)
-        getContext(this).eventHub.on(EventType.MessageRead, this.onReadMessage)
+        wfc.eventEmitter!.on(EventType.SendMessage, this.onSendMessage)
+        wfc.eventEmitter!.on(EventType.ReceiveMessage, this.onReceiveMessage)
+        wfc.eventEmitter!.on(EventType.DeleteMessage, this.onDeleteMessage)
+        wfc.eventEmitter!.on(EventType.MessageDeleted, this.onRemoteDeleteMessage)
+        wfc.eventEmitter!.on(EventType.RecallMessage, this.onRecallMessage)
+        wfc.eventEmitter!.on(EventType.MessageRead, this.onReadMessage)
         if (this.conversation.type === ConversationType.Group) {
-            getContext(this).eventHub.on(EventType.GroupMembersUpdate, this.onGroupMembersUpdate)
+            wfc.eventEmitter!.on(EventType.GroupMembersUpdate, this.onGroupMembersUpdate)
         }
     }
 
@@ -137,14 +137,14 @@ struct ConversationPage {
         clearTimeout(this.timer);
         this.audioPlayerManager.release()
 
-        getContext(this).eventHub.off(EventType.SendMessage, this.onSendMessage)
-        getContext(this).eventHub.off(EventType.ReceiveMessage, this.onReceiveMessage)
-        getContext(this).eventHub.off(EventType.DeleteMessage, this.onDeleteMessage)
-        getContext(this).eventHub.on(EventType.MessageDeleted, this.onRemoteDeleteMessage)
-        getContext(this).eventHub.off(EventType.RecallMessage, this.onRecallMessage)
-        getContext(this).eventHub.off(EventType.MessageRead, this.onReadMessage)
+        wfc.eventEmitter!.off(EventType.SendMessage, this.onSendMessage)
+        wfc.eventEmitter!.off(EventType.ReceiveMessage, this.onReceiveMessage)
+        wfc.eventEmitter!.off(EventType.DeleteMessage, this.onDeleteMessage)
+        wfc.eventEmitter!.on(EventType.MessageDeleted, this.onRemoteDeleteMessage)
+        wfc.eventEmitter!.off(EventType.RecallMessage, this.onRecallMessage)
+        wfc.eventEmitter!.off(EventType.MessageRead, this.onReadMessage)
         if (this.conversation!.type === ConversationType.Group) {
-            getContext(this).eventHub.off(EventType.GroupMembersUpdate, this.onGroupMembersUpdate)
+            wfc.eventEmitter!.off(EventType.GroupMembersUpdate, this.onGroupMembersUpdate)
         } else if (this.conversation!.type === ConversationType.ChatRoom) {
             wfc.quitChatroom(this.conversation!.target, null, null)
         }

@@ -14,7 +14,7 @@ struct ChannelListPage {
 
     aboutToAppear() {
 
-        getContext(this).eventHub.on(EventType.ChannelInfosUpdate, this.onChannelInfosUpdate)
+        wfc.eventEmitter!.on(EventType.ChannelInfosUpdate, this.onChannelInfosUpdate)
         wfc.getRemoteListenedChannels((channelIds: string[]) => {
             channelIds.forEach((channelId: string) => {
                 this.channelList.push(wfc.getChannelInfo(channelId, false))
@@ -25,7 +25,7 @@ struct ChannelListPage {
     }
 
     aboutToDisappear() {
-        getContext(this).eventHub.off(EventType.ChannelInfosUpdate, this.onChannelInfosUpdate)
+        wfc.eventEmitter!.off(EventType.ChannelInfosUpdate, this.onChannelInfosUpdate)
     }
 
     onChannelInfosUpdate = (channelInfos: ChannelInfo[]) => {

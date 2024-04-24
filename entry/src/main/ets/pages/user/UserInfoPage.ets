@@ -23,11 +23,11 @@ export default struct UserInfoPage {
         }
         this.isMyFriend = wfc.isMyFriend(this.userInfo!.uid)
 
-        getContext(this).eventHub.on(EventType.UserInfosUpdate, this.onUserInfosUpdate)
+        wfc.eventEmitter!.on(EventType.UserInfosUpdate, this.onUserInfosUpdate)
     }
 
     aboutToDisappear() {
-        getContext(this).eventHub.off(EventType.UserInfosUpdate, this.onUserInfosUpdate)
+        wfc.eventEmitter!.off(EventType.UserInfosUpdate, this.onUserInfosUpdate)
     }
 
     onUserInfosUpdate = (infos: UserInfo[]) => {

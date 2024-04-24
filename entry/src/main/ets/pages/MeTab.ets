@@ -19,8 +19,8 @@ export default struct MeTab {
 
     aboutToAppear() {
         this.loadSelfUserInfo()
-        getContext(this).eventHub.on(EventType.UserInfosUpdate, this.onUserInfosUpdate)
-        getContext(this).eventHub.on(EventType.ConnectionStatusChanged, this.onConnectionStatusChange)
+        wfc.eventEmitter!.on(EventType.UserInfosUpdate, this.onUserInfosUpdate)
+        wfc.eventEmitter!.on(EventType.ConnectionStatusChanged, this.onConnectionStatusChange)
     }
 
     onUserInfosUpdate = (usersInfo: UserInfo[]) => {
@@ -41,8 +41,8 @@ export default struct MeTab {
     }
 
     aboutToDisappear() {
-        getContext(this).eventHub.off(EventType.UserInfosUpdate, this.onUserInfosUpdate)
-        getContext(this).eventHub.off(EventType.ConnectionStatusChanged, this.onConnectionStatusChange)
+        wfc.eventEmitter!.off(EventType.UserInfosUpdate, this.onUserInfosUpdate)
+        wfc.eventEmitter!.off(EventType.ConnectionStatusChanged, this.onConnectionStatusChange)
     }
 
     build() {

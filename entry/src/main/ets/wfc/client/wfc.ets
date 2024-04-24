@@ -61,7 +61,7 @@ export class WfcManager {
      * @type {module:events.internal.EventEmitter}
      */
     //eventEmitter = new EventEmitter();
-    //eventEmitter;
+    eventEmitter?: common.EventHub;
 
     constructor() {
         // impl.eventEmitter = {
@@ -91,6 +91,7 @@ export class WfcManager {
      * @param {[]} args，pc 时，传入[node实例]; web 时，可以传入Config配置对象，配置项，请参考{@link Config}
      */
     init(context: common.ApplicationContext, eventHub: common.EventHub, dbPath: string, platform: number) {
+        this.eventEmitter = eventHub;
         impl.init(context, eventHub, dbPath);
         impl.setPlatform(platform);
         // if (Config.ENABLE_PTT) {

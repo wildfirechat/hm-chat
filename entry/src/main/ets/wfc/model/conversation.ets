@@ -14,8 +14,8 @@ import ConversationType from "./conversationType";
  */
 export default class Conversation {
     type: number = ConversationType.Single;
-    conversationType = this.type;
     // 这行是为了做一个兼容处理
+    conversationType = this.type;
     target = '';
     line = 0;
 

@@ -5,7 +5,7 @@ import data_preferences from '@ohos.data.preferences';
 import wfc from '../wfc/client/wfc'
 import Config from '../config'
 import { AbilityConstant, Want } from '@kit.AbilityKit';
-import { KeyboardAvoidMode, router } from '@kit.ArkUI';
+import { router } from '@kit.ArkUI';
 import { GlobalContext } from '../globalContext';
 import { pushService } from '@kit.PushKit';
 
@@ -63,27 +63,12 @@ export default class EntryAbility extends UIAbility {
             }
         })
 
-
-        let conversation = want.parameters?.conversation as Conversation
-        if (conversation) {
-            if (this.isMaiPageLoaded) {
-                this.routeToConversationPage(conversation)
-            } else {
-                this.targetConversation = conversation;
-            }
-        }
+        this.parseLaunchParamsAndThen(want);
     }
 
     onNewWant(want: Want, launchParam: AbilityConstant.LaunchParam): void {
-        console.log('testTag, xxxxxxnewWant',)
-        let conversation = want.parameters?.conversation as Conversation
-        if (conversation) {
-            if (this.isMaiPageLoaded) {
-                this.routeToConversationPage(conversation)
-            } else {
-                this.targetConversation = conversation;
-            }
-        }
+        console.log('testTag, newWant',)
+        this.parseLaunchParamsAndThen(want);
     }
 
     onDestroy() {
@@ -160,17 +145,25 @@ export default class EntryAbility extends UIAbility {
         });
     }
 
-    private parseLaunchParams() {
-
+    private parseLaunchParamsAndThen(want: Want) {
+        let conversation = want.parameters?.conversation as Conversation
+        if (conversation) {
+            this.routeToConversationPage(conversation);
+        }
+        // TODO more，比如跳转到加好友、voip 相关页面
     }
 
     private routeToConversationPage(conversation: Conversation) {
-        wfc.clearConversationUnreadStatus(conversation!)
-        router.pushUrl({
-            url: "pages/conversation/ConversationPage",
-            params: {
-                conversation: conversation
-            }
-        }, router.RouterMode.Standard)
+        if (this.isMaiPageLoaded) {
+            wfc.clearConversationUnreadStatus(conversation!)
+            router.pushUrl({
+                url: "pages/conversation/ConversationPage",
+                params: {
+                    conversation: conversation
+                }
+            }, router.RouterMode.Standard)
+        } else {
+            this.targetConversation = conversation;
+        }
     }
 }

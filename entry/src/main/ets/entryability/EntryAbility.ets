@@ -124,6 +124,11 @@ export default class EntryAbility extends UIAbility {
         this.isInBackground = true;
     }
 
+    onBackPressed(): boolean {
+        return true;
+    }
+
+
     private loadContent(url: string) {
         // this.windowStage.getMainWindowSync().setWindowBackgroundColor('#EDEDED')
         console.log('testTag, loadUrl', url)

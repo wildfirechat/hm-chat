@@ -86,41 +86,12 @@ struct ConversationPage {
     }
 
     aboutToAppear() {
-
-        setTimeout(() => {
-            this.scroller.scrollEdge(Edge.Bottom)
-        }, 100)
         this.audioPlayerManager.init(getContext(this))
 
         const params = router.getParams() as Record<string, Object>;
-        this.title = params['title'] as string;
-        this.conversation = params['conversation'] as Conversation;
-        this.conversationInfo = wfc.getConversationInfo(this.conversation)
-        this.readEntries = wfc.getConversationRead(this.conversation)
-        this.enableReceipt = wfc.isReceiptEnabled() && wfc.isUserReceiptEnabled()
-        this.enableGroupReceipt = wfc.isGroupReceiptEnabled()
-
-        if (this.conversation.type === ConversationType.Group) {
-            this.groupMembers = wfc.getGroupMembers(this.conversation.target, false);
-        } else if (this.conversation.type === ConversationType.ChatRoom) {
-            wfc.joinChatroom(this.conversation.target, () => {
-                console.log('join chatroom success', this.conversation!.target)
-            }, err => {
-                showToast('加入聊天室失败')
-                router.back()
-            })
-        }
-
-        Utils.computeConversationItemPortraitAndName(this.conversation)
-            .then(value => {
-                this.title = value.name
-            })
-
-        wfc.getMessagesV2(this.conversation, 0, true, 20, '', (messages) => {
-            this.messages = messages;
-        }, err => {
-            console.error('getMessageV2 error', err)
-        })
+        let title = params['title'] as string;
+        let conversation = params['conversation'] as Conversation;
+        this.setupConversation(conversation, title);
 
         wfc.eventEmitter!.on(EventType.SendMessage, this.onSendMessage)
         wfc.eventEmitter!.on(EventType.ReceiveMessage, this.onReceiveMessage)
@@ -128,8 +99,19 @@ struct ConversationPage {
         wfc.eventEmitter!.on(EventType.MessageDeleted, this.onRemoteDeleteMessage)
         wfc.eventEmitter!.on(EventType.RecallMessage, this.onRecallMessage)
         wfc.eventEmitter!.on(EventType.MessageRead, this.onReadMessage)
-        if (this.conversation.type === ConversationType.Group) {
-            wfc.eventEmitter!.on(EventType.GroupMembersUpdate, this.onGroupMembersUpdate)
+    }
+
+    onPageShow(): void {
+        const params = router.getParams() as Record<string, Object>;
+        let title = params['title'] as string;
+        let conversation = params['conversation'] as Conversation;
+
+        if (!Conversation.equal(this.conversation!, conversation)) {
+            if (this.conversation!.type === ConversationType.Group && conversation.type !== ConversationType.Group) {
+                wfc.eventEmitter!.off(EventType.GroupMembersUpdate, this.onGroupMembersUpdate)
+            }
+
+            this.setupConversation(conversation, title);
         }
     }
 
@@ -147,6 +129,47 @@ struct ConversationPage {
             wfc.eventEmitter!.off(EventType.GroupMembersUpdate, this.onGroupMembersUpdate)
         } else if (this.conversation!.type === ConversationType.ChatRoom) {
             wfc.quitChatroom(this.conversation!.target, null, null)
+        }
+    }
+
+    setupConversation(conversation: Conversation, title: string) {
+        this.conversation = conversation;
+
+        this.conversationInfo = wfc.getConversationInfo(this.conversation)
+        this.readEntries = wfc.getConversationRead(this.conversation)
+        this.enableReceipt = wfc.isReceiptEnabled() && wfc.isUserReceiptEnabled()
+        this.enableGroupReceipt = wfc.isGroupReceiptEnabled()
+
+        if (this.conversation.type === ConversationType.Group) {
+            this.groupMembers = wfc.getGroupMembers(this.conversation.target, false);
+        } else if (this.conversation.type === ConversationType.ChatRoom) {
+            wfc.joinChatroom(this.conversation.target, () => {
+                console.log('join chatroom success', this.conversation!.target)
+            }, err => {
+                showToast('加入聊天室失败')
+                router.back()
+            })
+        }
+
+        if (!title) {
+            Utils.computeConversationItemPortraitAndName(this.conversation)
+                .then(value => {
+                    this.title = value.name
+                })
+        } else {
+            this.title = title;
+        }
+
+        wfc.getMessagesV2(this.conversation, 0, true, 20, '', (messages) => {
+            this.messages = messages;
+
+            this.scroller.scrollEdge(Edge.Bottom)
+        }, err => {
+            console.error('getMessageV2 error', err)
+        })
+
+        if (this.conversation.type === ConversationType.Group) {
+            wfc.eventEmitter!.on(EventType.GroupMembersUpdate, this.onGroupMembersUpdate)
         }
     }
 

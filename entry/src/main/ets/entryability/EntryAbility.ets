@@ -128,7 +128,6 @@ export default class EntryAbility extends UIAbility {
         return true;
     }
 
-
     private loadContent(url: string) {
         // this.windowStage.getMainWindowSync().setWindowBackgroundColor('#EDEDED')
         console.log('testTag, loadUrl', url)
@@ -166,7 +165,7 @@ export default class EntryAbility extends UIAbility {
                 params: {
                     conversation: conversation
                 }
-            }, router.RouterMode.Standard)
+            }, router.RouterMode.Single)
         } else {
             this.targetConversation = conversation;
         }

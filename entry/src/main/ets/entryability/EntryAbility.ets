@@ -14,6 +14,7 @@ import Message from '../wfc/messages/message';
 import wfcNotificationManager from '../notification/wfcNotificationManager'
 import { BusinessError } from '@ohos.base';
 import Conversation from '../wfc/model/conversation';
+import ConnectionStatus from '../wfc/client/connectionStatus';
 
 
 export default class EntryAbility extends UIAbility {
@@ -27,32 +28,41 @@ export default class EntryAbility extends UIAbility {
         hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onCreate');
 
         wfc.init(this.context.getApplicationContext(), this.context.eventHub, this.context.filesDir, Config.getWFCPlatform());
-        // wfc.setConnectionStatusListener(async (status) => {
-        //     console.log('connectionStatus changed', status);
-        //     // TODO 有的状态码时，需要清 session
-        //     if (status === -6) {
-        //         let preference = await data_preferences.getPreferences(this.context, 'wfcstore')
-        //         if (preference) {
-        //             preference.clear()
-        //             preference.flush()
-        //         }
-        //         let url = 'pages/Login'
-        //         this.loadContent(url)
-        //     }
-        // })
-        this.context.eventHub.on(EventType.ReceiveMessage, (message: Message, hasMore: boolean) => {
+        wfc.eventEmitter!.on(EventType.ConnectionStatusChanged, async (status: number) => {
+            if (status === ConnectionStatus.ConnectionStatusConnected) {
+                try {
+                    const pushToken: string = await pushService.getToken();
+                    // huawei harmony
+                    wfc.setDeviceToken(8, pushToken);
+                    hilog.info(0x0000, 'testTag', 'Get push token successfully: %{public}s', pushToken);
+                } catch (err) {
+                    let e: BusinessError = err as BusinessError;
+                    hilog.error(0x0000, 'testTag', 'Get push token catch error: %{public}d %{public}s', e.code, e.message);
+                }
+
+            } else if ([
+                ConnectionStatus.ConnectionStatusTokenIncorrect,
+                ConnectionStatus.ConnectionStatusSecretKeyMismatch,
+                ConnectionStatus.ConnectionStatusRejected,
+                ConnectionStatus.ConnectionStatusLogout,
+                ConnectionStatus.ConnectionStatusKickedOff
+            ].indexOf(status) >= 0) {
+                let preference = await data_preferences.getPreferences(this.context, 'wfcstore')
+                if (preference) {
+                    preference.clear()
+                    preference.flush()
+                }
+                let url = 'pages/Login'
+                this.loadContent(url)
+            }
+        })
+
+        wfc.eventEmitter!.on(EventType.ReceiveMessage, (message: Message, hasMore: boolean) => {
             if (this.isInBackground) {
                 wfcNotificationManager.onReceiveMessage(message, hasMore);
             }
         })
 
-        try {
-            const pushToken: string = await pushService.getToken();
-            hilog.info(0x0000, 'testTag', 'Get push token successfully: %{public}s', pushToken);
-        } catch (err) {
-            let e: BusinessError = err as BusinessError;
-            hilog.error(0x0000, 'testTag', 'Get push token catch error: %{public}d %{public}s', e.code, e.message);
-        }
 
         let conversation = want.parameters?.conversation as Conversation
         if (conversation) {
@@ -60,7 +70,6 @@ export default class EntryAbility extends UIAbility {
                 this.routeToConversationPage(conversation)
             } else {
                 this.targetConversation = conversation;
-                console.log('testTag, xxxxxxnewWant100', JSON.stringify(conversation))
             }
         }
     }
@@ -73,7 +82,6 @@ export default class EntryAbility extends UIAbility {
                 this.routeToConversationPage(conversation)
             } else {
                 this.targetConversation = conversation;
-                console.log('testTag, xxxxxxnewWant100', JSON.stringify(conversation))
             }
         }
     }

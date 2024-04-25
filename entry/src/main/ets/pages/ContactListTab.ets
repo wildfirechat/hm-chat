@@ -118,7 +118,7 @@ export default struct ContactListTab {
         let lastCategory: string = '';
 
         userInfos.forEach(user => {
-            let category:string = pinyin4js.getShortPinyin(user.displayName).substring(0, 1).toUpperCase() as string
+            let category: string = pinyin4js.getShortPinyin(user.displayName).substring(0, 1).toUpperCase() as string
             if (category < 'A' || category > 'Z') {
                 category = '#'
             }
@@ -298,6 +298,7 @@ export default struct ContactListTab {
                     strokeWidth: 1,
                     startMargin: 60,
                 })
+                .scrollBar(BarState.Off)
                 .width('100%')
                 .height('100%')
             }

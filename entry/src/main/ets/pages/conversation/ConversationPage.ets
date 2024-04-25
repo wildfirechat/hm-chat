@@ -103,6 +103,9 @@ struct ConversationPage {
 
     onPageShow(): void {
         const params = router.getParams() as Record<string, Object>;
+        if (!params) {
+            return
+        }
         let title = params['title'] as string;
         let conversation = params['conversation'] as Conversation;
 

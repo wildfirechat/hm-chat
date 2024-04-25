@@ -79,11 +79,10 @@ export default struct PickContactPage {
                 .type(ButtonType.Normal)
                 .height(30)
                 .width(60)
-                .margin({right: 18})
+                .margin({ right: 18 })
                 .enabled(this.newlyCheckedUsers().length > 0)
                 .fontSize(14)
                 .borderRadius(4)// .backgroundColor(Color.Blue)
-                    // TODO
                 .onClick(() => {
                     let options: router.RouterOptions = {
                         url: '',

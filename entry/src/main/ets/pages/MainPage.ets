@@ -19,6 +19,8 @@ import { ChannelInfoPage } from './channel/ChannelInfoPage'
 
 import notificationManager from '@ohos.notificationManager';
 import Base from '@ohos.base';
+import WorkSpaceTab from './WorkSpaceTab'
+import Config from '../config'
 
 const TAG = 'Main';
 
@@ -30,11 +32,12 @@ const permissions: Array<Permissions> = [
     'ohos.permission.READ_IMAGEVIDEO'
 ];
 
+
 @Entry
 @Component
 struct MainPage {
     private tabsController: TabsController = new TabsController()
-    private tabTitles: string[] = ['野火', '通讯录', '发现', '我的']
+    private tabTitles: string[] = ['野火', '通讯录', '工作台', '发现', '我的']
     @State message: string = 'Hello World'
     @State title: string = '野火'
     @State currentIndex: number = 0
@@ -51,37 +54,13 @@ struct MainPage {
         if (params) {
             const tag: string = params['tag'] as string
             if (tag === PickContactPage.TAG) {
-                if (!this.isNewPickContact) {
-                    return
-                }
                 this.isNewPickContact = false
-                let result: UserInfo[] = params['result'] as UserInfo[]
-                if (result.length === 1) {
-                    router.pushUrl({
-                        url: "pages/conversation/ConversationPage",
-                        params: {
-                            conversation: new Conversation(ConversationType.Single, result[0].uid, 0)
-                        }
-                    }, router.RouterMode.Standard)
-                } else {
-                    let memberIds: string[] = result.map(userInfo => userInfo.uid)
-                    let first5Members = result.slice(0, 5)
-                    let groupName = ''
-                    first5Members.forEach(userInfo => {
-                        groupName += userInfo.displayName
-                        groupName += '、'
-                    })
-                    groupName = groupName.substring(0, groupName.length - 1)
-                    wfc.createGroup('', GroupType.Normal, groupName, '', '', memberIds, '', [0], null, (groupId) => {
-                        router.pushUrl({
-                            url: "pages/conversation/ConversationPage",
-                            params: {
-                                conversation: new Conversation(ConversationType.Group, groupId, 0)
-                            }
-                        }, router.RouterMode.Standard)
-                    }, err => {
-
-                    })
+                if (this.isNewPickContact) {
+                    this.isNewPickContact = false;
+                    let pickedUser: UserInfo[] = params['result'] as UserInfo[]
+                    if (pickedUser.length > 0) {
+                        this.createConversation(pickedUser)
+                    }
                 }
             }
         }
@@ -99,6 +78,36 @@ struct MainPage {
                     conversation: conversation
                 }
             }, router.RouterMode.Standard)
+        }
+    }
+
+    createConversation(users: UserInfo[]) {
+        if (users.length === 1) {
+            router.pushUrl({
+                url: "pages/conversation/ConversationPage",
+                params: {
+                    conversation: new Conversation(ConversationType.Single, users[0].uid, 0)
+                }
+            }, router.RouterMode.Standard)
+        } else {
+            let memberIds: string[] = users.map(userInfo => userInfo.uid)
+            let first5Members = users.slice(0, 5)
+            let groupName = ''
+            first5Members.forEach(userInfo => {
+                groupName += userInfo.displayName
+                groupName += '、'
+            })
+            groupName = groupName.substring(0, groupName.length - 1)
+            wfc.createGroup('', GroupType.Normal, groupName, '', '', memberIds, '', [0], null, (groupId) => {
+                router.pushUrl({
+                    url: "pages/conversation/ConversationPage",
+                    params: {
+                        conversation: new Conversation(ConversationType.Group, groupId, 0)
+                    }
+                }, router.RouterMode.Standard)
+            }, err => {
+
+            })
         }
     }
 
@@ -291,15 +300,32 @@ struct MainPage {
                 }
                 .tabBar(this.TabBuilder(this.tabTitles[1], 1, $r('app.media.contacts_press'), $r('app.media.contacts_normal')))
 
-                TabContent() {
-                    DiscoveryTab({ discoveryTabUnreadCount: $discoveryTabUnreadCount })
-                }
-                .tabBar(this.TabBuilder(this.tabTitles[2], 2, $r('app.media.discovery_press'), $r('app.media.discovery_normal')))
+                if (Config.OPEN_PLATFORM_WORK_SPACE_URL) {
+                    TabContent() {
+                        WorkSpaceTab()
+                    }
+                    .tabBar(this.TabBuilder(this.tabTitles[2], 2, $r('app.media.work_press'), $r('app.media.work')))
 
-                TabContent() {
-                    MeTab({ meTabUnreadCount: $meTabUnreadCount })
+                    TabContent() {
+                        DiscoveryTab({ discoveryTabUnreadCount: $discoveryTabUnreadCount })
+                    }
+                    .tabBar(this.TabBuilder(this.tabTitles[3], 3, $r('app.media.discovery_press'), $r('app.media.discovery_normal')))
+
+                    TabContent() {
+                        MeTab({ meTabUnreadCount: $meTabUnreadCount })
+                    }
+                    .tabBar(this.TabBuilder(this.tabTitles[4], 4, $r('app.media.me_press'), $r('app.media.me_normal')))
+                } else {
+                    TabContent() {
+                        DiscoveryTab({ discoveryTabUnreadCount: $discoveryTabUnreadCount })
+                    }
+                    .tabBar(this.TabBuilder(this.tabTitles[3], 3, $r('app.media.discovery_press'), $r('app.media.discovery_normal')))
+
+                    TabContent() {
+                        MeTab({ meTabUnreadCount: $meTabUnreadCount })
+                    }
+                    .tabBar(this.TabBuilder(this.tabTitles[4], 4, $r('app.media.me_press'), $r('app.media.me_normal')))
                 }
-                .tabBar(this.TabBuilder(this.tabTitles[3], 3, $r('app.media.me_press'), $r('app.media.me_normal')))
             }
             .onChange(index => {
                 this.currentIndex = index

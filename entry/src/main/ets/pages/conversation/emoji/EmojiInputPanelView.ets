@@ -112,6 +112,7 @@ export default struct EmojiInputPanelView {
                             .scrollable(ScrollDirection.Vertical)
                             .scrollBar(BarState.Off)
                             .padding({ bottom: 40 })
+                            .height('100%')
 
                         } else {
                             Scroll() {
@@ -126,6 +127,7 @@ export default struct EmojiInputPanelView {
                                             Image(emoji.data)
                                                 .height(64)
                                                 .width(64)
+                                                .draggable(false)
                                         }
                                         .width(70)
                                         .height(70)
@@ -146,10 +148,12 @@ export default struct EmojiInputPanelView {
                                         })
                                     }, (emoji: Emoji, index: number) => index + '')
                                 }
+                                .height('100%')
                             }
                             .scrollable(ScrollDirection.Vertical)
                             .scrollBar(BarState.Off)
                             .padding({ top: 10 })
+                            .height('100%')
                         }
                     }, (category: Category, index: number) => index + '')
                 }
@@ -181,6 +185,7 @@ export default struct EmojiInputPanelView {
                             .backgroundColor(Color.White)
                         }
                     })
+                    .alignSelf(ItemAlign.End)
                     .onClick(() => {
                         // TODO 不能处理 unicode 字符
                         // FIXME

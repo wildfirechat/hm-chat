@@ -22,6 +22,7 @@ import { KeyboardAvoidMode, window } from '@kit.ArkUI'
 import MentionGroupMemberView from './mention/MentionGroupMemberView'
 import UserInfo from '../../wfc/model/userInfo'
 import ConversationType from '../../wfc/model/conversationType'
+import { preferences } from '@kit.ArkData'
 
 
 const INPUT_ICON_WIDTH = 30
@@ -268,6 +269,7 @@ export default struct ConversationInputPanelView {
         }
         this.showEmojiPanel = false
         this.showExtPanel = false
+        this.setKeyboardAvoidMode(KeyboardAvoidMode.RESIZE)
         setTimeout(() => {
             this.collapseConversationInputPanelViewTimestamp = 0
         }, 100)
@@ -294,26 +296,31 @@ export default struct ConversationInputPanelView {
         window.getLastWindow(getContext(this)).then(currentWindow => {
             let property = currentWindow.getWindowProperties();
 
-            // TODO
-            // FIXME
-            // 将软键盘高度持久化
-            // 监听软键盘的隐藏和显示
-            currentWindow.on('avoidAreaChange', async data => {
-                let property = currentWindow.getWindowProperties();
-                if (data.type === window.AvoidAreaType.TYPE_KEYBOARD) {
-                    this.messageListScroller!.scrollEdge(Edge.Bottom);
-                    if (data.area.bottomRect.height > 0) {
-                        let type = window.AvoidAreaType.TYPE_NAVIGATION_INDICATOR; // 底部导航条
-                        let navIndicatorAvoidArea = currentWindow.getWindowAvoidArea(type);
-                        this.keyboardHeight = px2vp(data.area.bottomRect.height - navIndicatorAvoidArea.bottomRect.height);
+            let preference = preferences.getPreferencesSync(getContext(this), { name: 'wfcstore' })
+            let keyboardHeight = preference.getSync('keyboardHeight', 0) as number
+            if (keyboardHeight === 0) {
+                currentWindow.on('avoidAreaChange', async data => {
+                    let property = currentWindow.getWindowProperties();
+                    if (data.type === window.AvoidAreaType.TYPE_KEYBOARD) {
+                        this.messageListScroller!.scrollEdge(Edge.Bottom);
+                        if (data.area.bottomRect.height > 0) {
+                            let type = window.AvoidAreaType.TYPE_NAVIGATION_INDICATOR; // 底部导航条
+                            let navIndicatorAvoidArea = currentWindow.getWindowAvoidArea(type);
+                            this.keyboardHeight = px2vp(data.area.bottomRect.height - navIndicatorAvoidArea.bottomRect.height);
+                            preference.put('keyboardHeight', this.keyboardHeight);
+                        }
                     }
-                }
-            })
+                })
+            } else {
+                this.keyboardHeight = keyboardHeight;
+            }
         })
 
         if (this.conversation.type === ConversationType.Group) {
             this.groupId = this.conversation.target;
         }
+
+        this.setKeyboardAvoidMode(KeyboardAvoidMode.RESIZE);
     }
 
     async startRecordAudio() {
@@ -400,24 +407,6 @@ export default struct ConversationInputPanelView {
                             })
                             .caretPosition(this.caretPosition)
                             .onFocus(() => {
-                                // this.showExtPanel = false
-                                // this.showEmojiPanel = true
-                                if (!this.showEmojiPanel && !this.showExtPanel) {
-                                    this.showEmojiPanel = true;
-                                }
-                                if (this.showExtPanel || this.showEmojiPanel) {
-                                    let windowStage = GlobalContext.getContext()
-                                        .getObject('windowStage') as window.WindowStage;
-                                    windowStage.getMainWindowSync()
-                                        .getUIContext()
-                                        .setKeyboardAvoidMode(KeyboardAvoidMode.OFFSET);
-                                } else {
-                                    let windowStage = GlobalContext.getContext()
-                                        .getObject('windowStage') as window.WindowStage;
-                                    windowStage.getMainWindowSync()
-                                        .getUIContext()
-                                        .setKeyboardAvoidMode(KeyboardAvoidMode.RESIZE);
-                                }
                                 this.textInputFocused = true
                             })
                             .focusable(this.collapseConversationInputPanelViewTimestamp === 0)
@@ -482,7 +471,8 @@ export default struct ConversationInputPanelView {
                         .focusOnTouch(true)
                         .onClick(() => {
                             this.showExtPanel = false
-                            this.showEmojiPanel = !this.textInputFocused
+                            this.showEmojiPanel = !this.showEmojiPanel;
+                            this.textInputFocused = false;
                             this.showAudioRecorderButton = false
                         })
                     if (this.text.trim().length > 0) {
@@ -562,8 +552,13 @@ export default struct ConversationInputPanelView {
                     .columnsTemplate('1fr 1fr 1fr 1fr')
                     .columnsGap(10)
                     .rowsGap(10)
+                    .margin(0)
+                    .padding(0)
                     .width('100%')
                     .height(this.keyboardHeight)
+                    .onAppear(() => {
+                        this.setKeyboardAvoidMode(KeyboardAvoidMode.OFFSET)
+                    })
                 }
 
                 if (this.showEmojiPanel) {
@@ -576,10 +571,14 @@ export default struct ConversationInputPanelView {
                     })
                         .focusable(true)
                         .width('100%')
+                        .margin(0)
+                        .padding(0)
                         .height(this.keyboardHeight)
+                        .onAppear(() => {
+                            this.setKeyboardAvoidMode(KeyboardAvoidMode.OFFSET)
+                        })
                 }
             }
-            .expandSafeArea([SafeAreaType.KEYBOARD])
             .backgroundColor('#F7F7F7')
 
             .bindSheet(this.showMentionSheet, MentionGroupMemberView(this.groupId, this.onMentionGroupMember), {
@@ -591,6 +590,14 @@ export default struct ConversationInputPanelView {
                 }
             })
         }
+    }
+
+    setKeyboardAvoidMode(value: KeyboardAvoidMode) {
+        let windowStage = GlobalContext.getContext()
+            .getObject('windowStage') as window.WindowStage;
+        windowStage.getMainWindowSync()
+            .getUIContext()
+            .setKeyboardAvoidMode(value);
     }
 }
 

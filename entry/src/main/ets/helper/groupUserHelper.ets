@@ -1,7 +1,7 @@
 import { pinyin4js } from '@ohos/pinyin4js';
-import { UIUserInfo } from '../../common/Types';
-import wfc from '../../wfc/client/wfc';
-import UserInfo from '../../wfc/model/userInfo';
+import { UIUserInfo } from '../common/Types';
+import wfc from '../wfc/client/wfc';
+import UserInfo from '../wfc/model/userInfo';
 import taskpool from '@ohos.taskpool';
 
 
@@ -14,18 +14,15 @@ export function loadAndGroupContactUserInfos(): Promise<UIUserInfo[]> {
     })
 }
 
-export function groupUserInfos(userInfos: UserInfo[]): Promise<UIUserInfo[]> {
+export function groupUserInfos(userIds: string[], groupId = ''): Promise<UIUserInfo[]> {
     return new Promise((resolve, reject) => {
         try {
-
-            taskpool.execute(groupUserInfoTask, userInfos).then((ret: Object) => {
+            taskpool.execute(groupUserInfoTask, userIds, groupId).then((ret: Object) => {
                 let uiUserInfos = ret as UIUserInfo[]
                 resolve(uiUserInfos)
             }).catch((e: Error) => {
-                console.log('xxxxxxxxxxxx e', e)
             })
         } catch (e) {
-            console.log('xxxxxxxxxxxx e', e)
         }
     })
 }
@@ -89,11 +86,11 @@ function loadContactAndGroupTask(): UIUserInfo[] {
 
 
 @Concurrent
-function groupUserInfoTask(userInfos: UserInfo[]): UIUserInfo[] {
-    console.log('xxxxxxxxx groupUserInfoTask', userInfos.length)
+function groupUserInfoTask(userIds: string[], groupId = ''): UIUserInfo[] {
     let groupedUsers: UIUserInfo[] = []
     let lastCategory: string = '';
 
+    let userInfos = wfc.getUserInfos(userIds, groupId)
     userInfos.forEach(user => {
         let category: string = pinyin4js.getShortPinyin(user.displayName.substring(0, 1)).toUpperCase() as string
         if (category < 'A' || category > 'Z') {
@@ -140,6 +137,5 @@ function groupUserInfoTask(userInfos: UserInfo[]): UIUserInfo[] {
 
     })
 
-    console.log('xxxxxxxxx groupUserInfoTask end', userInfos.length)
     return groupedUsers
 }

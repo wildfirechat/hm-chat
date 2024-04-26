@@ -5,6 +5,7 @@ import BasicDataSource from '../common/BasicDataSource'
 import UserItemView from './UserItemView'
 import wfc from '../wfc/client/wfc'
 import GroupMemberType from '../wfc/model/groupMemberType'
+import { groupUserInfos } from '../helper/groupUserHelper'
 
 @Component
 export default struct MentionGroupMemberListView {
@@ -29,7 +30,10 @@ export default struct MentionGroupMemberListView {
             this.enableMentionAll = true;
         }
 
-        this.userInfoDataSource.setUserInfos(this.groupUserInfos(this.filteredUserInfos))
+        groupUserInfos(this.filteredUserInfos.map(u => u.uid), this.groupId)
+            .then(infos => {
+                this.userInfoDataSource.setUserInfos(infos)
+            })
     }
 
     filter(key: string) {
@@ -43,79 +47,11 @@ export default struct MentionGroupMemberListView {
         } else {
             this.filteredUserInfos = this.userInfos
         }
-        this.userInfoDataSource.setUserInfos(this.groupUserInfos(this.filteredUserInfos))
-    }
 
-    groupUserInfos(userInfos: UserInfo[]): UIUserInfo[] {
-        let groupedUsers: UIUserInfo[] = []
-        let lastCategory: string = '';
-
-        if (!this.showCategory) {
-            return this.userInfos.map((info: UserInfo) => {
-                return {
-                    showCategory: false,
-                    userInfo: info
-                } as UIUserInfo
+        groupUserInfos(this.filteredUserInfos.map(u => u.uid), this.groupId)
+            .then(infos => {
+                this.userInfoDataSource.setUserInfos(infos)
             })
-        }
-        userInfos.forEach(user => {
-            let category = pinyin4js.getShortPinyin(user.displayName).substring(0, 1).toUpperCase() as string
-            if (category < 'A' || category > 'Z') {
-                category = '#'
-            }
-            if (!lastCategory || lastCategory !== category) {
-                groupedUsers.push({
-                    showCategory: false,
-                    category: category,
-                    userInfo: user
-                });
-            } else {
-                groupedUsers.push({
-                    showCategory: false,
-                    category: category,
-                    userInfo: user
-                });
-            }
-            lastCategory = category
-        })
-
-        groupedUsers.sort((a, b) => {
-            if (a.category !== '#' && b.category !== '#') {
-                return a.category > b.category ? 1 : 0
-            } else {
-                if (a.category === '#' && b.category !== '#') {
-                    return 1
-                } else if (a.category !== '#' && b.category === '#') {
-                    return -1
-                } else {
-                    return 0
-                }
-            }
-        })
-
-        lastCategory = ''
-        groupedUsers.forEach(gu => {
-            if (!lastCategory || lastCategory !== gu.category) {
-                gu.showCategory = true
-            } else {
-                gu.showCategory = false
-            }
-            lastCategory = gu.category
-        })
-
-        if (this.enableMentionAll) {
-            let mentionAllUserInfo = new UserInfo();
-            mentionAllUserInfo.uid = '@all'
-            mentionAllUserInfo.displayName = '所有人'
-            mentionAllUserInfo.portrait = wfc.getGroupInfo(this.groupId, false).portrait
-            groupedUsers.splice(0, 0, {
-                userInfo: mentionAllUserInfo,
-                showCategory: false,
-                category: '',
-            });
-        }
-
-        return groupedUsers
     }
 
     build() {

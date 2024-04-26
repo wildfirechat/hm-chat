@@ -12,7 +12,7 @@ import ConnectionStatus from '../wfc/client/connectionStatus'
 import { pinyin4js } from '@ohos/pinyin4js/src/main/ets/components'
 import { UIUserInfo } from '../common/Types'
 import BasicDataSource from '../common/BasicDataSource'
-import { loadAndGroupContactUserInfos } from './contact/contactAdapter'
+import { loadAndGroupContactUserInfos } from '../helper/groupUserHelper'
 
 interface ContactListHeader {
     title: string,

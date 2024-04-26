@@ -12,6 +12,7 @@ import ConnectionStatus from '../wfc/client/connectionStatus'
 import { pinyin4js } from '@ohos/pinyin4js/src/main/ets/components'
 import { UIUserInfo } from '../common/Types'
 import BasicDataSource from '../common/BasicDataSource'
+import { loadAndGroupContactUserInfos } from './contact/contactAdapter'
 
 interface ContactListHeader {
     title: string,
@@ -90,80 +91,28 @@ export default struct ContactListTab {
     }
 
     loadContact() {
-        let favUserInfos: UserInfo[] = []
-        let favUserIds = wfc.getFavUsers()
-        if (favUserIds.length > 0) {
-            favUserInfos = wfc.getUserInfos(favUserIds, '')
-            let groupedFavContactUserInfos: UIUserInfo[] = []
-            for (let i = 0; i < favUserInfos.length; i++) {
-                groupedFavContactUserInfos.push({
-                    showCategory: i === 0,
-                    category: '☆',
-                    userInfo: favUserInfos[i]
-                })
-            }
-            this.contactDataSource.setFavContactInfos(groupedFavContactUserInfos)
-        }
-        let friendUserIds = wfc.getMyFriendList()
-        let userInfos = wfc.getUserInfos(friendUserIds, '')
-        let groupedContactUserInfos = this.groupUserInfos(userInfos)
-        this.contactDataSource.setContactInfos(groupedContactUserInfos)
+        // let favUserInfos: UserInfo[] = []
+        // let favUserIds = wfc.getFavUsers()
+        // if (favUserIds.length > 0) {
+        //     favUserInfos = wfc.getUserInfos(favUserIds, '')
+        //     let groupedFavContactUserInfos: UIUserInfo[] = []
+        //     for (let i = 0; i < favUserInfos.length; i++) {
+        //         groupedFavContactUserInfos.push({
+        //             showCategory: i === 0,
+        //             category: '☆',
+        //             userInfo: favUserInfos[i]
+        //         })
+        //     }
+        //     this.contactDataSource.setFavContactInfos(groupedFavContactUserInfos)
+        // }
+
+        loadAndGroupContactUserInfos().then(groupedUserInfos => {
+            let groupedContactUserInfos = groupedUserInfos;
+            this.contactDataSource.setContactInfos(groupedContactUserInfos)
+        })
     }
 
     onPageShow() {
-    }
-
-    groupUserInfos(userInfos: UserInfo[]): UIUserInfo[] {
-        let groupedUsers: UIUserInfo[] = []
-        let lastCategory: string = '';
-
-        userInfos.forEach(user => {
-            let category: string = pinyin4js.getShortPinyin(user.displayName).substring(0, 1).toUpperCase() as string
-            if (category < 'A' || category > 'Z') {
-                category = '#'
-            }
-            if (!lastCategory || lastCategory !== category) {
-                groupedUsers.push({
-                    showCategory: false,
-                    category: category,
-                    userInfo: user
-                });
-            } else {
-                groupedUsers.push({
-                    showCategory: false,
-                    category: category,
-                    userInfo: user
-                });
-            }
-            lastCategory = category
-        })
-
-        groupedUsers.sort((a, b) => {
-            if (a.category !== '#' && b.category !== '#') {
-                return a.category > b.category ? 1 : 0
-            } else {
-                if (a.category === '#' && b.category !== '#') {
-                    return 1
-                } else if (a.category !== '#' && b.category === '#') {
-                    return -1
-                } else {
-                    return 0
-                }
-            }
-        })
-
-        lastCategory = ''
-        groupedUsers.forEach(gu => {
-            if (!lastCategory || lastCategory !== gu.category) {
-                gu.showCategory = true
-            } else {
-                gu.showCategory = false
-            }
-            lastCategory = gu.category
-
-        })
-
-        return groupedUsers
     }
 
     scrollContactListToCategory(category: string) {

@@ -21,6 +21,12 @@ import notificationManager from '@ohos.notificationManager';
 import Base from '@ohos.base';
 import WorkSpaceTab from './WorkSpaceTab'
 import Config from '../config'
+import SearchPortalPage from './search/SearchPortalPage'
+import ConversationPage from './conversation/ConversationPage'
+import ConversationInfo from '../wfc/model/conversationInfo'
+import SingleConversationInfoPage from './conversation/SingleConversationInfoPage'
+import GroupConversationInfoPage from './conversation/GroupConversationInfoPage'
+import ChannelConversationInfoPage from './conversation/ChannelConversationInfoPage'
 
 const TAG = 'Main';
 
@@ -46,24 +52,13 @@ struct MainPage {
     @State @Watch('onUnreadCountUpdated') discoveryTabUnreadCount: number = 0
     @State meTabUnreadCount: number = 0
     // TODO router.getParams() 一直返回 router.back 时设置的参数
-    private isNewPickContact = false
+    @Provide('isNewPickContact') isNewPickContact: boolean = false
+    @Provide('mainNavPathStack') mainNavPathStack: NavPathStack = new NavPathStack()
+    @Provide('pickUserResult') pickUserResult: UserInfo[] = []
 
     onPageShow() {
         let params = router.getParams() as Record<string, Object>
         console.log('main Index Show', params)
-        if (params) {
-            const tag: string = params['tag'] as string
-            if (tag === PickContactPage.TAG) {
-                this.isNewPickContact = false
-                if (this.isNewPickContact) {
-                    this.isNewPickContact = false;
-                    let pickedUser: UserInfo[] = params['result'] as UserInfo[]
-                    if (pickedUser.length > 0) {
-                        this.createConversation(pickedUser)
-                    }
-                }
-            }
-        }
 
         notificationManager.cancelAll()
 
@@ -72,23 +67,17 @@ struct MainPage {
         if (conversation) {
             storage.delete('targetConversation')
             wfc.clearConversationUnreadStatus(conversation!)
-            router.pushUrl({
-                url: "pages/conversation/ConversationPage",
-                params: {
-                    conversation: conversation
-                }
-            }, router.RouterMode.Standard)
+            this.mainNavPathStack.pushPathByName('conversation', {
+                'conversation': Conversation
+            } as Record<string, Object>)
         }
     }
 
     createConversation(users: UserInfo[]) {
         if (users.length === 1) {
-            router.pushUrl({
-                url: "pages/conversation/ConversationPage",
-                params: {
-                    conversation: new Conversation(ConversationType.Single, users[0].uid, 0)
-                }
-            }, router.RouterMode.Standard)
+            this.mainNavPathStack.pushPathByName('conversation', {
+                'conversation': new Conversation(ConversationType.Single, users[0].uid, 0)
+            } as Record<string, Object>)
         } else {
             let memberIds: string[] = users.map(userInfo => userInfo.uid)
             let first5Members = users.slice(0, 5)
@@ -99,12 +88,9 @@ struct MainPage {
             })
             groupName = groupName.substring(0, groupName.length - 1)
             wfc.createGroup('', GroupType.Normal, groupName, '', '', memberIds, '', [0], null, (groupId) => {
-                router.pushUrl({
-                    url: "pages/conversation/ConversationPage",
-                    params: {
-                        conversation: new Conversation(ConversationType.Group, groupId, 0)
-                    }
-                }, router.RouterMode.Standard)
+                this.mainNavPathStack.pushPathByName('conversation', {
+                    'conversation': new Conversation(ConversationType.Group, groupId, 0)
+                } as Record<string, Object>)
             }, err => {
 
             })
@@ -232,15 +218,34 @@ struct MainPage {
     }
 
     @Builder
+    pickContactModal() {
+        PickContactPage()
+            .height('100%')
+            .width('100%')
+            .margin({ top: px2vp(AppStorage.get<number>('SafeAreaTopHeight')) })
+            .backgroundColor(Color.White)
+    }
+
+    @Builder
     SubMoreMenus() {
         Menu() {
             MenuItem({ startIcon: $r('app.media.faqiqunliao_iconfont'), content: "创建群聊" })
                 .onClick(() => {
                     this.isNewPickContact = true
-                    router.pushUrl({
-                        url: "pages/picker/PickContactPage",
-                    }, router.RouterMode.Standard).then(() => {
-                    })
+                    this.pickUserResult = [];
+                })
+                .bindContentCover(this.isNewPickContact, this.pickContactModal(), {
+                    modalTransition: ModalTransition.DEFAULT,
+                    onAppear: () => {
+                    },
+
+                    onDisappear: () => {
+                        this.isNewPickContact = false
+                        if (this.pickUserResult.length > 0) {
+                            this.createConversation(this.pickUserResult)
+                        }
+                        this.pickUserResult = []
+                    }
                 })
             MenuItem({ startIcon: $r('app.media.faqiqunliao_iconfont'), content: "发起密聊" })
                 .enabled(false)
@@ -269,9 +274,10 @@ struct MainPage {
                 .height(30)
                 .padding(6)
                 .onClick(() => {
-                    router.pushUrl({
-                        url: 'pages/search/SearchPortalPage'
-                    })
+                    let xx = this.mainNavPathStack.getAllPathName();
+                    this.mainNavPathStack.pushPathByName('searchPortal', {
+                        'keyword': '1'
+                    } as Record<string, Object>, true)
                 })
 
             Image($r('app.media.ic_add'))
@@ -288,7 +294,7 @@ struct MainPage {
     }
 
     build() {
-        Navigation() {
+        Navigation(this.mainNavPathStack) {
             Tabs({ barPosition: BarPosition.End, controller: this.tabsController }) {
                 TabContent() {
                     ConversationListTab({ conversationListTabUnreadCount: $conversationListTabUnreadCount })
@@ -336,14 +342,24 @@ struct MainPage {
         .titleMode(NavigationTitleMode.Mini)
         .hideBackButton(true)
         .menus(this.NavigationMenus())
+        .mode(NavigationMode.Stack)
+        .navDestination(this.PagesMap)
+    }
 
-        // .menus([
-        //     { value: "", icon: "common/image/ic_search.png", action: () => {
-        //         showToast('TODO search')
-        //     } },
-        //     { value: "", icon: "common/image/ic_add.png", action: () => {
-        //         showToast('TODO add')
-        //     } },
-        // ])
+    @Builder
+    PagesMap(name: string) {
+        // TODO add more
+        // TODO FIXME 参数使用 NavDestination.onReady 处理，而不是 aboutToAppear
+        if (name == 'searchPortal') {
+            SearchPortalPage()
+        } else if (name == 'conversation') {
+            ConversationPage()
+        } else if (name === 'singleConversationInfo') {
+            SingleConversationInfoPage()
+        } else if (name === 'groupConversationInfo') {
+            GroupConversationInfoPage()
+        } else if (name === 'channelConversationInfo') {
+            ChannelConversationInfoPage()
+        }
     }
 }

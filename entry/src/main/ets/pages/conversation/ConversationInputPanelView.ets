@@ -52,6 +52,7 @@ export default struct ConversationInputPanelView {
     @State showMentionSheet: boolean = false
     @State keyboardHeight: number = 300
     @State showAudioRecorderButton: boolean = false
+    @State enable:boolean = false
     // for audioRecorderView
     @Link showAudioRecorderView: boolean
     @Link showCancelRecordIndicator: boolean
@@ -404,8 +405,7 @@ export default struct ConversationInputPanelView {
                                 } else {
                                     this.text = value
                                 }
-                            })
-                            .caretPosition(this.caretPosition)
+                            })// .caretPosition(this.caretPosition)
                             .onFocus(() => {
                                 this.textInputFocused = true
                             })
@@ -468,10 +468,14 @@ export default struct ConversationInputPanelView {
                         .width(INPUT_ICON_WIDTH)
                         .height(INPUT_ICON_WIDTH)
                         .focusable(true)
+                        .defaultFocus(false)
                         .focusOnTouch(true)
                         .onClick(() => {
                             this.showExtPanel = false
                             this.showEmojiPanel = !this.showEmojiPanel;
+                            if (!this.showEmojiPanel) {
+                                this.textInputController.caretPosition(0)
+                            }
                             this.textInputFocused = false;
                             this.showAudioRecorderButton = false
                         })
@@ -579,6 +583,10 @@ export default struct ConversationInputPanelView {
                         })
                 }
             }
+            .enabled(this.enable)
+            .onAppear(() => {
+                this.enable = true
+            })
             .backgroundColor('#F7F7F7')
 
             .bindSheet(this.showMentionSheet, MentionGroupMemberView(this.groupId, this.onMentionGroupMember), {

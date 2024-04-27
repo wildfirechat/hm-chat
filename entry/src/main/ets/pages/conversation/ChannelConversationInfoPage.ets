@@ -1,15 +1,14 @@
 @Entry
 @Component
-struct ChannelConversationInfoPage {
+export default struct ChannelConversationInfoPage {
+    @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
+
     build() {
-        Navigation() {
+        NavDestination() {
             Text('TODO ConversationInfo')
         }
         .title('频道会话详情')
-        .titleMode(NavigationTitleMode.Mini)
-        .hideBackButton(false)
         .height('100%')
         .width('100%')
-        .navBarPosition(NavBarPosition.Start)
     }
 }

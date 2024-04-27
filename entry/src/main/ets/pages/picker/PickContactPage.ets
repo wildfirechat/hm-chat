@@ -12,6 +12,8 @@ export default struct PickContactPage {
     private uncheckableUserIds: string[] = []
     public static TAG: string = 'pickUser'
     public static PICKER_RESULT: string = 'pickerResult'
+    @Consume('pickUserResult') pickUserResult: UserInfo[]
+    @Consume('isNewPickContact') isNewPickContact: boolean
 
     aboutToAppear() {
         let friendUserIds = wfc.getMyFriendList()
@@ -69,6 +71,7 @@ export default struct PickContactPage {
         .height('100%')
         .width('100%')
         .navBarPosition(NavBarPosition.Start)
+        // .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.START])
         .menus(this.NavigationMenus())
     }
 
@@ -84,14 +87,8 @@ export default struct PickContactPage {
                 .fontSize(14)
                 .borderRadius(4)// .backgroundColor(Color.Blue)
                 .onClick(() => {
-                    let options: router.RouterOptions = {
-                        url: '',
-                        params: {
-                            tag: PickContactPage.TAG,
-                            result: this.newlyCheckedUsers(),
-                        }
-                    }
-                    router.back(options)
+                    this.pickUserResult = this.newlyCheckedUsers();
+                    this.isNewPickContact = false
                 })
         }
         .height('100%')

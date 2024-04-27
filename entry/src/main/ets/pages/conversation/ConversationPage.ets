@@ -32,10 +32,11 @@ import UserInfo from '../../wfc/model/userInfo'
 import Utils from '../../common/Utils'
 import { FaultLogger } from '@kit.PerformanceAnalysisKit'
 import { HashMap } from '@kit.ArkTS'
+import SingleConversationInfoPage from './SingleConversationInfoPage'
 
 @Entry
 @Component
-struct ConversationPage {
+export default struct ConversationPage {
     @State text: string = ''
     @State title: string = ''
     @State conversation?: Conversation = undefined
@@ -61,6 +62,7 @@ struct ConversationPage {
     private enableReceipt: boolean = false
     private enableGroupReceipt: boolean = false
     private groupMembers: GroupMember[] = []
+    @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
 
     putDownRefresh(event?: TouchEvent): void {
         if (event === undefined) {
@@ -88,9 +90,9 @@ struct ConversationPage {
     aboutToAppear() {
         this.audioPlayerManager.init(getContext(this))
 
-        const params = router.getParams() as Record<string, Object>;
-        let title = params['title'] as string;
+        let params = this.mainNavPathStack.getParamByIndex(this.mainNavPathStack.size() - 1) as Record<string, Object>;
         let conversation = params['conversation'] as Conversation;
+        let title = params['title'] as string;
         this.setupConversation(conversation, title);
 
         wfc.eventEmitter!.on(EventType.SendMessage, this.onSendMessage)
@@ -347,265 +349,262 @@ struct ConversationPage {
         return null
     }
 
-    conversationInfoPageUrl(): string {
-        let url: string = ''
+    conversationInfoPageName(): string {
+        let name: string = ''
         switch (this.conversation!.type) {
             case ConversationType.Single:
-                url = 'pages/conversation/SingleConversationInfoPage'
+                name = 'singleConversationInfo'
                 break
             case ConversationType.Group:
-                url = 'pages/conversation/GroupConversationInfoPage'
+                name = 'groupConversationInfo'
                 break
             case ConversationType.Channel:
-                url = 'pages/conversation/ChannelConversationInfoPage'
+                name = 'channelConversationInfo'
                 break
             default:
                 break
         }
-        return url
+        return name
     }
 
     build() {
-        Navigation() {
-            Scroll() {
-                Stack() {
-                    Column() {
-                        if (this.refreshStatus) {
-                            PutDownRefresh({ refreshText: $refreshText })
-                        }
-                        if (this.hasNoMoreHistoryMessage) {
-                            Text('没有更多消息')
-                                .padding(5)
-                                .fontSize(13)
-                        }
+        NavDestination() {
+            Navigation() {
 
-                        Blank()
-                            .width('100%')
-                            .layoutWeight(1)
-
-                        List({ scroller: this.scroller }) {
-                            ForEach(this.messages,
-                                (msg: Message, index: number) => {
-                                    ListItem() {
-                                        if (msg.messageContent instanceof NotificationMessageContent) {
-                                            Row() {
-                                                SimpleNotificationMessageContentView({ message: msg })
-                                            }
-                                            .width('100%')
-                                            .justifyContent(FlexAlign.Center)
-
-                                            // out
-                                        } else if (msg.direction === 0) {
-                                            Column() {
-                                                if (this.showMessageTimeInfo(index)) {
-                                                    Text(timeFormat(msg.timestamp))
-                                                        .fontSize(12)
-                                                        .padding(10)
-                                                }
-                                                Row() {
-                                                    if (this.enableMultiCheck) {
-                                                        Row() {
-                                                            Checkbox()
-                                                                .select(this.isMessageChecked(msg))
-                                                                .onChange((value => {
-                                                                    // if (!this.enableMultiCheck) {
-                                                                    //     return
-                                                                    // }
-                                                                    if (this.checkValueChangeTriggerByClick) {
-                                                                        this.checkValueChangeTriggerByClick = false
-                                                                        return
-                                                                    }
-                                                                    this.checkOrUncheckMessage(msg)
-                                                                }))
-                                                        }
-                                                        .margin({ top: 10 })
-                                                        .height(48)
-                                                        .alignItems(VerticalAlign.Center)
-                                                    }
-                                                    Row() {
-                                                        NormalMessageContentView({
-                                                            message: msg,
-                                                            enableMultiCheck: $enableMultiCheck,
-                                                            audioPlayManager: this.audioPlayerManager,
-                                                            readReceipt: this.messageReadReceipt(msg)
-                                                        })//.layoutWeight(1)
-                                                            .margin({ top: 10 })
-                                                            .enabled(!this.enableMultiCheck)
-                                                    }
-                                                    .justifyContent(FlexAlign.End)
-                                                    .layoutWeight(1)
-                                                    .margin({ left: 70 })
-
-                                                    Image(wfc.getUserInfo(msg.from).portrait)
-                                                        .width(48)
-                                                        .height(48)
-                                                        .borderRadius(4)
-                                                        .margin(10)
-                                                        .enabled(!this.enableMultiCheck)
-                                                        .onClick(() => {
-                                                            this.showUserInfo(msg.from)
-                                                        })
-                                                }
-                                                .width('100%')
-                                                .justifyContent(FlexAlign.End)
-                                                .alignItems(VerticalAlign.Top)
-                                                .onClick((event) => {
-                                                    if (!this.enableMultiCheck) {
-                                                        return
-                                                    }
-                                                    this.checkValueChangeTriggerByClick = true
-                                                    this.checkOrUncheckMessage(msg)
-                                                })
-                                            }
-                                            .width('100%')
-                                            .alignItems(HorizontalAlign.Center)
-
-                                            // in
-                                        } else {
-                                            Column() {
-                                                if (this.showMessageTimeInfo(index)) {
-                                                    Text(timeFormat(msg.timestamp))
-                                                        .fontSize(12)
-                                                        .padding(10)
-                                                }
-                                                Row() {
-                                                    if (this.enableMultiCheck) {
-                                                        Row() {
-                                                            Checkbox()
-                                                                .select(this.isMessageChecked(msg))
-                                                                .onChange((value => {
-                                                                    if (this.checkValueChangeTriggerByClick) {
-                                                                        this.checkValueChangeTriggerByClick = false
-                                                                        return
-                                                                    }
-                                                                    this.checkOrUncheckMessage(msg)
-                                                                }))
-                                                        }
-                                                        .margin({ top: 10 })
-                                                        .height(48)
-                                                        .alignItems(VerticalAlign.Center)
-
-                                                        // .alignSelf(ItemAlign.Center)
-                                                    }
-                                                    Image(wfc.getUserInfo(msg.from).portrait)
-                                                        .width(48)
-                                                        .height(48)
-                                                        .margin(10)
-                                                        .borderRadius(4)
-                                                        .enabled(!this.enableMultiCheck)
-                                                        .onClick(() => {
-                                                            this.showUserInfo(msg.from)
-                                                        })
-                                                    Row() {
-                                                        NormalMessageContentView({
-                                                            message: msg,
-                                                            enableMultiCheck: $enableMultiCheck,
-                                                            audioPlayManager: this.audioPlayerManager
-                                                        })//.layoutWeight(1)
-                                                            .margin({ top: 10 })
-                                                            .enabled(!this.enableMultiCheck)
-                                                    }
-                                                    .justifyContent(FlexAlign.Start)
-                                                    .layoutWeight(1)
-                                                    .margin({ right: 70 })
-                                                }
-                                                .width('100%')
-                                                .justifyContent(FlexAlign.Start)
-                                                .alignItems(VerticalAlign.Top)
-                                                .onClick((event) => {
-                                                    if (!this.enableMultiCheck) {
-                                                        return
-                                                    }
-                                                    this.checkValueChangeTriggerByClick = true
-                                                    this.checkOrUncheckMessage(msg)
-                                                })
-                                            }
-                                            .width('100%')
-                                            .alignItems(HorizontalAlign.Center)
-                                        }
-                                    }
-                                },
-                                (msg: Message) => this.messageItemKey(msg))
-
-                        }
-                        .onScrollIndex((star, end) => {
-                            this.currentMessageIndex = star;
-                            if (end == this.messages.length - 1) {
-                                // wfc.clearUnreadStatusBeforeMessage(this.conversation, )
-                                wfc.clearConversationUnreadStatus(this.conversation!);
+                Scroll() {
+                    Stack() {
+                        Column() {
+                            if (this.refreshStatus) {
+                                PutDownRefresh({ refreshText: $refreshText })
                             }
-                        })
-                        .listDirection(Axis.Vertical)
-                        .height('100%')
-                        .width('100%')
-                    }
-                    .justifyContent(FlexAlign.End)
-                    .width('100%')
-                    .height('100%')
+                            if (this.hasNoMoreHistoryMessage) {
+                                Text('没有更多消息')
+                                    .padding(5)
+                                    .fontSize(13)
+                            }
 
-                    if (this.showAudioRecorderView) {
-                        AudioRecorderView({
-                            showAudioRecorderView: $showAudioRecorderView,
-                            showCancelRecordIndicator: $showCancelRecordIndicator,
-                            recordCountDown: $recordCountDown
-                        })
-                            .width('100%')
+                            Blank()
+                                .width('100%')
+                                .layoutWeight(1)
+
+                            List({ scroller: this.scroller }) {
+                                ForEach(this.messages,
+                                    (msg: Message, index: number) => {
+                                        ListItem() {
+                                            if (msg.messageContent instanceof NotificationMessageContent) {
+                                                Row() {
+                                                    SimpleNotificationMessageContentView({ message: msg })
+                                                }
+                                                .width('100%')
+                                                .justifyContent(FlexAlign.Center)
+
+                                                // out
+                                            } else if (msg.direction === 0) {
+                                                Column() {
+                                                    if (this.showMessageTimeInfo(index)) {
+                                                        Text(timeFormat(msg.timestamp))
+                                                            .fontSize(12)
+                                                            .padding(10)
+                                                    }
+                                                    Row() {
+                                                        if (this.enableMultiCheck) {
+                                                            Row() {
+                                                                Checkbox()
+                                                                    .select(this.isMessageChecked(msg))
+                                                                    .onChange((value => {
+                                                                        // if (!this.enableMultiCheck) {
+                                                                        //     return
+                                                                        // }
+                                                                        if (this.checkValueChangeTriggerByClick) {
+                                                                            this.checkValueChangeTriggerByClick = false
+                                                                            return
+                                                                        }
+                                                                        this.checkOrUncheckMessage(msg)
+                                                                    }))
+                                                            }
+                                                            .margin({ top: 10 })
+                                                            .height(48)
+                                                            .alignItems(VerticalAlign.Center)
+                                                        }
+                                                        Row() {
+                                                            NormalMessageContentView({
+                                                                message: msg,
+                                                                enableMultiCheck: $enableMultiCheck,
+                                                                audioPlayManager: this.audioPlayerManager,
+                                                                readReceipt: this.messageReadReceipt(msg)
+                                                            })//.layoutWeight(1)
+                                                                .margin({ top: 10 })
+                                                                .enabled(!this.enableMultiCheck)
+                                                        }
+                                                        .justifyContent(FlexAlign.End)
+                                                        .layoutWeight(1)
+                                                        .margin({ left: 70 })
+
+                                                        Image(wfc.getUserInfo(msg.from).portrait)
+                                                            .width(48)
+                                                            .height(48)
+                                                            .borderRadius(4)
+                                                            .margin(10)
+                                                            .enabled(!this.enableMultiCheck)
+                                                            .onClick(() => {
+                                                                this.showUserInfo(msg.from)
+                                                            })
+                                                    }
+                                                    .width('100%')
+                                                    .justifyContent(FlexAlign.End)
+                                                    .alignItems(VerticalAlign.Top)
+                                                    .onClick((event) => {
+                                                        if (!this.enableMultiCheck) {
+                                                            return
+                                                        }
+                                                        this.checkValueChangeTriggerByClick = true
+                                                        this.checkOrUncheckMessage(msg)
+                                                    })
+                                                }
+                                                .width('100%')
+                                                .alignItems(HorizontalAlign.Center)
+
+                                                // in
+                                            } else {
+                                                Column() {
+                                                    if (this.showMessageTimeInfo(index)) {
+                                                        Text(timeFormat(msg.timestamp))
+                                                            .fontSize(12)
+                                                            .padding(10)
+                                                    }
+                                                    Row() {
+                                                        if (this.enableMultiCheck) {
+                                                            Row() {
+                                                                Checkbox()
+                                                                    .select(this.isMessageChecked(msg))
+                                                                    .onChange((value => {
+                                                                        if (this.checkValueChangeTriggerByClick) {
+                                                                            this.checkValueChangeTriggerByClick = false
+                                                                            return
+                                                                        }
+                                                                        this.checkOrUncheckMessage(msg)
+                                                                    }))
+                                                            }
+                                                            .margin({ top: 10 })
+                                                            .height(48)
+                                                            .alignItems(VerticalAlign.Center)
+
+                                                            // .alignSelf(ItemAlign.Center)
+                                                        }
+                                                        Image(wfc.getUserInfo(msg.from).portrait)
+                                                            .width(48)
+                                                            .height(48)
+                                                            .margin(10)
+                                                            .borderRadius(4)
+                                                            .enabled(!this.enableMultiCheck)
+                                                            .onClick(() => {
+                                                                this.showUserInfo(msg.from)
+                                                            })
+                                                        Row() {
+                                                            NormalMessageContentView({
+                                                                message: msg,
+                                                                enableMultiCheck: $enableMultiCheck,
+                                                                audioPlayManager: this.audioPlayerManager
+                                                            })//.layoutWeight(1)
+                                                                .margin({ top: 10 })
+                                                                .enabled(!this.enableMultiCheck)
+                                                        }
+                                                        .justifyContent(FlexAlign.Start)
+                                                        .layoutWeight(1)
+                                                        .margin({ right: 70 })
+                                                    }
+                                                    .width('100%')
+                                                    .justifyContent(FlexAlign.Start)
+                                                    .alignItems(VerticalAlign.Top)
+                                                    .onClick((event) => {
+                                                        if (!this.enableMultiCheck) {
+                                                            return
+                                                        }
+                                                        this.checkValueChangeTriggerByClick = true
+                                                        this.checkOrUncheckMessage(msg)
+                                                    })
+                                                }
+                                                .width('100%')
+                                                .alignItems(HorizontalAlign.Center)
+                                            }
+                                        }
+                                    },
+                                    (msg: Message) => this.messageItemKey(msg))
+
+                            }
+                            .onScrollIndex((star, end) => {
+                                this.currentMessageIndex = star;
+                                if (end == this.messages.length - 1) {
+                                    // wfc.clearUnreadStatusBeforeMessage(this.conversation, )
+                                    wfc.clearConversationUnreadStatus(this.conversation!);
+                                }
+                            })
+                            .listDirection(Axis.Vertical)
                             .height('100%')
-                            .backgroundColor('#A0E5E5E5')
+                            .width('100%')
+                        }
+                        .justifyContent(FlexAlign.End)
+                        .width('100%')
+                        .height('100%')
+
+                        if (this.showAudioRecorderView) {
+                            AudioRecorderView({
+                                showAudioRecorderView: $showAudioRecorderView,
+                                showCancelRecordIndicator: $showCancelRecordIndicator,
+                                recordCountDown: $recordCountDown
+                            })
+                                .width('100%')
+                                .height('100%')
+                                .backgroundColor('#A0E5E5E5')
+                        }
+                    }
+                    .height('100%')
+                    .width('100%')
+                    .alignContent(Alignment.Center)
+                }
+                .scrollBar(BarState.Off)
+                .edgeEffect(EdgeEffect.Spring)
+                .width('100%')
+                .layoutWeight(1)
+                .backgroundColor('#F3F3F3')
+                .onTouch((event?: TouchEvent) => {
+                    this.putDownRefresh(event);
+                    this.collapseConversationInputPanelViewTimestamp = new Date().getTime()
+                })
+
+                if (this.conversation) {
+                    ConversationInputPanelView({
+                        conversation: $conversation,
+                        showAudioRecorderView: $showAudioRecorderView,
+                        showCancelRecordIndicator: $showCancelRecordIndicator,
+                        recordCountDown: $recordCountDown,
+                        enableMultiCheck: $enableMultiCheck,
+                        messages: $messages,
+                        checkedMessages: $checkedMessages,
+                        collapseConversationInputPanelViewTimestamp: $collapseConversationInputPanelViewTimestamp,
+                        messageListScroller: this.scroller
+                    })
+                }
+            }
+            .title(this.title)
+            .titleMode(NavigationTitleMode.Mini)
+            .hideBackButton(false)
+            .menus([
+                {
+                    value: '',
+                    icon: "common/image/ic_session_info.png",
+                    action: () => {
+                        this.mainNavPathStack.pushPathByName(this.conversationInfoPageName(), {
+                            'conversationInfo': this.conversationInfo
+                        } as Record<string, Object>, true)
                     }
                 }
-                .height('100%')
-                .width('100%')
-                .alignContent(Alignment.Center)
-            }
-            .scrollBar(BarState.Off)
-            .edgeEffect(EdgeEffect.Spring)
-            .width('100%')
-            .layoutWeight(1)
-            .backgroundColor('#F3F3F3')
-            .onTouch((event?: TouchEvent) => {
-                this.putDownRefresh(event);
-                this.collapseConversationInputPanelViewTimestamp = new Date().getTime()
-            })
+            ])
 
-            if (this.conversation) {
-                ConversationInputPanelView({
-                    conversation: $conversation,
-                    showAudioRecorderView: $showAudioRecorderView,
-                    showCancelRecordIndicator: $showCancelRecordIndicator,
-                    recordCountDown: $recordCountDown,
-                    enableMultiCheck: $enableMultiCheck,
-                    messages: $messages,
-                    checkedMessages: $checkedMessages,
-                    collapseConversationInputPanelViewTimestamp: $collapseConversationInputPanelViewTimestamp,
-                    messageListScroller: this.scroller
-                })
-            }
         }
-        .title(this.title)
-        .titleMode(NavigationTitleMode.Mini)
-        .hideBackButton(false)
+        .mode(NavDestinationMode.STANDARD)
+        .hideTitleBar(true)
         .height('100%')
         .width('100%')
-        .navBarPosition(NavBarPosition.Start)
-        .menus([
-            {
-                value: '',
-                icon: "common/image/ic_session_info.png",
-                action: () => {
-                    let url = this.conversationInfoPageUrl()
-                    if (url) {
-                        router.pushUrl({
-                            url: url,
-                            params: {
-                                conversationInfo: this.conversationInfo
-                            }
-                        }, router.RouterMode.Standard)
-                    } else {
-                        showToast('not implement')
-                    }
-                }
-            }
-        ])
     }
 }

@@ -25,6 +25,8 @@ export default struct GroupConversationInfoPage {
     private enableAddMember: boolean = false
     private enableRemoveMember: boolean = false
     private isAddOrRemoveNewGroupMember: boolean = false
+    @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
+
     dialogController: CustomDialogController = new CustomDialogController({
         builder: ActionSheetDialog({
             title: 'ojooo',
@@ -40,7 +42,7 @@ export default struct GroupConversationInfoPage {
     })
 
     aboutToAppear() {
-        const params = router.getParams() as Record<string, Object>;
+        let params = this.mainNavPathStack.getParamByIndex(this.mainNavPathStack.size() - 1) as Record<string, Object>;
         this.conversationInfo = params['conversationInfo'] as ConversationInfo
         this.groupInfo = wfc.getGroupInfo(this.conversationInfo.conversation.target)
         this.groupMembers = wfc.getGroupMembers(this.conversationInfo.conversation.target, false)
@@ -92,7 +94,7 @@ export default struct GroupConversationInfoPage {
     }
 
     build() {
-        Navigation() {
+        NavDestination() {
             Scroll() {
 
                 Column() {
@@ -126,6 +128,7 @@ export default struct GroupConversationInfoPage {
                                     .height(48)
                                     .onClick(() => {
                                         this.isAddOrRemoveNewGroupMember = true
+                                        // TODO
                                         router.pushUrl({
                                             url: 'pages/group/AddGroupMemberPage',
                                             params: {
@@ -363,10 +366,7 @@ export default struct GroupConversationInfoPage {
             .backgroundColor('#EDEDED')
         }
         .title('会话详情')
-        .titleMode(NavigationTitleMode.Mini)
-        .hideBackButton(false)
         .height('100%')
         .width('100%')
-        .navBarPosition(NavBarPosition.Start)
     }
 }

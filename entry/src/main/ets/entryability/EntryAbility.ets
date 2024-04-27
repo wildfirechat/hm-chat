@@ -102,6 +102,18 @@ export default class EntryAbility extends UIAbility {
             this.loadContent(url);
         })
 
+        // 获取应用主窗口
+        let windowClass: window.Window = windowStage.getMainWindowSync();
+        // 获取状态栏高度
+        let statusArea = windowClass.getWindowAvoidArea(window.AvoidAreaType.TYPE_SYSTEM);
+        AppStorage.setOrCreate('SafeAreaTopHeight', statusArea.topRect.height);
+        // 获取导航栏高度
+        let navigationArea = windowClass.getWindowAvoidArea(window.AvoidAreaType.TYPE_NAVIGATION_INDICATOR);
+        AppStorage.setOrCreate('SafeAreaBottomHeight', navigationArea.bottomRect.height);
+        // 获取软键盘高度
+        let keyboardArea = windowClass.getWindowAvoidArea(window.AvoidAreaType.TYPE_KEYBOARD);
+        AppStorage.setOrCreate('SafeAreaKeyboardHeight', navigationArea.bottomRect.height);
+
         // setConnectionStatusListener((value) => {
         //   hilog.info(0x0000, 'testTag', 'connection status changed: %{public}d', value);
         // });

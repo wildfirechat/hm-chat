@@ -18,6 +18,7 @@ import BasicDataSource from '../common/BasicDataSource'
 import data_preferences from '@ohos.data.preferences';
 import Conversation from '../wfc/model/conversation'
 
+
 @Component
 @Preview
 export default struct ConversationListTab {
@@ -26,6 +27,7 @@ export default struct ConversationListTab {
     @Link conversationListTabUnreadCount: number
     private conversationInfoDataSource: ConversationInfoDataSource = new ConversationInfoDataSource()
     private context?: Context
+    @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
 
     aboutToAppear() {
         console.log('conversationList', 'aboutToAppear')
@@ -216,13 +218,9 @@ export default struct ConversationListTab {
                         ConversationInfoItemView({ conversationInfo: info })
                             .onClick(() => {
                                 wfc.clearConversationUnreadStatus(info.conversation!)
-                                router.pushUrl({
-                                    url: "pages/conversation/ConversationPage",
-                                    // url: "pages/Login",
-                                    params: {
-                                        conversation: info.conversation
-                                    }
-                                }, router.RouterMode.Standard)
+                                this.mainNavPathStack.pushPathByName('conversation', {
+                                    'conversation': info.conversation
+                                } as Record<string, Object>)
                             })
                             .bindContextMenu(this.MenuBuilder(info), ResponseType.LongPress)
                     }

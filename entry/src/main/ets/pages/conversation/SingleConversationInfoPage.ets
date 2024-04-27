@@ -16,14 +16,16 @@ export default struct SingleConversationInfoPage {
     @State isTop: boolean = false
     @State isSilent: boolean = false
 
+    @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
+
     aboutToAppear() {
-        const params = router.getParams() as Record<string, Object>;
+        let params = this.mainNavPathStack.getParamByIndex(this.mainNavPathStack.size() - 1) as Record<string, Object>;
         this.conversationInfo = params['conversationInfo'] as ConversationInfo
-        this.userInfo = wfc.getUserInfo(this.conversationInfo.conversation.target)
+        this.userInfo = wfc.getUserInfo(this.conversationInfo!.conversation.target)
     }
 
     build() {
-        Navigation() {
+        NavDestination() {
             Column() {
                 Row() {
                     Image(this.userInfo.portrait)
@@ -106,10 +108,8 @@ export default struct SingleConversationInfoPage {
             .backgroundColor('#EDEDED')
         }
         .title('会话详情')
-        .titleMode(NavigationTitleMode.Mini)
-        .hideBackButton(false)
+        // .hideBackButton(false)
         .height('100%')
         .width('100%')
-        .navBarPosition(NavBarPosition.Start)
     }
 }

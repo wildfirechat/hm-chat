@@ -1,7 +1,6 @@
 import { showToast } from '../../common/utils/Toast'
 import UserInfo from '../../wfc/model/userInfo'
 import wfc from '../../wfc/client/wfc'
-import router from '@ohos.router'
 import ChannelInfo from '../../wfc/model/channelInfo'
 import GroupSearchResult from '../../wfc/model/groupSearchResult'
 import SearchType from '../../wfc/model/searchType'

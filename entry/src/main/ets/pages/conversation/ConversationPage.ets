@@ -1,18 +1,11 @@
-import hilog from '@ohos.hilog'
-import common from '@ohos.app.ability.common'
-
 import wfc from '../../wfc/client/wfc'
 import router from '@ohos.router'
 import ConversationInfo from '../../wfc/model/conversationInfo'
-import GroupInfo from '../../wfc/model/groupInfo'
-import ChannelInfo from '../../wfc/model/channelInfo'
 import ConversationType from '../../wfc/model/conversationType'
-import ChatRoomInfo from '../../wfc/model/chatRoomInfo'
 
-import PutDownRefresh from '../../view/PutDownRefreshLayout';
+import PutDownRefresh from '../../view/PutDownRefreshLayout'
 import Message from '../../wfc/messages/message'
-import { eq, stringValue } from '../../wfc/util/longUtil'
-import TextMessageContent from '../../wfc/messages/textMessageContent'
+import { eq } from '../../wfc/util/longUtil'
 import EventType from '../../wfc/client/wfcEvent'
 import Conversation from '../../wfc/model/conversation'
 import MessageContentType from '../../wfc/messages/messageContentType'
@@ -28,11 +21,8 @@ import ReadEntry from '../../wfc/model/readEntry'
 import ReadReceipt from './model/readReceipt'
 import GroupMember from '../../wfc/model/groupMember'
 import { showToast } from '../../common/utils/Toast'
-import UserInfo from '../../wfc/model/userInfo'
 import Utils from '../../common/Utils'
-import { FaultLogger } from '@kit.PerformanceAnalysisKit'
 import { HashMap } from '@kit.ArkTS'
-import SingleConversationInfoPage from './SingleConversationInfoPage'
 
 @Entry
 @Component

@@ -1,4 +1,3 @@
-import ConversationType from '../../../wfc/model/conversationType'
 
 export default class ReadReceipt {
     conversationType = 0

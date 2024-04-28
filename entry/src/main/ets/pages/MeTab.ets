@@ -1,13 +1,9 @@
-import hilog from '@ohos.hilog'
-import common from '@ohos.app.ability.common'
-import client from 'marswrapper'
 import UserInfo from '../wfc/model/userInfo'
 import wfc from '../wfc/client/wfc'
 import router from '@ohos.router'
-import data_preferences from '@ohos.data.preferences';
+import data_preferences from '@ohos.data.preferences'
 import EventType from '../wfc/client/wfcEvent'
 import ConnectionStatus from '../wfc/client/connectionStatus'
-import { showToast } from '../common/utils/Toast'
 import OptionItemView from '../view/OptionItemView'
 
 @Component

@@ -1,11 +1,8 @@
-import router from '@ohos.router';
 import { showToast } from '../../common/utils/Toast';
 import OptionItemView from '../../view/OptionItemView';
 import wfc from '../../wfc/client/wfc';
-import Conversation from '../../wfc/model/conversation';
 import ConversationInfo from '../../wfc/model/conversationInfo';
-import ConversationType from '../../wfc/model/conversationType';
-import UserInfo from '../../wfc/model/userInfo'
+import UserInfo from '../../wfc/model/userInfo';
 
 @Preview
 @Entry

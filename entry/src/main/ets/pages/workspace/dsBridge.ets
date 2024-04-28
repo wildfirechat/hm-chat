@@ -2,7 +2,6 @@ import { router } from '@kit.ArkUI';
 import { showToast } from '../../common/utils/Toast';
 import wfc from '../../wfc/client/wfc';
 import url from '@ohos.url';
-import web_webview from '@ohos.web.webview'
 import UserInfo from '../../wfc/model/userInfo';
 
 export default class DSBridge {

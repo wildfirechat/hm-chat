@@ -1,8 +1,5 @@
 import { PortraitAndName } from '../../../common/Types'
 import Utils from '../../../common/Utils'
-import ImageMessageContent from '../../../wfc/messages/imageMessageContent'
-import Message from '../../../wfc/messages/message'
-import VideoMessageContent from '../../../wfc/messages/videoMessageContent'
 import Conversation from '../../../wfc/model/conversation'
 
 @Preview

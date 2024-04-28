@@ -1,4 +1,3 @@
-import media from '@ohos.multimedia.media'
 import Message from '../../../wfc/messages/message'
 import SoundMessageContent from '../../../wfc/messages/soundMessageContent'
 import AudioPlayManager from '../audio/AudioPlayManager'

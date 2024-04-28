@@ -1,5 +1,4 @@
 import web_webview from '@ohos.web.webview'
-import router from '@ohos.router'
 import Config from '../config'
 import WfcWebView from './workspace/WfcWebView'
 import DSBridge from './workspace/dsBridge'

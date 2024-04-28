@@ -1,12 +1,10 @@
 import router from '@ohos.router';
-import promptAction from '@ohos.promptAction';
 import { showToast } from '../../common/utils/Toast';
 import wfc from '../../wfc/client/wfc';
 import Conversation from '../../wfc/model/conversation';
 import ConversationType from '../../wfc/model/conversationType';
-import UserInfo from '../../wfc/model/userInfo'
+import UserInfo from '../../wfc/model/userInfo';
 import EventType from '../../wfc/client/wfcEvent';
-import FormExtensionAbility from '@ohos.app.form.FormExtensionAbility';
 
 @Entry
 @Component

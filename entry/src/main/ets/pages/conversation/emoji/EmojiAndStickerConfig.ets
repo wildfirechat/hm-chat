@@ -1,5 +1,5 @@
-import { Category, Emoji, emojisDefault } from './emojis'
-import Config from "../../../config";
+import { Category, Emoji, emojisDefault } from './emojis';
+import Config from '../../../config';
 
 // 如何修改、添加自定义动态表情
 /*

@@ -2,10 +2,10 @@ import ConversationListTab from './ConversationListTab'
 import ContactListTab from './ContactListTab'
 import DiscoveryTab from './DiscoveryTab'
 import MeTab from './MeTab'
-import AbilityAccessCtrl, { Permissions } from '@ohos.abilityAccessCtrl';
+import AbilityAccessCtrl, { Permissions } from '@ohos.abilityAccessCtrl'
 import Logger from '../common/utils/Logger'
-import promptAction from '@ohos.promptAction';
-import bundleManager from '@ohos.bundle.bundleManager';
+import promptAction from '@ohos.promptAction'
+import bundleManager from '@ohos.bundle.bundleManager'
 import common from '@ohos.app.ability.common'
 import { showToast } from '../common/utils/Toast'
 import router from '@ohos.router'
@@ -15,15 +15,13 @@ import wfc from '../wfc/client/wfc'
 import GroupType from '../wfc/model/groupType'
 import Conversation from '../wfc/model/conversation'
 import ConversationType from '../wfc/model/conversationType'
-import { ChannelInfoPage } from './channel/ChannelInfoPage'
 
-import notificationManager from '@ohos.notificationManager';
-import Base from '@ohos.base';
+import notificationManager from '@ohos.notificationManager'
+import Base from '@ohos.base'
 import WorkSpaceTab from './WorkSpaceTab'
 import Config from '../config'
 import SearchPortalPage from './search/SearchPortalPage'
 import ConversationPage from './conversation/ConversationPage'
-import ConversationInfo from '../wfc/model/conversationInfo'
 import SingleConversationInfoPage from './conversation/SingleConversationInfoPage'
 import GroupConversationInfoPage from './conversation/GroupConversationInfoPage'
 import ChannelConversationInfoPage from './conversation/ChannelConversationInfoPage'

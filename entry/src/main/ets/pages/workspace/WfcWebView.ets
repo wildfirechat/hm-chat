@@ -1,9 +1,4 @@
 import web_webview from '@ohos.web.webview'
-import router from '@ohos.router'
-import Config from '../../config'
-import { showToast } from '../../common/utils/Toast'
-import wfc, { WfcManager } from '../../wfc/client/wfc'
-import url from '@ohos.url'
 import UserInfo from '../../wfc/model/userInfo'
 import DSBridge from './dsBridge'
 

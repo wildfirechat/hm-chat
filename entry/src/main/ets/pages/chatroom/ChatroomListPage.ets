@@ -1,8 +1,6 @@
 import router from '@ohos.router'
-import wfc from '../../wfc/client/wfc'
 import Conversation from '../../wfc/model/conversation'
 import ConversationType from '../../wfc/model/conversationType'
-import GroupInfo from '../../wfc/model/groupInfo'
 
 @Entry
 @Component

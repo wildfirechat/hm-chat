@@ -1,5 +1,3 @@
-import hilog from '@ohos.hilog'
-import common from '@ohos.app.ability.common'
 import router from '@ohos.router'
 import { showToast } from '../common/utils/Toast'
 import Conversation from '../wfc/model/conversation'

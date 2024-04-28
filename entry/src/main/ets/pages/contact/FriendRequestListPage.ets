@@ -1,10 +1,6 @@
-import hilog from '@ohos.hilog'
-import common from '@ohos.app.ability.common'
-import client from 'marswrapper'
 import { showToast } from '../../common/utils/Toast'
 import UserInfo from '../../wfc/model/userInfo'
 import wfc from '../../wfc/client/wfc'
-import SearchType from '../../wfc/model/searchType'
 import router from '@ohos.router'
 import FriendRequest from '../../wfc/model/friendRequest'
 

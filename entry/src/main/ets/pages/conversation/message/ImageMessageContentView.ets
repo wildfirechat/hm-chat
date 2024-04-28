@@ -1,6 +1,5 @@
 import router from '@ohos.router'
 import { exist } from '../../../common/utils/FileUtil'
-import wfc from '../../../wfc/client/wfc'
 import ImageMessageContent from '../../../wfc/messages/imageMessageContent'
 import Message from '../../../wfc/messages/message'
 

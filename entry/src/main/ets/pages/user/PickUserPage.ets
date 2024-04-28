@@ -1,13 +1,6 @@
-import hilog from '@ohos.hilog'
-import common from '@ohos.app.ability.common'
-import client from 'marswrapper'
 import UserInfo from '../../wfc/model/userInfo'
 import wfc from '../../wfc/client/wfc'
 import router from '@ohos.router'
-import Conversation from '../../wfc/model/conversation'
-import ConversationType from '../../wfc/model/conversationType'
-import { showToast } from '../../common/utils/Toast'
-import CheckableUserItemView from '../../view/CheckableUserItemView'
 import CheckableUserListView from '../../view/CheckableUserListView'
 
 @Entry

@@ -5,7 +5,7 @@ import ImageMessageContent from '../../wfc/messages/imageMessageContent';
 import Message from '../../wfc/messages/message';
 import MessageContentType from '../../wfc/messages/messageContentType';
 import VideoMessageContent from '../../wfc/messages/videoMessageContent';
-import { exist } from '../../common/utils/FileUtil'
+import { exist } from '../../common/utils/FileUtil';
 
 @Entry
 @Component

@@ -1,5 +1,5 @@
 import { config as emojiConfig } from './EmojiAndStickerConfig'
-import { Emoji, Category } from './emojis'
+import { Category, Emoji } from './emojis'
 import Conversation from '../../../wfc/model/conversation'
 import StickerMessageContent from '../../../wfc/messages/stickerMessageContent'
 import wfc from '../../../wfc/client/wfc'

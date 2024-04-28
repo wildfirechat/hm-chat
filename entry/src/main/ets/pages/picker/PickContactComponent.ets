@@ -1,6 +1,5 @@
 import UserInfo from '../../wfc/model/userInfo'
 import wfc from '../../wfc/client/wfc'
-import router from '@ohos.router'
 import CheckableUserListView from '../../view/CheckableUserListView'
 
 @Component

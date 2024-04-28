@@ -1,21 +1,15 @@
-import hilog from '@ohos.hilog'
-import common from '@ohos.app.ability.common'
 import wfc from '../wfc/client/wfc'
 import ConversationType from '../wfc/model/conversationType'
-import UserInfo from '../wfc/model/userInfo'
 import EventType from '../wfc/client/wfcEvent'
 import Message from '../wfc/messages/message'
-import TextMessageContent from '../wfc/messages/textMessageContent'
 import ConversationInfo from '../wfc/model/conversationInfo'
-import GroupInfo from '../wfc/model/groupInfo'
-import ChannelInfo from '../wfc/model/channelInfo'
 import router from '@ohos.router'
 import ConnectionStatus from '../wfc/client/connectionStatus'
 import UnreadCount from '../wfc/model/unreadCount'
 import ConversationInfoItemView from '../view/ConversationInfoItemView'
 import { showToast } from '../common/utils/Toast'
 import BasicDataSource from '../common/BasicDataSource'
-import data_preferences from '@ohos.data.preferences';
+import data_preferences from '@ohos.data.preferences'
 import Conversation from '../wfc/model/conversation'
 
 

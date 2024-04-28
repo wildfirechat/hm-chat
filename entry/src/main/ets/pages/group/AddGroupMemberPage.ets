@@ -3,7 +3,6 @@ import wfc from '../../wfc/client/wfc'
 import router from '@ohos.router'
 import CheckableUserListView from '../../view/CheckableUserListView'
 import GroupInfo from '../../wfc/model/groupInfo'
-import AddGroupMemberNotification from '../../wfc/messages/notification/addGroupMemberNotification'
 
 @Entry
 @Component

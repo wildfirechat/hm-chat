@@ -1,5 +1,4 @@
 import Message from '../../../wfc/messages/message'
-import TextMessageContent from '../../../wfc/messages/textMessageContent'
 
 @Component
 export default struct TextMessageContentView {

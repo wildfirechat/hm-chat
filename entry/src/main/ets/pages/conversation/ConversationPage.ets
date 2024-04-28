@@ -46,6 +46,7 @@ export default struct ConversationPage {
     private scroller: Scroller = new Scroller()
     private touchDownOffsetY: number = 0
     private currentMessageIndex: number = 0
+    private unreadStatusCleared: boolean = false
     private timer: number = 0
     private audioPlayerManager: AudioPlayManager = new AudioPlayManager()
     private enableReceipt: boolean = false
@@ -223,6 +224,7 @@ export default struct ConversationPage {
         }
     }
     onReceiveMessage = (message: Message, hasMore: boolean) => {
+        this.unreadStatusCleared = false
         if (this.isDisplayMessage(message) && Conversation.equal(message.conversation, this.conversation!)) {
             this.conversationMessageDataSource.appendMessages([message]);
             this.scroller.scrollEdge(Edge.Bottom)
@@ -517,9 +519,10 @@ export default struct ConversationPage {
                                     (msg: Message) => this.messageItemKey(msg))
 
                             }
-                            .onScrollIndex((star, end) => {
-                                this.currentMessageIndex = star;
-                                if (end == this.conversationMessageDataSource.totalCount() - 1) {
+                            .onScrollIndex((start, end) => {
+                                this.currentMessageIndex = start;
+                                if (!this.unreadStatusCleared && end == this.conversationMessageDataSource.totalCount() - 1) {
+                                    this.unreadStatusCleared = true
                                     // wfc.clearUnreadStatusBeforeMessage(this.conversation, )
                                     wfc.clearConversationUnreadStatus(this.conversation!);
                                 }

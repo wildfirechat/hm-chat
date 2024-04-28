@@ -22,6 +22,7 @@ import GroupMember from '../../wfc/model/groupMember'
 import { showToast } from '../../common/utils/Toast'
 import Utils from '../../common/Utils'
 import { HashMap } from '@kit.ArkTS'
+import BasicDataSource from '../../common/BasicDataSource'
 
 @Entry
 @Component
@@ -32,7 +33,6 @@ export default struct ConversationPage {
     @State conversationInfo?: ConversationInfo = undefined
     @State refreshStatus: boolean = false;
     @State refreshText: Resource = $r('app.string.refresh_text')
-    @State messages: Message[] = []
     @State hasNoMoreHistoryMessage: boolean = false
     // for audioRecorderView
     @State showAudioRecorderView: boolean = false
@@ -52,6 +52,7 @@ export default struct ConversationPage {
     private enableGroupReceipt: boolean = false
     private groupMembers: GroupMember[] = []
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
+    private conversationMessageDataSource: ConversationMessageDataSource = new ConversationMessageDataSource()
 
     putDownRefresh(event?: TouchEvent): void {
         if (event === undefined) {
@@ -62,7 +63,7 @@ export default struct ConversationPage {
                 this.touchDownOffsetY = event.touches[0].y;
                 break;
             case TouchType.Move:
-                this.refreshStatus = (this.messages.length === 0 || this.currentMessageIndex === 0) && event.touches[0].y - this.touchDownOffsetY > 100;
+                this.refreshStatus = (this.conversationMessageDataSource.totalCount() === 0 || this.currentMessageIndex === 0) && event.touches[0].y - this.touchDownOffsetY > 100;
                 break;
             case TouchType.Cancel:
                 break;
@@ -157,7 +158,7 @@ export default struct ConversationPage {
         }
 
         wfc.getMessagesV2(this.conversation, 0, true, 20, '', (messages) => {
-            this.messages = messages;
+            this.conversationMessageDataSource.setMessages(messages);
 
             this.scroller.scrollEdge(Edge.Bottom)
         }, err => {
@@ -171,11 +172,11 @@ export default struct ConversationPage {
 
     loadHistoryMessage() {
         let oldestMessageId = 0;
-        if (this.messages.length > 0) {
-            oldestMessageId = this.messages[0].messageId
+        if (this.conversationMessageDataSource.totalCount() > 0) {
+            oldestMessageId = this.conversationMessageDataSource.getData(0).messageId
         }
         wfc.getMessagesV2(this.conversation!, oldestMessageId, true, 20, '', (messages) => {
-            this.messages = messages.concat(...this.messages);
+            this.conversationMessageDataSource.insertMessages(0, messages)
             this.refreshStatus = false;
             this.scroller.scrollToIndex(messages.length - 1)
             if (messages.length === 0) {
@@ -217,30 +218,28 @@ export default struct ConversationPage {
     onSendMessage = (message: Message) => {
         let conversation = new Conversation(message.conversation.type, message.conversation.target, message.conversation.line)
         if (this.isDisplayMessage(message) && Conversation.equal(conversation, this.conversation!)) {
-            this.messages.push(message);
+            this.conversationMessageDataSource.appendMessages([message]);
             this.scroller.scrollEdge(Edge.Bottom)
         }
     }
     onReceiveMessage = (message: Message, hasMore: boolean) => {
         if (this.isDisplayMessage(message) && Conversation.equal(message.conversation, this.conversation!)) {
-            this.messages.push(message);
+            this.conversationMessageDataSource.appendMessages([message]);
             this.scroller.scrollEdge(Edge.Bottom)
         }
     }
     onDeleteMessage = (messageId: number) => {
-        this.messages = this.messages.filter(msg => msg.messageId !== messageId)
+        this.conversationMessageDataSource.removeMessageById(messageId)
         console.log('onDeleteMessage', messageId)
     }
     onRemoteDeleteMessage = (messageUid: Long) => {
-        this.messages = this.messages.filter(msg =>!eq(msg.messageUid, messageUid))
+        this.conversationMessageDataSource.removeMessageByUid(messageUid)
         console.log('onRemoteDeleteMessage', messageUid)
     }
     onRecallMessage = (operator: string, messageUid: Long) => {
-        //this.messages = this.messages.filter(msg =>!eq(msg.messageUid, messageUid))
-        let index = this.messages.findIndex(msg => eq(msg.messageUid, messageUid))
-        if (index >= 0) {
-            let msg = wfc.getMessageByUid(messageUid)
-            this.messages[index] = msg!
+        let msg = wfc.getMessageByUid(messageUid)
+        if (msg) {
+            this.conversationMessageDataSource.updateMessage(msg)
         }
         console.log('onRecallMessage', messageUid)
     }
@@ -255,14 +254,14 @@ export default struct ConversationPage {
 
     showMessageTimeInfo(index: number) {
         // index 值，可能为 length
-        if (index < 0 || index >= this.messages.length) {
+        if (index < 0 || index >= this.conversationMessageDataSource.totalCount()) {
             return false
         }
         if (index === 0) {
             return true
         } else {
-            let preMsg = this.messages[index -1];
-            let curMsg = this.messages[index]
+            let preMsg = this.conversationMessageDataSource.getData(index - 1);
+            let curMsg = this.conversationMessageDataSource.getData(index)
 
             if (curMsg.timestamp - preMsg.timestamp > 5 * 60 * 1000) {
                 return true;
@@ -374,7 +373,7 @@ export default struct ConversationPage {
                                 .layoutWeight(1)
 
                             List({ scroller: this.scroller }) {
-                                ForEach(this.messages,
+                                LazyForEach(this.conversationMessageDataSource,
                                     (msg: Message, index: number) => {
                                         ListItem() {
                                             if (msg.messageContent instanceof NotificationMessageContent) {
@@ -520,7 +519,7 @@ export default struct ConversationPage {
                             }
                             .onScrollIndex((star, end) => {
                                 this.currentMessageIndex = star;
-                                if (end == this.messages.length - 1) {
+                                if (end == this.conversationMessageDataSource.totalCount() - 1) {
                                     // wfc.clearUnreadStatusBeforeMessage(this.conversation, )
                                     wfc.clearConversationUnreadStatus(this.conversation!);
                                 }
@@ -565,7 +564,6 @@ export default struct ConversationPage {
                         showCancelRecordIndicator: $showCancelRecordIndicator,
                         recordCountDown: $recordCountDown,
                         enableMultiCheck: $enableMultiCheck,
-                        messages: $messages,
                         checkedMessages: $checkedMessages,
                         collapseConversationInputPanelViewTimestamp: $collapseConversationInputPanelViewTimestamp,
                         messageListScroller: this.scroller
@@ -595,5 +593,58 @@ export default struct ConversationPage {
         .hideTitleBar(true)
         .height('100%')
         .width('100%')
+    }
+}
+
+class ConversationMessageDataSource extends BasicDataSource<Message> {
+    private messages: Message[] = []
+
+    setMessages(messages: Message[]): void {
+        this.messages = messages
+        this.notifyDataReload()
+    }
+
+    insertMessages(index: number, messages: Message[]) {
+        this.messages.splice(0, 0, ...messages)
+        this.notifyDataReload();
+    }
+
+    appendMessages(messages: Message[]) {
+        this.messages = this.messages.concat(messages)
+        this.notifyDataReload();
+    }
+
+    removeMessageById(messageId: number) {
+        let index = this.messages.findIndex(msg => msg.messageId === messageId);
+        if (index >= 0) {
+            this.messages.splice(index, 1)
+            this.notifyDataDelete(index)
+        }
+    }
+
+    removeMessageByUid(messageUid: Long) {
+        let index = this.messages.findIndex(msg => eq(msg.messageUid, messageUid));
+        if (index >= 0) {
+            this.messages.splice(index, 1)
+            this.notifyDataDelete(index)
+        }
+    }
+
+    updateMessage(message: Message) {
+        if (message.messageId !== 0) {
+            let index = this.messages.findIndex(msg => msg.messageId === message.messageId);
+            if (index >= 0) {
+                this.messages[index] = message;
+                this.notifyDataChange(index);
+            }
+        }
+    }
+
+    public totalCount(): number {
+        return this.messages.length
+    }
+
+    public getData(index: number): Message {
+        return this.messages[index]
     }
 }

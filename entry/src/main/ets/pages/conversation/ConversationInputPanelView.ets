@@ -57,7 +57,6 @@ export default struct ConversationInputPanelView {
     // 取消多选时，需要先将 enableMultiCheck 置为 false，在清空 checkedMessages
     @Link enableMultiCheck: boolean
     @Link checkedMessages: Message[]
-    @Link messages: Message[]
     private messageListScroller?: Scroller
     private textInputBottomWhenBlur: number = 0
     private textInputController: TextInputController = new TextInputController()

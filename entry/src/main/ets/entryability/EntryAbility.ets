@@ -21,8 +21,8 @@ export default class EntryAbility extends UIAbility {
     private windowStage?: window.WindowStage
     private isMaiPageLoaded: boolean = false
     private isInBackground: boolean = false
-    private targetConversation?: Conversation
     private launchParams: Record<string, Object> = {};
+    private storage: LocalStorage = new LocalStorage();
 
     async onCreate(want: Want, launchParam: AbilityConstant.LaunchParam) {
         hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onCreate');
@@ -143,12 +143,7 @@ export default class EntryAbility extends UIAbility {
     private loadContent(url: string) {
         // this.windowStage.getMainWindowSync().setWindowBackgroundColor('#EDEDED')
         console.log('testTag, loadUrl', url)
-        let param: Record<string, Object> = {}
-        let storage = new LocalStorage(param);
-        if (this.targetConversation) {
-            storage.set('targetConversation', this.targetConversation);
-        }
-        this.windowStage!.loadContent(url, storage, (err, data) => {
+        this.windowStage!.loadContent(url, this.storage, (err, data) => {
             if (err.code) {
                 hilog.error(0x0000, 'testTag', 'Failed to load the content. Cause: %{public}s', JSON.stringify(err) ?? '');
                 return;
@@ -164,22 +159,8 @@ export default class EntryAbility extends UIAbility {
     private parseLaunchParamsAndThen(want: Want) {
         let conversation = want.parameters?.conversation as Conversation
         if (conversation) {
-            this.routeToConversationPage(conversation);
+            this.storage.setOrCreate<Conversation>('targetConversation', conversation);
         }
         // TODO more，比如跳转到加好友、voip 相关页面
-    }
-
-    private routeToConversationPage(conversation: Conversation) {
-        if (this.isMaiPageLoaded) {
-            wfc.clearConversationUnreadStatus(conversation!)
-            router.pushUrl({
-                url: "pages/conversation/ConversationPage",
-                params: {
-                    conversation: conversation
-                }
-            }, router.RouterMode.Single)
-        } else {
-            this.targetConversation = conversation;
-        }
     }
 }

@@ -68,7 +68,7 @@ struct MainPage {
             storage.delete('targetConversation')
             wfc.clearConversationUnreadStatus(conversation!)
             this.mainNavPathStack.pushPathByName('conversation', {
-                'conversation': Conversation
+                'conversation': conversation
             } as Record<string, Object>)
         }
     }

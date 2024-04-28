@@ -103,8 +103,10 @@ export default struct ConversationPage {
         wfc.eventEmitter!.on(EventType.MessageRead, this.onReadMessage)
     }
 
+    // navigation 导航时，声明周期回调并不会回调次方法
+    // 可通过 NavDestination.onShow 触发
     onPageShow(): void {
-        const params = router.getParams() as Record<string, Object>;
+        let params = this.mainNavPathStack.getParamByIndex(this.mainNavPathStack.size() - 1) as Record<string, Object>;
         if (!params) {
             return
         }
@@ -602,6 +604,9 @@ export default struct ConversationPage {
             ])
 
         }
+        .onShown(() => {
+            this.onPageShow();
+        })
         .mode(NavDestinationMode.STANDARD)
         .hideTitleBar(true)
         .height('100%')

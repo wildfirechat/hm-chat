@@ -21,8 +21,10 @@ export default class EntryAbility extends UIAbility {
     private windowStage?: window.WindowStage
     private isMaiPageLoaded: boolean = false
     private isInBackground: boolean = false
-    private launchParams: Record<string, Object> = {};
-    private storage: LocalStorage = new LocalStorage();
+    private launchParams: Record<string, Object> = {
+        'targetConversation': new Conversation(0, '', 0)
+    };
+    private storage: LocalStorage = new LocalStorage(this.launchParams);
 
     async onCreate(want: Want, launchParam: AbilityConstant.LaunchParam) {
         hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onCreate');

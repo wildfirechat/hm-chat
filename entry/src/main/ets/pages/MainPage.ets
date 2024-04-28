@@ -38,8 +38,10 @@ const permissions: Array<Permissions> = [
     'ohos.permission.READ_IMAGEVIDEO'
 ];
 
+let storage = LocalStorage.getShared()
 
-@Entry
+
+@Entry(storage)
 @Component
 struct MainPage {
     private tabsController: TabsController = new TabsController()
@@ -53,22 +55,28 @@ struct MainPage {
     @State meTabUnreadCount: number = 0
     @State showPickContactComponent: boolean = false
     @Provide('mainNavPathStack') mainNavPathStack: NavPathStack = new NavPathStack()
+    @LocalStorageProp('targetConversation') @Watch('onTargetConversation') targetConversation?: Conversation = undefined
 
-    onPageShow() {
-        let params = router.getParams() as Record<string, Object>
-        console.log('main Index Show', params)
-
-        notificationManager.cancelAll()
-
-        let storage = LocalStorage.getShared()
-        let conversation = storage.get<Conversation>('targetConversation')
+    onTargetConversation() {
+        let conversation = this.targetConversation
         if (conversation) {
             storage.delete('targetConversation')
             wfc.clearConversationUnreadStatus(conversation!)
-            this.mainNavPathStack.pushPathByName('conversation', {
-                'conversation': conversation
-            } as Record<string, Object>)
+            let index = this.mainNavPathStack.popToName('conversation')
+            if (index >= 0) {
+                this.mainNavPathStack.replacePathByName('conversation', {
+                    'conversation': conversation
+                } as Record<string, Object>)
+            } else {
+                this.mainNavPathStack.pushPathByName('conversation', {
+                    'conversation': conversation
+                } as Record<string, Object>)
+            }
         }
+    }
+
+    onPageShow() {
+        notificationManager.cancelAll()
     }
 
     createConversation(users: UserInfo[]) {

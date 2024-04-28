@@ -4,7 +4,6 @@ import Config from '../../config'
 import { showToast } from '../../common/utils/Toast'
 import wfc, { WfcManager } from '../../wfc/client/wfc'
 import url from '@ohos.url'
-import PickContactPage from '../picker/PickContactPage'
 import UserInfo from '../../wfc/model/userInfo'
 import DSBridge from './dsBridge'
 

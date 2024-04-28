@@ -9,7 +9,7 @@ import bundleManager from '@ohos.bundle.bundleManager';
 import common from '@ohos.app.ability.common'
 import { showToast } from '../common/utils/Toast'
 import router from '@ohos.router'
-import PickContactPage from './picker/PickContactPage'
+import PickContactComponent from './picker/PickContactComponent'
 import UserInfo from '../wfc/model/userInfo'
 import wfc from '../wfc/client/wfc'
 import GroupType from '../wfc/model/groupType'
@@ -51,10 +51,8 @@ struct MainPage {
     @State @Watch('onUnreadCountUpdated') contactTabUnreadCount: number = 0
     @State @Watch('onUnreadCountUpdated') discoveryTabUnreadCount: number = 0
     @State meTabUnreadCount: number = 0
-    // TODO router.getParams() 一直返回 router.back 时设置的参数
-    @Provide('isNewPickContact') isNewPickContact: boolean = false
+    @State showPickContactComponent: boolean = false
     @Provide('mainNavPathStack') mainNavPathStack: NavPathStack = new NavPathStack()
-    @Provide('pickUserResult') pickUserResult: UserInfo[] = []
 
     onPageShow() {
         let params = router.getParams() as Record<string, Object>
@@ -219,7 +217,7 @@ struct MainPage {
 
     @Builder
     pickContactModal() {
-        PickContactPage()
+        PickContactComponent({ showPickContactComponent: $showPickContactComponent })
             .height('100%')
             .width('100%')
             .margin({ top: px2vp(AppStorage.get<number>('SafeAreaTopHeight')) })
@@ -231,20 +229,21 @@ struct MainPage {
         Menu() {
             MenuItem({ startIcon: $r('app.media.faqiqunliao_iconfont'), content: "创建群聊" })
                 .onClick(() => {
-                    this.isNewPickContact = true
-                    this.pickUserResult = [];
+                    this.showPickContactComponent = true
                 })
-                .bindContentCover(this.isNewPickContact, this.pickContactModal(), {
+                .bindContentCover(this.showPickContactComponent, this.pickContactModal(), {
                     modalTransition: ModalTransition.DEFAULT,
                     onAppear: () => {
                     },
 
                     onDisappear: () => {
-                        this.isNewPickContact = false
-                        if (this.pickUserResult.length > 0) {
-                            this.createConversation(this.pickUserResult)
+                        this.showPickContactComponent = false
+                        let localStorage = LocalStorage.getShared();
+                        let pickUsers = localStorage.get<UserInfo[]>(PickContactComponent.PICK_RESULT);
+                        if (pickUsers?.length) {
+                            this.createConversation(pickUsers)
+                            localStorage.delete(PickContactComponent.PICK_RESULT)
                         }
-                        this.pickUserResult = []
                     }
                 })
             MenuItem({ startIcon: $r('app.media.faqiqunliao_iconfont'), content: "发起密聊" })

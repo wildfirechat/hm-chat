@@ -12,6 +12,7 @@ export default struct MeTab {
     @State userInfo?: UserInfo = undefined
     private userId: string = ''
     @Link meTabUnreadCount: number
+    @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
 
     aboutToAppear() {
         this.loadSelfUserInfo()
@@ -19,8 +20,8 @@ export default struct MeTab {
         wfc.eventEmitter!.on(EventType.ConnectionStatusChanged, this.onConnectionStatusChange)
     }
 
-    onUserInfosUpdate = (usersInfo: UserInfo[]) => {
-        for (const userinfo of usersInfo) {
+    onUserInfosUpdate = (usersInfos: UserInfo[]) => {
+        for (const userinfo of usersInfos) {
             if (userinfo.uid === this.userId)
                 this.userInfo = userinfo
         }
@@ -102,12 +103,12 @@ export default struct MeTab {
 
             OptionItemView({ title: 'API测试页' })
                 .onClick(() => {
-                    router.pushUrl({
-                        url: 'pages/misc/WebViewPage', params: {
-                            url: 'https://baidu.com',
-                            title: '百度。。'
-                        }
-                    }, router.RouterMode.Standard)
+                    // router.pushUrl({
+                    //     url: 'pages/misc/WebViewPage', params: {
+                    //         url: 'https://baidu.com',
+                    //         title: '百度。。'
+                    //     }
+                    // }, router.RouterMode.Standard)
                     // router.pushUrl({
                     //     url: 'pages/conversation/forward/ForwardMessagePage'
                     // })

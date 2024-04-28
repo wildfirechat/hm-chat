@@ -1,10 +1,10 @@
-import router from '@ohos.router'
-import Conversation from '../../wfc/model/conversation'
-import ConversationType from '../../wfc/model/conversationType'
+import Conversation from '../../wfc/model/conversation';
+import ConversationType from '../../wfc/model/conversationType';
 
 @Entry
 @Component
-struct FavGroupListPage {
+export default struct ChatroomListPage {
+    @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
     @State chatroomList: ChatroomItem[] = [
         {
             title: '野火IM 聊天室1',
@@ -24,7 +24,7 @@ struct FavGroupListPage {
     }
 
     build() {
-        Navigation() {
+        NavDestination() {
             List() {
                 ForEach(this.chatroomList, (chatroom: ChatroomItem) => {
                     ListItem() {
@@ -42,12 +42,10 @@ struct FavGroupListPage {
                         .width('100%')
                         .padding({ left: 10, right: 10 })
                         .onClick(() => {
-                            router.replaceUrl({
-                                url: 'pages/conversation/ConversationPage',
-                                params: {
-                                    conversation: new Conversation(ConversationType.ChatRoom, chatroom.roomId, 0)
-                                }
-                            }, router.RouterMode.Standard)
+                            this.mainNavPathStack.pushPathByName('conversation', {
+                                'conversation': new Conversation(ConversationType.ChatRoom, chatroom.roomId, 0)
+                            } as Record<string, Object>)
+
                         })
                     }
                 }, (chatroom: ChatroomItem) => chatroom.roomId)
@@ -60,11 +58,8 @@ struct FavGroupListPage {
             })
         }
         .title('聊天室列表')
-        .titleMode(NavigationTitleMode.Mini)
-        .hideBackButton(false)
         .height('100%')
         .width('100%')
-        .navBarPosition(NavBarPosition.Start)
     }
 }
 

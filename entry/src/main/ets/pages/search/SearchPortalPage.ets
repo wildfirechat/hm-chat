@@ -1,6 +1,5 @@
 import { showToast } from '../../common/utils/Toast'
 import UserInfo from '../../wfc/model/userInfo'
-import router from '@ohos.router'
 import ChannelInfo from '../../wfc/model/channelInfo'
 import SearchResultView from './SearchResultView'
 import GroupInfo from '../../wfc/model/groupInfo'
@@ -18,12 +17,9 @@ export default struct SearchPortalPage {
             tag: 'contact',
             onSearchResultItemClick: value => {
                 let userInfo = value as UserInfo
-                router.pushUrl({
-                    url: 'pages/user/UserInfoPage',
-                    params: {
-                        userInfo: userInfo
-                    }
-                }, router.RouterMode.Standard)
+                this.mainNavPathStack.pushPathByName('userInfo', {
+                    'userInfo': userInfo
+                } as Record<string, Object>)
             }
         },
         {
@@ -43,7 +39,8 @@ export default struct SearchPortalPage {
     ]
 
     aboutToAppear() {
-        const params = router.getParams();
+        let params = this.mainNavPathStack.getParamByIndex(this.mainNavPathStack.size() - 1) as Record<string, Object>;
+        // TODO
     }
 
     build() {

@@ -1,4 +1,3 @@
-import router from '@ohos.router'
 import { showToast } from '../common/utils/Toast'
 import Conversation from '../wfc/model/conversation'
 import ConversationType from '../wfc/model/conversationType'
@@ -8,6 +7,7 @@ import ConversationType from '../wfc/model/conversationType'
 export default struct DiscoveryTab {
     @State unreadMomentCount: number = 10
     @Link discoveryTabUnreadCount: number
+    @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
 
     aboutToAppear() {
     }
@@ -42,9 +42,6 @@ export default struct DiscoveryTab {
                         }
                         .onClick(() => {
                             showToast('TODO')
-                            // router.pushUrl({
-                            //     url: 'pages/contact/FriendRequestListPage'
-                            // })
                         })
                         .padding({ left: 10, right: 10 })
                         .width('100%')
@@ -69,11 +66,7 @@ export default struct DiscoveryTab {
                                 .padding({ left: 10 })
                         }
                         .onClick(() => {
-                            router.pushUrl({
-                                url: "pages/chatroom/ChatroomListPage",
-                                params: {
-                                }
-                            }, router.RouterMode.Standard)
+                            this.mainNavPathStack.pushPathByName('chatroomListPage', {} as Record<string, Object>)
                         })
                         .padding({ left: 10, right: 10 })
                         .width('100%')
@@ -99,12 +92,9 @@ export default struct DiscoveryTab {
                         }
                         .onClick(() => {
                             let conversation = new Conversation(ConversationType.Single, 'FireRobot', 0)
-                            router.pushUrl({
-                                url: "pages/conversation/ConversationPage",
-                                params: {
-                                    conversation: conversation
-                                }
-                            }, router.RouterMode.Standard)
+                            this.mainNavPathStack.pushPathByName('conversation', {
+                                'conversation': conversation
+                            } as Record<string, Object>)
                         })
                         .padding({ left: 10, right: 10 })
                         .width('100%')
@@ -128,12 +118,10 @@ export default struct DiscoveryTab {
                                 .padding({ left: 10 })
                         }
                         .onClick(() => {
-                            router.pushUrl({
-                                url: 'pages/misc/WebViewPage', params: {
-                                    url: 'https://docs.wildfirechat.cn',
-                                    title: '野火IM 开发文档'
-                                }
-                            }, router.RouterMode.Standard)
+                            this.mainNavPathStack.pushPathByName('webViewPage', {
+                                'url': 'https://docs.wildfirechat.cn',
+                                'title': '野火IM 开发文档'
+                            } as Record<string, Object>)
                         })
                         .padding({ left: 10, right: 10 })
                         .width('100%')

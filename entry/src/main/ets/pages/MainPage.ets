@@ -8,7 +8,6 @@ import promptAction from '@ohos.promptAction'
 import bundleManager from '@ohos.bundle.bundleManager'
 import common from '@ohos.app.ability.common'
 import { showToast } from '../common/utils/Toast'
-import router from '@ohos.router'
 import PickContactComponent from './picker/PickContactComponent'
 import UserInfo from '../wfc/model/userInfo'
 import wfc from '../wfc/client/wfc'
@@ -25,6 +24,14 @@ import ConversationPage from './conversation/ConversationPage'
 import SingleConversationInfoPage from './conversation/SingleConversationInfoPage'
 import GroupConversationInfoPage from './conversation/GroupConversationInfoPage'
 import ChannelConversationInfoPage from './conversation/ChannelConversationInfoPage'
+import UserInfoPage from './user/UserInfoPage'
+import FriendRequestListPage from './contact/FriendRequestListPage'
+import SearchUserPage from './search/SearchUserPage'
+import FavGroupListPage from './group/FavGroupListPage'
+import ChannelListPage from './channel/ChannelListPage'
+import ChatroomListPage from './chatroom/ChatroomListPage'
+import WebViewPage from './misc/WebViewPage'
+import PickContactPage from './picker/PickContactPage'
 
 const TAG = 'Main';
 
@@ -259,10 +266,7 @@ struct MainPage {
                 })
             MenuItem({ startIcon: $r('app.media.tianjiapengyou_iconfont'), content: "添加朋友" })
                 .onClick(() => {
-                    router.pushUrl({
-                        url: "pages/search/SearchUserPage",
-                    }, router.RouterMode.Standard).then(() => {
-                    })
+                    this.mainNavPathStack.pushPathByName('searchUserPage', {} as Record<string, Object>)
                 })
             MenuItem({ startIcon: $r('app.media.saoyisao1_iconfont'), content: "扫一扫" })
                 .onClick(() => {
@@ -365,6 +369,22 @@ struct MainPage {
             GroupConversationInfoPage()
         } else if (name === 'channelConversationInfo') {
             ChannelConversationInfoPage()
+        } else if (name === 'userInfoPage') {
+            UserInfoPage()
+        } else if (name === 'friendRequestListPage') {
+            FriendRequestListPage();
+        } else if (name === 'searchUserPage') {
+            SearchUserPage();
+        } else if (name === 'favGroupListPage') {
+            FavGroupListPage();
+        } else if (name === 'channelListPage') {
+            ChannelListPage();
+        } else if (name === 'chatroomListPage') {
+            ChatroomListPage()
+        } else if (name === 'webViewPage') {
+            WebViewPage()
+        } else if (name === 'pickContactPage') {
+            PickContactPage()
         }
     }
 }

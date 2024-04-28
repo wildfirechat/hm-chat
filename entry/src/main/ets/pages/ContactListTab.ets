@@ -1,5 +1,4 @@
 import wfc from '../wfc/client/wfc'
-import router from '@ohos.router'
 import EventType from '../wfc/client/wfcEvent'
 import ConnectionStatus from '../wfc/client/connectionStatus'
 import { UIUserInfo } from '../common/Types'
@@ -25,6 +24,7 @@ export default struct ContactListTab {
         'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '#'
     ]
     private scroller: Scroller = new Scroller()
+    @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
     @State contactListHeaders: ContactListHeader[] = [
         {
             title: '新的朋友',
@@ -33,9 +33,7 @@ export default struct ContactListTab {
             badgeValue: '',
             action: () => {
                 wfc.clearUnreadFriendRequestStatus()
-                router.pushUrl({
-                    url: 'pages/contact/FriendRequestListPage'
-                })
+                this.mainNavPathStack.pushPathByName('friendRequestListPage', {} as Record<string, Object>)
             }
         },
         {
@@ -44,9 +42,7 @@ export default struct ContactListTab {
             badgeCount: 0,
             badgeValue: '',
             action: () => {
-                router.pushUrl({
-                    url: 'pages/group/FavGroupListPage'
-                })
+                this.mainNavPathStack.pushPathByName('favGroupListPage', {} as Record<string, Object>)
             }
         },
         {
@@ -55,9 +51,7 @@ export default struct ContactListTab {
             badgeCount: 0,
             badgeValue: '',
             action: () => {
-                router.pushUrl({
-                    url: 'pages/channel/ChannelListPage'
-                })
+                this.mainNavPathStack.pushPathByName('channelListPage', {} as Record<string, Object>)
             }
         },
     ]
@@ -214,12 +208,9 @@ export default struct ContactListTab {
                                 .width('100%')
                                 .padding({ left: 10, right: 10 })
                                 .onClick(() => {
-                                    router.pushUrl({
-                                        url: 'pages/user/UserInfoPage',
-                                        params: {
-                                            userInfo: groupedUserInfo.userInfo
-                                        }
-                                    }, router.RouterMode.Standard)
+                                    this.mainNavPathStack.pushPathByName('userInfoPage', {
+                                        'userInfo': groupedUserInfo.userInfo
+                                    } as Record<string, Object>)
                                 })
                             }
                             .alignItems(HorizontalAlign.Start)

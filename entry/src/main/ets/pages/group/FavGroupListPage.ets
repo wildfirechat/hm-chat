@@ -1,4 +1,3 @@
-import router from '@ohos.router'
 import wfc from '../../wfc/client/wfc'
 import Conversation from '../../wfc/model/conversation'
 import ConversationType from '../../wfc/model/conversationType'
@@ -6,15 +5,16 @@ import GroupInfo from '../../wfc/model/groupInfo'
 
 @Entry
 @Component
-struct FavGroupListPage {
+export default struct FavGroupListPage {
     @State favGroupList: GroupInfo[] = []
+    @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
 
-    onPageShow() {
+    aboutToAppear() {
         this.favGroupList = wfc.getFavGroupList()
     }
 
     build() {
-        Navigation() {
+        NavDestination() {
             Text('保存到通讯录的群组')
                 .width('100%')
                 .fontSize(13)
@@ -39,12 +39,9 @@ struct FavGroupListPage {
                         .width('100%')
                         .padding({ left: 10, right: 10 })
                         .onClick(() => {
-                            router.replaceUrl({
-                                url: 'pages/conversation/ConversationPage',
-                                params: {
-                                    conversation: new Conversation(ConversationType.Group, groupInfo.target, 0)
-                                }
-                            }, router.RouterMode.Standard)
+                            this.mainNavPathStack.pushPathByName('conversation', {
+                                'conversation': new Conversation(ConversationType.Group, groupInfo.target, 0)
+                            } as Record<string, Object>)
                         })
                     }
                 }, (groupInfo: GroupInfo) => groupInfo.target)
@@ -57,10 +54,7 @@ struct FavGroupListPage {
             })
         }
         .title('群列表')
-        .titleMode(NavigationTitleMode.Mini)
-        .hideBackButton(false)
         .height('100%')
         .width('100%')
-        .navBarPosition(NavBarPosition.Start)
     }
 }

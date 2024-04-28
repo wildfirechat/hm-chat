@@ -1,4 +1,3 @@
-import router from '@ohos.router'
 import { showToast } from '../../common/utils/Toast'
 import wfc from '../../wfc/client/wfc'
 import EventType from '../../wfc/client/wfcEvent'
@@ -8,8 +7,9 @@ import ConversationType from '../../wfc/model/conversationType'
 
 @Entry
 @Component
-struct ChannelListPage {
+export default struct ChannelListPage {
     @State channelList: ChannelInfo[] = []
+    @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
 
     aboutToAppear() {
 
@@ -43,67 +43,66 @@ struct ChannelListPage {
     }
 
     build() {
-        Navigation() {
-            Text('我订阅的频道')
-                .width('100%')
-                .fontSize(13)
-                .fontColor('#989898')
-                .padding(10)
-                .backgroundColor('#E5E5E5')
+        NavDestination() {
+            Navigation() {
+                Text('我订阅的频道')
+                    .width('100%')
+                    .fontSize(13)
+                    .fontColor('#989898')
+                    .padding(10)
+                    .backgroundColor('#E5E5E5')
 
-            List() {
-                ForEach(this.channelList, (channelInfo: ChannelInfo) => {
-                    ListItem() {
-                        Row() {
-                            Image(channelInfo.portrait)
-                                .alt($r('app.media.ic_channel_1'))
-                                .width(40)
-                                .height(40)
-                                .borderRadius(4)
-                            Text(channelInfo.name)
-                                .maxLines(1)
-                                .padding({ left: 10 })
+                List() {
+                    ForEach(this.channelList, (channelInfo: ChannelInfo) => {
+                        ListItem() {
+                            Row() {
+                                Image(channelInfo.portrait)
+                                    .alt($r('app.media.ic_channel_1'))
+                                    .width(40)
+                                    .height(40)
+                                    .borderRadius(4)
+                                Text(channelInfo.name)
+                                    .maxLines(1)
+                                    .padding({ left: 10 })
+                            }
+                            .height(60)
+                            .width('100%')
+                            .padding({ left: 10, right: 10 })
+                            .onClick(() => {
+                                this.mainNavPathStack.pushPathByName('conversation', {
+                                    'conversation': new Conversation(ConversationType.Channel, channelInfo.channelId, 0)
+                                } as Record<string, Object>)
+                            })
                         }
-                        .height(60)
-                        .width('100%')
-                        .padding({ left: 10, right: 10 })
-                        .onClick(() => {
-                            router.replaceUrl({
-                                url: 'pages/conversation/ConversationPage',
-                                params: {
-                                    conversation: new Conversation(ConversationType.Channel, channelInfo.channelId, 0)
-                                }
-                            }, router.RouterMode.Standard)
-                        })
-                    }
-                }, (channelInfo: ChannelInfo) => channelInfo.channelId + '-' + channelInfo.updateDt)
-            }
-            .width('100%')
-            .height('100%')
-            .divider({
-                strokeWidth: 1,
-                startMargin: 60
-            })
-        }
-        .title('频道列表')
-        .titleMode(NavigationTitleMode.Mini)
-        .hideBackButton(false)
-        .height('100%')
-        .width('100%')
-        .navBarPosition(NavBarPosition.Start)
-        .menus([
-            {
-                value: '',
-                icon: "common/image/ic_add.png",
-                action: () => {
-                    router.pushUrl({
-                        url: 'pages/search/SearchPortalPage',
-                        params: {
-                            channel: true
-                        }
-                    }, router.RouterMode.Standard)
+                    }, (channelInfo: ChannelInfo) => channelInfo.channelId + '-' + channelInfo.updateDt)
                 }
+                .width('100%')
+                .height('100%')
+                .divider({
+                    strokeWidth: 1,
+                    startMargin: 60
+                })
             }
-        ])
+            .title('频道列表')
+            .titleMode(NavigationTitleMode.Mini)
+            .hideBackButton(false)
+            .height('100%')
+            .width('100%')
+            .navBarPosition(NavBarPosition.Start)
+            .menus([
+                {
+                    value: '',
+                    icon: "common/image/ic_add.png",
+                    action: () => {
+                        this.mainNavPathStack.pushPathByName('searchPortal', {
+                            'channel': true
+                        } as Record<string, Object>)
+                    }
+                }
+            ])
+        }
+        .width('100%')
+        .height('100%')
+        .hideTitleBar(true)
     }
 }

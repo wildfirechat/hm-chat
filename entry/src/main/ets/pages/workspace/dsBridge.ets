@@ -1,4 +1,3 @@
-import { router } from '@kit.ArkUI';
 import { showToast } from '../../common/utils/Toast';
 import wfc from '../../wfc/client/wfc';
 import url from '@ohos.url';
@@ -10,10 +9,12 @@ export default class DSBridge {
     private ready = false;
     private callId = 0;
     private asyncJsCallbacks: Record<number, string> = {}
+    private mainNavPathStack: NavPathStack
 
-    constructor(webUrl: string, webviewController: WebviewController) {
+    constructor(webUrl: string, webviewController: WebviewController, mainNavPathStack: NavPathStack) {
         this.webUrl = webUrl;
         this.webviewController = webviewController;
+        this.mainNavPathStack = mainNavPathStack
     }
 
     private _callbackJs = (cbMethodName: string, code: number, data?: Object | string, complete = true) => {
@@ -83,14 +84,12 @@ export default class DSBridge {
         let args = JSON.parse(arg) as Record<string, Object>
         let url = args.data
 
-        router.pushUrl({
-            url: 'pages/misc/WebViewPage', params: {
-                url: url
-            }
-        }, router.RouterMode.Standard)
+        this.mainNavPathStack.pushPathByName('webViewPage', {
+            'url': url
+        } as Record<string, Object>)
     }
     private close = (arg: string) => {
-        router.back()
+        this.mainNavPathStack.pop(true)
         let args = JSON.parse(arg) as Record<string, Object>
         let cb = args._dscbstub as string;
         this._callbackJs(cb, 0)
@@ -98,11 +97,7 @@ export default class DSBridge {
     private chooseContacts = (arg: string) => {
         let args = JSON.parse(arg) as Record<string, Object>
         let cb = args._dscbstub as string;
-        //TODO page 层处理
-        router.pushUrl({
-            url: "pages/picker/PickContactPage",
-        }, router.RouterMode.Standard).then(() => {
-        })
+        this.mainNavPathStack.pushPathByName('pickContactPage', {} as Record<string, Object>)
         this.asyncJsCallbacks[0] = cb;
 
     }

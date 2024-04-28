@@ -1,13 +1,8 @@
 import web_webview from '@ohos.web.webview'
-import router from '@ohos.router'
-import Config from '../../config'
-import { showToast } from '../../common/utils/Toast'
-import wfc, { WfcManager } from '../../wfc/client/wfc'
-import url from '@ohos.url'
 import WfcWebView from '../workspace/WfcWebView'
-import PickContactPage from '../picker/PickContactPage'
 import UserInfo from '../../wfc/model/userInfo'
 import DSBridge from '../workspace/dsBridge'
+import PickContactComponent from '../picker/PickContactComponent'
 
 
 @Entry
@@ -18,34 +13,29 @@ export default struct WebViewPage {
     @State title: string = '加载中'
     isNewPickContact = true;
     dsbridge?: DSBridge
+    @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
 
     aboutToAppear() {
-        let params = router.getParams() as Record<string, Object>
+        let params = this.mainNavPathStack.getParamByIndex(this.mainNavPathStack.size() - 1) as Record<string, Object>;
         this.url = params['url'] as string
         let title = params['title'] as string
         if (title) {
             this.title = title
         }
-        this.dsbridge = new DSBridge(this.url, this.webviewController)
+        this.dsbridge = new DSBridge(this.url, this.webviewController, this.mainNavPathStack)
     }
 
     onPageShow(): void {
-        let params = router.getParams() as Record<string, Object>
-        console.log('main Index Show', params)
-        if (params) {
-            const tag: string = params['tag'] as string
-            if (tag === PickContactPage.TAG) {
-                if (this.isNewPickContact) {
-                    this.isNewPickContact = false;
-                    let pickedUser: UserInfo[] = params['result'] as UserInfo[]
-                    this.dsbridge?.onPickContact(pickedUser);
-                }
-            }
+        let localStorage = LocalStorage.getShared();
+        let pickedUsers = localStorage.get<UserInfo[]>(PickContactComponent.PICK_RESULT);
+        if (pickedUsers) {
+            this.dsbridge?.onPickContact(pickedUsers);
+            localStorage.delete(PickContactComponent.PICK_RESULT)
         }
     }
 
     build() {
-        Navigation() {
+        NavDestination() {
             WfcWebView({
                 url: this.url,
                 controller: this.webviewController,
@@ -56,12 +46,26 @@ export default struct WebViewPage {
                     }
                 }
             })
+                .width('100%')
+                .height('100%')
         }
         .title(this.title)
-        .titleMode(NavigationTitleMode.Mini)
-        .hideBackButton(false)
         .height('100%')
         .width('100%')
-        .navBarPosition(NavBarPosition.Start)
+        .onShown(() => {
+            this.onPageShow()
+        })
+    }
+
+    uiMethodConfig(): Record<string, Function> {
+        let record: Record<string, Function> = {
+            'chooseContact': this.chooseContact
+        }
+
+        return record;
+    }
+
+    chooseContact() {
+        // TODO
     }
 }

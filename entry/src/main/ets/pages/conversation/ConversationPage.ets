@@ -1,5 +1,4 @@
 import wfc from '../../wfc/client/wfc'
-import router from '@ohos.router'
 import ConversationInfo from '../../wfc/model/conversationInfo'
 import ConversationType from '../../wfc/model/conversationType'
 
@@ -144,7 +143,7 @@ export default struct ConversationPage {
                 console.log('join chatroom success', this.conversation!.target)
             }, err => {
                 showToast('加入聊天室失败')
-                router.back()
+                this.mainNavPathStack.pop(true)
             })
         }
 
@@ -189,13 +188,9 @@ export default struct ConversationPage {
     }
 
     showUserInfo(userId: string) {
-        router.pushUrl({
-            url: 'pages/user/UserInfoPage',
-            params: {
-                userInfo: wfc.getUserInfo(userId)
-            }
-        })
-
+        this.mainNavPathStack.pushPathByName('userInfoPage', {
+            'userInfo': wfc.getUserInfo(userId)
+        } as Record<string, Object>)
     }
 
     isDisplayMessage(message: Message) {
@@ -362,7 +357,6 @@ export default struct ConversationPage {
     build() {
         NavDestination() {
             Navigation() {
-
                 Scroll() {
                     Stack() {
                         Column() {

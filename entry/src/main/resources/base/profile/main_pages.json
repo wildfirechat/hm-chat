@@ -23,6 +23,7 @@
         "pages/mm/MMPreviewPage",
         "pages/misc/WebViewPage",
         "pages/chatroom/ChatroomListPage",
+        "pages/voip/VoipFloatingPage",
         "pages/TestPage"
     ]
 }

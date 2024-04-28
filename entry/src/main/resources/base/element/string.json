@@ -35,6 +35,10 @@
         {
             "name": "reason_media_location",
             "value": "位置信息"
+        },
+        {
+            "name": "reason_floating_window",
+            "value": " 音视频通话"
         }
     ]
 }

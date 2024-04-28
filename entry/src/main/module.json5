@@ -37,6 +37,18 @@
                         ]
                     }
                 ]
+            },
+            {
+                "name": "VoipFloatingEntryAbility",
+                "srcEntry": "./ets/entryability/VoipFloatingEntryAbility.ets",
+                "description": "$string:EntryAbility_desc",
+                "icon": "$media:icon",
+                "label": "$string:EntryAbility_label",
+                "startWindowIcon": "$media:icon",
+                "startWindowBackground": "$color:start_window_background",
+                "exported": true,
+                "skills": [
+                ]
             }
         ],
         "requestPermissions": [
@@ -77,6 +89,13 @@
             {
                 "name": "ohos.permission.MEDIA_LOCATION",
                 "reason": "$string:reason_media_location",
+                "usedScene": {
+                    "when": "inuse"
+                }
+            },
+            {
+                "name": "ohos.permission.SYSTEM_FLOAT_WINDOW",
+                "reason": "$string:reason_floating_window",
                 "usedScene": {
                     "when": "inuse"
                 }

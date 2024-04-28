@@ -32,6 +32,7 @@ import ChannelListPage from './channel/ChannelListPage'
 import ChatroomListPage from './chatroom/ChatroomListPage'
 import WebViewPage from './misc/WebViewPage'
 import PickContactPage from './picker/PickContactPage'
+import SingleAudioCallPage from './voip/SingleAudioCallPage'
 
 const TAG = 'Main';
 
@@ -40,7 +41,8 @@ const permissions: Array<Permissions> = [
     'ohos.permission.READ_MEDIA',
     'ohos.permission.WRITE_MEDIA',
     'ohos.permission.MICROPHONE',
-    'ohos.permission.READ_IMAGEVIDEO'
+    'ohos.permission.READ_IMAGEVIDEO',
+    'ohos.permission.SYSTEM_FLOAT_WINDOW'
 ];
 
 let storage = LocalStorage.getShared()
@@ -385,6 +387,8 @@ struct MainPage {
             WebViewPage()
         } else if (name === 'pickContactPage') {
             PickContactPage()
+        } else if (name === 'singleAudioCallPage') {
+            SingleAudioCallPage()
         }
     }
 }

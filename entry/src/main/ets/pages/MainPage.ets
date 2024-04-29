@@ -387,8 +387,6 @@ struct MainPage {
             WebViewPage()
         } else if (name === 'pickContactPage') {
             PickContactPage()
-        } else if (name === 'singleAudioCallPage') {
-            SingleAudioCallPage()
         }
     }
 }

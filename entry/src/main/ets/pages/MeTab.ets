@@ -12,6 +12,8 @@ import { BusinessError } from '@kit.BasicServicesKit'
 import { hilog } from '@kit.PerformanceAnalysisKit'
 import { backgroundTaskManager } from '@kit.BackgroundTasksKit'
 import { AVCastPicker } from '@kit.AVSessionKit'
+import { window } from '@kit.ArkUI'
+import { showVoipFloatingWindow } from '../helper/floatingWindowHelper'
 
 @Component
 export default struct MeTab {
@@ -166,7 +168,16 @@ export default struct MeTab {
                     // router.pushUrl({ url: 'pages/TestPage' })
                     // // this.showVoipFloatingWindow()
 
-                    this.startContinuousTask();
+                    // this.startContinuousTask();
+                    // this.showVoipFloatingWindow()
+                    showVoipFloatingWindow(this.context, 'voipWindow', 'pages/voip/VoipFloatingPage', 200, 300, 100, 100)
+                        .then(win => {
+                            win.destroyWindow()
+                        })
+                        .catch((reason: BusinessError) => {
+                            console.log('xxxxx', reason)
+                        })
+
                 })
 
             Button('退出')
@@ -183,28 +194,5 @@ export default struct MeTab {
         .width('100%')
         .height('100%')
         .backgroundColor('#EDEDED')
-    }
-
-    showVoipFloatingWindow() {
-        let context: common.UIAbilityContext = getContext(this) as common.UIAbilityContext; // UIAbilityContext
-
-        let want: Want = {
-            deviceId: '', // deviceId为空表示本设备
-            bundleName: 'cn.wildfirechat.messenger',
-            abilityName: 'VoipFloatingEntryAbility',
-            action: '',
-            entities: [],
-            uri: '',
-            parameters: {
-                // 自定义信息
-                info: '来自EntryAbility UIAbilityComponentsInteractive页面'
-            }
-        };
-        context.startAbilityForResult(want).then((data) => {
-            // ...
-            console.log('xxxxxxxx', data)
-        }).catch((err: BusinessError) => {
-            hilog.error(0, "xxx", `Failed to start ability for result. Code is ${err.code}, message is ${err.message}`);
-        });
     }
 }

@@ -26,6 +26,11 @@
                 "label": "$string:EntryAbility_label",
                 "startWindowIcon": "$media:icon",
                 "startWindowBackground": "$color:start_window_background",
+                "backgroundModes": [
+                    "audioPlayback",
+                    "audioRecording",
+                    "voip"
+                ],
                 "exported": true,
                 "skills": [
                     {
@@ -95,6 +100,13 @@
             },
             {
                 "name": "ohos.permission.SYSTEM_FLOAT_WINDOW",
+                "reason": "$string:reason_floating_window",
+                "usedScene": {
+                    "when": "inuse"
+                }
+            },
+            {
+                "name": "ohos.permission.KEEP_BACKGROUND_RUNNING",
                 "reason": "$string:reason_floating_window",
                 "usedScene": {
                     "when": "inuse"

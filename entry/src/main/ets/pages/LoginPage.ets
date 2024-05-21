@@ -62,6 +62,7 @@ struct LoginPage {
                     .margin(20)
                     .fontSize(14)
                     .borderRadius(4)
+                    .type(InputType.Number)
                     .fontColor(Color.Black)
                     .enabled(!this.isLogin)
                     .inputFilter('[a-zA-Z0-9]', (e) => {

@@ -4,7 +4,7 @@ import DSBridge from './dsBridge'
 
 
 @Component
-export default struct WebViewPage {
+export default struct WfcWebView {
     controller?: web_webview.WebviewController
     url: string = ''
     onTitleReceive?: (title?: string) => void

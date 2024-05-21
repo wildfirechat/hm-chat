@@ -1,9 +1,14 @@
 import { showToast } from '../../common/utils/Toast'
 import UserInfo from '../../wfc/model/userInfo'
 import ChannelInfo from '../../wfc/model/channelInfo'
-import SearchResultView from './SearchResultView'
+import SearchResultView from './SearchPortalResultView'
 import GroupInfo from '../../wfc/model/groupInfo'
 import { SearchModule } from '../../common/Types'
+import Conversation from '../../wfc/model/conversation'
+import ConversationType from '../../wfc/model/conversationType'
+import { inputMethod } from '@kit.IMEKit'
+import ConversationSearchResult from '../../wfc/model/conversationSearchResult'
+import { navigationDestinations } from '../navigationConfig'
 
 
 @Entry
@@ -17,8 +22,8 @@ export default struct SearchPortalPage {
             tag: 'contact',
             onSearchResultItemClick: value => {
                 let userInfo = value as UserInfo
-                this.mainNavPathStack.pushPathByName('userInfo', {
-                    'userInfo': userInfo
+                this.mainNavPathStack.pushPathByName(navigationDestinations.ConversationPage, {
+                    'conversation': new Conversation(ConversationType.Single, userInfo.uid, 0)
                 } as Record<string, Object>)
             }
         },
@@ -26,14 +31,34 @@ export default struct SearchPortalPage {
             tag: 'group',
             onSearchResultItemClick: value => {
                 let groupInfo = value as GroupInfo
-                showToast('TODO group')
+                this.mainNavPathStack.pushPathByName(navigationDestinations.ConversationPage, {
+                    'conversation': new Conversation(ConversationType.Group, groupInfo.target, 0)
+                } as Record<string, Object>)
+            }
+        },
+        {
+            tag: 'conversation',
+            onSearchResultItemClick: value => {
+                let conversationSearchResult = value as ConversationSearchResult
+                if (conversationSearchResult.matchCount > 1) {
+                    this.mainNavPathStack.pushPathByName(navigationDestinations.SearchConversationMessagePage, {
+                        'keyword': this.keyword,
+                        'conversation': conversationSearchResult.conversation!
+                    } as Record<string, Object>)
+                } else {
+                    this.mainNavPathStack.pushPathByName(navigationDestinations.ConversationPage, {
+                        'conversation': conversationSearchResult.conversation!
+                    } as Record<string, Object>)
+                }
             }
         },
         {
             tag: 'channel',
             onSearchResultItemClick: value => {
                 let channelInfo = value as ChannelInfo
-                showToast('TODO channel')
+                this.mainNavPathStack.pushPathByName(navigationDestinations.ConversationPage, {
+                    'conversation': new Conversation(ConversationType.Channel, channelInfo.channelId, 0)
+                } as Record<string, Object>)
             }
         },
     ]
@@ -51,6 +76,7 @@ export default struct SearchPortalPage {
                         .type(InputType.Normal)
                         .layoutWeight(1)
                         .borderRadius(4)
+                        .enableKeyboardOnFocus(true)
                         .onChange((value: string) => {
                             this.keyword = value
                         })
@@ -68,6 +94,11 @@ export default struct SearchPortalPage {
                     keyword: this.keyword,
                     searchModules: this.searchModules
                 })
+                    .onTouch(event => {
+                        inputMethod.getController().stopInputSession()
+                    })
+                    .focusable(true)
+                    .focusOnTouch(true)
                     .width('100%')
                     .layoutWeight(1)
             }
@@ -76,9 +107,9 @@ export default struct SearchPortalPage {
         }
         .height('100%')
         .width('100%')
-        // .onReady((ctx: NavDestinationContext) => {
-        //
-        // })
+        .onReady((ctx: NavDestinationContext) => {
+
+        })
 
         // .onReady((ctx: NavDestinationContext) => {
         //     // 在NavDestination中能够拿到传来的NavPathInfo和当前所处的NavPathStack

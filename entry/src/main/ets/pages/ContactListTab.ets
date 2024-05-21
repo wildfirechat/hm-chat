@@ -3,7 +3,8 @@ import EventType from '../wfc/client/wfcEvent'
 import ConnectionStatus from '../wfc/client/connectionStatus'
 import { UIUserInfo } from '../common/Types'
 import BasicDataSource from '../common/BasicDataSource'
-import { loadAndGroupContactUserInfos } from '../helper/groupUserHelper'
+import { loadAndGroupContactUserInfos } from '../helper/asyncTaskHelper'
+import { navigationDestinations } from './navigationConfig'
 
 interface ContactListHeader {
     title: string,
@@ -33,7 +34,7 @@ export default struct ContactListTab {
             badgeValue: '',
             action: () => {
                 wfc.clearUnreadFriendRequestStatus()
-                this.mainNavPathStack.pushPathByName('friendRequestListPage', {} as Record<string, Object>)
+                this.mainNavPathStack.pushPathByName(navigationDestinations.FriendRequestListPage, {} as Record<string, Object>)
             }
         },
         {
@@ -42,7 +43,7 @@ export default struct ContactListTab {
             badgeCount: 0,
             badgeValue: '',
             action: () => {
-                this.mainNavPathStack.pushPathByName('favGroupListPage', {} as Record<string, Object>)
+                this.mainNavPathStack.pushPathByName(navigationDestinations.FavGroupListPage, {} as Record<string, Object>)
             }
         },
         {
@@ -51,7 +52,7 @@ export default struct ContactListTab {
             badgeCount: 0,
             badgeValue: '',
             action: () => {
-                this.mainNavPathStack.pushPathByName('channelListPage', {} as Record<string, Object>)
+                this.mainNavPathStack.pushPathByName(navigationDestinations.ChannelListPage, {} as Record<string, Object>)
             }
         },
     ]
@@ -124,6 +125,14 @@ export default struct ContactListTab {
 
     build() {
         Stack() {
+            Column() {
+                Text('联系人列表加载中...')
+            }
+            .justifyContent(FlexAlign.Center)
+            .align(Alignment.Center)
+            .width('100%')
+            .height('100%')
+
             Column() {
                 List({ scroller: this.scroller }) {
                     // TODO lazyForEach https://developer.huawei.com/consumer/cn/doc/harmonyos-guides-V2/ui-ts-performance-improvement-recommendation-0000001477981001-V2
@@ -208,7 +217,7 @@ export default struct ContactListTab {
                                 .width('100%')
                                 .padding({ left: 10, right: 10 })
                                 .onClick(() => {
-                                    this.mainNavPathStack.pushPathByName('userInfoPage', {
+                                    this.mainNavPathStack.pushPathByName(navigationDestinations.UserInfoPage, {
                                         'userInfo': groupedUserInfo.userInfo
                                     } as Record<string, Object>)
                                 })

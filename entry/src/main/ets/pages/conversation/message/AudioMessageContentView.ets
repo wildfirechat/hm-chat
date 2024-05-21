@@ -1,6 +1,8 @@
 import Message from '../../../wfc/messages/message'
 import SoundMessageContent from '../../../wfc/messages/soundMessageContent'
 import AudioPlayManager from '../audio/AudioPlayManager'
+import fs from '@ohos.file.fs'
+import Config from '../../../config'
 
 @Component
 export default struct AudioMessageContent {
@@ -90,9 +92,14 @@ export default struct AudioMessageContent {
             //
             // })
             this.startAudioPlayingAnimation()
-            this.audioPlayManager!.play(content.remotePath, true, err => {
+            let url: string = content.remotePath;
+            if (this.message.direction === 1) {
+                url = Config.AMR_TO_MP3_SERVER_ADDRESS + content.remotePath;
+            }
+            this.audioPlayManager!.play(url, true, (err?: Error) => {
                 this.stopAudioPlayingAnimation()
             })
+
         })
     }
 }

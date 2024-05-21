@@ -187,6 +187,10 @@ class WfcImpl {
         }
 
         let groupIdArray = JSON.parse(groupListIds) as string[];
+        self._onGroupInfoUpdate(groupIdArray)
+    }
+
+    _onGroupInfoUpdate(groupIdArray: string[]) {
         let groupInfos = self.getGroupInfos(groupIdArray, false);
         groupInfos.forEach(gi => {
             self.groups.set(gi.target, gi);
@@ -536,7 +540,7 @@ class WfcImpl {
         }
 
         // console.log('getuserInfo', userId, fresh, groupId);
-        let userInfoStr = protoProxy.getUserInfo(userId, groupId, fresh);
+        let userInfoStr = protoProxy.getUserInfo(userId, fresh, groupId);
         if (userInfoStr === '') {
             userInfo = new NullUserInfo(userId);
         } else {
@@ -848,6 +852,7 @@ class WfcImpl {
 
     async setGroupRemark(groupId: string, remark: string, successCB: SuccessCallback, failCB: FailCallback) {
         protoProxy.setGroupRemark(groupId, remark, () => {
+            this._onGroupInfoUpdate([groupId])
             successCB && successCB();
         }, (errorCode: number) => {
             failCB && failCB(errorCode);
@@ -1024,6 +1029,7 @@ class WfcImpl {
                 if (successCB) {
                     successCB();
                 }
+                this._onGroupInfoUpdate([groupId])
             }, (errorCode: number) => {
                 if (failCB) {
                     failCB(errorCode);

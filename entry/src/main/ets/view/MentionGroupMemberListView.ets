@@ -5,7 +5,7 @@ import BasicDataSource from '../common/BasicDataSource'
 import UserItemView from './UserItemView'
 import wfc from '../wfc/client/wfc'
 import GroupMemberType from '../wfc/model/groupMemberType'
-import { groupUserInfos } from '../helper/groupUserHelper'
+import { groupUserInfos } from '../helper/asyncTaskHelper'
 
 @Component
 export default struct MentionGroupMemberListView {

@@ -2,6 +2,7 @@ import wfc from '../../wfc/client/wfc'
 import Conversation from '../../wfc/model/conversation'
 import ConversationType from '../../wfc/model/conversationType'
 import GroupInfo from '../../wfc/model/groupInfo'
+import { navigationDestinations } from '../navigationConfig'
 
 @Entry
 @Component
@@ -39,7 +40,7 @@ export default struct FavGroupListPage {
                         .width('100%')
                         .padding({ left: 10, right: 10 })
                         .onClick(() => {
-                            this.mainNavPathStack.pushPathByName('conversation', {
+                            this.mainNavPathStack.pushPathByName(navigationDestinations.ConversationPage, {
                                 'conversation': new Conversation(ConversationType.Group, groupInfo.target, 0)
                             } as Record<string, Object>)
                         })

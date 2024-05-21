@@ -9,6 +9,7 @@ import ConversationType from '../../../wfc/model/conversationType'
 import AudioPlayManager from '../audio/AudioPlayManager'
 import ReadReceipt from '../model/readReceipt'
 import AudioMessageContent from './AudioMessageContentView'
+import CallStartMessageContentView from './CallStartMessageContentView'
 import ImageMessageContentView from './ImageMessageContentView'
 import StickerMessageContentView from './StickerMessageContentView'
 import TextMessageContentView from './TextMessageContentView'
@@ -39,6 +40,8 @@ export default struct NormaMessageContentView {
                 VideoMessageContentView({ message: $message })
             } else if (this.message!.messageContent.type === MessageContentType.Voice) {
                 AudioMessageContent({ message: $message, audioPlayManager: this.audioPlayManager })
+            } else if (this.message!.messageContent.type === MessageContentType.VOIP_CONTENT_TYPE_START) {
+                CallStartMessageContentView({ message: $message })
             } else {
                 Text(this.message!.messageContent.digest(this.message))
                     .margin({ top: 4 })
@@ -105,8 +108,8 @@ export default struct NormaMessageContentView {
                             ]
                         }),
                         autoCancel: true,
-                        alignment: DialogAlignment.Default,
-                        gridCount: 3,
+                        alignment: DialogAlignment.Bottom,
+                        gridCount: 6,
                         customStyle: false
                     })
 

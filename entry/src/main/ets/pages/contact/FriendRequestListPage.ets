@@ -2,6 +2,7 @@ import { showToast } from '../../common/utils/Toast'
 import UserInfo from '../../wfc/model/userInfo'
 import wfc from '../../wfc/client/wfc'
 import FriendRequest from '../../wfc/model/friendRequest'
+import { navigationDestinations } from '../navigationConfig'
 
 @Entry
 @Component
@@ -87,7 +88,7 @@ export default struct FriendRequestListPage {
                                 }
                                 .width('100%')
                                 .onClick(() => {
-                                    this.mainNavPathStack.pushPathByName('userInfoPage', {
+                                    this.mainNavPathStack.pushPathByName(navigationDestinations.UserInfoPage, {
                                         'userInfo': req.userInfo
                                     } as Record<string, Object>)
                                 })
@@ -112,7 +113,7 @@ export default struct FriendRequestListPage {
                     value: '',
                     icon: "common/image/ic_add.png",
                     action: () => {
-                        this.mainNavPathStack.pushPathByName('searchUserPage', {} as Record<string, Object>)
+                        this.mainNavPathStack.pushPathByName(navigationDestinations.SearchUserPage, {} as Record<string, Object>)
                     }
                 }
             ])

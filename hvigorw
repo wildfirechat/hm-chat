@@ -2,11 +2,11 @@
 
 # ----------------------------------------------------------------------------
 #  Hvigor startup script, version 1.0.0
-# 
+#
 #  Required ENV vars:
 #  ------------------
 #    NODE_HOME - location of a Node home dir
-#    or 
+#    or
 #    Add /usr/local/nodejs/bin to the PATH environment variable
 # ----------------------------------------------------------------------------
 

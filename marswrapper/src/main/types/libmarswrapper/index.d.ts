@@ -102,7 +102,7 @@ export const insertMessage: (conversationStr: string, from: string, content: str
 export const insertMessageEx: (messageUid: string, conversationStr: string, from: string, content: string, status: number, serverTime: number, localExtra: string) => string;
 export const updateMessage: (messageId: number, content: string) => void;
 export const updateMessageStatus: (messageId: number, status: number) => void;
-export const getUserInfo: (userId: string, groupId: string, refresh: boolean) => string;
+export const getUserInfo: (userId: string, refresh: boolean, groupId: string) => string;
 export const getUserInfos: (userIds: string[], groupId: string) => string;
 export const getUserInfoEx: (userId: string, refresh: boolean, successCB: Function, errorCB: Function) => void;
 export const searchUser: (keyword: string, searchType: number, page: number, successCB: Function, errorCB: Function) => void;

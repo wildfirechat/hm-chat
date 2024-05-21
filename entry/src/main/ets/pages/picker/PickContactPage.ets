@@ -1,4 +1,4 @@
-import PickContactComponent from './PickContactComponent'
+import PickContactModal from './PickContactModal'
 
 @Entry
 @Component
@@ -9,7 +9,7 @@ export default struct PickContactPage {
 
     build() {
         NavDestination() {
-            PickContactComponent({ showPickContactComponent: $showPickContactComponent })
+            PickContactModal({ showPickContactModal: $showPickContactComponent })
         }
         .hideTitleBar(true)
         .width('100%')

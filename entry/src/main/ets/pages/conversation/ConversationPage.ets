@@ -23,6 +23,10 @@ import { showToast } from '../../common/utils/Toast'
 import Utils from '../../common/Utils'
 import { HashMap } from '@kit.ArkTS'
 import BasicDataSource from '../../common/BasicDataSource'
+import UserInfo from '../../wfc/model/userInfo'
+import GroupInfo from '../../wfc/model/groupInfo'
+import ChannelInfo from '../../wfc/model/channelInfo'
+import { navigationDestinations } from '../navigationConfig'
 
 @Entry
 @Component
@@ -42,6 +46,7 @@ export default struct ConversationPage {
     @State collapseConversationInputPanelViewTimestamp: number = 0
     @State enableMultiCheck: boolean = false
     @State checkedMessages: Message[] = []
+    private focusMessageId: number = 0
     private checkValueChangeTriggerByClick = false
     private scroller: Scroller = new Scroller()
     private touchDownOffsetY: number = 0
@@ -54,6 +59,7 @@ export default struct ConversationPage {
     private groupMembers: GroupMember[] = []
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
     private conversationMessageDataSource: ConversationMessageDataSource = new ConversationMessageDataSource()
+    @State focusMessageBackgroundColor: Color = Color.Green
 
     putDownRefresh(event?: TouchEvent): void {
         if (event === undefined) {
@@ -65,6 +71,9 @@ export default struct ConversationPage {
                 break;
             case TouchType.Move:
                 this.refreshStatus = (this.conversationMessageDataSource.totalCount() === 0 || this.currentMessageIndex === 0) && event.touches[0].y - this.touchDownOffsetY > 100;
+                if (this.refreshStatus) {
+                    event.stopPropagation()
+                }
                 break;
             case TouchType.Cancel:
                 break;
@@ -84,6 +93,7 @@ export default struct ConversationPage {
         let params = this.mainNavPathStack.getParamByIndex(this.mainNavPathStack.size() - 1) as Record<string, Object>;
         let conversation = params['conversation'] as Conversation;
         let title = params['title'] as string;
+        this.focusMessageId = params['focusMessageId'] as number
         this.setupConversation(conversation, title);
 
         wfc.eventEmitter!.on(EventType.SendMessage, this.onSendMessage)
@@ -92,12 +102,19 @@ export default struct ConversationPage {
         wfc.eventEmitter!.on(EventType.MessageDeleted, this.onRemoteDeleteMessage)
         wfc.eventEmitter!.on(EventType.RecallMessage, this.onRecallMessage)
         wfc.eventEmitter!.on(EventType.MessageRead, this.onReadMessage)
+        wfc.eventEmitter!.on(EventType.UserInfosUpdate, this.onUserInfosUpdate)
+        wfc.eventEmitter!.on(EventType.GroupInfosUpdate, this.onGroupInfosUpdate)
+        wfc.eventEmitter!.on(EventType.ChannelInfosUpdate, this.onChannelInfosUpdate)
+        wfc.eventEmitter!.on(EventType.ConversationInfoUpdate, this.onConversationInfoUpdate)
+
+        // 监听 observer.on('navDestinationUpdate')，处理重入问题
     }
 
-    // navigation 导航时，声明周期回调并不会回调次方法
+    // navigation 导航时，生命周期回调并不会回调次方法
     // 可通过 NavDestination.onShow 触发
     onPageShow(): void {
-        let params = this.mainNavPathStack.getParamByIndex(this.mainNavPathStack.size() - 1) as Record<string, Object>;
+        let params = (this.mainNavPathStack.getParamByName('conversation') as Record<string, Object>[])[0]
+        // let params = this.mainNavPathStack.getParamByIndex(this.mainNavPathStack.size() - 1) as Record<string, Object>;
         if (!params) {
             return
         }
@@ -128,6 +145,10 @@ export default struct ConversationPage {
         } else if (this.conversation!.type === ConversationType.ChatRoom) {
             wfc.quitChatroom(this.conversation!.target, null, null)
         }
+        wfc.eventEmitter!.off(EventType.UserInfosUpdate, this.onUserInfosUpdate)
+        wfc.eventEmitter!.off(EventType.GroupInfosUpdate, this.onGroupInfosUpdate)
+        wfc.eventEmitter!.off(EventType.ChannelInfosUpdate, this.onChannelInfosUpdate)
+        wfc.eventEmitter!.off(EventType.ConversationInfoUpdate, this.onConversationInfoUpdate)
     }
 
     setupConversation(conversation: Conversation, title: string) {
@@ -158,13 +179,38 @@ export default struct ConversationPage {
             this.title = title;
         }
 
-        wfc.getMessagesV2(this.conversation, 0, true, 20, '', (messages) => {
-            this.conversationMessageDataSource.setMessages(messages);
+        if (this.focusMessageId) {
+            let aroundMessages: Message[] = []
+            let scrollIndex = 0
+            wfc.getMessagesV2(this.conversation, this.focusMessageId, true, 20, '', (messages) => {
+                aroundMessages = aroundMessages.concat(messages)
 
-            this.scroller.scrollEdge(Edge.Bottom)
-        }, err => {
-            console.error('getMessageV2 error', err)
-        })
+                let focusMessage = wfc.getMessageById(this.focusMessageId)!;
+                scrollIndex = aroundMessages.length
+                aroundMessages.push(focusMessage)
+
+                wfc.getMessagesV2(this.conversation!, this.focusMessageId, false, 20, '', (messages) => {
+                    aroundMessages = aroundMessages.concat(messages)
+                    this.conversationMessageDataSource.setMessages(aroundMessages);
+                    this.scroller.scrollToIndex(scrollIndex)
+                }, err => {
+                    console.error('getMessageV2 error', err)
+                })
+
+            }, err => {
+                console.error('getMessageV2 error', err)
+            })
+
+
+        } else {
+            wfc.getMessagesV2(this.conversation, 0, true, 20, '', (messages) => {
+                this.conversationMessageDataSource.setMessages(messages);
+
+                this.scroller.scrollEdge(Edge.Bottom)
+            }, err => {
+                console.error('getMessageV2 error', err)
+            })
+        }
 
         if (this.conversation.type === ConversationType.Group) {
             wfc.eventEmitter!.on(EventType.GroupMembersUpdate, this.onGroupMembersUpdate)
@@ -183,6 +229,8 @@ export default struct ConversationPage {
             if (messages.length === 0) {
                 this.hasNoMoreHistoryMessage = true
             }
+            // TODO 加载远程历史消息
+            // FIXME
         }, err => {
             console.error('getMessageV2 error', err)
             this.refreshStatus = false;
@@ -190,7 +238,7 @@ export default struct ConversationPage {
     }
 
     showUserInfo(userId: string) {
-        this.mainNavPathStack.pushPathByName('userInfoPage', {
+        this.mainNavPathStack.pushPathByName(navigationDestinations.UserInfoPage, {
             'userInfo': wfc.getUserInfo(userId)
         } as Record<string, Object>)
     }
@@ -247,6 +295,48 @@ export default struct ConversationPage {
     }
     onReadMessage = (readEntries: ReadEntry[]) => {
         this.readEntries = wfc.getConversationRead(this.conversation!);
+    }
+    onUserInfosUpdate = (userInfos: UserInfo[]) => {
+        if (this.conversation?.type === ConversationType.Single) {
+            let index = userInfos.findIndex(info => info.uid === this.conversation?.target)
+            if (index >= 0) {
+                Utils.computeConversationItemPortraitAndName(this.conversation)
+                    .then(value => {
+                        this.title = value.name
+                    })
+            }
+        }
+        // TODO 消息发送者的头像等可能也需要更新
+    }
+    onGroupInfosUpdate = (groupInfos: GroupInfo[]) => {
+        if (this.conversation?.type === ConversationType.Group) {
+            let index = groupInfos.findIndex(info => info.target === this.conversation?.target)
+            if (index >= 0) {
+
+                Utils.computeConversationItemPortraitAndName(this.conversation)
+                    .then(value => {
+                        this.title = value.name
+                    })
+            }
+        }
+    }
+    onConversationInfoUpdate = (conversationInfo: ConversationInfo) => {
+        // 清空会话消息
+        if (!conversationInfo.lastMessage) {
+            this.conversationMessageDataSource.setMessages([])
+        }
+    }
+    onChannelInfosUpdate = (channelInfos: ChannelInfo[]) => {
+        if (this.conversation?.type === ConversationType.Channel) {
+            let index = channelInfos.findIndex(info => info.channelId === this.conversation?.target)
+            if (index >= 0) {
+                Utils.computeConversationItemPortraitAndName(this.conversation)
+                    .then(value => {
+                        this.title = value.name
+                    })
+            }
+        }
+
     }
     onGroupMembersUpdate = (groupId: string, groupMembers: GroupMember[]) => {
         if (groupId === this.conversation!.target) {
@@ -341,13 +431,13 @@ export default struct ConversationPage {
         let name: string = ''
         switch (this.conversation!.type) {
             case ConversationType.Single:
-                name = 'singleConversationInfo'
+                name = navigationDestinations.SingleConversationInfoPage
                 break
             case ConversationType.Group:
-                name = 'groupConversationInfo'
+                name = navigationDestinations.GroupConversationInfoPage
                 break
             case ConversationType.Channel:
-                name = 'channelConversationInfo'
+                name = navigationDestinations.ChannelConversationInfoPage
                 break
             default:
                 break
@@ -358,6 +448,8 @@ export default struct ConversationPage {
     build() {
         NavDestination() {
             Navigation() {
+                // 下来刷新用 Refresh 组件替换，https://developer.huawei.com/consumer/cn/doc/harmonyos-references-V5/ts-container-refresh-V5?catalogVersion=V5
+                // api 12
                 Scroll() {
                     Stack() {
                         Column() {
@@ -398,6 +490,7 @@ export default struct ConversationPage {
                                                             Row() {
                                                                 Checkbox()
                                                                     .select(this.isMessageChecked(msg))
+                                                                    .margin({ left: 10 })
                                                                     .onChange((value => {
                                                                         // if (!this.enableMultiCheck) {
                                                                         //     return
@@ -440,6 +533,16 @@ export default struct ConversationPage {
                                                     .width('100%')
                                                     .justifyContent(FlexAlign.End)
                                                     .alignItems(VerticalAlign.Top)
+                                                    .backgroundColor(this.focusMessageId && msg.messageId === this.focusMessageId ? this.focusMessageBackgroundColor : undefined)
+                                                    .animation(this.focusMessageId && msg.messageId === this.focusMessageId ? {
+                                                        curve: Curve.Linear,
+                                                        duration: 1000,
+                                                        iterations: 5,
+                                                        playMode: PlayMode.Normal,
+                                                        onFinish: () => {
+                                                            this.focusMessageBackgroundColor = Color.Red
+                                                        }
+                                                    } : undefined)
                                                     .onClick((event) => {
                                                         if (!this.enableMultiCheck) {
                                                             return
@@ -464,6 +567,7 @@ export default struct ConversationPage {
                                                             Row() {
                                                                 Checkbox()
                                                                     .select(this.isMessageChecked(msg))
+                                                                    .margin({ left: 10 })
                                                                     .onChange((value => {
                                                                         if (this.checkValueChangeTriggerByClick) {
                                                                             this.checkValueChangeTriggerByClick = false
@@ -503,6 +607,16 @@ export default struct ConversationPage {
                                                     .width('100%')
                                                     .justifyContent(FlexAlign.Start)
                                                     .alignItems(VerticalAlign.Top)
+                                                    .backgroundColor(this.focusMessageId && msg.messageId === this.focusMessageId ? this.focusMessageBackgroundColor : undefined)
+                                                    .animation(this.focusMessageId && msg.messageId === this.focusMessageId ? {
+                                                        curve: Curve.Linear,
+                                                        duration: 1000,
+                                                        iterations: 5,
+                                                        playMode: PlayMode.Normal,
+                                                        onFinish: () => {
+                                                            this.focusMessageBackgroundColor = Color.Red
+                                                        }
+                                                    } : undefined)
                                                     .onClick((event) => {
                                                         if (!this.enableMultiCheck) {
                                                             return
@@ -525,6 +639,18 @@ export default struct ConversationPage {
                                     this.unreadStatusCleared = true
                                     // wfc.clearUnreadStatusBeforeMessage(this.conversation, )
                                     wfc.clearConversationUnreadStatus(this.conversation!);
+                                }
+                                if (this.focusMessageId && end === this.conversationMessageDataSource.totalCount() - 1) {
+                                    wfc.getMessagesV2(this.conversation!, this.conversationMessageDataSource.getData(this.conversationMessageDataSource.totalCount() - 1)
+                                        .messageId, false, 20, '', (messages) => {
+                                        if (messages.length > 0) {
+                                            this.conversationMessageDataSource.appendMessages(messages)
+                                        } else {
+                                            this.focusMessageId = 0
+                                        }
+                                    }, err => {
+                                        console.error('getMessageV2 error', err)
+                                    })
                                 }
                             })
                             .listDirection(Axis.Vertical)
@@ -562,7 +688,8 @@ export default struct ConversationPage {
 
                 if (this.conversation) {
                     ConversationInputPanelView({
-                        conversation: $conversation,
+                        conversation: this.conversation,
+                        conversationInfo: this.conversationInfo,
                         showAudioRecorderView: $showAudioRecorderView,
                         showCancelRecordIndicator: $showCancelRecordIndicator,
                         recordCountDown: $recordCountDown,
@@ -579,7 +706,7 @@ export default struct ConversationPage {
             .menus([
                 {
                     value: '',
-                    icon: "common/image/ic_session_info.png",
+                    icon: 'resources/base/media/ic_public_more.svg',
                     action: () => {
                         this.mainNavPathStack.pushPathByName(this.conversationInfoPageName(), {
                             'conversationInfo': this.conversationInfo
@@ -589,6 +716,12 @@ export default struct ConversationPage {
             ])
 
         }
+        .onReady(ctx => {
+            // let params = ctx.pathInfo.param as Record<string, Object>;
+            // let conversation = params['conversation'] as Conversation;
+            // let title = params['title'] as string;
+            // this.setupConversation(conversation, title);
+        })
         .onShown(() => {
             this.onPageShow();
         })

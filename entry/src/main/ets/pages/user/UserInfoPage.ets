@@ -4,6 +4,7 @@ import Conversation from '../../wfc/model/conversation';
 import ConversationType from '../../wfc/model/conversationType';
 import UserInfo from '../../wfc/model/userInfo';
 import EventType from '../../wfc/client/wfcEvent';
+import { navigationDestinations } from '../navigationConfig';
 
 @Entry
 @Component
@@ -39,7 +40,6 @@ export default struct UserInfoPage {
 
     build() {
         NavDestination() {
-
             Navigation() {
                 Column() {
                     Row() {
@@ -75,8 +75,9 @@ export default struct UserInfoPage {
                             .margin({ top: 20 })
                             .textAlign(TextAlign.Center)
                             .backgroundColor(Color.White)
+                            .clickEffect({ level: ClickEffectLevel.HEAVY })
                             .onClick(() => {
-                                this.mainNavPathStack.pushPathByName('conversation', {
+                                this.mainNavPathStack.pushPathByName(navigationDestinations.ConversationPage, {
                                     'conversation': new Conversation(ConversationType.Single, this.userInfo!.uid, 0)
                                 } as Record<string, Object>)
                             })
@@ -107,9 +108,18 @@ export default struct UserInfoPage {
             .title('用户信息')
             .titleMode(NavigationTitleMode.Mini)
             .hideBackButton(false)
+            .menus([
+                {
+                    value: '',
+                    icon: 'resources/base/media/ic_public_more.svg',
+                    action: () => {
+                        this.mainNavPathStack.pushPathByName(navigationDestinations.UpdateUserInfoPage, {
+                            'userInfo': this.userInfo
+                        } as Record<string, Object>)
 
-            // TODO
-            //.menus([])
+                    }
+                }
+            ])
         }
         .hideTitleBar(true)
         .height('100%')

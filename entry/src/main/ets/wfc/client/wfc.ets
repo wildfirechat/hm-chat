@@ -321,23 +321,24 @@ export class WfcManager {
      * 获取用户在群里面的displayName
      * @param {string} groupId 群id
      * @param {string} userId 用户id
+     * @param {boolean} ignoreFriendAlias 用户id
      * @returns {string} 用户在群里面的displayName
      */
-    getGroupMemberDisplayName(groupId: string, userId: string) {
+    getGroupMemberDisplayName(groupId: string, userId: string, ignoreFriendAlias: boolean = false) {
         let userInfo = this.getUserInfo(userId, false, groupId);
         if (!userInfo) {
             return '<' + userId + '>';
         }
 
-        return userInfo.groupAlias ? userInfo.groupAlias : (userInfo.friendAlias ? userInfo.friendAlias : (userInfo.displayName ? userInfo.displayName : '<' + userId + '>'))
+        return userInfo.groupAlias ? userInfo.groupAlias : (userInfo.friendAlias && !ignoreFriendAlias ? userInfo.friendAlias : (userInfo.displayName ? userInfo.displayName : '<' + userId + '>'))
     }
 
     getUserDisplayNameEx(userInfo: UserInfo) {
         return userInfo.friendAlias ? userInfo.friendAlias : (userInfo.displayName ? userInfo.displayName : '<' + userInfo.uid + '>');
     }
 
-    getGroupMemberDisplayNameEx(userInfo: UserInfo) {
-        return userInfo.groupAlias ? userInfo.groupAlias : (userInfo.friendAlias ? userInfo.friendAlias : (userInfo.displayName ? userInfo.displayName : '<' + userInfo.uid + '>'))
+    getGroupMemberDisplayNameEx(userInfo: UserInfo, ignoreFriendAlias: boolean = false) {
+        return userInfo.groupAlias ? userInfo.groupAlias : (userInfo.friendAlias && !ignoreFriendAlias ? userInfo.friendAlias : (userInfo.displayName ? userInfo.displayName : '<' + userInfo.uid + '>'))
     }
 
     /**
@@ -807,7 +808,7 @@ export class WfcManager {
      * @param failCB
      * @returns {Promise<void>}
      */
-    async modifyGroupAlias(groupId: string, alias: string, lines: numberArray, notifyMessageContent: MessageContent, successCB: SuccessCallback, failCB: FailCallback) {
+    async modifyGroupAlias(groupId: string, alias: string, lines: numberArray, notifyMessageContent: MessageContent | null, successCB: SuccessCallback, failCB: FailCallback) {
         impl.modifyGroupAlias(groupId, alias, lines, notifyMessageContent, successCB, failCB);
     }
 
@@ -2432,9 +2433,9 @@ export class WfcManager {
         return atob(str).buffer
     }
 
-    arrayBuffer_to_b64(data: ArrayBuffer) {
-        // fixme
-        //return Buffer.from(data).toString('base64');
+    arrayBuffer_to_b64(data: ArrayBuffer): string {
+        return btoa(new Uint8Array(data))
+
     }
 
     // // 兼容 web 端

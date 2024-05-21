@@ -1,7 +1,7 @@
 import UserInfo from '../../wfc/model/userInfo'
 import router from '@ohos.router'
-import SearchResultView from '../search/SearchResultView'
-import { SearchModule } from '../../common/uimodel/UITypes'
+import SearchResultView from '../search/SearchPortalResultView'
+import { SearchModule } from '../../common/Types'
 
 @Entry
 @Component

@@ -1,25 +1,26 @@
 import UserInfo from '../../wfc/model/userInfo'
 import wfc from '../../wfc/client/wfc'
 import CheckableUserListView from '../../view/CheckableUserListView'
+import GroupInfo from '../../wfc/model/groupInfo'
 
 @Component
-export default struct PickContactComponent {
+export default struct RemoveGroupMemberModal {
     @State checkedUsers: UserInfo[] = []
     private userInfos: UserInfo[] = []
     private initialCheckedUserIds: string[] = []
     private uncheckableUserIds: string[] = []
-    public static TAG: string = 'pickUser'
-    public static PICK_RESULT: string = 'pickResult'
-    @Link showPickContactComponent: boolean
+    public static TAG: string = 'removeGroupMember'
+    private groupInfo?: GroupInfo
+    @Link showRemoveGroupMemberModal: boolean
+    public static PICK_RESULT = 'removeGroupMembers'
 
     aboutToAppear() {
-        let friendUserIds = wfc.getMyFriendList()
-        this.userInfos = wfc.getUserInfos(friendUserIds, '')
-        if (this.initialCheckedUserIds) {
-            this.checkedUsers = this.userInfos.filter((info: UserInfo) => {
-                return this.initialCheckedUserIds.indexOf(info.uid) >= 0
-            })
-        }
+        let groupMemberIds = wfc.getGroupMemberIds(this.groupInfo!.target, false)
+
+        this.userInfos = wfc.getUserInfos(groupMemberIds, '')
+        // TODO
+        // 不能移除级别更高的
+        this.uncheckableUserIds = [wfc.getUserId()]
     }
 
     onCheckUser = (info: UserInfo, checked?: boolean) => {
@@ -48,7 +49,7 @@ export default struct PickContactComponent {
                     CheckableUserListView({
                         checkedUsers: $checkedUsers,
                         userInfos: this.userInfos,
-                        uncheckableUserIds: this.initialCheckedUserIds,
+                        uncheckableUserIds: this.uncheckableUserIds,
                         showCategory: true,
                         showSearchView: true
                     })
@@ -61,13 +62,12 @@ export default struct PickContactComponent {
             .height('100%')
             .padding({ top: 5 })
         }
-        .title('选取联系人')
+        .title('移除群成员')
         .titleMode(NavigationTitleMode.Mini)
         .hideBackButton(false)
         .height('100%')
         .width('100%')
         .navBarPosition(NavBarPosition.Start)
-        // .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.START])
         .menus(this.NavigationMenus())
     }
 
@@ -84,12 +84,12 @@ export default struct PickContactComponent {
                 .borderRadius(4)// .backgroundColor(Color.Blue)
                 .onClick(() => {
                     LocalStorage.getShared()
-                        .setOrCreate<UserInfo[]>(PickContactComponent.PICK_RESULT, this.newlyCheckedUsers());
-                    this.showPickContactComponent = false
+                        .setOrCreate<UserInfo[]>(RemoveGroupMemberModal.PICK_RESULT, this.newlyCheckedUsers());
+                    this.showRemoveGroupMemberModal = false;
                 })
         }
         .height('100%')
         .justifyContent(FlexAlign.Center)
-        .alignItems(VerticalAlign.Center)
+        .align(Alignment.Center)
     }
 }

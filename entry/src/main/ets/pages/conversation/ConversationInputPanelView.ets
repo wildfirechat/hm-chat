@@ -14,12 +14,20 @@ import router from '@ohos.router'
 import ActionSheetDialog from '../../view/ActionSheetDialog'
 import EmojiInputPanelView from './emoji/EmojiInputPanelView'
 import { GlobalContext } from '../../globalContext'
-import { KeyboardAvoidMode, window } from '@kit.ArkUI'
+import { curves, KeyboardAvoidMode, window } from '@kit.ArkUI'
 import MentionGroupMemberView from './mention/MentionGroupMemberView'
 import UserInfo from '../../wfc/model/userInfo'
 import ConversationType from '../../wfc/model/conversationType'
 import { preferences } from '@kit.ArkData'
-
+// import avenginekit from '../../wfc/av/internal/avenginekitImpl'
+import MessageContent from '../../wfc/messages/messageContent'
+import VideoMessageContent from '../../wfc/messages/videoMessageContent'
+import cameraPicker from '@ohos.multimedia.cameraPicker';
+import media from '@ohos.multimedia.media'
+import photoAccessHelper from '@ohos.file.photoAccessHelper'
+import ConversationInfo from '../../wfc/model/conversationInfo'
+import { imageSize, imageThumbnail } from '../../helper/imageHelper'
+import { inputMethod } from '@kit.IMEKit'
 
 const INPUT_ICON_WIDTH = 30
 
@@ -37,7 +45,8 @@ interface MultiCheckAction {
 
 @Component
 export default struct ConversationInputPanelView {
-    @Link conversation: Conversation
+    @Prop conversation: Conversation
+    @Prop conversationInfo: ConversationInfo
     @State text: string = ''
     @State caretPosition: number = 0
     @State selectionStart: number = 0
@@ -46,9 +55,9 @@ export default struct ConversationInputPanelView {
     @State @Watch('onExpandConversationInputPanelView') showEmojiPanel: boolean = false
     @State @Watch('onExpandConversationInputPanelView') showExtPanel: boolean = false
     @State showMentionSheet: boolean = false
-    @State keyboardHeight: number = 300
+    @State keyboardHeight: number = 320
     @State showAudioRecorderButton: boolean = false
-    @State enable:boolean = false
+    @State enable: boolean = false
     // for audioRecorderView
     @Link showAudioRecorderView: boolean
     @Link showCancelRecordIndicator: boolean
@@ -64,7 +73,6 @@ export default struct ConversationInputPanelView {
     private recordTouchDownY: number = 0
     private recorder?: AudioRecordManager
     private recordOutputAudioFile: string = ''
-    private recordOutputAudioFileFd: number = 0
     private recordAudioStartMillis: number = 0
     private forwardMessageDialogController?: CustomDialogController
     private deleteMessageDialogController?: CustomDialogController
@@ -77,11 +85,14 @@ export default struct ConversationInputPanelView {
             action: async () => {
                 try {
                     let imgUris = await this.mediaHelper.selectPicture(9);
-                    imgUris.forEach(imgUri => {
+                    imgUris.forEach(async imgUri => {
                         let file = getContext(this).cacheDir + '/' + new Date().getTime() + '.jpg'
                         copyFileUri(imgUri, file);
-                        let size = fileSize(file);
-                        let content = new ImageMessageContent(file, '', '')
+                        let thumbnail = await imageThumbnail(getContext(this), imgUri, { width: 200, height: 200 })
+                        let size = await imageSize(imgUri);
+                        let content = new ImageMessageContent(file, '', thumbnail)
+                        content.imageWidth = size.width;
+                        content.imageHeight = size.height;
                         wfc.sendConversationMessage(this.conversation, content, [], null, null, null, null, null);
                     })
                 } catch (reason) {
@@ -94,20 +105,40 @@ export default struct ConversationInputPanelView {
             icon: $r('app.media.ic_func_video'),
             action: () => {
                 showToast('TODO')
+                // if (this.conversation.type === ConversationType.Single) {
+                //     avenginekit.startCall(this.conversation, [this.conversation.target], true)
+                // } else {
+                //     showToast('TODO')
+                // }
             }
         },
         {
             title: '拍摄',
             icon: $r('app.media.ic_func_shot'),
             action: async () => {
-                showToast('TODO')
                 try {
-                    let imgUri = await this.mediaHelper.takePhoto(getContext() as common.UIAbilityContext)
-                    let file = getContext(this).cacheDir + '/' + new Date().getTime() + '.jpg'
-                    copyFileUri(imgUri, file);
-                    let size = fileSize(file);
-                    let content = new ImageMessageContent(file, '', '')
-                    wfc.sendConversationMessage(this.conversation, content);
+                    let pickResult = await this.mediaHelper.takePhoto(getContext() as common.UIAbilityContext)
+                    if (pickResult && pickResult.resultCode === 0) {
+                        let file = ''
+                        let content: MessageContent
+                        if (pickResult.mediaType === cameraPicker.PickerMediaType.PHOTO) {
+                            file = getContext(this).cacheDir + '/' + new Date().getTime() + '.jpg'
+                            copyFileUri(pickResult.resultUri, file);
+                            let size = fileSize(file);
+                            // TODO
+                            // FIXME 缩略图
+                            // let avImageGenerator: media.AVImageGenerator = await media.createAVImageGenerator()
+
+                            content = new ImageMessageContent(file, '', '')
+                            wfc.sendConversationMessage(this.conversation, content);
+                        } else {
+                            let file = getContext(this).cacheDir + '/' + new Date().getTime() + '.mp4'
+                            copyFileUri(pickResult.resultUri, file);
+                            let size = fileSize(file);
+                            content = new VideoMessageContent(file, '', '')
+                        }
+                        wfc.sendConversationMessage(this.conversation, content);
+                    }
                 } catch (reason) {
                     showToast('拍摄照片失败: ' + reason)
                 }
@@ -152,7 +183,7 @@ export default struct ConversationInputPanelView {
                 AlertDialog.show({
                     message: '确定删除？',
                     autoCancel: true,
-                    alignment: DialogAlignment.Center,
+                    alignment: DialogAlignment.Default,
                     gridCount: 4,
                     primaryButton: {
                         value: '取消',
@@ -196,8 +227,8 @@ export default struct ConversationInputPanelView {
                                     ]
                                 }),
                                 autoCancel: true,
-                                alignment: DialogAlignment.Default,
-                                gridCount: 3,
+                                alignment: DialogAlignment.Bottom,
+                                gridCount: 6,
                                 customStyle: false
                             })
 
@@ -249,8 +280,8 @@ export default struct ConversationInputPanelView {
                         ]
                     }),
                     autoCancel: true,
-                    alignment: DialogAlignment.Default,
-                    gridCount: 3,
+                    alignment: DialogAlignment.Bottom,
+                    gridCount: 6,
                     customStyle: false
                 })
 
@@ -272,14 +303,23 @@ export default struct ConversationInputPanelView {
     }
 
     onExpandConversationInputPanelView(propName: string) {
+        console.log('xxxxxxxxx on onExpandConversationInputPanelView', this.showEmojiPanel, this.showExtPanel);
         if (this.showEmojiPanel || this.showExtPanel) {
-            this.messageListScroller!.scrollEdge(Edge.Bottom);
+            this.scrollMessageListToBottom();
+        }
+    }
+
+    private scrollMessageListToBottom() {
+        if (!this.messageListScroller?.isAtEnd()) {
+            animateTo({ curve: curves.responsiveSpringMotion() }, () => {
+                this.messageListScroller!.scrollEdge(Edge.Bottom);
+            })
         }
     }
 
     onMentionGroupMember = (userInfo: UserInfo) => {
         this.showMentionSheet = false;
-        let mentionText = '@' + userInfo.displayName;
+        let mentionText = '@' + wfc.getGroupMemberDisplayNameEx(userInfo, true)
         this.text = this.text + mentionText + ' ';
         this.mentions.push({
             target: userInfo.uid,
@@ -294,22 +334,24 @@ export default struct ConversationInputPanelView {
 
             let preference = preferences.getPreferencesSync(getContext(this), { name: 'wfcstore' })
             let keyboardHeight = preference.getSync('keyboardHeight', 0) as number
-            if (keyboardHeight === 0) {
-                currentWindow.on('avoidAreaChange', async data => {
-                    let property = currentWindow.getWindowProperties();
-                    if (data.type === window.AvoidAreaType.TYPE_KEYBOARD) {
-                        this.messageListScroller!.scrollEdge(Edge.Bottom);
-                        if (data.area.bottomRect.height > 0) {
+            if (keyboardHeight > 0) {
+                this.keyboardHeight = keyboardHeight;
+            }
+            currentWindow.on('avoidAreaChange', async data => {
+                let property = currentWindow.getWindowProperties();
+                if (data.type === window.AvoidAreaType.TYPE_KEYBOARD) {
+                    this.messageListScroller!.scrollEdge(Edge.Bottom);
+                    if (data.area.bottomRect.height > 0) {
+                        if (this.keyboardHeight === 0) {
                             let type = window.AvoidAreaType.TYPE_NAVIGATION_INDICATOR; // 底部导航条
                             let navIndicatorAvoidArea = currentWindow.getWindowAvoidArea(type);
                             this.keyboardHeight = px2vp(data.area.bottomRect.height - navIndicatorAvoidArea.bottomRect.height);
                             preference.put('keyboardHeight', this.keyboardHeight);
                         }
+                        this.scrollMessageListToBottom()
                     }
-                })
-            } else {
-                this.keyboardHeight = keyboardHeight;
-            }
+                }
+            })
         })
 
         if (this.conversation.type === ConversationType.Group) {
@@ -317,18 +359,21 @@ export default struct ConversationInputPanelView {
         }
 
         this.setKeyboardAvoidMode(KeyboardAvoidMode.RESIZE);
+
+        if (this.conversationInfo.draft) {
+            this.text = this.conversationInfo.draft;
+        }
+    }
+
+    aboutToDisappear(): void {
+        if (this.text.trim()) {
+            wfc.setConversationDraft(this.conversation, this.text.trim())
+        }
     }
 
     async startRecordAudio() {
-        // let audioStreamInfo = {
-        //     samplingRate: audio.AudioSamplingRate.SAMPLE_RATE_44100,
-        //     channels: audio.AudioChannel.CHANNEL_1,
-        //     sampleFormat: audio.AudioSampleFormat.SAMPLE_FORMAT_S16LE,
-        //     encodingType: audio.AudioEncodingType.ENCODING_TYPE_RAW
-        // }
         if (!this.recorder) {
             this.recorder = new AudioRecordManager()
-            this.recorder.init()
         }
 
         let cacheDir = getContext(this).cacheDir;
@@ -345,14 +390,16 @@ export default struct ConversationInputPanelView {
         console.log('record audioFile', this.recordOutputAudioFile)
 
         let fd = fs.openSync(this.recordOutputAudioFile, fs.OpenMode.READ_WRITE | fs.OpenMode.CREATE)
-        this.recorder.start(`fd://${fd}`);
+        this.recorder.start(fd.fd);
     }
 
-    stopRecordAudio(canceled: boolean) {
-        this.recorder!.finish()
-        fs.closeSync(this.recordOutputAudioFileFd)
-        this.recordOutputAudioFileFd = 0
-        if (canceled) {
+    async stopRecordAudio(canceled: boolean) {
+        await this.recorder!.finish()
+        let stat = fs.statSync(this.recordOutputAudioFile)
+        console.log('AudioRecordManager', 'record file size', stat.size)
+
+        if (canceled || stat.size === 0) {
+            showToast('获取录音文件失败')
             return;
         }
         let audioMessageContent = new SoundMessageContent(this.recordOutputAudioFile, '', Math.round((new Date().getTime() - this.recordAudioStartMillis) / 1000))
@@ -469,7 +516,8 @@ export default struct ConversationInputPanelView {
                             this.showExtPanel = false
                             this.showEmojiPanel = !this.showEmojiPanel;
                             if (!this.showEmojiPanel) {
-                                this.textInputController.caretPosition(0)
+                                focusControl.requestFocus('textInput')
+                                this.setKeyboardAvoidMode(KeyboardAvoidMode.RESIZE)
                             }
                             this.textInputFocused = false;
                             this.showAudioRecorderButton = false
@@ -499,6 +547,7 @@ export default struct ConversationInputPanelView {
                                 }
 
                                 wfc.sendConversationMessage(this.conversation, textMessageContent, [], null, null, null, null, null);
+                                wfc.setConversationDraft(this.conversation, '')
                                 this.text = '';
 
                             })

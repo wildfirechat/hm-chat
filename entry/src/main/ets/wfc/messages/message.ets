@@ -101,7 +101,7 @@ export default class Message {
                     content.fromSelf = msg.from === wfc.getUserId();
                 }
             } catch (error) {
-                console.error('decode message payload failed, fallback to unkownMessage', msg.content, error);
+                console.error('decode message payload failed, fallback to unkownMessage', msg.content?.type, msg.content, error);
                 let flag = MessageConfig.getMessageContentPersitFlag(payload.type);
                 if (PersistFlag.Persist === flag || PersistFlag.Persist_And_Count === flag) {
                     content = new UnknownMessageContent(payload);

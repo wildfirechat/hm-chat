@@ -2,31 +2,24 @@
 @CustomDialog
 export default struct ActionSheetDialog {
     title: string = ''
-    sheets: SheetInfo[] = [
-        {
-            title: '项目 1',
-            action: () => {
-            }
-        },
-        {
-            title: '项目 2',
-            action: () => {
-            }
-        },
-        {
-            title: '项目 3',
-            action: () => {
-            }
-        }
-    ]
-
+    sheets: SheetInfo[] = []
     // 若尝试在CustomDialog中传入多个其他的Controller，以实现在CustomDialog中打开另一个或另一些CustomDialog，那么此处需要将指向自己的controller放在最后
     controller: CustomDialogController
 
     build() {
         Column() {
             if (this.title) {
-                Text(this.title).fontSize(20).margin({ bottom: 10 })
+                Column() {
+                    Text(this.title)
+                        .fontSize(20)
+                    Divider()
+                        .width('100%')
+                        .padding({ top: 10 })
+                }
+                .justifyContent(FlexAlign.Center)
+                .align(Alignment.Center)
+                .width('100%')
+                .padding({ top: 20 })
             }
 
             ForEach(this.sheets, (sheet: SheetInfo) => {
@@ -38,10 +31,12 @@ export default struct ActionSheetDialog {
                     }
                     Text(sheet.title)
                         .padding(10)
-                        .fontSize(14)
+                        .fontSize(16)
                         .textAlign(TextAlign.Center)
                 }
                 .justifyContent(FlexAlign.Center)
+                .align(Alignment.Center)
+                .height(50)
                 .width('100%')
                 .stateStyles({
                     pressed: {
@@ -58,7 +53,12 @@ export default struct ActionSheetDialog {
             }, (sheet: SheetInfo, index: number) => index + '')
 
         }
-        .padding({ top: 10, bottom: 10 })
+        // .padding({ top: 10, bottom: 10 })
+        .width('100%')
+        .backgroundColor(Color.White)
+
+        // .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.BOTTOM])
+
         // dialog默认的borderRadius为24vp，如果需要使用border属性，请和borderRadius属性一起使用。
     }
 }

@@ -4,7 +4,7 @@ import window from '@ohos.window';
 import data_preferences from '@ohos.data.preferences';
 import wfc from '../wfc/client/wfc'
 import Config from '../config'
-import { AbilityConstant, Want } from '@kit.AbilityKit';
+import { AbilityConstant, Context, Want } from '@kit.AbilityKit';
 import { router } from '@kit.ArkUI';
 import { GlobalContext } from '../globalContext';
 import { pushService } from '@kit.PushKit';
@@ -28,6 +28,7 @@ export default class EntryAbility extends UIAbility {
 
     async onCreate(want: Want, launchParam: AbilityConstant.LaunchParam) {
         hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onCreate');
+        GlobalContext.getContext().setObject('context', this.context);
 
         wfc.init(this.context.getApplicationContext(), this.context.eventHub, this.context.filesDir, Config.getWFCPlatform());
         wfc.eventEmitter!.on(EventType.ConnectionStatusChanged, async (status: number) => {
@@ -54,7 +55,7 @@ export default class EntryAbility extends UIAbility {
                     preference.clear()
                     preference.flush()
                 }
-                let url = 'pages/Login'
+                let url = 'pages/LoginPage'
                 this.loadContent(url)
             }
         })
@@ -112,9 +113,9 @@ export default class EntryAbility extends UIAbility {
         // 获取导航栏高度
         let navigationArea = windowClass.getWindowAvoidArea(window.AvoidAreaType.TYPE_NAVIGATION_INDICATOR);
         AppStorage.setOrCreate('SafeAreaBottomHeight', navigationArea.bottomRect.height);
-        // 获取软键盘高度
+        // 获取软键盘高度，但这儿获取到的软键盘高度无效，后续也没有使用
         let keyboardArea = windowClass.getWindowAvoidArea(window.AvoidAreaType.TYPE_KEYBOARD);
-        AppStorage.setOrCreate('SafeAreaKeyboardHeight', navigationArea.bottomRect.height);
+        AppStorage.setOrCreate('SafeAreaKeyboardHeight', keyboardArea.bottomRect.height);
 
         // setConnectionStatusListener((value) => {
         //   hilog.info(0x0000, 'testTag', 'connection status changed: %{public}d', value);

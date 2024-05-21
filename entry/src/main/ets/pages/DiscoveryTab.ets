@@ -1,6 +1,7 @@
 import { showToast } from '../common/utils/Toast'
 import Conversation from '../wfc/model/conversation'
 import ConversationType from '../wfc/model/conversationType'
+import { navigationDestinations } from './navigationConfig'
 
 @Preview
 @Component
@@ -66,7 +67,8 @@ export default struct DiscoveryTab {
                                 .padding({ left: 10 })
                         }
                         .onClick(() => {
-                            this.mainNavPathStack.pushPathByName('chatroomListPage', {} as Record<string, Object>)
+                            this.mainNavPathStack.pushPathByName(navigationDestinations.ChatroomListPage, {
+                            } as Record<string, Object>)
                         })
                         .padding({ left: 10, right: 10 })
                         .width('100%')
@@ -92,7 +94,7 @@ export default struct DiscoveryTab {
                         }
                         .onClick(() => {
                             let conversation = new Conversation(ConversationType.Single, 'FireRobot', 0)
-                            this.mainNavPathStack.pushPathByName('conversation', {
+                            this.mainNavPathStack.pushPathByName(navigationDestinations.ConversationPage, {
                                 'conversation': conversation
                             } as Record<string, Object>)
                         })
@@ -118,7 +120,7 @@ export default struct DiscoveryTab {
                                 .padding({ left: 10 })
                         }
                         .onClick(() => {
-                            this.mainNavPathStack.pushPathByName('webViewPage', {
+                            this.mainNavPathStack.pushPathByName(navigationDestinations.WebViewPage, {
                                 'url': 'https://docs.wildfirechat.cn',
                                 'title': '野火IM 开发文档'
                             } as Record<string, Object>)
@@ -137,9 +139,9 @@ export default struct DiscoveryTab {
                     })
                 }
                 .divider({
-                    strokeWidth: 1,
+                    strokeWidth: 0.6,
+                    color: '#EDEDED',
                     startMargin: 40
-
                 })
             }
             .width('100%')

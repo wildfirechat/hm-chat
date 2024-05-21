@@ -27,6 +27,7 @@ export default class CallStartMessageContent extends MessageContent {
     status = 0;
     audioOnly = false;
     pin = '';
+    sdkType = 0;
 
     constructor(mentionedType = 0, mentionedTargets = []) {
         super(MessageContentType.VOIP_CONTENT_TYPE_START, mentionedType, mentionedTargets);

@@ -22,7 +22,7 @@ const TAG = 'AudioPlayManager';
 export default class AudioPlayManager {
     public audioPlayer?: media.AVPlayer;
     private playCompleteCallbackMap?: Map<string, (err: Error) => void>
-    private playCompleteCallback?: (err: Error) => void
+    private playCompleteCallback?: (err?: Error) => void
 
     init(context:common.Context) {
         this.release();
@@ -71,7 +71,8 @@ export default class AudioPlayManager {
                             break;
                         case 'completed':
                             Logger.info(TAG, `The AVPlayer state is: ${this.audioPlayer!.state}`);
-                            // context.isCompleted = true;
+                            this.playCompleteCallback?.()
+                        // TODO
                             break;
                         case 'stopped':
                             Logger.info(TAG, `The AVPlayer state is: ${this.audioPlayer!.state}`);
@@ -113,7 +114,7 @@ export default class AudioPlayManager {
         }
     }
 
-    play(filePath: string, isNewAudio: boolean = true, callback?: (err: Error) => void) {
+    play(filePath: string, isNewAudio: boolean = true, callback?: (err?: Error) => void) {
         this.playCompleteCallback = callback
         if (!isNewAudio) {
             if (this.audioPlayer!.state === 'idle') {

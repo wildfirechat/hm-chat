@@ -7,7 +7,7 @@ import wfc from "../../client/wfc"
 import Message from '../../messages/message';
 import MessagePayload from '../../messages/messagePayload';
 
-class ParticipantStatus {
+export class ParticipantStatus {
     userId = '';
     acceptTime = 0;
     joinTime = 0;

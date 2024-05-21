@@ -1,0 +1,116 @@
+import ChannelListPage from './channel/ChannelListPage'
+import ChatroomListPage from './chatroom/ChatroomListPage'
+import FriendRequestListPage from './contact/FriendRequestListPage'
+import ChannelConversationInfoPage from './conversation/ChannelConversationInfoPage'
+import ConversationPage from './conversation/ConversationPage'
+import GroupConversationInfoPage from './conversation/GroupConversationInfoPage'
+import SingleConversationInfoPage from './conversation/SingleConversationInfoPage'
+import FavGroupListPage from './group/FavGroupListPage'
+import GroupManagePage from './group/GroupManagePage'
+import GroupQRCodePage from './group/GroupQRCodePage'
+import UpdateGroupAnnouncementPage from './group/UpdateGroupAnnouncementPage'
+import UpdateGroupNamePage from './group/UpdateGroupNamePage'
+import UpdateGroupRemarkNamePage from './group/UpdateGroupRemarkPage'
+import UpdateMyGroupAliasNamePage from './group/UpdateMyGroupAliasPage'
+import AccountPage from './me/AccountPage'
+import FavRecordPage from './me/FavRecordPage'
+import FileRecordPage from './me/FileRecordPage'
+import NotificationPage from './me/NotificaitonPage'
+import SettingPage from './me/SettingPage'
+import WebViewPage from './misc/WebViewPage'
+import PickContactPage from './picker/PickContactPage'
+import SearchConversationMessagePage from './search/SearchConversationMessagePage'
+import SearchPortalPage from './search/SearchPortalPage'
+import SearchUserPage from './search/SearchUserPage'
+import UpdateUserInfoPage from './user/UpdateUserInfoPage'
+import UserInfoPage from './user/UserInfoPage'
+import WfcWebView from './workspace/WfcWebView'
+
+
+export class navigationDestinations {
+    static SearchPortalPage = 'searchPortalPage'
+    static ConversationPage = 'conversationPage'
+    static SingleConversationInfoPage = 'singleConversationInfoPage'
+    static GroupConversationInfoPage = 'groupConversationInfo'
+    static ChannelConversationInfoPage = 'channelConversationInfoPage'
+    static UserInfoPage = 'userInfoPage'
+    static FriendRequestListPage = 'friendRequestListPage'
+    static SearchUserPage = 'searchUserPage'
+    static FavGroupListPage = 'favGroupListPage'
+    static ChannelListPage = 'channelListPage'
+    static ChatroomListPage = 'chatroomListPage'
+    static WebViewPage = 'webViewPage'
+    static PickContactPage = 'pickContactPage'
+    static SearchConversationMessagePage = 'searchConversationMessagePage'
+    static UpdateUserInfoPage = 'updateUserInfoPage'
+    static UpdateGroupAnnouncementPage = 'updateGroupAnnouncementPage'
+    static UpdateGroupNamePage = 'updateGroupNamePage'
+    static UpdateGroupRemarkPage = 'updateGroupRemarkPage'
+    static UpdateMyGroupAliasPage = 'updateMyGroupAliasPage'
+    static GroupQRCodePage = 'groupQRCodePage'
+    static GroupManagePage = 'groupManagePage'
+    static AccountPage = 'accountPage'
+    static FavRecordPage = 'favRecordPage'
+    static FileRecordPage = 'fileRecordPage'
+    static NotificationPage = 'notificationPage'
+    static SettingPage = 'settingPage'
+}
+
+@Builder
+export function PagesMap(name: string) {
+    // TODO add more
+    // TODO FIXME 参数使用 NavDestination.onReady 处理，而不是 aboutToAppear
+    if (name == navigationDestinations.SearchPortalPage) {
+        SearchPortalPage()
+    } else if (name == navigationDestinations.ConversationPage) {
+        ConversationPage()
+    } else if (name === navigationDestinations.SingleConversationInfoPage) {
+        SingleConversationInfoPage()
+    } else if (name === navigationDestinations.GroupConversationInfoPage) {
+        GroupConversationInfoPage()
+    } else if (name === navigationDestinations.ChannelConversationInfoPage) {
+        ChannelConversationInfoPage()
+    } else if (name === navigationDestinations.UserInfoPage) {
+        UserInfoPage()
+    } else if (name === navigationDestinations.FriendRequestListPage) {
+        FriendRequestListPage();
+    } else if (name === navigationDestinations.SearchUserPage) {
+        SearchUserPage();
+    } else if (name === navigationDestinations.FavGroupListPage) {
+        FavGroupListPage();
+    } else if (name === navigationDestinations.ChannelListPage) {
+        ChannelListPage();
+    } else if (name === navigationDestinations.ChatroomListPage) {
+        ChatroomListPage()
+    } else if (name === navigationDestinations.WebViewPage) {
+        WebViewPage()
+    } else if (name === navigationDestinations.PickContactPage) {
+        PickContactPage()
+    } else if (name === navigationDestinations.SearchConversationMessagePage) {
+        SearchConversationMessagePage()
+    } else if (name === navigationDestinations.UpdateUserInfoPage) {
+        UpdateUserInfoPage()
+    } else if (name === navigationDestinations.UpdateGroupAnnouncementPage) {
+        UpdateGroupAnnouncementPage()
+    } else if (name === navigationDestinations.UpdateGroupNamePage) {
+        UpdateGroupNamePage()
+    } else if (name === navigationDestinations.UpdateGroupRemarkPage) {
+        UpdateGroupRemarkNamePage()
+    } else if (name === navigationDestinations.UpdateMyGroupAliasPage) {
+        UpdateMyGroupAliasNamePage()
+    } else if (name === navigationDestinations.GroupQRCodePage) {
+        GroupQRCodePage()
+    } else if (name === navigationDestinations.GroupManagePage) {
+        GroupManagePage()
+    } else if (name === navigationDestinations.AccountPage) {
+        AccountPage()
+    } else if (name === navigationDestinations.FavRecordPage) {
+        FavRecordPage()
+    } else if (name === navigationDestinations.FileRecordPage) {
+        FileRecordPage()
+    } else if (name === navigationDestinations.NotificationPage) {
+        NotificationPage()
+    } else if (name === navigationDestinations.SettingPage) {
+        SettingPage()
+    }
+}

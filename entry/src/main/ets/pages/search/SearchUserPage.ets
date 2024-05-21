@@ -1,6 +1,7 @@
 import UserInfo from '../../wfc/model/userInfo'
-import SearchResultView from './SearchResultView'
+import SearchResultView from './SearchPortalResultView'
 import { SearchModule } from '../../common/Types'
+import { navigationDestinations } from '../navigationConfig'
 
 @Entry
 @Component
@@ -13,7 +14,7 @@ export default struct SearchUserPage {
             tag: 'user',
             onSearchResultItemClick: value => {
                 let userInfo = value as UserInfo
-                this.mainNavPathStack.pushPathByName('userInfoPage', {
+                this.mainNavPathStack.pushPathByName(navigationDestinations.UserInfoPage, {
                     'userInfo': userInfo
                 } as Record<string, Object>)
             }
@@ -47,6 +48,7 @@ export default struct SearchUserPage {
                 })
                     .width('100%')
                     .layoutWeight(1)
+                    .focusable(true)
             }
             .height('100%')
             .width('100%')

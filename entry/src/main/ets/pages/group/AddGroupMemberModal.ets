@@ -1,28 +1,32 @@
 import UserInfo from '../../wfc/model/userInfo'
 import wfc from '../../wfc/client/wfc'
-import router from '@ohos.router'
 import CheckableUserListView from '../../view/CheckableUserListView'
 import GroupInfo from '../../wfc/model/groupInfo'
 
-@Entry
 @Component
-export default struct RemoveGroupMemberPage {
+export default struct AddGroupMemberModal {
     @State checkedUsers: UserInfo[] = []
     private userInfos: UserInfo[] = []
     private initialCheckedUserIds: string[] = []
     private uncheckableUserIds: string[] = []
-    public static TAG: string = 'removeGroupMember'
+    public static TAG: string = 'addGroupMember'
     private groupInfo?: GroupInfo
+    @Link showAddGroupMemberModal: boolean
+    public static PICK_RESULT = 'pickResult'
 
     aboutToAppear() {
-        let params = router.getParams() as Record<string, Object>
-        this.groupInfo = params['groupInfo'] as GroupInfo
-        let groupMemberIds = wfc.getGroupMemberIds(this.groupInfo.target, false)
+        let groupMemberIds = wfc.getGroupMemberIds(this.groupInfo!.target, false)
 
-        this.userInfos = wfc.getUserInfos(groupMemberIds, '')
-        // TODO
-        // 不能移除自己，以及级别更高的
-        // this.uncheckableUserIds = groupMemberIds
+        let friendUserIds = wfc.getMyFriendList()
+        this.userInfos = wfc.getUserInfos(friendUserIds, '')
+        this.uncheckableUserIds = groupMemberIds
+        this.initialCheckedUserIds = groupMemberIds
+
+        if (this.initialCheckedUserIds) {
+            this.checkedUsers = this.userInfos.filter((info: UserInfo) => {
+                return this.initialCheckedUserIds.indexOf(info.uid) >= 0
+            })
+        }
     }
 
     onCheckUser = (info: UserInfo, checked?: boolean) => {
@@ -64,7 +68,7 @@ export default struct RemoveGroupMemberPage {
             .height('100%')
             .padding({ top: 5 })
         }
-        .title('选取联系人')
+        .title('添加群成员')
         .titleMode(NavigationTitleMode.Mini)
         .hideBackButton(false)
         .height('100%')
@@ -80,20 +84,18 @@ export default struct RemoveGroupMemberPage {
                 .type(ButtonType.Normal)
                 .height(30)
                 .width(60)
+                .margin({ right: 18 })
                 .enabled(this.newlyCheckedUsers().length > 0)
                 .fontSize(14)
                 .borderRadius(4)// .backgroundColor(Color.Blue)
-                    // TODO
                 .onClick(() => {
-                    let options: router.RouterOptions = {
-                        url: '',
-                        params: {
-                            tag: RemoveGroupMemberPage.TAG,
-                            result: this.newlyCheckedUsers(),
-                        }
-                    }
-                    router.back(options)
+                    LocalStorage.getShared()
+                        .setOrCreate<UserInfo[]>(AddGroupMemberModal.PICK_RESULT, this.newlyCheckedUsers());
+                    this.showAddGroupMemberModal = false;
                 })
         }
+        .height('100%')
+        .justifyContent(FlexAlign.Center)
+        .alignItems(VerticalAlign.Center)
     }
 }

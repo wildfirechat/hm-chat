@@ -5,6 +5,12 @@ import ChannelInfo from '../../wfc/model/channelInfo'
 import GroupSearchResult from '../../wfc/model/groupSearchResult'
 import SearchType from '../../wfc/model/searchType'
 import { SearchModule } from '../../common/Types'
+import Message from '../../wfc/messages/message'
+import ConversationSearchResult from '../../wfc/model/conversationSearchResult'
+import ConversationType from '../../wfc/model/conversationType'
+import Conversation from '../../wfc/model/conversation'
+import Utils from '../../common/Utils'
+import { drawing } from '@kit.ArkGraphics2D'
 
 @Component
 @Preview
@@ -17,6 +23,8 @@ export default struct SearchResultView {
     @State expandGroupSearchResult: boolean = false
     @State channelSearchResults: ChannelInfo[] = []
     @State expandChannelSearchResult: boolean = false
+    @State conversationSearchResults: ConversationSearchResultWrapper[] = []
+    @State expandConversationSearchResults: boolean = false
     @Prop @Watch('onSearchKeywordUpdate') keyword: string
     private searchModules: SearchModule[] = []
 
@@ -37,6 +45,7 @@ export default struct SearchResultView {
             this.contactSearchResults = []
             this.groupSearchResults = []
             this.channelSearchResults = []
+            this.conversationSearchResults = []
         } else {
             if (this.searchModules.length === 1) {
                 // 只有一个搜索模块时，全部展开
@@ -44,9 +53,13 @@ export default struct SearchResultView {
                 this.expandContactSearchResult = true
                 this.expandGroupSearchResult = true
                 this.expandChannelSearchResult = true
+                this.expandConversationSearchResults = true
             }
             this.searchModules.forEach(module => {
                 switch (module.tag) {
+                    case 'conversation':
+                        this.searchConversation(keyword)
+                        break
                     case 'contact':
                         this.contactSearchResults = wfc.searchFriends(keyword)
                         break
@@ -79,6 +92,20 @@ export default struct SearchResultView {
                 }
             })
         }
+    }
+
+    private async searchConversation(keyword: string) {
+        this.conversationSearchResults = await Promise.all(wfc.searchConversation(keyword, [ConversationType.Single, ConversationType.Group], [0])
+            .map(async result => {
+                let portraitAndName = await Utils.computeConversationItemPortraitAndName(result.conversation!)
+                let resultWrapper = {
+                    conversationSearchResult: result,
+                    portrait: portraitAndName.portrait,
+                    title: portraitAndName.name,
+                    desc: result.matchCount > 1 ? `${result.matchCount}条记录` : result.matchMessage?.messageContent.digest(result.matchMessage)
+                } as ConversationSearchResultWrapper
+                return resultWrapper
+            }))
     }
 
     @Builder
@@ -263,6 +290,64 @@ export default struct SearchResultView {
         }
     }
 
+    conversationSearchResultKey(result: ConversationSearchResult) {
+        let conv = result.conversation!
+        return conv.type + '-' + conv.target + '-' + conv.line
+    }
+
+    @Builder
+    conversationSearchResultBuilder() {
+        if (this.conversationSearchResults.length > 0) {
+            this.searchResultCategoryHeader('聊天记录')
+        }
+        ForEach(this.expandConversationSearchResults ? this.conversationSearchResults : this.conversationSearchResults.slice(0, 5), (resultWrapper: ConversationSearchResultWrapper) => {
+            ListItem() {
+                Row() {
+                    Image(resultWrapper.portrait)
+                        .alt($r('app.media.avatar_def'))
+                        .width(40)
+                        .height(40)
+                        .borderRadius(4)
+                    Column() {
+                        Text(resultWrapper.title)
+                            .maxLines(1)
+                            .textOverflow({ overflow: TextOverflow.Ellipsis })
+
+                        Text(resultWrapper.desc)
+                            .fontSize(12)
+                            .margin({ top: 5 })
+                            .fontColor('#B3B3B3')
+                            .maxLines(1)
+                            .textOverflow({ overflow: TextOverflow.Ellipsis })
+                    }
+                    .alignItems(HorizontalAlign.Start)
+                    .padding({ left: 10 })
+                }
+                .width('100%')
+                .justifyContent(FlexAlign.Start)
+                .padding(10)
+            }
+            .stateStyles({
+                pressed: {
+                    .backgroundColor('#E5E5E5')
+                },
+                normal: {
+                    .backgroundColor(Color.White)
+                }
+            })
+            .onClick(() => {
+                let conversationSearchModule = this.searchModules.filter(m => m.tag === 'conversation')[0]
+                conversationSearchModule.onSearchResultItemClick(resultWrapper.conversationSearchResult)
+            })
+        }, (resultWrapper: ConversationSearchResultWrapper) => this.conversationSearchResultKey(resultWrapper.conversationSearchResult))
+
+        if (!this.expandConversationSearchResults && this.conversationSearchResults.length > 5) {
+            this.searchResultCategoryFooter(`展开剩余${this.channelSearchResults.length - 5}项`, () => {
+                this.expandConversationSearchResults = true
+            })
+        }
+    }
+
     @Builder
     searchResultCategoryHeader(title: string) {
         Text(title)
@@ -291,6 +376,7 @@ export default struct SearchResultView {
                 this.userSearchResultBuilder()
                 this.contactSearchResultBuilder()
                 this.groupSearchResultBuilder()
+                this.conversationSearchResultBuilder()
                 this.channelSearchResultBuilder()
             }
         } else {
@@ -303,4 +389,11 @@ export default struct SearchResultView {
             .alignItems(HorizontalAlign.Center)
         }
     }
+}
+
+interface ConversationSearchResultWrapper {
+    conversationSearchResult: ConversationSearchResult
+    portrait: string,
+    title: string,
+    desc: string
 }

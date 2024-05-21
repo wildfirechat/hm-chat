@@ -87,7 +87,7 @@ export class MediaHelper {
     /**
      * 拍照
      */
-    public async takePhoto(context: common.UIAbilityContext): Promise<string> {
+    public async takePhoto(context: common.UIAbilityContext): Promise<cameraPicker.PickerResult | null> {
         // let want = {
         //     'uri': '',
         //     'action': wantConstant.Action.ACTION_IMAGE_CAPTURE,
@@ -107,16 +107,17 @@ export class MediaHelper {
         //     });
         try {
             let pickerProfile: cameraPicker.PickerProfile = {
-                cameraPosition: camera.CameraPosition.CAMERA_POSITION_BACK
+                cameraPosition: camera.CameraPosition.CAMERA_POSITION_BACK,
+                videoDuration: 60
             };
             let pickerResult: cameraPicker.PickerResult = await cameraPicker.pick(context,
                 [cameraPicker.PickerMediaType.PHOTO, cameraPicker.PickerMediaType.VIDEO], pickerProfile);
             console.log("the pick pickerResult is:" + JSON.stringify(pickerResult));
-            return pickerResult.resultCode === 0 ? pickerResult.resultUri : ''
+            return pickerResult
         } catch (error) {
             let err = error as BusinessError;
             console.error(`the pick call failed. error code: ${err.code}`);
-            return ''
+            return null
         }
 
         // let predicates: dataSharePredicates.DataSharePredicates = new dataSharePredicates.DataSharePredicates();

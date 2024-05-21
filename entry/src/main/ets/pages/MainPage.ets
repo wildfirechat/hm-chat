@@ -8,7 +8,7 @@ import promptAction from '@ohos.promptAction'
 import bundleManager from '@ohos.bundle.bundleManager'
 import common from '@ohos.app.ability.common'
 import { showToast } from '../common/utils/Toast'
-import PickContactComponent from './picker/PickContactComponent'
+import PickContactModal from './picker/PickContactModal'
 import UserInfo from '../wfc/model/userInfo'
 import wfc from '../wfc/client/wfc'
 import GroupType from '../wfc/model/groupType'
@@ -19,20 +19,8 @@ import notificationManager from '@ohos.notificationManager'
 import Base from '@ohos.base'
 import WorkSpaceTab from './WorkSpaceTab'
 import Config from '../config'
-import SearchPortalPage from './search/SearchPortalPage'
-import ConversationPage from './conversation/ConversationPage'
-import SingleConversationInfoPage from './conversation/SingleConversationInfoPage'
-import GroupConversationInfoPage from './conversation/GroupConversationInfoPage'
-import ChannelConversationInfoPage from './conversation/ChannelConversationInfoPage'
-import UserInfoPage from './user/UserInfoPage'
-import FriendRequestListPage from './contact/FriendRequestListPage'
-import SearchUserPage from './search/SearchUserPage'
-import FavGroupListPage from './group/FavGroupListPage'
-import ChannelListPage from './channel/ChannelListPage'
-import ChatroomListPage from './chatroom/ChatroomListPage'
-import WebViewPage from './misc/WebViewPage'
-import PickContactPage from './picker/PickContactPage'
-import SingleAudioCallPage from './voip/SingleAudioCallPage'
+import { checkPermissions, requestPermissions } from '../helper/permissionHelper'
+import { navigationDestinations, PagesMap } from './navigationConfig'
 
 const TAG = 'Main';
 
@@ -61,7 +49,7 @@ struct MainPage {
     @State @Watch('onUnreadCountUpdated') contactTabUnreadCount: number = 0
     @State @Watch('onUnreadCountUpdated') discoveryTabUnreadCount: number = 0
     @State meTabUnreadCount: number = 0
-    @State showPickContactComponent: boolean = false
+    @State showPickContactModal: boolean = false
     @Provide('mainNavPathStack') mainNavPathStack: NavPathStack = new NavPathStack()
     @LocalStorageProp('targetConversation') @Watch('onTargetConversation') targetConversation?: Conversation = undefined
 
@@ -70,13 +58,15 @@ struct MainPage {
         if (conversation) {
             storage.delete('targetConversation')
             wfc.clearConversationUnreadStatus(conversation!)
-            let index = this.mainNavPathStack.popToName('conversation')
+            // https://developer.huawei.com/consumer/cn/doc/harmonyos-references-V5/js-apis-arkui-observer-V5?catalogVersion=V5
+            //  会话页面，监听 observer.on('navDestinationUpdate')
+            let index = this.mainNavPathStack.popToName(navigationDestinations.ConversationPage)
             if (index >= 0) {
-                this.mainNavPathStack.replacePathByName('conversation', {
+                this.mainNavPathStack.replacePathByName(navigationDestinations.ConversationPage, {
                     'conversation': conversation
                 } as Record<string, Object>)
             } else {
-                this.mainNavPathStack.pushPathByName('conversation', {
+                this.mainNavPathStack.pushPathByName(navigationDestinations.ConversationPage, {
                     'conversation': conversation
                 } as Record<string, Object>)
             }
@@ -89,7 +79,7 @@ struct MainPage {
 
     createConversation(users: UserInfo[]) {
         if (users.length === 1) {
-            this.mainNavPathStack.pushPathByName('conversation', {
+            this.mainNavPathStack.pushPathByName(navigationDestinations.ConversationPage, {
                 'conversation': new Conversation(ConversationType.Single, users[0].uid, 0)
             } as Record<string, Object>)
         } else {
@@ -102,7 +92,7 @@ struct MainPage {
             })
             groupName = groupName.substring(0, groupName.length - 1)
             wfc.createGroup('', GroupType.Normal, groupName, '', '', memberIds, '', [0], null, (groupId) => {
-                this.mainNavPathStack.pushPathByName('conversation', {
+                this.mainNavPathStack.pushPathByName(navigationDestinations.ConversationPage, {
                     'conversation': new Conversation(ConversationType.Group, groupId, 0)
                 } as Record<string, Object>)
             }, err => {
@@ -116,15 +106,7 @@ struct MainPage {
         notificationManager.setBadgeNumber(badgeNumber, null)
     }
 
-    async requestPermissions() {
-        let atManager = AbilityAccessCtrl.createAtManager();
-        let context = getContext(this);
-        await atManager.requestPermissionsFromUser(context, permissions).then((data) => {
-            Logger.info(TAG, `Request permissions succeed, data is: ${data}`);
-        }).catch((error: Error) => {
-            Logger.error(TAG, `Request permissions failed, error is: ${error}`);
-        });
-
+    async enableNotification() {
         notificationManager.isNotificationEnabled().then((data: boolean) => {
             console.info("isNotificationEnabled success, data: " + JSON.stringify(data));
             if (!data) {
@@ -144,43 +126,16 @@ struct MainPage {
 
     }
 
-    async checkAccessToken(permission: Permissions) {
-        let atManager = AbilityAccessCtrl.createAtManager();
-        let grantStatus: AbilityAccessCtrl.GrantStatus;
-        let tokenID: number;
-        try {
-            let bundleInfo: bundleManager.BundleInfo = await bundleManager.getBundleInfoForSelf(bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION);
-            let appInfo: bundleManager.ApplicationInfo = bundleInfo.appInfo;
-            tokenID = appInfo.accessTokenId;
-        } catch (err) {
-            console.error(`getBundleInfoForSelf failed, error: ${err}`);
-        }
-
-        try {
-            grantStatus = await atManager.checkAccessToken(tokenID!, permission);
-        } catch (err) {
-            console.error(`checkAccessToken failed, error: ${err}`);
-        }
-        return grantStatus!;
-    }
-
-    async checkPermissions(): Promise<void> {
-        for (let i = 0; i < permissions.length; i++) {
-            let grantStatus: AbilityAccessCtrl.GrantStatus = await this.checkAccessToken(permissions[i]);
-            if (grantStatus !== AbilityAccessCtrl.GrantStatus.PERMISSION_GRANTED) {
-                let context: common.UIAbilityContext = getContext(this) as common.UIAbilityContext;
-                promptAction.showDialog({
-                    title: '警告',
-                    message: '没有权限，请自行去<设置>添加权限'
-                })
-                setTimeout(() => context.terminateSelf(), 1000);
+    async aboutToAppear() {
+        this.enableNotification();
+        let ungrantedPermissions = await checkPermissions(getContext(this), permissions)
+        if (ungrantedPermissions.length > 0) {
+            await requestPermissions(getContext(this), ungrantedPermissions)
+            ungrantedPermissions = await checkPermissions(getContext(this), permissions)
+            if (ungrantedPermissions.length > 0) {
+                showToast(`请授予相关权限，否则不能正常工作 ${ungrantedPermissions[0]}`)
             }
         }
-    }
-
-    async aboutToAppear() {
-        await this.requestPermissions();
-        await this.checkPermissions();
     }
 
     tabUnreadCount(tabIndex: number) {
@@ -233,7 +188,7 @@ struct MainPage {
 
     @Builder
     pickContactModal() {
-        PickContactComponent({ showPickContactComponent: $showPickContactComponent })
+        PickContactModal({ showPickContactModal: $showPickContactModal })
             .height('100%')
             .width('100%')
             .margin({ top: px2vp(AppStorage.get<number>('SafeAreaTopHeight')) })
@@ -245,20 +200,20 @@ struct MainPage {
         Menu() {
             MenuItem({ startIcon: $r('app.media.faqiqunliao_iconfont'), content: "创建群聊" })
                 .onClick(() => {
-                    this.showPickContactComponent = true
+                    this.showPickContactModal = true
                 })
-                .bindContentCover(this.showPickContactComponent, this.pickContactModal(), {
+                .bindContentCover(this.showPickContactModal, this.pickContactModal(), {
                     modalTransition: ModalTransition.DEFAULT,
                     onAppear: () => {
                     },
 
                     onDisappear: () => {
-                        this.showPickContactComponent = false
+                        this.showPickContactModal = false
                         let localStorage = LocalStorage.getShared();
-                        let pickUsers = localStorage.get<UserInfo[]>(PickContactComponent.PICK_RESULT);
+                        let pickUsers = localStorage.get<UserInfo[]>(PickContactModal.PICK_RESULT);
                         if (pickUsers?.length) {
                             this.createConversation(pickUsers)
-                            localStorage.delete(PickContactComponent.PICK_RESULT)
+                            localStorage.delete(PickContactModal.PICK_RESULT)
                         }
                     }
                 })
@@ -269,7 +224,7 @@ struct MainPage {
                 })
             MenuItem({ startIcon: $r('app.media.tianjiapengyou_iconfont'), content: "添加朋友" })
                 .onClick(() => {
-                    this.mainNavPathStack.pushPathByName('searchUserPage', {} as Record<string, Object>)
+                    this.mainNavPathStack.pushPathByName(navigationDestinations.SearchUserPage, {} as Record<string, Object>)
                 })
             MenuItem({ startIcon: $r('app.media.saoyisao1_iconfont'), content: "扫一扫" })
                 .onClick(() => {
@@ -287,7 +242,7 @@ struct MainPage {
                 .padding(6)
                 .onClick(() => {
                     let xx = this.mainNavPathStack.getAllPathName();
-                    this.mainNavPathStack.pushPathByName('searchPortal', {
+                    this.mainNavPathStack.pushPathByName(navigationDestinations.SearchPortalPage, {
                         'keyword': '1'
                     } as Record<string, Object>, true)
                 })
@@ -355,39 +310,12 @@ struct MainPage {
         .hideBackButton(true)
         .menus(this.NavigationMenus())
         .mode(NavigationMode.Stack)
-        .navDestination(this.PagesMap)
+        .navDestination(this.PagesMapInternal)
     }
 
+    // 为了规避直接用全局定义的构建函数失败
     @Builder
-    PagesMap(name: string) {
-        // TODO add more
-        // TODO FIXME 参数使用 NavDestination.onReady 处理，而不是 aboutToAppear
-        if (name == 'searchPortal') {
-            SearchPortalPage()
-        } else if (name == 'conversation') {
-            ConversationPage()
-        } else if (name === 'singleConversationInfo') {
-            SingleConversationInfoPage()
-        } else if (name === 'groupConversationInfo') {
-            GroupConversationInfoPage()
-        } else if (name === 'channelConversationInfo') {
-            ChannelConversationInfoPage()
-        } else if (name === 'userInfoPage') {
-            UserInfoPage()
-        } else if (name === 'friendRequestListPage') {
-            FriendRequestListPage();
-        } else if (name === 'searchUserPage') {
-            SearchUserPage();
-        } else if (name === 'favGroupListPage') {
-            FavGroupListPage();
-        } else if (name === 'channelListPage') {
-            ChannelListPage();
-        } else if (name === 'chatroomListPage') {
-            ChatroomListPage()
-        } else if (name === 'webViewPage') {
-            WebViewPage()
-        } else if (name === 'pickContactPage') {
-            PickContactPage()
-        }
+    PagesMapInternal(name: string) {
+        PagesMap(name)
     }
 }

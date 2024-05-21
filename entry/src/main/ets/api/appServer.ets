@@ -3,10 +3,24 @@ import http from '@ohos.net.http';
 import data_preferences from '@ohos.data.preferences';
 import wfc from 'marswrapper'
 import Config from '../config';
+import { GlobalContext } from '../globalContext';
+import common from '@ohos.app.ability.common';
+import url from '@ohos.url';
+import { ifaa } from '@kit.OnlineAuthenticationKit';
+import GroupAnnouncement from './model/groupAnnouncement';
+import AppServerError from './appServerError';
 
 class AppServer {
     baseUrl = Config.APP_SERVER;
     authToken = '';
+    constructor() {
+        let context = GlobalContext.getContext().getObject<common.UIAbilityContext>('context');
+        let preference = data_preferences.getPreferencesSync(context, {
+            name: 'wfcstore'
+        })
+        let _url = url.URL.parseURL(this.baseUrl)
+        this.authToken = preference.getSync(`authToken-${_url.host}-${_url.port}`, '') as string
+    }
 
     requestAuthCode(mobile: string) {
         return this._post('/send_code', { 'mobile': mobile } as Record<string, string>)
@@ -22,17 +36,48 @@ class AppServer {
         return this._post('/login', obj)
     }
 
-    _post(path: string, data: string | object): Promise<object> {
+    // loinWithPassword(mobile: string, password: string) {
+    //     return new Promise((resolve, reject) => {
+    //         let responsePromise = this._post('/login_pwd', {
+    //             mobile,
+    //             password,
+    //             platform: Config.getWFCPlatform(),
+    //             clientId: wfc.getClientId()
+    //         }, true)
+    //         this._interceptLoginResponse(responsePromise, resolve, reject)
+    //     })
+    // }
+
+    async getGroupAnnouncement(groupId: string): Promise<GroupAnnouncement> {
+        let result = await this._post('/get_group_announcement', { 'groupId': groupId } as Record<string, Object>)
+        return result as GroupAnnouncement
+    }
+
+    updateGroupAnnouncement(author: string, groupId: string, announcement: string) {
+        return this._post('/put_group_announcement', {
+            'author': author,
+            'groupId': groupId,
+            'text': announcement
+        } as Record<string, Object>)
+    }
+
+    _post(path: string, data: string | Object): Promise<object> {
         return new Promise((resolve, reject) => {
             let httpRequest = http.createHttp();
             // 用于订阅HTTP响应头，此接口会比request请求先返回。可以根据业务需要订阅此消息
             // 从API 8开始，使用on('headersReceive', Callback)替代on('headerReceive', AsyncCallback)。 8+
-            httpRequest.on('headersReceive', (header) => {
-                console.info('header: ' + JSON.stringify(header));
+            // httpRequest.on('headersReceive', (header) => {
+            //     console.info('header: ' + JSON.stringify(header));
                 // if (header.toString() === 'authToken') {
                 //     this.authToken = header.toString();
+            //         let context = GlobalContext.getContext().getObject<common.ApplicationContext>('applicationContext');
+            //         let preference = data_preferences.getPreferencesSync(context, {
+            //             name: 'wfcstore'
+            //         })
+            //         let _url = url.URL.parseURL(this.baseUrl)
+            //         preference.put(`authToken-${_url.host}-${_url.port}`, this.authToken)
                 // }
-            });
+            // });
             console.log('request', path, data)
             httpRequest.request(// 填写HTTP请求的URL地址，可以带参数也可以不带参数。URL地址需要开发者自定义。请求的参数可以在extraData中指定
                 this.baseUrl + path,
@@ -40,7 +85,8 @@ class AppServer {
                     method: http.RequestMethod.POST, // 可选，默认为http.RequestMethod.GET
                     // 开发者根据自身业务需要添加header字段
                     header: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'authToken': this.authToken
                     },
                     // 当使用POST请求时此字段用于传递内容
                     extraData: data,
@@ -59,15 +105,30 @@ class AppServer {
                     console.info('header:' + JSON.stringify(data.header));
                     console.info('cookies:' + JSON.stringify(data.cookies)); // 8+
                     // 取消订阅HTTP响应头事件
-                    httpRequest.off('headersReceive');
+                    // httpRequest.off('headersReceive');
                     // 当该请求使用完毕时，调用destroy方法主动销毁
                     httpRequest.destroy();
                     console.log('response', data)
                     let result = data.result as Record<string, Object>
                     if (result.code === 0) {
+                        // 30ba6ab2d4d249d4ab9114a02a9850fc
+                        let authToken: string = data.header['authtoken']
+                        if (!authToken) {
+                            authToken = data.header['authToken']
+                        }
+                        if (authToken) {
+                            this.authToken = authToken
+                            let context = GlobalContext.getContext()
+                                .getObject<common.ApplicationContext>('context');
+                            let preference = data_preferences.getPreferencesSync(context, {
+                                name: 'wfcstore'
+                            })
+                            let _url = url.URL.parseURL(this.baseUrl)
+                            preference.putSync(`authToken-${_url.host}-${_url.port}`, this.authToken)
+                        }
                         resolve(result.result)
                     } else {
-                        reject(result.code)
+                        reject(new AppServerError(result.code as number, result.message as string))
                     }
                 } else {
                     console.info('error:' + JSON.stringify(err));
@@ -77,6 +138,7 @@ class AppServer {
                     httpRequest.destroy();
                     console.error('err', err)
                     reject(err)
+                    reject(new AppServerError(-1, err.message))
                 }
             }
             )

@@ -5,15 +5,9 @@ import data_preferences from '@ohos.data.preferences'
 import EventType from '../wfc/client/wfcEvent'
 import ConnectionStatus from '../wfc/client/connectionStatus'
 import OptionItemView from '../view/OptionItemView'
-import { GlobalContext } from '../globalContext'
-import EntryAbility from '../entryability/EntryAbility'
-import { common, Want, WantAgent, wantAgent } from '@kit.AbilityKit'
-import { BusinessError } from '@kit.BasicServicesKit'
-import { hilog } from '@kit.PerformanceAnalysisKit'
-import { backgroundTaskManager } from '@kit.BackgroundTasksKit'
-import { AVCastPicker } from '@kit.AVSessionKit'
-import { window } from '@kit.ArkUI'
-import { showVoipFloatingWindow } from '../helper/floatingWindowHelper'
+import { showToast } from '../common/utils/Toast'
+import { navigationDestinations } from './navigationConfig'
+
 
 @Component
 export default struct MeTab {
@@ -24,47 +18,10 @@ export default struct MeTab {
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
     private context: Context = getContext(this);
 
-    startContinuousTask() {
-        let wantAgentInfo: wantAgent.WantAgentInfo = {
-            // 点击通知后，将要执行的动作列表
-            // 添加需要被拉起应用的bundleName和abilityName
-            wants: [
-                {
-                    bundleName: 'cn.wildfirechat.messenger',
-                    abilityName: 'EntryAbility',
-                }
-            ],
-            // 指定点击通知栏消息后的动作是拉起ability
-            actionType: wantAgent.OperationType.START_ABILITY,
-            // 使用者自定义的一个私有值
-            requestCode: 0,
-            // 点击通知后，动作执行属性
-            wantAgentFlags: [wantAgent.WantAgentFlags.UPDATE_PRESENT_FLAG]
-        };
-
-        // 通过wantAgent模块下getWantAgent方法获取WantAgent对象
-        wantAgent.getWantAgent(wantAgentInfo).then((wantAgentObj: WantAgent) => {
-            backgroundTaskManager.startBackgroundRunning(this.context,
-                backgroundTaskManager.BackgroundMode.AUDIO_RECORDING, wantAgentObj).then(() => {
-                console.info(`Succeeded in operationing startBackgroundRunning.`);
-            }).catch((err: BusinessError) => {
-                console.error(`Failed to operation startBackgroundRunning. Code is ${err.code}, message is ${err.message}`);
-            });
-        });
-    }
-
-    stopContinuousTask() {
-        backgroundTaskManager.stopBackgroundRunning(this.context).then(() => {
-            console.info(`Succeeded in operationing stopBackgroundRunning.`);
-        }).catch((err: BusinessError) => {
-            console.error(`Failed to operation stopBackgroundRunning. Code is ${err.code}, message is ${err.message}`);
-        });
-    }
-
-    aboutToAppear() {
+    async aboutToAppear() {
         this.loadSelfUserInfo()
-        wfc.eventEmitter!.on(EventType.UserInfosUpdate, this.onUserInfosUpdate)
-        wfc.eventEmitter!.on(EventType.ConnectionStatusChanged, this.onConnectionStatusChange)
+        getContext(this).eventHub.on(EventType.UserInfosUpdate, this.onUserInfosUpdate)
+        getContext(this).eventHub.on(EventType.ConnectionStatusChanged, this.onConnectionStatusChange)
     }
 
     onUserInfosUpdate = (usersInfos: UserInfo[]) => {
@@ -85,8 +42,8 @@ export default struct MeTab {
     }
 
     aboutToDisappear() {
-        wfc.eventEmitter!.off(EventType.UserInfosUpdate, this.onUserInfosUpdate)
-        wfc.eventEmitter!.off(EventType.ConnectionStatusChanged, this.onConnectionStatusChange)
+        getContext(this).eventHub.off(EventType.UserInfosUpdate, this.onUserInfosUpdate)
+        getContext(this).eventHub.off(EventType.ConnectionStatusChanged, this.onConnectionStatusChange)
     }
 
     build() {
@@ -112,9 +69,10 @@ export default struct MeTab {
                 .padding({ top: 5, bottom: 5 })
                 .margin({ left: 10 })
 
-                Image($r('app.media.ic_right'))
-                    .width(12)
-                    .height(12)
+                Image($r('app.media.ic_public_arrow_right'))
+                    .width(22)
+                    .height(22)
+                    .fillColor('#B6B6B6')
             }
             .width('100%')
             .height(100)
@@ -124,16 +82,32 @@ export default struct MeTab {
 
             OptionItemView({ icon: $r('app.media.ic_account'), title: '账号与安全' })
                 .margin({ top: 10, bottom: 10 })
+                .onClick(() => {
+                    this.mainNavPathStack.pushPathByName(navigationDestinations.AccountPage, {
+                    } as Record<string, Object>)
+                })
 
             OptionItemView({ icon: $r('app.media.ic_notification'), title: '消息与通知' })
                 .margin({ top: 10, bottom: 10 })
+                .onClick(() => {
+                    this.mainNavPathStack.pushPathByName(navigationDestinations.NotificationPage, {
+                    } as Record<string, Object>)
+                })
 
             Column() {
                 OptionItemView({ icon: $r('app.media.ic_settings_file'), title: '文件' })
+                    .onClick(() => {
+                        this.mainNavPathStack.pushPathByName(navigationDestinations.FileRecordPage, {
+                        } as Record<string, Object>)
+                    })
                 Divider()
                     .margin({ left: 40 })
                     .color('#F7F7F7')
-                OptionItemView({ icon: $r('app.media.ic_star'), title: '收藏' })
+                OptionItemView({ icon: $r('app.media.ic_star'), title: '收藏', showDivider: false })
+                    .onClick(() => {
+                        this.mainNavPathStack.pushPathByName(navigationDestinations.FavRecordPage, {
+                        } as Record<string, Object>)
+                    })
             }
             .margin({ top: 10, bottom: 10 })
             .backgroundColor(Color.White)
@@ -143,41 +117,20 @@ export default struct MeTab {
                 Divider()
                     .margin({ left: 40 })
                     .color('#F7F7F7')
-                OptionItemView({ icon: $r('app.media.ic_setting'), title: '设置' })
+                OptionItemView({ icon: $r('app.media.ic_setting'), title: '设置', showDivider: false })
+                    .onClick(() => {
+                        this.mainNavPathStack.pushPathByName(navigationDestinations.SettingPage, {
+                        } as Record<string, Object>)
+                    })
             }
             .margin({ top: 10, bottom: 10 })
             .backgroundColor(Color.White)
 
-            Column() {
-                Stack() {
-                    Text('点击 显示 AVCastPicker')
-                    AVCastPicker()
-                        .size({ height: '100%', width: '100%' })
-                }
-            }
-            .width('100%')
-            .height(50)
-
             OptionItemView({ title: 'API测试页' })
                 .onClick(() => {
-                    // //this.mainNavPathStack.pushPathByName('singleAudioCallPage', {} as Record<string, Object>)
-                    // // (GlobalContext.getContext().getObject('entry') as EntryAbility).showSubWindow()
-                    //
-                    // // this.mainNavPathStack.pushPathByName('singleAudioCallPage', {} as Record<string, Object>)
-                    // //router.pushUrl({url: 'pages/voip/SingleAudioCallPage'})
-                    // router.pushUrl({ url: 'pages/TestPage' })
-                    // // this.showVoipFloatingWindow()
-
-                    // this.startContinuousTask();
-                    // this.showVoipFloatingWindow()
-                    showVoipFloatingWindow(this.context, 'voipWindow', 'pages/voip/VoipFloatingPage', 200, 300, 100, 100)
-                        .then(win => {
-                            win.destroyWindow()
-                        })
-                        .catch((reason: BusinessError) => {
-                            console.log('xxxxx', reason)
-                        })
-
+                    router.pushUrl({
+                        url: 'pages/TestPage'
+                    })
                 })
 
             Button('退出')
@@ -186,9 +139,9 @@ export default struct MeTab {
                 .borderRadius(4)
                 .margin({ top: 30 })
                 .onClick(() => {
+                    showToast('正在退出登录，请稍后...')
                     data_preferences.deletePreferences(getContext(this), 'wfcstore')
                     wfc.disconnect(true, false)
-                    router.replaceUrl({ url: 'pages/LoginPage' }, router.RouterMode.Standard)
                 })
         }
         .width('100%')

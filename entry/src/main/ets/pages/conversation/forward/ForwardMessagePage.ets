@@ -1,6 +1,6 @@
 import UserInfo from '../../../wfc/model/userInfo'
 import router from '@ohos.router'
-import SearchResultView from '../../search/SearchResultView'
+import SearchResultView from '../../search/SearchPortalResultView'
 import GroupInfo from '../../../wfc/model/groupInfo'
 import { showToast } from '../../../common/utils/Toast'
 import ConversationInfo from '../../../wfc/model/conversationInfo'

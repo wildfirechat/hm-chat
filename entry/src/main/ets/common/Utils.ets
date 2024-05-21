@@ -51,7 +51,7 @@ export default class Utils {
                 let groupInfo: GroupInfo = wfc.getGroupInfo(conversation.target)
                 resolve({
                     portrait: groupInfo.portrait!,
-                    name: groupInfo.name
+                    name: groupInfo.remark ? groupInfo.remark : groupInfo.name
                 })
             } else if (conversation.type === ConversationType.Channel) {
                 let channelInfo: ChannelInfo = wfc.getChannelInfo(conversation.target, false)

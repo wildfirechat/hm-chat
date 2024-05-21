@@ -11,6 +11,7 @@ import { showToast } from '../common/utils/Toast'
 import BasicDataSource from '../common/BasicDataSource'
 import data_preferences from '@ohos.data.preferences'
 import Conversation from '../wfc/model/conversation'
+import { navigationDestinations } from './navigationConfig'
 
 
 @Component
@@ -212,7 +213,7 @@ export default struct ConversationListTab {
                         ConversationInfoItemView({ conversationInfo: info })
                             .onClick(() => {
                                 wfc.clearConversationUnreadStatus(info.conversation!)
-                                this.mainNavPathStack.pushPathByName('conversation', {
+                                this.mainNavPathStack.pushPathByName(navigationDestinations.ConversationPage, {
                                     'conversation': info.conversation
                                 } as Record<string, Object>)
                             })

@@ -2,15 +2,15 @@ import CheckableUserItemView from '../view/CheckableUserItemView'
 import UserInfo from '../wfc/model/userInfo'
 import { UIUserInfo } from '../common/Types'
 import BasicDataSource from '../common/BasicDataSource'
-import { groupUserInfos } from '../helper/groupUserHelper'
+import { groupUserInfos } from '../helper/asyncTaskHelper'
 
 @Component
 export default struct CheckableUserListView {
     @Link checkedUsers: UserInfo[]
     @State filteredUserInfos: UserInfo[] = []
     @State searchInputViewMaxWidth: string = '100%'
+    @State userInfoDataSource?: UserInfoDataSource = undefined
     private userInfos: UserInfo[] = []
-    private userInfoDataSource: UserInfoDataSource = new UserInfoDataSource()
     private showCategory: boolean = false
     private uncheckableUserIds: string[] = []
     private showSearchView: boolean = false
@@ -19,6 +19,7 @@ export default struct CheckableUserListView {
     aboutToAppear() {
         this.filteredUserInfos = this.userInfos
         groupUserInfos(this.filteredUserInfos.map(u => u.uid)).then(userInfos => {
+            this.userInfoDataSource = new UserInfoDataSource();
             this.userInfoDataSource.setUserInfos(userInfos)
         })
     }
@@ -57,7 +58,7 @@ export default struct CheckableUserListView {
             this.filteredUserInfos = this.userInfos
         }
         groupUserInfos(this.filteredUserInfos.map(u => u.uid)).then(userInfos => {
-            this.userInfoDataSource.setUserInfos(userInfos)
+            this.userInfoDataSource?.setUserInfos(userInfos)
         })
     }
 
@@ -110,27 +111,30 @@ export default struct CheckableUserListView {
                 .margin({ left: 10, right: 10 })
                 .alignListItem(ListItemAlign.Center)
             }
-            List() {
-                LazyForEach(this.userInfoDataSource, (info: UIUserInfo) => {
-                    ListItem() {
-                        CheckableUserItemView({
-                            checkedUsers: $checkedUsers,
-                            uiUserInfo: info,
-                            paddingLeft: 10,
-                            paddingRight: 10,
-                            enable: !this.isUncheckable(info.userInfo),
-                            onCheckUser: this.onCheckUser,
-                        })
-                    }
-                    .key('ooo')
-                }, (info: UIUserInfo) => info.userInfo.uid + '-' + info.userInfo.updateDt)
+            if (this.userInfoDataSource) {
+                List() {
+                    LazyForEach(this.userInfoDataSource, (info: UIUserInfo) => {
+                        ListItem() {
+                            CheckableUserItemView({
+                                checkedUsers: $checkedUsers,
+                                uiUserInfo: info,
+                                paddingLeft: 10,
+                                paddingRight: 10,
+                                enable: !this.isUncheckable(info.userInfo),
+                                onCheckUser: this.onCheckUser,
+                            })
+                        }
+                    }, (info: UIUserInfo) => info.userInfo.uid + '-' + info.userInfo.updateDt)
+                }
+                .width('100%')
+                .layoutWeight(1)
+                .divider({
+                    strokeWidth: 1,
+                    startMargin: 80
+                })
+            } else {
+                Text('加载中..')
             }
-            .width('100%')
-            .layoutWeight(1)
-            .divider({
-                strokeWidth: 1,
-                startMargin: 80
-            })
         }
         .width('100%')
         .height('100%')

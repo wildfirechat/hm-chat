@@ -2,7 +2,7 @@ import web_webview from '@ohos.web.webview'
 import WfcWebView from '../workspace/WfcWebView'
 import UserInfo from '../../wfc/model/userInfo'
 import DSBridge from '../workspace/dsBridge'
-import PickContactComponent from '../picker/PickContactComponent'
+import PickContactModal from '../picker/PickContactModal'
 
 
 @Entry
@@ -27,10 +27,10 @@ export default struct WebViewPage {
 
     onPageShow(): void {
         let localStorage = LocalStorage.getShared();
-        let pickedUsers = localStorage.get<UserInfo[]>(PickContactComponent.PICK_RESULT);
+        let pickedUsers = localStorage.get<UserInfo[]>(PickContactModal.PICK_RESULT);
         if (pickedUsers) {
             this.dsbridge?.onPickContact(pickedUsers);
-            localStorage.delete(PickContactComponent.PICK_RESULT)
+            localStorage.delete(PickContactModal.PICK_RESULT)
         }
     }
 

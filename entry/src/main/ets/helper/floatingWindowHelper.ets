@@ -58,8 +58,7 @@ export function showVoipFloatingWindow(context: Context, name: string, contentPa
                     }
                     console.info('Succeeded in showing the window.');
 
-                    // resolve(_newWindow!)
-                    reject(err)
+                    resolve(_newWindow!)
                 });
             });
         })

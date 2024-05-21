@@ -15,11 +15,14 @@
 
 import media from '@ohos.multimedia.media';
 import Logger from '../../../common/utils/Logger';
+import { BusinessError } from '@kit.BasicServicesKit';
+import fs from '@ohos.file.fs'
 
 const TAG = 'AudioRecordManager';
 
 export default class AudioRecordManager {
-    private audioRecorder?: media.AVRecorder;
+    private avRecorder?: media.AVRecorder;
+    private outputFileFd: number = 0
     private recordProfile: media.AVRecorderProfile = {
         audioBitrate: 48000,
         audioChannels: 2,
@@ -35,124 +38,52 @@ export default class AudioRecordManager {
         // location: { latitude: Const.LATITUDE, longitude: Const.LONGITUDE }
     };
 
-    init() {
-        this.release();
-        media.createAVRecorder((err, recorder: media.AVRecorder) => {
-            if (recorder !== null) {
-                this.audioRecorder = recorder;
-                this.audioRecorder.on('stateChange', async (state: media.AVRecorderState) => {
-                    switch (state.toString()) {
-                        case 'idle':
-                            Logger.info(TAG, `The AVRecorder state is: ${this.audioRecorder!.state}`);
-                            break;
-                        case 'prepared':
-                            Logger.info(TAG, `The AVRecorder state is: ${this.audioRecorder!.state}`);
-                            this.audioRecorder!.start((err) => {
-                                if (!err) {
-                                    Logger.info(TAG, `The AVRecorder start success`);
-                                } else {
-                                    Logger.info(TAG, `The AVRecorder start failed, error: ${err.message}`);
-                                }
+    // 注册audioRecorder回调函数
+    setAudioRecorderCallback() {
+        if (this.avRecorder != undefined) {
+            // 状态机变化回调函数
+            this.avRecorder.on('stateChange', (state: media.AVRecorderState, reason: media.StateChangeReason) => {
+                console.log(TAG, `AudioRecorder current state is ${state}`);
                             })
-                            break;
-                        case 'started':
-                            Logger.info(TAG, `The AVRecorder state is: ${this.audioRecorder!.state}`);
-                            break;
-                        case 'paused':
-                            Logger.info(TAG, `The AVRecorder state is: ${this.audioRecorder!.state}`);
-                            break;
-                        case 'stopped':
-                            Logger.info(TAG, `The AVRecorder state is: ${this.audioRecorder!.state}`);
-                            break;
-                        case 'released':
-                            Logger.info(TAG, `The AVRecorder state is: ${this.audioRecorder!.state}`);
-                            break;
-                        case 'error':
-                            Logger.info(TAG, `The AVRecorder state is: ${this.audioRecorder!.state}`);
-                            break;
-                        default:
-                            break;
+            // 错误上报回调函数
+            this.avRecorder.on('error', (err: BusinessError) => {
+                console.error(TAG, `AudioRecorder failed, code is ${err.code}, message is ${err.message}`);
+            })
                     }
-                    Logger.info(TAG, `The AVRecorder state is changed to: ${this.audioRecorder!.state}`);
-                });
-                this.audioRecorder.on('error', (error) => {
-                    Logger.info(TAG, `The AVRecorder error, err code is: ${error.code}, err message is: ${error.message}`);
-                });
-                Logger.info(TAG, `create AVRecorder success`);
-            } else {
-                Logger.info(TAG, `create AVRecorder failed, error: ${err.message}`);
-            }
-        });
     }
 
-    release() {
-        if (this.audioRecorder !== undefined) {
-            this.audioRecorder!.release((err) => {
-                if (!err) {
-                    Logger.info(TAG, `release AVRecorder success`);
-                } else {
-                    Logger.info(TAG, `release AVRecorder failed, error: ${err.message}`);
+    async start(fd: number) {
+        this.outputFileFd = fd
+        if (this.avRecorder != undefined) {
+            await this.avRecorder.reset();
                 }
-            });
-        } else {
-            Logger.info(TAG, `No need to release AVRecorder`);
-        }
+        // 1.创建录制实例
+        this.avRecorder = await media.createAVRecorder();
+        this.setAudioRecorderCallback();
+        // 2.获取录制文件fd赋予avConfig里的url；参考FilePicker文档
+        this.recordConfig.url = `fd://${fd}`;
+
+        // 3.配置录制参数完成准备工作
+        await this.avRecorder!.prepare(this.recordConfig);
+        // 4.开始录制
+        await this.avRecorder!.start();
     }
 
-    start(filePath: string) {
-        if (this.audioRecorder !== undefined) {
-            this.recordConfig.url = filePath;
-            this.audioRecorder!.prepare(this.recordConfig, (err) => {
-                if (!err) {
-                    Logger.info(TAG, `AVPlayer prepare success`);
-                } else {
-                    Logger.info(TAG, `AVPlayer prepare failed, error: ${err.message}`);
+    async finish() {
+        if (!this.avRecorder) {
+            return
                 }
-            });
+        if (this.avRecorder!.state === 'started' || this.avRecorder!.state === 'paused') {
+            await this.avRecorder!.stop();
         } else {
-            Logger.info(TAG, `No AVRecorder found`);
-        }
-    }
-
-    pause() {
-        if (this.audioRecorder!.state === 'started') {
-            this.audioRecorder!.pause((err) => {
-                if (!err) {
-                    Logger.info(TAG, `AVRecorder pause success`);
-                } else {
-                    Logger.info(TAG, `AVRecorder pause failed, error: ${err.message}`);
-                }
-            });
-        } else {
-            Logger.info(TAG, `AVRecorder pause failed, current state is wrong, now is: ${this.audioRecorder!.state}`);
-        }
-    }
-
-    resume() {
-        if (this.audioRecorder!.state === 'paused') {
-            this.audioRecorder!.resume((err) => {
-                if (!err) {
-                    Logger.info(TAG, `AVRecorder resume success`);
-                } else {
-                    Logger.info(TAG, `AVRecorder resume failed, error: ${err.message}`);
-                }
-            });
-        } else {
-            Logger.info(TAG, `AVRecorder resume failed, current state is wrong, now is: ${this.audioRecorder!.state}`);
-        }
-    }
-
-    finish() {
-        if (this.audioRecorder!.state === 'started' || this.audioRecorder!.state === 'paused') {
-            this.audioRecorder!.stop((err) => {
-                if (!err) {
-                    Logger.info(TAG, `AVRecorder stop success`);
-                } else {
-                    Logger.info(TAG, `AVRecorder stop failed, error: ${err.message}`);
-                }
-            });
-        } else {
-            Logger.info(TAG, `AVRecorder stop failed, current state is wrong, now is: ${this.audioRecorder!.state}`);
+            //Logger.info(TAG, `AVRecorder stop failed, current state is wrong, now is: ${this.avRecorder!.state}`);
+            // 2.重置
+            await this.avRecorder.reset();
+            // 3.释放录制实例
+            await this.avRecorder.release();
+            this.avRecorder = undefined;
+            // 4.关闭录制文件fd
+            await fs.close(this.outputFileFd)
         }
     }
 }

@@ -13,7 +13,7 @@ export interface MediaEntry {
 }
 
 export interface SearchModule {
-    tag: 'user' | 'contact' | 'group' | 'channel' | 'message',
+    tag: 'user' | 'contact' | 'group' | 'channel' | 'message' | 'conversation' | 'conversationMessage',
     onSearchResultItemClick: (value: object) => void
 }
 

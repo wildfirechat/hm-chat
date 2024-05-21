@@ -1,34 +1,27 @@
 import UserInfo from '../../wfc/model/userInfo'
 import wfc from '../../wfc/client/wfc'
-import router from '@ohos.router'
 import CheckableUserListView from '../../view/CheckableUserListView'
-import GroupInfo from '../../wfc/model/groupInfo'
+import { loadContactUserInfos } from '../../helper/asyncTaskHelper'
 
-@Entry
 @Component
-export default struct AddGroupMemberPage {
+export default struct PickContactModal {
     @State checkedUsers: UserInfo[] = []
-    private userInfos: UserInfo[] = []
+    @State userInfos?: UserInfo[] = undefined
     private initialCheckedUserIds: string[] = []
     private uncheckableUserIds: string[] = []
-    public static TAG: string = 'addGroupMember'
-    private groupInfo?: GroupInfo
+    public static TAG: string = 'pickUser'
+    public static PICK_RESULT: string = 'pickResult'
+    @Link showPickContactModal: boolean
 
     aboutToAppear() {
-        let params = router.getParams() as Record<string, Object>
-        this.groupInfo = params['groupInfo'] as GroupInfo
-        let groupMemberIds = wfc.getGroupMemberIds(this.groupInfo.target, false)
-
-        let friendUserIds = wfc.getMyFriendList()
-        this.userInfos = wfc.getUserInfos(friendUserIds, '')
-        this.uncheckableUserIds = groupMemberIds
-        this.initialCheckedUserIds = groupMemberIds
-
-        if (this.initialCheckedUserIds) {
-            this.checkedUsers = this.userInfos.filter((info: UserInfo) => {
-                return this.initialCheckedUserIds.indexOf(info.uid) >= 0
-            })
-        }
+        loadContactUserInfos().then((userinfos: UserInfo[]) => {
+            this.userInfos = userinfos;
+            if (this.initialCheckedUserIds) {
+                this.checkedUsers = this.userInfos.filter((info: UserInfo) => {
+                    return this.initialCheckedUserIds.indexOf(info.uid) >= 0
+                })
+            }
+        })
     }
 
     onCheckUser = (info: UserInfo, checked?: boolean) => {
@@ -54,13 +47,17 @@ export default struct AddGroupMemberPage {
         Navigation() {
             Scroll() {
                 Column() {
-                    CheckableUserListView({
-                        checkedUsers: $checkedUsers,
-                        userInfos: this.userInfos,
-                        uncheckableUserIds: this.initialCheckedUserIds,
-                        showCategory: true,
-                        showSearchView: true
-                    })
+                    if (this.userInfos) {
+                        CheckableUserListView({
+                            checkedUsers: $checkedUsers,
+                            userInfos: this.userInfos,
+                            uncheckableUserIds: this.initialCheckedUserIds,
+                            showCategory: true,
+                            showSearchView: true
+                        })
+                    } else {
+                        Text('加载中..')
+                    }
                 }
                 .height('100%')
                 .width('100%')
@@ -76,6 +73,7 @@ export default struct AddGroupMemberPage {
         .height('100%')
         .width('100%')
         .navBarPosition(NavBarPosition.Start)
+        // .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.START])
         .menus(this.NavigationMenus())
     }
 
@@ -86,20 +84,18 @@ export default struct AddGroupMemberPage {
                 .type(ButtonType.Normal)
                 .height(30)
                 .width(60)
+                .margin({ right: 18 })
                 .enabled(this.newlyCheckedUsers().length > 0)
                 .fontSize(14)
                 .borderRadius(4)// .backgroundColor(Color.Blue)
-                    // TODO
                 .onClick(() => {
-                    let options: router.RouterOptions = {
-                        url: '',
-                        params: {
-                            tag: AddGroupMemberPage.TAG,
-                            result: this.newlyCheckedUsers(),
-                        }
-                    }
-                    router.back(options)
+                    LocalStorage.getShared()
+                        .setOrCreate<UserInfo[]>(PickContactModal.PICK_RESULT, this.newlyCheckedUsers());
+                    this.showPickContactModal = false
                 })
         }
+        .height('100%')
+        .justifyContent(FlexAlign.Center)
+        .alignItems(VerticalAlign.Center)
     }
 }

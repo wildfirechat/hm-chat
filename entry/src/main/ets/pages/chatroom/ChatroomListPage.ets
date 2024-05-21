@@ -1,5 +1,6 @@
 import Conversation from '../../wfc/model/conversation';
 import ConversationType from '../../wfc/model/conversationType';
+import { navigationDestinations } from '../navigationConfig';
 
 @Entry
 @Component
@@ -42,7 +43,7 @@ export default struct ChatroomListPage {
                         .width('100%')
                         .padding({ left: 10, right: 10 })
                         .onClick(() => {
-                            this.mainNavPathStack.pushPathByName('conversation', {
+                            this.mainNavPathStack.pushPathByName(navigationDestinations.ConversationPage, {
                                 'conversation': new Conversation(ConversationType.ChatRoom, chatroom.roomId, 0)
                             } as Record<string, Object>)
 

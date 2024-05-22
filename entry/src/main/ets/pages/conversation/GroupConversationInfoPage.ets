@@ -34,6 +34,7 @@ export default struct GroupConversationInfoPage {
     @State groupAnnouncement: string = ''
     @State userInfo?: UserInfo = undefined
     private clearConversationHistoryDialogController?: CustomDialogController
+    @State showGroupMemberNickName: boolean = false
 
     aboutToAppear() {
         let params = this.mainNavPathStack.getParamByIndex(this.mainNavPathStack.size() - 1) as Record<string, Object>;
@@ -67,6 +68,8 @@ export default struct GroupConversationInfoPage {
         wfc.eventEmitter?.on(EventType.GroupInfosUpdate, this.onGroupInfosUpdate)
 
         this.userInfo = wfc.getUserInfo(wfc.getUserId(), false, this.groupInfo.target)
+
+        this.showGroupMemberNickName = !wfc.isHiddenGroupMemberName(this.groupInfo.target)
     }
 
     onPageShow() {
@@ -351,9 +354,13 @@ export default struct GroupConversationInfoPage {
 
                         Row() {
                             Text('显示群成员昵称聊天')
-                            Toggle({ type: ToggleType.Switch })
+                            Toggle({ type: ToggleType.Switch, isOn: this.showGroupMemberNickName })
                                 .onChange((value: boolean) => {
-                                    showToast('TODO')
+                                    wfc.setHiddenGroupMemberName(this.groupInfo.target, !value, () => {
+                                        this.showGroupMemberNickName = value;
+                                    }, err => {
+                                        showToast('设置失败')
+                                    })
                                 })
                         }
                         .justifyContent(FlexAlign.SpaceBetween)

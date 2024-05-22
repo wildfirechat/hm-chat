@@ -6,7 +6,6 @@ export default struct TextMessageContentView {
 
     build() {
         Text(this.message.messageContent.digest(this.message))
-            .margin({ top: 4 })
             .padding(10)
             .constraintSize({ minHeight: 40 })
             .backgroundColor(Color.White)

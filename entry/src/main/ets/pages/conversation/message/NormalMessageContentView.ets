@@ -81,7 +81,7 @@ export default struct NormaMessageContentView {
                 }
             }
         }
-        .alignItems(HorizontalAlign.End)
+        // .alignItems(HorizontalAlign.End)
         .bindContextMenu(this.MessageContextMenuBuilder, ResponseType.LongPress)
     }
 

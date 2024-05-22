@@ -60,6 +60,7 @@ export default struct ConversationPage {
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
     private conversationMessageDataSource: ConversationMessageDataSource = new ConversationMessageDataSource()
     @State focusMessageBackgroundColor: Color = Color.Green
+    @State showGroupMemberNickName: boolean = false
 
     putDownRefresh(event?: TouchEvent): void {
         if (event === undefined) {
@@ -116,6 +117,9 @@ export default struct ConversationPage {
         let params = (this.mainNavPathStack.getParamByName('conversation') as Record<string, Object>[])[0]
         // let params = this.mainNavPathStack.getParamByIndex(this.mainNavPathStack.size() - 1) as Record<string, Object>;
         if (!params) {
+            if (this.conversation?.type === ConversationType.Group) {
+                this.showGroupMemberNickName = !wfc.isHiddenGroupMemberName(this.conversation.target)
+            }
             return
         }
         let title = params['title'] as string;
@@ -125,7 +129,6 @@ export default struct ConversationPage {
             if (this.conversation!.type === ConversationType.Group && conversation.type !== ConversationType.Group) {
                 wfc.eventEmitter!.off(EventType.GroupMembersUpdate, this.onGroupMembersUpdate)
             }
-
             this.setupConversation(conversation, title);
         }
     }
@@ -214,6 +217,7 @@ export default struct ConversationPage {
 
         if (this.conversation.type === ConversationType.Group) {
             wfc.eventEmitter!.on(EventType.GroupMembersUpdate, this.onGroupMembersUpdate)
+            this.showGroupMemberNickName = !wfc.isHiddenGroupMemberName(this.conversation.target)
         }
     }
 
@@ -467,7 +471,7 @@ export default struct ConversationPage {
                                                                     }))
                                                             }
                                                             .margin({ top: 10 })
-                                                            .height(48)
+                                                            .height(40)
                                                             .alignItems(VerticalAlign.Center)
                                                         }
                                                         Row() {
@@ -487,8 +491,8 @@ export default struct ConversationPage {
                                                         .margin({ left: 70 })
 
                                                         Image(wfc.getUserInfo(msg.from).portrait)
-                                                            .width(48)
-                                                            .height(48)
+                                                            .width(40)
+                                                            .height(40)
                                                             .borderRadius(4)
                                                             .margin(10)
                                                             .enabled(!this.enableMultiCheck)
@@ -543,32 +547,37 @@ export default struct ConversationPage {
                                                                     }))
                                                             }
                                                             .margin({ top: 10 })
-                                                            .height(48)
+                                                            .height(40)
                                                             .alignItems(VerticalAlign.Center)
 
                                                             // .alignSelf(ItemAlign.Center)
                                                         }
                                                         Image(wfc.getUserInfo(msg.from).portrait)
-                                                            .width(48)
-                                                            .height(48)
+                                                            .width(40)
+                                                            .height(40)
                                                             .margin(10)
                                                             .borderRadius(4)
                                                             .enabled(!this.enableMultiCheck)
                                                             .onClick(() => {
                                                                 this.showUserInfo(msg.from)
                                                             })
-                                                        Row() {
+                                                        Column() {
+                                                            if (this.showGroupMemberNickName) {
+                                                                Text(wfc.getGroupMemberDisplayName(this.conversation!.target, msg.from))
+                                                                    .fontSize(12)
+                                                                    .padding({ bottom: 2 })
+                                                            }
                                                             NormalMessageContentView({
                                                                 message: msg,
                                                                 enableMultiCheck: $enableMultiCheck,
                                                                 audioPlayManager: this.audioPlayerManager
                                                             })//.layoutWeight(1)
-                                                                .margin({ top: 10 })
                                                                 .enabled(!this.enableMultiCheck)
                                                         }
                                                         .justifyContent(FlexAlign.Start)
+                                                        .alignItems(HorizontalAlign.Start)
                                                         .layoutWeight(1)
-                                                        .margin({ right: 70 })
+                                                        .margin({ right: 70, top: 10 })
                                                     }
                                                     .width('100%')
                                                     .justifyContent(FlexAlign.Start)

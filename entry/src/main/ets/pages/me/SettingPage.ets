@@ -1,9 +1,9 @@
-import wfc from '../../wfc/client/wfc'
-import Conversation from '../../wfc/model/conversation'
-import ConversationType from '../../wfc/model/conversationType'
-import GroupInfo from '../../wfc/model/groupInfo'
-import { navigationDestinations } from '../navigationConfig'
+import { showToast } from '../../common/utils/Toast'
+import OptionItemView from '../../view/OptionItemView'
+import data_preferences from '@ohos.data.preferences'
+import wfc from '../../wfc/client/wfc';
 
+@Preview
 @Entry
 @Component
 export default struct SettingPage {
@@ -14,16 +14,40 @@ export default struct SettingPage {
 
     build() {
         NavDestination() {
-            Text('TODO ')
-                .width('100%')
-                .fontSize(13)
-                .fontColor('#989898')
-                .padding(10)
-                .backgroundColor('#E5E5E5')
+            Column() {
+                OptionItemView({
+                    title: '隐私设置'
+                })
 
+                Column() {
+                    OptionItemView({
+                        title: '关于',
+                        showDivider: true
+                    })
+                    OptionItemView({
+                        title: ' 诊断'
+                    })
+                }
+                .margin({ top: 10 })
+                .backgroundColor(Color.White)
+
+                Button('退出')
+                    .width(200)
+                    .type(ButtonType.Normal)
+                    .borderRadius(4)
+                    .margin({ top: 30 })
+                    .onClick(() => {
+                        showToast('正在退出登录，请稍后...')
+                        data_preferences.deletePreferences(getContext(this), 'wfcstore')
+                        wfc.disconnect(true, false)
+                    })
+            }
+            .width('100%')
+            .height('100%')
         }
         .title('设置')
         .height('100%')
         .width('100%')
+        .backgroundColor('#EDEDED')
     }
 }

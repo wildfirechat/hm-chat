@@ -114,6 +114,9 @@ export default struct MeTab {
 
             Column() {
                 OptionItemView({ icon: $r('app.media.ic_theme'), title: '主题' })
+                    .onClick(() => {
+                        showToast('TODO')
+                    })
                 Divider()
                     .margin({ left: 40 })
                     .color('#F7F7F7')
@@ -131,17 +134,6 @@ export default struct MeTab {
                     router.pushUrl({
                         url: 'pages/TestPage'
                     })
-                })
-
-            Button('退出')
-                .width(100)
-                .type(ButtonType.Normal)
-                .borderRadius(4)
-                .margin({ top: 30 })
-                .onClick(() => {
-                    showToast('正在退出登录，请稍后...')
-                    data_preferences.deletePreferences(getContext(this), 'wfcstore')
-                    wfc.disconnect(true, false)
                 })
         }
         .width('100%')

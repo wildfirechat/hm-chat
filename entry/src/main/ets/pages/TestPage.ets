@@ -18,11 +18,15 @@ struct TestPage {
 
     // 创建组件，并设置大小
     build() {
-        Row() {
-            Column() {
-                AVCastPicker()
-                    .size({ height: '100%', width: '100%' })
+        Navigation() {
+            Row() {
+                Column() {
+                    Text('本页用于 API 功能测试')
+                }
             }
         }
+        .title('API 测试页')
+        .titleMode(NavigationTitleMode.Mini)
+        .navBarPosition(NavBarPosition.Start)
     }
 }

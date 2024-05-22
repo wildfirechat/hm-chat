@@ -15,7 +15,7 @@ import UpdateMyGroupAliasNamePage from './group/UpdateMyGroupAliasPage'
 import AccountPage from './me/AccountPage'
 import FavRecordPage from './me/FavRecordPage'
 import FileRecordPage from './me/FileRecordPage'
-import NotificationPage from './me/NotificaitonPage'
+import MessageAndNotificationPage from './me/MessageAndNotificaitonPage'
 import SettingPage from './me/SettingPage'
 import WebViewPage from './misc/WebViewPage'
 import PickContactPage from './picker/PickContactPage'
@@ -52,7 +52,7 @@ export class navigationDestinations {
     static AccountPage = 'accountPage'
     static FavRecordPage = 'favRecordPage'
     static FileRecordPage = 'fileRecordPage'
-    static NotificationPage = 'notificationPage'
+    static NotificationPage = 'messageAndNotificationPage'
     static SettingPage = 'settingPage'
 }
 
@@ -109,7 +109,7 @@ export function PagesMap(name: string) {
     } else if (name === navigationDestinations.FileRecordPage) {
         FileRecordPage()
     } else if (name === navigationDestinations.NotificationPage) {
-        NotificationPage()
+        MessageAndNotificationPage()
     } else if (name === navigationDestinations.SettingPage) {
         SettingPage()
     }

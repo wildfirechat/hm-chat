@@ -1,3 +1,4 @@
+import OptionItemView from '../../view/OptionItemView'
 import wfc from '../../wfc/client/wfc'
 import Conversation from '../../wfc/model/conversation'
 import ConversationType from '../../wfc/model/conversationType'
@@ -14,16 +15,18 @@ export default struct AccountPage {
 
     build() {
         NavDestination() {
-            Text('TODO ')
-                .width('100%')
-                .fontSize(13)
-                .fontColor('#989898')
-                .padding(10)
-                .backgroundColor('#E5E5E5')
-
+            Column() {
+                OptionItemView({
+                    title: '修改密码',
+                    showDivider: false
+                })
+            }
+            .width('100%')
+            .height('100%')
         }
         .title('账号与安全')
         .height('100%')
         .width('100%')
+        .backgroundColor('#EDEDED')
     }
 }

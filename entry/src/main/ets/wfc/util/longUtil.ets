@@ -15,7 +15,7 @@ import Long from './long'
  * @param {long | number | string} b
  * @return {number} 相等返回0，a 大于 b 返回1，a 小于 b 返回-1
  */
-export function compare(a: Long | number | string, b: Long | number | string) {
+export function compare(a: Long | number | string, b: Long | number | string): number {
     const longA = Long.fromValue(a)
     const longB = Long.fromValue(b)
     return longA.compare(longB)

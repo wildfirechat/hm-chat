@@ -10,6 +10,7 @@ import AudioPlayManager from '../audio/AudioPlayManager'
 import ReadReceipt from '../model/readReceipt'
 import AudioMessageContent from './AudioMessageContentView'
 import CallStartMessageContentView from './CallStartMessageContentView'
+import CompositeMessageContentView from './CompositeMessageContentView'
 import ImageMessageContentView from './ImageMessageContentView'
 import StickerMessageContentView from './StickerMessageContentView'
 import TextMessageContentView from './TextMessageContentView'
@@ -42,6 +43,8 @@ export default struct NormaMessageContentView {
                 AudioMessageContent({ message: $message, audioPlayManager: this.audioPlayManager })
             } else if (this.message!.messageContent.type === MessageContentType.VOIP_CONTENT_TYPE_START) {
                 CallStartMessageContentView({ message: $message })
+            } else if (this.message!.messageContent.type === MessageContentType.Composite_Message) {
+                CompositeMessageContentView({ message: $message })
             } else {
                 Text(this.message!.messageContent.digest(this.message))
                     .margin({ top: 4 })

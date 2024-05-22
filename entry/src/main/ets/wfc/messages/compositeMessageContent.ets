@@ -15,7 +15,6 @@ import fs from '@ohos.file.fs';
 export default class CompositeMessageContent extends MediaMessageContent {
     title = '';
     messages = [] as Message[];
-    // web 端有效，仅仅是用来标识 mediaCompositeMessage 是否已加载
     loaded = false;
 
     constructor() {
@@ -120,7 +119,7 @@ export default class CompositeMessageContent extends MediaMessageContent {
             // str = str.replace(/"serverTime":"([0-9]+)"/, "\"serverTime\":$1");
 
             this.localPath = getContext(this)
-                .cacheDir + '/' + new Date().getTime() + 'wcf-' + new Date().getTime() + '.data';
+                .cacheDir + '/' + new Date().getTime() + 'cpm-' + new Date().getTime() + '.data';
             let file = fs.openSync(this.localPath, fs.OpenMode.CREATE | fs.OpenMode.READ_WRITE)
             fs.writeSync(file.fd, str)
             fs.closeSync(file.fd)

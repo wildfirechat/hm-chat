@@ -15,18 +15,22 @@ import ImageMessageContentView from './ImageMessageContentView'
 import StickerMessageContentView from './StickerMessageContentView'
 import TextMessageContentView from './TextMessageContentView'
 import VideoMessageContentView from './VideoMessageContentView'
+import { HashMap } from '@kit.ArkTS'
+import GroupMember from '../../../wfc/model/groupMember'
 
 @Component
 export default struct NormaMessageContentView {
-    @State message?: Message = undefined
+    @Prop message?: Message = undefined
     @Link enableMultiCheck: boolean
     private audioPlayManager?: AudioPlayManager
-    private readReceipt: ReadReceipt | null = null
+    @State readReceipt: ReadReceipt | null = null
+    @Prop @Watch('updateMessageReadReceipt') readEntries: Map<string, number> = new Map();
+    @Prop groupMembers: GroupMember[] = []
+    private enableReceipt: boolean = false
     private deleteMessageDialogController?: CustomDialogController
 
-    constructor(value) {
-        super()
-        this.message = value
+    aboutToAppear(): void {
+        this.updateMessageReadReceipt()
     }
 
     build() {
@@ -192,6 +196,44 @@ export default struct NormaMessageContentView {
         //     Text('Hello2')
         //         .backgroundColor(Color.Red)
         // }
+    }
+
+    updateMessageReadReceipt(): void {
+        let message = this.message!
+        console.log('xxxxxxxxx updateMessageReadReceipt', message.direction, this.readEntries, this.readEntries.size)
+        if (!this.enableReceipt || message.direction === 1) {
+            return
+        }
+        if (message.conversation.type === ConversationType.Single) {
+            let readReceipt: ReadReceipt = new ReadReceipt()
+            readReceipt.conversationType = ConversationType.Single
+            if (this.readEntries.size > 0) {
+                //let readDt = this.readEntries[0].value
+                let readDt = this.readEntries.get(message.conversation.target)
+                if (readDt && readDt! >= message.timestamp) {
+                    readReceipt.readCount = 1
+                    readReceipt.unreadCount = 0
+                }
+            } else {
+                readReceipt.readCount = 0
+                readReceipt.unreadCount = 0
+            }
+            this.readReceipt = readReceipt
+        } else if (message.conversation.type === ConversationType.Group) {
+            let readReceipt: ReadReceipt = new ReadReceipt()
+            readReceipt.conversationType = ConversationType.Group
+
+            let readCount = 0
+            this.readEntries.forEach(readDt => {
+                if (readDt! >= message.timestamp) {
+                    readCount++
+                }
+            })
+            readReceipt.readCount = readCount
+            let groupMembersJoinBeforeMessage = this.groupMembers.filter(member => member.createDt < message.timestamp)
+            readReceipt.unreadCount = groupMembersJoinBeforeMessage.length - readCount
+            this.readReceipt = readReceipt
+        }
     }
 }
 

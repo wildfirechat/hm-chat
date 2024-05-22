@@ -30,7 +30,7 @@ import KickoffGroupMemberNotification from '../messages/notification/kickoffGrou
 import Message from '../messages/message';
 import ChatRoomInfo from '../model/chatRoomInfo';
 import MessageContent from '../messages/messageContent';
-import { HashMap, util } from '@kit.ArkTS';
+import { util } from '@kit.ArkTS';
 import common from '@ohos.app.ability.common';
 import ModifyMyInfoEntry from '../model/modifyMyInfoEntry';
 import {
@@ -2216,7 +2216,7 @@ export class WfcManager {
      * @param conversation
      * @return {Map<string, Long>}
      */
-    getConversationDelivery(conversation: Conversation): HashMap<string, number> {
+    getConversationDelivery(conversation: Conversation): Map<string, number> {
         return impl.getConversationDelivery(conversation);
     }
 
@@ -2225,7 +2225,7 @@ export class WfcManager {
      * @param conversation
      * @return {Map<string, Long>}
      */
-    getConversationRead(conversation: Conversation): HashMap<string, number> {
+    getConversationRead(conversation: Conversation): Map<string, number> {
         return impl.getConversationRead(conversation);
     }
 

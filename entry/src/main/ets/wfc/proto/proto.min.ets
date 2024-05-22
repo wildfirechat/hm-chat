@@ -46,7 +46,6 @@ import protoProxy from 'marswrapper'
 // import path from "path";
 
 import common from '@ohos.app.ability.common';
-import { HashMap, HashSet } from '@kit.ArkTS';
 import assign from '../util/assign';
 import Friend from '../model/friend';
 import MessageContent from '../messages/messageContent';
@@ -68,15 +67,15 @@ class WfcImpl {
     connectionStatus = 0;
     userId = '';
     token = '';
-    users: HashMap<string, UserInfo> = new HashMap();
-    groups: HashMap<string, GroupInfo> = new HashMap();
+    users: Map<string, UserInfo> = new Map();
+    groups: Map<string, GroupInfo> = new Map();
     isLogined = false;
     needPreloadDefaultData = false;
     doubleNetworkStrategy = 0;
     _connectedToMainNetwork = false;
     eventEmitter?: common.EventHub;
     context?: common.ApplicationContext;
-    uploadingMap: HashMap<string, number> = new HashMap();
+    uploadingMap: Map<string, number> = new Map();
 
     onConnectionChanged(status: number) {
         if (!self.isLogined && status === ConnectionStatus.ConnectionStatusConnected) {
@@ -255,7 +254,7 @@ class WfcImpl {
             return;
         }
         let deliveries = JSON.parse(receivedMapStr) as Record<string, number>[];
-        let deliveryMap: HashMap<string, number> = new HashMap();
+        let deliveryMap: Map<string, number> = new Map();
 
         deliveries.forEach(e => {
             let entries = Object.entries(e)
@@ -312,7 +311,7 @@ class WfcImpl {
         console.log('friendList update, ids', friendListIds);
         let ids = JSON.parse(friendListIds) as string[];
         ids.forEach((uid) => {
-            self.users.remove(uid);
+            self.users.delete(uid);
         });
         self.eventEmitter!.emit(EventType.FriendListUpdate, ids);
     }
@@ -533,9 +532,9 @@ class WfcImpl {
         }
         let userInfo: UserInfo;
         if (!fresh && (!groupId || groupId === '')) {
-            userInfo = self.users.get(userId);
-            if (userInfo) {
-                return userInfo;
+            let ui = self.users.get(userId);
+            if (ui) {
+                return ui;
             }
         }
 
@@ -852,7 +851,7 @@ class WfcImpl {
 
     async setGroupRemark(groupId: string, remark: string, successCB: SuccessCallback, failCB: FailCallback) {
         protoProxy.setGroupRemark(groupId, remark, () => {
-            this._onGroupInfoUpdate([groupId])
+            self._onGroupInfoUpdate([groupId])
             successCB && successCB();
         }, (errorCode: number) => {
             failCB && failCB(errorCode);
@@ -866,9 +865,9 @@ class WfcImpl {
     getGroupInfo(groupId: string, fresh = false): GroupInfo {
         let groupInfo: GroupInfo;
         if (!fresh) {
-            groupInfo = self.groups.get(groupId);
-            if (groupInfo) {
-                return groupInfo;
+            let gi = self.groups.get(groupId);
+            if (gi) {
+                return gi;
             }
         }
 
@@ -1029,7 +1028,7 @@ class WfcImpl {
                 if (successCB) {
                     successCB();
                 }
-                this._onGroupInfoUpdate([groupId])
+                self._onGroupInfoUpdate([groupId])
             }, (errorCode: number) => {
                 if (failCB) {
                     failCB(errorCode);
@@ -1513,7 +1512,7 @@ class WfcImpl {
         return false;
     }
 
-    getConversationRead(conversation: Conversation): HashMap<string, number> {
+    getConversationRead(conversation: Conversation): Map<string, number> {
         let readedStr = protoProxy.getConversationRead(JSON.stringify(conversation));
         let readedArr = JSON.parse(readedStr) as Record<string, Object>[];
         // let result = []
@@ -1523,24 +1522,24 @@ class WfcImpl {
         //     })
         // }
         // return readedArr;
-        let result: HashMap<string, number> = new HashMap();
+        let result: Map<string, number> = new Map();
         if (readedArr) {
             readedArr.forEach(e => {
-                let entry = Object.entries(e)[0]
-                result.set(entry[0], entry[1] as number)
+                let values = Object.values(e)
+                result.set(values[0] as string, values[1] as number)
             })
         }
         return result;
     }
 
-    getConversationDelivery(conversation: Conversation): HashMap<string, number> {
+    getConversationDelivery(conversation: Conversation): Map<string, number> {
         let deliveryStr = protoProxy.getMessageDelivery(JSON.stringify(conversation));
         let deliveryArr = JSON.parse(deliveryStr) as Record<string, Object>[];
-        let result: HashMap<string, number> = new HashMap();
+        let result: Map<string, number> = new Map();
         if (deliveryArr) {
             deliveryArr.forEach(e => {
-                let entry = Object.entries(e)[0]
-                result.set(entry[0], entry[1] as number)
+                let values = Object.values(e)
+                result.set(values[0] as string, values[1] as number)
             })
         }
         return result;
@@ -2796,7 +2795,7 @@ class WfcImpl {
     // 获取所有好友、好友请求的用户信息
     _preloadDefaultData() {
         let requests = self.getIncommingFriendRequest()
-        let userIdSet: HashSet<string> = new HashSet();
+        let userIdSet: Set<string> = new Set();
         requests.forEach(fr => {
             userIdSet.add(fr.target);
         });

@@ -42,7 +42,7 @@ export default struct ConversationPage {
     @State showAudioRecorderView: boolean = false
     @State showCancelRecordIndicator: boolean = false
     @State recordCountDown: number = 0
-    @State readEntries: HashMap<string, number> = new HashMap();
+    @State readEntries: Map<string, number> = new Map();
     @State collapseConversationInputPanelViewTimestamp: number = 0
     @State enableMultiCheck: boolean = false
     @State checkedMessages: Message[] = []
@@ -56,7 +56,7 @@ export default struct ConversationPage {
     private audioPlayerManager: AudioPlayManager = new AudioPlayManager()
     private enableReceipt: boolean = false
     private enableGroupReceipt: boolean = false
-    private groupMembers: GroupMember[] = []
+    @State groupMembers: GroupMember[] = []
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
     private conversationMessageDataSource: ConversationMessageDataSource = new ConversationMessageDataSource()
     @State focusMessageBackgroundColor: Color = Color.Green
@@ -295,6 +295,7 @@ export default struct ConversationPage {
     }
     onReadMessage = (readEntries: ReadEntry[]) => {
         this.readEntries = wfc.getConversationRead(this.conversation!);
+        console.log('xxxx onReadMessage')
     }
     onUserInfosUpdate = (userInfos: UserInfo[]) => {
         if (this.conversation?.type === ConversationType.Single) {
@@ -372,15 +373,15 @@ export default struct ConversationPage {
         // receipt status： 已读、未读，不支持送达报告
 
         let key: string = message.messageContent.type + '-' + message.messageId + '-' + message.status
-        if (this.enableReceipt && this.readEntries && this.readEntries.length > 0) {
+        if (this.enableReceipt && this.readEntries && this.readEntries.size > 0) {
             if (this.conversation!.type === ConversationType.Group) {
                 if (this.enableGroupReceipt) {
                     // TODO
                 }
             } else if (this.conversation!.type === ConversationType.Single) {
                 // TODO
-                let readDt: number = this.readEntries.get(this.conversation!.target)
-                if (readDt >= message.timestamp) {
+                let readDt = this.readEntries.get(this.conversation!.target)
+                if (readDt && readDt >= message.timestamp) {
                     key += '-1'
                 } else {
                     key += '-0'
@@ -388,43 +389,6 @@ export default struct ConversationPage {
             }
         }
         return key
-    }
-
-    messageReadReceipt(message: Message): ReadReceipt | null {
-        if (!this.enableReceipt) {
-            return null
-        }
-        if (message.conversation.type === ConversationType.Single) {
-            let readReceipt: ReadReceipt = new ReadReceipt()
-            readReceipt.conversationType = ConversationType.Single
-            if (this.readEntries.length > 0) {
-                //let readDt = this.readEntries[0].value
-                let readDt = this.readEntries.get(message.conversation.target)
-                if (readDt >= message.timestamp) {
-                    readReceipt.readCount = 1
-                    readReceipt.unreadCount = 0
-                }
-            } else {
-                readReceipt.readCount = 0
-                readReceipt.unreadCount = 0
-            }
-            return readReceipt
-        } else if (message.conversation.type === ConversationType.Group) {
-            let readReceipt: ReadReceipt = new ReadReceipt()
-            readReceipt.conversationType = ConversationType.Group
-
-            let readCount = 0
-            this.readEntries.forEach(readDt => {
-                if (readDt! >= message.timestamp) {
-                    readCount++
-                }
-            })
-            readReceipt.readCount = readCount
-            let groupMembersJoinBeforeMessage = this.groupMembers.filter(member => member.createDt < message.timestamp)
-            readReceipt.unreadCount = groupMembersJoinBeforeMessage.length - readCount
-            return readReceipt
-        }
-        return null
     }
 
     conversationInfoPageName(): string {
@@ -511,7 +475,9 @@ export default struct ConversationPage {
                                                                 message: msg,
                                                                 enableMultiCheck: $enableMultiCheck,
                                                                 audioPlayManager: this.audioPlayerManager,
-                                                                readReceipt: this.messageReadReceipt(msg)
+                                                                enableReceipt: this.enableReceipt,
+                                                                readEntries: this.readEntries,
+                                                                groupMembers: this.groupMembers
                                                             })//.layoutWeight(1)
                                                                 .margin({ top: 10 })
                                                                 .enabled(!this.enableMultiCheck)

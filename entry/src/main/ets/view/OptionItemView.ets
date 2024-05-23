@@ -6,7 +6,7 @@ export default struct OptionItemView {
     private title: string = ''
     @Prop desc: string = ''
     @Prop subTitle: string = ''
-    private imgUrl: string = ''
+    @Prop imgUrl: string = ''
     private showRightArrow: boolean = true
     private paddingLeft: number = 10
     private paddingRight: number = 10

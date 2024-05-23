@@ -117,6 +117,7 @@ export default struct MeTab {
                     .onClick(() => {
                         showToast('TODO')
                     })
+                    .visibility(Visibility.None)
                 Divider()
                     .margin({ left: 40 })
                     .color('#F7F7F7')

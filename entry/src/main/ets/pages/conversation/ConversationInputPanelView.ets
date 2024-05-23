@@ -84,7 +84,7 @@ export default struct ConversationInputPanelView {
             icon: $r('app.media.ic_func_pic'),
             action: async () => {
                 try {
-                    let imgUris = await this.mediaHelper.selectPicture(9);
+                    let imgUris = await this.mediaHelper.selectImageAndVideo(9);
                     imgUris.forEach(async imgUri => {
                         let file = getContext(this).cacheDir + '/' + new Date().getTime() + '.jpg'
                         copyFileUri(imgUri, file);

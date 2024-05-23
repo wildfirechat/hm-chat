@@ -4,8 +4,53 @@ import photoAccessHelper from '@ohos.file.photoAccessHelper';
 import image from '@ohos.multimedia.image';
 import wfc from '../wfc/client/wfc';
 import fs from '@ohos.file.fs';
+import { Context } from '@kit.AbilityKit';
+import { BusinessError } from '@kit.BasicServicesKit';
 
-export async function imageThumbnail(context: Context, uri: string, size: Size): Promise<string> {
+/**
+ *
+ * @param context
+ * @param uri 图片文件原始 uri
+ * @param imageWH 压缩的目标宽高
+ * @param maxImageSize 压缩后的图片大小，单位是 K，默认 20，<=0 时，不进行图片大小压缩
+ * @returns
+ */
+export async function imageThumbnail(context: Context, uri: string, imageWH: Size, maxImageSize = 20): Promise<string> {
+    let base64Data = ''
+    let pixelMap = await _imageThumbnail(context, uri, imageWH)
+    if (pixelMap) {
+        if (maxImageSize > 0) {
+            let compressedImageData = await compressImage(pixelMap!, maxImageSize)
+            base64Data = wfc.arrayBuffer_to_b64(compressedImageData)
+        } else {
+            let imageData = await packing(pixelMap, 50)
+            base64Data = wfc.arrayBuffer_to_b64(imageData)
+        }
+    }
+    return base64Data;
+}
+
+export async function imageThumbnailFile(context: Context, uri: string, wh: Size): Promise<string> {
+    let pixelMap = await _imageThumbnail(context, uri, wh)
+    if (pixelMap) {
+        try {
+            let path = context.cacheDir + '/' + new Date().getTime() + '.jpg'
+            let file = fs.openSync(path, fs.OpenMode.CREATE | fs.OpenMode.READ_WRITE);
+            let packOpts: image.PackingOption = { format: "image/jpeg", quality: 50 };
+            const imagePackerApi = image.createImagePacker();
+            await imagePackerApi.packToFile(pixelMap, file.fd, packOpts)
+            console.log('xxxxxx', fs.statSync(file.fd).size)
+            fs.closeSync(file)
+            return path;
+        } catch (e) {
+            console.error(e)
+        }
+    }
+
+    return ''
+}
+
+async function _imageThumbnail(context: Context, uri: string, size: Size): Promise<image.PixelMap | null> {
     let phAccessHelper = photoAccessHelper.getPhotoAccessHelper(context);
     let predicates: dataSharePredicates.DataSharePredicates = new dataSharePredicates.DataSharePredicates();
     predicates.equalTo(photoAccessHelper.PhotoKeys.URI, uri.toString());
@@ -19,15 +64,11 @@ export async function imageThumbnail(context: Context, uri: string, size: Size):
         let photoAsset: photoAccessHelper.PhotoAsset = await fetchResult.getFirstObject();
         console.info('getAssets photoAsset.uri : ' + photoAsset.uri);
         let pixelMap: image.PixelMap = await photoAsset.getThumbnail(size);
-        let compressedImageData = await compressImage(pixelMap, 20)
-        let base64Data = wfc.arrayBuffer_to_b64(compressedImageData)
-        fetchResult.close();
-
-        pixelMap.release()
-        return base64Data;
+        fetchResult.close()
+        return pixelMap
     } catch (err) {
         console.error('getAssets failed with err: ' + err);
-        return ''
+        return null
     }
 }
 

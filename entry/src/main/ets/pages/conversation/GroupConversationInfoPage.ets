@@ -16,6 +16,10 @@ import GroupAnnouncement from '../../api/model/groupAnnouncement';
 import AppServerError from '../../api/appServerError';
 import { navigationDestinations } from '../navigationConfig';
 import EventType from '../../wfc/client/wfcEvent';
+import { imageThumbnail, imageThumbnailFile } from '../../helper/imageHelper';
+import { MediaHelper } from '../../helper/MediaHelper';
+import MessageContentMediaType from '../../wfc/messages/messageContentMediaType';
+import ModifyGroupInfoType from '../../wfc/model/modifyGroupInfoType';
 
 @Preview
 @Entry
@@ -35,6 +39,7 @@ export default struct GroupConversationInfoPage {
     @State userInfo?: UserInfo = undefined
     private clearConversationHistoryDialogController?: CustomDialogController
     @State showGroupMemberNickName: boolean = false
+    private mediaHelper: MediaHelper = new MediaHelper(getContext())
 
     aboutToAppear() {
         let params = this.mainNavPathStack.getParamByIndex(this.mainNavPathStack.size() - 1) as Record<string, Object>;
@@ -226,8 +231,44 @@ export default struct GroupConversationInfoPage {
                             })
                         OptionItemView({
                             title: ' 群头像',
-                            imgUrl: 'http://static.wildfirechat.cn/wx_wfc_qrcode.jpg'
+                            imgUrl: this.groupInfo.portrait
                         })
+                            .onClick(async () => {
+                                try {
+                                    let imgUris = await this.mediaHelper.selectImage(1);
+                                    imgUris.forEach(async imgUri => {
+                                        let base64Data = await imageThumbnail(getContext(this), imgUri, {
+                                            width: 400,
+                                            height: 400
+                                        })
+                                        wfc.uploadMedia(new Date().getTime() + '.jpg', base64Data, MessageContentMediaType.Image, remoteUrl => {
+                                            wfc.modifyGroupInfo(this.groupInfo.target, ModifyGroupInfoType.Modify_Group_Portrait, remoteUrl, [0], null, () => {
+                                                this.groupInfo.portrait = remoteUrl;
+                                            }, err => {
+
+                                            })
+
+                                        }, err => {
+                                            console.log('uploadMedia err', err)
+
+                                        }, (progress, total) => {
+                                            console.log('uploadMedia progress ', progress, total)
+
+                                        })
+                                        // if (file) {
+                                        //     wfc.modifyGroupInfo()
+                                        // }
+
+                                        // let size = await imageSize(imgUri);
+                                        // let content = new ImageMessageContent(file, '', thumbnail)
+                                        // content.imageWidth = size.width;
+                                        // content.imageHeight = size.height;
+                                        // wfc.sendConversationMessage(this.conversation, content, [], null, null, null, null, null);
+                                    })
+                                } catch (reason) {
+                                    showToast('选取照片失败: ' + reason)
+                                }
+                            })
                         OptionItemView({
                             title: '二维码',
                             imgUrl: 'http://static.wildfirechat.cn/wx_wfc_qrcode.jpg'

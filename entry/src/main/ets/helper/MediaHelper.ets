@@ -27,11 +27,23 @@ export class MediaHelper {
     /**
      * 选择图片
      */
-    public selectPicture(maxSelectCount: number = 1): Promise<string[]> {
+    public selectImageAndVideo(maxSelectCount: number = 1): Promise<string[]> {
+        return this.selectMedia(picker.PhotoViewMIMETypes.IMAGE_VIDEO_TYPE, maxSelectCount);
+    }
+
+    public selectImage(maxSelectCount: number = 1): Promise<string[]> {
+        return this.selectMedia(picker.PhotoViewMIMETypes.IMAGE_TYPE, maxSelectCount);
+    }
+
+    public selectVideo(maxSelectCount: number = 1): Promise<string[]> {
+        return this.selectMedia(picker.PhotoViewMIMETypes.VIDEO_TYPE, maxSelectCount);
+    }
+
+    private selectMedia(mimeType: picker.PhotoViewMIMETypes, maxSelectCount: number = 1): Promise<string[]> {
         try {
             let photoSelectOptions = new picker.PhotoSelectOptions();
-            photoSelectOptions.MIMEType = picker.PhotoViewMIMETypes.IMAGE_VIDEO_TYPE;
-            photoSelectOptions.maxSelectNumber = 9;
+            photoSelectOptions.MIMEType = mimeType;
+            photoSelectOptions.maxSelectNumber = maxSelectCount;
             let photoPicker = new picker.PhotoViewPicker();
             return photoPicker.select(photoSelectOptions)
                 .then((photoSelectResult) => {

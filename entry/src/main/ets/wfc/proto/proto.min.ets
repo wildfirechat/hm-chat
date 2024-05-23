@@ -2173,7 +2173,7 @@ class WfcImpl {
     // }
 
     // 大文件上传
-    async _uploadFile(message: Message, file: string, mediaType: number, progressCB: CallbackWithValue_2<number, number>, successCB: CallbackWithValue_1<string>, failCB: FailCallback) {
+    async _uploadFile(message: Message | null, file: string, mediaType: number, progressCB: CallbackWithValue_2<number, number>, successCB: CallbackWithValue_1<string>, failCB: FailCallback) {
         let fileName = file.substring(file.lastIndexOf('/') + 1);
         let contentType = this._getContentType(mediaType, fileName);
         this.getUploadMediaUrl(fileName, mediaType, contentType, (uploadUrl: string, remoteUrl: string, backUploadUrl: string, serverType: number) => {
@@ -2521,51 +2521,31 @@ class WfcImpl {
     }
 
     async uploadMedia(fileName: string, fileOrData: string, mediaType: number, successCB: CallbackWithValue_1<string>, failCB: FailCallback, progressCB: CallbackWithValue_2<number, number>) {
-        // var data = file.slile(0, file.size);
-        // if (this.isTcpShortLink() && !this.isSupportBigFilesUpload()) {
-        //     console.error('TCP短连接不支持内置对象存储，请把对象存储切换到其他类型')
-        //     failCB && failCB(-1);
-        //     return;
-        // }
-        // // dataUri
-        // if (typeof fileOrData === 'string' && fileOrData.indexOf("base64,") >= 0) {
-        //     fileOrData = fileOrData.substring(fileOrData.indexOf(',') + 1);
-        // }
-        // if (this.isTcpShortLink() || this.isSupportBigFilesUpload()) {
-        //     let file;
-        //     if (typeof fileOrData === 'string') {
-        //         const byteCharacters = atob(fileOrData);
-        //         const byteArray = new Uint8Array(byteCharacters.length);
-        //         for (let i = 0; i < byteCharacters.length; i++) {
-        //             byteArray[i] = byteCharacters.charCodeAt(i);
-        //         }
-        //         file = new Blob([new Uint8Array(byteArray, 0, byteArray.byteLength)]);
-        //     } else {
-        //         file = fileOrData;
-        //     }
-        //     this._uploadFile(null, file, mediaType, progressCB, successCB, failCB);
-        // } else {
-        //     // file
-        //     if (fileOrData.path) {
-        //         fileOrData = await fs.readFile(fileOrData.path, { encoding: 'base64' });
-        //     }
-        //     protoProxy.uploadMedia(fileName, fileOrData, mediaType,
-        //         (remoteUrl) => {
-        //             if (successCB) {
-        //                 successCB(remoteUrl);
-        //             }
-        //         },
-        //         (errorCode) => {
-        //             if (failCB) {
-        //                 failCB(errorCode);
-        //             }
-        //         },
-        //         (current, total) => {
-        //             if (progressCB) {
-        //                 progressCB(current, total);
-        //             }
-        //         });
-        // }
+        if (this.isTcpShortLink() && !this.isSupportBigFilesUpload()) {
+            console.error('TCP短连接不支持内置对象存储，请把对象存储切换到其他类型')
+            failCB && failCB(-1);
+            return;
+        }
+        if (this.isTcpShortLink() || this.isSupportBigFilesUpload()) {
+            this._uploadFile(null, fileOrData, mediaType, progressCB, successCB, failCB);
+        } else {
+            protoProxy.uploadMedia(fileName, fileOrData, mediaType,
+                (remoteUrl: string) => {
+                    if (successCB) {
+                        successCB(remoteUrl);
+                    }
+                },
+                (errorCode: number) => {
+                    if (failCB) {
+                        failCB(errorCode);
+                    }
+                },
+                (current: number, total: number) => {
+                    if (progressCB) {
+                        progressCB(current, total);
+                    }
+                });
+        }
     }
 
     sendConferenceRequest(sessionId: string, roomId: string, request: string, data: string, advance: boolean, callback: CallbackWithValue_2<number, string | null>) {

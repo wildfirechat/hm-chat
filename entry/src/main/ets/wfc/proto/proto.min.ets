@@ -52,6 +52,9 @@ import MessageContent from '../messages/messageContent';
 import ModifyMyInfoEntry from '../model/modifyMyInfoEntry';
 import request from '@ohos.request';
 import { FailCallback, SuccessCallback, CallbackWithValue_1, CallbackWithValue_2 } from '../type/types';
+import { uri } from '@kit.ArkTS';
+import { fileUri } from '@kit.CoreFileKit';
+import fs from '@ohos.file.fs';
 
 
 /**
@@ -2177,7 +2180,9 @@ class WfcImpl {
         let fileName = file.substring(file.lastIndexOf('/') + 1);
         let contentType = this._getContentType(mediaType, fileName);
         this.getUploadMediaUrl(fileName, mediaType, contentType, (uploadUrl: string, remoteUrl: string, backUploadUrl: string, serverType: number) => {
-            uploadUrl = (self.connectedToMainNetwork() || !backUploadUrl) ? uploadUrl : backUploadUrl;
+            // TODO
+            // FIXME
+            // uploadUrl = (self.connectedToMainNetwork() || !backUploadUrl) ? uploadUrl : backUploadUrl;
             console.log('getUploadMediaUrl', uploadUrl, remoteUrl, backUploadUrl, serverType)
             if (serverType === 0) {
                 // 内置存储，不支持大文件上传
@@ -2208,17 +2213,20 @@ class WfcImpl {
                 // xhr.setRequestHeader("content-disposition", `attachment; filename="${fileName}"`);
                 // xhr.send(file);
 
+                let header = new Map<Object, string>();
+                header.set('content-type', contentType);
+                header.set('content-disposition', `attachment; filename="${fileName}"`);
+
                 let uploadRequestOptions: request.UploadConfig = {
                     url: uploadUrl,
-                    header: {
-                        'Content-Type': 'multipart/form-data'
-                    },
-                    method: 'POST',
+                    header: header,
+                    method: 'PUT',
                     files: [{
                         filename: fileName,
+                        //uri前缀internal://cache 对应applicationCache.cacheDir目录
                         name: 'file',
-                        uri: file,
-                        type: 'jpg'
+                        uri: `internal://${file.substring(file.indexOf('/cache') + 1)}`,
+                        type: contentType
                     }],
                     data: []
                 };
@@ -2227,11 +2235,7 @@ class WfcImpl {
                 request.uploadFile(self.context, uploadRequestOptions).then((data: request.UploadTask) => {
                     data.on('complete', (result: Array<request.TaskState>) => {
                         if (result && result.length >= 1) {
-                            // serverData.code = Constants.SERVER_CODE_SUCCESS;
-                            // serverData.msg = result[0].message;
-                            // serverData.data = Constants.IMAGE_PREFIX + result[0].path;
-                            // resolve(serverData);
-                            if (result[0].responseCode === 200) {
+                            if (result[0].responseCode === 0) {
                                 successCB(remoteUrl)
                             } else {
                                 failCB(result[0].responseCode)
@@ -2388,8 +2392,7 @@ class WfcImpl {
     }
 
     isSupportBigFilesUpload(): boolean {
-        return false
-        //return protoProxy.isSupportBigFilesUpload();
+        return protoProxy.isSupportBigFilesUpload() === 1;
     }
 
     getUploadMediaUrl(fileName: string, mediaType: number, contentType: string, successCB: (uploadUrl: string, remoteUrl: string, backUploadUrl: string, serverType: number) => void, failCB: FailCallback) {

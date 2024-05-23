@@ -86,7 +86,9 @@ export default struct ConversationInputPanelView {
                 try {
                     let imgUris = await this.mediaHelper.selectImageAndVideo(9);
                     imgUris.forEach(async imgUri => {
-                        let file = getContext(this).cacheDir + '/' + new Date().getTime() + '.jpg'
+                        let file = getContext(this)
+                            .getApplicationContext()
+                            .cacheDir + '/' + new Date().getTime() + '.jpg'
                         copyFileUri(imgUri, file);
                         let thumbnail = await imageThumbnail(getContext(this), imgUri, { width: 200, height: 200 })
                         let size = await imageSize(imgUri);
@@ -122,17 +124,23 @@ export default struct ConversationInputPanelView {
                         let file = ''
                         let content: MessageContent
                         if (pickResult.mediaType === cameraPicker.PickerMediaType.PHOTO) {
-                            file = getContext(this).cacheDir + '/' + new Date().getTime() + '.jpg'
+                            file = getContext(this)
+                                .getApplicationContext()
+                                .cacheDir + '/' + new Date().getTime() + '.jpg'
                             copyFileUri(pickResult.resultUri, file);
-                            let size = fileSize(file);
-                            // TODO
-                            // FIXME 缩略图
-                            // let avImageGenerator: media.AVImageGenerator = await media.createAVImageGenerator()
-
-                            content = new ImageMessageContent(file, '', '')
-                            wfc.sendConversationMessage(this.conversation, content);
+                            let thumbnail = await imageThumbnail(getContext(this), pickResult.resultUri, {
+                                width: 200,
+                                height: 200
+                            })
+                            let size = await imageSize(pickResult.resultUri);
+                            let imageContent = new ImageMessageContent(file, '', thumbnail)
+                            imageContent.imageWidth = size.width;
+                            imageContent.imageHeight = size.height;
+                            content = imageContent
                         } else {
-                            let file = getContext(this).cacheDir + '/' + new Date().getTime() + '.mp4'
+                            let file = getContext(this)
+                                .getApplicationContext()
+                                .cacheDir + '/' + new Date().getTime() + '.mp4'
                             copyFileUri(pickResult.resultUri, file);
                             let size = fileSize(file);
                             content = new VideoMessageContent(file, '', '')
@@ -150,7 +158,7 @@ export default struct ConversationInputPanelView {
             action: async () => {
                 try {
                     let fileUri = await this.mediaHelper.selectFile()
-                    let file = getContext(this).cacheDir + '/' + new Date().getTime() + '.jpg'
+                    let file = getContext(this).getApplicationContext().cacheDir + '/' + new Date().getTime() + '.jpg'
                     copyFileUri(fileUri, file);
                     let size = fileSize(file);
                     let content = new ImageMessageContent(file, '', '')
@@ -376,7 +384,7 @@ export default struct ConversationInputPanelView {
             this.recorder = new AudioRecordManager()
         }
 
-        let cacheDir = getContext(this).cacheDir;
+        let cacheDir = getContext(this).getApplicationContext().cacheDir;
         let audioDir = `${cacheDir}/audio`
         try {
             fs.mkdirSync(audioDir)

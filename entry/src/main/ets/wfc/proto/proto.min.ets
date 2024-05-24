@@ -78,7 +78,7 @@ class WfcImpl {
     _connectedToMainNetwork = false;
     eventEmitter?: common.EventHub;
     context?: common.ApplicationContext;
-    uploadingMap: Map<string, number> = new Map();
+    uploadingMap: Map<number, request.UploadTask> = new Map();
 
     onConnectionChanged(status: number) {
         if (!self.isLogined && status === ConnectionStatus.ConnectionStatusConnected) {
@@ -2011,10 +2011,9 @@ class WfcImpl {
                 (insertedMsg.messageContent as MediaMessageContent).remotePath = remoteUrl;
                 this.updateMessageContent(insertedMsg.messageId, insertedMsg.messageContent!);
                 uploadedCB && uploadedCB(remoteUrl);
-                protoProxy.sendSavedMessage(insertedMsg.messageId, 0, (messageUid: Long, timestamp: number) => {
-                    messageUid = Long.fromValue(messageUid);
-                    insertedMsg.messageUid = messageUid;
-                    insertedMsg.timestamp = timestamp;
+                protoProxy.sendSavedMessage(insertedMsg.messageId, 0, (messageUid: string, timestamp: string) => {
+                    insertedMsg.messageUid = Long.fromValue(messageUid);
+                    insertedMsg.timestamp = Long.fromValue(timestamp).toNumber();
                     insertedMsg.status = MessageStatus.Sent;
                     console.log('send saved msg success', messageUid, insertedMsg);
                     successCB && successCB(insertedMsg.messageUid, insertedMsg.timestamp);
@@ -2055,7 +2054,7 @@ class WfcImpl {
             (mediaUrl: string) => {
                 uploadedCB && uploadedCB(mediaUrl);
             },
-            (messageUid: Long, timestamp: number) => { //successCB
+            (messageUid: string, timestamp: string) => { //successCB
                 message.status = MessageStatus.Sent;
                 message.messageUid = Long.fromValue(messageUid);
                 message.timestamp = Long.fromValue(timestamp).toNumber();
@@ -2088,7 +2087,7 @@ class WfcImpl {
 
     async sendSavedMessage(message: Message, expireDuration: number, successCB: CallbackWithValue_2<Long, number> | null = null, failCB: FailCallback | null = null) {
         protoProxy.sendSavedMessage(message.messageId, expireDuration,
-            (messageUid: Long, timestamp: string) => { //successCB
+            (messageUid: string, timestamp: string) => { //successCB
                 message.status = MessageStatus.Sent;
                 message.messageUid = Long.fromValue(messageUid);
                 message.timestamp = Long.fromValue(timestamp).toNumber();
@@ -2113,21 +2112,20 @@ class WfcImpl {
     // }
 
     cancelSendingMessage(messageId: number): boolean {
-        let canceled = protoProxy.cancelSendingMessage(messageId);
-        // if (!canceled) {
-        //     let xhr = this.uploadingMap.get(messageId + '');
-        //     if (xhr) {
-        //         this.uploadingMap.remove(messageId + '');
-        //         try {
-        //             xhr.abort();
-        //             canceled = true;
-        //         } catch (e) {
-        //             console.log(e);
-        //         }
-        //     }
-        // }
-        // return canceled;
-        return false
+        let canceled = protoProxy.cancelSendingMessage(messageId) === 1;
+        if (!canceled) {
+            let task = this.uploadingMap.get(messageId);
+            if (task) {
+                this.uploadingMap.delete(messageId)
+                try {
+                    task.delete()
+                    canceled = true;
+                } catch (e) {
+                    console.log(e);
+                }
+            }
+        }
+        return canceled;
     }
 
     // cancelUploadBigFile(remoteUrl) {
@@ -2233,7 +2231,12 @@ class WfcImpl {
 
                 // Upload the file.
                 request.uploadFile(self.context, uploadRequestOptions).then((data: request.UploadTask) => {
+                    if (message) {
+                        self.uploadingMap.set(message.messageId, data)
+                    }
+
                     data.on('complete', (result: Array<request.TaskState>) => {
+                        message && self.uploadingMap.delete(message!.messageId)
                         if (result && result.length >= 1) {
                             if (result[0].responseCode === 0) {
                                 successCB(remoteUrl)
@@ -2243,6 +2246,7 @@ class WfcImpl {
                         }
                     });
                     data.on('fail', (result: Array<request.TaskState>) => {
+                        message && self.uploadingMap.delete(message.messageId)
                         if (result && result.length >= 1) {
                             // serverData.msg = '上传失败'
                             // reject(serverData);

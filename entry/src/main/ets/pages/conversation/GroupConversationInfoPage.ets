@@ -313,7 +313,9 @@ export default struct GroupConversationInfoPage {
                     Column() {
                         OptionItemView({ title: '查找聊天记录' })
                             .onClick(() => {
-                                showToast('todo')
+                                this.mainNavPathStack.pushPathByName(navigationDestinations.SearchConversationMessagePage, {
+                                    'conversation': this.conversationInfo?.conversation
+                                } as Record<string, Object>)
                             })
                         OptionItemView({ title: '文件记录', showDivider: false })
                     }

@@ -1,5 +1,5 @@
 import common from '@ohos.app.ability.common'
-import { copyFileUri, fileSize } from '../../common/utils/FileUtil'
+import { copyFileUri, fileNameFromFileUri, fileSize } from '../../common/utils/FileUtil'
 import { showToast } from '../../common/utils/Toast'
 import { MediaHelper } from '../../helper/MediaHelper'
 import wfc from '../../wfc/client/wfc'
@@ -28,6 +28,8 @@ import photoAccessHelper from '@ohos.file.photoAccessHelper'
 import ConversationInfo from '../../wfc/model/conversationInfo'
 import { imageSize, imageThumbnail } from '../../helper/imageHelper'
 import { inputMethod } from '@kit.IMEKit'
+import FileMessageContent from '../../wfc/messages/fileMessageContent'
+import { isImage, isVideo } from '../../util/helper'
 
 const INPUT_ICON_WIDTH = 30
 
@@ -86,6 +88,7 @@ export default struct ConversationInputPanelView {
                 try {
                     let imgUris = await this.mediaHelper.selectImageAndVideo(9);
                     imgUris.forEach(async imgUri => {
+                        // 通过request包上传时，只能使用 applicationContext.cacheDir 目录下的文件
                         let file = getContext(this)
                             .getApplicationContext()
                             .cacheDir + '/' + new Date().getTime() + '.jpg'
@@ -158,10 +161,25 @@ export default struct ConversationInputPanelView {
             action: async () => {
                 try {
                     let fileUri = await this.mediaHelper.selectFile()
-                    let file = getContext(this).getApplicationContext().cacheDir + '/' + new Date().getTime() + '.jpg'
+                    let name = fileNameFromFileUri(fileUri)
+                    let file = getContext(this)
+                        .getApplicationContext()
+                        .cacheDir + '/' + new Date().getTime() + '-' + name
                     copyFileUri(fileUri, file);
                     let size = fileSize(file);
-                    let content = new ImageMessageContent(file, '', '')
+                    let content: MessageContent
+                    if (isImage(name.substring(name.lastIndexOf('.') + 1))) {
+                        let thumbnail = await imageThumbnail(getContext(this), fileUri, { width: 200, height: 200 })
+                        content = new ImageMessageContent(file, '', thumbnail)
+                    } else if (isVideo(name.substring(name.lastIndexOf('.') + 1))) {
+                        // TODO
+                        // FIXME
+                        let duration = 0
+                        let thumbnail = ''
+                        content = new VideoMessageContent(fileUri, '', thumbnail, duration)
+                    } else {
+                        content = new FileMessageContent(file, '', name, size)
+                    }
                     wfc.sendConversationMessage(this.conversation, content);
                 } catch (reason) {
                     showToast('选择文件失败: ' + reason)

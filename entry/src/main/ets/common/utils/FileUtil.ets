@@ -13,6 +13,13 @@ export function fileSize(file: string): number {
     return stat.size;
 }
 
+export function fileNameFromFileUri(fileUri: string) {
+    if (!fileUri) {
+        return ''
+    }
+    return fileUri.substring(fileUri.lastIndexOf('/') + 1)
+}
+
 export function exist(file: string): boolean {
     try {
         fs.statSync(file)

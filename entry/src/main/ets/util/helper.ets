@@ -66,6 +66,10 @@ export const isImage = (ext: string) => {
     return ['bmp', 'gif', 'jpeg', 'jpg', 'png'].includes(ext);
 }
 
+export const isVideo = (ext: string) => {
+    return ['mp4'].includes(ext);
+}
+
 // 3 types supported: pic, video, doc
 export const getMediaType = (ext = '') => {
     ext = ext.toLowerCase();

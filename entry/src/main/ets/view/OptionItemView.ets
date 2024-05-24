@@ -44,7 +44,7 @@ export default struct OptionItemView {
                         .fontSize(13)
                         .fontColor('#747474')
                         .maxLines(1)
-                        .constraintSize({ maxWidth: 100 })
+                        .constraintSize({ maxWidth: 200 })
                         .textOverflow({ overflow: TextOverflow.Ellipsis })
                 }
                 if (this.imgUrl) {

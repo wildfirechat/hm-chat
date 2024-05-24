@@ -7,6 +7,7 @@ import GroupConversationInfoPage from './conversation/GroupConversationInfoPage'
 import SingleConversationInfoPage from './conversation/SingleConversationInfoPage'
 import FavGroupListPage from './group/FavGroupListPage'
 import GroupManagePage from './group/GroupManagePage'
+import GroupManagerListPage from './group/GroupManagerListPage'
 import GroupQRCodePage from './group/GroupQRCodePage'
 import UpdateGroupAnnouncementPage from './group/UpdateGroupAnnouncementPage'
 import UpdateGroupNamePage from './group/UpdateGroupNamePage'
@@ -49,6 +50,7 @@ export class navigationDestinations {
     static UpdateMyGroupAliasPage = 'updateMyGroupAliasPage'
     static GroupQRCodePage = 'groupQRCodePage'
     static GroupManagePage = 'groupManagePage'
+    static GroupManagerListPage = 'groupManagerListPage'
     static AccountPage = 'accountPage'
     static FavRecordPage = 'favRecordPage'
     static FileRecordPage = 'fileRecordPage'
@@ -102,6 +104,8 @@ export function PagesMap(name: string) {
         GroupQRCodePage()
     } else if (name === navigationDestinations.GroupManagePage) {
         GroupManagePage()
+    } else if (name === navigationDestinations.GroupManagerListPage) {
+        GroupManagerListPage()
     } else if (name === navigationDestinations.AccountPage) {
         AccountPage()
     } else if (name === navigationDestinations.FavRecordPage) {

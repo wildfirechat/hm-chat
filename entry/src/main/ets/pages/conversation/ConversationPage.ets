@@ -451,6 +451,7 @@ export default struct ConversationPage {
                                                     if (this.showMessageTimeInfo(index)) {
                                                         Text(timeFormat(msg.timestamp))
                                                             .fontSize(12)
+                                                            .fontColor('#b4b4b4')
                                                             .padding(10)
                                                     }
                                                     Row() {
@@ -530,6 +531,7 @@ export default struct ConversationPage {
                                                     if (this.showMessageTimeInfo(index)) {
                                                         Text(timeFormat(msg.timestamp))
                                                             .fontSize(12)
+                                                            .fontColor('#b4b4b4')
                                                             .padding(10)
                                                     }
                                                     Row() {

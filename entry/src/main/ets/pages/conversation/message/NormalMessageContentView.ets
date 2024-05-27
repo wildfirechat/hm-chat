@@ -17,6 +17,7 @@ import TextMessageContentView from './TextMessageContentView'
 import VideoMessageContentView from './VideoMessageContentView'
 import { HashMap } from '@kit.ArkTS'
 import GroupMember from '../../../wfc/model/groupMember'
+import FileMessageContentView from './FileMessageContentView'
 
 @Component
 export default struct NormaMessageContentView {
@@ -49,6 +50,8 @@ export default struct NormaMessageContentView {
                 CallStartMessageContentView({ message: $message })
             } else if (this.message!.messageContent.type === MessageContentType.Composite_Message) {
                 CompositeMessageContentView({ message: $message })
+            } else if (this.message!.messageContent.type === MessageContentType.File) {
+                FileMessageContentView({ message: $message })
             } else {
                 Text(this.message!.messageContent.digest(this.message))
                     .margin({ top: 4 })
@@ -72,11 +75,15 @@ export default struct NormaMessageContentView {
                     if (this.message!.conversation.type === ConversationType.Group) {
                         Text(`已读 ${this.readReceipt.readCount}/${this.readReceipt.readCount + this.readReceipt.unreadCount}`)
                             .fontSize(12)
+                            .fontColor('#b4b4b4')
                             .margin({ top: 4 })
+                            .alignSelf(ItemAlign.End)
                     } else if (this.message!.conversation.type === ConversationType.Single) {
                         Text(this.readReceipt.readCount > 0 ? '已读' : '未读')
                             .fontSize(12)
+                            .fontColor('#b4b4b4')
                             .margin({ top: 4 })
+                            .alignSelf(ItemAlign.End)
                     }
                 }
             }

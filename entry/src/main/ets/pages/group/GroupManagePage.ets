@@ -39,6 +39,11 @@ export default struct GroupManagePage {
                         title: '设置禁言',
                         showDivider: true,
                     })
+                        .onClick(() => {
+                            this.mainNavPathStack.pushPathByName(navigationDestinations.GroupMemberMuteOrAllowListPage, {
+                                'groupInfo': this.groupInfo
+                            } as Record<string, Object>)
+                        })
                     OptionItemView({
                         title: '成员权限',
                         showDivider: false,

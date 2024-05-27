@@ -9,6 +9,7 @@ import SingleConversationInfoPage from './conversation/SingleConversationInfoPag
 import FavGroupListPage from './group/FavGroupListPage'
 import GroupManagePage from './group/GroupManagePage'
 import GroupManagerListPage from './group/GroupManagerListPage'
+import GroupMemberMuteOrAllowListPage from './group/GroupMemberMuteOrAllowListPage'
 import GroupQRCodePage from './group/GroupQRCodePage'
 import UpdateGroupAnnouncementPage from './group/UpdateGroupAnnouncementPage'
 import UpdateGroupNamePage from './group/UpdateGroupNamePage'
@@ -26,7 +27,6 @@ import SearchPortalPage from './search/SearchPortalPage'
 import SearchUserPage from './search/SearchUserPage'
 import UpdateUserInfoPage from './user/UpdateUserInfoPage'
 import UserInfoPage from './user/UserInfoPage'
-import WfcWebView from './workspace/WfcWebView'
 
 
 export class navigationDestinations {
@@ -52,6 +52,7 @@ export class navigationDestinations {
     static GroupQRCodePage = 'groupQRCodePage'
     static GroupManagePage = 'groupManagePage'
     static GroupManagerListPage = 'groupManagerListPage'
+    static GroupMemberMuteOrAllowListPage = 'groupMemberMuteOrAllowListPage'
     static AccountPage = 'accountPage'
     static FavRecordPage = 'favRecordPage'
     static FileRecordPage = 'fileRecordPage'
@@ -108,6 +109,8 @@ export function PagesMap(name: string) {
         GroupManagePage()
     } else if (name === navigationDestinations.GroupManagerListPage) {
         GroupManagerListPage()
+    } else if (name === navigationDestinations.GroupMemberMuteOrAllowListPage) {
+        GroupMemberMuteOrAllowListPage()
     } else if (name === navigationDestinations.AccountPage) {
         AccountPage()
     } else if (name === navigationDestinations.FavRecordPage) {

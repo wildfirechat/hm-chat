@@ -1,6 +1,6 @@
 @Entry
 @Component
-struct GroupMemberListPage {
+export default struct GroupMemberListPage {
     build() {
         Navigation() {
             Text('TODO')

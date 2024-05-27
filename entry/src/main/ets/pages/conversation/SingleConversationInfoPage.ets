@@ -141,7 +141,9 @@ export default struct SingleConversationInfoPage {
                         })
                     OptionItemView({ title: '文件记录' })
                         .onClick(() => {
-                            showToast('todo')
+                            this.mainNavPathStack.pushPathByName(navigationDestinations.ConversationFileRecordPage, {
+                                'conversation': this.conversationInfo?.conversation
+                            } as Record<string, Object>)
                         })
                 }
                 .margin({ top: 10 })

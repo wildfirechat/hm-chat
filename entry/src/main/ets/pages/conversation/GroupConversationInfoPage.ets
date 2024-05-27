@@ -318,6 +318,11 @@ export default struct GroupConversationInfoPage {
                                 } as Record<string, Object>)
                             })
                         OptionItemView({ title: '文件记录', showDivider: false })
+                            .onClick(() => {
+                                this.mainNavPathStack.pushPathByName(navigationDestinations.ConversationFileRecordPage, {
+                                    'conversation': this.conversationInfo?.conversation
+                                } as Record<string, Object>)
+                            })
                     }
                     .margin({ top: 10 })
                     .width('100%')

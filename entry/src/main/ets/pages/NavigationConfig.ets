@@ -2,6 +2,7 @@ import ChannelListPage from './channel/ChannelListPage'
 import ChatroomListPage from './chatroom/ChatroomListPage'
 import FriendRequestListPage from './contact/FriendRequestListPage'
 import ChannelConversationInfoPage from './conversation/ChannelConversationInfoPage'
+import ConversationFileRecordPage from './conversation/ConversationFileRecordPage'
 import ConversationPage from './conversation/ConversationPage'
 import GroupConversationInfoPage from './conversation/GroupConversationInfoPage'
 import SingleConversationInfoPage from './conversation/SingleConversationInfoPage'
@@ -54,6 +55,7 @@ export class navigationDestinations {
     static AccountPage = 'accountPage'
     static FavRecordPage = 'favRecordPage'
     static FileRecordPage = 'fileRecordPage'
+    static ConversationFileRecordPage = 'conversationFileRecordPage'
     static NotificationPage = 'messageAndNotificationPage'
     static SettingPage = 'settingPage'
 }
@@ -112,6 +114,8 @@ export function PagesMap(name: string) {
         FavRecordPage()
     } else if (name === navigationDestinations.FileRecordPage) {
         FileRecordPage()
+    } else if (name === navigationDestinations.ConversationFileRecordPage) {
+        ConversationFileRecordPage()
     } else if (name === navigationDestinations.NotificationPage) {
         MessageAndNotificationPage()
     } else if (name === navigationDestinations.SettingPage) {

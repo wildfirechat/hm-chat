@@ -14,6 +14,10 @@ export const humanSize = (size: number): string => {
 export const getFiletypeIcon = (extension: string) => {
     let filename = 'unknown';
 
+    if (extension && extension.indexOf('.')) {
+        extension = extension.substring(extension.lastIndexOf('.') + 1)
+    }
+
     extension = (extension || '').toLowerCase().replace(/^\./, '');
 
     switch (true) {
@@ -26,7 +30,7 @@ export const getFiletypeIcon = (extension: string) => {
             break;
 
         case ['zip', 'rar', 'tar', 'tar.gz'].includes(extension):
-            filename = 'archive';
+            filename = 'zip';
             break;
 
         case ['doc', 'docx'].includes(extension):
@@ -44,7 +48,7 @@ export const getFiletypeIcon = (extension: string) => {
             break;
     }
 
-    return `${filename}.png`;
+    return $r(`app.media.ic_file_type_${filename}`);
 }
 
 

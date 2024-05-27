@@ -4,23 +4,20 @@ import CheckableUserListView from '../../view/CheckableUserListView'
 import GroupInfo from '../../wfc/model/groupInfo'
 
 @Component
-export default struct RemoveGroupMemberModal {
+export default struct PickGroupMemberModal {
     @State checkedUsers: UserInfo[] = []
     private userInfos: UserInfo[] = []
     private initialCheckedUserIds: string[] = []
     private uncheckableUserIds: string[] = []
-    public static TAG: string = 'removeGroupMember'
+    public static TAG: string = 'pickGroupMember'
     private groupInfo?: GroupInfo
-    @Link showRemoveGroupMemberModal: boolean
-    public static PICK_RESULT = 'removeGroupMembers'
+    @Link showPickGroupMemberModal: boolean
+    public static PICK_RESULT = 'pickGroupMembers'
+    private title: string = ''
 
     aboutToAppear() {
         let groupMemberIds = wfc.getGroupMemberIds(this.groupInfo!.target, false)
-
         this.userInfos = wfc.getUserInfos(groupMemberIds, '')
-        // TODO
-        // 不能移除级别更高的
-        this.uncheckableUserIds = [wfc.getUserId()]
     }
 
     onCheckUser = (info: UserInfo, checked?: boolean) => {
@@ -50,6 +47,7 @@ export default struct RemoveGroupMemberModal {
                         checkedUsers: $checkedUsers,
                         userInfos: this.userInfos,
                         uncheckableUserIds: this.uncheckableUserIds,
+                        initialCheckedUserIds: this.initialCheckedUserIds,
                         showCategory: true,
                         showSearchView: true
                     })
@@ -62,7 +60,7 @@ export default struct RemoveGroupMemberModal {
             .height('100%')
             .padding({ top: 5 })
         }
-        .title('移除群成员')
+        .title(this.title)
         .titleMode(NavigationTitleMode.Mini)
         .hideBackButton(false)
         .height('100%')
@@ -84,8 +82,8 @@ export default struct RemoveGroupMemberModal {
                 .borderRadius(4)// .backgroundColor(Color.Blue)
                 .onClick(() => {
                     LocalStorage.getShared()
-                        .setOrCreate<UserInfo[]>(RemoveGroupMemberModal.PICK_RESULT, this.newlyCheckedUsers());
-                    this.showRemoveGroupMemberModal = false;
+                        .setOrCreate<UserInfo[]>(PickGroupMemberModal.PICK_RESULT, this.newlyCheckedUsers());
+                    this.showPickGroupMemberModal = false;
                 })
         }
         .height('100%')

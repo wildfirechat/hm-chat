@@ -1,3 +1,4 @@
+import { showToast } from '../../../common/utils/Toast'
 import { getFiletypeIcon, humanSize } from '../../../util/helper'
 import FileMessageContent from '../../../wfc/messages/fileMessageContent'
 import Message from '../../../wfc/messages/message'
@@ -32,5 +33,8 @@ export default struct FileMessageContentView {
         .backgroundColor(Color.White)
         .borderRadius(4)
         .justifyContent(FlexAlign.Start)
+        .onClick(() => {
+            showToast('TODO 预览文件')
+        })
     }
 }

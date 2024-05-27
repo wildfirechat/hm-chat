@@ -10,7 +10,7 @@ import GroupType from '../../wfc/model/groupType';
 import UserInfo from '../../wfc/model/userInfo';
 import ActionSheetDialog from '../../view/ActionSheetDialog';
 import AddGroupMemberModal from '../group/AddGroupMemberModal';
-import RemoveGroupMemberModal from '../group/RemoveGroupMemberModal';
+import PickGroupMemberModal from '../group/PickGroupMemberModal';
 import appServer from '../../api/appServer';
 import GroupAnnouncement from '../../api/model/groupAnnouncement';
 import AppServerError from '../../api/appServerError';
@@ -78,7 +78,6 @@ export default struct GroupConversationInfoPage {
     }
 
     onPageShow() {
-        console.log('xxxxxx onPageShow')
         this.userInfo = wfc.getUserInfo(wfc.getUserId(), false, this.groupInfo.target)
     }
 
@@ -104,7 +103,11 @@ export default struct GroupConversationInfoPage {
 
     @Builder
     removeGroupMemberModal() {
-        RemoveGroupMemberModal({ groupInfo: this.groupInfo, showRemoveGroupMemberModal: $showRemoveGroupMemberModal })
+        PickGroupMemberModal({
+            groupInfo: this.groupInfo,
+            showPickGroupMemberModal: $showRemoveGroupMemberModal,
+            title: '移除群成员'
+        })
             .height('100%')
             .width('100%')
             .margin({ top: px2vp(AppStorage.get<number>('SafeAreaTopHeight')) })
@@ -187,9 +190,9 @@ export default struct GroupConversationInfoPage {
                                         onDisappear: () => {
                                             this.showRemoveGroupMemberModal = false
                                             let localStorage = LocalStorage.getShared();
-                                            let pickUsers = localStorage.get<UserInfo[]>(RemoveGroupMemberModal.PICK_RESULT);
+                                            let pickUsers = localStorage.get<UserInfo[]>(PickGroupMemberModal.PICK_RESULT);
                                             if (pickUsers?.length) {
-                                                localStorage.delete(RemoveGroupMemberModal.PICK_RESULT)
+                                                localStorage.delete(PickGroupMemberModal.PICK_RESULT)
                                                 let uids = pickUsers.map(info => info.uid)
                                                 wfc.kickoffGroupMembers(this.groupInfo.target, uids, [0], null, () => {
                                                     this.groupMembers = wfc.getGroupMembers(this.conversationInfo!.conversation.target, false)

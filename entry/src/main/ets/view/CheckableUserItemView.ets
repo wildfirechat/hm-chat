@@ -6,7 +6,8 @@ let isChangeTriggeredByClick: boolean = false
 @Preview
 @Component
 export default struct CheckableUserItemView {
-    private enable?: boolean = true
+    private enable: boolean = true
+    private initialChecked: boolean = false
     private paddingLeft: number = 10
     private paddingRight: number = 10
     private uiUserInfo: UIUserInfo = {} as UIUserInfo;
@@ -38,7 +39,7 @@ export default struct CheckableUserItemView {
             }
             Row() {
                 Checkbox()
-                    .select(this.isChecked())
+                    .select(this.isChecked() || this.initialChecked)
                     .enabled(this.enable)
                     .onChange((value: boolean) => {
                         if (isChangeTriggeredByClick) {

@@ -13,6 +13,7 @@ export default struct CheckableUserListView {
     private userInfos: UserInfo[] = []
     private showCategory: boolean = false
     private uncheckableUserIds: string[] = []
+    private initialCheckedUserIds: string[] = []
     private showSearchView: boolean = false
     private checkedUserListScroller: Scroller = new Scroller()
 
@@ -121,6 +122,7 @@ export default struct CheckableUserListView {
                                 paddingLeft: 10,
                                 paddingRight: 10,
                                 enable: !this.isUncheckable(info.userInfo),
+                                initialChecked: this.initialCheckedUserIds.indexOf(info.userInfo.uid) >= 0,
                                 onCheckUser: this.onCheckUser,
                             })
                         }

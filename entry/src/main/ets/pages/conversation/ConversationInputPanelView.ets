@@ -82,23 +82,36 @@ export default struct ConversationInputPanelView {
     private mentions: MentionBlock[] = []
     private conversationExts: ConversationExt[] = [
         {
-            title: '照片',
+            title: '相册',
             icon: $r('app.media.ic_func_pic'),
             action: async () => {
                 try {
                     let imgUris = await this.mediaHelper.selectImageAndVideo(9);
                     imgUris.forEach(async imgUri => {
-                        // 通过request包上传时，只能使用 applicationContext.cacheDir 目录下的文件
-                        let file = getContext(this)
-                            .getApplicationContext()
-                            .cacheDir + '/' + new Date().getTime() + '.jpg'
-                        copyFileUri(imgUri, file);
-                        let thumbnail = await imageThumbnail(getContext(this), imgUri, { width: 200, height: 200 })
-                        let size = await imageSize(imgUri);
-                        let content = new ImageMessageContent(file, '', thumbnail)
-                        content.imageWidth = size.width;
-                        content.imageHeight = size.height;
-                        wfc.sendConversationMessage(this.conversation, content, [], null, null, null, null, null);
+                        // TODO
+                        // FIXME 判断是图片，还是视频
+                        if (imgUri.endsWith('.mp4')) {
+                            let file = getContext(this)
+                                .getApplicationContext()
+                                .cacheDir + '/' + new Date().getTime() + '.mp4'
+                            copyFileUri(imgUri, file);
+                            let size = fileSize(file);
+                            let content = new VideoMessageContent(file, '', '')
+                            wfc.sendConversationMessage(this.conversation, content, [], null, null, null, null, null);
+                            return
+                        } else {
+                            // 通过request包上传时，只能使用 applicationContext.cacheDir 目录下的文件
+                            let file = getContext(this)
+                                .getApplicationContext()
+                                .cacheDir + '/' + new Date().getTime() + '.jpg'
+                            copyFileUri(imgUri, file);
+                            let thumbnail = await imageThumbnail(getContext(this), imgUri, { width: 200, height: 200 })
+                            let size = await imageSize(imgUri);
+                            let content = new ImageMessageContent(file, '', thumbnail)
+                            content.imageWidth = size.width;
+                            content.imageHeight = size.height;
+                            wfc.sendConversationMessage(this.conversation, content, [], null, null, null, null, null);
+                        }
                     })
                 } catch (reason) {
                     showToast('选取照片失败: ' + reason)

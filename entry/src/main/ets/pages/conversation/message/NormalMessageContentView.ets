@@ -18,6 +18,8 @@ import VideoMessageContentView from './VideoMessageContentView'
 import { HashMap } from '@kit.ArkTS'
 import GroupMember from '../../../wfc/model/groupMember'
 import FileMessageContentView from './FileMessageContentView'
+import TextMessageContent from '../../../wfc/messages/textMessageContent'
+import pasteboard from '@ohos.pasteboard'
 
 @Component
 export default struct NormaMessageContentView {
@@ -155,33 +157,45 @@ export default struct NormaMessageContentView {
             }
         ]
 
-        // TODO 判断是否可以撤回等
         // recall
-        if (true) {
-            let enableRecall: boolean = false
-            if (this.message!.conversation.type === ConversationType.Group) {
-                // TODO 撤回权限验证
-            }
-            let delta = wfc.getServerDeltaTime()
-            let now = new Date().getTime()
-            if (this.message!.direction === 0 && this.message!.from === wfc.getUserId() && now - (this.message!.timestamp - delta) < Config.RECALL_TIME_LIMIT * 1000) {
-                enableRecall = true
-            }
-
-            if (enableRecall) {
-                menus.push({
-                    title: '撤回',
-                    tag: 'recall',
-                    action: () => {
-                        wfc.recallMessage(this.message!.messageUid, () => {
-
-                        }, err => {
-                            console.error('recall error', err)
-                        })
-                    }
-                })
-            }
+        let enableRecall: boolean = false
+        if (this.message!.conversation.type === ConversationType.Group) {
+            // TODO 撤回权限验证
         }
+        let delta = wfc.getServerDeltaTime()
+        let now = new Date().getTime()
+        if (this.message!.direction === 0 && this.message!.from === wfc.getUserId() && now - (this.message!.timestamp - delta) < Config.RECALL_TIME_LIMIT * 1000) {
+            enableRecall = true
+        }
+
+        if (enableRecall) {
+            menus.push({
+                title: '撤回',
+                tag: 'recall',
+                action: () => {
+                    wfc.recallMessage(this.message!.messageUid, () => {
+
+                    }, err => {
+                        console.error('recall error', err)
+                    })
+                }
+            })
+        }
+
+        // copy
+        if (this.message!.messageContent instanceof TextMessageContent) {
+            menus.push({
+                title: '复制',
+                tag: 'copy',
+                action: () => {
+                    let pasteData: pasteboard.PasteData = pasteboard.createData(pasteboard.MIMETYPE_TEXT_PLAIN, this.message!.messageContent.digest())
+                    let systemPasteboard: pasteboard.SystemPasteboard = pasteboard.getSystemPasteboard();
+                    systemPasteboard.setData(pasteData)
+
+                }
+            })
+        }
+
 
         // TODO more context menus
 

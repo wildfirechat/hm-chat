@@ -14,7 +14,7 @@ export default struct GroupMemberMuteOrAllowListPage {
     @State groupInfo?: GroupInfo = undefined
     @State mutedGroupMemberUsers: UserInfo[] = []
     @State allowGroupMemberUsers: UserInfo[] = []
-    private showPickGroupMemberModal: boolean = false
+    @State showPickGroupMemberModal: boolean = false
     private groupOwnerUid?: string
     private groupManagerUids: string[] = []
 
@@ -23,7 +23,9 @@ export default struct GroupMemberMuteOrAllowListPage {
         this.groupInfo = params['groupInfo'] as GroupInfo;
 
         this.groupOwnerUid = this.groupInfo.owner;
-        this.groupManagerUids = wfc.getGroupMemberIds(this.groupInfo.target, false);
+        let groupManagers = wfc.getGroupMembersByType(this.groupInfo.target, GroupMemberType.Manager)
+        this.groupManagerUids = groupManagers.map(m => m.memberId)
+        this.groupManagerUids.push(this.groupOwnerUid)
         this.loadMuteOrAllowGroupMembers()
     }
 
@@ -33,7 +35,7 @@ export default struct GroupMemberMuteOrAllowListPage {
             this.allowGroupMemberUsers = wfc.getUserInfos(allowMembers.map(m => m.memberId), this.groupInfo!.target)
         } else {
             let mutedMembers = wfc.getGroupMembersByType(this.groupInfo!.target, GroupMemberType.Muted)
-            this.allowGroupMemberUsers = wfc.getUserInfos(mutedMembers.map(m => m.memberId), this.groupInfo!.target)
+            this.mutedGroupMemberUsers = wfc.getUserInfos(mutedMembers.map(m => m.memberId), this.groupInfo!.target)
         }
     }
 
@@ -41,7 +43,7 @@ export default struct GroupMemberMuteOrAllowListPage {
     pickGroupMemberModal() {
         PickGroupMemberModal({
             groupInfo: this.groupInfo,
-            title: '添加管理员',
+            title: this.groupInfo?.mute === 0 ? '添加群禁言黑名单' : '添加群禁言白名单',
             showPickGroupMemberModal: $showPickGroupMemberModal,
             uncheckableUserIds: [this.groupOwnerUid!].concat(this.groupManagerUids),
             initialCheckedUserIds: [this.groupOwnerUid!].concat(this.groupManagerUids)
@@ -63,6 +65,8 @@ export default struct GroupMemberMuteOrAllowListPage {
                         onChange: isOn => {
                             wfc.modifyGroupInfo(this.groupInfo!.target, ModifyGroupInfoType.Modify_Group_Mute, isOn ? '1' : '0', [0], null, () => {
                                 this.groupInfo!.mute = isOn ? 1 : 0
+                                this.allowGroupMemberUsers = []
+                                this.mutedGroupMemberUsers = []
                             }, err => {
                                 showToast((isOn ? '设置全局禁言失败 ' : '取消全局禁言失败') + " " + err)
                             })
@@ -131,7 +135,7 @@ export default struct GroupMemberMuteOrAllowListPage {
                 })
 
                 List() {
-                    ForEach(this.groupInfo?.mute === 0 ? this.mutedGroupMemberUsers : this.allowGroupMemberUsers, (info: UserInfo) => {
+                    ForEach(this.groupInfo?.mute === 0 ? this.mutedGroupMemberUsers : this.allowGroupMemberUsers, (info: UserInfo, index: number) => {
                         ListItem() {
                             Row() {
                                 Image(info.portrait)
@@ -153,20 +157,17 @@ export default struct GroupMemberMuteOrAllowListPage {
                                 }
                             })
                             .onClick(() => {
-                                // TODO
-                                // FIXME
-                                // 取消禁言或者取消允许发言
                                 if (this.groupInfo?.mute === 1) {
-                                    wfc.muteGroupMembers(this.groupInfo.target, false, [info.uid], [0], null, () => {
-
-                                    }, err => {
-                                        showToast('取消禁言失败')
-                                    })
-                                } else {
-                                    wfc.allowGroupMembers(this.groupInfo!.target, false, [info.uid], [0], null, () => {
-
+                                    wfc.allowGroupMembers(this.groupInfo.target, false, [info.uid], [0], null, () => {
+                                        this.allowGroupMemberUsers.splice(index, 1)
                                     }, err => {
                                         showToast('取消允许发言失败')
+                                    })
+                                } else {
+                                    wfc.muteGroupMembers(this.groupInfo!.target, false, [info.uid], [0], null, () => {
+                                        this.mutedGroupMemberUsers.splice(index, 1)
+                                    }, err => {
+                                        showToast('取消禁言失败')
                                     })
                                 }
                             })

@@ -15,7 +15,7 @@ import PickContactModal from '../picker/PickContactModal';
 @Entry
 @Component
 export default struct SingleConversationInfoPage {
-    @State userInfo: UserInfo = {} as UserInfo
+    @State targetUserInfo: UserInfo = {} as UserInfo
     private conversationInfo?: ConversationInfo
     @State isTop: boolean = false
     @State isSilent: boolean = false
@@ -26,7 +26,7 @@ export default struct SingleConversationInfoPage {
     aboutToAppear() {
         let params = this.mainNavPathStack.getParamByIndex(this.mainNavPathStack.size() - 1) as Record<string, Object>;
         this.conversationInfo = params['conversationInfo'] as ConversationInfo
-        this.userInfo = wfc.getUserInfo(this.conversationInfo!.conversation.target)
+        this.targetUserInfo = wfc.getUserInfo(this.conversationInfo!.conversation.target)
     }
 
     @Builder
@@ -47,7 +47,7 @@ export default struct SingleConversationInfoPage {
         NavDestination() {
             Column() {
                 Row() {
-                    Image(this.userInfo.portrait)
+                    Image(this.targetUserInfo.portrait)
                         .width(48)
                         .height(48)
                     Image($r('app.media.ic_add_team_member'))
@@ -68,6 +68,9 @@ export default struct SingleConversationInfoPage {
                                     localStorage.delete(PickContactModal.PICK_RESULT)
                                     let memberIds: string[] = pickUsers.map(userInfo => userInfo.uid)
                                     memberIds.push(this.conversationInfo!.conversation.target)
+                                    let selfUserInfo = wfc.getUserInfo(wfc.getUserId())
+                                    pickUsers.splice(0, 0, selfUserInfo);
+                                    pickUsers.splice(1, 0, this.targetUserInfo);
                                     let first5Members = pickUsers.slice(0, 5)
                                     let groupName = ''
                                     first5Members.forEach(userInfo => {
@@ -76,8 +79,10 @@ export default struct SingleConversationInfoPage {
                                     })
                                     groupName = groupName.substring(0, groupName.length - 1)
                                     wfc.createGroup('', GroupType.Normal, groupName, '', '', memberIds, '', [0], null, (groupId) => {
-                                        this.mainNavPathStack.popToName(navigationDestinations.ConversationPage, {
-                                            'conversation': new Conversation(ConversationType.Group, groupId, 0)
+                                        let conversation = new Conversation(ConversationType.Group, groupId, 0);
+                                        this.mainNavPathStack.popToName(navigationDestinations.ConversationPage)
+                                        this.mainNavPathStack.replacePathByName(navigationDestinations.ConversationPage, {
+                                            'conversation': conversation
                                         } as Record<string, Object>)
                                     }, err => {
 

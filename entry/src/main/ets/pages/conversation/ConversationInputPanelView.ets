@@ -30,6 +30,10 @@ import { imageSize, imageThumbnail } from '../../helper/imageHelper'
 import { inputMethod } from '@kit.IMEKit'
 import FileMessageContent from '../../wfc/messages/fileMessageContent'
 import { isImage, isVideo } from '../../util/helper'
+import GroupMemberType from '../../wfc/model/groupMemberType'
+import GroupMember from '../../wfc/model/groupMember'
+import GroupInfo from '../../wfc/model/groupInfo'
+import EventType from '../../wfc/client/wfcEvent'
 
 const INPUT_ICON_WIDTH = 30
 
@@ -68,6 +72,7 @@ export default struct ConversationInputPanelView {
     // 取消多选时，需要先将 enableMultiCheck 置为 false，在清空 checkedMessages
     @Link enableMultiCheck: boolean
     @Link checkedMessages: Message[]
+    @State muted: boolean = false
     private messageListScroller?: Scroller
     private textInputBottomWhenBlur: number = 0
     private textInputController: TextInputController = new TextInputController()
@@ -395,6 +400,7 @@ export default struct ConversationInputPanelView {
 
         if (this.conversation.type === ConversationType.Group) {
             this.groupId = this.conversation.target;
+            this.updateGroupConversationMuteState()
         }
 
         this.setKeyboardAvoidMode(KeyboardAvoidMode.RESIZE);
@@ -402,11 +408,50 @@ export default struct ConversationInputPanelView {
         if (this.conversationInfo.draft) {
             this.text = this.conversationInfo.draft;
         }
+
+        wfc.eventEmitter?.on(EventType.GroupMembersUpdate, this.onGroupMembersUpdate)
+        wfc.eventEmitter?.on(EventType.GroupInfosUpdate, this.onGroupInfosUpdate)
+    }
+
+    updateGroupConversationMuteState() {
+        let groupInfo = wfc.getGroupInfo(this.conversation.target, true)
+        let groupMember = wfc.getGroupMember(this.groupId, wfc.getUserId())
+        if (groupInfo.mute === 1) {
+            if ([GroupMemberType.Owner, GroupMemberType.Manager, GroupMemberType.Allowed].indexOf(groupMember.type) >= 0) {
+                this.muted = false;
+            } else {
+                this.muted = true;
+            }
+        } else {
+            if ([GroupMemberType.Muted, GroupMemberType.Removed].indexOf(groupMember.type) >= 0) {
+                this.muted = true
+            } else {
+                this.muted = false
+            }
+        }
     }
 
     aboutToDisappear(): void {
         if (this.text.trim()) {
             wfc.setConversationDraft(this.conversation, this.text.trim())
+        }
+        wfc.eventEmitter?.off(EventType.GroupMembersUpdate, this.onGroupMembersUpdate)
+        wfc.eventEmitter?.off(EventType.GroupInfosUpdate, this.onGroupInfosUpdate)
+    }
+
+    onGroupMembersUpdate = (groupId: string, groupMembers: GroupMember[]) => {
+        if (this.conversation.type === ConversationType.Group && groupId === this.groupId) {
+            this.updateGroupConversationMuteState()
+        }
+    }
+    onGroupInfosUpdate = (groupInfos: GroupInfo[]) => {
+        if (this.conversation.type === ConversationType.Group) {
+            for (let info of groupInfos) {
+                if (info.target === this.groupId) {
+                    this.updateGroupConversationMuteState()
+                    break
+                }
+            }
         }
     }
 
@@ -459,6 +504,14 @@ export default struct ConversationInputPanelView {
                 })
             }
             .enabled(this.checkedMessages.length > 0)
+            .padding(10)
+            .height(INPUT_ICON_WIDTH + 10)
+            .width('100%')
+            .justifyContent(FlexAlign.SpaceAround)
+        } else if (this.muted) {
+            Row() {
+                Text('群禁言或者群已被解散')
+            }
             .padding(10)
             .height(INPUT_ICON_WIDTH + 10)
             .width('100%')

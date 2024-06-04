@@ -13,7 +13,7 @@ export default class TextMessageContent extends MessageContent {
     content = '';
     quoteInfo?: QuoteInfo;
 
-    constructor(content: string = '', mentionedType = 0, mentionedTargets = []) {
+    constructor(content: string = '', mentionedType = 0, mentionedTargets:string[] = []) {
         super(MessageContentType.Text, mentionedType, mentionedTargets);
         this.content = content;
     }

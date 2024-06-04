@@ -14,7 +14,7 @@ export default class MessageContent {
     extra = '';
     pushContent = '';
 
-    constructor(type = 0, mentionedType = 0, mentionedTargets = []) {
+    constructor(type = 0, mentionedType = 0, mentionedTargets: string[] = []) {
         this.type = type;
         this.mentionedType = mentionedType;
         this.mentionedTargets = mentionedTargets;

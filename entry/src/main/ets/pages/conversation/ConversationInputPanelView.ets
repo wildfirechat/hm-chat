@@ -34,6 +34,10 @@ import GroupMemberType from '../../wfc/model/groupMemberType'
 import GroupMember from '../../wfc/model/groupMember'
 import GroupInfo from '../../wfc/model/groupInfo'
 import EventType from '../../wfc/client/wfcEvent'
+import ChannelInfo from '../../wfc/model/channelInfo'
+import ChannelMenu from '../../wfc/model/channelMenu'
+import ChannelMenuEventMessageContent from '../../wfc/messages/channelMenuEventMessageContent'
+import { navigationDestinations } from '../navigationConfig'
 
 const INPUT_ICON_WIDTH = 30
 
@@ -63,7 +67,10 @@ export default struct ConversationInputPanelView {
     @State showMentionSheet: boolean = false
     @State keyboardHeight: number = 320
     @State showAudioRecorderButton: boolean = false
+    @State showChannelMenu: boolean = false
     @State enable: boolean = false
+    @State muted: boolean = false
+    @State channelInfo?: ChannelInfo = undefined
     // for audioRecorderView
     @Link showAudioRecorderView: boolean
     @Link showCancelRecordIndicator: boolean
@@ -72,7 +79,7 @@ export default struct ConversationInputPanelView {
     // 取消多选时，需要先将 enableMultiCheck 置为 false，在清空 checkedMessages
     @Link enableMultiCheck: boolean
     @Link checkedMessages: Message[]
-    @State muted: boolean = false
+    @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
     private messageListScroller?: Scroller
     private textInputBottomWhenBlur: number = 0
     private textInputController: TextInputController = new TextInputController()
@@ -401,6 +408,8 @@ export default struct ConversationInputPanelView {
         if (this.conversation.type === ConversationType.Group) {
             this.groupId = this.conversation.target;
             this.updateGroupConversationMuteState()
+        } else if (this.conversation.type === ConversationType.Channel) {
+            this.channelInfo = wfc.getChannelInfo(this.conversation.target)
         }
 
         this.setKeyboardAvoidMode(KeyboardAvoidMode.RESIZE);
@@ -411,6 +420,7 @@ export default struct ConversationInputPanelView {
 
         wfc.eventEmitter?.on(EventType.GroupMembersUpdate, this.onGroupMembersUpdate)
         wfc.eventEmitter?.on(EventType.GroupInfosUpdate, this.onGroupInfosUpdate)
+        wfc.eventEmitter?.on(EventType.ChannelInfosUpdate, this.onChannelInfoUpdate)
     }
 
     updateGroupConversationMuteState() {
@@ -437,12 +447,24 @@ export default struct ConversationInputPanelView {
         }
         wfc.eventEmitter?.off(EventType.GroupMembersUpdate, this.onGroupMembersUpdate)
         wfc.eventEmitter?.off(EventType.GroupInfosUpdate, this.onGroupInfosUpdate)
+        wfc.eventEmitter?.off(EventType.ChannelInfosUpdate, this.onChannelInfoUpdate)
     }
 
     onGroupMembersUpdate = (groupId: string, groupMembers: GroupMember[]) => {
         if (this.conversation.type === ConversationType.Group && groupId === this.groupId) {
             this.updateGroupConversationMuteState()
         }
+    }
+    onChannelInfoUpdate = (channelInfos: ChannelInfo[]) => {
+        if (this.conversation.type === ConversationType.Channel) {
+            for (let info of channelInfos) {
+                if (info.channelId === this.conversation.target) {
+                    this.channelInfo = info
+                    break
+                }
+            }
+        }
+
     }
     onGroupInfosUpdate = (groupInfos: GroupInfo[]) => {
         if (this.conversation.type === ConversationType.Group) {
@@ -491,6 +513,43 @@ export default struct ConversationInputPanelView {
         this.recordOutputAudioFile = ''
     }
 
+    openChannelMenu(menu: ChannelMenu) {
+        let content = new ChannelMenuEventMessageContent(menu)
+        wfc.sendConversationMessage(this.conversation, content)
+
+        switch (menu.type) {
+            case 'view':
+                if (menu.url) {
+                    this.mainNavPathStack.pushPathByName(navigationDestinations.WebViewPage, {
+                        'url': menu.url,
+                        'title': menu.name
+                    } as Record<string, Object>)
+                }
+                break
+            case 'miniprogram':
+                break
+            default:
+                break
+        }
+    }
+
+    @Builder
+    channelSubMenus(channelMenu: ChannelMenu) {
+        if (channelMenu.subMenus.length > 0) {
+            Menu() {
+                ForEach(channelMenu.subMenus, (subMenu: ChannelMenu) => {
+                    MenuItem({ content: subMenu.name })
+                        .onClick(() => {
+                            this.openChannelMenu(subMenu)
+                        })
+                })
+            }
+
+        } else {
+            // nothing
+        }
+    }
+
     build() {
         if (this.enableMultiCheck) {
             Row() {
@@ -519,142 +578,188 @@ export default struct ConversationInputPanelView {
         } else {
             Column() {
                 Row() {
-                    Image($r('app.media.ic_chat_voice'))
-                        .id('audio')
-                        .width(INPUT_ICON_WIDTH)
-                        .height(INPUT_ICON_WIDTH)
-                        .onClick(() => {
-                            this.showAudioRecorderButton = !this.showAudioRecorderButton
-                            this.showExtPanel = false
-                            this.showEmojiPanel = false
-                        })
-                    if (!this.showAudioRecorderButton) {
-                        TextInput({ text: this.text, controller: this.textInputController })
-                            .id('textInput')
-                            .onChange(value => {
-                                // TODO 优化，mentionview 弹出逻辑
-                                // FIXME
-                                if (this.text + "@" === value && this.conversation.type === ConversationType.Group) {
-                                    this.showMentionSheet = true;
+                    if (this.conversation.type === ConversationType.Channel) {
+                        Image(this.showChannelMenu ? $r('app.media.ic_chat_keyboard') : $r('app.media.ic_chat_menu'))
+                            .draggable(false)
+                            .id('channelMenu')
+                            .margin({ right: 10 })
+                            .width(INPUT_ICON_WIDTH)
+                            .height(INPUT_ICON_WIDTH)
+                            .onClick(() => {
+                                if (this.channelInfo!.menus.length > 0) {
+                                    this.showChannelMenu = !this.showChannelMenu
+                                    this.showAudioRecorderButton = false
+                                    this.showExtPanel = false
+                                    this.showEmojiPanel = false
                                 } else {
-                                    this.text = value
-                                }
-                            })// .caretPosition(this.caretPosition)
-                            .onFocus(() => {
-                                this.textInputFocused = true
-                            })
-                            .focusable(this.collapseConversationInputPanelViewTimestamp === 0)
-                            .onBlur(() => {
-                                this.textInputFocused = false
-                            })
-                            .onClick((event) => {
-                                // this.showExtPanel = false
-                                // this.showEmojiPanel = false
-                            })
-                            .onTextSelectionChange((selectionStart, selectionEnd) => {
-                                this.selectionStart = selectionStart;
-                                this.selectionEnd = selectionEnd;
-                                this.caretPosition = selectionStart;
-                            })
-                            .margin({ left: 10, right: 10 })
-                            .height(40)
-                            .borderRadius(4)
-                            .layoutWeight(1)
-                    } else {
-                        Button('按住录音')
-                            .layoutWeight(1)
-                            .margin({ left: 10, right: 10 })
-                            .borderRadius(4)
-                            .fontColor('#7E7E7E')// .backgroundColor('#F3F3F3')
-                            .type(ButtonType.Normal)
-                            .stateStyles({
-                                pressed: {
-                                    .backgroundColor('#E5E5E5')
-                                },
-                                normal: {
-                                    .backgroundColor(Color.White)
-                                }
-                            })
-                            .onTouch(event => {
-                                event.stopPropagation()
-                                if (event.type === TouchType.Down) {
-                                    this.startRecordAudio()
-                                    this.showAudioRecorderView = true
-                                    this.showCancelRecordIndicator = false
-                                    this.recordTouchDownY = event.touches[0].screenY
-                                } else if (event.type === TouchType.Up) {
-                                    this.stopRecordAudio(this.showCancelRecordIndicator)
-                                    this.showAudioRecorderView = false
-                                    this.showCancelRecordIndicator = false
-                                } else if (event.type === TouchType.Move) {
-                                    let y = event.touches[0].screenY;
-                                    if (this.recordTouchDownY - y > 100) {
-                                        this.showCancelRecordIndicator = true;
-                                    } else {
-                                        this.showCancelRecordIndicator = false;
-                                    }
-                                } else if (event.type === TouchType.Cancel) {
+                                    showToast('频道暂未配置菜单')
                                 }
                             })
                     }
-
-                    Image(this.textInputFocused || !this.showEmojiPanel ? $r('app.media.ic_chat_emo') : $r('app.media.ic_chat_keyboard'))
-                        .width(INPUT_ICON_WIDTH)
+                    if (this.showChannelMenu) {
+                        Row() {
+                            ForEach(this.channelInfo?.menus, (menu: ChannelMenu) => {
+                                Text(menu.name)
+                                    .height(INPUT_ICON_WIDTH)// .padding(10)
+                                    .layoutWeight(1)
+                                    .textAlign(TextAlign.Center)
+                                    .stateStyles({
+                                        pressed: {
+                                            .backgroundColor('#E5E5E5')
+                                        },
+                                        normal: {
+                                            .backgroundColor('#F7F7F7')
+                                        }
+                                    })
+                                    .onClick(() => {
+                                        if (menu.subMenus.length === 0) {
+                                            this.openChannelMenu(menu)
+                                        }
+                                    })
+                                    .bindMenu(this.channelSubMenus(menu))
+                            })
+                        }
+                        .justifyContent(FlexAlign.SpaceAround)
                         .height(INPUT_ICON_WIDTH)
-                        .focusable(true)
-                        .defaultFocus(false)
-                        .focusOnTouch(true)
-                        .onClick(() => {
-                            this.showExtPanel = false
-                            this.showEmojiPanel = !this.showEmojiPanel;
-                            if (!this.showEmojiPanel) {
-                                focusControl.requestFocus('textInput')
-                                this.setKeyboardAvoidMode(KeyboardAvoidMode.RESIZE)
-                            }
-                            this.textInputFocused = false;
-                            this.showAudioRecorderButton = false
-                        })
-                    if (this.text.trim().length > 0) {
-                        Button('发送')
-                            .type(ButtonType.Normal)
-                            .margin({ left: 10 })
+                        .layoutWeight(1)
+                    } else {
+                        Image($r('app.media.ic_chat_voice'))
+                            .id('audio')
+                            .width(INPUT_ICON_WIDTH)
                             .height(INPUT_ICON_WIDTH)
-                            .borderRadius(4)
                             .onClick(() => {
-                                let textMessageContent = new TextMessageContent(this.text);
-                                if (this.mentions.length > 0) {
-                                    for (const mention of this.mentions) {
-                                        if (this.text.indexOf(mention.text) >= 0) {
-                                            if (mention.target === '@all') {
-                                                textMessageContent.mentionedType = 2;
-                                                break
-                                            } else {
-                                                if (textMessageContent.mentionedTargets.indexOf(mention.target) === -1) {
-                                                    textMessageContent.mentionedTargets.push(mention.target)
+                                this.showAudioRecorderButton = !this.showAudioRecorderButton
+                                this.showExtPanel = false
+                                this.showEmojiPanel = false
+                            })
+                        if (!this.showAudioRecorderButton) {
+                            TextInput({ text: this.text, controller: this.textInputController })
+                                .id('textInput')
+                                .onChange(value => {
+                                    // TODO 优化，mentionview 弹出逻辑
+                                    // FIXME
+                                    if (this.text + "@" === value && this.conversation.type === ConversationType.Group) {
+                                        this.showMentionSheet = true;
+                                    } else {
+                                        this.text = value
+                                    }
+                                })// .caretPosition(this.caretPosition)
+                                .onFocus(() => {
+                                    this.textInputFocused = true
+                                })
+                                .focusable(this.collapseConversationInputPanelViewTimestamp === 0)
+                                .onBlur(() => {
+                                    this.textInputFocused = false
+                                })
+                                .onClick((event) => {
+                                    // this.showExtPanel = false
+                                    // this.showEmojiPanel = false
+                                })
+                                .onTextSelectionChange((selectionStart, selectionEnd) => {
+                                    this.selectionStart = selectionStart;
+                                    this.selectionEnd = selectionEnd;
+                                    this.caretPosition = selectionStart;
+                                })
+                                .margin({ left: 10, right: 10 })
+                                .height(40)
+                                .borderRadius(4)
+                                .layoutWeight(1)
+                        } else {
+                            Button('按住录音')
+                                .layoutWeight(1)
+                                .margin({ left: 10, right: 10 })
+                                .borderRadius(4)
+                                .fontColor('#7E7E7E')// .backgroundColor('#F3F3F3')
+                                .type(ButtonType.Normal)
+                                .stateStyles({
+                                    pressed: {
+                                        .backgroundColor('#E5E5E5')
+                                    },
+                                    normal: {
+                                        .backgroundColor(Color.White)
+                                    }
+                                })
+                                .onTouch(event => {
+                                    event.stopPropagation()
+                                    if (event.type === TouchType.Down) {
+                                        this.startRecordAudio()
+                                        this.showAudioRecorderView = true
+                                        this.showCancelRecordIndicator = false
+                                        this.recordTouchDownY = event.touches[0].screenY
+                                    } else if (event.type === TouchType.Up) {
+                                        this.stopRecordAudio(this.showCancelRecordIndicator)
+                                        this.showAudioRecorderView = false
+                                        this.showCancelRecordIndicator = false
+                                    } else if (event.type === TouchType.Move) {
+                                        let y = event.touches[0].screenY;
+                                        if (this.recordTouchDownY - y > 100) {
+                                            this.showCancelRecordIndicator = true;
+                                        } else {
+                                            this.showCancelRecordIndicator = false;
+                                        }
+                                    } else if (event.type === TouchType.Cancel) {
+                                    }
+                                })
+                        }
+
+                        Image(this.textInputFocused || !this.showEmojiPanel ? $r('app.media.ic_chat_emo') : $r('app.media.ic_chat_keyboard'))
+                            .width(INPUT_ICON_WIDTH)
+                            .height(INPUT_ICON_WIDTH)
+                            .focusable(true)
+                            .defaultFocus(false)
+                            .focusOnTouch(true)
+                            .onClick(() => {
+                                this.showExtPanel = false
+                                this.showEmojiPanel = !this.showEmojiPanel;
+                                if (!this.showEmojiPanel) {
+                                    focusControl.requestFocus('textInput')
+                                    this.setKeyboardAvoidMode(KeyboardAvoidMode.RESIZE)
+                                }
+                                this.textInputFocused = false;
+                                this.showAudioRecorderButton = false
+                            })
+                        if (this.text.trim().length > 0) {
+                            Button('发送')
+                                .type(ButtonType.Normal)
+                                .margin({ left: 10 })
+                                .height(INPUT_ICON_WIDTH)
+                                .borderRadius(4)
+                                .onClick(() => {
+                                    let textMessageContent = new TextMessageContent(this.text);
+                                    if (this.mentions.length > 0) {
+                                        for (const mention of this.mentions) {
+                                            if (this.text.indexOf(mention.text) >= 0) {
+                                                if (mention.target === '@all') {
+                                                    textMessageContent.mentionedType = 2;
+                                                    break
+                                                } else {
+                                                    if (textMessageContent.mentionedTargets.indexOf(mention.target) === -1) {
+                                                        textMessageContent.mentionedTargets.push(mention.target)
+                                                    }
                                                 }
                                             }
                                         }
+                                        this.mentions = []
                                     }
-                                    this.mentions = []
-                                }
 
-                                wfc.sendConversationMessage(this.conversation, textMessageContent, [], null, null, null, null, null);
-                                wfc.setConversationDraft(this.conversation, '')
-                                this.text = '';
+                                    wfc.sendConversationMessage(this.conversation, textMessageContent, [], null, null, null, null, null);
+                                    wfc.setConversationDraft(this.conversation, '')
+                                    this.text = '';
 
-                            })
-                    } else {
-                        Image($r('app.media.ic_chat_add'))
-                            .width(INPUT_ICON_WIDTH)
-                            .height(INPUT_ICON_WIDTH)
-                            .margin({ left: 10 })
-                            .focusable(true)
-                            .focusOnTouch(true)
-                            .onClick(() => {
-                                this.showExtPanel = true
-                                this.showEmojiPanel = false
-                                this.showAudioRecorderButton = false
-                            })
+                                })
+                        } else {
+                            Image($r('app.media.ic_chat_add'))
+                                .width(INPUT_ICON_WIDTH)
+                                .height(INPUT_ICON_WIDTH)
+                                .margin({ left: 10 })
+                                .focusable(true)
+                                .focusOnTouch(true)
+                                .onClick(() => {
+                                    this.showExtPanel = true
+                                    this.showEmojiPanel = false
+                                    this.showAudioRecorderButton = false
+                                })
+                        }
                     }
                 }
                 .padding(10)

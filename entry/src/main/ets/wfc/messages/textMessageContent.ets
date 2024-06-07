@@ -13,7 +13,7 @@ export default class TextMessageContent extends MessageContent {
     content = '';
     quoteInfo?: QuoteInfo;
 
-    constructor(content: string = '', mentionedType = 0, mentionedTargets:string[] = []) {
+    constructor(content: string = '', mentionedType = 0, mentionedTargets: string[] = []) {
         super(MessageContentType.Text, mentionedType, mentionedTargets);
         this.content = content;
     }
@@ -26,11 +26,9 @@ export default class TextMessageContent extends MessageContent {
         let payload = super.encode();
         payload.searchableContent = this.content;
         if (this.quoteInfo) {
-            let obj: Map<string, QuoteInfoPayload> = new Map<string, QuoteInfoPayload>();
-            // {
-            //     "quote": this.quoteInfo.encode()
-            // }
-            obj.set('quote', this.quoteInfo.encode())
+            let obj: Record<string, QuoteInfoPayload> = {
+                "quote": this.quoteInfo.encode()
+            }
             // JSON.parse 和 JSON.stringify 不能处理java long
             let orgStr = JSON.stringify(obj);
             let str = orgStr.replace(/"u":"([0-9]+)"/, "\"u\":$1");

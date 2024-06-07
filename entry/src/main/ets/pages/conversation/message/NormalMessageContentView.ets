@@ -23,8 +23,9 @@ import pasteboard from '@ohos.pasteboard'
 
 @Component
 export default struct NormaMessageContentView {
-    @Prop message?: Message = undefined
+    @Prop message: Message
     @Link enableMultiCheck: boolean
+    @Link quotedMessage: Message
     private audioPlayManager?: AudioPlayManager
     @State readReceipt: ReadReceipt | null = null
     @Prop @Watch('updateMessageReadReceipt') readEntries: Map<string, number> = new Map();
@@ -153,6 +154,14 @@ export default struct NormaMessageContentView {
                 tag: 'multiCheck',
                 action: () => {
                     this.enableMultiCheck = true
+                }
+            },
+            {
+                title: '引用',
+                tag: 'quote',
+                action: () => {
+                    showToast('TODO引用')
+                    this.quotedMessage = this.message;
                 }
             }
         ]

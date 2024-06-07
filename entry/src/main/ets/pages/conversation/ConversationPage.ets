@@ -46,6 +46,7 @@ export default struct ConversationPage {
     @State collapseConversationInputPanelViewTimestamp: number = 0
     @State enableMultiCheck: boolean = false
     @State checkedMessages: Message[] = []
+    @State @Watch('onQuoteMessage') quotedMessage: Message | null = null
     private focusMessageId: number = 0
     private checkValueChangeTriggerByClick = false
     private scroller: Scroller = new Scroller()
@@ -268,6 +269,10 @@ export default struct ConversationPage {
         }
     }
 
+    onQuoteMessage() {
+        this.scroller.scrollEdge(Edge.Bottom)
+    }
+
     onSendMessage = (message: Message) => {
         let conversation = new Conversation(message.conversation.type, message.conversation.target, message.conversation.line)
         if (this.isDisplayMessage(message) && Conversation.equal(conversation, this.conversation!)) {
@@ -479,6 +484,7 @@ export default struct ConversationPage {
                                                             NormalMessageContentView({
                                                                 message: msg,
                                                                 enableMultiCheck: $enableMultiCheck,
+                                                                quotedMessage: $quotedMessage,
                                                                 audioPlayManager: this.audioPlayerManager,
                                                                 enableReceipt: this.enableReceipt,
                                                                 readEntries: this.readEntries,
@@ -572,6 +578,7 @@ export default struct ConversationPage {
                                                             NormalMessageContentView({
                                                                 message: msg,
                                                                 enableMultiCheck: $enableMultiCheck,
+                                                                quotedMessage: $quotedMessage,
                                                                 audioPlayManager: this.audioPlayerManager
                                                             })//.layoutWeight(1)
                                                                 .enabled(!this.enableMultiCheck)
@@ -672,6 +679,7 @@ export default struct ConversationPage {
                         recordCountDown: $recordCountDown,
                         enableMultiCheck: $enableMultiCheck,
                         checkedMessages: $checkedMessages,
+                        quotedMessage: $quotedMessage,
                         collapseConversationInputPanelViewTimestamp: $collapseConversationInputPanelViewTimestamp,
                         messageListScroller: this.scroller
                     })

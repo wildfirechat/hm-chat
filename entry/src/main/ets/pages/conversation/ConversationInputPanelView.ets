@@ -38,6 +38,7 @@ import ChannelInfo from '../../wfc/model/channelInfo'
 import ChannelMenu from '../../wfc/model/channelMenu'
 import ChannelMenuEventMessageContent from '../../wfc/messages/channelMenuEventMessageContent'
 import { navigationDestinations } from '../navigationConfig'
+import QuoteInfo from '../../wfc/model/quoteInfo'
 
 const INPUT_ICON_WIDTH = 30
 
@@ -71,6 +72,7 @@ export default struct ConversationInputPanelView {
     @State enable: boolean = false
     @State muted: boolean = false
     @State channelInfo?: ChannelInfo = undefined
+    @Link quotedMessage: Message | null
     // for audioRecorderView
     @Link showAudioRecorderView: boolean
     @Link showCancelRecordIndicator: boolean
@@ -600,7 +602,7 @@ export default struct ConversationInputPanelView {
                         Row() {
                             ForEach(this.channelInfo?.menus, (menu: ChannelMenu) => {
                                 Text(menu.name)
-                                    .height(INPUT_ICON_WIDTH)// .padding(10)
+                                    .height('100%')// .padding(10)
                                     .layoutWeight(1)
                                     .textAlign(TextAlign.Center)
                                     .stateStyles({
@@ -620,7 +622,7 @@ export default struct ConversationInputPanelView {
                             })
                         }
                         .justifyContent(FlexAlign.SpaceAround)
-                        .height(INPUT_ICON_WIDTH)
+                        .height(40)
                         .layoutWeight(1)
                     } else {
                         Image($r('app.media.ic_chat_voice'))
@@ -633,37 +635,63 @@ export default struct ConversationInputPanelView {
                                 this.showEmojiPanel = false
                             })
                         if (!this.showAudioRecorderButton) {
-                            TextInput({ text: this.text, controller: this.textInputController })
-                                .id('textInput')
-                                .onChange(value => {
-                                    // TODO 优化，mentionview 弹出逻辑
-                                    // FIXME
-                                    if (this.text + "@" === value && this.conversation.type === ConversationType.Group) {
-                                        this.showMentionSheet = true;
-                                    } else {
-                                        this.text = value
+                            Column() {
+                                TextInput({ text: this.text, controller: this.textInputController })
+                                    .id('textInput')
+                                    .onChange(value => {
+                                        // TODO 优化，mentionview 弹出逻辑
+                                        // FIXME
+                                        if (this.text + "@" === value && this.conversation.type === ConversationType.Group) {
+                                            this.showMentionSheet = true;
+                                        } else {
+                                            this.text = value
+                                        }
+                                    })// .caretPosition(this.caretPosition)
+                                    .onFocus(() => {
+                                        this.textInputFocused = true
+                                    })
+                                    .focusable(this.collapseConversationInputPanelViewTimestamp === 0)
+                                    .onBlur(() => {
+                                        this.textInputFocused = false
+                                    })
+                                    .onClick((event) => {
+                                        // this.showExtPanel = false
+                                        // this.showEmojiPanel = false
+                                    })
+                                    .onTextSelectionChange((selectionStart, selectionEnd) => {
+                                        this.selectionStart = selectionStart;
+                                        this.selectionEnd = selectionEnd;
+                                        this.caretPosition = selectionStart;
+                                    })
+                                    .height(40)
+                                    .borderRadius(4)
+                                    .backgroundColor('#FDFDFD')
+
+                                if (this.quotedMessage) {
+                                    Row() {
+                                        Text(this.quotedMessage.messageContent.digest(this.quotedMessage))
+                                            .maxLines(2)
+                                            .layoutWeight(1)
+                                        Image($r('app.media.ic_delete'))
+                                            .width(15)
+                                            .height(15)
+                                            .padding(2)
+                                            .margin({ left: 10 })
+                                            .draggable(false)
+                                            .borderRadius(10)
+                                            .backgroundColor('#B3B3B3')
+                                            .onClick(() => {
+                                                this.quotedMessage = null
+                                            })
                                     }
-                                })// .caretPosition(this.caretPosition)
-                                .onFocus(() => {
-                                    this.textInputFocused = true
-                                })
-                                .focusable(this.collapseConversationInputPanelViewTimestamp === 0)
-                                .onBlur(() => {
-                                    this.textInputFocused = false
-                                })
-                                .onClick((event) => {
-                                    // this.showExtPanel = false
-                                    // this.showEmojiPanel = false
-                                })
-                                .onTextSelectionChange((selectionStart, selectionEnd) => {
-                                    this.selectionStart = selectionStart;
-                                    this.selectionEnd = selectionEnd;
-                                    this.caretPosition = selectionStart;
-                                })
-                                .margin({ left: 10, right: 10 })
-                                .height(40)
-                                .borderRadius(4)
-                                .layoutWeight(1)
+                                    .margin({ top: 10 })
+                                    .padding(8)
+                                    .borderRadius(4)
+                                    .backgroundColor('#EAEAEA')
+                                }
+                            }
+                            .margin({ left: 10, right: 10 })
+                            .layoutWeight(1)
                         } else {
                             Button('按住录音')
                                 .layoutWeight(1)
@@ -742,10 +770,13 @@ export default struct ConversationInputPanelView {
                                         this.mentions = []
                                     }
 
+                                    if (this.quotedMessage) {
+                                        textMessageContent.quoteInfo = QuoteInfo.initWithMessage(this.quotedMessage!)
+                                    }
                                     wfc.sendConversationMessage(this.conversation, textMessageContent, [], null, null, null, null, null);
                                     wfc.setConversationDraft(this.conversation, '')
                                     this.text = '';
-
+                                    this.quotedMessage = null
                                 })
                         } else {
                             Image($r('app.media.ic_chat_add'))
@@ -762,6 +793,7 @@ export default struct ConversationInputPanelView {
                         }
                     }
                 }
+                .alignItems(VerticalAlign.Bottom)
                 .padding(10)
                 .width('100%')
 

@@ -202,21 +202,6 @@ struct MainPage {
                 .onClick(() => {
                     this.showPickContactModal = true
                 })
-                .bindContentCover(this.showPickContactModal, this.pickContactModal(), {
-                    modalTransition: ModalTransition.DEFAULT,
-                    onAppear: () => {
-                    },
-
-                    onDisappear: () => {
-                        this.showPickContactModal = false
-                        let localStorage = LocalStorage.getShared();
-                        let pickUsers = localStorage.get<UserInfo[]>(PickContactModal.PICK_RESULT);
-                        if (pickUsers?.length) {
-                            this.createConversation(pickUsers)
-                            localStorage.delete(PickContactModal.PICK_RESULT)
-                        }
-                    }
-                })
             MenuItem({ startIcon: $r('app.media.faqiqunliao_iconfont'), content: "发起密聊" })
                 .enabled(false)
                 .onClick(() => {
@@ -253,6 +238,21 @@ struct MainPage {
                 .padding(6)
                 .margin({ left: 12 })
                 .bindMenu(this.SubMoreMenus())
+                .bindContentCover(this.showPickContactModal, this.pickContactModal(), {
+                    modalTransition: ModalTransition.DEFAULT,
+                    onAppear: () => {
+                    },
+
+                    onDisappear: () => {
+                        this.showPickContactModal = false
+                        let localStorage = LocalStorage.getShared();
+                        let pickUsers = localStorage.get<UserInfo[]>(PickContactModal.PICK_RESULT);
+                        if (pickUsers?.length) {
+                            this.createConversation(pickUsers)
+                            localStorage.delete(PickContactModal.PICK_RESULT)
+                        }
+                    }
+                })
         }
         .margin({ right: 18 })
         .height('100%')

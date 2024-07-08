@@ -1,5 +1,6 @@
 import AVSessionManager from '@ohos.multimedia.avsession';
 import { AVCastPicker } from '@kit.AVSessionKit';
+import orgServer from '../api/orgServer'
 
 
 @Entry
@@ -23,6 +24,15 @@ struct TestPage {
                 Column() {
                     Text('本页用于 API 功能测试')
                 }
+
+                Button('test')
+                    .onClick(() => {
+                        orgServer.login()
+                            .then(async () => {
+                                let orgs = await orgServer.getRootOrganization();
+                                console.log('xxxxxxx', orgs.length)
+                            })
+                    })
             }
         }
         .title('API 测试页')

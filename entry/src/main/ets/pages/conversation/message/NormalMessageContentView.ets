@@ -59,18 +59,6 @@ export default struct NormaMessageContentView {
                 Text(this.message!.messageContent.digest(this.message))
                     .margin({ top: 4 })
                     .padding(10)
-                    .onClick(() => {
-                        router.pushUrl({
-                            url: 'pages/conversation/forward/ForwardMessagePage',
-                            params: {
-                                messages: [this.message]
-                            }
-                        })
-                            .then(value => {
-                                console.log('xxxxxxxxxxxx th', value)
-                            })
-                            .catch((r: Error) => console.log('xxxxxxxxxxxx', r))
-                    })
             }
             // out
             if (this.message!.direction === 0) {
@@ -230,7 +218,7 @@ export default struct NormaMessageContentView {
 
     updateMessageReadReceipt(): void {
         let message = this.message!
-        console.log('xxxxxxxxx updateMessageReadReceipt', message.direction, this.readEntries, this.readEntries.size)
+        console.log('updateMessageReadReceipt', message.direction, this.readEntries, this.readEntries.size)
         if (!this.enableReceipt || message.direction === 1) {
             return
         }

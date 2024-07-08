@@ -393,286 +393,270 @@ export default struct ConversationPage {
 
     build() {
         NavDestination() {
-            Navigation() {
-                Scroll() {
-                    Stack() {
-                        Refresh({ refreshing: $$this.refreshStatus }) {
-                            Column() {
-                                if (this.hasNoMoreHistoryMessage) {
-                                    Text('没有更多消息')
-                                        .padding(5)
-                                        .fontSize(13)
-                                }
-
-                                Blank()
-                                    .width('100%')
-                                    .layoutWeight(1)
-
-                                List({ scroller: this.scroller }) {
-                                    LazyForEach(this.conversationMessageDataSource,
-                                        (msg: Message, index: number) => {
-                                            ListItem() {
-                                                if (msg.messageContent instanceof NotificationMessageContent) {
-                                                    Row() {
-                                                        SimpleNotificationMessageContentView({ message: msg })
-                                                    }
-                                                    .width('100%')
-                                                    .justifyContent(FlexAlign.Center)
-
-                                                    // out
-                                                } else if (msg.direction === 0) {
-                                                    Column() {
-                                                        if (this.showMessageTimeInfo(index)) {
-                                                            Text(timeFormat(msg.timestamp))
-                                                                .fontSize(12)
-                                                                .fontColor('#b4b4b4')
-                                                                .padding(10)
-                                                        }
-                                                        Row() {
-                                                            if (this.enableMultiCheck) {
-                                                                Row() {
-                                                                    Checkbox()
-                                                                        .select(this.isMessageChecked(msg))
-                                                                        .margin({ left: 10 })
-                                                                        .onChange((value => {
-                                                                            // if (!this.enableMultiCheck) {
-                                                                            //     return
-                                                                            // }
-                                                                            if (this.checkValueChangeTriggerByClick) {
-                                                                                this.checkValueChangeTriggerByClick = false
-                                                                                return
-                                                                            }
-                                                                            this.checkOrUncheckMessage(msg)
-                                                                        }))
-                                                                }
-                                                                .margin({ top: 10 })
-                                                                .height(40)
-                                                                .alignItems(VerticalAlign.Center)
-                                                            }
-                                                            Row() {
-                                                                NormalMessageContentView({
-                                                                    message: msg,
-                                                                    enableMultiCheck: $enableMultiCheck,
-                                                                    quotedMessage: $quotedMessage,
-                                                                    audioPlayManager: this.audioPlayerManager,
-                                                                    enableReceipt: this.enableReceipt,
-                                                                    readEntries: this.readEntries,
-                                                                    groupMembers: this.groupMembers
-                                                                })//.layoutWeight(1)
-                                                                    .margin({ top: 10 })
-                                                                    .enabled(!this.enableMultiCheck)
-                                                            }
-                                                            .justifyContent(FlexAlign.End)
-                                                            .layoutWeight(1)
-                                                            .margin({ left: 70 })
-
-                                                            Image(wfc.getUserInfo(msg.from).portrait)
-                                                                .width(40)
-                                                                .height(40)
-                                                                .borderRadius(4)
-                                                                .margin(10)
-                                                                .enabled(!this.enableMultiCheck)
-                                                                .onClick(() => {
-                                                                    this.showUserInfo(msg.from)
-                                                                })
-                                                        }
-                                                        .width('100%')
-                                                        .justifyContent(FlexAlign.End)
-                                                        .alignItems(VerticalAlign.Top)
-                                                        .backgroundColor(this.focusMessageId && msg.messageId === this.focusMessageId ? this.focusMessageBackgroundColor : undefined)
-                                                        .animation(this.focusMessageId && msg.messageId === this.focusMessageId ? {
-                                                            curve: Curve.Linear,
-                                                            duration: 1000,
-                                                            iterations: 5,
-                                                            playMode: PlayMode.Normal,
-                                                            onFinish: () => {
-                                                                this.focusMessageBackgroundColor = Color.Red
-                                                            }
-                                                        } : undefined)
-                                                        .onClick((event) => {
-                                                            if (!this.enableMultiCheck) {
-                                                                return
-                                                            }
-                                                            this.checkValueChangeTriggerByClick = true
-                                                            this.checkOrUncheckMessage(msg)
-                                                        })
-                                                    }
-                                                    .width('100%')
-                                                    .alignItems(HorizontalAlign.Center)
-
-                                                    // in
-                                                } else {
-                                                    Column() {
-                                                        if (this.showMessageTimeInfo(index)) {
-                                                            Text(timeFormat(msg.timestamp))
-                                                                .fontSize(12)
-                                                                .fontColor('#b4b4b4')
-                                                                .padding(10)
-                                                        }
-                                                        Row() {
-                                                            if (this.enableMultiCheck) {
-                                                                Row() {
-                                                                    Checkbox()
-                                                                        .select(this.isMessageChecked(msg))
-                                                                        .margin({ left: 10 })
-                                                                        .onChange((value => {
-                                                                            if (this.checkValueChangeTriggerByClick) {
-                                                                                this.checkValueChangeTriggerByClick = false
-                                                                                return
-                                                                            }
-                                                                            this.checkOrUncheckMessage(msg)
-                                                                        }))
-                                                                }
-                                                                .margin({ top: 10 })
-                                                                .height(40)
-                                                                .alignItems(VerticalAlign.Center)
-
-                                                                // .alignSelf(ItemAlign.Center)
-                                                            }
-                                                            Image(wfc.getUserInfo(msg.from).portrait)
-                                                                .width(40)
-                                                                .height(40)
-                                                                .margin(10)
-                                                                .borderRadius(4)
-                                                                .enabled(!this.enableMultiCheck)
-                                                                .onClick(() => {
-                                                                    this.showUserInfo(msg.from)
-                                                                })
-                                                            Column() {
-                                                                if (this.showGroupMemberNickName) {
-                                                                    Text(wfc.getGroupMemberDisplayName(this.conversation!.target, msg.from))
-                                                                        .fontSize(12)
-                                                                        .padding({ bottom: 2 })
-                                                                }
-                                                                NormalMessageContentView({
-                                                                    message: msg,
-                                                                    enableMultiCheck: $enableMultiCheck,
-                                                                    quotedMessage: $quotedMessage,
-                                                                    audioPlayManager: this.audioPlayerManager
-                                                                })//.layoutWeight(1)
-                                                                    .enabled(!this.enableMultiCheck)
-                                                            }
-                                                            .justifyContent(FlexAlign.Start)
-                                                            .alignItems(HorizontalAlign.Start)
-                                                            .layoutWeight(1)
-                                                            .margin({ right: 70, top: 10 })
-                                                        }
-                                                        .width('100%')
-                                                        .justifyContent(FlexAlign.Start)
-                                                        .alignItems(VerticalAlign.Top)
-                                                        .backgroundColor(this.focusMessageId && msg.messageId === this.focusMessageId ? this.focusMessageBackgroundColor : undefined)
-                                                        .animation(this.focusMessageId && msg.messageId === this.focusMessageId ? {
-                                                            curve: Curve.Linear,
-                                                            duration: 1000,
-                                                            iterations: 5,
-                                                            playMode: PlayMode.Normal,
-                                                            onFinish: () => {
-                                                                this.focusMessageBackgroundColor = Color.Red
-                                                            }
-                                                        } : undefined)
-                                                        .onClick((event) => {
-                                                            if (!this.enableMultiCheck) {
-                                                                return
-                                                            }
-                                                            this.checkValueChangeTriggerByClick = true
-                                                            this.checkOrUncheckMessage(msg)
-                                                        })
-                                                    }
-                                                    .width('100%')
-                                                    .alignItems(HorizontalAlign.Center)
-                                                }
-                                            }
-                                        },
-                                        (msg: Message) => this.messageItemKey(msg))
-
-                                }
-                                .onScrollIndex((start, end) => {
-                                    this.currentMessageIndex = start;
-                                    if (!this.unreadStatusCleared && end == this.conversationMessageDataSource.totalCount() - 1) {
-                                        this.unreadStatusCleared = true
-                                        // wfc.clearUnreadStatusBeforeMessage(this.conversation, )
-                                        wfc.clearConversationUnreadStatus(this.conversation!);
-                                    }
-                                    if (this.focusMessageId && end === this.conversationMessageDataSource.totalCount() - 1) {
-                                        wfc.getMessagesV2(this.conversation!, this.conversationMessageDataSource.getData(this.conversationMessageDataSource.totalCount() - 1)
-                                            .messageId, false, 20, '', (messages) => {
-                                            if (messages.length > 0) {
-                                                this.conversationMessageDataSource.appendMessages(messages)
-                                            } else {
-                                                this.focusMessageId = 0
-                                            }
-                                        }, err => {
-                                            console.error('getMessageV2 error', err)
-                                        })
-                                    }
-                                })
-                                .listDirection(Axis.Vertical)
-                                .height('100%')
-                                .width('100%')
+            Scroll() {
+                Stack() {
+                    Refresh({ refreshing: $$this.refreshStatus }) {
+                        Column() {
+                            if (this.hasNoMoreHistoryMessage) {
+                                Text('没有更多消息')
+                                    .padding(5)
+                                    .fontSize(13)
                             }
-                            .justifyContent(FlexAlign.End)
+
+                            Blank()
+                                .width('100%')
+                                .layoutWeight(1)
+
+                            List({ scroller: this.scroller }) {
+                                LazyForEach(this.conversationMessageDataSource,
+                                    (msg: Message, index: number) => {
+                                        ListItem() {
+                                            if (msg.messageContent instanceof NotificationMessageContent) {
+                                                Row() {
+                                                    SimpleNotificationMessageContentView({ message: msg })
+                                                }
+                                                .width('100%')
+                                                .justifyContent(FlexAlign.Center)
+
+                                                // out
+                                            } else if (msg.direction === 0) {
+                                                Column() {
+                                                    if (this.showMessageTimeInfo(index)) {
+                                                        Text(timeFormat(msg.timestamp))
+                                                            .fontSize(12)
+                                                            .fontColor('#b4b4b4')
+                                                            .padding(10)
+                                                    }
+                                                    Row() {
+                                                        if (this.enableMultiCheck) {
+                                                            Row() {
+                                                                Checkbox()
+                                                                    .select(this.isMessageChecked(msg))
+                                                                    .margin({ left: 10 })
+                                                                    .onChange((value => {
+                                                                        // if (!this.enableMultiCheck) {
+                                                                        //     return
+                                                                        // }
+                                                                        if (this.checkValueChangeTriggerByClick) {
+                                                                            this.checkValueChangeTriggerByClick = false
+                                                                            return
+                                                                        }
+                                                                        this.checkOrUncheckMessage(msg)
+                                                                    }))
+                                                            }
+                                                            .margin({ top: 10 })
+                                                            .height(40)
+                                                            .alignItems(VerticalAlign.Center)
+                                                        }
+                                                        Row() {
+                                                            NormalMessageContentView({
+                                                                message: msg,
+                                                                enableMultiCheck: $enableMultiCheck,
+                                                                quotedMessage: $quotedMessage,
+                                                                audioPlayManager: this.audioPlayerManager,
+                                                                enableReceipt: this.enableReceipt,
+                                                                readEntries: this.readEntries,
+                                                                groupMembers: this.groupMembers
+                                                            })//.layoutWeight(1)
+                                                                .margin({ top: 10 })
+                                                                .enabled(!this.enableMultiCheck)
+                                                        }
+                                                        .justifyContent(FlexAlign.End)
+                                                        .layoutWeight(1)
+                                                        .margin({ left: 70 })
+
+                                                        Image(wfc.getUserInfo(msg.from).portrait)
+                                                            .width(40)
+                                                            .height(40)
+                                                            .borderRadius(4)
+                                                            .margin(10)
+                                                            .enabled(!this.enableMultiCheck)
+                                                            .onClick(() => {
+                                                                this.showUserInfo(msg.from)
+                                                            })
+                                                    }
+                                                    .width('100%')
+                                                    .justifyContent(FlexAlign.End)
+                                                    .alignItems(VerticalAlign.Top)
+                                                    .backgroundColor(this.focusMessageId && msg.messageId === this.focusMessageId ? this.focusMessageBackgroundColor : undefined)
+                                                    .animation(this.focusMessageId && msg.messageId === this.focusMessageId ? {
+                                                        curve: Curve.Linear,
+                                                        duration: 1000,
+                                                        iterations: 5,
+                                                        playMode: PlayMode.Normal,
+                                                        onFinish: () => {
+                                                            this.focusMessageBackgroundColor = Color.Red
+                                                        }
+                                                    } : undefined)
+                                                    .onClick((event) => {
+                                                        if (!this.enableMultiCheck) {
+                                                            return
+                                                        }
+                                                        this.checkValueChangeTriggerByClick = true
+                                                        this.checkOrUncheckMessage(msg)
+                                                    })
+                                                }
+                                                .width('100%')
+                                                .alignItems(HorizontalAlign.Center)
+
+                                                // in
+                                            } else {
+                                                Column() {
+                                                    if (this.showMessageTimeInfo(index)) {
+                                                        Text(timeFormat(msg.timestamp))
+                                                            .fontSize(12)
+                                                            .fontColor('#b4b4b4')
+                                                            .padding(10)
+                                                    }
+                                                    Row() {
+                                                        if (this.enableMultiCheck) {
+                                                            Row() {
+                                                                Checkbox()
+                                                                    .select(this.isMessageChecked(msg))
+                                                                    .margin({ left: 10 })
+                                                                    .onChange((value => {
+                                                                        if (this.checkValueChangeTriggerByClick) {
+                                                                            this.checkValueChangeTriggerByClick = false
+                                                                            return
+                                                                        }
+                                                                        this.checkOrUncheckMessage(msg)
+                                                                    }))
+                                                            }
+                                                            .margin({ top: 10 })
+                                                            .height(40)
+                                                            .alignItems(VerticalAlign.Center)
+
+                                                            // .alignSelf(ItemAlign.Center)
+                                                        }
+                                                        Image(wfc.getUserInfo(msg.from).portrait)
+                                                            .width(40)
+                                                            .height(40)
+                                                            .margin(10)
+                                                            .borderRadius(4)
+                                                            .enabled(!this.enableMultiCheck)
+                                                            .onClick(() => {
+                                                                this.showUserInfo(msg.from)
+                                                            })
+                                                        Column() {
+                                                            if (this.showGroupMemberNickName) {
+                                                                Text(wfc.getGroupMemberDisplayName(this.conversation!.target, msg.from))
+                                                                    .fontSize(12)
+                                                                    .padding({ bottom: 2 })
+                                                            }
+                                                            NormalMessageContentView({
+                                                                message: msg,
+                                                                enableMultiCheck: $enableMultiCheck,
+                                                                quotedMessage: $quotedMessage,
+                                                                audioPlayManager: this.audioPlayerManager
+                                                            })//.layoutWeight(1)
+                                                                .enabled(!this.enableMultiCheck)
+                                                        }
+                                                        .justifyContent(FlexAlign.Start)
+                                                        .alignItems(HorizontalAlign.Start)
+                                                        .layoutWeight(1)
+                                                        .margin({ right: 70, top: 10 })
+                                                    }
+                                                    .width('100%')
+                                                    .justifyContent(FlexAlign.Start)
+                                                    .alignItems(VerticalAlign.Top)
+                                                    .backgroundColor(this.focusMessageId && msg.messageId === this.focusMessageId ? this.focusMessageBackgroundColor : undefined)
+                                                    .animation(this.focusMessageId && msg.messageId === this.focusMessageId ? {
+                                                        curve: Curve.Linear,
+                                                        duration: 1000,
+                                                        iterations: 5,
+                                                        playMode: PlayMode.Normal,
+                                                        onFinish: () => {
+                                                            this.focusMessageBackgroundColor = Color.Red
+                                                        }
+                                                    } : undefined)
+                                                    .onClick((event) => {
+                                                        if (!this.enableMultiCheck) {
+                                                            return
+                                                        }
+                                                        this.checkValueChangeTriggerByClick = true
+                                                        this.checkOrUncheckMessage(msg)
+                                                    })
+                                                }
+                                                .width('100%')
+                                                .alignItems(HorizontalAlign.Center)
+                                            }
+                                        }
+                                    },
+                                    (msg: Message) => this.messageItemKey(msg))
+
+                            }
+                            .onScrollIndex((start, end) => {
+                                this.currentMessageIndex = start;
+                                if (!this.unreadStatusCleared && end == this.conversationMessageDataSource.totalCount() - 1) {
+                                    this.unreadStatusCleared = true
+                                    // wfc.clearUnreadStatusBeforeMessage(this.conversation, )
+                                    wfc.clearConversationUnreadStatus(this.conversation!);
+                                }
+                                if (this.focusMessageId && end === this.conversationMessageDataSource.totalCount() - 1) {
+                                    wfc.getMessagesV2(this.conversation!, this.conversationMessageDataSource.getData(this.conversationMessageDataSource.totalCount() - 1)
+                                        .messageId, false, 20, '', (messages) => {
+                                        if (messages.length > 0) {
+                                            this.conversationMessageDataSource.appendMessages(messages)
+                                        } else {
+                                            this.focusMessageId = 0
+                                        }
+                                    }, err => {
+                                        console.error('getMessageV2 error', err)
+                                    })
+                                }
+                            })
+                            .listDirection(Axis.Vertical)
+                            .height('100%')
+                            .width('100%')
+                        }
+                        .justifyContent(FlexAlign.End)
+                        .width('100%')
+                        .height('100%')
+                    }
+                    .onRefreshing(() => {
+                        this.loadHistoryMessage()
+                    })
+                    .refreshOffset(64)
+                    .pullToRefresh(true)
+
+                    if (this.showAudioRecorderView) {
+                        AudioRecorderView({
+                            showAudioRecorderView: $showAudioRecorderView,
+                            showCancelRecordIndicator: $showCancelRecordIndicator,
+                            recordCountDown: $recordCountDown
+                        })
                             .width('100%')
                             .height('100%')
-                        }
-                        .onRefreshing(() => {
-                            this.loadHistoryMessage()
-                        })
-                        .refreshOffset(64)
-                        .pullToRefresh(true)
-
-                        if (this.showAudioRecorderView) {
-                            AudioRecorderView({
-                                showAudioRecorderView: $showAudioRecorderView,
-                                showCancelRecordIndicator: $showCancelRecordIndicator,
-                                recordCountDown: $recordCountDown
-                            })
-                                .width('100%')
-                                .height('100%')
-                                .backgroundColor('#A0E5E5E5')
-                        }
+                            .backgroundColor('#A0E5E5E5')
                     }
-                    .height('100%')
-                    .width('100%')
-                    .alignContent(Alignment.Center)
                 }
-                .scrollBar(BarState.Off)
-                .edgeEffect(EdgeEffect.Spring)
+                .height('100%')
                 .width('100%')
-                .layoutWeight(1)
-                .backgroundColor('#F3F3F3')
-                .onTouch((event?: TouchEvent) => {
-                    this.collapseConversationInputPanelViewTimestamp = new Date().getTime()
-                })
-
-                if (this.conversation) {
-                    ConversationInputPanelView({
-                        conversation: this.conversation,
-                        conversationInfo: this.conversationInfo,
-                        showAudioRecorderView: $showAudioRecorderView,
-                        showCancelRecordIndicator: $showCancelRecordIndicator,
-                        recordCountDown: $recordCountDown,
-                        enableMultiCheck: $enableMultiCheck,
-                        checkedMessages: $checkedMessages,
-                        quotedMessage: $quotedMessage,
-                        collapseConversationInputPanelViewTimestamp: $collapseConversationInputPanelViewTimestamp,
-                        messageListScroller: this.scroller
-                    })
-                }
+                .alignContent(Alignment.Center)
             }
-            .title(this.title)
-            .titleMode(NavigationTitleMode.Mini)
-            .hideBackButton(false)
-            .menus([
-                {
-                    value: '',
-                    icon: 'resources/base/media/ic_public_more.svg',
-                    action: () => {
-                        this.mainNavPathStack.pushPathByName(this.conversationInfoPageName(), {
-                            'conversationInfo': this.conversationInfo
-                        } as Record<string, Object>, true)
-                    }
-                }
-            ])
+            .scrollBar(BarState.Off)
+            .edgeEffect(EdgeEffect.Spring)
+            .width('100%')
+            .layoutWeight(1)
+            .backgroundColor('#F3F3F3')
+            .onTouch((event?: TouchEvent) => {
+                this.collapseConversationInputPanelViewTimestamp = new Date().getTime()
+            })
+
+            if (this.conversation) {
+                ConversationInputPanelView({
+                    conversation: this.conversation,
+                    conversationInfo: this.conversationInfo,
+                    showAudioRecorderView: $showAudioRecorderView,
+                    showCancelRecordIndicator: $showCancelRecordIndicator,
+                    recordCountDown: $recordCountDown,
+                    enableMultiCheck: $enableMultiCheck,
+                    checkedMessages: $checkedMessages,
+                    quotedMessage: $quotedMessage,
+                    collapseConversationInputPanelViewTimestamp: $collapseConversationInputPanelViewTimestamp,
+                    messageListScroller: this.scroller
+                })
+            }
 
         }
         .onReady(ctx => {
@@ -685,7 +669,18 @@ export default struct ConversationPage {
             this.onPageShow();
         })
         .mode(NavDestinationMode.STANDARD)
-        .hideTitleBar(true)
+        .title(this.title)
+        .menus([
+            {
+                value: '',
+                icon: 'resources/base/media/ic_public_more.svg',
+                action: () => {
+                    this.mainNavPathStack.pushPathByName(this.conversationInfoPageName(), {
+                        'conversationInfo': this.conversationInfo
+                    } as Record<string, Object>, true)
+                }
+            }
+        ])
         .height('100%')
         .width('100%')
     }

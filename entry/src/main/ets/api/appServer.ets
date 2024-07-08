@@ -6,7 +6,6 @@ import Config from '../config';
 import { GlobalContext } from '../globalContext';
 import common from '@ohos.app.ability.common';
 import url from '@ohos.url';
-import { ifaa } from '@kit.OnlineAuthenticationKit';
 import GroupAnnouncement from './model/groupAnnouncement';
 import AppServerError from './appServerError';
 

@@ -3,20 +3,6 @@ import http from '@ohos.net.http';
 export function post(url: string, data: string | Object, header?: Object, expectDataType?: http.HttpDataType): Promise<Object> {
     return new Promise((resolve, reject) => {
         let httpRequest = http.createHttp();
-        // 用于订阅HTTP响应头，此接口会比request请求先返回。可以根据业务需要订阅此消息
-        // 从API 8开始，使用on('headersReceive', Callback)替代on('headerReceive', AsyncCallback)。 8+
-        // httpRequest.on('headersReceive', (header) => {
-        //     console.info('header: ' + JSON.stringify(header));
-        // if (header.toString() === 'authToken') {
-        //     this.authToken = header.toString();
-        //         let context = GlobalContext.getContext().getObject<common.ApplicationContext>('applicationContext');
-        //         let preference = data_preferences.getPreferencesSync(context, {
-        //             name: 'wfcstore'
-        //         })
-        //         let _url = url.URL.parseURL(this.baseUrl)
-        //         preference.put(`authToken-${_url.host}-${_url.port}`, this.authToken)
-        // }
-        // });
         console.log('request', url, data)
         httpRequest.request(// 填写HTTP请求的URL地址，可以带参数也可以不带参数。URL地址需要开发者自定义。请求的参数可以在extraData中指定
             url,
@@ -67,16 +53,6 @@ export function get(url: string, data?: string | Object, header?: Object, expect
         // 从API 8开始，使用on('headersReceive', Callback)替代on('headerReceive', AsyncCallback)。 8+
         // httpRequest.on('headersReceive', (header) => {
         //     console.info('header: ' + JSON.stringify(header));
-        // if (header.toString() === 'authToken') {
-        //     this.authToken = header.toString();
-        //         let context = GlobalContext.getContext().getObject<common.ApplicationContext>('applicationContext');
-        //         let preference = data_preferences.getPreferencesSync(context, {
-        //             name: 'wfcstore'
-        //         })
-        //         let _url = url.URL.parseURL(this.baseUrl)
-        //         preference.put(`authToken-${_url.host}-${_url.port}`, this.authToken)
-        // }
-        // });
         console.log('request', url, data)
         httpRequest.request(// 填写HTTP请求的URL地址，可以带参数也可以不带参数。URL地址需要开发者自定义。请求的参数可以在extraData中指定
             url,

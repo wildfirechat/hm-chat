@@ -1,9 +1,10 @@
-import { showToast } from '../../../common/utils/Toast'
 import CompositeMessageContent from '../../../wfc/messages/compositeMessageContent'
 import Message from '../../../wfc/messages/message'
+import { navigationDestinations } from '../../navigationConfig'
 
 @Component
 export default struct CompositeMessageContentView {
+    @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
     @Link message: Message
     private compositeMessageContent?: CompositeMessageContent;
 
@@ -34,7 +35,9 @@ export default struct CompositeMessageContentView {
         .borderRadius(4)
         .backgroundColor(Color.White)
         .onClick(() => {
-            showToast('TODO: 查看组合消息')
+            this.mainNavPathStack.pushPathByName(navigationDestinations.PreviewCompositeMessagePage, {
+                'message': this.message
+            } as Record<string, Object>)
         })
     }
 }

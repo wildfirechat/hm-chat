@@ -137,7 +137,6 @@ class AppServer {
                     // 当该请求使用完毕时，调用destroy方法主动销毁。
                     httpRequest.destroy();
                     console.error('err', err)
-                    reject(err)
                     reject(new AppServerError(-1, err.message))
                 }
             }

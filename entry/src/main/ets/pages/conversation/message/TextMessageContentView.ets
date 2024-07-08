@@ -4,6 +4,7 @@ import TextMessageContent from '../../../wfc/messages/textMessageContent'
 @Component
 export default struct TextMessageContentView {
     @Link message: Message
+    @Prop textPadding: Length | Padding = 10
 
     quoteInfoDesc() {
         let quoteInfo = (this.message.messageContent as TextMessageContent).quoteInfo
@@ -14,13 +15,13 @@ export default struct TextMessageContentView {
         if ((this.message.messageContent as TextMessageContent).quoteInfo) {
             Column() {
                 Text(this.message.messageContent.digest(this.message))
-                    .padding(10)
+                    .padding(this.textPadding)
                     .constraintSize({ minHeight: 40 })
                     .backgroundColor(Color.White)
                     .borderRadius(4)
 
                 Text(this.quoteInfoDesc())
-                    .padding(10)
+                    .padding(this.textPadding)
                     .margin({ top: 8 })
                     .constraintSize({ minHeight: 40 })
                     .maxLines(2)
@@ -33,7 +34,7 @@ export default struct TextMessageContentView {
 
         } else {
             Text(this.message.messageContent.digest(this.message))
-                .padding(10)
+                .padding(this.textPadding)
                 .constraintSize({ minHeight: 40 })
                 .backgroundColor(Color.White)
                 .borderRadius(4)

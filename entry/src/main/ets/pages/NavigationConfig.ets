@@ -5,6 +5,7 @@ import ChannelConversationInfoPage from './conversation/ChannelConversationInfoP
 import ConversationFileRecordPage from './conversation/ConversationFileRecordPage'
 import ConversationPage from './conversation/ConversationPage'
 import GroupConversationInfoPage from './conversation/GroupConversationInfoPage'
+import PreviewCompositeMessagePage from './conversation/PreviewCompositeMessagePage'
 import SingleConversationInfoPage from './conversation/SingleConversationInfoPage'
 import FavGroupListPage from './group/FavGroupListPage'
 import GroupManagePage from './group/GroupManagePage'
@@ -59,6 +60,7 @@ export class navigationDestinations {
     static ConversationFileRecordPage = 'conversationFileRecordPage'
     static NotificationPage = 'messageAndNotificationPage'
     static SettingPage = 'settingPage'
+    static PreviewCompositeMessagePage = 'previewCompositeMessagePage'
 }
 
 @Builder
@@ -123,5 +125,7 @@ export function PagesMap(name: string) {
         MessageAndNotificationPage()
     } else if (name === navigationDestinations.SettingPage) {
         SettingPage()
+    } else if (name === navigationDestinations.PreviewCompositeMessagePage) {
+        PreviewCompositeMessagePage()
     }
 }

@@ -195,7 +195,7 @@ export default class CompositeMessageContent extends MediaMessageContent {
             msg.to = o.tos as string;
             msg.direction = o.direction as number;
             msg.status = o.status as number;
-            msg.timestamp = o.serverTime as number
+            msg.timestamp = Long.fromValue(o.serverTime as number).toNumber();
             this.messages.push(msg);
         });
         console.log('cp ms', this.messages)

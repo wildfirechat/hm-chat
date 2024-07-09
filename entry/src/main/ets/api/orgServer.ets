@@ -30,20 +30,6 @@ class OrgServer {
         this.authToken = preference.getSync(`authToken-${_url.host}-${_url.port}`, '') as string
     }
 
-    requestAuthCode(mobile: string) {
-        return this._post('/send_code', { 'mobile': mobile } as Record<string, string>)
-    }
-
-    loginWithAuthCode(phone: string, authCode: string) {
-        let obj = {
-            'mobile': phone,
-            'code': authCode,
-            'platform': Config.getWFCPlatform(),
-            'clientId': wfc.getClientId(),
-        } as Record<string, Object>
-        return this._post('/login', obj)
-    }
-
     login(): Promise<void> {
         return new Promise((resolve, reject) => {
             wfc.getAuthCode('admin', 2, '', (code: string) => {
@@ -113,16 +99,16 @@ class OrgServer {
         return result as Employee[]
     }
 
-    async getOrganizationPath(organizationId: number): Promise<Organization[]> {
+    async getOrganizationPath(orgId: number): Promise<Organization[]> {
         let pathList: Organization[] = [];
-        let org = await this._getOrganizationSync(organizationId);
+        let org = await this._getOrganizationSync(orgId);
         if (org) {
             pathList.push(org)
             if (org.parentId) {
                 pathList.push(...await this.getOrganizationPath(org.parentId));
             }
         }
-        return pathList;
+        return pathList.reverse();
     }
 
     async _getOrganizationSync(orgId: number): Promise<Organization | null> {

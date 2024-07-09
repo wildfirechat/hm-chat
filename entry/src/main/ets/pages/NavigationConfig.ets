@@ -22,6 +22,7 @@ import FileRecordPage from './me/FileRecordPage'
 import MessageAndNotificationPage from './me/MessageAndNotificaitonPage'
 import SettingPage from './me/SettingPage'
 import WebViewPage from './misc/WebViewPage'
+import OrganizationTreePage from './organization/OrganizationTreePage'
 import PickContactPage from './picker/PickContactPage'
 import SearchConversationMessagePage from './search/SearchConversationMessagePage'
 import SearchPortalPage from './search/SearchPortalPage'
@@ -61,6 +62,7 @@ export class navigationDestinations {
     static NotificationPage = 'messageAndNotificationPage'
     static SettingPage = 'settingPage'
     static PreviewCompositeMessagePage = 'previewCompositeMessagePage'
+    static OrganizationTreePage = 'organizationTreePage'
 }
 
 @Builder
@@ -127,5 +129,7 @@ export function PagesMap(name: string) {
         SettingPage()
     } else if (name === navigationDestinations.PreviewCompositeMessagePage) {
         PreviewCompositeMessagePage()
+    } else if (name === navigationDestinations.OrganizationTreePage) {
+        OrganizationTreePage()
     }
 }

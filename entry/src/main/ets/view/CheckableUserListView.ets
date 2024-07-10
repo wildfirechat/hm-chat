@@ -3,6 +3,12 @@ import UserInfo from '../wfc/model/userInfo'
 import { UIUserInfo } from '../common/Types'
 import BasicDataSource from '../common/BasicDataSource'
 import { groupUserInfos } from '../helper/asyncTaskHelper'
+import { showToast } from '../common/utils/Toast'
+import Organization from '../api/model/organization'
+import orgServer from '../api/orgServer'
+import { navigationDestinations } from '../pages/navigationConfig'
+import { router } from '@kit.ArkUI'
+import PickOrganizationMemberModal from '../pages/organization/PickOrganizationMemberModal'
 
 @Component
 export default struct CheckableUserListView {
@@ -10,12 +16,17 @@ export default struct CheckableUserListView {
     @State filteredUserInfos: UserInfo[] = []
     @State searchInputViewMaxWidth: string = '100%'
     @State userInfoDataSource?: UserInfoDataSource = undefined
-    private userInfos: UserInfo[] = []
-    private showCategory: boolean = false
-    private uncheckableUserIds: string[] = []
-    private initialCheckedUserIds: string[] = []
-    private showSearchView: boolean = false
+    userInfos: UserInfo[] = []
+    showCategory: boolean = false
+    uncheckableUserIds: string[] = []
+    initialCheckedUserIds: string[] = []
+    showSearchView: boolean = false
+    showOrganization: boolean = false
+    showFavGroup: boolean = false
+    @State organizations?: Organization[] = []
     private checkedUserListScroller: Scroller = new Scroller()
+    // @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
+    @State showPickOrganizationModal: boolean = false
 
     aboutToAppear() {
         this.filteredUserInfos = this.userInfos
@@ -23,6 +34,13 @@ export default struct CheckableUserListView {
             this.userInfoDataSource = new UserInfoDataSource();
             this.userInfoDataSource.setUserInfos(userInfos)
         })
+
+        if (this.showOrganization) {
+            orgServer.getRootOrganization()
+                .then(orgs => {
+                    this.organizations = orgs;
+                })
+        }
     }
 
     onCheckUser = (info: UserInfo, checked?: boolean) => {
@@ -77,6 +95,15 @@ export default struct CheckableUserListView {
         return false
     }
 
+    @Builder
+    pickOrganizationModal(org: Organization) {
+        PickOrganizationMemberModal({ showPickOrganizationModal: $showPickOrganizationModal, curOrganization: org })
+            .height('100%')
+            .width('100%')
+            .margin({ top: px2vp(AppStorage.get<number>('SafeAreaTopHeight')) })
+            .backgroundColor(Color.White)
+    }
+
     build() {
         Column() {
             if (this.showSearchView) {
@@ -114,6 +141,86 @@ export default struct CheckableUserListView {
             }
             if (this.userInfoDataSource) {
                 List() {
+                    ListItemGroup() {
+                        if (this.organizations && this.organizations.length > 0) {
+                            ForEach(this.organizations, (org: Organization, index: number) => {
+                                ListItem() {
+                                    Row() {
+                                        Image(org.portraitUrl)
+                                            .alt($r('app.media.ic_organization'))
+                                            .width(40)
+                                            .height(40)
+                                            .borderRadius(4)
+                                        Text(org.name)
+                                            .maxLines(1)
+                                            .padding({ left: 10 })
+                                    }
+                                    .height(60)
+                                    .width('100%')
+                                    .padding({ left: 10, right: 10 })
+                                    .stateStyles({
+                                        pressed: {
+                                            .backgroundColor('#E5E5E5')
+                                        },
+                                        normal: {
+                                            .backgroundColor(Color.White)
+                                        }
+                                    })
+                                    .onClick(() => {
+                                        this.showPickOrganizationModal = true
+                                        // this.mainNavPathStack.pushPathByName(navigationDestinations.PickOrganizationMemberPage, {
+                                        //     'organization': org
+                                        // } as Record<string, Object>)
+                                        // router.pushUrl({
+                                        //     url: 'pages/organization/PickOrganizationMemberPage',
+                                        //     params: {
+                                        //         organization: org
+                                        //     }
+                                        // }, router.RouterMode.Standard)
+                                    })
+                                }
+                                .bindContentCover(this.showPickOrganizationModal,
+                                    this.pickOrganizationModal(org),
+                                    {
+                                        // transition: TransitionEffect.SLIDE,
+                                        modalTransition: ModalTransition.NONE,
+                                        onDisappear: () => {
+                                            this.showPickOrganizationModal = false;
+                                        }
+                                    })
+                            }, (org: Organization, index: number) => org.id + '')
+                        }
+
+                        if (this.showFavGroup) {
+                            ListItem() {
+                                Row() {
+                                    Image($r('app.media.ic_group_chat'))
+                                        .width(40)
+                                        .height(40)
+                                        .borderRadius(4)
+                                    Text('群聊(保存到通讯录的群组)')
+                                        .maxLines(1)
+                                        .padding({ left: 10 })
+                                }
+                                .height(60)
+                                .width('100%')
+                                .padding({ left: 10, right: 10 })
+                                .stateStyles({
+                                    pressed: {
+                                        .backgroundColor('#E5E5E5')
+                                    },
+                                    normal: {
+                                        .backgroundColor(Color.White)
+                                    }
+                                })
+                                .onClick(() => {
+                                    showToast('todo favGroup')
+                                })
+                            }
+                        }
+                    }
+                    .divider({ strokeWidth: 1, startMargin: 10 })
+
                     LazyForEach(this.userInfoDataSource, (info: UIUserInfo) => {
                         ListItem() {
                             CheckableUserItemView({

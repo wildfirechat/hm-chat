@@ -2,13 +2,11 @@ import Employee from '../../api/model/employee';
 import Organization from '../../api/model/organization';
 import OrganizationEx from '../../api/model/organizationEx';
 import orgServer from '../../api/orgServer';
-import { showToast } from '../../common/utils/Toast';
-import { navigationDestinations } from '../navigationConfig';
+import { router } from '@kit.ArkUI';
 
 @Entry
 @Component
-export default struct OrganizationTreePage {
-    @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
+export default struct PickOrganizationMemberPage {
     @State title: string = '组织结构'
     @State curOrganization?: Organization = undefined
     @State organizationEx?: OrganizationEx = undefined
@@ -16,20 +14,26 @@ export default struct OrganizationTreePage {
     @State employees?: Employee[] = []
     @State orgPath: Organization[] = [];
     private scroller: Scroller = new Scroller()
+    @State checkedEmployees: Employee[] = []
+    @State checkedOrganizations: Organization[] = []
+    public static PICK_RESULT = 'pickOrganizationMemberResult';
+    @Link showPickOrganizationModal: boolean
 
     aboutToAppear() {
-        let params = this.mainNavPathStack.getParamByIndex(this.mainNavPathStack.size() - 1) as Record<string, Object>;
-        this.curOrganization = params['organization'] as Organization
-        this.title = this.curOrganization.name;
-        if (this.curOrganization.parentId) {
-            this.loadOrganizationPath(this.curOrganization.id)
+        // let params = this.mainNavPathStack.getParamByIndex(this.mainNavPathStack.size() - 1) as Record<string, Object>;
+        // let params = router.getParams() as Record<string, Object>
+        // this.curOrganization = params['organization'] as Organization
+        let org = this.curOrganization!
+        this.title = org.name;
+        if (org.parentId) {
+            this.loadOrganizationPath(org.id)
         } else {
-            this.orgPath = [this.curOrganization]
+            this.orgPath = [org]
             setTimeout(() => {
                 this.scroller.scrollEdge(Edge.End)
             })
         }
-        this.loadOrganizationMembers(this.curOrganization.id)
+        this.loadOrganizationMembers(org.id)
     }
 
     async loadOrganizationPath(orgId: number) {
@@ -57,8 +61,23 @@ export default struct OrganizationTreePage {
         this.loadOrganizationMembers(org.id)
     }
 
+    isOrganizationChecked(org: Organization) {
+        return this.checkedOrganizations.findIndex(checkedOrg => org.id === checkedOrg.id) >= 0
+    }
+
+    isEmployeeChecked(employee: Employee) {
+        let index = this.checkedEmployees.findIndex(e => e.employeeId === employee.employeeId)
+        if (index >= 0) {
+            return true;
+        } else {
+            let orgId = employee.organizationId;
+            index = this.checkedOrganizations.findIndex(org => orgId === org.id);
+            return index >= 0
+        }
+    }
+
     build() {
-        NavDestination() {
+        Navigation() {
             Column() {
                 Scroll(this.scroller) {
                     Row() {
@@ -90,6 +109,17 @@ export default struct OrganizationTreePage {
                         ForEach(this.subOrganizations, (org: Organization, index: number) => {
                             ListItem() {
                                 Row() {
+                                    Checkbox()
+                                        .select(this.checkedOrganizations.findIndex(checkedOrg => org.id === checkedOrg.id) >= 0)
+                                        .onChange((value: boolean) => {
+                                            // do nothing
+                                        })
+                                        .responseRegion({
+                                            x: 0,
+                                            y: 0,
+                                            width: 0,
+                                            height: 0
+                                        })
                                     Image($r('app.media.ic_deparment'))
                                         .width(40)
                                         .height(40)
@@ -97,6 +127,14 @@ export default struct OrganizationTreePage {
                                     Text(org.name + `(${org.memberCount})`)
                                         .maxLines(1)
                                         .padding({ left: 10 })
+                                    Blank()
+                                    Text('下级')
+                                        .enabled(!this.isOrganizationChecked(org))
+                                        .fontColor('#3B62E0')
+                                        .visibility(this.isOrganizationChecked(org) ? Visibility.None : Visibility.Visible)
+                                        .onClick((event: ClickEvent) => {
+                                            this.onClickOrg(org)
+                                        })
                                 }
                                 .height(60)
                                 .width('100%')
@@ -110,7 +148,12 @@ export default struct OrganizationTreePage {
                                     }
                                 })
                                 .onClick(() => {
-                                    this.onClickOrg(org)
+                                    let i = this.checkedOrganizations.findIndex(checkedOrg => checkedOrg.id === org.id)
+                                    if (i >= 0) {
+                                        this.checkedOrganizations.splice(i, 1);
+                                    } else {
+                                        this.checkedOrganizations.push(org)
+                                    }
                                 })
                             }
                         }, (org: Organization, index: number) => org.id + 'o')
@@ -118,6 +161,17 @@ export default struct OrganizationTreePage {
                         ForEach(this.employees, (employee: Employee, index: number) => {
                             ListItem() {
                                 Row() {
+                                    Checkbox()
+                                        .select(this.isEmployeeChecked(employee))
+                                        .onChange((value: boolean) => {
+                                            // do nothing
+                                        })
+                                        .responseRegion({
+                                            x: 0,
+                                            y: 0,
+                                            width: 0,
+                                            height: 0
+                                        })
                                     Image(employee.portraitUrl)
                                         .alt($r('app.media.avatar_def'))
                                         .width(40)
@@ -139,7 +193,12 @@ export default struct OrganizationTreePage {
                                     }
                                 })
                                 .onClick(() => {
-                                    this.mainNavPathStack.pushPathByName(navigationDestinations.UserInfoPage, { 'userInfo': orgServer.employeeToUserInfo(employee) } as Record<string, Object>)
+                                    let i = this.checkedEmployees.findIndex(checkedEmployee => checkedEmployee.employeeId === employee.employeeId)
+                                    if (i >= 0) {
+                                        this.checkedEmployees.splice(i, 1);
+                                    } else {
+                                        this.checkedEmployees.push(employee)
+                                    }
                                 })
                             }
                         },
@@ -153,7 +212,41 @@ export default struct OrganizationTreePage {
             }
         }
         .title(this.title)
+        .titleMode(NavigationTitleMode.Mini)
+        .hideBackButton(false)
         .height('100%')
         .width('100%')
+        .navBarPosition(NavBarPosition.Start)
+        .menus(this.NavigationMenus)
     }
+
+    @Builder
+    NavigationMenus() {
+        Row() {
+            Button('确定')
+                .type(ButtonType.Normal)
+                .height(30)
+                .width(60)
+                .margin({ right: 18 })
+                .enabled(this.checkedEmployees.length > 0 || this.checkedOrganizations.length > 0)
+                .fontSize(14)
+                .borderRadius(4)// .backgroundColor(Color.Blue)
+                .onClick(() => {
+                    LocalStorage.getShared()
+                        .setOrCreate<PickOrganizationMemberResult>(PickOrganizationMemberPage.PICK_RESULT, {
+                            employees: this.checkedEmployees,
+                            organizations: this.checkedOrganizations,
+                        });
+                    this.showPickOrganizationModal = false
+                })
+        }
+        .height('100%')
+        .justifyContent(FlexAlign.Center)
+        .alignItems(VerticalAlign.Center)
+    }
+}
+
+export interface PickOrganizationMemberResult {
+    employees: Employee[]
+    organizations: Organization[]
 }

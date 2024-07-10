@@ -9,6 +9,7 @@
         "pages/conversation/forward/ForwardMessagePage",
         "pages/picker/PickContactPage",
         "pages/contact/FriendRequestListPage",
+        "pages/organization/PickOrganizationMemberPage",
         "pages/search/SearchUserPage",
         "pages/search/SearchPortalPage",
         "pages/user/UserInfoPage",

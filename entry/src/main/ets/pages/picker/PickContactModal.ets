@@ -2,6 +2,7 @@ import UserInfo from '../../wfc/model/userInfo'
 import wfc from '../../wfc/client/wfc'
 import CheckableUserListView from '../../view/CheckableUserListView'
 import { loadContactUserInfos } from '../../helper/asyncTaskHelper'
+import Organization from '../../api/model/organization'
 
 @Component
 export default struct PickContactModal {
@@ -9,8 +10,8 @@ export default struct PickContactModal {
     @State userInfos?: UserInfo[] = undefined
     initialCheckedUserIds: string[] = []
     uncheckableUserIds: string[] = []
-    public static TAG: string = 'pickUser'
-    public static PICK_RESULT: string = 'pickResult'
+    organization?: Organization
+    public static PICK_RESULT: string = 'pickContactResult'
     @Link showPickContactModal: boolean
 
     aboutToAppear() {
@@ -53,7 +54,9 @@ export default struct PickContactModal {
                             userInfos: this.userInfos,
                             uncheckableUserIds: this.initialCheckedUserIds,
                             showCategory: true,
-                            showSearchView: true
+                            showSearchView: true,
+                            showFavGroup: true,
+                            showOrganization: true,
                         })
                     } else {
                         Text('加载中..')

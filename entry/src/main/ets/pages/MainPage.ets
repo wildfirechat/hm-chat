@@ -21,6 +21,7 @@ import WorkSpaceTab from './WorkSpaceTab'
 import Config from '../config'
 import { checkPermissions, requestPermissions } from '../helper/permissionHelper'
 import { navigationDestinations, PagesMap } from './navigationConfig'
+import orgServer from '../api/orgServer'
 
 const TAG = 'Main';
 
@@ -58,6 +59,8 @@ struct MainPage {
         if (conversation) {
             storage.delete('targetConversation')
             wfc.clearConversationUnreadStatus(conversation!)
+            // TODO
+            // FIXME
             // https://developer.huawei.com/consumer/cn/doc/harmonyos-references-V5/js-apis-arkui-observer-V5?catalogVersion=V5
             //  会话页面，监听 observer.on('navDestinationUpdate')
             let index = this.mainNavPathStack.popToName(navigationDestinations.ConversationPage)
@@ -135,6 +138,10 @@ struct MainPage {
             if (ungrantedPermissions.length > 0) {
                 showToast(`请授予相关权限，否则不能正常工作 ${ungrantedPermissions[0]}`)
             }
+        }
+
+        if (Config.ORGANIZATION_SERVER) {
+            orgServer.login()
         }
     }
 

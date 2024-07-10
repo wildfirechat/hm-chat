@@ -6,7 +6,6 @@ import BasicDataSource from '../common/BasicDataSource'
 import { loadAndGroupContactUserInfos } from '../helper/asyncTaskHelper'
 import { navigationDestinations } from './navigationConfig'
 import orgServer from '../api/orgServer'
-import Organization from '../api/model/organization'
 import Config from '../config'
 
 interface ContactListHeader {
@@ -92,7 +91,6 @@ export default struct ContactListTab {
         if (!Config.ORGANIZATION_SERVER) {
             return
         }
-        await orgServer.login()
         let rootOrgs = await orgServer.getRootOrganization()
         rootOrgs.forEach(org => {
             this.contactListHeaders.push({

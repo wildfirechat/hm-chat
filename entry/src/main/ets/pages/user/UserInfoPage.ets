@@ -5,6 +5,7 @@ import ConversationType from '../../wfc/model/conversationType';
 import UserInfo from '../../wfc/model/userInfo';
 import EventType from '../../wfc/client/wfcEvent';
 import { navigationDestinations } from '../navigationConfig';
+import ActionSheetDialog from '../../view/ActionSheetDialog';
 
 @Entry
 @Component
@@ -12,6 +13,7 @@ export default struct UserInfoPage {
     @State userInfo?: UserInfo = undefined
     private isMyFriend: boolean = false
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
+    private voipDialogController?: CustomDialogController
 
     aboutToAppear() {
         let params = this.mainNavPathStack.getParamByIndex(this.mainNavPathStack.size() - 1) as Record<string, Object>;
@@ -68,20 +70,61 @@ export default struct UserInfoPage {
                     .justifyContent(FlexAlign.Start)
                     .backgroundColor(Color.White)
 
-                    if (this.isMyFriend || this.userInfo!.uid === wfc.getUserId()) {
+                    Column() {
                         Text('发消息')
                             .width('100%')
                             .padding(15)
-                            .margin({ top: 20 })
                             .textAlign(TextAlign.Center)
-                            .backgroundColor(Color.White)
                             .clickEffect({ level: ClickEffectLevel.HEAVY })
                             .onClick(() => {
                                 this.mainNavPathStack.pushPathByName(navigationDestinations.ConversationPage, {
                                     'conversation': new Conversation(ConversationType.Single, this.userInfo!.uid, 0)
                                 } as Record<string, Object>)
                             })
-                    } else {
+
+                        Divider()
+                            .width('100%')
+
+                        Text('音视频通话')
+                            .width('100%')
+                            .padding(15)
+                            .textAlign(TextAlign.Center)
+                            .clickEffect({ level: ClickEffectLevel.HEAVY })
+                            .onClick(() => {
+                                this.voipDialogController = new CustomDialogController({
+                                    builder: ActionSheetDialog({
+                                        cancel: '取消',
+                                        controller: this.voipDialogController,
+                                        sheets: [
+                                            {
+                                                title: '语音通话',
+                                                action: () => {
+                                                    // TODO
+                                                    showToast('TODO')
+                                                }
+                                            },
+                                            {
+                                                title: '视频通话',
+                                                action: () => {
+                                                    // TODO
+                                                    showToast('TODO')
+                                                }
+                                            },
+                                        ]
+                                    }),
+                                    autoCancel: true,
+                                    alignment: DialogAlignment.Bottom,
+                                    // gridCount: 4,
+                                    customStyle: false
+                                })
+
+                                this.voipDialogController.open()
+                            })
+                    }
+                    .backgroundColor(Color.White)
+                    .margin({ top: 20 })
+
+                    if (!this.isMyFriend && this.userInfo!.uid !== wfc.getUserId()) {
                         Text('添加到通讯录')
                             .width('100%')
                             .padding(15)

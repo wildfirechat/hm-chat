@@ -2,6 +2,7 @@
 @CustomDialog
 export default struct ActionSheetDialog {
     title: string = ''
+    cancel: string = ''
     sheets: SheetInfo[] = []
     // 若尝试在CustomDialog中传入多个其他的Controller，以实现在CustomDialog中打开另一个或另一些CustomDialog，那么此处需要将指向自己的controller放在最后
     controller: CustomDialogController
@@ -12,14 +13,14 @@ export default struct ActionSheetDialog {
                 Column() {
                     Text(this.title)
                         .fontSize(20)
+                        .height(50)
                     Divider()
                         .width('100%')
-                        .padding({ top: 10 })
                 }
                 .justifyContent(FlexAlign.Center)
                 .align(Alignment.Center)
                 .width('100%')
-                .padding({ top: 20 })
+                .padding({ top: 5 })
             }
 
             ForEach(this.sheets, (sheet: SheetInfo) => {
@@ -52,6 +53,32 @@ export default struct ActionSheetDialog {
                 })
             }, (sheet: SheetInfo, index: number) => index + '')
 
+            if (this.cancel) {
+                Column() {
+                    Divider()
+                        .width('100%')
+                    Text(this.cancel)
+                        .fontColor(Color.Red)
+                        .fontSize(20)
+                        .height(50)
+                        .width('100%')
+                        .textAlign(TextAlign.Center)
+                        .stateStyles({
+                            pressed: {
+                                .backgroundColor('#E5E5E5')
+                            },
+                            normal: {
+                                .backgroundColor(Color.White)
+                            }
+                        })
+                        .onClick(() => {
+                            this.controller.close()
+                        })
+                }
+                .justifyContent(FlexAlign.Center)
+                .align(Alignment.Center)
+                .width('100%')
+            }
         }
         // .padding({ top: 10, bottom: 10 })
         .width('100%')

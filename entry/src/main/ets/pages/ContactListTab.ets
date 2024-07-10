@@ -271,6 +271,7 @@ export default struct ContactListTab {
             .height('100%')
             .width('100%')
             .justifyContent(FlexAlign.Start)
+            .backgroundColor(Color.White)
             .padding({ top: 5 })
 
             AlphabetIndexer({ arrayValue: this.contactCategories, selected: 0 })

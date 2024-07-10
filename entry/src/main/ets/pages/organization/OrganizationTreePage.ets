@@ -3,6 +3,7 @@ import Organization from '../../api/model/organization';
 import OrganizationEx from '../../api/model/organizationEx';
 import orgServer from '../../api/orgServer';
 import { showToast } from '../../common/utils/Toast';
+import { navigationDestinations } from '../navigationConfig';
 
 @Entry
 @Component
@@ -121,7 +122,7 @@ export default struct OrganizationTreePage {
                                 .width('100%')
                                 .padding({ left: 10, right: 10 })
                                 .onClick(() => {
-                                    showToast('TODO')
+                                    this.mainNavPathStack.pushPathByName(navigationDestinations.UserInfoPage, { 'userInfo': orgServer.employeeToUserInfo(employee) } as Record<string, Object>)
                                 })
                             }
                         },

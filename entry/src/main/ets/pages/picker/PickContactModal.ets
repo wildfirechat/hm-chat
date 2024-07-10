@@ -7,8 +7,8 @@ import { loadContactUserInfos } from '../../helper/asyncTaskHelper'
 export default struct PickContactModal {
     @State checkedUsers: UserInfo[] = []
     @State userInfos?: UserInfo[] = undefined
-    private initialCheckedUserIds: string[] = []
-    private uncheckableUserIds: string[] = []
+    initialCheckedUserIds: string[] = []
+    uncheckableUserIds: string[] = []
     public static TAG: string = 'pickUser'
     public static PICK_RESULT: string = 'pickResult'
     @Link showPickContactModal: boolean

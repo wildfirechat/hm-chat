@@ -6,12 +6,12 @@ let isChangeTriggeredByClick: boolean = false
 @Preview
 @Component
 export default struct CheckableUserItemView {
-    private enable: boolean = true
-    private initialChecked: boolean = false
-    private paddingLeft: number = 10
-    private paddingRight: number = 10
-    private uiUserInfo: UIUserInfo = {} as UIUserInfo;
-    private onCheckUser?: (userInfo: UserInfo, checked: boolean) => void
+    enable: boolean = true
+    initialChecked: boolean = false
+    paddingLeft: number = 10
+    paddingRight: number = 10
+    uiUserInfo: UIUserInfo = {} as UIUserInfo;
+    onCheckUser?: (userInfo: UserInfo, checked: boolean) => void
     @State _checked: boolean = false
     @Link checkedUsers: UserInfo[]
 
@@ -49,7 +49,12 @@ export default struct CheckableUserItemView {
                         this._checked = value
                         this.onCheckUser && this.onCheckUser(this.uiUserInfo.userInfo, this._checked)
                     })
-                    .responseRegion({ x: 0, y: 0, width: 0, height: 0 })
+                    .responseRegion({
+                        x: 0,
+                        y: 0,
+                        width: 0,
+                        height: 0
+                    })
                 Image(this.uiUserInfo.userInfo.portrait)
                     .alt($r('app.media.avatar_def'))
                     .width(40)

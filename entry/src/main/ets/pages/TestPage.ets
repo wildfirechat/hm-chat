@@ -1,6 +1,10 @@
 import AVSessionManager from '@ohos.multimedia.avsession';
 import { AVCastPicker } from '@kit.AVSessionKit';
 import orgServer from '../api/orgServer'
+import TestCustomMessageContent from '../wfc_custom_message/testCustomMessageContent';
+import Conversation from '../wfc/model/conversation';
+import ConversationType from '../wfc/model/conversationType';
+import wfc from '../wfc/client/wfc';
 
 
 @Entry
@@ -27,11 +31,9 @@ struct TestPage {
 
                 Button('test')
                     .onClick(() => {
-                        orgServer.login()
-                            .then(async () => {
-                                let orgs = await orgServer.getRootOrganization();
-                                console.log('xxxxxxx', orgs.length)
-                            })
+                        let content = new TestCustomMessageContent('hello hm-chat')
+                        let conversation = new Conversation(ConversationType.Single, 'uiuJuJcc', 0)
+                        wfc.sendConversationMessage(conversation, content)
                     })
             }
         }

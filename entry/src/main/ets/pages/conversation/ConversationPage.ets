@@ -26,6 +26,9 @@ import UserInfo from '../../wfc/model/userInfo'
 import GroupInfo from '../../wfc/model/groupInfo'
 import ChannelInfo from '../../wfc/model/channelInfo'
 import { navigationDestinations } from '../navigationConfig'
+import TestCustomNotificationMessageContent from '../../wfc_custom_message/testCustomNotificationMessageContent'
+import TestCustomMessageContentView from './custom_message/testCustomMessageContentView'
+import TestCustomNotificationMessageContentView from './custom_message/TestCustomNotificationMessageContentView'
 
 @Entry
 @Component
@@ -413,7 +416,14 @@ export default struct ConversationPage {
                                         ListItem() {
                                             if (msg.messageContent instanceof NotificationMessageContent) {
                                                 Row() {
-                                                    SimpleNotificationMessageContentView({ message: msg })
+                                                    // 自定义通知消息 start
+                                                    if (msg.messageContent instanceof TestCustomNotificationMessageContent) {
+                                                        TestCustomNotificationMessageContentView({ message: msg })
+                                                    }
+                                                    // 自定义通知消息 end
+                                                    else {
+                                                        SimpleNotificationMessageContentView({ message: msg })
+                                                    }
                                                 }
                                                 .width('100%')
                                                 .justifyContent(FlexAlign.Center)

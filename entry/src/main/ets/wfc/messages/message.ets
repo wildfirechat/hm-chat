@@ -50,6 +50,7 @@ import RecallMessageNotification from "../messages/notification/recallMessageNot
 import MessageContent from './messageContent';
 import assign from '../util/assign';
 import MessagePayload from './messagePayload';
+import CustomMessageConfig from '../../wfc_custom_message/customMessageConfig';
 
 export default class Message {
     conversation: Conversation;
@@ -79,7 +80,10 @@ export default class Message {
         // iOS，Android，Windows，OSX
         if ([1, 2, 3, 4, 7, 8, 9, 10, 11, 12].indexOf(Config.getWFCPlatform()) >= 0) {
             let payload = obj.content as MessagePayload
-            let content = MessageConfig.newMessageContent(payload.type);
+            let content = CustomMessageConfig.newCustomMessageContent(payload.type);
+            if (!content) {
+                content = MessageConfig.newMessageContent(payload.type);
+            }
             let objConv = obj.conversation as Record<string, Object>
             let conversation = new Conversation(objConv.conversationType as number, objConv.target as string, objConv.line as number)
 

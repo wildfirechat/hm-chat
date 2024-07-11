@@ -2,7 +2,7 @@ import Message from '../../../wfc/messages/message'
 
 @Component
 export default struct RichNotificationMessageContentView {
-    @State message: Message = null
+    @Prop message: Message
 
     build() {
         Text(this.message.messageContent.digest(this.message))

@@ -20,6 +20,8 @@ import GroupMember from '../../../wfc/model/groupMember'
 import FileMessageContentView from './FileMessageContentView'
 import TextMessageContent from '../../../wfc/messages/textMessageContent'
 import pasteboard from '@ohos.pasteboard'
+import CustomMessageContentType from '../../../wfc_custom_message/customMessageContentType'
+import TestCustomMessageContentView from '../custom_message/testCustomMessageContentView'
 
 @Component
 export default struct NormaMessageContentView {
@@ -55,7 +57,14 @@ export default struct NormaMessageContentView {
                 CompositeMessageContentView({ message: $message })
             } else if (this.message!.messageContent.type === MessageContentType.File) {
                 FileMessageContentView({ message: $message })
-            } else {
+            }
+            // 自定义消息配置 start
+            else if (this.message!.messageContent.type === CustomMessageContentType.MESSAGE_CONTENT_TYPE_CUSTOM_MESSAGE_TEST) {
+                TestCustomMessageContentView({ message: $message })
+            }
+            // 自定义消息配置 end
+
+            else {
                 Text(this.message!.messageContent.digest(this.message))
                     .margin({ top: 4 })
                     .padding(10)

@@ -15,6 +15,7 @@ import wfcNotificationManager from '../notification/wfcNotificationManager'
 import { BusinessError } from '@ohos.base';
 import Conversation from '../wfc/model/conversation';
 import ConnectionStatus from '../wfc/client/connectionStatus';
+import CustomMessageConfig from '../wfc_custom_message/customMessageConfig';
 
 
 export default class EntryAbility extends UIAbility {
@@ -31,6 +32,7 @@ export default class EntryAbility extends UIAbility {
         GlobalContext.getContext().setObject('context', this.context);
 
         wfc.init(this.context.getApplicationContext(), this.context.eventHub, this.context.filesDir, Config.getWFCPlatform());
+        CustomMessageConfig.registerCustomMessages();
         wfc.eventEmitter!.on(EventType.ConnectionStatusChanged, async (status: number) => {
             if (status === ConnectionStatus.ConnectionStatusConnected) {
                 try {

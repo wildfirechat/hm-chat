@@ -19,8 +19,10 @@ export default class CustomMessageConfig {
             flag: PersistFlag.Persist,
             type: CustomMessageContentType.MESSAGE_CONTENT_TYPE_CUSTOM_MESSAGE_TEST_NOTIFICATION,
         },
+        // 添加更多自定消息
     ];
 
+    // 请勿修改
     static newCustomMessageContent(customMessageType: number): MessageContent | undefined {
         let content: MessageContent | undefined
         switch (customMessageType) {
@@ -37,6 +39,7 @@ export default class CustomMessageConfig {
         return content
     }
 
+    // 请勿修改
     static registerCustomMessages() {
         CustomMessageConfig.CustomMessageContents.forEach(cmc => {
             wfc.registerMessageContent(cmc.name, cmc.flag, cmc.type)

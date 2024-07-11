@@ -3,16 +3,21 @@ import wfc from '../../wfc/client/wfc'
 import CheckableUserListView from '../../view/CheckableUserListView'
 import { loadContactUserInfos } from '../../helper/asyncTaskHelper'
 import Organization from '../../api/model/organization'
+import Employee from '../../api/model/employee'
+import orgServer from '../../api/orgServer'
 
 @Component
 export default struct PickContactModal {
     @State checkedUsers: UserInfo[] = []
+    @State checkedOrganizations: Organization[] = []
+    @State checkedEmployees: Employee[] = []
     @State userInfos?: UserInfo[] = undefined
     initialCheckedUserIds: string[] = []
     uncheckableUserIds: string[] = []
     organization?: Organization
     public static PICK_RESULT: string = 'pickContactResult'
     @Link showPickContactModal: boolean
+    @LocalStorageLink('pickContactResult') pickContactResult: UserInfo[] = []
 
     aboutToAppear() {
         loadContactUserInfos().then((userinfos: UserInfo[]) => {
@@ -44,6 +49,27 @@ export default struct PickContactModal {
         return this.checkedUsers.filter(info => this.initialCheckedUserIds.indexOf(info.uid) === -1)
     }
 
+    async allNewlyCheckedUsers(): Promise<UserInfo[]> {
+        let users = this.checkedUsers.filter(info => this.initialCheckedUserIds.indexOf(info.uid) === -1)
+        let checkedUserMap = new Map<string, UserInfo>()
+        users.forEach(u => {
+            checkedUserMap.set(u.uid, u);
+        })
+        if (this.checkedOrganizations.length > 0) {
+            let employees = await orgServer.getOrganizationEmployees(this.checkedOrganizations.map(o => o.id))
+            employees.forEach(e => {
+                let u = Employee.toUserInfo(e);
+                checkedUserMap.set(u.uid, u);
+            })
+        }
+        this.checkedEmployees.forEach(e => {
+            let u = Employee.toUserInfo(e);
+            checkedUserMap.set(u.uid, u);
+        })
+
+        return Array.from(checkedUserMap.values());
+    }
+
     build() {
         Navigation() {
             Scroll() {
@@ -51,6 +77,8 @@ export default struct PickContactModal {
                     if (this.userInfos) {
                         CheckableUserListView({
                             checkedUsers: $checkedUsers,
+                            checkedEmployees: $checkedEmployees,
+                            checkedOrganizations: $checkedOrganizations,
                             userInfos: this.userInfos,
                             uncheckableUserIds: this.initialCheckedUserIds,
                             showCategory: true,
@@ -88,12 +116,11 @@ export default struct PickContactModal {
                 .height(30)
                 .width(60)
                 .margin({ right: 18 })
-                .enabled(this.newlyCheckedUsers().length > 0)
+                .enabled(this.newlyCheckedUsers().length + this.checkedOrganizations.length + this.checkedEmployees.length > 0)
                 .fontSize(14)
                 .borderRadius(4)// .backgroundColor(Color.Blue)
-                .onClick(() => {
-                    LocalStorage.getShared()
-                        .setOrCreate<UserInfo[]>(PickContactModal.PICK_RESULT, this.newlyCheckedUsers());
+                .onClick(async () => {
+                    this.pickContactResult = await this.allNewlyCheckedUsers();
                     this.showPickContactModal = false
                 })
         }

@@ -4,7 +4,6 @@ import OrganizationEx from '../../api/model/organizationEx';
 import orgServer from '../../api/orgServer';
 import { router } from '@kit.ArkUI';
 
-@Entry
 @Component
 export default struct PickOrganizationMemberPage {
     @State title: string = '组织结构'
@@ -14,9 +13,9 @@ export default struct PickOrganizationMemberPage {
     @State employees?: Employee[] = []
     @State orgPath: Organization[] = [];
     private scroller: Scroller = new Scroller()
-    @State checkedEmployees: Employee[] = []
-    @State checkedOrganizations: Organization[] = []
     public static PICK_RESULT = 'pickOrganizationMemberResult';
+    @Link checkedEmployees: Employee[]
+    @Link checkedOrganizations: Organization[]
     @Link showPickOrganizationModal: boolean
 
     aboutToAppear() {
@@ -232,11 +231,6 @@ export default struct PickOrganizationMemberPage {
                 .fontSize(14)
                 .borderRadius(4)// .backgroundColor(Color.Blue)
                 .onClick(() => {
-                    LocalStorage.getShared()
-                        .setOrCreate<PickOrganizationMemberResult>(PickOrganizationMemberPage.PICK_RESULT, {
-                            employees: this.checkedEmployees,
-                            organizations: this.checkedOrganizations,
-                        });
                     this.showPickOrganizationModal = false
                 })
         }

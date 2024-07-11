@@ -53,6 +53,7 @@ struct MainPage {
     @State showPickContactModal: boolean = false
     @Provide('mainNavPathStack') mainNavPathStack: NavPathStack = new NavPathStack()
     @LocalStorageProp('targetConversation') @Watch('onTargetConversation') targetConversation?: Conversation = undefined
+    @LocalStorageLink('pickContactResult') @Watch('onPickContact') pickedUsers: UserInfo[] = []
 
     onTargetConversation() {
         let conversation = this.targetConversation
@@ -73,6 +74,13 @@ struct MainPage {
                     'conversation': conversation
                 } as Record<string, Object>)
             }
+        }
+    }
+
+    onPickContact() {
+        if (this.pickedUsers.length > 0) {
+            this.createConversation(this.pickedUsers)
+            this.pickedUsers = [];
         }
     }
 
@@ -245,20 +253,10 @@ struct MainPage {
                 .padding(6)
                 .margin({ left: 12 })
                 .bindMenu(this.SubMoreMenus())
-                .bindContentCover(this.showPickContactModal, this.pickContactModal(), {
+                .bindContentCover($$this.showPickContactModal, this.pickContactModal(), {
                     modalTransition: ModalTransition.DEFAULT,
                     onAppear: () => {
                     },
-
-                    onDisappear: () => {
-                        this.showPickContactModal = false
-                        let localStorage = LocalStorage.getShared();
-                        let pickUsers = localStorage.get<UserInfo[]>(PickContactModal.PICK_RESULT);
-                        if (pickUsers?.length) {
-                            this.createConversation(pickUsers)
-                            localStorage.delete(PickContactModal.PICK_RESULT)
-                        }
-                    }
                 })
         }
         .margin({ right: 18 })

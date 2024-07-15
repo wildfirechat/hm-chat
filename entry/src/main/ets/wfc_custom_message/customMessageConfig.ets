@@ -19,10 +19,9 @@ export default class CustomMessageConfig {
             flag: PersistFlag.Persist,
             type: CustomMessageContentType.MESSAGE_CONTENT_TYPE_CUSTOM_MESSAGE_TEST_NOTIFICATION,
         },
-        // 添加更多自定消息
+        // 添加更多自定义消息
     ];
 
-    // 请勿修改
     static newCustomMessageContent(customMessageType: number): MessageContent | undefined {
         let content: MessageContent | undefined
         switch (customMessageType) {
@@ -32,6 +31,7 @@ export default class CustomMessageConfig {
             case CustomMessageContentType.MESSAGE_CONTENT_TYPE_CUSTOM_MESSAGE_TEST_NOTIFICATION:
                 content = new TestCustomNotificationMessageContent()
                 break;
+             // 参考上面的逻辑，根据消息类型，创建其他自定义消息
             default:
                 content = undefined
                 break

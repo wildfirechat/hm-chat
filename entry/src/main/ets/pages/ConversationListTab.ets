@@ -217,7 +217,7 @@ export default struct ConversationListTab {
                                     'conversation': info.conversation
                                 } as Record<string, Object>)
                             })
-                            .bindContextMenu(this.MenuBuilder(info), ResponseType.LongPress)
+                            .bindContextMenu(this.MenuBuilder(info), ResponseType.LongPress, { preview: MenuPreviewMode.IMAGE })
                     }
                     .stateStyles({
                         pressed: {

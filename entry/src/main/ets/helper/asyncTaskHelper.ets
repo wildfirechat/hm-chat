@@ -81,7 +81,7 @@ function loadContactAndGroupTask(): UIUserInfo[] {
 
     groupedUsers.sort((a, b) => {
         if (a.category !== '#' && b.category !== '#') {
-            return a.category > b.category ? 1 : 0
+            return a.category.localeCompare(b.category);
         } else {
             if (a.category === '#' && b.category !== '#') {
                 return 1
@@ -137,7 +137,7 @@ function groupUserInfoTask(userIds: string[], groupId = ''): UIUserInfo[] {
 
     groupedUsers.sort((a, b) => {
         if (a.category !== '#' && b.category !== '#') {
-            return a.category > b.category ? 1 : 0
+            return a.category.localeCompare(b.category)
         } else {
             if (a.category === '#' && b.category !== '#') {
                 return 1

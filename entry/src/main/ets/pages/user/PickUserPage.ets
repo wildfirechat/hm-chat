@@ -2,12 +2,16 @@ import UserInfo from '../../wfc/model/userInfo'
 import wfc from '../../wfc/client/wfc'
 import router from '@ohos.router'
 import CheckableUserListView from '../../view/CheckableUserListView'
+import Employee from '../../api/model/employee'
+import Organization from '../../api/model/organization'
 
 @Entry
 @Component
 export default struct PickUserPage {
     @State message: string = 'Hello ContactList'
     @State checkedUsers: UserInfo[] = []
+    @State checkedEmployees: Employee[] = []
+    @State checkedOrganizations: Organization[] = []
     private userInfos: UserInfo[] = []
     private initialCheckedUserIds: string[] = []
     private uncheckableUserIds: string[] = []
@@ -46,6 +50,8 @@ export default struct PickUserPage {
 
                     CheckableUserListView({
                         checkedUsers: $checkedUsers,
+                        checkedEmployees: $checkedEmployees,
+                        checkedOrganizations: $checkedOrganizations,
                         userInfos: this.userInfos,
                         // uncheckableUserIds: this.initialCheckedUserIds,
                         showCategory: true,
@@ -69,7 +75,8 @@ export default struct PickUserPage {
         .menus(this.NavigationMenus())
     }
 
-    @Builder NavigationMenus() {
+    @Builder
+    NavigationMenus() {
         Row() {
             Button('确定')
                 .type(ButtonType.Normal)

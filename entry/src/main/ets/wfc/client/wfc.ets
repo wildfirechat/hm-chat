@@ -1963,7 +1963,7 @@ export class WfcManager {
      * @param {[string]} messageUids 消息uid列表
      * @returns {*}
      */
-    batchDeleteMessages(messageUids: Long[]): boolean {
+    batchDeleteMessages(messageUids: string[]): boolean {
         return impl.batchDeleteMessages(messageUids);
     }
 

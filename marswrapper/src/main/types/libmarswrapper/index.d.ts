@@ -91,7 +91,7 @@ export const deleteRemoteMessage: (messageUid: string, successCB: Function, erro
 export const updateRemoteMessageContent: (messageUid: string, messagePayload: string, distribute: boolean, updateLocal: boolean, successCB: Function, errorCB: Function) => void;
 export const uploadMedia: (name: string, data: string, mediaType: number, successCB: Function, errorCB: Function, progressCB: Function) => void;
 export const deleteMessage: (messageId: number) => boolean;
-export const batchDeleteMessages: (messageUids: number[]) => boolean;
+export const batchDeleteMessages: (messageUids: string[]) => boolean;
 export const clearMessages: (conversationStr: string) => void;
 export const clearMessagesByTime: (conversationStr: string, before: number) => void;
 export const clearMessagesKeepLatest: (conversationStr: string, keepCount: number) => void;

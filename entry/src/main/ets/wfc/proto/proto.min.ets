@@ -2324,13 +2324,8 @@ class WfcImpl {
         return result;
     }
 
-    batchDeleteMessages(messageUids: Long[]): boolean {
-        // TODO
-        // FIXME
-        // 参数类型错误，messageUid 超出 number 表示范围
-        // let result = protoProxy.batchDeleteMessages(messageUids);
-        // return result;
-        return false;
+    batchDeleteMessages(messageUids: string[]): boolean {
+        return protoProxy.batchDeleteMessages(messageUids);
     }
 
     watchOnlineState(conversationType: number, targets: string[], duration: number, successCB: CallbackWithValue_1<UserOnlineState[]>, failCB: FailCallback) {

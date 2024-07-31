@@ -1,4 +1,5 @@
 import wfc from '../../wfc/client/wfc'
+import EventType from '../../wfc/client/wfcEvent'
 import Conversation from '../../wfc/model/conversation'
 import ConversationType from '../../wfc/model/conversationType'
 import GroupInfo from '../../wfc/model/groupInfo'
@@ -11,6 +12,15 @@ export default struct FavGroupListPage {
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
 
     aboutToAppear() {
+        this.favGroupList = wfc.getFavGroupList()
+        wfc.eventEmitter?.on(EventType.GroupInfosUpdate, this.onGroupUpdateListener)
+    }
+
+    aboutToDisappear(): void {
+        wfc.eventEmitter?.off(EventType.GroupInfosUpdate, this.onGroupUpdateListener)
+    }
+
+    onGroupUpdateListener() {
         this.favGroupList = wfc.getFavGroupList()
     }
 
@@ -33,8 +43,11 @@ export default struct FavGroupListPage {
                                 .height(40)
                                 .borderRadius(4)
                             Text(groupInfo.name)
+                                .layoutWeight(1)
                                 .maxLines(1)
-                                .padding({ left: 10 })
+                                .textOverflow({ overflow: TextOverflow.Ellipsis })
+                                .ellipsisMode(EllipsisMode.END)
+                                .padding({ left: 10, right: 10 })
                         }
                         .height(60)
                         .width('100%')
@@ -45,7 +58,7 @@ export default struct FavGroupListPage {
                             } as Record<string, Object>)
                         })
                     }
-                }, (groupInfo: GroupInfo) => groupInfo.target)
+                }, (groupInfo: GroupInfo) => groupInfo.target + groupInfo.updateDt)
             }
             .width('100%')
             .height('100%')

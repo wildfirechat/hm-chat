@@ -40,7 +40,7 @@ export default struct ContactListTab {
             }
         },
         {
-            title: '群组',
+            title: '群组(保存到通讯录的群组)',
             icon: $r('app.media.ic_group_chat'),
             badgeCount: 0,
             badgeValue: '',

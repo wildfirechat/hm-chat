@@ -5,7 +5,7 @@ import orgServer from '../../api/orgServer';
 import { router } from '@kit.ArkUI';
 
 @Component
-export default struct PickOrganizationMemberPage {
+export default struct PickOrganizationMemberModal {
     @State title: string = '组织结构'
     @State curOrganization?: Organization = undefined
     @State organizationEx?: OrganizationEx = undefined

@@ -1,10 +1,13 @@
 import UserInfo from '../../wfc/model/userInfo'
-import wfc from '../../wfc/client/wfc'
+import Conversation from '../../wfc/model/conversation'
+import ConversationType from '../../wfc/model/conversationType'
 import CheckableUserListView from '../../view/CheckableUserListView'
 import { loadContactUserInfos } from '../../helper/asyncTaskHelper'
 import Organization from '../../api/model/organization'
 import Employee from '../../api/model/employee'
 import orgServer from '../../api/orgServer'
+import GroupInfo from '../../wfc/model/groupInfo'
+import { navigationDestinations } from '../navigationConfig'
 
 @Component
 export default struct PickContactModal {
@@ -12,12 +15,14 @@ export default struct PickContactModal {
     @State checkedOrganizations: Organization[] = []
     @State checkedEmployees: Employee[] = []
     @State userInfos?: UserInfo[] = undefined
+    @State @Watch('onCheckFavGroupInfo') checkedFavGroupInfo?: GroupInfo = undefined
     initialCheckedUserIds: string[] = []
     uncheckableUserIds: string[] = []
     organization?: Organization
     public static PICK_RESULT: string = 'pickContactResult'
     @Link showPickContactModal: boolean
     @LocalStorageLink('pickContactResult') pickContactResult: UserInfo[] = []
+    @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
 
     aboutToAppear() {
         loadContactUserInfos().then((userinfos: UserInfo[]) => {
@@ -28,6 +33,15 @@ export default struct PickContactModal {
                 })
             }
         })
+    }
+
+    onCheckFavGroupInfo() {
+        if (this.checkedFavGroupInfo) {
+            this.showPickContactModal = false;
+            this.mainNavPathStack.pushPathByName(navigationDestinations.ConversationPage, {
+                'conversation': new Conversation(ConversationType.Group, this.checkedFavGroupInfo.target, 0)
+            } as Record<string, Object>)
+        }
     }
 
     onCheckUser = (info: UserInfo, checked?: boolean) => {
@@ -79,6 +93,7 @@ export default struct PickContactModal {
                             checkedUsers: $checkedUsers,
                             checkedEmployees: $checkedEmployees,
                             checkedOrganizations: $checkedOrganizations,
+                            checkedFavGroupInfo: $checkedFavGroupInfo,
                             userInfos: this.userInfos,
                             uncheckableUserIds: this.initialCheckedUserIds,
                             showCategory: true,

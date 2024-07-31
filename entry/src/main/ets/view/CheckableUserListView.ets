@@ -1,5 +1,6 @@
 import CheckableUserItemView from '../view/CheckableUserItemView'
 import UserInfo from '../wfc/model/userInfo'
+import GroupInfo from '../wfc/model/groupInfo'
 import { UIUserInfo } from '../common/Types'
 import BasicDataSource from '../common/BasicDataSource'
 import { groupUserInfos } from '../helper/asyncTaskHelper'
@@ -9,12 +10,11 @@ import orgServer from '../api/orgServer'
 import { navigationDestinations } from '../pages/navigationConfig'
 import PickOrganizationMemberModal from '../pages/organization/PickOrganizationMemberModal'
 import Employee from '../api/model/employee'
+import PickFavGroupModal from '../pages/picker/PickFavGroupModal'
 
 @Component
 export default struct CheckableUserListView {
     @Link checkedUsers: UserInfo[]
-    @Link @Watch('onCheckEmployee') checkedEmployees: Employee[]
-    @Link @Watch('onCheckOrganization') checkedOrganizations: Organization[]
     @State filteredUserInfos: UserInfo[] = []
     @State searchInputViewMaxWidth: string = '100%'
     @State userInfoDataSource?: UserInfoDataSource = undefined
@@ -28,7 +28,12 @@ export default struct CheckableUserListView {
     @State organizations?: Organization[] = []
     private checkedUserListScroller: Scroller = new Scroller()
     // @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
+
     @State showPickOrganizationModal: boolean = false
+    @Link @Watch('onCheckEmployee') checkedEmployees: Employee[]
+    @Link @Watch('onCheckOrganization') checkedOrganizations: Organization[]
+    @State showPickFavGroupModal: boolean = false
+    @Link checkedFavGroupInfo: GroupInfo
 
     aboutToAppear() {
         this.filteredUserInfos = this.userInfos
@@ -119,6 +124,18 @@ export default struct CheckableUserListView {
             checkedEmployees: $checkedEmployees,
             checkedOrganizations: $checkedOrganizations,
             curOrganization: org
+        })
+            .height('100%')
+            .width('100%')
+            .margin({ top: px2vp(AppStorage.get<number>('SafeAreaTopHeight')) })
+            .backgroundColor(Color.White)
+    }
+
+    @Builder
+    pickSingleFavGroupModal() {
+        PickFavGroupModal({
+            showPickFavGroupModal: $showPickFavGroupModal,
+            checkedFavGroupInfo: $checkedFavGroupInfo,
         })
             .height('100%')
             .width('100%')
@@ -264,9 +281,17 @@ export default struct CheckableUserListView {
                                     }
                                 })
                                 .onClick(() => {
-                                    showToast('todo favGroup')
+                                    this.showPickFavGroupModal = true
                                 })
                             }
+                            .bindContentCover($$this.showPickFavGroupModal,
+                                this.pickSingleFavGroupModal(),
+                                {
+                                    // transition: TransitionEffect.SLIDE,
+                                    modalTransition: ModalTransition.NONE,
+                                    onDisappear: () => {
+                                    }
+                                })
                         }
                     }
                     .divider({ strokeWidth: 1, startMargin: 10 })

@@ -22,6 +22,7 @@ import Config from '../config'
 import { checkPermissions, requestPermissions } from '../helper/permissionHelper'
 import { navigationDestinations, PagesMap } from './navigationConfig'
 import orgServer from '../api/orgServer'
+import GroupInfo from '../wfc/model/groupInfo'
 
 const TAG = 'Main';
 
@@ -53,7 +54,6 @@ struct MainPage {
     @State showPickContactModal: boolean = false
     @Provide('mainNavPathStack') mainNavPathStack: NavPathStack = new NavPathStack()
     @LocalStorageProp('targetConversation') @Watch('onTargetConversation') targetConversation?: Conversation = undefined
-    @LocalStorageLink('pickContactResult') @Watch('onPickContact') pickedUsers: UserInfo[] = []
 
     onTargetConversation() {
         let conversation = this.targetConversation
@@ -74,13 +74,6 @@ struct MainPage {
                     'conversation': conversation
                 } as Record<string, Object>)
             }
-        }
-    }
-
-    onPickContact() {
-        if (this.pickedUsers.length > 0) {
-            this.createConversation(this.pickedUsers)
-            this.pickedUsers = [];
         }
     }
 
@@ -203,7 +196,17 @@ struct MainPage {
 
     @Builder
     pickContactModal() {
-        PickContactModal({ showPickContactModal: $showPickContactModal })
+        PickContactModal({
+            showPickContactModal: $showPickContactModal,
+            onCheckUser: (users: UserInfo[]) => {
+                this.createConversation(users)
+            },
+            onCheckFavGroup: (groupInfo: GroupInfo) => {
+                this.mainNavPathStack.pushPathByName(navigationDestinations.ConversationPage, {
+                    'conversation': new Conversation(ConversationType.Group, groupInfo.target, 0)
+                } as Record<string, Object>)
+            }
+        })
             .height('100%')
             .width('100%')
             .margin({ top: px2vp(AppStorage.get<number>('SafeAreaTopHeight')) })

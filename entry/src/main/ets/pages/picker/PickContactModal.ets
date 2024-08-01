@@ -15,14 +15,18 @@ export default struct PickContactModal {
     @State checkedOrganizations: Organization[] = []
     @State checkedEmployees: Employee[] = []
     @State userInfos?: UserInfo[] = undefined
-    @State @Watch('onCheckFavGroupInfo') checkedFavGroupInfo?: GroupInfo = undefined
+    @State @Watch('_onCheckFavGroup') checkedFavGroupInfo?: GroupInfo = undefined
     initialCheckedUserIds: string[] = []
     uncheckableUserIds: string[] = []
     organization?: Organization
     public static PICK_RESULT: string = 'pickContactResult'
     @Link showPickContactModal: boolean
-    @LocalStorageLink('pickContactResult') pickContactResult: UserInfo[] = []
-    @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
+    onCheckFavGroup?: (info: GroupInfo) => void
+    onCheckUser?: (users: UserInfo[]) => void
+
+    // TODO
+    // fixme
+    // 添加选人结束、选中favGroup 的处理方法
 
     aboutToAppear() {
         loadContactUserInfos().then((userinfos: UserInfo[]) => {
@@ -35,29 +39,13 @@ export default struct PickContactModal {
         })
     }
 
-    onCheckFavGroupInfo() {
+    _onCheckFavGroup() {
         if (this.checkedFavGroupInfo) {
+            this.onCheckFavGroup?.(this.checkedFavGroupInfo)
             this.showPickContactModal = false;
-            this.mainNavPathStack.pushPathByName(navigationDestinations.ConversationPage, {
-                'conversation': new Conversation(ConversationType.Group, this.checkedFavGroupInfo.target, 0)
-            } as Record<string, Object>)
         }
     }
 
-    onCheckUser = (info: UserInfo, checked?: boolean) => {
-        let index = this.checkedUsers.findIndex(checkedUser => checkedUser.uid === info.uid)
-        if (checked) {
-            if (index < 0) {
-                this.checkedUsers.push(info)
-            }
-        } else {
-            if (index >= 0) {
-                this.checkedUsers.splice(index, 1)
-            } else {
-                this.checkedUsers.push(info)
-            }
-        }
-    }
 
     newlyCheckedUsers(): UserInfo[] {
         return this.checkedUsers.filter(info => this.initialCheckedUserIds.indexOf(info.uid) === -1)
@@ -135,7 +123,8 @@ export default struct PickContactModal {
                 .fontSize(14)
                 .borderRadius(4)// .backgroundColor(Color.Blue)
                 .onClick(async () => {
-                    this.pickContactResult = await this.allNewlyCheckedUsers();
+                    let users = await this.allNewlyCheckedUsers();
+                    this.onCheckUser?.(users)
                     this.showPickContactModal = false
                 })
         }

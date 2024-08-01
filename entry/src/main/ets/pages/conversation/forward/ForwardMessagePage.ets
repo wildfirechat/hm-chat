@@ -15,6 +15,8 @@ import { SearchModule } from '../../../common/Types'
 import ImageMessageContent from '../../../wfc/messages/imageMessageContent'
 import VideoMessageContent from '../../../wfc/messages/videoMessageContent'
 import CompositeMessageContent from '../../../wfc/messages/compositeMessageContent'
+import PickContactModal from '../../picker/PickContactModal'
+import GroupType from '../../../wfc/model/groupType'
 
 @Entry
 @Component
@@ -26,6 +28,7 @@ export default struct ForwardMessagePage {
     private forwardDialogController?: CustomDialogController
     private forwardType: 'oneByOne' | 'compose' = 'oneByOne'
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
+    @State showPickContactModal: boolean = false
 
     aboutToAppear() {
         this.recentConversationInfos = wfc.getConversationInfoList([0, 1, 2, 3], [0, 1]);
@@ -134,6 +137,44 @@ export default struct ForwardMessagePage {
         this.forwardDialogController.open()
     }
 
+    @Builder
+    pickContactModal() {
+        PickContactModal({
+            showPickContactModal: $showPickContactModal,
+            onCheckUser: (users: UserInfo[]) => {
+                // this.createConversation(users)
+                showToast('TODO')
+                if (users.length === 1) {
+                    let conversation = new Conversation(ConversationType.Single, users[0].uid, 0)
+                    this.forwardMessage([conversation])
+                } else {
+                    let memberIds: string[] = users.map(userInfo => userInfo.uid)
+                    let first5Members = users.slice(0, 5)
+                    let groupName = ''
+                    first5Members.forEach(userInfo => {
+                        groupName += userInfo.displayName
+                        groupName += '、'
+                    })
+                    groupName = groupName.substring(0, groupName.length - 1)
+                    wfc.createGroup('', GroupType.Normal, groupName, '', '', memberIds, '', [0], null, (groupId) => {
+                        let conversation = new Conversation(ConversationType.Group, groupId, 0)
+                        this.forwardMessage([conversation])
+                    }, err => {
+
+                    })
+                }
+            },
+            onCheckFavGroup: (groupInfo: GroupInfo) => {
+                let conversation = new Conversation(ConversationType.Group, groupInfo.target, 0)
+                this.forwardMessage([conversation])
+            }
+        })
+            .height('100%')
+            .width('100%')
+            .margin({ top: px2vp(AppStorage.get<number>('SafeAreaTopHeight')) })
+            .backgroundColor(Color.White)
+    }
+
     build() {
         NavDestination() {
             Column() {
@@ -169,9 +210,14 @@ export default struct ForwardMessagePage {
                                     })
                                     .enabled(true)
                                     .onClick(() => {
-                                        showToast('TODO')
+                                        this.showPickContactModal = true
                                     })
                             }
+                            .bindContentCover($$this.showPickContactModal, this.pickContactModal(), {
+                                modalTransition: ModalTransition.DEFAULT,
+                                onAppear: () => {
+                                },
+                            })
 
                             ListItem() {
                                 Text('最近聊天')

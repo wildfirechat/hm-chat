@@ -315,12 +315,6 @@ struct MainPage {
         .hideBackButton(true)
         .menus(this.NavigationMenus())
         .mode(NavigationMode.Stack)
-        .navDestination(this.PagesMapInternal)
-    }
-
-    // 为了规避直接用全局定义的构建函数失败
-    @Builder
-    PagesMapInternal(name: string) {
-        PagesMap(name)
+        .navDestination(PagesMap)
     }
 }

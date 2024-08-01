@@ -22,6 +22,7 @@ import TextMessageContent from '../../../wfc/messages/textMessageContent'
 import pasteboard from '@ohos.pasteboard'
 import CustomMessageContentType from '../../../wfc_custom_message/customMessageContentType'
 import TestCustomMessageContentView from '../custom_message/testCustomMessageContentView'
+import { navigationDestinations } from '../../navigationConfig'
 
 @Component
 export default struct NormaMessageContentView {
@@ -34,6 +35,7 @@ export default struct NormaMessageContentView {
     @Prop groupMembers: GroupMember[] = []
     private enableReceipt: boolean = false
     private deleteMessageDialogController?: CustomDialogController
+    @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
 
     aboutToAppear(): void {
         this.updateMessageReadReceipt()
@@ -134,16 +136,11 @@ export default struct NormaMessageContentView {
                 title: '转发',
                 tag: 'forward',
                 action: () => {
-                    router.pushUrl({
-                        url: 'pages/conversation/forward/ForwardMessagePage',
-                        params: {
-                            messages: [this.message]
-                        }
-                    })
-                        .then(value => {
-                            console.log('xxxxxxxxxxxx th', value)
-                        })
-                        .catch((r: Error) => console.log('xxxxxxxxxxxx', r))
+                    this.mainNavPathStack.pushPathByName(navigationDestinations.ForwardMessagePage,
+                        {
+                            'messages': [this.message]
+                        } as Record<string, Object>
+                    )
                 }
             },
             {

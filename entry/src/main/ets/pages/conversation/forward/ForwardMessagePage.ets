@@ -25,10 +25,11 @@ export default struct ForwardMessagePage {
     private messages: Message[] = []
     private forwardDialogController?: CustomDialogController
     private forwardType: 'oneByOne' | 'compose' = 'oneByOne'
+    @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
 
     aboutToAppear() {
         this.recentConversationInfos = wfc.getConversationInfoList([0, 1, 2, 3], [0, 1]);
-        let params = router.getParams() as Record<string, Object>
+        let params = this.mainNavPathStack.getParamByIndex(this.mainNavPathStack.size() - 1) as Record<string, Object>;
         if (params) {
             let msgs: Message[] = params['messages'] as Message[]
             // 通过 params 传递的对象，会丢失方法，故
@@ -121,7 +122,7 @@ export default struct ForwardMessagePage {
                             wfc.sendConversationMessage(conversation, textMessageContent)
                         }
                     })
-                    router.back()
+                    this.mainNavPathStack.pop()
                 }
             }),
             autoCancel: true,
@@ -134,7 +135,7 @@ export default struct ForwardMessagePage {
     }
 
     build() {
-        Navigation() {
+        NavDestination() {
             Column() {
                 Row() {
                     TextInput({ placeholder: '搜索...' })
@@ -221,10 +222,7 @@ export default struct ForwardMessagePage {
             .width('100%')
         }
         .title('选择一个聊天')
-        .titleMode(NavigationTitleMode.Mini)
-        .hideBackButton(false)
         .height('100%')
         .width('100%')
-        .navBarPosition(NavBarPosition.Start)
     }
 }

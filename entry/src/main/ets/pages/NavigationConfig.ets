@@ -4,6 +4,7 @@ import FriendRequestListPage from './contact/FriendRequestListPage'
 import ChannelConversationInfoPage from './conversation/ChannelConversationInfoPage'
 import ConversationFileRecordPage from './conversation/ConversationFileRecordPage'
 import ConversationPage from './conversation/ConversationPage'
+import ForwardMessagePage from './conversation/forward/ForwardMessagePage'
 import GroupConversationInfoPage from './conversation/GroupConversationInfoPage'
 import PreviewCompositeMessagePage from './conversation/PreviewCompositeMessagePage'
 import SingleConversationInfoPage from './conversation/SingleConversationInfoPage'
@@ -65,6 +66,7 @@ export class navigationDestinations {
     static PreviewCompositeMessagePage = 'previewCompositeMessagePage'
     static OrganizationTreePage = 'organizationTreePage'
     static PickOrganizationMemberPage = 'pickOrganizationMemberPage'
+    static ForwardMessagePage = 'forwardMessagePage'
 }
 
 @Builder
@@ -135,5 +137,7 @@ export function PagesMap(name: string) {
         OrganizationTreePage()
     } else if (name === navigationDestinations.PickOrganizationMemberPage) {
         PickOrganizationMemberPage()
+    } else if (name === navigationDestinations.ForwardMessagePage) {
+        ForwardMessagePage()
     }
 }

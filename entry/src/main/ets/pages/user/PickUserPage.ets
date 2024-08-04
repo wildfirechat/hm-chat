@@ -4,6 +4,7 @@ import router from '@ohos.router'
 import CheckableUserListView from '../../view/CheckableUserListView'
 import Employee from '../../api/model/employee'
 import Organization from '../../api/model/organization'
+import GroupInfo from '../../wfc/model/groupInfo'
 
 @Entry
 @Component
@@ -12,6 +13,7 @@ export default struct PickUserPage {
     @State checkedUsers: UserInfo[] = []
     @State checkedEmployees: Employee[] = []
     @State checkedOrganizations: Organization[] = []
+    @State checkedFavGroupInfo?: GroupInfo = undefined
     private userInfos: UserInfo[] = []
     private initialCheckedUserIds: string[] = []
     private uncheckableUserIds: string[] = []
@@ -52,6 +54,7 @@ export default struct PickUserPage {
                         checkedUsers: $checkedUsers,
                         checkedEmployees: $checkedEmployees,
                         checkedOrganizations: $checkedOrganizations,
+                        checkedFavGroupInfo: $checkedFavGroupInfo,
                         userInfos: this.userInfos,
                         // uncheckableUserIds: this.initialCheckedUserIds,
                         showCategory: true,
@@ -83,8 +86,7 @@ export default struct PickUserPage {
                 .height(30)
                 .width(60)
                 .fontSize(14)
-                .borderRadius(4)
-                    // .backgroundColor(Color.Blue)
+                .borderRadius(4)// .backgroundColor(Color.Blue)
                     // TODO
                 .onClick(() => {
                     let options: router.RouterOptions = {

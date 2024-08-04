@@ -10,6 +10,7 @@ export default struct AddGroupMemberModal {
     @State checkedUsers: UserInfo[] = []
     @State checkedEmployees: Employee[] = []
     @State checkedOrganizations: Organization[] = []
+    @State checkedFavGroupInfo?: GroupInfo = undefined
     private userInfos: UserInfo[] = []
     private initialCheckedUserIds: string[] = []
     private uncheckableUserIds: string[] = []
@@ -60,6 +61,7 @@ export default struct AddGroupMemberModal {
                         checkedUsers: $checkedUsers,
                         checkedEmployees: $checkedEmployees,
                         checkedOrganizations: $checkedOrganizations,
+                        checkedFavGroupInfo: $checkedFavGroupInfo,
                         userInfos: this.userInfos,
                         uncheckableUserIds: this.initialCheckedUserIds,
                         showCategory: true,

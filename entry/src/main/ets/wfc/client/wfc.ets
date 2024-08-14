@@ -1581,7 +1581,7 @@ export class WfcManager {
     }
 
     /**
-     * 获取会话提醒消息
+     * 获取会话提醒消息，注意这里是获取所有的提醒消息，包括已读和未读的。如果需要获取未读的提醒消息，请使用getMessagesByStatusV2方法，参数messageStatus填入[MessageStatus.Mentioned, MessageStatus.AllMentioned]
      * @param {Conversation} conversation 目标会话
      * @param {number} fromIndex messageId，表示从那一条消息开始获取
      * @param {boolean} before true, 获取fromIndex之前的消息，即更旧的消息；false，获取fromIndex之后的消息，即更新的消息。都不包含fromIndex对应的消息

@@ -962,6 +962,16 @@ class WfcImpl {
         return members;
     }
 
+    getGroupMembersByCount(groupId: string, count: number): GroupMember[] {
+        let membersStr = protoProxy.getGroupMembersByCount(groupId, count);
+        let members: GroupMember[] = [];
+        let arr = JSON.parse(membersStr) as Record<string, Object>[];
+        arr.forEach(e => {
+            members.push(assign(new GroupMember(), e) as GroupMember);
+        });
+        return members;
+    }
+
     getGroupMember(groupId: string, memberId: string): GroupMember {
         let result = protoProxy.getGroupMember(groupId, memberId);
         return assign(new GroupMember(), JSON.parse(result)) as GroupMember;

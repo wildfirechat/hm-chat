@@ -695,6 +695,10 @@ export class WfcManager {
         return impl.getGroupMembersByType(groupId, memberType);
     }
 
+    getGroupMembersByCount(groupId: string, count: number): GroupMember[] {
+        return impl.getGroupMembersByCount(groupId, count);
+    }
+
     /**
      * 获取群成员信息
      * @param {string} groupId 群id

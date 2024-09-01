@@ -9,7 +9,6 @@ import photoAccessHelper from '@ohos.file.photoAccessHelper';
 import cameraPicker from '@ohos.multimedia.cameraPicker';
 import wantConstant from '@ohos.app.ability.wantConstant';
 import MediaBean from '../bean/MediaBean';
-import mediaLibrary from '@ohos.multimedia.mediaLibrary';
 import fs from '@ohos.file.fs';
 import camera from '@ohos.multimedia.camera';
 import { BusinessError } from '@ohos.base';
@@ -153,71 +152,4 @@ export class MediaHelper {
         // return ""
     }
 
-    /**
-     * 封装多媒体实体类
-     *
-     * @param uri 文件路径
-     */
-    // private async buildMediaBean(uri: string): Promise<MediaBean> {
-    //
-    //     if (this.isNullOrEmpty(uri)) {
-    //         return null;
-    //     }
-    //
-    //     const mediaBean: MediaBean = new MediaBean();
-    //     mediaBean.localUrl = uri;
-    //     await this.appendFileInfoToMediaBean(mediaBean, uri);
-    //     return mediaBean;
-    // }
-
-    /**
-     * 通过Uri查找所选文件信息，插入到MediaBean中
-     * @param mediaBean
-     * @param uri
-     */
-    private async appendFileInfoToMediaBean(mediaBean: MediaBean, uri: string) {
-
-        if (this.isNullOrEmpty(uri)) {
-            return;
-        }
-        let fileList: Array<mediaLibrary.FileAsset> = [];
-
-        const parts: string[] = uri.split('/');
-        const id: string = parts.length > 0 ? parts[parts.length - 1] : '-1';
-
-        try {
-
-            let media = mediaLibrary.getMediaLibrary(this.mContext);
-            let mediaFetchOptions: mediaLibrary.MediaFetchOptions = {
-                selections: mediaLibrary.FileKey.ID + '= ?',
-                selectionArgs: [id],
-                uri: uri
-            };
-
-            let fetchFileResult = await media.getFileAssets(mediaFetchOptions);
-            console.info(this.TAG, `fileList getFileAssetsFromType fetchFileResult.count = ${fetchFileResult.getCount()}`);
-            fileList = await fetchFileResult.getAllObject();
-            fetchFileResult.close();
-            await media.release();
-
-        } catch (e) {
-            console.error(this.TAG, "query: file data  exception ");
-        }
-
-        if (fileList && fileList.length > 0) {
-
-            let fileInfoObj = fileList[0];
-            console.info(this.TAG, `file id = ${JSON.stringify(fileInfoObj.id)} , uri = ${JSON.stringify(fileInfoObj.uri)}`);
-            console.info(this.TAG, `file fileList displayName = ${fileInfoObj.displayName} ,size = ${fileInfoObj.size} ,mimeType = ${fileInfoObj.mimeType}`);
-
-            mediaBean.fileName = fileInfoObj.displayName;
-            mediaBean.fileSize = fileInfoObj.size;
-            mediaBean.fileType = fileInfoObj.mimeType;
-
-        }
-    }
-
-    private isNullOrEmpty(text: string): boolean {
-        return!text || !text.trim()
-    }
 }

@@ -2353,6 +2353,14 @@ export class WfcManager {
         return impl.isUserOnlineStateEnabled();
     }
 
+    getUserOnlineState(userId: string): UserOnlineState | undefined {
+        return impl.getUserOnlineState(userId)
+    }
+
+    getUserOnlineStateMap(): Map<string, UserOnlineState> {
+        return impl.getUserOnlineStateMap()
+    }
+
     /**
      *
      * @param {number} type 会话类型， 支持{@link ConversationType.Single}和{@link ConversationType.Group}

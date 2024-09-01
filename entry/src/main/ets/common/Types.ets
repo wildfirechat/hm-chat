@@ -1,9 +1,11 @@
 import UserInfo from '../wfc/model/userInfo'
+import UserOnlineState from '../wfc/model/userOnlineState'
 
 export interface UIUserInfo {
     showCategory: boolean,
     category: string,
     userInfo: UserInfo
+    onlineState?: UserOnlineState
 }
 
 export interface MediaEntry {

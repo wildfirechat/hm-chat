@@ -79,6 +79,7 @@ class WfcImpl {
     eventEmitter?: common.EventHub;
     context?: common.ApplicationContext;
     uploadingMap: Map<number, request.UploadTask> = new Map();
+    userOnlineState: Map<string, UserOnlineState> = new Map()
 
     onConnectionChanged(status: number) {
         if (!self.isLogined && status === ConnectionStatus.ConnectionStatusConnected) {
@@ -155,6 +156,9 @@ class WfcImpl {
 
     onOnlineEvent(event: string) {
         let userOnlineStates = self._parseUserOnlineState(event);
+        for (const state of userOnlineStates) {
+            self.userOnlineState.set(state.userId, state)
+        }
         self.eventEmitter!.emit(EventType.UserOnlineEvent, userOnlineStates);
     }
 
@@ -437,8 +441,9 @@ class WfcImpl {
         let exitTime = now.getTime() + 1000;
         while (true) {
             now = new Date();
-            if (now.getTime() > exitTime)
+            if (now.getTime() > exitTime) {
                 return;
+            }
         }
     }
 
@@ -800,7 +805,8 @@ class WfcImpl {
         protoProxy.setFriendAlias(userId, alias, successCB, failCB);
     }
 
-    async createGroup(groupId: string, groupType: number, name: string, portrait: string, groupExtra: string = '', memberIds: string[] = [], memberExtra = '', lines: number[] = [0], notifyContent: MessageContent | null, successCB: CallbackWithValue_1<string>, failCB: FailCallback) {
+    async createGroup(groupId: string, groupType: number, name: string, portrait: string, groupExtra: string = '', memberIds: string[] = [], memberExtra = '', lines: number[] = [0],
+        notifyContent: MessageContent | null, successCB: CallbackWithValue_1<string>, failCB: FailCallback) {
         groupId = !groupId ? '' : groupId;
         groupExtra = !groupExtra ? '' : groupExtra;
         memberExtra = !memberExtra ? '' : memberExtra;
@@ -832,7 +838,8 @@ class WfcImpl {
         protoProxy.setGroupManager(groupId, isSet, memberIds, lines, notifyContentStr, successCB, failCB);
     }
 
-    async muteOrAllowGroupMembers(groupId: string, isSet: boolean, isAllow: boolean, memberIds: string[], notifyLines: number[] = [0], notifyContent: MessageContent | null, successCB: SuccessCallback, failCB: FailCallback) {
+    async muteOrAllowGroupMembers(groupId: string, isSet: boolean, isAllow: boolean, memberIds: string[], notifyLines: number[] = [0], notifyContent: MessageContent | null, successCB: SuccessCallback,
+        failCB: FailCallback) {
         if (isAllow) {
             let payload = notifyContent ? notifyContent.encode() : '';
             let notifyContentStr = JSON.stringify(payload);
@@ -1049,7 +1056,8 @@ class WfcImpl {
             });
     }
 
-    async modifyGroupAlias(groupId: string, alias: string, lines: number[] = [0], notifyMessageContent: MessageContent | null | undefined, successCB: SuccessCallback | null | undefined, failCB: FailCallback | null | undefined) {
+    async modifyGroupAlias(groupId: string, alias: string, lines: number[] = [0], notifyMessageContent: MessageContent | null | undefined, successCB: SuccessCallback | null | undefined,
+        failCB: FailCallback | null | undefined) {
         let payload = notifyMessageContent ? notifyMessageContent.encode() : '';
         protoProxy.modifyGroupAlias(groupId, alias, lines, JSON.stringify(payload), () => {
             successCB && successCB();
@@ -1058,7 +1066,8 @@ class WfcImpl {
         });
     }
 
-    async modifyGroupMemberAlias(groupId: string, memberId: string, alias: string, lines: number[] = [0], notifyMessageContent: MessageContent | null | undefined, successCB: SuccessCallback | null | undefined, failCB: FailCallback | null | undefined) {
+    async modifyGroupMemberAlias(groupId: string, memberId: string, alias: string, lines: number[] = [0], notifyMessageContent: MessageContent | null | undefined,
+        successCB: SuccessCallback | null | undefined, failCB: FailCallback | null | undefined) {
         let payload = notifyMessageContent ? notifyMessageContent.encode() : '';
         protoProxy.modifyGroupMemberAlias(groupId, memberId, alias, lines, JSON.stringify(payload), () => {
             successCB && successCB();
@@ -1067,7 +1076,8 @@ class WfcImpl {
         });
     }
 
-    async modifyGroupMemberExtra(groupId: string, memberId: string, extra: string, lines: number[] = [0], notifyMessageContent: MessageContent | null | undefined, successCB: SuccessCallback | null | undefined, failCB: FailCallback | null | undefined) {
+    async modifyGroupMemberExtra(groupId: string, memberId: string, extra: string, lines: number[] = [0], notifyMessageContent: MessageContent | null | undefined,
+        successCB: SuccessCallback | null | undefined, failCB: FailCallback | null | undefined) {
         let payload = notifyMessageContent ? notifyMessageContent.encode() : '';
         protoProxy.modifyGroupMemberExtra(groupId, memberId, extra, lines, JSON.stringify(payload), () => {
             successCB && successCB();
@@ -1076,7 +1086,8 @@ class WfcImpl {
         });
     }
 
-    transferGroup(groupId: string, newOwner: string, lines: number[] = [0], notifyMessageContent: MessageContent | null | undefined, successCB: SuccessCallback | null | undefined, failCB: FailCallback | null | undefined) {
+    transferGroup(groupId: string, newOwner: string, lines: number[] = [0], notifyMessageContent: MessageContent | null | undefined, successCB: SuccessCallback | null | undefined,
+        failCB: FailCallback | null | undefined) {
         let payload = notifyMessageContent ? notifyMessageContent.encode() : '';
         protoProxy.transferGroup(groupId, newOwner, lines, JSON.stringify(payload), () => {
             if (successCB) {
@@ -1680,7 +1691,8 @@ class WfcImpl {
         return [] as Message[]
     }
 
-    getMessagesExV2(conversationTypes: number[], lines: number[], contentTypes: number[], fromIndex: number, before: boolean, count: number, withUser: string, successCB: CallbackWithValue_1<Message[]>, failCB: FailCallback) {
+    getMessagesExV2(conversationTypes: number[], lines: number[], contentTypes: number[], fromIndex: number, before: boolean, count: number, withUser: string,
+        successCB: CallbackWithValue_1<Message[]>, failCB: FailCallback) {
         protoProxy.getMessagesExV2(conversationTypes, lines, contentTypes, fromIndex, before, count, withUser, (protoMsgsStr: string) => {
             let protoMsgs = JSON.parse(protoMsgsStr) as Record<string, Object>[];
             let msgs: Message[] = [];
@@ -1716,7 +1728,8 @@ class WfcImpl {
         return [] as Message[]
     }
 
-    getMessagesEx2V2(conversationTypes: number[], lines: number[], statuses: number[], fromIndex: number, before: boolean, count: number, withUser: string, successCB: CallbackWithValue_1<Message[]>, failCB: FailCallback) {
+    getMessagesEx2V2(conversationTypes: number[], lines: number[], statuses: number[], fromIndex: number, before: boolean, count: number, withUser: string, successCB: CallbackWithValue_1<Message[]>,
+        failCB: FailCallback) {
         protoProxy.getMessagesEx2V2(conversationTypes, lines, statuses, fromIndex, before, count, withUser, (protoMsgsStr: string) => {
             let protoMsgs = JSON.parse(protoMsgsStr) as Record<string, Object>[];
             let msgs: Message[] = [];
@@ -1751,7 +1764,8 @@ class WfcImpl {
         return [] as Message[]
     }
 
-    getMessagesByTimestampV2(conversation: Conversation, contentTypes: number[], timestamp: number, before: boolean, count: number, withUser: string, successCB: CallbackWithValue_1<Message[]>, failCB: FailCallback) {
+    getMessagesByTimestampV2(conversation: Conversation, contentTypes: number[], timestamp: number, before: boolean, count: number, withUser: string, successCB: CallbackWithValue_1<Message[]>,
+        failCB: FailCallback) {
         protoProxy.getMessagesByTimestampV2(JSON.stringify(conversation), contentTypes, timestamp, before, count, withUser, (protoMsgsStr: string) => {
             let protoMsgs = JSON.parse(protoMsgsStr) as Record<string, Object>[];
             let msgs: Message[] = [];
@@ -1769,7 +1783,8 @@ class WfcImpl {
         });
     }
 
-    getMessagesByStatusV2(conversation: Conversation, statuses: number[], fromIndex: number, before: boolean, count: number, withUser: string, successCB: CallbackWithValue_1<Message[]>, failCB: FailCallback) {
+    getMessagesByStatusV2(conversation: Conversation, statuses: number[], fromIndex: number, before: boolean, count: number, withUser: string, successCB: CallbackWithValue_1<Message[]>,
+        failCB: FailCallback) {
         protoProxy.getMessagesByStatusV2(JSON.stringify(conversation), statuses, fromIndex, before, count, withUser, (protoMsgsStr: string) => {
             let protoMsgs = JSON.parse(protoMsgsStr) as Record<string, Object>[];
             let msgs: Message[] = [];
@@ -1802,7 +1817,8 @@ class WfcImpl {
     //     return msgs;
     // }
 
-    getUserMessagesV2(userId: string, conversation: Conversation, contentTypes: number[], fromIndex: number, before: boolean, count: number, withUser: string, successCB: CallbackWithValue_1<Message[]>, failCB: FailCallback) {
+    getUserMessagesV2(userId: string, conversation: Conversation, contentTypes: number[], fromIndex: number, before: boolean, count: number, withUser: string,
+        successCB: CallbackWithValue_1<Message[]>, failCB: FailCallback) {
         protoProxy.getUserMessagesV2(userId, JSON.stringify(conversation), contentTypes, fromIndex, before, count, withUser, (protoMsgsStr: string) => {
             let protoMsgs = JSON.parse(protoMsgsStr) as Record<string, Object>[];
             let msgs: Message[] = [];
@@ -1835,7 +1851,8 @@ class WfcImpl {
     //     return msgs;
     // }
 
-    getUserMessagesExV2(userId: string, conversationTypes: number[], lines: number[], contentTypes: number[], fromIndex: number, before: boolean, count: number, withUser: string, successCB: CallbackWithValue_1<Message[]>, failCB: FailCallback) {
+    getUserMessagesExV2(userId: string, conversationTypes: number[], lines: number[], contentTypes: number[], fromIndex: number, before: boolean, count: number, withUser: string,
+        successCB: CallbackWithValue_1<Message[]>, failCB: FailCallback) {
         protoProxy.getUserMessagesExV2(userId, conversationTypes, lines, contentTypes, fromIndex, before, count, withUser, (protoMsgsStr: string) => {
             let protoMsgs = JSON.parse(protoMsgsStr) as Record<string, Object>[];
             let msgs: Message[] = [];
@@ -1918,7 +1935,8 @@ class WfcImpl {
         return matchMsgs;
     }
 
-    searchMessageByTypesAndTimes(conversation: Conversation, keyword: string, contentTypes: number[], startTime: number, endTime: number, desc: boolean = false, limit = 20, offset = 0, withUser = ''): Message[] {
+    searchMessageByTypesAndTimes(conversation: Conversation, keyword: string, contentTypes: number[], startTime: number, endTime: number, desc: boolean = false, limit = 20, offset = 0,
+        withUser = ''): Message[] {
         if (!contentTypes) {
             contentTypes = [];
         }
@@ -1966,17 +1984,21 @@ class WfcImpl {
         return matchMsgs;
     }
 
-    async sendConversationMessage(conversation: Conversation, messageContent: MessageContent, toUsers: string[] = [], preparedCB: CallbackWithValue_2<number, number> | null = null, progressCB: CallbackWithValue_2<number, number> | null = null, uploadedCB: CallbackWithValue_1<string> | null = null, successCB: CallbackWithValue_2<Long, number> | null = null, failCB: FailCallback | null = null) {
+    async sendConversationMessage(conversation: Conversation, messageContent: MessageContent, toUsers: string[] = [], preparedCB: CallbackWithValue_2<number, number> | null = null,
+        progressCB: CallbackWithValue_2<number, number> | null = null, uploadedCB: CallbackWithValue_1<string> | null = null, successCB: CallbackWithValue_2<Long, number> | null = null,
+        failCB: FailCallback | null = null) {
         let message = new Message(conversation, messageContent);
         self.sendMessageEx(message, toUsers, preparedCB, progressCB, uploadedCB, successCB, failCB);
     }
 
-    async sendMessage(message: Message, preparedCB: CallbackWithValue_2<number, number> | null = null, progressCB: CallbackWithValue_2<number, number> | null = null, uploadedCB: CallbackWithValue_1<string> | null = null, successCB: CallbackWithValue_2<Long, number> | null = null, failCB: FailCallback | null = null) {
+    async sendMessage(message: Message, preparedCB: CallbackWithValue_2<number, number> | null = null, progressCB: CallbackWithValue_2<number, number> | null = null,
+        uploadedCB: CallbackWithValue_1<string> | null = null, successCB: CallbackWithValue_2<Long, number> | null = null, failCB: FailCallback | null = null) {
         self.sendMessageEx(message, [], preparedCB, progressCB, uploadedCB, successCB, failCB);
     }
 
     // toUsers 用来实现定向消息
-    async sendMessageEx(message: Message, toUsers: string[] = [], preparedCB: CallbackWithValue_2<number, number> | null, progressCB: CallbackWithValue_2<number, number> | null, uploadedCB: CallbackWithValue_1<string> | null, successCB: CallbackWithValue_2<Long, number> | null, failCB: FailCallback | null) {
+    async sendMessageEx(message: Message, toUsers: string[] = [], preparedCB: CallbackWithValue_2<number, number> | null, progressCB: CallbackWithValue_2<number, number> | null,
+        uploadedCB: CallbackWithValue_1<string> | null, successCB: CallbackWithValue_2<Long, number> | null, failCB: FailCallback | null) {
         let strConv = JSON.stringify(message.conversation);
         message.content = message.messageContent!.encode();
         message.from = this.userId;
@@ -2338,10 +2360,22 @@ class WfcImpl {
         return protoProxy.batchDeleteMessages(messageUids);
     }
 
+    getUserOnlineState(userId: string): UserOnlineState | undefined {
+        return self.userOnlineState.get(userId);
+    }
+
+    getUserOnlineStateMap(): Map<string, UserOnlineState> {
+        return self.userOnlineState;
+    }
+
     watchOnlineState(conversationType: number, targets: string[], duration: number, successCB: CallbackWithValue_1<UserOnlineState[]>, failCB: FailCallback) {
         protoProxy.watchOnlineState(conversationType, targets, duration,
             (strStates: string) => {
                 let userOnlineStates = self._parseUserOnlineState(strStates);
+                for (const state of userOnlineStates) {
+                    self.userOnlineState.set(state.userId, state)
+                }
+
                 successCB && successCB(userOnlineStates);
             },
             (errorCode: number) => {
@@ -2404,7 +2438,8 @@ class WfcImpl {
         return protoProxy.isSupportBigFilesUpload() === 1;
     }
 
-    getUploadMediaUrl(fileName: string, mediaType: number, contentType: string, successCB: (uploadUrl: string, remoteUrl: string, backUploadUrl: string, serverType: number) => void, failCB: FailCallback) {
+    getUploadMediaUrl(fileName: string, mediaType: number, contentType: string, successCB: (uploadUrl: string, remoteUrl: string, backUploadUrl: string, serverType: number) => void,
+        failCB: FailCallback) {
         protoProxy.getUploadMediaUrl(fileName, mediaType, contentType, successCB, failCB);
     }
 
@@ -2570,7 +2605,8 @@ class WfcImpl {
             }, advance);
     }
 
-    searchFiles(keyword: string, conversation: Conversation, fromUser: string, beforeMessageId: number, order: number, count: number, successCB: CallbackWithValue_1<FileRecord[]>, failCB: FailCallback) {
+    searchFiles(keyword: string, conversation: Conversation, fromUser: string, beforeMessageId: number, order: number, count: number, successCB: CallbackWithValue_1<FileRecord[]>,
+        failCB: FailCallback) {
         protoProxy.searchFiles(keyword, conversation ? JSON.stringify(conversation) : '', fromUser, Long.fromValue(beforeMessageId)
             .toString(), order, count,
             (files: string) => {

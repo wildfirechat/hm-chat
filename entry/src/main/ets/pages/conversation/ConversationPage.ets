@@ -29,6 +29,7 @@ import { navigationDestinations } from '../navigationConfig'
 import TestCustomNotificationMessageContent from '../../wfc_custom_message/testCustomNotificationMessageContent'
 import TestCustomMessageContentView from './custom_message/testCustomMessageContentView'
 import TestCustomNotificationMessageContentView from './custom_message/TestCustomNotificationMessageContentView'
+import UserOnlineState from '../../wfc/model/userOnlineState'
 
 @Entry
 @Component
@@ -129,9 +130,29 @@ export default struct ConversationPage {
         wfc.eventEmitter!.off(EventType.GroupInfosUpdate, this.onGroupInfosUpdate)
         wfc.eventEmitter!.off(EventType.ChannelInfosUpdate, this.onChannelInfosUpdate)
         wfc.eventEmitter!.off(EventType.ConversationInfoUpdate, this.onConversationInfoUpdate)
+
+        this.unwatchOnlineState(this.conversation!)
+    }
+
+    unwatchOnlineState(conversation: Conversation) {
+        if (
+            wfc.isUserOnlineStateEnabled()
+                && (conversation.type === ConversationType.Single && !wfc.isMyFriend(conversation.target))
+                && (conversation.type === ConversationType.Group)
+        ) {
+            wfc.unwatchOnlineState(conversation.type, [conversation.target], () => {
+
+            }, err => {
+
+            })
+        }
     }
 
     setupConversation(conversation: Conversation, title: string) {
+        if (this.conversation) {
+            this.unwatchOnlineState(this.conversation!)
+        }
+
         this.conversation = conversation;
 
         this.conversationInfo = wfc.getConversationInfo(this.conversation)
@@ -150,13 +171,34 @@ export default struct ConversationPage {
             })
         }
 
+        if (wfc.isUserOnlineStateEnabled()
+            && (this.conversation.type === ConversationType.Single && !wfc.isMyFriend(this.conversation.target))
+            && (this.conversation.type === ConversationType.Group)
+        ) {
+            wfc.watchOnlineState(ConversationType.Group, [this.conversation.target], 60, (states: UserOnlineState[]) => {
+                if (this.conversation?.type === ConversationType.Single) {
+                    let userOnlineState = wfc.getUserOnlineState(this.conversation.target)
+                    if (userOnlineState) {
+                        this.title += userOnlineState.desc()
+                    }
+                }
+
+            }, err => {
+            })
+        }
+
         if (!title) {
             Utils.computeConversationItemPortraitAndName(this.conversation)
                 .then(value => {
-                    this.title = value.name
+                    this.title = value.name + this.title
                 })
         } else {
             this.title = title;
+        }
+
+        let userOnlineState = wfc.getUserOnlineState(this.conversation.target)
+        if (userOnlineState) {
+            this.title += `(${userOnlineState.desc()})`
         }
 
         if (this.focusMessageId) {

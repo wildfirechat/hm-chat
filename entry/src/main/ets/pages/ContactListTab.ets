@@ -68,10 +68,12 @@ export default struct ContactListTab {
         this.loadContact()
         this.loadMyOrganization()
         wfc.eventEmitter!.on(EventType.ConnectionStatusChanged, this.onConnectionStatusChange)
+        wfc.eventEmitter!.on(EventType.UserOnlineEvent, this.onUserOnlineState)
     }
 
     aboutToDisappear() {
         wfc.eventEmitter!.off(EventType.ConnectionStatusChanged, this.onConnectionStatusChange)
+        wfc.eventEmitter!.off(EventType.UserOnlineEvent, this.onUserOnlineState)
     }
 
     onConnectionStatusChange = (status: number) => {
@@ -79,10 +81,29 @@ export default struct ContactListTab {
             this.loadContact()
         }
     }
+    onUserOnlineState = (status: number) => {
+        let userOnlineStateMap = wfc.getUserOnlineStateMap();
+
+        let groupedContactUserInfos = this.contactDataSource.groupedContactUserInfos.map(uiUserinfo => {
+            uiUserinfo.onlineState = userOnlineStateMap.get(uiUserinfo.userInfo.uid)
+            return uiUserinfo
+        })
+        this.contactDataSource.setContactInfos(groupedContactUserInfos)
+
+        let groupedFavContactUserInfos = this.contactDataSource.groupedFavContactUserInfos.map(uiUserinfo => {
+            uiUserinfo.onlineState = userOnlineStateMap.get(uiUserinfo.userInfo.uid)
+            return uiUserinfo
+        })
+        this.contactDataSource.setContactInfos(groupedFavContactUserInfos)
+    }
 
     loadContact() {
         loadAndGroupContactUserInfos().then(groupedUserInfos => {
-            let groupedContactUserInfos = groupedUserInfos;
+            let userOnlineStateMap = wfc.getUserOnlineStateMap();
+            let groupedContactUserInfos = groupedUserInfos.map(uiUserinfo => {
+                uiUserinfo.onlineState = userOnlineStateMap.get(uiUserinfo.userInfo.uid)
+                return uiUserinfo
+            })
             this.contactDataSource.setContactInfos(groupedContactUserInfos)
         })
     }
@@ -232,9 +253,18 @@ export default struct ContactListTab {
                                         .width(40)
                                         .height(40)
                                         .borderRadius(4)
-                                    Text(groupedUserInfo.userInfo.displayName)
-                                        .maxLines(1)
-                                        .padding({ left: 10 })
+                                    Column() {
+                                        Text(groupedUserInfo.userInfo.displayName)
+                                            .maxLines(1)
+                                            .padding({ left: 10 })
+                                        if (groupedUserInfo.onlineState) {
+                                            Text(groupedUserInfo.onlineState.desc())
+                                                .maxLines(1)
+                                                .padding({ left: 10, top: 4 })
+                                                .fontSize(11)
+                                        }
+                                    }
+                                    .alignItems(HorizontalAlign.Start)
                                 }
                                 .height(60)
                                 .width('100%')

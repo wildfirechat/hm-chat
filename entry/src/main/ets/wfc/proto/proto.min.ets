@@ -381,6 +381,18 @@ class WfcImpl {
         protoProxy.useAES256();
     }
 
+    startLog() {
+        protoProxy.startLog();
+    }
+
+    stopLog() {
+        protoProxy.stopLog();
+    }
+
+    setLiteMode(liteMode: boolean) {
+        protoProxy.setLiteMode(liteMode);
+    }
+
     useTcpShortLink() {
         protoProxy.useTcpShortLink();
     }
@@ -408,7 +420,7 @@ class WfcImpl {
         }
         self.userId = userId;
 
-        let lastActiveTime = protoProxy.connect(userId, token);
+        let lastActiveTime : number = protoProxy.connect(userId, token);
         console.log('lastActiveTime', lastActiveTime);
         // 超过一周没有活跃，就预加载数据
         if (new Date().getTime() / 1000 - lastActiveTime > 7 * 24 * 60 * 60) {
@@ -474,7 +486,7 @@ class WfcImpl {
         return self.isLogined;
     }
 
-    getConnectionStatus() {
+    getConnectionStatus(): number {
         return protoProxy.getConnectionStatus();
     }
 
@@ -547,7 +559,7 @@ class WfcImpl {
         }
 
         // console.log('getuserInfo', userId, fresh, groupId);
-        let userInfoStr = protoProxy.getUserInfo(userId, fresh, groupId);
+        let userInfoStr: string = protoProxy.getUserInfo(userId, fresh, groupId);
         if (userInfoStr === '') {
             userInfo = new NullUserInfo(userId);
         } else {
@@ -561,7 +573,7 @@ class WfcImpl {
 
     getUserInfos(userIds: string[], groupId = ''): UserInfo[] {
         let users: UserInfo[] = [];
-        let userInfoStrs = protoProxy.getUserInfos(userIds, groupId);
+        let userInfoStrs: string = protoProxy.getUserInfos(userIds, groupId);
         if (userInfoStrs && userInfoStrs !== '') {
             let tmp = JSON.parse(userInfoStrs) as Record<string, Object>[];
             tmp.forEach((u) => {
@@ -608,7 +620,7 @@ class WfcImpl {
     }
 
     searchFriends(keyword: string) {
-        let result = protoProxy.searchFriends(keyword);
+        let result: string = protoProxy.searchFriends(keyword);
         let userListStr = JSON.parse(result) as Record<string, Object>[];
         let userList: UserInfo[] = [];
         if (userListStr && userListStr.length > 0) {
@@ -620,7 +632,7 @@ class WfcImpl {
     }
 
     searchGroups(keyword: string) {
-        let result = protoProxy.searchGroups(keyword);
+        let result: string = protoProxy.searchGroups(keyword);
         let groupSearchResultListStr = JSON.parse(result) as Record<string, Object>[];
         let groupSearchResultList: GroupSearchResult[] = [];
         if (groupSearchResultListStr && groupSearchResultListStr.length > 0) {
@@ -632,7 +644,7 @@ class WfcImpl {
     }
 
     getIncommingFriendRequest() {
-        let result = protoProxy.getIncommingFriendRequest();
+        let result: string = protoProxy.getIncommingFriendRequest();
         let friendRequestListStr = JSON.parse(result) as Record<string, Object>[];
         let firendRequestList: FriendRequest[] = [];
         if (friendRequestListStr && friendRequestListStr.length > 0) {
@@ -644,7 +656,7 @@ class WfcImpl {
     }
 
     getOutgoingFriendRequest(): FriendRequest[] {
-        let result = protoProxy.getOutgoingFriendRequest();
+        let result: string = protoProxy.getOutgoingFriendRequest();
         let friendRequestListStr = JSON.parse(result) as Record<string, Object>[];
         let firendRequestList: FriendRequest[] = [];
         if (friendRequestListStr && friendRequestListStr.length > 0) {
@@ -656,7 +668,7 @@ class WfcImpl {
     }
 
     getOneFriendRequest(userId: string, incoming: boolean) {
-        let result = protoProxy.getFriendRequest(userId, incoming);
+        let result: string = protoProxy.getFriendRequest(userId, incoming);
         return JSON.parse(result) as FriendRequest;
     }
 
@@ -665,7 +677,7 @@ class WfcImpl {
     }
 
     getFavUsers() {
-        let result = protoProxy.getFavUsers();
+        let result: string = protoProxy.getFavUsers();
         return JSON.parse(result) as string[];
     }
 
@@ -736,6 +748,14 @@ class WfcImpl {
         protoProxy.clearUnreadFriendRequestStatus();
     }
 
+    clearFriendRequest(direction: number, beforeTime:number) {
+        protoProxy.clearFriendRequest(direction, beforeTime);
+    }
+
+    deleteFriendRequest(userId: string, direction: number) {
+        protoProxy.deleteFriendRequest(userId, direction);
+    }
+
     async deleteFriend(userId: string, successCB: SuccessCallback, failCB: FailCallback) {
         protoProxy.deleteFriend(userId, () => {
             if (successCB) {
@@ -764,7 +784,7 @@ class WfcImpl {
     }
 
     getBlackList(refresh = false) {
-        let result = protoProxy.getBlackList(refresh);
+        let result: string = protoProxy.getBlackList(refresh);
         return JSON.parse(result) as string[];
     }
 
@@ -781,7 +801,7 @@ class WfcImpl {
     }
 
     getMyFriendList(fresh = false) {
-        let idsStr = protoProxy.getMyFriendList(fresh);
+        let idsStr: string = protoProxy.getMyFriendList(fresh);
         if (idsStr !== '') {
             return JSON.parse(idsStr) as string[];
         }
@@ -789,12 +809,16 @@ class WfcImpl {
     }
 
     getFriendList(fresh = false): Friend[] {
-        let result = protoProxy.getFriendList(fresh);
+        let result: string = protoProxy.getFriendList(fresh);
         let friendList = JSON.parse(result) as Record<string, Object>[];
 
         return friendList.map(f => {
             return assign(new Friend(), f) as Friend
         })
+    }
+
+    getFriendExtra(userId: string): string {
+        return protoProxy.getFriendAlias(userId);
     }
 
     getFriendAlias(userId: string): string {
@@ -882,7 +906,7 @@ class WfcImpl {
         }
 
         console.log('get groupInfo', groupId, fresh);
-        let groupInfoStr = protoProxy.getGroupInfo(groupId, fresh);
+        let groupInfoStr: string = protoProxy.getGroupInfo(groupId, fresh);
         if (groupInfoStr === '') {
             return new NullGroupInfo(groupId);
         } else {
@@ -894,7 +918,7 @@ class WfcImpl {
 
     getGroupInfos(groupIds: string[], fresh = false) {
         let groups: GroupInfo[] = [];
-        let groupInfoStrs = protoProxy.getGroupInfos(groupIds, fresh);
+        let groupInfoStrs: string = protoProxy.getGroupInfos(groupIds, fresh);
         if (groupInfoStrs && groupInfoStrs !== '') {
             let tmp: Record<string, Object>[] = JSON.parse(groupInfoStrs);
             tmp.forEach((u) => {
@@ -950,7 +974,7 @@ class WfcImpl {
     }
 
     getGroupMembers(groupId: string, fresh = false) {
-        let membersStr = protoProxy.getGroupMembers(groupId, fresh);
+        let membersStr: string = protoProxy.getGroupMembers(groupId, fresh);
         let members: GroupMember[] = [];
         let arr = JSON.parse(membersStr) as Record<string, Object>[];
         arr.forEach(e => {
@@ -960,7 +984,7 @@ class WfcImpl {
     }
 
     getGroupMembersByType(groupId: string, memberType: number): GroupMember[] {
-        let membersStr = protoProxy.getGroupMembersByType(groupId, memberType);
+        let membersStr: string = protoProxy.getGroupMembersByType(groupId, memberType);
         let members: GroupMember[] = [];
         let arr = JSON.parse(membersStr) as Record<string, Object>[];
         arr.forEach(e => {
@@ -980,7 +1004,7 @@ class WfcImpl {
     }
 
     getGroupMember(groupId: string, memberId: string): GroupMember {
-        let result = protoProxy.getGroupMember(groupId, memberId);
+        let result: string = protoProxy.getGroupMember(groupId, memberId);
         return assign(new GroupMember(), JSON.parse(result)) as GroupMember;
     }
 
@@ -1101,7 +1125,7 @@ class WfcImpl {
     }
 
     getFavGroups(): string[] {
-        let result = protoProxy.getFavGroups();
+        let result: string = protoProxy.getFavGroups();
         return JSON.parse(result) as string[];
     }
 
@@ -1150,7 +1174,7 @@ class WfcImpl {
     }
 
     getUserSettings(scope: number): Record<string, string>[] {
-        let result = protoProxy.getUserSettings(scope);
+        let result: string = protoProxy.getUserSettings(scope);
         return JSON.parse(result);
     }
 
@@ -1300,7 +1324,7 @@ class WfcImpl {
     }
 
     getChannelInfo(channelId: string, refresh = false) {
-        let result = protoProxy.getChannelInfo(channelId, refresh);
+        let result: string = protoProxy.getChannelInfo(channelId, refresh);
         if (result === '') {
             return new NullChannelInfo(channelId);
         }
@@ -1361,13 +1385,13 @@ class WfcImpl {
 
     // return channelIds
     getMyChannels(): string[] {
-        let result = protoProxy.getMyChannels();
+        let result: string = protoProxy.getMyChannels();
         return JSON.parse(result) as string[];
     }
 
     getListenedChannels(): string[] {
         // TODO
-        // let result = protoProxy.getListenedChannels();
+        // let result: string = protoProxy.getListenedChannels();
         // return JSON.parse(result);
         return [] as string[]
     }
@@ -1393,7 +1417,7 @@ class WfcImpl {
     }
 
     getConversationInfoList(types: number[], lines: number[]): ConversationInfo[] {
-        let conversationListStr = protoProxy.getConversationInfos(types, lines);
+        let conversationListStr: string = protoProxy.getConversationInfos(types, lines);
         // console.log(conversationListStr);
         // TODO convert to conversationInfo, messageContent
 
@@ -1407,12 +1431,12 @@ class WfcImpl {
     }
 
     getConversationInfo(conversation: Conversation): ConversationInfo {
-        let convStr = protoProxy.getConversationInfo(JSON.stringify(conversation));
+        let convStr: string = protoProxy.getConversationInfo(JSON.stringify(conversation));
         return ConversationInfo.protoConversationToConversationInfo(JSON.parse(convStr));
     }
 
     searchConversation(keyword: string, types: number[] = [], lines: number[] = []) {
-        let result = protoProxy.searchConversation(keyword, types, lines);
+        let result: string = protoProxy.searchConversation(keyword, types, lines);
         let resultList = JSON.parse(result) as Record<string, Object>[];
         let conversationSearchResult: ConversationSearchResult[] = [];
         if (resultList && resultList.length > 0) {
@@ -1424,7 +1448,7 @@ class WfcImpl {
     }
 
     searchConversationEx(keyword: string, types: number[], lines: number[], startTime = 0, endTime = 0, desc = false, limit = 20, offset = 0) {
-        let result = protoProxy.searchConversationEx(keyword, types, lines, startTime, endTime, desc, limit, offset);
+        let result: string = protoProxy.searchConversationEx(keyword, types, lines, startTime, endTime, desc, limit, offset);
         let resultList = JSON.parse(result) as Record<string, Object>[];
         let conversationSearchResult: ConversationSearchResult[] = [];
         if (resultList && resultList.length > 0) {
@@ -1436,7 +1460,7 @@ class WfcImpl {
     }
 
     searchConversationEx2(keyword: string, types: number[], lines: number[], cntTypes: number[], startTime = 0, endTime = 0, desc = false, limit = 20, offset = 0, onlyMentionedMsg = false) {
-        let result = protoProxy.searchConversationEx2(keyword, types, lines, cntTypes, startTime, endTime, desc, limit, offset, onlyMentionedMsg);
+        let result: string = protoProxy.searchConversationEx2(keyword, types, lines, cntTypes, startTime, endTime, desc, limit, offset, onlyMentionedMsg);
         let resultList = JSON.parse(result) as Record<string, Object>[];
         let conversationSearchResult: ConversationSearchResult[] = [];
         if (resultList && resultList.length > 0) {
@@ -1499,15 +1523,19 @@ class WfcImpl {
     }
 
     getUnreadCount(types: number[], lines: number[] = [0]) {
-        let unreadCountStr = protoProxy.getUnreadCount(types, lines);
+        let unreadCountStr: string = protoProxy.getUnreadCount(types, lines);
         return assign(new UnreadCount(), JSON.parse(unreadCountStr)) as UnreadCount;
     }
 
     getConversationUnreadCount(conversation: Conversation) {
-        let unreadCountStr = protoProxy.getConversationUnreadCount(JSON.stringify(conversation));
+        let unreadCountStr: string = protoProxy.getConversationUnreadCount(JSON.stringify(conversation));
         return assign(new UnreadCount(), JSON.parse(unreadCountStr)) as UnreadCount;
     }
 
+    clearConversationsUnreadStatus(types: number[], lines: number[] = [0]) {
+        protoProxy.clearConversationsUnreadStatus(types, lines);
+        //Todo notify UI?
+    }
     clearConversationUnreadStatus(conversation: Conversation) {
         protoProxy.clearUnreadStatus(JSON.stringify(conversation));
         let conversationInfo = self.getConversationInfo(conversation);
@@ -1521,7 +1549,7 @@ class WfcImpl {
     }
 
     markConversationAsUnread(conversation: Conversation, syncToOtherClient: boolean) {
-        let msgUid = protoProxy.setLastReceivedMessageUnRead(JSON.stringify(conversation));
+        let msgUid: string = protoProxy.setLastReceivedMessageUnRead(JSON.stringify(conversation));
         if (msgUid && gt(msgUid, 0)) {
             if (syncToOtherClient) {
                 let msg = this.getMessageByUid(msgUid);
@@ -1537,7 +1565,7 @@ class WfcImpl {
     }
 
     getConversationRead(conversation: Conversation): Map<string, number> {
-        let readedStr = protoProxy.getConversationRead(JSON.stringify(conversation));
+        let readedStr: string = protoProxy.getConversationRead(JSON.stringify(conversation));
         let readedArr = JSON.parse(readedStr) as Record<string, Object>[];
         // let result = []
         // if (readedArr) {
@@ -1557,7 +1585,7 @@ class WfcImpl {
     }
 
     getConversationDelivery(conversation: Conversation): Map<string, number> {
-        let deliveryStr = protoProxy.getMessageDelivery(JSON.stringify(conversation));
+        let deliveryStr: string = protoProxy.getMessageDelivery(JSON.stringify(conversation));
         let deliveryArr = JSON.parse(deliveryStr) as Record<string, Object>[];
         let result: Map<string, number> = new Map();
         if (deliveryArr) {
@@ -1569,6 +1597,10 @@ class WfcImpl {
         return result;
     }
 
+    kickoffPCClient(clientId: string, successCB: SuccessCallback, failCB: FailCallback) {
+        protoProxy.kickoffPCClient(clientId, successCB, failCB);
+    }
+
     clearMessageUnreadStatus(messageId: number) {
         protoProxy.clearMessageUnreadStatus(messageId);
     }
@@ -1578,8 +1610,8 @@ class WfcImpl {
         protoProxy.clearAllUnreadStatus();
     }
 
-    getConversationFirstUnreadMessageId(conversation: Conversation) {
-        let messageId = protoProxy.getConversationFirstUnreadMessageId(JSON.stringify(conversation));
+    getConversationFirstUnreadMessageId(conversation: Conversation): number {
+        let messageId: number = protoProxy.getConversationFirstUnreadMessageId(JSON.stringify(conversation));
         return messageId;
     }
 
@@ -1621,7 +1653,7 @@ class WfcImpl {
      */
     getMessages(conversation: Conversation, fromIndex: number, before = true, count = 20, withUser = '') {
         // TODO
-        // let protoMsgsStr = protoProxy.getMessages(JSON.stringify(conversation), [], fromIndex, before, count, withUser);
+        // let protoMsgsStr: string = protoProxy.getMessages(JSON.stringify(conversation), [], fromIndex, before, count, withUser);
         // // let protoMsgsStr = proto.getMessages('xxx', [0], fromIndex, before, count, withUser);
         // var protoMsgs = JSON.parse(protoMsgsStr);
         // let msgs = [];
@@ -1675,7 +1707,7 @@ class WfcImpl {
     }
 
     getMessagesEx(conversationTypes: number[], lines: Number[], contentTypes: number[], fromIndex: number = 0, before = true, count = 20, withUser = '') {
-        // let protoMsgsStr = protoProxy.getMessagesEx(conversationTypes, lines, contentTypes, fromIndex, before, count, withUser);
+        // let protoMsgsStr: string = protoProxy.getMessagesEx(conversationTypes, lines, contentTypes, fromIndex, before, count, withUser);
         // // let protoMsgsStr = proto.getMessages('xxx', [0], fromIndex, before, count, withUser);
         // var protoMsgs = JSON.parse(protoMsgsStr);
         // let msgs = [];
@@ -1711,7 +1743,7 @@ class WfcImpl {
     }
 
     getMessagesEx2(conversationTypes: number[], lines: number[], status: number, fromIndex: number, before = true, count = 20, withUser = '') {
-        // let protoMsgsStr = protoProxy.getMessagesEx2(conversationTypes, lines, status, fromIndex, before, count, withUser);
+        // let protoMsgsStr: string = protoProxy.getMessagesEx2(conversationTypes, lines, status, fromIndex, before, count, withUser);
         // // let protoMsgsStr = proto.getMessages('xxx', [0], fromIndex, before, count, withUser);
         // var protoMsgs = JSON.parse(protoMsgsStr);
         // let msgs = [];
@@ -1748,7 +1780,7 @@ class WfcImpl {
     }
 
     getMessagesByTimestamp(conversation: Conversation, contentTypes: number[], timestamp: number, before = true, count = 20, withUser = '') {
-        // let protoMsgsStr = protoProxy.getMessagesByTimestamp(JSON.stringify(conversation), contentTypes, timestamp, before, count, withUser);
+        // let protoMsgsStr: string = protoProxy.getMessagesByTimestamp(JSON.stringify(conversation), contentTypes, timestamp, before, count, withUser);
         // var protoMsgs = JSON.parse(protoMsgsStr);
         // let msgs = [];
         // protoMsgs.map(m => {
@@ -1803,7 +1835,7 @@ class WfcImpl {
     }
 
     // getUserMessages(userId, conversation, fromIndex, before = true, count = 20, contentTypes = []) {
-    //     let protoMsgsStr = protoProxy.getUserMessages(userId, JSON.stringify(conversation), contentTypes, fromIndex, before, count);
+    //     let protoMsgsStr: string = protoProxy.getUserMessages(userId, JSON.stringify(conversation), contentTypes, fromIndex, before, count);
     //     var protoMsgs = JSON.parse(protoMsgsStr);
     //     let msgs = [];
     //     protoMsgs.map(m => {
@@ -1837,7 +1869,7 @@ class WfcImpl {
     }
 
     // getUserMessagesEx(userId, conversationTypes, lines, fromIndex, before = true, count = 20, contentTypes = []) {
-    //     let protoMsgsStr = protoProxy.getUserMessagesEx(userId, conversationTypes, lines, contentTypes, fromIndex, before, count);
+    //     let protoMsgsStr: string = protoProxy.getUserMessagesEx(userId, conversationTypes, lines, contentTypes, fromIndex, before, count);
     //     var protoMsgs = JSON.parse(protoMsgsStr);
     //     let msgs = [];
     //     protoMsgs.map(m => {
@@ -1871,17 +1903,17 @@ class WfcImpl {
     }
 
     getMessageById(messageId: number): Message | null {
-        let mStr = protoProxy.getMessage(messageId);
+        let mStr: string = protoProxy.getMessage(messageId);
         return Message.fromProtoMessage(JSON.parse(mStr));
     }
 
     getMessageByUid(messageUid: Long | string): Message | null {
-        let mStr = protoProxy.getMessageByUid(Long.fromValue(messageUid).toString());
+        let mStr: string = protoProxy.getMessageByUid(Long.fromValue(messageUid).toString());
         return Message.fromProtoMessage(JSON.parse(mStr));
     }
 
     searchMessage(conversation: Conversation, keyword: string, withUser = ''): Message[] {
-        let result = protoProxy.searchMessage(JSON.stringify(conversation), keyword, withUser);
+        let result: string = protoProxy.searchMessage(JSON.stringify(conversation), keyword, withUser);
         let msgs = JSON.parse(result) as Record<string, Object>[];
         let matchMsgs: Message[] = [];
         if (msgs && msgs.length > 0) {
@@ -1894,7 +1926,7 @@ class WfcImpl {
     }
 
     searchMessageEx(conversation: Conversation, keyword: string, desc: boolean, limit = 20, offset = 0, withUser = ''): Message[] {
-        let result = protoProxy.searchMessageEx(JSON.stringify(conversation), keyword, desc, limit, offset, withUser);
+        let result: string = protoProxy.searchMessageEx(JSON.stringify(conversation), keyword, desc, limit, offset, withUser);
         let msgs = JSON.parse(result) as Record<string, Object>[];
         let matchMsgs: Message[] = [];
         if (msgs && msgs.length > 0) {
@@ -1907,7 +1939,7 @@ class WfcImpl {
     }
 
     searchMentionedMessages(conversation: Conversation, keyword: string, desc: boolean, limit = 20, offset = 0): Message[] {
-        let result = protoProxy.searchMentionedMessages(JSON.stringify(conversation), keyword, desc, limit, offset);
+        let result: string = protoProxy.searchMentionedMessages(JSON.stringify(conversation), keyword, desc, limit, offset);
         let msgs = JSON.parse(result) as Record<string, Object>[];
         let matchMsgs: Message[] = [];
         if (msgs && msgs.length > 0) {
@@ -1923,7 +1955,7 @@ class WfcImpl {
         if (!contentTypes) {
             contentTypes = [];
         }
-        let result = protoProxy.searchMessageByTypes(JSON.stringify(conversation), keyword, contentTypes, desc, limit, offset, withUser);
+        let result: string = protoProxy.searchMessageByTypes(JSON.stringify(conversation), keyword, contentTypes, desc, limit, offset, withUser);
         let msgs = JSON.parse(result) as Record<string, Object>[];
         let matchMsgs: Message[] = [];
         if (msgs && msgs.length > 0) {
@@ -1940,7 +1972,7 @@ class WfcImpl {
         if (!contentTypes) {
             contentTypes = [];
         }
-        let result = protoProxy.searchMessageByTypesAndTimes(JSON.stringify(conversation), keyword, contentTypes, startTime, endTime, desc, limit, offset, withUser);
+        let result: string = protoProxy.searchMessageByTypesAndTimes(JSON.stringify(conversation), keyword, contentTypes, startTime, endTime, desc, limit, offset, withUser);
         let msgs = JSON.parse(result) as Record<string, Object>[];
         let matchMsgs: Message[] = [];
         if (msgs && msgs.length > 0) {
@@ -1956,7 +1988,7 @@ class WfcImpl {
         if (!contentTypes) {
             contentTypes = [];
         }
-        let result = protoProxy.searchMessageEx2(conversationTypes, lines, contentTypes, keyword, fromIndex, desc, count, withUser);
+        let result: string = protoProxy.searchMessageEx2(conversationTypes, lines, contentTypes, keyword, fromIndex, desc, count, withUser);
         let msgs = JSON.parse(result) as Record<string, Object>[];
         let matchMsgs: Message[] = [];
         if (msgs && msgs.length > 0) {
@@ -1972,7 +2004,7 @@ class WfcImpl {
         if (!conversationTypes) {
             conversationTypes = [];
         }
-        let result = protoProxy.searchMentionedMessagesEx(conversationTypes, lines, keyword, desc, limit, offset);
+        let result: string = protoProxy.searchMentionedMessagesEx(conversationTypes, lines, keyword, desc, limit, offset);
         let msgs = JSON.parse(result) as Record<string, Object>[];
         let matchMsgs: Message[] = [];
         if (msgs && msgs.length > 0) {
@@ -2074,7 +2106,7 @@ class WfcImpl {
         }
 
         let strCont = JSON.stringify(message.content);
-        let msgStr = protoProxy.sendMessage(strConv, strCont, toUsers, 0,
+        let msgStr: string = protoProxy.sendMessage(strConv, strCont, toUsers, 0,
             (messageId: number, timestamp: number) => { //preparedCB
                 message.messageId = messageId;
                 message.timestamp = Long.fromValue(timestamp).toNumber();
@@ -2349,7 +2381,7 @@ class WfcImpl {
     }
 
     deleteMessageById(messageId: number): boolean {
-        let result = protoProxy.deleteMessage(messageId);
+        let result: boolean = protoProxy.deleteMessage(messageId);
         if (result) {
             this.onMessageDeleted(messageId);
         }
@@ -2547,13 +2579,13 @@ class WfcImpl {
      */
     insertMessage(conversation: Conversation, messageContent: MessageContent, status: number, notify = false, toUsers: string[] = [], serverTime = 0): Message | null {
         let protoMessageContent = messageContent.encode();
-        let mStr = protoProxy.insertMessage(JSON.stringify(conversation), self.userId, JSON.stringify(protoMessageContent), status, notify, toUsers, serverTime);
+        let mStr: string = protoProxy.insertMessage(JSON.stringify(conversation), self.userId, JSON.stringify(protoMessageContent), status, notify, toUsers, serverTime);
         return Message.fromProtoMessage(JSON.parse(mStr));
     }
 
     insertMessageEx(messageUid: Long, conversation: Conversation, fromUser: string, messageContent: MessageContent, status: number, serverTime: number, localExtra = ''): Message | null {
         let protoMessageContent = messageContent.encode();
-        let mStr = protoProxy.insertMessageEx(Long.fromValue(messageUid)
+        let mStr: string = protoProxy.insertMessageEx(Long.fromValue(messageUid)
             .toString(), JSON.stringify(conversation), fromUser, JSON.stringify(protoMessageContent), status, serverTime, localExtra);
         return Message.fromProtoMessage(JSON.parse(mStr));
     }
@@ -2565,6 +2597,10 @@ class WfcImpl {
 
     async updateMessageStatus(messageId: number, status: number) {
         protoProxy.updateMessageStatus(messageId, status);
+    }
+
+    getMessageCount(conversation: Conversation): number {
+        return protoProxy.getMessageCount(JSON.stringify(conversation));
     }
 
     async uploadMedia(fileName: string, fileOrData: string, mediaType: number, successCB: CallbackWithValue_1<string>, failCB: FailCallback, progressCB: CallbackWithValue_2<number, number>) {
@@ -2674,7 +2710,7 @@ class WfcImpl {
     }
 
     getSecretChatInfo(targetId: string): SecretChatInfo | null {
-        let secretChatInfoStr = protoProxy.getSecretChatInfo(targetId);
+        let secretChatInfoStr: string = protoProxy.getSecretChatInfo(targetId);
         if (!secretChatInfoStr) {
             return null;
         }

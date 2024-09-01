@@ -94,6 +94,7 @@ export class WfcManager {
         this.eventEmitter = eventHub;
         impl.init(context, eventHub, dbPath);
         impl.setPlatform(platform);
+        this.startLog();
         // if (Config.ENABLE_PTT) {
         //     pttClient.init();
         // }
@@ -139,6 +140,27 @@ export class WfcManager {
      */
     useAES256() {
         impl.useAES256();
+    }
+
+    /*
+     * 开启日志，需要在connect之前调用。如果有设置包名或者其他connect之前调用的操作，需要放到这些操作之后。
+     */
+    startLog() {
+        impl.startLog();
+    }
+
+    /*
+     * 结束日志
+     */
+    stopLog() {
+        impl.stopLog();
+    }
+
+    /*
+     * 设置lite模式。lite模式不同步历史记录，本地不存储消息。
+     */
+    setLiteMode(liteMode: boolean) {
+        impl.setLiteMode(liteMode);
     }
 
     /**
@@ -199,10 +221,24 @@ export class WfcManager {
         impl.disconnect(disablePush, cleanSession);
     }
 
+    /**
+     * 设置包名。包名会影响到数据库的存储路径，需要在调用connect之前调用。
+     * @param packageName
+     */
     setPackageName(packageName: string) {
         impl.setPackageName(packageName);
     }
 
+    /**
+     * 获取日志文件的路径列表。只有startLo之后才会生成日志。
+     * @returns 日志文件的路径列表
+     */
+    getLogFilesPath(): string[] {
+        let logPath = this.getAppPath();
+        let filesPath: string[] = [];
+        //Todo 遍历logPath目录，找出来所有protocol开头，xlog结尾的所有文件
+        return filesPath;
+    }
 
     /**
      * 获取当前用户的id
@@ -333,10 +369,21 @@ export class WfcManager {
         return userInfo.groupAlias ? userInfo.groupAlias : (userInfo.friendAlias && !ignoreFriendAlias ? userInfo.friendAlias : (userInfo.displayName ? userInfo.displayName : '<' + userId + '>'))
     }
 
+    /**
+     * 这是一个辅助函数，用来读取用户信息中的用户名。
+     * @param userInfo
+     * @returns
+     */
     getUserDisplayNameEx(userInfo: UserInfo) {
         return userInfo.friendAlias ? userInfo.friendAlias : (userInfo.displayName ? userInfo.displayName : '<' + userInfo.uid + '>');
     }
 
+    /**
+     * 这是一个辅助函数，用来读取群组用户信息中的用户名。
+     * @param userInfo
+     * @param ignoreFriendAlias
+     * @returns
+     */
     getGroupMemberDisplayNameEx(userInfo: UserInfo, ignoreFriendAlias: boolean = false) {
         return userInfo.groupAlias ? userInfo.groupAlias : (userInfo.friendAlias && !ignoreFriendAlias ? userInfo.friendAlias : (userInfo.displayName ? userInfo.displayName : '<' + userInfo.uid + '>'))
     }
@@ -475,6 +522,25 @@ export class WfcManager {
     }
 
     /**
+     * 清除好友请求的历史记录。注意只清理本地数据，服务器端的会一直保留。
+     * @param direction 方向，0是发出去的请求，1是收到的请求。
+     * @param beforeTime 清除某个时间戳之前的请求，单位毫秒。如果清除全部用0
+     */
+    clearFriendRequest(direction: number, beforeTime:number) {
+        impl.clearFriendRequest(direction, beforeTime);
+    }
+
+    /**
+     * 删除好友请求
+     * @param userId    用户ID
+     * @param direction 方向，0是发出去的请求，1是收到的请求。
+     */
+    deleteFriendRequest(userId: string, direction: number) {
+        impl.deleteFriendRequest(userId, direction);
+    }
+
+
+    /**
      * 删除好友
      * @param {string} userId 好友id
      * @param {function ()} successCB
@@ -552,9 +618,13 @@ export class WfcManager {
         return impl.getFriendAlias(userId);
     }
 
+    /**
+     * 获取好友的Extra信息。
+     * @param userId
+     * @returns
+     */
     getFriendExtra(userId: string) {
-        // fixme
-        // return impl.getFriendExtra(userId);
+        return impl.getFriendExtra(userId);
     }
 
     /**
@@ -1110,34 +1180,75 @@ export class WfcManager {
         return impl.getSecretChatInfo(targetId);
     }
 
+    /**
+     * 销毁密聊
+     * @param targetId
+     * @param successCB
+     * @param failCB
+     */
     destroySecretChat(targetId: string, successCB: SuccessCallback | null = null, failCB: FailCallback | null = null) {
         impl.destroySecretChat(targetId, successCB, failCB);
     }
 
+    /**
+     * 使用密聊的密钥，加密数据。一般应用层无法直接使用。
+     * @param targetId
+     * @param mediaDataBuffer
+     * @returns
+     */
     encodeSecretChatMediaData(targetId: string, mediaDataBuffer: string): string {
         return impl.encodeSecretChatMediaData(targetId, mediaDataBuffer);
     }
 
+    /**
+     * 使用密聊的密钥，解密数据。在密聊会话中发送媒体类信息，对方收到的文件会是加密过的，需要调用此方法解密。
+     * @param targetId
+     * @param mediaDataBuffer
+     * @returns
+     */
     decodeSecretChatMediaData(targetId: string, mediaDataBuffer: string): string {
         return impl.decodeSecretChatMediaData(targetId, mediaDataBuffer);
     }
 
+    /**
+     * 设置密聊会话阅后即焚时间。
+     * @param targetId
+     * @param ms
+     */
     setSecretChatBurnTime(targetId: string, ms: number) {
         impl.setSecretChatBurnTime(targetId, ms);
     }
 
+    /**
+     * 检查是否开启了密聊。密聊仅限于部分客户开启，详情请参考 https://docs.wildfirechat.cn/blogs/野火端到端及阅后即焚功能介绍.html
+     * @returns
+     */
     isEnableSecretChat(): boolean {
         return impl.isEnableSecretChat();
     }
 
+    /**
+     * 获取应用数据目录
+     * @returns
+     */
     getAppPath(): string {
         return impl.getAppPath();
     }
 
+    /**
+     * 获取自己是否开启密聊
+     * @returns
+     */
     isUserEnableSecretChat(): boolean {
         return impl.isUserEnableSecretChat();
     }
 
+    /**
+     * 设置自己是否开启密聊
+     * @param enable
+     * @param successCB
+     * @param failCB
+     */
     setUserEnableSecretChat(enable: boolean, successCB: SuccessCallback, failCB: FailCallback) {
         impl.setUserEnableSecretChat(enable, successCB, failCB);
     }
@@ -1360,6 +1471,9 @@ export class WfcManager {
         return impl.getConversationUnreadCount(conversation);
     }
 
+    clearConversationsUnreadStatus(types = [0, 1, 2], lines = [0]) {
+        impl.clearConversationsUnreadStatus(types, lines);
+    }
     /**
      * 清楚会话消息未读状态
      * @param {Conversation} conversation 目标会话
@@ -1475,103 +1589,6 @@ export class WfcManager {
 
     /**
      * 获取会话消息
-     * @deprecated 请使用{@link getMessagesV2}
-     * @param {Conversation} conversation 目标会话
-     * @param {number} fromIndex messageId，表示从那一条消息开始获取
-     * @param {boolean} before true, 获取fromIndex之前的消息，即更旧的消息；false，获取fromIndex之后的消息，即更新的消息。都不包含fromIndex对应的消息
-     * @param {number} count 获取多少条消息
-     * @param {string} withUser 只有会话类型为{@link ConversationType#Channel}时生效, channel主用来查询和某个用户的所有消息
-     * @return {[Message]} 会话消息列表，参考{@link Message}
-     */
-    // TODO
-    // getMessages(conversation, fromIndex = 0, before = true, count = 20, withUser = '') {
-    //     return impl.getMessages(conversation, fromIndex, before, count, withUser);
-    // }
-
-    /**
-     * 获取消息
-     * @deprecated 请使用{@link getMessagesExV2}
-     * @param {[number]} conversationTypes 会话类型列表，可选值参考{@link  ConversationType}
-     * @param {[number]} lines 会话线路列表
-     * @param {number} fromIndex 本参数暂时无效! messageId，表示从那一条消息开始获取
-     * @param {boolean} before 本参数暂时无效! true, 获取fromIndex之前的消息，即更旧的消息；false，获取fromIndex之后的消息，即更新的消息。都不包含fromIndex对应的消息
-     * @param {number} count 本参数暂时无效! 获取多少条消息
-     * @param {string} withUser 只有会话类型为{@link ConversationType#Channel}时生效, channel主用来查询和某个用户的所有消息
-     * @param {[number]} contentTypes 消息类型列表，可选值参考{@link MessageContentType}
-     * @return {[Message]} 会话消息列表，参考{@link Message}
-     */
-    // TODO
-    // getMessagesEx(conversationTypes, lines, fromIndex = 0, before = true, count = 20, withUser = '', contentTypes = []) {
-    //     return impl.getMessagesEx(conversationTypes, lines, contentTypes, fromIndex, before, count, withUser);
-    // }
-
-    /**
-     * 获取消息
-     * @deprecated 请使用{@link getMessagesEx2V2}
-     * @param {[number]} conversationTypes 会话类型列表，可选值参考{@link  ConversationType}
-     * @param {[number]} lines 会话线路列表
-     * @param {[number]} messageStatus 消息状态，可选值参考{@link MessageStatus}
-     * @param {number} fromIndex 本参数暂时无效! messageId，表示从那一条消息开始获取
-     * @param {boolean} before 本参数暂时无效! true, 获取fromIndex之前的消息，即更旧的消息；false，获取fromIndex之后的消息，即更新的消息。都不包含fromIndex对应的消息
-     * @param {number} count 本参数暂时无效! 获取多少条消息
-     * @param {string} withUser 只有会话类型为{@link ConversationType#Channel}时生效, channel主用来查询和某个用户的所有消息
-     * @return {[Message]} 会话消息列表，参考{@link Message}
-     */
-    // TODO
-    // getMessagesEx2(conversationTypes, lines, messageStatus, fromIndex = 0, before = true, count = 20, withUser = '') {
-    //     return impl.getMessagesEx2(conversationTypes, lines, messageStatus, fromIndex, before, count, withUser);
-    // }
-
-    /**
-     * 获取会话消息
-     * @deprecated 请使用{@link getMessagesByTimestampV2}
-     * @param {Conversation} conversation 目标会话
-     * @param {[number]} contentTypes 消息类型，可选值参考{@link MessageContentType}
-     * @param {number} timestamp 时间戳
-     * @param {boolean} before true, 获取timestamp之前的消息，即更旧的消息；false，获取timestamp之后的消息，即更新的消息。都不包含timestamp对应的消息
-     * @param {number} count 获取多少条消息
-     * @param {string} withUser 只有会话类型为{@link ConversationType#Channel}时生效, channel主用来查询和某个用户的所有消息
-     * @return {[Message]} 会话消息列表，参考{@link Message}
-     */
-    // TODO
-    // getMessagesByTimestamp(conversation, contentTypes, timestamp, before = true, count = 20, withUser = '') {
-    //     return impl.getMessagesByTimestamp(conversation, contentTypes, timestamp, before, count, withUser);
-    // }
-
-    /**
-     * 获取用户会话消息
-     * @deprecated 请使用{@link getUserMessagesV2}
-     * @param {string} userId 用户id
-     * @param {Conversation} conversation 目标会话
-     * @param {number} fromIndex 本参数暂时无效！ messageId，表示从那一条消息开始获取
-     * @param {boolean} before 本参数暂时无效！ true, 获取fromIndex之前的消息，即更旧的消息；false，获取fromIndex之后的消息，即更新的消息。都不包含fromIndex对应的消息
-     * @param {number} count 本参数暂时无效! 获取多少条消息
-     * @return
-     */
-    // TODO
-    // getUserMessages(userId, conversation, fromIndex, before = true, count = 20) {
-    //     return impl.getUserMessages(userId, conversation, fromIndex, before, count);
-    // }
-
-    /**
-     * 获取用户消息
-     * @deprecated 请使用{@link getUserMessagesExV2}
-     * @param {string} userId 用户id
-     * @param {[number]} conversationTypes 想获取的会话类型，可选值参考{@link ConversationType}
-     * @param {[0]} lines 想获取哪些会话线路的会话，默认传[0]即可
-     * @param {number} fromIndex 本参数暂时无效！ messageId，表示从那一条消息开始获取
-     * @param {boolean} before 本参数暂时无效！ true, 获取fromIndex之前的消息，即更旧的消息；false，获取fromIndex之后的消息，即更新的消息。都不包含fromIndex对应的消息
-     * @param {number} count 本参数暂时无效！ 获取多少条消息
-     * @param {[number]} contentTypes 消息类型，可选值参考{@link MessageContentType}
-     * @return
-     */
-    // TODO
-    // getUserMessagesEx(userId, conversationTypes, lines, fromIndex, before = true, count = 20, contentTypes = []) {
-    //     return impl.getUserMessagesEx(userId, conversationTypes, lines, fromIndex, before, count, contentTypes);
-    // }
-
-    /**
-     * 获取会话消息
      * @param {Conversation} conversation 目标会话
      * @param {number} fromIndex messageId，表示从那一条消息开始获取
      * @param {boolean} before true, 获取fromIndex之前的消息，即更旧的消息；false，获取fromIndex之后的消息，即更新的消息。都不包含fromIndex对应的消息
@@ -1644,6 +1661,17 @@ export class WfcManager {
         impl.getMessagesByTimestampV2(conversation, contentTypes, timestamp, before, count, withUser, successCB, failCB);
     }
 
+    /**
+     * 获取会话消息
+     * @param {Conversation} conversation 目标会话
+     * @param {[number]} statuses 消息状态类型，可选值参考{@link MessageStatus}
+     * @param {number} fromIndex 本参数暂时无效！ messageId，表示从那一条消息开始获取
+     * @param {boolean} before 本参数暂时无效！ true, 获取fromIndex之前的消息，即更旧的消息；false，获取fromIndex之后的消息，即更新的消息。都不包含fromIndex对应的消息
+     * @param {number} count 本参数暂时无效! 获取多少条消息
+     * @param {string} withUser 只有会话类型为{@link ConversationType#Channel}时生效, channel主用来查询和某个用户的所有消息
+     * @param {function ([Message])} successCB
+     * @param failCB
+     */
     getMessagesByStatusV2(conversation: Conversation, statuses: numberArray, fromIndex: number, before: boolean, count: number, withUser: string, successCB: CallbackWithValue_1<Message[]>, failCB: FailCallback) {
         impl.getMessagesByStatusV2(conversation, statuses, fromIndex, before, count, withUser, successCB, failCB);
     }
@@ -1684,9 +1712,8 @@ export class WfcManager {
      * @param {Conversation} conversation
      * @return {number}
      */
-    getFirstUnreadMessageId(conversation: Conversation) {
-        // fixme
-        // return impl.getFirstUnreadMessageId(conversation);
+    getFirstUnreadMessageId(conversation: Conversation): number {
+        return impl.getConversationFirstUnreadMessageId(conversation);
     }
 
     /**
@@ -2068,7 +2095,6 @@ export class WfcManager {
         return impl.insertMessage(conversation, messageContent, status, notify, toUsers, serverTime);
     }
 
-
     /**
      * 插入消息
      * @param {Conversation} conversation 目标会话
@@ -2104,6 +2130,15 @@ export class WfcManager {
     }
 
     /**
+     * 获取会话内的消息总数。
+     * @param conversation
+     * @returns
+     */
+    getMessageCount(conversation: Conversation): number {
+        return impl.getMessageCount(conversation);
+    }
+
+    /**
      * 上传媒体文件
      * @param {string} fileName
      * @param {string | File} fileOrData dataUri，或者 base64格式的媒体数据，或者 File 对象
@@ -2124,6 +2159,11 @@ export class WfcManager {
 
     /**
      * 获取经过认证的下载地址。
+     * @param messageUid
+     * @param mediaType 媒体类型，可选值参考{@link MediaType}，不能填写错误。
+     * @param mediaPath
+     * @param successCB
+     * @param failCB
      */
     getAuthorizedMediaUrl(messageUid: Long, mediaType: number, mediaPath: string, successCB: CallbackWithValue_1<string>, failCB: FailCallback) {
         impl.getAuthorizedMediaUrl(messageUid, mediaType, mediaPath, successCB, failCB)
@@ -2190,9 +2230,8 @@ export class WfcManager {
         return impl.isGlobalDisableSyncDraft();
     }
 
-
     /**
-     *
+     * 设置是否禁止草稿同步
      * @param disable
      * @param successCB
      * @param failCB
@@ -2201,6 +2240,10 @@ export class WfcManager {
         impl.setDisableSyncDraft(disable, successCB, failCB)
     }
 
+    /**
+     * 是否关闭草稿同步
+     * @returns
+     */
     isDisableSyncDraft(): boolean {
         return impl.isDisableSyncDraft();
     }
@@ -2231,6 +2274,16 @@ export class WfcManager {
      */
     getConversationRead(conversation: Conversation): Map<string, number> {
         return impl.getConversationRead(conversation);
+    }
+
+    /**
+     * 踢掉在线的电脑客户端。
+     * @param clientId
+     * @param successCB
+     * @param failCB
+     */
+    kickoffPCClient(clientId: string, successCB: SuccessCallback, failCB: FailCallback) {
+        impl.kickoffPCClient(clientId, successCB, failCB);
     }
 
     /**
@@ -2345,10 +2398,23 @@ export class WfcManager {
         this.sendConferenceRequestEx(sessionId, roomId, request, data, false, callback)
     }
 
+    /**
+     * 发送会议相关的请求
+     * @param sessionId
+     * @param roomId
+     * @param request
+     * @param data
+     * @param advance
+     * @param callback
+     */
     sendConferenceRequestEx(sessionId: string, roomId: string, request: string, data: string, advance: boolean, callback: CallbackWithValue_2<number, string | null>) {
         impl.sendConferenceRequest(sessionId, roomId, request, data, advance, callback);
     }
 
+    /**
+     * 当前用户是否开启在线状态
+     * @returns
+     */
     isUserOnlineStateEnabled(): boolean {
         return impl.isUserOnlineStateEnabled();
     }
@@ -2360,9 +2426,8 @@ export class WfcManager {
     getUserOnlineStateMap(): Map<string, UserOnlineState> {
         return impl.getUserOnlineStateMap()
     }
-
     /**
-     *
+     * 定义目标在线状态
      * @param {number} type 会话类型， 支持{@link ConversationType.Single}和{@link ConversationType.Group}
      * @param {string[]} targets 会话类型为单聊时，是用户 id列表；会话类型为群组时，是群组 id 列表
      * @param {number} duration 关注时间长度，单位是秒
@@ -2373,38 +2438,95 @@ export class WfcManager {
         impl.watchOnlineState(type, targets, duration, successCB, failCB);
     }
 
+    /**
+     * 取消订阅目标在线状态。
+     * @param type 会话类型， 支持{@link ConversationType.Single}和{@link ConversationType.Group}
+     * @param targets 会话类型为单聊时，是用户 id列表；会话类型为群组时，是群组 id 列表
+     * @param successCB
+     * @param failCB
+     */
     unwatchOnlineState(type: number, targets: stringArray, successCB: SuccessCallback, failCB: FailCallback) {
         impl.unwatchOnlineState(type, targets, successCB, failCB);
     }
 
+    /**
+     * 设置我的自定义状态
+     * @param customState
+     * @param customText
+     * @param successCB
+     * @param failCB
+     */
     setMyCustomState(customState: number, customText: string, successCB: SuccessCallback, failCB: FailCallback) {
         impl.setMyCustomState(customState, customText, successCB, failCB)
     }
 
+    /**
+     * 获取AuthCode，AuthCode用于开放平台，详情请参考 https://gitee.com/wfchat/open-platform
+     * @param appId
+     * @param appType
+     * @param host
+     * @param successCB
+     * @param failCB
+     */
     getAuthCode(appId: string, appType: number, host: string, successCB: CallbackWithValue_1<string>, failCB: FailCallback) {
         impl.getAuthCode(appId, appType, host, successCB, failCB);
     }
 
+    /**
+     * config应用，开放平台接口，详情请参考 https://gitee.com/wfchat/open-platform
+     * @param appId
+     * @param appType
+     * @param timestamp
+     * @param nonceStr
+     * @param signature
+     * @param successCB
+     * @param failCB
+     */
     configApplication(appId: string, appType: number, timestamp: number, nonceStr: string, signature: string, successCB: SuccessCallback, failCB: FailCallback) {
         impl.configApplication(appId, appType, timestamp, nonceStr, signature, successCB, failCB);
     }
 
+    /**
+     * 开启数据库的事物。用户数据备份与恢复的接口。
+     * @returns
+     */
     beginTransaction(): boolean {
         return impl.beginTransaction();
     }
 
+    /**
+     * 提交数据库的事物。用户数据备份与恢复的接口。
+     * @returns
+     */
     commitTransaction(): boolean {
         return impl.commitTransaction();
     }
 
+    /**
+     * 回滚数据库的事物。用户数据备份与恢复的接口。
+     * @returns
+     */
     rollbackTransaction(): boolean {
         return impl.rollbackTransaction();
     }
 
+    /**
+     * 应用锁，可以用于多个客户端抢某个共同资源。
+     * @param lockId  资源ID
+     * @param duration 单位为秒
+     * @param successCB
+     * @param failCB
+     */
     requireLock(lockId: string, duration: number, successCB: SuccessCallback, failCB: FailCallback) {
         impl.requireLock(lockId, duration, successCB, failCB);
     }
 
+    /**
+     * 应用锁，可以用于多个客户端抢某个共同资源。
+     * @param lockId
+     * @param successCB
+     * @param failCB
+     */
     releaseLock(lockId: string, successCB: SuccessCallback, failCB: FailCallback) {
         impl.releaseLock(lockId, successCB, failCB);
     }

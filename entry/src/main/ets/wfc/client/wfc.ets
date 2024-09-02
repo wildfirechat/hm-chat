@@ -1823,7 +1823,7 @@ export class WfcManager {
      * @param {string} withUser 目标用户
      * @returns {Message[]}
      */
-    searchMessageEx(conversation: Conversation, keyword: string, desc: boolean, limit: 20, offset: 0, withUser = ''): Message[] {
+    searchMessageEx(conversation: Conversation, keyword: string, desc: boolean, limit = 20, offset = 0, withUser = ''): Message[] {
         return impl.searchMessageEx(conversation, keyword, desc, limit, offset, withUser);
     }
 
@@ -1851,7 +1851,7 @@ export class WfcManager {
      * @param {string} withUser 目标用户
      * @returns {Message[]}
      */
-    searchMessageByTypes(conversation: Conversation, keyword: string, contentTypes: numberArray, desc: boolean, limit: 20, offset = 0, withUser = ''): Message[] {
+    searchMessageByTypes(conversation: Conversation, keyword: string, contentTypes: numberArray, desc: boolean, limit = 20, offset = 0, withUser = ''): Message[] {
         return impl.searchMessageByTypes(conversation, keyword, contentTypes, desc, limit, offset, withUser);
     }
 

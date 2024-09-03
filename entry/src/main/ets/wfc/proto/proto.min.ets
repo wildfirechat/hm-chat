@@ -74,6 +74,7 @@ class WfcImpl {
     groups: Map<string, GroupInfo> = new Map();
     isLogined = false;
     needPreloadDefaultData = false;
+    defaultSilentWhenPCOnline = true;
     doubleNetworkStrategy = 0;
     _connectedToMainNetwork = false;
     eventEmitter?: common.EventHub;
@@ -1202,23 +1203,20 @@ class WfcImpl {
         });
     }
 
-    isGlobalSlient(): boolean {
-        // TODO
-        // return protoProxy.isGlobalSlient() === 1;
-        return false
+    isGlobalSilent(): boolean {
+        return protoProxy.isGlobalSilent() === 1;
     }
 
-    setGlobalSlient(silent: boolean, successCB: SuccessCallback | null, failCB: FailCallback | null) {
-        // TODO
-        // protoProxy.setGlobalSlient(silent, () => {
-        //     if (successCB) {
-        //         successCB();
-        //     }
-        // }, (errorCode: number) => {
-        //     if (failCB) {
-        //         failCB(errorCode);
-        //     }
-        // });
+    setGlobalSilent(silent: boolean, successCB: SuccessCallback | null, failCB: FailCallback | null) {
+        protoProxy.setGlobalSilent(silent, () => {
+            if (successCB) {
+                successCB();
+            }
+        }, (errorCode: number) => {
+            if (failCB) {
+                failCB(errorCode);
+            }
+        });
     }
 
     isHiddenNotificationDetail(): boolean {
@@ -1599,6 +1597,31 @@ class WfcImpl {
 
     kickoffPCClient(clientId: string, successCB: SuccessCallback, failCB: FailCallback) {
         protoProxy.kickoffPCClient(clientId, successCB, failCB);
+    }
+
+    isMuteNotificationWhenPcOnline(): boolean {
+        let strValue = this.getUserSetting(UserSettingScope.MuteWhenPCOnline, "");
+        if("1" === strValue) {
+            return !this.defaultSilentWhenPCOnline;
+        }
+        return this.defaultSilentWhenPCOnline;
+    }
+
+    setDefaultSilentWhenPcOnline(defaultSilent: boolean) {
+        this.defaultSilentWhenPCOnline = defaultSilent;
+    }
+
+    muteNotificationWhenPcOnline(isMute: boolean, successCB: SuccessCallback, failCB: FailCallback) {
+        let strValue: string;
+        if(!this.defaultSilentWhenPCOnline) {
+            isMute = !isMute;
+        }
+        if(isMute) {
+            strValue = "0";
+        } else {
+            strValue = "1";
+        }
+        this.setUserSetting(UserSettingScope.MuteWhenPCOnline, "", strValue, successCB, failCB);
     }
 
     clearMessageUnreadStatus(messageId: number) {

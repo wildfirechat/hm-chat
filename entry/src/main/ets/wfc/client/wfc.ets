@@ -1047,8 +1047,8 @@ export class WfcManager {
      * 是否全局免打扰
      * @returns {boolean}
      */
-    isGlobalSlient(): boolean {
-        return impl.isGlobalSlient();
+    isGlobalSilent(): boolean {
+        return impl.isGlobalSilent();
     }
 
     /**
@@ -1057,8 +1057,8 @@ export class WfcManager {
      * @param {function ()} successCB
      * @param failCB
      */
-    setGlobalSlient(silent: boolean, successCB: SuccessCallback, failCB: FailCallback) {
-        impl.setGlobalSlient(silent, successCB, failCB);
+    setGlobalSilent(silent: boolean, successCB: SuccessCallback, failCB: FailCallback) {
+        impl.setGlobalSilent(silent, successCB, failCB);
     }
 
     /**
@@ -2284,6 +2284,34 @@ export class WfcManager {
      */
     kickoffPCClient(clientId: string, successCB: SuccessCallback, failCB: FailCallback) {
         impl.kickoffPCClient(clientId, successCB, failCB);
+    }
+
+    /**
+     * 是否PC在线时禁止通知
+     * @returns
+     */
+    isMuteNotificationWhenPcOnline(): boolean {
+        return impl.isMuteNotificationWhenPcOnline();
+    }
+
+    /**
+     * 设置PC在线时默认是否静音
+     * @param enable
+     * @param successCB
+     * @param failCB
+     */
+    setDefaultSilentWhenPcOnline(defaultSilent: boolean) {
+        impl.setDefaultSilentWhenPcOnline(defaultSilent);
+    }
+
+    /**
+     * 设置是否PC在线时禁止通知
+     * @param disable
+     * @param successCB
+     * @param failCB
+     */
+    muteNotificationWhenPcOnline(isMute: boolean, successCB: SuccessCallback, failCB: FailCallback) {
+        impl.muteNotificationWhenPcOnline(isMute, successCB, failCB)
     }
 
     /**

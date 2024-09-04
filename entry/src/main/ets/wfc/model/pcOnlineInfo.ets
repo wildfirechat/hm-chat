@@ -29,7 +29,7 @@ export default class PCOnlineInfo {
         if (!value) {
             return null;
         }
-        let parts = value.split("\\|");
+        let parts = value.split("|");
         if (parts.length >= 4) {
             let info = new PCOnlineInfo();
             info.type = type;

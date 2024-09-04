@@ -49,6 +49,8 @@ import ConversationSearchResult from '../model/conversationSearchResult';
 import UnreadCount from '../model/unreadCount';
 import FileRecord from '../model/fileRecord';
 import UserOnlineState from '../model/userOnlineState';
+import UserSettingScope from './userSettingScope';
+import PCOnlineInfo from '../model/pcOnlineInfo';
 
 const textEncoder = new util.TextEncoder('utf-8')
 
@@ -2557,6 +2559,33 @@ export class WfcManager {
      */
     releaseLock(lockId: string, successCB: SuccessCallback, failCB: FailCallback) {
         impl.releaseLock(lockId, successCB, failCB);
+    }
+
+    getPCOnlinesInfos(): PCOnlineInfo[] {
+        let pcOnline = this.getUserSetting(UserSettingScope.UserSettingPCOnline, "PC");
+        let webOnline = this.getUserSetting(UserSettingScope.UserSettingPCOnline, "Web");
+        let wxOnline = this.getUserSetting(UserSettingScope.UserSettingPCOnline, "WX");
+        let padOnline = this.getUserSetting(UserSettingScope.UserSettingPCOnline, "Pad");
+
+        let infos: PCOnlineInfo[] = []
+        let info = PCOnlineInfo.infoFromStr(pcOnline, PCOnlineInfo.PC_Online);
+        if (info != null) {
+            infos.push(info);
+        }
+        info = PCOnlineInfo.infoFromStr(webOnline, PCOnlineInfo.Web_Online);
+        if (info != null) {
+            infos.push(info);
+        }
+        info = PCOnlineInfo.infoFromStr(wxOnline, PCOnlineInfo.WX_Online);
+        if (info != null) {
+            infos.push(info);
+        }
+        info = PCOnlineInfo.infoFromStr(padOnline, PCOnlineInfo.Pad_Online);
+        if (info != null) {
+            infos.push(info);
+        }
+
+        return infos;
     }
 
     // _getStore() {

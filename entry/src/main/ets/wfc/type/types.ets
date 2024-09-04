@@ -18,6 +18,10 @@ export declare type numberArray = number[]
 
 export declare type stringArray = string[]
 
+export declare type JSONObject = Record<string, Object>
+
+export declare type JSONArray = Record<string, Object>[]
+
 export const SuccessCallbackDefault = () => {
 }
 

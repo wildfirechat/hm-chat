@@ -25,6 +25,9 @@ export default class GroupInfo {
     extra = '';
     remark = '';
     updateDt = 0;
+    // 群成员的最后更新日期，一般是没有什么作用，唯一的作用就是当用户退出群组后，再获取群组信息，memberDt会为负数。
+    // < -1 已退出群组；-1 未加入群组；>-1 已加入群组
+    memberDt = 0;
     memberUpdateDt = 0;
 
     //0 正常；1 全局禁言

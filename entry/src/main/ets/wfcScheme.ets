@@ -5,7 +5,7 @@ export default class WfcScheme {
     static QR_CODE_PREFIX_CHANNEL = "wildfirechat://channel/";
     static QR_CODE_PREFIX_CONFERENCE = "wildfirechat://conference/";
 
-    static buildConferenceLink(conferenceId, password) {
+    static buildConferenceLink(conferenceId: string, password: string) {
         let link = WfcScheme.QR_CODE_PREFIX_CONFERENCE + conferenceId;
         if (password) {
             link += '/?pwd=' + password

@@ -47,6 +47,12 @@ export default struct GroupConversationInfoPage {
         this.groupInfo = wfc.getGroupInfo(this.conversationInfo.conversation.target)
         this.groupMembers = wfc.getGroupMembers(this.conversationInfo.conversation.target, false)
 
+        if(this.groupInfo.memberDt < 0){
+            showToast('你已被移除群聊')
+            this.mainNavPathStack.pop()
+            return
+        }
+
         if (this.groupInfo.type !== GroupType.Organization) {
             let groupMember = wfc.getGroupMember(this.groupInfo.target, wfc.getUserId())
             if (this.groupInfo.joinType === 2) {

@@ -33,17 +33,7 @@ import MessageContent from '../messages/messageContent';
 import { util } from '@kit.ArkTS';
 import common from '@ohos.app.ability.common';
 import ModifyMyInfoEntry from '../model/modifyMyInfoEntry';
-import {
-    FailCallback,
-    SuccessCallback,
-    CallbackWithValue_1,
-    CallbackWithValue_2,
-    numberArray,
-    CallbackWithValue_1_OrNull,
-    CallbackWithValue_2_OrNull,
-    stringArray,
-    FailCallbackOrNull,
-} from '../type/types';
+import { FailCallback, SuccessCallback, CallbackWithValue_1, CallbackWithValue_2, numberArray, CallbackWithValue_1_OrNull, CallbackWithValue_2_OrNull, stringArray, FailCallbackOrNull, } from '../type/types';
 import SecretChatInfo from '../model/secretChatInfo';
 import ConversationSearchResult from '../model/conversationSearchResult';
 import UnreadCount from '../model/unreadCount';
@@ -528,7 +518,7 @@ export class WfcManager {
      * @param direction 方向，0是发出去的请求，1是收到的请求。
      * @param beforeTime 清除某个时间戳之前的请求，单位毫秒。如果清除全部用0
      */
-    clearFriendRequest(direction: number, beforeTime:number) {
+    clearFriendRequest(direction: number, beforeTime: number) {
         impl.clearFriendRequest(direction, beforeTime);
     }
 
@@ -1476,6 +1466,7 @@ export class WfcManager {
     clearConversationsUnreadStatus(types = [0, 1, 2], lines = [0]) {
         impl.clearConversationsUnreadStatus(types, lines);
     }
+
     /**
      * 清楚会话消息未读状态
      * @param {Conversation} conversation 目标会话
@@ -2456,6 +2447,7 @@ export class WfcManager {
     getUserOnlineStateMap(): Map<string, UserOnlineState> {
         return impl.getUserOnlineStateMap()
     }
+
     /**
      * 定义目标在线状态
      * @param {number} type 会话类型， 支持{@link ConversationType.Single}和{@link ConversationType.Group}

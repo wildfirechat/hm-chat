@@ -7,6 +7,7 @@ import Logger from '../common/utils/Logger'
 import promptAction from '@ohos.promptAction'
 import bundleManager from '@ohos.bundle.bundleManager'
 import common from '@ohos.app.ability.common'
+import { scanCore, scanBarcode } from '@kit.ScanKit';
 import { showToast } from '../common/utils/Toast'
 import PickContactModal from './picker/PickContactModal'
 import UserInfo from '../wfc/model/userInfo'
@@ -16,13 +17,16 @@ import Conversation from '../wfc/model/conversation'
 import ConversationType from '../wfc/model/conversationType'
 
 import notificationManager from '@ohos.notificationManager'
-import Base from '@ohos.base'
+import Base, { BusinessError } from '@ohos.base'
 import WorkSpaceTab from './WorkSpaceTab'
 import Config from '../config'
 import { checkPermissions, requestPermissions } from '../helper/permissionHelper'
 import { navigationDestinations, PagesMap } from './navigationConfig'
 import orgServer from '../api/orgServer'
 import GroupInfo from '../wfc/model/groupInfo'
+import { faceDetector } from '@kit.CoreVisionKit'
+import { url } from '@kit.ArkTS'
+import WfcScheme from '../wfcScheme'
 
 const TAG = 'Main';
 
@@ -146,6 +150,17 @@ struct MainPage {
         }
     }
 
+    showUser(userId: string) {
+        let userInfo = wfc.getUserInfo(userId)
+        this.mainNavPathStack.pushPathByName(navigationDestinations.UserInfoPage, {
+            'userInfo': userInfo
+        } as Record<string, Object>)
+    }
+
+    showGroup(groupId: string) {
+
+    }
+
     tabUnreadCount(tabIndex: number) {
         let unreadCount: number = 0
         switch (tabIndex) {
@@ -232,6 +247,45 @@ struct MainPage {
             MenuItem({ startIcon: $r('app.media.saoyisao1_iconfont'), content: "扫一扫" })
                 .onClick(() => {
                     showToast('扫一扫')
+                    // 定义扫码参数options
+                    let options: scanBarcode.ScanOptions = {
+                        scanTypes: [scanCore.ScanType.QR_CODE],
+                        enableMultiMode: true,
+                        enableAlbum: true
+                    };
+                    // 可调用getContext接口获取当前页面关联的UIAbilityContext
+                    scanBarcode.startScanForResult(getContext(this), options).then((result: scanBarcode.ScanResult) => {
+                        // 解析码值结果跳转应用服务页
+
+                        let qrcode = result.originalValue;
+                        let prefix = qrcode.substring(0, qrcode.lastIndexOf('/') + 1)
+                        let value = qrcode.substring(qrcode.lastIndexOf('/') + 1)
+                        try {
+                            let _url = url.URL.parseURL(qrcode)
+                        } catch (e) {
+                        }
+
+                        switch (prefix) {
+                            // case WfcScheme.QR_CODE_PREFIX_PC_SESSION:
+                            //     break
+                            case WfcScheme.QR_CODE_PREFIX_USER:
+                                this.showUser(value)
+                                break
+                            // case WfcScheme.QR_CODE_PREFIX_GROUP:
+                            //     break
+                            // case WfcScheme.QR_CODE_PREFIX_CHANNEL:
+                            //     break
+                            // case WfcScheme.QR_CODE_PREFIX_CONFERENCE:
+                            //     break
+                            default:
+                                showToast('qrcode: ' + qrcode);
+                                break
+                        }
+
+                    }).catch((error: BusinessError) => {
+                        // TODO
+                    });
+
                 })
         }
     }

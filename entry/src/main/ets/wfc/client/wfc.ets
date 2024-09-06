@@ -704,7 +704,7 @@ export class WfcManager {
      * @param {function (GroupInfo)} successCB 成功回调
      * @param {function (number)} failCB 失败回调
      */
-    getGroupInfoEx(groupId: string, refresh: boolean, successCB: Function, failCB: FailCallback) {
+    getGroupInfoEx(groupId: string, refresh: boolean, successCB: (info:GroupInfo) => void, failCB: FailCallback) {
         impl.getGroupInfoEx(groupId, refresh, (info: GroupInfo) => {
             if (!info.portrait || info.portrait.startsWith(Config.APP_SERVER)) {
                 info.portrait = this.defaultGroupPortrait(info);

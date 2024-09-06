@@ -158,7 +158,9 @@ struct MainPage {
     }
 
     showGroup(groupId: string) {
-
+        this.mainNavPathStack.pushPathByName(navigationDestinations.GroupInfoPage, {
+            'groupId': groupId
+        } as Record<string, Object>)
     }
 
     tabUnreadCount(tabIndex: number) {
@@ -266,17 +268,19 @@ struct MainPage {
                         }
 
                         switch (prefix) {
-                            // case WfcScheme.QR_CODE_PREFIX_PC_SESSION:
-                            //     break
+                        // case WfcScheme.QR_CODE_PREFIX_PC_SESSION:
+                        //     break
                             case WfcScheme.QR_CODE_PREFIX_USER:
                                 this.showUser(value)
                                 break
-                            // case WfcScheme.QR_CODE_PREFIX_GROUP:
-                            //     break
-                            // case WfcScheme.QR_CODE_PREFIX_CHANNEL:
-                            //     break
-                            // case WfcScheme.QR_CODE_PREFIX_CONFERENCE:
-                            //     break
+                            case WfcScheme.QR_CODE_PREFIX_GROUP:
+                                this.showGroup(value)
+                                break
+                                break
+                        // case WfcScheme.QR_CODE_PREFIX_CHANNEL:
+                        //     break
+                        // case WfcScheme.QR_CODE_PREFIX_CONFERENCE:
+                        //     break
                             default:
                                 showToast('qrcode: ' + qrcode);
                                 break

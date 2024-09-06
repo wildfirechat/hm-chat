@@ -9,6 +9,7 @@ import GroupConversationInfoPage from './conversation/GroupConversationInfoPage'
 import PreviewCompositeMessagePage from './conversation/PreviewCompositeMessagePage'
 import SingleConversationInfoPage from './conversation/SingleConversationInfoPage'
 import FavGroupListPage from './group/FavGroupListPage'
+import GroupInfoPage from './group/GroupInfoPage'
 import GroupManagePage from './group/GroupManagePage'
 import GroupManagerListPage from './group/GroupManagerListPage'
 import GroupMemberMuteOrAllowListPage from './group/GroupMemberMuteOrAllowListPage'
@@ -67,6 +68,7 @@ export class navigationDestinations {
     static OrganizationTreePage = 'organizationTreePage'
     static PickOrganizationMemberPage = 'pickOrganizationMemberPage'
     static ForwardMessagePage = 'forwardMessagePage'
+    static GroupInfoPage = 'groupInfoPage'
 }
 
 @Builder
@@ -139,5 +141,7 @@ export function PagesMap(name: string) {
         PickOrganizationMemberPage()
     } else if (name === navigationDestinations.ForwardMessagePage) {
         ForwardMessagePage()
+    } else if (name === navigationDestinations.GroupInfoPage) {
+        GroupInfoPage()
     }
 }

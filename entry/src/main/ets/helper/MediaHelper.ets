@@ -7,12 +7,8 @@ import common from '@ohos.app.ability.common';
 import picker from '@ohos.file.picker';
 import photoAccessHelper from '@ohos.file.photoAccessHelper';
 import cameraPicker from '@ohos.multimedia.cameraPicker';
-import wantConstant from '@ohos.app.ability.wantConstant';
-import MediaBean from '../bean/MediaBean';
-import fs from '@ohos.file.fs';
 import camera from '@ohos.multimedia.camera';
 import { BusinessError } from '@ohos.base';
-import { dataSharePredicates } from '@kit.ArkData';
 
 
 export class MediaHelper {
@@ -27,23 +23,23 @@ export class MediaHelper {
      * 选择图片
      */
     public selectImageAndVideo(maxSelectCount: number = 1): Promise<string[]> {
-        return this.selectMedia(picker.PhotoViewMIMETypes.IMAGE_VIDEO_TYPE, maxSelectCount);
+        return this.selectMedia(photoAccessHelper.PhotoViewMIMETypes.IMAGE_VIDEO_TYPE, maxSelectCount);
     }
 
     public selectImage(maxSelectCount: number = 1): Promise<string[]> {
-        return this.selectMedia(picker.PhotoViewMIMETypes.IMAGE_TYPE, maxSelectCount);
+        return this.selectMedia(photoAccessHelper.PhotoViewMIMETypes.IMAGE_TYPE, maxSelectCount);
     }
 
     public selectVideo(maxSelectCount: number = 1): Promise<string[]> {
-        return this.selectMedia(picker.PhotoViewMIMETypes.VIDEO_TYPE, maxSelectCount);
+        return this.selectMedia(photoAccessHelper.PhotoViewMIMETypes.VIDEO_TYPE, maxSelectCount);
     }
 
-    private selectMedia(mimeType: picker.PhotoViewMIMETypes, maxSelectCount: number = 1): Promise<string[]> {
+    private selectMedia(mimeType: photoAccessHelper.PhotoViewMIMETypes, maxSelectCount: number = 1): Promise<string[]> {
         try {
-            let photoSelectOptions = new picker.PhotoSelectOptions();
+            let photoSelectOptions = new photoAccessHelper.PhotoSelectOptions();
             photoSelectOptions.MIMEType = mimeType;
             photoSelectOptions.maxSelectNumber = maxSelectCount;
-            let photoPicker = new picker.PhotoViewPicker();
+            let photoPicker = new photoAccessHelper.PhotoViewPicker();
             return photoPicker.select(photoSelectOptions)
                 .then((photoSelectResult) => {
                     console.info(this.TAG, 'PhotoViewPicker.select successfully, PhotoSelectResult uri: ' + JSON.stringify(photoSelectResult));

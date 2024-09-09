@@ -1,9 +1,9 @@
 import UserInfo from '../../wfc/model/userInfo'
 import wfc from '../../wfc/client/wfc'
 import CheckableUserListView from '../../view/CheckableUserListView'
-import GroupInfo from '../../wfc/model/groupInfo'
 import Employee from '../../api/model/employee'
 import Organization from '../../api/model/organization'
+import GroupInfo from '../../wfc/model/groupInfo'
 
 @Component
 export default struct PickGroupMemberModal {
@@ -15,14 +15,18 @@ export default struct PickGroupMemberModal {
     private initialCheckedUserIds: string[] = []
     private uncheckableUserIds: string[] = []
     public static TAG: string = 'pickGroupMember'
-    private groupInfo?: GroupInfo
+    public groupId: string = ''
     @Link showPickGroupMemberModal: boolean
+    onPickResult?: (users: UserInfo[]) => void = undefined
     public static PICK_RESULT = 'pickGroupMembers'
-    private title: string = ''
+    public title: string = ''
 
     aboutToAppear() {
-        let groupMemberIds = wfc.getGroupMemberIds(this.groupInfo!.target, false)
+        let groupMemberIds = wfc.getGroupMemberIds(this.groupId, false)
         this.userInfos = wfc.getUserInfos(groupMemberIds, '')
+        // TODO
+        // 不能移除级别更高的
+        this.uncheckableUserIds = [wfc.getUserId()]
     }
 
     onCheckUser = (info: UserInfo, checked?: boolean) => {
@@ -89,8 +93,12 @@ export default struct PickGroupMemberModal {
                 .fontSize(14)
                 .borderRadius(4)// .backgroundColor(Color.Blue)
                 .onClick(() => {
+                    if (this.onPickResult) {
+                        this.onPickResult(this.newlyCheckedUsers())
+                    } else {
                     LocalStorage.getShared()
                         .setOrCreate<UserInfo[]>(PickGroupMemberModal.PICK_RESULT, this.newlyCheckedUsers());
+                    }
                     this.showPickGroupMemberModal = false;
                 })
         }

@@ -110,7 +110,7 @@ export default struct GroupConversationInfoPage {
     @Builder
     removeGroupMemberModal() {
         PickGroupMemberModal({
-            groupInfo: this.groupInfo,
+            groupId: this.groupInfo.target,
             showPickGroupMemberModal: $showRemoveGroupMemberModal,
             title: '移除群成员'
         })

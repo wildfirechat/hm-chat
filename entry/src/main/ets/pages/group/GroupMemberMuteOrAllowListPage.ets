@@ -42,7 +42,7 @@ export default struct GroupMemberMuteOrAllowListPage {
     @Builder
     pickGroupMemberModal() {
         PickGroupMemberModal({
-            groupInfo: this.groupInfo,
+            groupId: this.groupInfo?.target,
             title: this.groupInfo?.mute === 0 ? '添加群禁言黑名单' : '添加群禁言白名单',
             showPickGroupMemberModal: $showPickGroupMemberModal,
             uncheckableUserIds: [this.groupOwnerUid!].concat(this.groupManagerUids),

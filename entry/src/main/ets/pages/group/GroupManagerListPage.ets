@@ -30,7 +30,7 @@ export default struct GroupManagerListPage {
     @Builder
     pickGroupMemberModal() {
         PickGroupMemberModal({
-            groupInfo: this.groupInfo,
+            groupId: this.groupInfo?.target,
             title: '添加管理员',
             showPickGroupMemberModal: $showPickGroupMemberModal,
             uncheckableUserIds: [this.groupOwnerUerInfo!.uid].concat(this.groupManagerUserInfos.map(u => u.uid)),

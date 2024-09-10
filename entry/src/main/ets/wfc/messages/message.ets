@@ -197,7 +197,10 @@ export default class Message {
     }
 
     static messageContentFromMessagePayload(payload: MessagePayload, from: string) {
-        let content = MessageConfig.newMessageContent(payload.type)
+        let content = CustomMessageConfig.newCustomMessageContent(payload.type)
+        if(!content){
+            content = MessageConfig.newMessageContent(payload.type)
+        }
         content.decode(payload);
 
         let selfUid = wfc.getUserId();

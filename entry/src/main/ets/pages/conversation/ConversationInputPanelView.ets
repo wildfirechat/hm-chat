@@ -303,13 +303,10 @@ export default struct ConversationInputPanelView {
                             {
                                 title: '逐条转发',
                                 action: () => {
-                                    router.pushUrl({
-                                        url: 'pages/conversation/forward/ForwardMessagePage',
-                                        params: {
-                                            messages: this.checkedMessages,
-                                            forwardType: 'oneByOne',
-                                        }
-                                    })
+                                    this.mainNavPathStack.pushPathByName(navigationDestinations.ForwardMessagePage, {
+                                            'messages': this.checkedMessages,
+                                            'forwardType': 'oneByOne',
+                                    } as Record<string, Object>)
                                     // TODO 转发完成之后，再重置
                                     this.enableMultiCheck = false
                                     this.checkedMessages = []
@@ -318,13 +315,10 @@ export default struct ConversationInputPanelView {
                             {
                                 title: '合并转发',
                                 action: () => {
-                                    router.pushUrl({
-                                        url: 'pages/conversation/forward/ForwardMessagePage',
-                                        params: {
-                                            messages: this.checkedMessages,
-                                            forwardType: 'compose',
-                                        }
-                                    })
+                                    this.mainNavPathStack.pushPathByName(navigationDestinations.ForwardMessagePage, {
+                                        'messages': this.checkedMessages,
+                                        'forwardType': 'compose',
+                                    } as Record<string, Object>)
                                     // TODO 转发完成之后，再重置
                                     this.enableMultiCheck = false
                                     this.checkedMessages = []

@@ -29,6 +29,8 @@ export default struct MMMessagePreviewDialog {
     private panOption: PanGestureOptions = new PanGestureOptions({ direction: PanDirection.Down });
     private displayHeight: number = 0
     private controller: CustomDialogController
+    @State showVideoPlayIcon: boolean = false
+    private isVideoPlaying = false
 
     async aboutToAppear() {
         // const params = router.getParams() as Record<string, Object>;
@@ -42,6 +44,9 @@ export default struct MMMessagePreviewDialog {
 
         let _display = display.getDefaultDisplaySync()
         this.displayHeight = _display.height;
+
+        let entry = this.mediaEntries[this.index];
+        this.showVideoPlayIcon = entry.type === 'video'
         // let windowClass: window.Window = await window.getLastWindow(getContext(this))
         //windowClass.setWindowBackgroundColor('#00000000')
     }
@@ -108,106 +113,151 @@ export default struct MMMessagePreviewDialog {
     }
 
     build() {
-        // Navigation() {
-        Swiper() {
-            ForEach(this.mediaEntries, (entry: MMMediaEntry) => {
-                if (entry.type === 'image') {
-                    Image(entry.url)
-                        .alt(entry.thumbnail)
-                        .objectFit(ImageFit.Contain)
-                        .margin({ top: this.marginTop })
-                        .width('100%')
-                        .height('100%')// .backgroundColor('#EDEDED')
-                            // .backgroundColor(this.bgColor)
-                        .draggable(true)
-                        .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM])
-                        .gesture(// 绑定PanGesture事件，监听拖拽动作
-                            PanGesture(this.panOption)
-                                .onActionStart((event: GestureEvent) => {
-                                    console.info('Pan start');
-                                })
-                                .onActionUpdate((event: GestureEvent) => {
-                                    this.onActionUpdate(event)
-                                })
-                                .onActionEnd(() => {
-                                    this.onActionEnd()
-                                })
-                        )
-                } else {
-                    // TODO 添加一个播放按钮
-                    // Stack布局
-                    Video({
-                        previewUri: entry.thumbnail,
-                        src: entry.url,
-                        controller: entry.videoController
-                    })
-                        .onDisAppear(() => {
-                            // entry.videoController?.stop()
+        Stack() {
+            Swiper() {
+                ForEach(this.mediaEntries, (entry: MMMediaEntry, index: number) => {
+                    if (entry.type === 'image') {
+                        Image(entry.url)
+                            .alt(entry.thumbnail)
+                            .objectFit(ImageFit.Contain)
+                            .margin({ top: this.marginTop })
+                            .width('100%')
+                            .height('100%')// .backgroundColor('#EDEDED')
+                                // .backgroundColor(this.bgColor)
+                            .draggable(true)
+                            .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM])
+                            .gesture(// 绑定PanGesture事件，监听拖拽动作
+                                PanGesture(this.panOption)
+                                    .onActionStart((event: GestureEvent) => {
+                                        console.info('Pan start');
+                                    })
+                                    .onActionUpdate((event: GestureEvent) => {
+                                        this.onActionUpdate(event)
+                                    })
+                                    .onActionEnd(() => {
+                                        this.onActionEnd()
+                                    })
+                            )
+                    } else {
+                        Video({
+                            previewUri: entry.thumbnail,
+                            src: entry.url,
+                            controller: entry.videoController
                         })
-                        .autoPlay(false)
-                        .controls(false)
-                        .objectFit(ImageFit.Contain)
-                        .width('100%')
-                        .height('100%')
-                        .margin({ top: this.marginTop })
-                        .draggable(false)
-                        .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM])
-                        .gesture(// 绑定PanGesture事件，监听拖拽动作
-                            PanGesture(this.panOption)
-                                .onActionStart((event: GestureEvent) => {
-                                    console.info('Pan start');
-                                })
-                                .onActionUpdate((event: GestureEvent) => {
-                                    this.onActionUpdate(event)
-                                })
-                                .onActionEnd(() => {
-                                    this.onActionEnd()
-                                })
-                        )
-                }
-            }, (entry: MMMediaEntry) => entry.message.messageId + '')
-        }
-        .indicator(false)
-        .vertical(false)
-        .index(this.index)
-        .loop(false)
-        // 关闭Swiper组件默认的裁切效果以便子节点可以绘制在Swiper外。
-        .clip(false)
-        .cachedCount(3)
-        .onChange((index: number) => {
-            let entry = this.mediaEntries[this.index];
-            if (entry.type === 'video') {
-                entry.videoController?.stop()
+                            .onDisAppear(() => {
+                                // entry.videoController?.stop()
+                            })
+                            .autoPlay(false)
+                            .controls(false)
+                            .objectFit(ImageFit.Contain)
+                            .width('100%')
+                            .height('100%')
+                            .margin({ top: this.marginTop })
+                            .draggable(false)
+                            .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM])
+                            .gesture(// 绑定PanGesture事件，监听拖拽动作
+                                PanGesture(this.panOption)
+                                    .onActionStart((event: GestureEvent) => {
+                                        console.info('Pan start');
+                                    })
+                                    .onActionUpdate((event: GestureEvent) => {
+                                        this.onActionUpdate(event)
+                                    })
+                                    .onActionEnd(() => {
+                                        this.onActionEnd()
+                                    })
+                            )
+                            .onFinish(() => {
+                                this.showVideoPlayIcon = true
+                                this.isVideoPlaying = false
+                            })
+                            .onStart(() => {
+                                this.showVideoPlayIcon = false
+                            })
+                            .onPause(() => {
+                                this.showVideoPlayIcon = true
+                                this.isVideoPlaying = false
+                            })
+                            .onClick(() => {
+                                if (!this.showVideoPlayIcon) {
+                                    entry.videoController?.pause()
+                                }
+                            })
+                    }
+                }, (entry: MMMediaEntry) => entry.message.messageId + '')
             }
-            this.index = index
-            entry = this.mediaEntries[this.index];
-            if (entry.type === 'video') {
-                entry.videoController?.start()
-            }
-            if (index < 3) {
-                if (this.isLoadingOldMessage) {
-                    return
+            .indicator(false)
+            .vertical(false)
+            .index(this.index)
+            .loop(false)
+            // 关闭Swiper组件默认的裁切效果以便子节点可以绘制在Swiper外。
+            .clip(false)
+            .cachedCount(3)
+            .onChange((index: number) => {
+                let entry = this.mediaEntries[this.index];
+                if (entry.type === 'video') {
+                    entry.videoController?.stop()
+                    entry.videoController?.reset()
+                    this.isVideoPlaying = false
                 }
-                this.isLoadingOldMessage = true
-                this.loadMoreMessages(this.mediaEntries[0].message, true)
-                    .then((msgs: Message[]) => {
-                        this.index = msgs.length + this.index
-                        this.mediaEntries = msgs.map(msg => this.mediaEntry(msg)).concat(this.mediaEntries)
-                        this.isLoadingOldMessage = false
-                    })
-            } else if (index > this.mediaEntries.length - 3) {
-                if (this.isLoadingNewMessage) {
-                    return
+                this.index = index
+                entry = this.mediaEntries[index];
+                if (entry.type === 'video') {
+                    this.showVideoPlayIcon = true;
+                } else {
+                    this.showVideoPlayIcon = false
                 }
-                this.isLoadingNewMessage = true
-                this.loadMoreMessages(this.mediaEntries[this.mediaEntries.length - 1].message, false)
-                    .then((msgs: Message[]) => {
-                        this.mediaEntries = this.mediaEntries.concat(msgs.map(msg => this.mediaEntry(msg)))
-                        this.isLoadingNewMessage = false
-                    })
+                if (index < 3) {
+                    if (this.isLoadingOldMessage) {
+                        return
+                    }
+                    this.isLoadingOldMessage = true
+                    this.loadMoreMessages(this.mediaEntries[0].message, true)
+                        .then((msgs: Message[]) => {
+                            this.index = msgs.length + this.index
+                            this.mediaEntries = msgs.map(msg => this.mediaEntry(msg)).concat(this.mediaEntries)
+                            this.isLoadingOldMessage = false
+                        })
+                } else if (index > this.mediaEntries.length - 3) {
+                    if (this.isLoadingNewMessage) {
+                        return
+                    }
+                    this.isLoadingNewMessage = true
+                    this.loadMoreMessages(this.mediaEntries[this.mediaEntries.length - 1].message, false)
+                        .then((msgs: Message[]) => {
+                            this.mediaEntries = this.mediaEntries.concat(msgs.map(msg => this.mediaEntry(msg)))
+                            this.isLoadingNewMessage = false
+                        })
 
+                }
+            })
+            .onGestureSwipe(index => {
+                this.showVideoPlayIcon = false
+            })
+            .onAnimationEnd(index => {
+                let entry = this.mediaEntries[index];
+                if (!this.isVideoPlaying && entry.type === 'video') {
+                    this.showVideoPlayIcon = true
+                }
+            })
+
+            if (this.showVideoPlayIcon) {
+                Column() {
+                    Image($r('app.media.img_video_play_session'))
+                        .width(40)
+                        .height(40)
+                        .onClick(() => {
+                            let entry = this.mediaEntries[this.index];
+                            entry.videoController?.start()
+                            this.isVideoPlaying = true
+                        })
+                }
+                .justifyContent(FlexAlign.Center)
+                .alignItems(HorizontalAlign.Center)
+                .margin({ top: this.marginTop })
             }
-        })
+
+        }
         // }
         // .title('媒体文件预览')
         // .titleMode(NavigationTitleMode.Mini)
@@ -218,7 +268,5 @@ export default struct MMMessagePreviewDialog {
         .width('100%')
 
         .backgroundColor(this.bgColor)
-
-        // .navBarPosition(NavBarPosition.Start)
     }
 }

@@ -33,6 +33,8 @@ struct LoginPage {
 
             Row() {
                 Text('手机号')
+                    .backgroundColor(Color.Red)
+                    .width(50)
                 TextInput({
                     text: this.phoneNumber,
                     placeholder: '请输入手机号(仅支持中国大陆手机号)',
@@ -62,6 +64,7 @@ struct LoginPage {
 
             Row() {
                 Text(this.isLoginByPassword ? '密码' : '验证码')
+                    .width(50)
                 if (this.isLoginByPassword) {
                     TextInput({ text: this.password, placeholder: '请输入密码', controller: this.controller })
                         .placeholderColor(Color.Grey)

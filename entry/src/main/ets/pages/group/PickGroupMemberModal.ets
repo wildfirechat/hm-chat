@@ -24,9 +24,6 @@ export default struct PickGroupMemberModal {
     aboutToAppear() {
         let groupMemberIds = wfc.getGroupMemberIds(this.groupId, false)
         this.userInfos = wfc.getUserInfos(groupMemberIds, '')
-        // TODO
-        // 不能移除级别更高的
-        this.uncheckableUserIds = [wfc.getUserId()]
     }
 
     onCheckUser = (info: UserInfo, checked?: boolean) => {

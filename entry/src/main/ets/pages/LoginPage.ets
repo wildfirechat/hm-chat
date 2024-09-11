@@ -11,14 +11,23 @@ import { showToast } from '../common/utils/Toast';
 @Component
 struct LoginPage {
     @State message: string = '野火 IM'
+
+    // 是否切换密码登陆
+    @State isLoginByPassword: boolean = false
+    @State isLogin: boolean = false
+
+    // 验证码登陆
     @State phoneNumber: string = ''
     @State authCode: string = ''
-    @State isLogin: boolean = false
+
+    // 密码登陆
+    @State password: string = ''
+
     controller: TextInputController = new TextInputController()
 
     build() {
         Column() {
-            Text('验证码登录')
+            Text(this.isLoginByPassword ? '密码登陆' : '验证码登录')
                 .fontSize(26)
                 .fontColor('#0C0C0C')
 
@@ -52,43 +61,76 @@ struct LoginPage {
             .margin({ top: 30 })
 
             Row() {
-                Text('验证码')
-                TextInput({ text: this.authCode, placeholder: '请输入验证码', controller: this.controller })
-                    .placeholderColor(Color.Grey)
-                    .placeholderFont({ size: 14, weight: 400 })
-                    .caretColor(Color.Blue)
-                    .layoutWeight(1)
-                    .height(40)
-                    .margin(20)
-                    .fontSize(14)
-                    .borderRadius(4)
-                    .type(InputType.Number)
-                    .fontColor(Color.Black)
-                    .enabled(!this.isLogin)
-                    .inputFilter('[a-zA-Z0-9]', (e) => {
-                        console.log(JSON.stringify(e))
-                    })
-                    .onChange((value: string) => {
-                        this.authCode = value
-                    })
+                Text(this.isLoginByPassword ? '密码' : '验证码')
+                if (this.isLoginByPassword) {
+                    TextInput({ text: this.password, placeholder: '请输入密码', controller: this.controller })
+                        .placeholderColor(Color.Grey)
+                        .placeholderFont({ size: 14, weight: 400 })
+                        .caretColor(Color.Blue)
+                        .layoutWeight(1)
+                        .height(40)
+                        .margin(20)
+                        .fontSize(14)
+                        .borderRadius(4)
+                        .type(InputType.Password)
+                        .fontColor(Color.Black)
+                        .enabled(!this.isLogin)
+                        .showPasswordIcon(true)
+                        .onChange((value: string) => {
+                            this.password = value
+                        })
+                } else {
+                    TextInput({ text: this.authCode, placeholder: '请输入验证码', controller: this.controller })
+                        .placeholderColor(Color.Grey)
+                        .placeholderFont({ size: 14, weight: 400 })
+                        .caretColor(Color.Blue)
+                        .layoutWeight(1)
+                        .height(40)
+                        .margin(20)
+                        .fontSize(14)
+                        .borderRadius(4)
+                        .type(InputType.Number)
+                        .fontColor(Color.Black)
+                        .enabled(!this.isLogin)
+                        .inputFilter('[a-zA-Z0-9]', (e) => {
+                            console.log(JSON.stringify(e))
+                        })
+                        .onChange((value: string) => {
+                            this.authCode = value
+                        })
 
-                Button('获取验证码')
-                    .fontSize(12)
-                    .type(ButtonType.Normal)
-                    .borderRadius(4)
-                    .enabled(!this.isLogin && this.phoneNumber.length === 11)
-                    .onClick(() => {
-                        appServer.requestAuthCode(this.phoneNumber)
-                            .then(res => {
-                                showToast('发送验证码成功')
-                            })
-                            .catch((reason: Error) => {
-                                showToast('发送验证码失败 ' + reason)
-                            })
-                    })
+                    Button('获取验证码')
+                        .fontSize(12)
+                        .type(ButtonType.Normal)
+                        .borderRadius(4)
+                        .enabled(!this.isLogin && this.phoneNumber.length === 11)
+                        .onClick(() => {
+                            appServer.requestAuthCode(this.phoneNumber)
+                                .then(res => {
+                                    showToast('发送验证码成功')
+                                })
+                                .catch((reason: Error) => {
+                                    showToast('发送验证码失败 ' + reason)
+                                })
+                        })
+                }
+
             }
             .width('100%')
             .margin({ top: 20 })
+
+            // 切换登陆方式
+            Row() {
+                Blank()
+                    .layoutWeight(1)
+                Text(this.isLoginByPassword ? '注册/验证码登录' : '使用密码登录')
+                    .fontSize(14)
+                    .fontColor('#0C0C0C')
+                    .textAlign(TextAlign.End)
+                    .onClick(() => {
+                        this.isLoginByPassword = !this.isLoginByPassword
+                    })
+            }
 
             Row() {
                 Button({ type: ButtonType.Normal, stateEffect: true }) {
@@ -105,42 +147,45 @@ struct LoginPage {
                 .height(40)
                 .focusable(true)
                 .focusOnTouch(true)
-                .enabled(!this.isLogin && this.phoneNumber.length === 11 && this.authCode.length > 0)
+                .enabled(!this.isLogin && ((this.isLoginByPassword && this.phoneNumber.length === 11 && this.password.length > 0) || (!this.isLoginByPassword && this.phoneNumber.length === 11 && this.authCode.length > 0)))
                 .type(ButtonType.Normal)
                 .width('100%')
                 .borderRadius(4)
                 .onClick(() => {
                     this.isLogin = true
-                    console.info('login', this.phoneNumber, this.authCode, appServer)
-                    appServer.loginWithAuthCode(this.phoneNumber, this.authCode)
-                        .then(async res => {
-                            this.isLogin = false
-                            console.log('login success', res);
-                            let obj = res as Record<string, Object>
-                            let context = getContext(this) as common.UIAbilityContext;
-                            let preference = await data_preferences.getPreferences(context, 'wfcstore')
-                            const userId = res['userId'] as string
-                            const token = res['token'] as string
-                            preference.put('userId', userId);
-                            preference.put('token', token);
-                            preference.flush()
+                    if (this.isLoginByPassword) {
+                        console.info('login_pwd', this.phoneNumber, appServer)
+                        appServer.loinWithPassword(this.phoneNumber, this.password)
+                            .then(async res => {
+                                this.isLogin = false
+                                this.onLoginSuccess(res as Record<string, Object>)
+                            })
+                            .catch((reason: Error) => {
+                                this.isLogin = false
+                                console.error('login failed', reason)
+                            })
 
-                            wfc.connect(userId, token);
-                            router.replaceUrl({
-                                url: "pages/MainPage",
-                                params: {}
-                            }, router.RouterMode.Standard)
-                        })
-                        .catch((reason: Error) => {
-                            this.isLogin = false
-                            console.error('login failed', reason)
-                        })
+                    } else {
+                        console.info('login', this.phoneNumber, this.authCode, appServer)
+                        appServer.loginWithAuthCode(this.phoneNumber, this.authCode)
+                            .then(async res => {
+                                this.isLogin = false
+                                this.onLoginSuccess(res as Record<string, Object>)
+                            })
+                            .catch((reason: Error) => {
+                                this.isLogin = false
+                                console.error('login failed', reason)
+                            })
+
+                    }
                 })
 
             }
             .justifyContent(FlexAlign.Center)
             .margin({ top: 40 })
             .width('100%')
+
+
 
             Blank()
                 .layoutWeight(1)
@@ -182,5 +227,22 @@ struct LoginPage {
         .padding({ left: 16, right: 16 })
         .margin({ top: 120 })
         .width('100%')
+    }
+
+    async onLoginSuccess(res: Record<string, Object>) {
+        console.log('login success', res);
+        let context = getContext(this) as common.UIAbilityContext;
+        let preference = await data_preferences.getPreferences(context, 'wfcstore')
+        const userId = res['userId'] as string
+        const token = res['token'] as string
+        preference.put('userId', userId);
+        preference.put('token', token);
+        preference.flush()
+
+        wfc.connect(userId, token);
+        router.replaceUrl({
+            url: "pages/MainPage",
+            params: {}
+        }, router.RouterMode.Standard)
     }
 }

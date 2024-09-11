@@ -35,17 +35,15 @@ class AppServer {
         return this._post('/login', obj)
     }
 
-    // loinWithPassword(mobile: string, password: string) {
-    //     return new Promise((resolve, reject) => {
-    //         let responsePromise = this._post('/login_pwd', {
-    //             mobile,
-    //             password,
-    //             platform: Config.getWFCPlatform(),
-    //             clientId: wfc.getClientId()
-    //         }, true)
-    //         this._interceptLoginResponse(responsePromise, resolve, reject)
-    //     })
-    // }
+    loinWithPassword(phone: string, password: string) {
+        let obj = {
+            'mobile': phone,
+            'password': password,
+            'platform': Config.getWFCPlatform(),
+            'clientId': wfc.getClientId(),
+        } as Record<string, Object>
+        return this._post('/login_pwd', obj)
+    }
 
     async getGroupAnnouncement(groupId: string): Promise<GroupAnnouncement> {
         let result = await this._post('/get_group_announcement', { 'groupId': groupId } as Record<string, Object>)

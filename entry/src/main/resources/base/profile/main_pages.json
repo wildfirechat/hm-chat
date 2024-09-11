@@ -20,6 +20,7 @@
         "pages/channel/ChannelInfoPage",
         "pages/mm/MMPreviewPage",
         "pages/misc/WebViewPage",
+        "pages/misc/WebViewPageWithRouter",
         "pages/chatroom/ChatroomListPage",
         "pages/voip/VoipFloatingPage",
         "pages/voip/SingleAudioCallPage",

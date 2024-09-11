@@ -33,7 +33,6 @@ struct LoginPage {
 
             Row() {
                 Text('手机号')
-                    .backgroundColor(Color.Red)
                     .width(50)
                 TextInput({
                     text: this.phoneNumber,
@@ -189,7 +188,6 @@ struct LoginPage {
             .width('100%')
 
 
-
             Blank()
                 .layoutWeight(1)
 
@@ -201,7 +199,8 @@ struct LoginPage {
                     .fontSize(12)
                     .onClick(() => {
                         router.pushUrl({
-                            url: 'pages/misc/WebViewPage', params: {
+                            url: 'pages/misc/WebViewPageWithRouter',
+                            params: {
                                 url: 'https://www.wildfirechat.net/wildfirechat_user_agreement.html',
                                 title: '野火IM用户协议'
                             }
@@ -214,7 +213,7 @@ struct LoginPage {
                     .fontSize(12)
                     .onClick(() => {
                         router.pushUrl({
-                            url: 'pages/misc/WebViewPage',
+                            url: 'pages/misc/WebViewPageWithRouter',
                             params: {
                                 url: 'https://www.wildfirechat.net/wildfirechat_user_privacy.html',
                                 title: '野火IM个人信息保护政策'

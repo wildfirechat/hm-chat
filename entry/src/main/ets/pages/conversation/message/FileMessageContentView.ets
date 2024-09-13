@@ -20,6 +20,7 @@ export default struct FileMessageContentView {
             Column() {
                 Text(this.fileMessageContent().name)
                     .textOverflow({ overflow: TextOverflow.Ellipsis })
+                    .constraintSize({ maxWidth: 160 })
                     .fontSize(18)
                     .maxLines(1)
                 Text(humanSize(this.fileMessageContent().size))

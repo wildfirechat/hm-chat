@@ -103,7 +103,7 @@ export default struct ForwardMessagePage {
                 forwardMessageDesc: forwardMessageDesc,
                 forwardMessageImageUri: forwardMessageImageUri,
                 cancel: () => {
-
+                    this.forwardDialogController = undefined
                 },
                 confirm: (text) => {
                     conversations.forEach(conversation => {
@@ -125,6 +125,7 @@ export default struct ForwardMessagePage {
                             wfc.sendConversationMessage(conversation, textMessageContent)
                         }
                     })
+                    this.forwardDialogController = undefined
                     this.mainNavPathStack.pop()
                 }
             }),

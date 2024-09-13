@@ -28,6 +28,7 @@ import photoAccessHelper from '@ohos.file.photoAccessHelper'
 import ConversationInfo from '../../wfc/model/conversationInfo'
 import { imageSize, imageThumbnail } from '../../helper/imageHelper'
 import { inputMethod } from '@kit.IMEKit'
+import PickGroupMemberModal from '../group/PickGroupMemberModal'
 import FileMessageContent from '../../wfc/messages/fileMessageContent'
 import { isImage, isVideo } from '../../util/helper'
 import GroupMemberType from '../../wfc/model/groupMemberType'
@@ -39,6 +40,10 @@ import ChannelMenu from '../../wfc/model/channelMenu'
 import ChannelMenuEventMessageContent from '../../wfc/messages/channelMenuEventMessageContent'
 import { navigationDestinations } from '../navigationConfig'
 import QuoteInfo from '../../wfc/model/quoteInfo'
+import PickContactModal from '../picker/PickContactModal'
+import PickSingleContactModal from '../picker/PickSingleContactModal'
+import ForwardMessageDialog from './forward/ForwardMessageDialog'
+import CardMessageContent from '../../wfc/messages/cardMessageContent'
 
 const INPUT_ICON_WIDTH = 30
 
@@ -94,6 +99,10 @@ export default struct ConversationInputPanelView {
     private deleteMessageDialogController?: CustomDialogController
     private groupId = ''
     private mentions: MentionBlock[] = []
+    private voipDialogController?: CustomDialogController
+    @State showExtContentCoverModal: boolean = false
+    private voipAudioOnly: boolean = false
+    private forwardDialogController?: CustomDialogController
     private conversationExts: ConversationExt[] = [
         {
             title: '相册',
@@ -136,12 +145,47 @@ export default struct ConversationInputPanelView {
             title: '视频通话',
             icon: $r('app.media.ic_func_video'),
             action: () => {
-                showToast('TODO')
-                // if (this.conversation.type === ConversationType.Single) {
-                //     avenginekit.startCall(this.conversation, [this.conversation.target], true)
-                // } else {
-                //     showToast('TODO')
-                // }
+                this.voipDialogController = new CustomDialogController({
+                    builder: ActionSheetDialog({
+                        controller: this.voipDialogController,
+                        sheets: [
+                            {
+                                title: '视频通话',
+                                action: () => {
+                                    showToast('TODO')
+                                    // if (this.conversation.type === ConversationType.Single) {
+                                    //     avenginekit.startCall(this.conversation, [this.conversation.target], false)
+                                    // } else if (this.conversation.type === ConversationType.Group) {
+                                    //     this.showExtContentCoverModal = true
+                                    //     this.extContentCoverBuilderParam = this.pickGroupMemberModal
+                                    //     this.voipAudioOnly = false
+                                    // } else {
+                                    //
+                                    // }
+                                }
+                            },
+                            {
+                                title: '音频通话',
+                                action: () => {
+                                    showToast('TODO')
+                                    // if (this.conversation.type === ConversationType.Single) {
+                                    //     avenginekit.startCall(this.conversation, [this.conversation.target], true)
+                                    // } else if (this.conversation.type === ConversationType.Group) {
+                                    //     this.showExtContentCoverModal = true
+                                    //     this.extContentCoverBuilderParam = this.pickGroupMemberModal
+                                    //     this.voipAudioOnly = true
+                                    // }
+                                }
+                            }
+                        ]
+                    }),
+                    autoCancel: true,
+                    alignment: DialogAlignment.Bottom,
+                    gridCount: 6,
+                    customStyle: false
+                })
+
+                this.voipDialogController.open()
             }
         },
         {
@@ -224,7 +268,8 @@ export default struct ConversationInputPanelView {
             title: '名片',
             icon: $r('app.media.ic_user_card'),
             action: () => {
-                showToast('TODO')
+                this.showExtContentCoverModal = true
+                this.extContentCoverBuilderParam = this.pickSingleContactModal
             }
         }
     ]
@@ -304,8 +349,8 @@ export default struct ConversationInputPanelView {
                                 title: '逐条转发',
                                 action: () => {
                                     this.mainNavPathStack.pushPathByName(navigationDestinations.ForwardMessagePage, {
-                                            'messages': this.checkedMessages,
-                                            'forwardType': 'oneByOne',
+                                        'messages': this.checkedMessages,
+                                        'forwardType': 'oneByOne',
                                     } as Record<string, Object>)
                                     // TODO 转发完成之后，再重置
                                     this.enableMultiCheck = false
@@ -350,7 +395,7 @@ export default struct ConversationInputPanelView {
     }
 
     onExpandConversationInputPanelView(propName: string) {
-        console.log('xxxxxxxxx on onExpandConversationInputPanelView', this.showEmojiPanel, this.showExtPanel);
+        console.log('on onExpandConversationInputPanelView', this.showEmojiPanel, this.showExtPanel);
         if (this.showEmojiPanel || this.showExtPanel) {
             this.scrollMessageListToBottom();
         }
@@ -544,6 +589,71 @@ export default struct ConversationInputPanelView {
         } else {
             // nothing
         }
+    }
+
+    @Builder
+    dummyContentCoverBuilder() {
+    }
+
+    // 发送名片、发起群音视频通话时，为其赋不同的具体 builder
+    @BuilderParam extContentCoverBuilderParam: () => void = this.dummyContentCoverBuilder
+
+    @Builder
+    pickGroupMemberModal() {
+        PickGroupMemberModal({
+            groupId: this.conversation.target,
+            title: '选择群成员',
+            initialCheckedUserIds: [wfc.getUserId()],
+            uncheckableUserIds: [wfc.getUserId()],
+            showPickGroupMemberModal: $showExtContentCoverModal,
+            onPickResult: (users: UserInfo[]) => {
+                // avenginekit.startCall(this.conversation, users.map(user => user.uid), this.voipAudioOnly)
+            }
+        })
+            .height('100%')
+            .width('100%')
+            .margin({ top: px2vp(AppStorage.get<number>('SafeAreaTopHeight')) })
+            .backgroundColor(Color.White)
+    }
+
+    @Builder
+    pickSingleContactModal() {
+        PickSingleContactModal({
+            showPickContactModal: $showExtContentCoverModal,
+            onClickUser: (user: UserInfo) => {
+                this.showExtContentCoverModal = false
+                this.sendUserCard(user)
+            },
+        })
+            .height('100%')
+            .width('100%')
+            .margin({ top: px2vp(AppStorage.get<number>('SafeAreaTopHeight')) })
+            .backgroundColor(Color.White)
+    }
+
+    sendUserCard(userInfo: UserInfo) {
+        let userCard = new CardMessageContent(0, userInfo.uid, userInfo.displayName, userInfo.portrait, wfc.getUserId())
+        this.forwardDialogController = new CustomDialogController({
+            builder: ForwardMessageDialog({
+                targetConversations: [this.conversation],
+                controller: this.forwardDialogController,
+                forwardMessageDesc: userCard.digest(),
+                forwardMessageImageUri: userInfo.portrait,
+                cancel: () => {
+                    this.forwardMessageDialogController = undefined
+                },
+                confirm: (text) => {
+                    wfc.sendConversationMessage(this.conversation, userCard)
+                    this.forwardMessageDialogController = undefined
+                }
+            }),
+            autoCancel: true,
+            alignment: DialogAlignment.Center,
+            gridCount: 4,
+            customStyle: false
+        })
+
+        this.forwardDialogController.open()
     }
 
     build() {
@@ -829,6 +939,15 @@ export default struct ConversationInputPanelView {
                     .height(this.keyboardHeight)
                     .onAppear(() => {
                         this.setKeyboardAvoidMode(KeyboardAvoidMode.OFFSET)
+                    })
+                    .bindContentCover(this.showExtContentCoverModal, this.extContentCoverBuilderParam, {
+                        modalTransition: ModalTransition.DEFAULT,
+                        onAppear: () => {
+                        },
+
+                        onDisappear: () => {
+                            this.showExtContentCoverModal = false
+                        }
                     })
                 }
 

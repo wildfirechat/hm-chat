@@ -24,6 +24,7 @@ import CustomMessageContentType from '../../../wfc_custom_message/customMessageC
 import TestCustomMessageContentView from '../custom_message/testCustomMessageContentView'
 import { navigationDestinations } from '../../navigationConfig'
 import ConferenceInviteMessageContentView from './ConferenceInviteMessageContentView'
+import CardMessageContentView from './CardMessageContentView'
 
 @Component
 export default struct NormaMessageContentView {
@@ -62,6 +63,8 @@ export default struct NormaMessageContentView {
                 FileMessageContentView({ message: $message })
             } else if (this.message.messageContent.type === MessageContentType.CONFERENCE_CONTENT_TYPE_INVITE) {
                 ConferenceInviteMessageContentView({ message: $message })
+            } else if (this.message.messageContent.type === MessageContentType.UserCard) {
+                CardMessageContentView({ message: $message })
             }
             // 自定义消息配置 start
             else if (this.message!.messageContent.type === CustomMessageContentType.MESSAGE_CONTENT_TYPE_CUSTOM_MESSAGE_TEST) {

@@ -197,8 +197,9 @@ export default struct ConversationPage {
         }
 
         let userOnlineState = wfc.getUserOnlineState(this.conversation.target)
-        if (userOnlineState) {
-            this.title += `(${userOnlineState.desc()})`
+        let userOnlineStateDesc = userOnlineState?.desc()
+        if (userOnlineStateDesc) {
+            this.title += `(${userOnlineStateDesc})`
         }
 
         if (this.focusMessageId) {

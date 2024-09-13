@@ -16,8 +16,8 @@ import GroupAnnouncement from '../../api/model/groupAnnouncement';
 import AppServerError from '../../api/appServerError';
 import { navigationDestinations } from '../navigationConfig';
 import EventType from '../../wfc/client/wfcEvent';
-import { imageThumbnail, imageThumbnailFile } from '../../helper/imageHelper';
-import { MediaHelper } from '../../helper/MediaHelper';
+import { imageThumbnail, imageThumbnailFile } from '../../helper/imageVideoHelper';
+import { selectImage } from '../../helper/mediaHelper';
 import MessageContentMediaType from '../../wfc/messages/messageContentMediaType';
 import ModifyGroupInfoType from '../../wfc/model/modifyGroupInfoType';
 
@@ -39,7 +39,6 @@ export default struct GroupConversationInfoPage {
     @State userInfo?: UserInfo = undefined
     private clearConversationHistoryDialogController?: CustomDialogController
     @State showGroupMemberNickName: boolean = false
-    private mediaHelper: MediaHelper = new MediaHelper(getContext())
 
     aboutToAppear() {
         let params = this.mainNavPathStack.getParamByIndex(this.mainNavPathStack.size() - 1) as Record<string, Object>;
@@ -47,7 +46,7 @@ export default struct GroupConversationInfoPage {
         this.groupInfo = wfc.getGroupInfo(this.conversationInfo.conversation.target)
         this.groupMembers = wfc.getGroupMembers(this.conversationInfo.conversation.target, false)
 
-        if(this.groupInfo.memberDt < 0){
+        if (this.groupInfo.memberDt < 0) {
             showToast('你已被移除群聊')
             this.mainNavPathStack.pop()
             return
@@ -244,7 +243,7 @@ export default struct GroupConversationInfoPage {
                         })
                             .onClick(async () => {
                                 try {
-                                    let imgUris = await this.mediaHelper.selectImage(1);
+                                    let imgUris = await selectImage(1);
                                     imgUris.forEach(async imgUri => {
                                         let base64Data = await imageThumbnail(getContext(this), imgUri, {
                                             width: 400,

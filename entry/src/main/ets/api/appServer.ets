@@ -8,10 +8,13 @@ import common from '@ohos.app.ability.common';
 import url from '@ohos.url';
 import GroupAnnouncement from './model/groupAnnouncement';
 import AppServerError from './appServerError';
+import PCSession from '../wfc/model/pcsession';
+import { JSONObject } from '../wfc/type/types';
 
 class AppServer {
     baseUrl = Config.APP_SERVER;
     authToken = '';
+
     constructor() {
         let context = GlobalContext.getContext().getObject<common.UIAbilityContext>('context');
         let preference = data_preferences.getPreferencesSync(context, {
@@ -58,22 +61,58 @@ class AppServer {
         } as Record<string, Object>)
     }
 
-    _post(path: string, data: string | Object): Promise<object> {
+    async scanPCLogin(token: string): Promise<PCSession> {
+        let result = await this._post(`/scan_pc/${token}`)
+        let pcSession = result as PCSession
+        if (pcSession.status === 1) {
+            return pcSession
+        } else {
+            throw new AppServerError(-1, pcSession.status + '')
+        }
+    }
+
+    async confirmPCLogin(token: string, userId: string): Promise<void> {
+        let result = await this._post('/confirm_pc', {
+            'user_id': userId,
+            'token': token,
+            'quick_login': 1
+        } as JSONObject)
+        let pcSession = result as PCSession
+        if (pcSession.status === 2) {
+            return
+        } else {
+            throw new AppServerError(-1, pcSession.status + '')
+        }
+    }
+
+    async cancelPCLogin(token: string): Promise<void> {
+        let result = await this._post('/cancel_pc', {
+            'token': token,
+        } as JSONObject)
+        let pcSession = result as PCSession
+        if (pcSession.status === 2) {
+            return
+        } else {
+            throw new AppServerError(-1, pcSession.status + '')
+        }
+    }
+
+    _post(path: string, data?: string | Object): Promise<object> {
         return new Promise((resolve, reject) => {
             let httpRequest = http.createHttp();
             // 用于订阅HTTP响应头，此接口会比request请求先返回。可以根据业务需要订阅此消息
             // 从API 8开始，使用on('headersReceive', Callback)替代on('headerReceive', AsyncCallback)。 8+
             // httpRequest.on('headersReceive', (header) => {
             //     console.info('header: ' + JSON.stringify(header));
-                // if (header.toString() === 'authToken') {
-                //     this.authToken = header.toString();
+            // if (header.toString() === 'authToken') {
+            //     this.authToken = header.toString();
             //         let context = GlobalContext.getContext().getObject<common.ApplicationContext>('applicationContext');
             //         let preference = data_preferences.getPreferencesSync(context, {
             //             name: 'wfcstore'
             //         })
             //         let _url = url.URL.parseURL(this.baseUrl)
             //         preference.put(`authToken-${_url.host}-${_url.port}`, this.authToken)
-                // }
+            // }
             // });
             console.log('request', path, data)
             httpRequest.request(// 填写HTTP请求的URL地址，可以带参数也可以不带参数。URL地址需要开发者自定义。请求的参数可以在extraData中指定

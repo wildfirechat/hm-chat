@@ -24,6 +24,7 @@ import FavRecordPage from './me/FavRecordPage'
 import FileRecordPage from './me/FileRecordPage'
 import MessageAndNotificationPage from './me/MessageAndNotificaitonPage'
 import SettingPage from './me/SettingPage'
+import PCLoginPage from './misc/PCLoginPage'
 import WebViewPage from './misc/WebViewPage'
 import OrganizationTreePage from './organization/OrganizationTreePage'
 import PickOrganizationMemberPage from './organization/PickOrganizationMemberPage'
@@ -71,6 +72,7 @@ export class navigationDestinations {
     static PickOrganizationMemberPage = 'pickOrganizationMemberPage'
     static ForwardMessagePage = 'forwardMessagePage'
     static GroupInfoPage = 'groupInfoPage'
+    static PCLoginPage = 'pcLoginPage'
 }
 
 @Builder
@@ -147,5 +149,7 @@ export function PagesMap(name: string) {
         ForwardMessagePage()
     } else if (name === navigationDestinations.GroupInfoPage) {
         GroupInfoPage()
+    } else if (name === navigationDestinations.PCLoginPage) {
+        PCLoginPage()
     }
 }

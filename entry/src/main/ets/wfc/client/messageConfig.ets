@@ -69,6 +69,7 @@ import LeaveChannelChatMessageContent from "../messages/leaveChannelChatMessageC
 import ModifyGroupSettingNotification from "../messages/notification/modifyGroupSettingNotification";
 import MessageContent from '../messages/messageContent';
 import { DEFAULT } from '@ohos/hypium';
+import PCLoginRequestMessageContent from '../messages/pcLoginRequestMessageContent';
 
 export default class MessageConfig {
     static getMessageContentClazz(type: number) {
@@ -311,6 +312,9 @@ export default class MessageConfig {
                 break
             case MessageContentType.CONFERENCE_CONTENT_TYPE_COMMAND:
                 content = new ConferenceCommandMessageContent()
+                break
+            case MessageContentType.PC_Login_Request:
+                content = new PCLoginRequestMessageContent()
                 break
             default:
                 content = new UnknownMessageContent()
@@ -614,6 +618,11 @@ export default class MessageConfig {
             name: 'conferenceCommandMessageContent',
             flag: PersistFlag.Transparent,
             type: MessageContentType.CONFERENCE_CONTENT_TYPE_COMMAND,
+        },
+        {
+            name: 'pcLoginRequestMessageContent',
+            flag: PersistFlag.No_Persist,
+            type: MessageContentType.PC_Login_Request,
         }
 
     ];

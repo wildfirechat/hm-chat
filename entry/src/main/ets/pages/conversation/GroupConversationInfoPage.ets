@@ -263,15 +263,6 @@ export default struct GroupConversationInfoPage {
                                             console.log('uploadMedia progress ', progress, total)
 
                                         })
-                                        // if (file) {
-                                        //     wfc.modifyGroupInfo()
-                                        // }
-
-                                        // let size = await imageSize(imgUri);
-                                        // let content = new ImageMessageContent(file, '', thumbnail)
-                                        // content.imageWidth = size.width;
-                                        // content.imageHeight = size.height;
-                                        // wfc.sendConversationMessage(this.conversation, content, [], null, null, null, null, null);
                                     })
                                 } catch (reason) {
                                     showToast('选取照片失败: ' + reason)

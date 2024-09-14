@@ -2,6 +2,7 @@ import { showToast } from '../../common/utils/Toast'
 import OptionItemView from '../../view/OptionItemView'
 import data_preferences from '@ohos.data.preferences'
 import wfc from '../../wfc/client/wfc';
+import { navigationDestinations } from '../navigationConfig';
 
 @Preview
 @Entry
@@ -23,7 +24,10 @@ export default struct SettingPage {
                     OptionItemView({
                         title: '关于',
                         showDivider: true
+                    }).onClick(() => {
+                        this.mainNavPathStack.pushPathByName(navigationDestinations.AboutPage, {} as Record<string, Object>)
                     })
+
                     OptionItemView({
                         title: ' 诊断'
                     })

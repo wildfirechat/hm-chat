@@ -39,6 +39,26 @@
         {
             "name": "reason_floating_window",
             "value": " 音视频通话"
+        },
+        {
+            "name": "app_about",
+            "value": "关于"
+        },
+        {
+            "name": "version_tag_s",
+            "value": "版本 %s"
+        },
+        {
+            "name": "feature_introduction",
+            "value": "功能介绍"
+        },
+        {
+            "name": "user_agreement",
+            "value": "用户协议"
+        },
+        {
+            "name": "privacy_policy",
+            "value": "隐私政策"
         }
     ]
 }

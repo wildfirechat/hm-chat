@@ -18,6 +18,7 @@ import UpdateGroupAnnouncementPage from './group/UpdateGroupAnnouncementPage'
 import UpdateGroupNamePage from './group/UpdateGroupNamePage'
 import UpdateGroupRemarkNamePage from './group/UpdateGroupRemarkPage'
 import UpdateMyGroupAliasNamePage from './group/UpdateMyGroupAliasPage'
+import AboutPage from './me/AboutPage'
 import AccountPage from './me/AccountPage'
 import FavRecordPage from './me/FavRecordPage'
 import FileRecordPage from './me/FileRecordPage'
@@ -64,6 +65,7 @@ export class navigationDestinations {
     static ConversationFileRecordPage = 'conversationFileRecordPage'
     static NotificationPage = 'messageAndNotificationPage'
     static SettingPage = 'settingPage'
+    static AboutPage = 'aboutPage'
     static PreviewCompositeMessagePage = 'previewCompositeMessagePage'
     static OrganizationTreePage = 'organizationTreePage'
     static PickOrganizationMemberPage = 'pickOrganizationMemberPage'
@@ -133,6 +135,8 @@ export function PagesMap(name: string) {
         MessageAndNotificationPage()
     } else if (name === navigationDestinations.SettingPage) {
         SettingPage()
+    } else if (name === navigationDestinations.AboutPage) {
+        AboutPage()
     } else if (name === navigationDestinations.PreviewCompositeMessagePage) {
         PreviewCompositeMessagePage()
     } else if (name === navigationDestinations.OrganizationTreePage) {

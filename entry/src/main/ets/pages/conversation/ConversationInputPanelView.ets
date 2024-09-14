@@ -1,7 +1,7 @@
 import common from '@ohos.app.ability.common'
 import { copyFileUri, fileNameFromFileUri, fileSize } from '../../common/utils/FileUtil'
 import { showToast } from '../../common/utils/Toast'
-import { MediaHelper } from '../../helper/MediaHelper'
+import { selectFile, selectMedia2, takePhoto } from '../../helper/mediaHelper'
 import wfc from '../../wfc/client/wfc'
 import ImageMessageContent from '../../wfc/messages/imageMessageContent'
 import TextMessageContent from '../../wfc/messages/textMessageContent'
@@ -26,7 +26,7 @@ import cameraPicker from '@ohos.multimedia.cameraPicker';
 import media from '@ohos.multimedia.media'
 import photoAccessHelper from '@ohos.file.photoAccessHelper'
 import ConversationInfo from '../../wfc/model/conversationInfo'
-import { imageSize, imageThumbnail } from '../../helper/imageHelper'
+import { imageSize, imageThumbnail } from '../../helper/imageVideoHelper'
 import { inputMethod } from '@kit.IMEKit'
 import PickGroupMemberModal from '../group/PickGroupMemberModal'
 import FileMessageContent from '../../wfc/messages/fileMessageContent'
@@ -90,7 +90,6 @@ export default struct ConversationInputPanelView {
     private messageListScroller?: Scroller
     private textInputBottomWhenBlur: number = 0
     private textInputController: TextInputController = new TextInputController()
-    private mediaHelper: MediaHelper = new MediaHelper(getContext())
     private recordTouchDownY: number = 0
     private recorder?: AudioRecordManager
     private recordOutputAudioFile: string = ''
@@ -109,17 +108,14 @@ export default struct ConversationInputPanelView {
             icon: $r('app.media.ic_func_pic'),
             action: async () => {
                 try {
-                    let imgUris = await this.mediaHelper.selectImageAndVideo(9);
-                    imgUris.forEach(async imgUri => {
-                        // TODO
-                        // FIXME 判断是图片，还是视频
-                        if (imgUri.endsWith('.mp4')) {
+                    let results = await selectMedia2(getContext());
+                    results.forEach(async result => {
+                        if (result.type === 2) {
                             let file = getContext(this)
                                 .getApplicationContext()
                                 .cacheDir + '/' + new Date().getTime() + '.mp4'
-                            copyFileUri(imgUri, file);
-                            let size = fileSize(file);
-                            let content = new VideoMessageContent(file, '', '')
+                            copyFileUri(result.uri, file);
+                            let content = new VideoMessageContent(file, '', result.thumbnail, result.duration)
                             wfc.sendConversationMessage(this.conversation, content, [], null, null, null, null, null);
                             return
                         } else {
@@ -127,12 +123,10 @@ export default struct ConversationInputPanelView {
                             let file = getContext(this)
                                 .getApplicationContext()
                                 .cacheDir + '/' + new Date().getTime() + '.jpg'
-                            copyFileUri(imgUri, file);
-                            let thumbnail = await imageThumbnail(getContext(this), imgUri, { width: 200, height: 200 })
-                            let size = await imageSize(imgUri);
-                            let content = new ImageMessageContent(file, '', thumbnail)
-                            content.imageWidth = size.width;
-                            content.imageHeight = size.height;
+                            copyFileUri(result.uri, file);
+                            let content = new ImageMessageContent(file, '', result.thumbnail)
+                            content.imageWidth = result.width;
+                            content.imageHeight = result.height;
                             wfc.sendConversationMessage(this.conversation, content, [], null, null, null, null, null);
                         }
                     })
@@ -193,34 +187,28 @@ export default struct ConversationInputPanelView {
             icon: $r('app.media.ic_func_shot'),
             action: async () => {
                 try {
-                    let pickResult = await this.mediaHelper.takePhoto(getContext() as common.UIAbilityContext)
-                    if (pickResult && pickResult.resultCode === 0) {
-                        let file = ''
-                        let content: MessageContent
-                        if (pickResult.mediaType === cameraPicker.PickerMediaType.PHOTO) {
-                            file = getContext(this)
-                                .getApplicationContext()
-                                .cacheDir + '/' + new Date().getTime() + '.jpg'
-                            copyFileUri(pickResult.resultUri, file);
-                            let thumbnail = await imageThumbnail(getContext(this), pickResult.resultUri, {
-                                width: 200,
-                                height: 200
-                            })
-                            let size = await imageSize(pickResult.resultUri);
-                            let imageContent = new ImageMessageContent(file, '', thumbnail)
-                            imageContent.imageWidth = size.width;
-                            imageContent.imageHeight = size.height;
-                            content = imageContent
-                        } else {
+                    let results = await takePhoto(getContext() as common.UIAbilityContext)
+                    results.forEach(async result => {
+                        if (result.type === 2) {
                             let file = getContext(this)
                                 .getApplicationContext()
                                 .cacheDir + '/' + new Date().getTime() + '.mp4'
-                            copyFileUri(pickResult.resultUri, file);
-                            let size = fileSize(file);
-                            content = new VideoMessageContent(file, '', '')
+                            copyFileUri(result.uri, file);
+                            let content = new VideoMessageContent(file, '', result.thumbnail, result.duration)
+                            wfc.sendConversationMessage(this.conversation, content, [], null, null, null, null, null);
+                            return
+                        } else {
+                            // 通过request包上传时，只能使用 applicationContext.cacheDir 目录下的文件
+                            let file = getContext(this)
+                                .getApplicationContext()
+                                .cacheDir + '/' + new Date().getTime() + '.jpg'
+                            copyFileUri(result.uri, file);
+                            let content = new ImageMessageContent(file, '', result.thumbnail)
+                            content.imageWidth = result.width;
+                            content.imageHeight = result.height;
+                            wfc.sendConversationMessage(this.conversation, content, [], null, null, null, null, null);
                         }
-                        wfc.sendConversationMessage(this.conversation, content);
-                    }
+                    })
                 } catch (reason) {
                     showToast('拍摄照片失败: ' + reason)
                 }
@@ -231,7 +219,7 @@ export default struct ConversationInputPanelView {
             icon: $r('app.media.ic_func_file'),
             action: async () => {
                 try {
-                    let fileUri = await this.mediaHelper.selectFile()
+                    let fileUri = await selectFile()
                     let name = fileNameFromFileUri(fileUri)
                     let file = getContext(this)
                         .getApplicationContext()

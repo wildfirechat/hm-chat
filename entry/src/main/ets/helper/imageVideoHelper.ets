@@ -10,6 +10,43 @@ import { BusinessError } from '@kit.BasicServicesKit';
 /**
  *
  * @param context
+ * @param uri 视频文件原始 uri
+ * @param imageWH 压缩的目标宽高
+ * @param maxImageSize 压缩后的图片大小，单位是 K，默认 20，<=0 时，不进行图片大小压缩
+ * @returns
+ */
+export async function videoThumbnail(context: Context, uri: string, imageWH: Size, maxImageSize = 20): Promise<string> {
+
+    let phAccessHelper = photoAccessHelper.getPhotoAccessHelper(context);
+    let predicates: dataSharePredicates.DataSharePredicates = new dataSharePredicates.DataSharePredicates();
+    // 配置查询条件，使用PhotoViewPicker选择图片返回的uri进行查询
+    predicates.equalTo('uri', uri);
+    let fetchOption: photoAccessHelper.FetchOptions = {
+        fetchColumns: [photoAccessHelper.PhotoKeys.WIDTH, photoAccessHelper.PhotoKeys.HEIGHT, photoAccessHelper.PhotoKeys.TITLE, photoAccessHelper.PhotoKeys.DURATION],
+        predicates: predicates
+    };
+    let fetchResult: photoAccessHelper.FetchResult<photoAccessHelper.PhotoAsset> = await phAccessHelper.getAssets(fetchOption);
+    // 得到uri对应的PhotoAsset对象，读取文件的部分信息
+    const asset: photoAccessHelper.PhotoAsset = await fetchResult.getFirstObject();
+    asset.photoType
+
+    let base64Data = ''
+    let pixelMap = await asset.getThumbnail(imageWH)
+    if (pixelMap) {
+        if (maxImageSize > 0) {
+            let compressedImageData = await compressImage(pixelMap!, maxImageSize)
+            base64Data = wfc.arrayBuffer_to_b64(compressedImageData)
+        } else {
+            let imageData = await packing(pixelMap, 50)
+            base64Data = wfc.arrayBuffer_to_b64(imageData)
+        }
+    }
+    return base64Data;
+}
+
+/**
+ *
+ * @param context
  * @param uri 图片文件原始 uri
  * @param imageWH 压缩的目标宽高
  * @param maxImageSize 压缩后的图片大小，单位是 K，默认 20，<=0 时，不进行图片大小压缩
@@ -95,7 +132,7 @@ export async function imageSize(uri: string): Promise<Size> {
  * @param maxCompressedImageSize：指定图片的压缩目标大小，单位kb
  * @returns compressedImageInfo：返回最终压缩后的图片信息
  */
-async function compressImage(sourcePixelMap: image.PixelMap, maxCompressedImageSize: number): Promise<ArrayBuffer> {
+export async function compressImage(sourcePixelMap: image.PixelMap, maxCompressedImageSize: number): Promise<ArrayBuffer> {
     // 创建图像编码ImagePacker对象
     const imagePackerApi = image.createImagePacker();
     // 定义图片质量参数
@@ -140,7 +177,7 @@ async function compressImage(sourcePixelMap: image.PixelMap, maxCompressedImageS
  * @param imageQuality：图片质量参数
  * @returns data：返回压缩后的图片数据
  */
-async function packing(sourcePixelMap: image.PixelMap, imageQuality: number): Promise<ArrayBuffer> {
+export async function packing(sourcePixelMap: image.PixelMap, imageQuality: number): Promise<ArrayBuffer> {
     const imagePackerApi = image.createImagePacker();
     const packOpts: image.PackingOption = { format: "image/jpeg", quality: imageQuality };
     const data: ArrayBuffer = await imagePackerApi.packing(sourcePixelMap, packOpts);

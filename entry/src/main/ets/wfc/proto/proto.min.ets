@@ -55,6 +55,7 @@ import { FailCallback, SuccessCallback, CallbackWithValue_1, CallbackWithValue_2
 import { uri } from '@kit.ArkTS';
 import { fileUri } from '@kit.CoreFileKit';
 import fs from '@ohos.file.fs';
+import { atob } from '../util/base64.min';
 
 
 /**
@@ -421,7 +422,7 @@ class WfcImpl {
         }
         self.userId = userId;
 
-        let lastActiveTime : number = protoProxy.connect(userId, token);
+        let lastActiveTime: number = protoProxy.connect(userId, token);
         console.log('lastActiveTime', lastActiveTime);
         // 超过一周没有活跃，就预加载数据
         if (new Date().getTime() / 1000 - lastActiveTime > 7 * 24 * 60 * 60) {
@@ -749,7 +750,7 @@ class WfcImpl {
         protoProxy.clearUnreadFriendRequestStatus();
     }
 
-    clearFriendRequest(direction: number, beforeTime:number) {
+    clearFriendRequest(direction: number, beforeTime: number) {
         protoProxy.clearFriendRequest(direction, beforeTime);
     }
 
@@ -1534,6 +1535,7 @@ class WfcImpl {
         protoProxy.clearConversationsUnreadStatus(types, lines);
         //Todo notify UI?
     }
+
     clearConversationUnreadStatus(conversation: Conversation) {
         protoProxy.clearUnreadStatus(JSON.stringify(conversation));
         let conversationInfo = self.getConversationInfo(conversation);
@@ -1601,7 +1603,7 @@ class WfcImpl {
 
     isMuteNotificationWhenPcOnline(): boolean {
         let strValue = this.getUserSetting(UserSettingScope.MuteWhenPCOnline, "");
-        if("1" === strValue) {
+        if ("1" === strValue) {
             return !this.defaultSilentWhenPCOnline;
         }
         return this.defaultSilentWhenPCOnline;
@@ -1613,10 +1615,10 @@ class WfcImpl {
 
     muteNotificationWhenPcOnline(isMute: boolean, successCB: SuccessCallback, failCB: FailCallback) {
         let strValue: string;
-        if(!this.defaultSilentWhenPCOnline) {
+        if (!this.defaultSilentWhenPCOnline) {
             isMute = !isMute;
         }
-        if(isMute) {
+        if (isMute) {
             strValue = "0";
         } else {
             strValue = "1";
@@ -2092,7 +2094,7 @@ class WfcImpl {
             preparedCB && preparedCB(insertedMsg.messageId, insertedMsg.timestamp);
 
             // image/jpeg
-            this._uploadFile(insertedMsg, message.messageContent.localPath, message.messageContent.mediaType, (uploaded: number, total: number) => {
+            this._uploadFile(insertedMsg, null, message.messageContent.localPath, null, message.messageContent.mediaType, (uploaded: number, total: number) => {
                 progressCB && progressCB(uploaded, total);
             }, (remoteUrl: string) => {
                 (insertedMsg.messageContent as MediaMessageContent).remotePath = remoteUrl;
@@ -2261,10 +2263,26 @@ class WfcImpl {
     // }
 
     // 大文件上传
-    async _uploadFile(message: Message | null, file: string, mediaType: number, progressCB: CallbackWithValue_2<number, number>, successCB: CallbackWithValue_1<string>, failCB: FailCallback) {
-        let fileName = file.substring(file.lastIndexOf('/') + 1);
-        let contentType = this._getContentType(mediaType, fileName);
-        this.getUploadMediaUrl(fileName, mediaType, contentType, (uploadUrl: string, remoteUrl: string, backUploadUrl: string, serverType: number) => {
+    async _uploadFile(message: Message | null, fileName: string | null, filePath: string | null, data: string | null, mediaType: number, progressCB: CallbackWithValue_2<number, number>, successCB: CallbackWithValue_1<string>, failCB: FailCallback) {
+        if (filePath) {
+            if (!fileName) {
+                fileName = filePath.substring(filePath.lastIndexOf('/') + 1);
+            }
+        } else if (data) {
+            if (!fileName) {
+                fileName = new Date().getTime() + ''
+            }
+            filePath = self.context!.cacheDir + '/' + fileName
+            let file = fs.openSync(filePath, fs.OpenMode.READ_WRITE | fs.OpenMode.CREATE)
+            fs.writeSync(file.fd, atob(data).buffer)
+            fs.closeSync(file)
+        } else {
+            console.log('filePath and data must not be null at the same time')
+            failCB(-1)
+        }
+
+        let contentType = this._getContentType(mediaType, fileName!);
+        this.getUploadMediaUrl(fileName!, mediaType, contentType, (uploadUrl: string, remoteUrl: string, backUploadUrl: string, serverType: number) => {
             // TODO
             // FIXME
             // uploadUrl = (self.connectedToMainNetwork() || !backUploadUrl) ? uploadUrl : backUploadUrl;
@@ -2307,10 +2325,10 @@ class WfcImpl {
                     header: header,
                     method: 'PUT',
                     files: [{
-                        filename: fileName,
+                        filename: fileName!,
                         //uri前缀internal://cache 对应applicationCache.cacheDir目录
                         name: 'file',
-                        uri: `internal://${file.substring(file.indexOf('/cache') + 1)}`,
+                        uri: `internal://${filePath!.substring(filePath!.indexOf('/cache') + 1)}`,
                         type: contentType
                     }],
                     data: []
@@ -2633,7 +2651,7 @@ class WfcImpl {
             return;
         }
         if (this.isTcpShortLink() || this.isSupportBigFilesUpload()) {
-            this._uploadFile(null, fileOrData, mediaType, progressCB, successCB, failCB);
+            this._uploadFile(null, fileName, null, fileOrData, mediaType, progressCB, successCB, failCB);
         } else {
             protoProxy.uploadMedia(fileName, fileOrData, mediaType,
                 (remoteUrl: string) => {

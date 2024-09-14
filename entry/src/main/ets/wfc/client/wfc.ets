@@ -41,6 +41,7 @@ import FileRecord from '../model/fileRecord';
 import UserOnlineState from '../model/userOnlineState';
 import UserSettingScope from './userSettingScope';
 import PCOnlineInfo from '../model/pcOnlineInfo';
+import fs from '@ohos.file.fs';
 
 const textEncoder = new util.TextEncoder('utf-8')
 
@@ -2134,7 +2135,7 @@ export class WfcManager {
     /**
      * 上传媒体文件
      * @param {string} fileName
-     * @param {string | File} fileOrData dataUri，或者 base64格式的媒体数据，或者 File 对象
+     * @param {string } fileOrData base64格式的媒体数据
      * @param {number} mediaType 媒体类型，可选值参考{@link MessageContentMediaType}
      * @param {function (string)} successCB 回调通知上传成功之后的url
      * @param {function (number)} failCB

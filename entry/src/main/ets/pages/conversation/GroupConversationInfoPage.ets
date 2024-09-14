@@ -246,14 +246,14 @@ export default struct GroupConversationInfoPage {
                                     let imgUris = await selectImage(1);
                                     imgUris.forEach(async imgUri => {
                                         let base64Data = await imageThumbnail(getContext(this), imgUri, {
-                                            width: 400,
-                                            height: 400
+                                            width: 640,
+                                            height: 640
                                         })
                                         wfc.uploadMedia(new Date().getTime() + '.jpg', base64Data, MessageContentMediaType.Image, remoteUrl => {
                                             wfc.modifyGroupInfo(this.groupInfo.target, ModifyGroupInfoType.Modify_Group_Portrait, remoteUrl, [0], null, () => {
                                                 this.groupInfo.portrait = remoteUrl;
                                             }, err => {
-
+                                                showToast('修改群头像失败 ' + err)
                                             })
 
                                         }, err => {

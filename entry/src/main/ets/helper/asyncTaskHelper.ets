@@ -8,9 +8,9 @@ import taskpool from '@ohos.taskpool';
 // 本文件包含一些异步辅助方法，耗时方法，都应当采用类似的方法处理，防止 UI 卡顿
 
 // exported functions
-export function loadAndGroupContactUserInfos(): Promise<UIUserInfo[]> {
+export function loadAndGroupContactUserInfos(includeFavUser: boolean = false): Promise<UIUserInfo[]> {
     return new Promise((resolve, reject) => {
-        taskpool.execute(loadContactAndGroupTask).then((ret: Object) => {
+        taskpool.execute(loadContactAndGroupTask, includeFavUser).then((ret: Object) => {
             let uiUserInfos = ret as UIUserInfo[]
             resolve(uiUserInfos)
         })
@@ -52,7 +52,7 @@ function loadContactUserInfosTask(): UserInfo[] {
 }
 
 @Concurrent
-function loadContactAndGroupTask(): UIUserInfo[] {
+function loadContactAndGroupTask(includeFavUser: boolean): UIUserInfo[] {
     let friendUserIds = wfc.getMyFriendList()
     let userInfos = wfc.getUserInfos(friendUserIds, '')
     let groupedUsers: UIUserInfo[] = []
@@ -92,6 +92,17 @@ function loadContactAndGroupTask(): UIUserInfo[] {
             }
         }
     })
+
+    let favUserInfos = wfc.getUserInfos(wfc.getFavUsers())
+    let faUIUserInfos: UIUserInfo[] = favUserInfos.map(u => {
+        return {
+            showCategory: false,
+            category: '☆',
+            userInfo: u,
+        } as UIUserInfo
+    })
+
+    groupedUsers.splice(0, 0, ...faUIUserInfos)
 
     lastCategory = ''
     groupedUsers.forEach(gu => {

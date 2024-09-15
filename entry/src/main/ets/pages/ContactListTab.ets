@@ -7,6 +7,7 @@ import { loadAndGroupContactUserInfos } from '../helper/asyncTaskHelper'
 import { navigationDestinations } from './navigationConfig'
 import orgServer from '../api/orgServer'
 import Config from '../config'
+import UserInfo from '../wfc/model/userInfo'
 
 interface ContactListHeader {
     title: string,
@@ -69,17 +70,22 @@ export default struct ContactListTab {
         this.loadMyOrganization()
         wfc.eventEmitter!.on(EventType.ConnectionStatusChanged, this.onConnectionStatusChange)
         wfc.eventEmitter!.on(EventType.UserOnlineEvent, this.onUserOnlineState)
+        wfc.eventEmitter?.on(EventType.UserInfosUpdate, this.onUserInfosUpdate)
     }
 
     aboutToDisappear() {
         wfc.eventEmitter!.off(EventType.ConnectionStatusChanged, this.onConnectionStatusChange)
         wfc.eventEmitter!.off(EventType.UserOnlineEvent, this.onUserOnlineState)
+        wfc.eventEmitter?.off(EventType.UserInfosUpdate, this.onUserInfosUpdate)
     }
 
     onConnectionStatusChange = (status: number) => {
         if (status === ConnectionStatus.ConnectionStatusConnected) {
             this.loadContact()
         }
+    }
+    onUserInfosUpdate = (infos: UserInfo[]) => {
+        this.loadContact()
     }
     onUserOnlineState = (status: number) => {
         let userOnlineStateMap = wfc.getUserOnlineStateMap();
@@ -89,16 +95,10 @@ export default struct ContactListTab {
             return uiUserinfo
         })
         this.contactDataSource.setContactInfos(groupedContactUserInfos)
-
-        let groupedFavContactUserInfos = this.contactDataSource.groupedFavContactUserInfos.map(uiUserinfo => {
-            uiUserinfo.onlineState = userOnlineStateMap.get(uiUserinfo.userInfo.uid)
-            return uiUserinfo
-        })
-        this.contactDataSource.setContactInfos(groupedFavContactUserInfos)
     }
 
     loadContact() {
-        loadAndGroupContactUserInfos().then(groupedUserInfos => {
+        loadAndGroupContactUserInfos(true).then(groupedUserInfos => {
             let userOnlineStateMap = wfc.getUserOnlineStateMap();
             let groupedContactUserInfos = groupedUserInfos.map(uiUserinfo => {
                 uiUserinfo.onlineState = userOnlineStateMap.get(uiUserinfo.userInfo.uid)
@@ -157,7 +157,7 @@ export default struct ContactListTab {
             for (let i = 0; i < this.contactDataSource.groupedContactUserInfos.length; i++) {
                 let gu = this.contactDataSource.groupedContactUserInfos[i]
                 if (gu.category === category) {
-                    listIndex = this.contactListHeaders.length + this.contactDataSource.groupedFavContactUserInfos.length + i
+                    listIndex = this.contactListHeaders.length + i
                     break
                 }
             }
@@ -344,7 +344,6 @@ export default struct ContactListTab {
 }
 
 class ContactDataSource extends BasicDataSource<UIUserInfo> {
-    groupedFavContactUserInfos: UIUserInfo[] = []
     groupedContactUserInfos: UIUserInfo[] = []
 
     setContactInfos(userInfos: UIUserInfo[]): void {
@@ -353,19 +352,14 @@ class ContactDataSource extends BasicDataSource<UIUserInfo> {
     }
 
     setFavContactInfos(userInfos: UIUserInfo[]): void {
-        this.groupedFavContactUserInfos = userInfos
         this.notifyDataReload()
     }
 
     public totalCount(): number {
-        return this.groupedFavContactUserInfos.length + this.groupedContactUserInfos.length
+        return this.groupedContactUserInfos.length
     }
 
     public getData(index: number): UIUserInfo {
-        if (index < this.groupedFavContactUserInfos.length) {
-            return this.groupedFavContactUserInfos[index]
-        } else {
-            return this.groupedContactUserInfos[index - this.groupedFavContactUserInfos.length]
-        }
+        return this.groupedContactUserInfos[index]
     }
 }

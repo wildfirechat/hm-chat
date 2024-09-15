@@ -72,20 +72,6 @@ import { DEFAULT } from '@ohos/hypium';
 import PCLoginRequestMessageContent from '../messages/pcLoginRequestMessageContent';
 
 export default class MessageConfig {
-    static getMessageContentClazz(type: number) {
-        for (const content of MessageConfig.MessageContents) {
-            if (content.type === type) {
-                if (content.contentClazz) {
-                    return content.contentClazz;
-                } else {
-                    return UnsupportMessageContent;
-                }
-            }
-        }
-        console.error(`message type ${type} is unknown`);
-        return UnknownMessageContent;
-    }
-
     static getMessageContentFlag(type: number) {
         let flag = PersistFlag.No_Persist;
         for (const content of MessageConfig.MessageContents) {
@@ -104,16 +90,6 @@ export default class MessageConfig {
         }
         return -1;
     }
-
-    // static getMessageContentType(messageContent: MessageContent) {
-    //     for (const content of MessageConfig.MessageContents) {
-    //         if (content.contentClazz && messageContent instanceof content.contentClazz) {
-    //             return content.type;
-    //         }
-    //     }
-    //
-    //     return MessageContentType.Unknown;
-    // }
 
     static registerMessageContent(name: string, flag: number, type: number, clazz: Promise<typeof import("../messages/messageContent")>) {
         // TODO validate args

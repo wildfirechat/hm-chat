@@ -8,6 +8,7 @@ import { navigationDestinations } from './navigationConfig'
 import orgServer from '../api/orgServer'
 import Config from '../config'
 import UserInfo from '../wfc/model/userInfo'
+import { showToast } from '../common/utils/Toast'
 
 interface ContactListHeader {
     title: string,
@@ -135,8 +136,7 @@ export default struct ContactListTab {
                 badgeCount: 0,
                 badgeValue: '',
                 action: () => {
-                    // this.mainNavPathStack.pushPathByName(navigationDestinations.ChannelListPage, {} as Record<string, Object>)
-                    // TODO
+                    this.mainNavPathStack.pushPathByName(navigationDestinations.OrganizationTreePage, { 'organization': org } as Record<string, Object>)
                 }
             })
 

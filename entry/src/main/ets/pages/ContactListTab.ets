@@ -38,6 +38,8 @@ export default struct ContactListTab {
             badgeValue: '',
             action: () => {
                 wfc.clearUnreadFriendRequestStatus()
+                this.contactTabUnreadCount = 0
+                this.contactListHeaders[0].badgeCount = 0
                 this.mainNavPathStack.pushPathByName(navigationDestinations.FriendRequestListPage, {} as Record<string, Object>)
             }
         },

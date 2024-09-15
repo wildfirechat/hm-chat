@@ -37,7 +37,9 @@ export default struct PickOrganizationMemberModal {
 
     async loadOrganizationPath(orgId: number) {
         this.orgPath = await orgServer.getOrganizationPath(orgId)
-        this.scroller.scrollEdge(Edge.End)
+        setTimeout(() => {
+            this.scroller.scrollEdge(Edge.End)
+        }, 100)
     }
 
     async loadOrganizationMembers(orgId: number) {

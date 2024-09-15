@@ -462,7 +462,7 @@ export default struct GroupConversationInfoPage {
                                     ]
                                 }),
                                 autoCancel: true,
-                                alignment: DialogAlignment.Bottom,
+                                alignment: DialogAlignment.Center,
                                 gridCount: 6,
                                 customStyle: false
                             })

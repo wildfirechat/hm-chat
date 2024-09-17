@@ -151,7 +151,7 @@ export default struct FavRecordPage {
             })
 
         }
-        .title('收藏')
+        .title('我的收藏')
         .height('100%')
         .width('100%')
     }

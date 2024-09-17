@@ -1,4 +1,3 @@
-import router from '@ohos.router'
 import { showToast } from '../../../common/utils/Toast'
 import Config from '../../../config'
 import ActionSheetDialog from '../../../view/ActionSheetDialog'
@@ -25,6 +24,8 @@ import TestCustomMessageContentView from '../custom_message/testCustomMessageCon
 import { navigationDestinations } from '../../navigationConfig'
 import ConferenceInviteMessageContentView from './ConferenceInviteMessageContentView'
 import CardMessageContentView from './CardMessageContentView'
+import appServer from '../../../api/appServer'
+import AppServerError from '../../../api/appServerError'
 
 @Component
 export default struct NormaMessageContentView {
@@ -160,8 +161,17 @@ export default struct NormaMessageContentView {
                 title: '引用',
                 tag: 'quote',
                 action: () => {
-                    showToast('TODO引用')
                     this.quotedMessage = this.message;
+                }
+            },
+            {
+                title: '收藏',
+                tag: 'fav',
+                action: () => {
+                    appServer.favMessage(this.message)
+                        .catch((e: AppServerError) => {
+                            showToast('收藏消息失败 ' + e.message)
+                        })
                 }
             }
         ]
@@ -220,12 +230,6 @@ export default struct NormaMessageContentView {
 
             }, (menuItem: MessageContextMenuItem) => menuItem.title)
         }
-
-        // Row() {
-        //     Text('Test')
-        //     Text('Hello2')
-        //         .backgroundColor(Color.Red)
-        // }
     }
 
     updateMessageReadReceipt(): void {

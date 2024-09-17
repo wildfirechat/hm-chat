@@ -153,7 +153,7 @@ export default class CompositeMessageContent extends MediaMessageContent {
 
         this.title = payload.content;
         let str: string = '';
-        if (!str) {
+        if (payload.binaryContent) {
             str = wfc.b64_to_utf8(payload.binaryContent);
             this._decodeMessages(str);
         }

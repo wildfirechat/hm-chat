@@ -127,65 +127,69 @@ export default class FavItem {
         return favItem;
     }
 
-    toMessage() {
-        if (this.messageUid) {
-            let msg = wfc.getMessageByUid(this.messageUid);
+    static toMessage(favItem: FavItem) {
+        if (favItem.messageUid) {
+            let msg = wfc.getMessageByUid(favItem.messageUid);
             if (msg) {
                 return msg;
             }
         }
         let content: MessageContent;
         let dataObj: JSONObject = {}
-        if (this.data) {
-            dataObj = JSON.parse(this.data)
+        if (favItem.data && favItem.type !== MessageContentType.Composite_Message) {
+            dataObj = JSON.parse(favItem.data)
         }
         try {
-            let type = this.favType ? this.favType : this.type;
+            let type = favItem.favType ? favItem.favType : favItem.type;
             switch (type) {
                 case MessageContentType.Text:
-                    content = new TextMessageContent(this.title);
+                    content = new TextMessageContent(favItem.title);
                     break;
                 case MessageContentType.Image:
-                    content = new ImageMessageContent('', this.url, Config.DEFAULT_THUMBNAIL_URL.split(',')[1]);
-                    if (this.data) {
+                    content = new ImageMessageContent('', favItem.url, Config.DEFAULT_THUMBNAIL_URL.split(',')[1]);
+                    if (favItem.data) {
                         (content as ImageMessageContent).thumbnail = dataObj.thumb as string;
                     }
                     break;
                 case MessageContentType.Video:
-                    content = new VideoMessageContent('', this.url, Config.DEFAULT_THUMBNAIL_URL.split(',')[1]);
-                    if (this.data) {
+                    content = new VideoMessageContent('', favItem.url, Config.DEFAULT_THUMBNAIL_URL.split(',')[1]);
+                    if (favItem.data) {
                         (content as VideoMessageContent).thumbnail = dataObj.thumb as string;
                     }
                     break;
                 case MessageContentType.File:
-                    content = new FileMessageContent('', this.url, this.title, 0);
-                    if (this.data) {
+                    content = new FileMessageContent('', favItem.url, favItem.title, 0);
+                    if (favItem.data) {
                         (content as FileMessageContent).size = dataObj.size as number;
                     }
                     break;
                 case MessageContentType.Composite_Message:
                     content = new CompositeMessageContent();
-                    (content as CompositeMessageContent).title = this.title;
+                    (content as CompositeMessageContent).title = favItem.title;
                     let payload = new MessagePayload();
-                    payload.type = this.favType;
-                    payload.content = this.title;
-                    if (this.data) {
-                        //let payloadBytes = wfc.b64_to_utf8(this.data)
-                        payload.binaryContent = this.data;
-                        payload.remoteMediaUrl = dataObj['remote_url'] as string;
-                        payload.binaryContent = '';
+                    payload.type = favItem.favType;
+                    payload.content = favItem.title;
+                    if (favItem.data) {
+                        payload.binaryContent = favItem.data;
+                        // 兼容处理
+                        try {
+                            let obj = JSON.parse(favItem.data) as JSONObject
+                            payload.remoteMediaUrl = obj['remote_url'] as string;
+                            payload.binaryContent = '';
+                        } catch (e) {
+                        }
                     }
                     content.decode(payload)
                     break;
                 case MessageContentType.Voice:
-                    content = new SoundMessageContent('', this.url, 0)
-                    if (this.data) {
+                    content = new SoundMessageContent('', favItem.url, 0)
+                    if (favItem.data) {
                         (content as SoundMessageContent).duration = dataObj.duration as number;
                     }
                     break;
-                // TODO
-                // case MessageContentType.Link:
-                //     break
+            // TODO
+            // case MessageContentType.Link:
+            //     break
                 default:
                     break;
             }
@@ -193,9 +197,9 @@ export default class FavItem {
             console.log('toMessage Error', e)
             content = new UnknownMessageContent();
         }
-        let msg = new Message(this.conversation!, content!);
-        if (this.messageUid) {
-            msg.messageUid = Long.fromValue(this.messageUid);
+        let msg = new Message(favItem.conversation!, content!);
+        if (favItem.messageUid) {
+            msg.messageUid = Long.fromValue(favItem.messageUid);
         }
 
         return msg;

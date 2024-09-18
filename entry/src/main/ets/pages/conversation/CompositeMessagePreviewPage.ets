@@ -12,13 +12,11 @@ import { http } from '@kit.NetworkKit'
 
 @Entry
 @Component
-export default struct PreviewCompositeMessagePage {
+export default struct CompositeMessagePreviewPage {
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
     private message?: Message;
     private conversation?: Conversation
     private compositeMessageDataSource?: CompositeMessageDataSource
-    @State enableMultiCheck: boolean = false
-    @State quotedMessage?: Message = undefined
     @State title: string = '组合消息'
 
     aboutToAppear() {

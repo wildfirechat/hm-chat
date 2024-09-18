@@ -15,6 +15,7 @@ import { getFiletypeIcon, humanSize, timeFormat } from '../../util/helper'
 import VideoMessageContent from '../../wfc/messages/videoMessageContent'
 import Config from '../../config'
 import FileMessageContent from '../../wfc/messages/fileMessageContent'
+import { showToast } from '../../common/utils/Toast'
 
 @Entry
 @Component
@@ -64,6 +65,25 @@ export default struct FavRecordPage {
         let msg = FavItem.toMessage(favItem)
         let content = msg.messageContent as FileMessageContent
         return content.size
+    }
+
+    previewMessage(favItem: FavItem) {
+        let msg = FavItem.toMessage(favItem)
+        let content = msg.messageContent
+        if (content.type === MessageContentType.Text) {
+            this.mainNavPathStack.pushPathByName(navigationDestinations.TextMessagePreviewPage, {
+                'message': msg
+            } as Record<string, object>)
+        } else if ([MessageContentType.Video, MessageContentType.Image].indexOf(content.type) >= 0) {
+
+        } else if (content.type === MessageContentType.Composite_Message) {
+            this.mainNavPathStack.pushPathByName(navigationDestinations.CompositeMessagePreviewPage, {
+                'message': msg
+            } as Record<string, object>)
+
+        } else {
+            showToast('TODO')
+        }
     }
 
     build() {
@@ -117,7 +137,6 @@ export default struct FavRecordPage {
                                     .textOverflow({ overflow: TextOverflow.Ellipsis })
                             }
                             Row() {
-
                                 Text(favItem.origin)
                                     .fontSize(12)
                                     .fontColor('#b2b2b2')
@@ -131,6 +150,9 @@ export default struct FavRecordPage {
                         }
                         .padding(10)
                         .alignItems(HorizontalAlign.Start)
+                        .onClick(() => {
+                            this.previewMessage(favItem)
+                        })
                     }
                     .key(favItem.id + '')
                 }, (favItem: FavItem) => favItem.id + '')
@@ -142,7 +164,6 @@ export default struct FavRecordPage {
                 strokeWidth: 1,
                 startMargin: 10,
                 endMargin: 10
-
             })
             .onScrollIndex((start, end) => {
                 if (end === this.favListDataSource.totalCount() - 1 && !this.isLoading) {

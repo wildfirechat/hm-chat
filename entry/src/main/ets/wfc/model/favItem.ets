@@ -167,7 +167,7 @@ export default class FavItem {
                     content = new CompositeMessageContent();
                     (content as CompositeMessageContent).title = favItem.title;
                     let payload = new MessagePayload();
-                    payload.type = favItem.favType;
+                    payload.type = type;
                     payload.content = favItem.title;
                     if (favItem.data) {
                         payload.binaryContent = favItem.data;

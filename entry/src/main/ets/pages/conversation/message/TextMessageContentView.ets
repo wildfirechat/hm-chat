@@ -21,6 +21,15 @@ export default struct TextMessageContentView {
                     .constraintSize({ minHeight: 40 })
                     .backgroundColor(Color.White)
                     .borderRadius(4)
+                    .enableDataDetector(true)
+                    .dataDetectorConfig({
+                        types: [TextDataDetectorType.URL, TextDataDetectorType.PHONE_NUMBER, TextDataDetectorType.EMAIL]
+                    })
+                    .onClick(() => {
+                        this.mainNavPathStack.pushPathByName(navigationDestinations.TextMessagePreviewPage, {
+                            'message': this.message
+                        } as Record<string, object>)
+                    })
 
                 Text(this.quoteInfoDesc())
                     .padding(this.textPadding)
@@ -40,6 +49,10 @@ export default struct TextMessageContentView {
                 .constraintSize({ minHeight: 40 })
                 .backgroundColor(Color.White)
                 .borderRadius(4)
+                .enableDataDetector(true)
+                .dataDetectorConfig({
+                    types: [TextDataDetectorType.URL, TextDataDetectorType.PHONE_NUMBER, TextDataDetectorType.EMAIL]
+                })
                 .onClick(() => {
                     this.mainNavPathStack.pushPathByName(navigationDestinations.TextMessagePreviewPage, {
                         'message': this.message

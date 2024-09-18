@@ -181,6 +181,7 @@ export default struct ConversationListTab {
             case ConnectionStatus.ConnectionStatusConnected:
                 break
             case ConnectionStatus.ConnectionStatusUnconnected:
+                text = '连接失败'
                 break
             default:
                 break;

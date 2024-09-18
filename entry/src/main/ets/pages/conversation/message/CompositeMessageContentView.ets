@@ -24,6 +24,7 @@ export default struct CompositeMessageContentView {
             .borderWidth({ bottom: '1px' })
             .borderColor('#EDEDED')
             .alignItems(HorizontalAlign.Start)
+            .constraintSize({minWidth: 200})
 
             Text('聊天记录')
                 .fontSize(12)

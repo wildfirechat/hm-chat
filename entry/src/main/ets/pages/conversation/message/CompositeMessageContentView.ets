@@ -35,7 +35,7 @@ export default struct CompositeMessageContentView {
         .borderRadius(4)
         .backgroundColor(Color.White)
         .onClick(() => {
-            this.mainNavPathStack.pushPathByName(navigationDestinations.PreviewCompositeMessagePage, {
+            this.mainNavPathStack.pushPathByName(navigationDestinations.CompositeMessagePreviewPage, {
                 'message': this.message
             } as Record<string, Object>)
         })

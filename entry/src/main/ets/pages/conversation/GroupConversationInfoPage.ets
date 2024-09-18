@@ -246,14 +246,14 @@ export default struct GroupConversationInfoPage {
                                     let imgUris = await selectImage(1);
                                     imgUris.forEach(async imgUri => {
                                         let base64Data = await imageThumbnail(getContext(this), imgUri, {
-                                            width: 400,
-                                            height: 400
+                                            width: 640,
+                                            height: 640
                                         })
                                         wfc.uploadMedia(new Date().getTime() + '.jpg', base64Data, MessageContentMediaType.Image, remoteUrl => {
                                             wfc.modifyGroupInfo(this.groupInfo.target, ModifyGroupInfoType.Modify_Group_Portrait, remoteUrl, [0], null, () => {
                                                 this.groupInfo.portrait = remoteUrl;
                                             }, err => {
-
+                                                showToast('修改群头像失败 ' + err)
                                             })
 
                                         }, err => {
@@ -263,15 +263,6 @@ export default struct GroupConversationInfoPage {
                                             console.log('uploadMedia progress ', progress, total)
 
                                         })
-                                        // if (file) {
-                                        //     wfc.modifyGroupInfo()
-                                        // }
-
-                                        // let size = await imageSize(imgUri);
-                                        // let content = new ImageMessageContent(file, '', thumbnail)
-                                        // content.imageWidth = size.width;
-                                        // content.imageHeight = size.height;
-                                        // wfc.sendConversationMessage(this.conversation, content, [], null, null, null, null, null);
                                     })
                                 } catch (reason) {
                                     showToast('选取照片失败: ' + reason)
@@ -471,7 +462,7 @@ export default struct GroupConversationInfoPage {
                                     ]
                                 }),
                                 autoCancel: true,
-                                alignment: DialogAlignment.Bottom,
+                                alignment: DialogAlignment.Center,
                                 gridCount: 6,
                                 customStyle: false
                             })

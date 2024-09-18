@@ -118,7 +118,7 @@ export default class CompositeMessageContent extends MediaMessageContent {
             str = str.replace(/"uid":"([0-9]+)"/, "\"uid\":$1");
             // str = str.replace(/"serverTime":"([0-9]+)"/, "\"serverTime\":$1");
 
-            this.localPath = getContext(this)
+            this.localPath = getContext(this).getApplicationContext()
                 .cacheDir + '/' + new Date().getTime() + 'cpm-' + new Date().getTime() + '.data';
             let file = fs.openSync(this.localPath, fs.OpenMode.CREATE | fs.OpenMode.READ_WRITE)
             fs.writeSync(file.fd, str)
@@ -153,7 +153,7 @@ export default class CompositeMessageContent extends MediaMessageContent {
 
         this.title = payload.content;
         let str: string = '';
-        if (!str) {
+        if (payload.binaryContent) {
             str = wfc.b64_to_utf8(payload.binaryContent);
             this._decodeMessages(str);
         }

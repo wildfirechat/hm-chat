@@ -1,8 +1,10 @@
 import Message from '../../../wfc/messages/message'
 import TextMessageContent from '../../../wfc/messages/textMessageContent'
+import { navigationDestinations } from '../../navigationConfig';
 
 @Component
 export default struct TextMessageContentView {
+    @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
     @Link message: Message
     @Prop textPadding: Length | Padding = 10
 
@@ -38,6 +40,11 @@ export default struct TextMessageContentView {
                 .constraintSize({ minHeight: 40 })
                 .backgroundColor(Color.White)
                 .borderRadius(4)
+                .onClick(() => {
+                    this.mainNavPathStack.pushPathByName(navigationDestinations.TextMessagePreviewPage, {
+                        'message': this.message
+                    } as Record<string, object>)
+                })
         }
     }
 }

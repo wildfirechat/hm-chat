@@ -116,7 +116,19 @@ export default struct ForwardMessagePage {
                                 })
                             } else {
                                 let composeMessageContent = new CompositeMessageContent()
+                                let title = ''
+                                let msgConv = this.messages[0].conversation
+                                if (msgConv.type === ConversationType.Single) {
+                                    let name1 = wfc.getUserDisplayName(wfc.getUserId())
+                                    let name2 = wfc.getUserDisplayName(msgConv.target)
+                                    title = `${name1}和${name2}的聊天记录`
+                                } else if (msgConv.type === ConversationType.Group) {
+                                    title = '群的聊天记录'
+                                } else {
+                                    title = '聊天记录'
+                                }
                                 composeMessageContent.setMessages(this.messages)
+                                composeMessageContent.title = title
                                 wfc.sendConversationMessage(conversation, composeMessageContent)
                             }
                         }

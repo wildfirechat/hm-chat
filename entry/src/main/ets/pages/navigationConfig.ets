@@ -6,7 +6,7 @@ import ConversationFileRecordPage from './conversation/ConversationFileRecordPag
 import ConversationPage from './conversation/ConversationPage'
 import ForwardMessagePage from './conversation/forward/ForwardMessagePage'
 import GroupConversationInfoPage from './conversation/GroupConversationInfoPage'
-import PreviewCompositeMessagePage from './conversation/PreviewCompositeMessagePage'
+import CompositeMessagePreviewPage from './conversation/CompositeMessagePreviewPage'
 import SingleConversationInfoPage from './conversation/SingleConversationInfoPage'
 import FavGroupListPage from './group/FavGroupListPage'
 import GroupInfoPage from './group/GroupInfoPage'
@@ -24,6 +24,7 @@ import FavRecordPage from './me/FavRecordPage'
 import FileRecordPage from './me/FileRecordPage'
 import MessageAndNotificationPage from './me/MessageAndNotificaitonPage'
 import SettingPage from './me/SettingPage'
+import PCLoginPage from './misc/PCLoginPage'
 import WebViewPage from './misc/WebViewPage'
 import OrganizationTreePage from './organization/OrganizationTreePage'
 import PickOrganizationMemberPage from './organization/PickOrganizationMemberPage'
@@ -33,6 +34,8 @@ import SearchPortalPage from './search/SearchPortalPage'
 import SearchUserPage from './search/SearchUserPage'
 import UpdateUserInfoPage from './user/UpdateUserInfoPage'
 import UserInfoPage from './user/UserInfoPage'
+import TextMessageContentView from './conversation/message/TextMessageContentView'
+import TextMessagePreviewPage from './conversation/TextMessagePreviewPage'
 
 
 export class navigationDestinations {
@@ -66,11 +69,13 @@ export class navigationDestinations {
     static NotificationPage = 'messageAndNotificationPage'
     static SettingPage = 'settingPage'
     static AboutPage = 'aboutPage'
-    static PreviewCompositeMessagePage = 'previewCompositeMessagePage'
+    static CompositeMessagePreviewPage = 'compositeMessagePreviewPage'
     static OrganizationTreePage = 'organizationTreePage'
     static PickOrganizationMemberPage = 'pickOrganizationMemberPage'
     static ForwardMessagePage = 'forwardMessagePage'
     static GroupInfoPage = 'groupInfoPage'
+    static PCLoginPage = 'pcLoginPage'
+    static TextMessagePreviewPage = 'textMessagePreviewPage'
 }
 
 @Builder
@@ -137,8 +142,10 @@ export function PagesMap(name: string) {
         SettingPage()
     } else if (name === navigationDestinations.AboutPage) {
         AboutPage()
-    } else if (name === navigationDestinations.PreviewCompositeMessagePage) {
-        PreviewCompositeMessagePage()
+    } else if (name === navigationDestinations.CompositeMessagePreviewPage) {
+        CompositeMessagePreviewPage()
+    } else if (name === navigationDestinations.TextMessagePreviewPage) {
+        TextMessagePreviewPage()
     } else if (name === navigationDestinations.OrganizationTreePage) {
         OrganizationTreePage()
     } else if (name === navigationDestinations.PickOrganizationMemberPage) {
@@ -147,5 +154,7 @@ export function PagesMap(name: string) {
         ForwardMessagePage()
     } else if (name === navigationDestinations.GroupInfoPage) {
         GroupInfoPage()
+    } else if (name === navigationDestinations.PCLoginPage) {
+        PCLoginPage()
     }
 }

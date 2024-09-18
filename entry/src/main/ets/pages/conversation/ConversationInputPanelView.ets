@@ -174,7 +174,7 @@ export default struct ConversationInputPanelView {
                         ]
                     }),
                     autoCancel: true,
-                    alignment: DialogAlignment.Bottom,
+                    alignment: DialogAlignment.Center,
                     gridCount: 6,
                     customStyle: false
                 })
@@ -269,7 +269,7 @@ export default struct ConversationInputPanelView {
                 AlertDialog.show({
                     message: '确定删除？',
                     autoCancel: true,
-                    alignment: DialogAlignment.Default,
+                    alignment: DialogAlignment.Center,
                     gridCount: 4,
                     primaryButton: {
                         value: '取消',
@@ -313,7 +313,7 @@ export default struct ConversationInputPanelView {
                                     ]
                                 }),
                                 autoCancel: true,
-                                alignment: DialogAlignment.Bottom,
+                                alignment: DialogAlignment.Center,
                                 gridCount: 6,
                                 customStyle: false
                             })
@@ -360,7 +360,7 @@ export default struct ConversationInputPanelView {
                         ]
                     }),
                     autoCancel: true,
-                    alignment: DialogAlignment.Bottom,
+                    alignment: DialogAlignment.Center,
                     gridCount: 6,
                     customStyle: false
                 })

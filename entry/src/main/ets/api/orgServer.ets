@@ -100,15 +100,21 @@ class OrgServer {
     }
 
     async getOrganizationPath(orgId: number): Promise<Organization[]> {
+        return (await this._getOrganizationPath(orgId)).reverse()
+    }
+
+    async _getOrganizationPath(orgId: number): Promise<Organization[]> {
         let pathList: Organization[] = [];
         let org = await this._getOrganizationSync(orgId);
         if (org) {
             pathList.push(org)
             if (org.parentId) {
-                pathList.push(...await this.getOrganizationPath(org.parentId));
+                pathList.push(...await this._getOrganizationPath(org.parentId));
             }
+            return pathList
+        } else {
+            return []
         }
-        return pathList.reverse();
     }
 
     async _getOrganizationSync(orgId: number): Promise<Organization | null> {

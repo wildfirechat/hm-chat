@@ -34,7 +34,9 @@ export default struct OrganizationTreePage {
 
     async loadOrganizationPath(orgId: number) {
         this.orgPath = await orgServer.getOrganizationPath(orgId)
-        this.scroller.scrollEdge(Edge.End)
+        setTimeout(() => {
+            this.scroller.scrollEdge(Edge.End)
+        }, 100)
     }
 
     async loadOrganizationMembers(orgId: number) {
@@ -64,7 +66,7 @@ export default struct OrganizationTreePage {
                     Row() {
                         ForEach(this.orgPath, (org: Organization, index: number) => {
                             Text(org.name)
-                                .fontColor(index === this.orgPath.length - 1 ? '#3B62E0' : '#485666')
+                                .fontColor(index === this.orgPath.length - 1 ? '#485666' : '#3B62E0')
                                 .onClick(() => {
                                     if (index < this.orgPath.length - 1) {
                                         this.onClickOrg(this.orgPath[index])

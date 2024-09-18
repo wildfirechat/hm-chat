@@ -15,7 +15,7 @@ export default struct ActionSheetDialog {
                         .fontSize(20)
                         .height(50)
                     Divider()
-                        .width('100%')
+                        .width('90%')
                 }
                 .justifyContent(FlexAlign.Center)
                 .align(Alignment.Center)
@@ -23,45 +23,51 @@ export default struct ActionSheetDialog {
                 .padding({ top: 5 })
             }
 
-            ForEach(this.sheets, (sheet: SheetInfo) => {
-                Row() {
-                    if (sheet.icon) {
-                        Image(sheet.icon)
-                            .width(20)
-                            .height(20)
+            Column() {
+                ForEach(this.sheets, (sheet: SheetInfo) => {
+                    Row() {
+                        if (sheet.icon) {
+                            Image(sheet.icon)
+                                .width(20)
+                                .height(20)
+                        }
+                        Text(sheet.title)
+                            .padding(10)
+                            .fontSize(15)
+                            .textAlign(TextAlign.Center)
                     }
-                    Text(sheet.title)
-                        .padding(10)
-                        .fontSize(16)
-                        .textAlign(TextAlign.Center)
-                }
-                .justifyContent(FlexAlign.Center)
-                .align(Alignment.Center)
-                .height(50)
-                .width('100%')
-                .stateStyles({
-                    pressed: {
-                        .backgroundColor('#E5E5E5')
-                    },
-                    normal: {
-                        .backgroundColor(Color.White)
-                    }
-                })
-                .onClick(() => {
-                    sheet.action()
-                    this.controller.close()
-                })
-            }, (sheet: SheetInfo, index: number) => index + '')
+                    .justifyContent(FlexAlign.Center)
+                    .align(Alignment.Center)
+                    .height(50)
+                    .width('90%')
+                    .borderRadius(10)
+                    .stateStyles({
+                        pressed: {
+                            .backgroundColor('#E5E5E5')
+                        },
+                        normal: {
+                            .backgroundColor(Color.White)
+                        }
+                    })
+                    .onClick(() => {
+                        sheet.action()
+                        this.controller.close()
+                    })
+                }, (sheet: SheetInfo, index: number) => index + '')
+            }
+            .padding(10)
 
             if (this.cancel) {
                 Column() {
                     Divider()
-                        .width('100%')
+                        .width('90%')
                     Text(this.cancel)
                         .fontColor(Color.Red)
-                        .fontSize(20)
-                        .height(50)
-                        .width('100%')
+                        .fontSize(15)
+                        .height(40)
+                        .width('90%')
+                        .borderRadius(10)
+                        .margin({ top: 10, bottom: 10 })
                         .textAlign(TextAlign.Center)
                         .stateStyles({
                             pressed: {

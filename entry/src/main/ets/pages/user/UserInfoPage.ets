@@ -113,7 +113,7 @@ export default struct UserInfoPage {
                                         ]
                                     }),
                                     autoCancel: true,
-                                    alignment: DialogAlignment.Bottom,
+                                    alignment: DialogAlignment.Center,
                                     // gridCount: 4,
                                     customStyle: false
                                 })

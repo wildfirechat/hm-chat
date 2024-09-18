@@ -69,22 +69,9 @@ import LeaveChannelChatMessageContent from "../messages/leaveChannelChatMessageC
 import ModifyGroupSettingNotification from "../messages/notification/modifyGroupSettingNotification";
 import MessageContent from '../messages/messageContent';
 import { DEFAULT } from '@ohos/hypium';
+import PCLoginRequestMessageContent from '../messages/pcLoginRequestMessageContent';
 
 export default class MessageConfig {
-    static getMessageContentClazz(type: number) {
-        for (const content of MessageConfig.MessageContents) {
-            if (content.type === type) {
-                if (content.contentClazz) {
-                    return content.contentClazz;
-                } else {
-                    return UnsupportMessageContent;
-                }
-            }
-        }
-        console.error(`message type ${type} is unknown`);
-        return UnknownMessageContent;
-    }
-
     static getMessageContentFlag(type: number) {
         let flag = PersistFlag.No_Persist;
         for (const content of MessageConfig.MessageContents) {
@@ -103,16 +90,6 @@ export default class MessageConfig {
         }
         return -1;
     }
-
-    // static getMessageContentType(messageContent: MessageContent) {
-    //     for (const content of MessageConfig.MessageContents) {
-    //         if (content.contentClazz && messageContent instanceof content.contentClazz) {
-    //             return content.type;
-    //         }
-    //     }
-    //
-    //     return MessageContentType.Unknown;
-    // }
 
     static registerMessageContent(name: string, flag: number, type: number, clazz: Promise<typeof import("../messages/messageContent")>) {
         // TODO validate args
@@ -311,6 +288,9 @@ export default class MessageConfig {
                 break
             case MessageContentType.CONFERENCE_CONTENT_TYPE_COMMAND:
                 content = new ConferenceCommandMessageContent()
+                break
+            case MessageContentType.PC_Login_Request:
+                content = new PCLoginRequestMessageContent()
                 break
             default:
                 content = new UnknownMessageContent()
@@ -614,6 +594,11 @@ export default class MessageConfig {
             name: 'conferenceCommandMessageContent',
             flag: PersistFlag.Transparent,
             type: MessageContentType.CONFERENCE_CONTENT_TYPE_COMMAND,
+        },
+        {
+            name: 'pcLoginRequestMessageContent',
+            flag: PersistFlag.No_Persist,
+            type: MessageContentType.PC_Login_Request,
         }
 
     ];

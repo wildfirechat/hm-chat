@@ -6,19 +6,17 @@ import CompositeMessageContent from '../../wfc/messages/compositeMessageContent'
 import Message from '../../wfc/messages/message'
 import Conversation from '../../wfc/model/conversation'
 import Long from '../../wfc/util/long'
-import { eq } from '../../wfc/util/longUtil'
+import { eq, stringValue } from '../../wfc/util/longUtil'
 import CompositeMessageContentContainerView from './message/CompositeMessageContentContainerView'
 import { http } from '@kit.NetworkKit'
 
 @Entry
 @Component
-export default struct PreviewCompositeMessagePage {
+export default struct CompositeMessagePreviewPage {
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
     private message?: Message;
     private conversation?: Conversation
     private compositeMessageDataSource?: CompositeMessageDataSource
-    @State enableMultiCheck: boolean = false
-    @State quotedMessage?: Message = undefined
     @State title: string = '组合消息'
 
     aboutToAppear() {
@@ -84,7 +82,7 @@ export default struct PreviewCompositeMessagePage {
                         }
                         .padding({ bottom: 10 })
                     },
-                    (msg: Message) => this.messageItemKey(msg))
+                    (msg: Message) => stringValue(msg.messageUid))
 
             }
             .scrollBar(BarState.Off)
@@ -111,13 +109,6 @@ export default struct PreviewCompositeMessagePage {
                 return true;
             }
         }
-    }
-
-    // why?
-    // forEach 需要 key 变化，对应项才会更新
-    messageItemKey(message: Message) {
-        let key: string = message.messageContent.type + '-' + message.messageId + '-' + message.status
-        return key
     }
 
     loadMediaCompositeMessageContent() {

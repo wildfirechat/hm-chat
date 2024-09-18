@@ -3,10 +3,6 @@ import ContactListTab from './ContactListTab'
 import DiscoveryTab from './DiscoveryTab'
 import MeTab from './MeTab'
 import AbilityAccessCtrl, { Permissions } from '@ohos.abilityAccessCtrl'
-import Logger from '../common/utils/Logger'
-import promptAction from '@ohos.promptAction'
-import bundleManager from '@ohos.bundle.bundleManager'
-import common from '@ohos.app.ability.common'
 import { scanCore, scanBarcode } from '@kit.ScanKit';
 import { showToast } from '../common/utils/Toast'
 import PickContactModal from './picker/PickContactModal'
@@ -24,9 +20,12 @@ import { checkPermissions, requestPermissions } from '../helper/permissionHelper
 import { navigationDestinations, PagesMap } from './navigationConfig'
 import orgServer from '../api/orgServer'
 import GroupInfo from '../wfc/model/groupInfo'
-import { faceDetector } from '@kit.CoreVisionKit'
 import { url } from '@kit.ArkTS'
 import WfcScheme from '../wfcScheme'
+import Message from '../wfc/messages/message'
+import MessageContentType from '../wfc/messages/messageContentType'
+import EventType from '../wfc/client/wfcEvent'
+import PCLoginRequestMessageContent from '../wfc/messages/pcLoginRequestMessageContent'
 
 const TAG = 'Main';
 
@@ -134,6 +133,16 @@ struct MainPage {
 
     }
 
+    onReceiveMessage = (msg: Message) => {
+        if (msg.content?.type === MessageContentType.PC_Login_Request) {
+            let pcLoginRequest = msg.messageContent as PCLoginRequestMessageContent
+            this.showPCLoginPage(pcLoginRequest.sessionId, true, pcLoginRequest.platform)
+
+        } else {
+            // DO NOTHING
+        }
+    }
+
     async aboutToAppear() {
         this.enableNotification();
         let ungrantedPermissions = await checkPermissions(getContext(this), permissions)
@@ -148,6 +157,20 @@ struct MainPage {
         if (Config.ORGANIZATION_SERVER) {
             orgServer.login()
         }
+
+        wfc.eventEmitter?.on(EventType.ReceiveMessage, this.onReceiveMessage)
+    }
+
+    aboutToDisappear(): void {
+        wfc.eventEmitter?.off(EventType.ReceiveMessage)
+    }
+
+    showPCLoginPage(token: string, isConfirmPCLogin = false, platform = 0) {
+        this.mainNavPathStack.pushPathByName(navigationDestinations.PCLoginPage, {
+            'token': token,
+            'isConfirmPCLogin': isConfirmPCLogin,
+            'platform': platform
+        } as Record<string, Object>)
     }
 
     showUser(userId: string) {
@@ -268,8 +291,9 @@ struct MainPage {
                         }
 
                         switch (prefix) {
-                        // case WfcScheme.QR_CODE_PREFIX_PC_SESSION:
-                        //     break
+                            case WfcScheme.QR_CODE_PREFIX_PC_SESSION:
+                                this.showPCLoginPage(value)
+                                break
                             case WfcScheme.QR_CODE_PREFIX_USER:
                                 this.showUser(value)
                                 break

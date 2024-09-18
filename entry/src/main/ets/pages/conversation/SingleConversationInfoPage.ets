@@ -182,7 +182,7 @@ export default struct SingleConversationInfoPage {
                                     ]
                                 }),
                                 autoCancel: true,
-                                alignment: DialogAlignment.Bottom,
+                                alignment: DialogAlignment.Center,
                                 gridCount: 6,
                                 customStyle: false
                             })

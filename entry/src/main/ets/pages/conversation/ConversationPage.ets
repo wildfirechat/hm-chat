@@ -243,18 +243,31 @@ export default struct ConversationPage {
 
     loadHistoryMessage() {
         let oldestMessageId = 0;
+        let oldestMessageUid = Long.ZERO
         if (this.conversationMessageDataSource.totalCount() > 0) {
-            oldestMessageId = this.conversationMessageDataSource.getData(0).messageId
+            let oldestMsg = this.conversationMessageDataSource.getData(0)
+            oldestMessageId = oldestMsg.messageId
+            oldestMessageUid = oldestMsg.messageUid
         }
         wfc.getMessagesV2(this.conversation!, oldestMessageId, true, 20, '', (messages) => {
-            this.conversationMessageDataSource.insertMessages(0, messages)
-            this.refreshStatus = false;
-            this.scroller.scrollToIndex(messages.length - 1, false)
             if (messages.length === 0) {
-                this.hasNoMoreHistoryMessage = true
+                wfc.loadRemoteConversationMessages(this.conversation!, [], oldestMessageUid, 20, msgs => {
+                    if (msgs.length === 0) {
+                        this.hasNoMoreHistoryMessage = true
+                    } else {
+                        this.conversationMessageDataSource.insertMessages(0, msgs)
+                        this.scroller.scrollToIndex(msgs.length - 1, false)
+                    }
+                    this.refreshStatus = false;
+                }, err => {
+                    this.hasNoMoreHistoryMessage = true
+                    this.refreshStatus = false;
+                })
+            } else {
+                this.conversationMessageDataSource.insertMessages(0, messages)
+                this.scroller.scrollToIndex(messages.length - 1, false)
+                this.refreshStatus = false;
             }
-            // TODO 加载远程历史消息
-            // FIXME
         }, err => {
             console.error('getMessageV2 error', err)
             this.refreshStatus = false;

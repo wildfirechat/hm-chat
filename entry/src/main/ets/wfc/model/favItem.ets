@@ -13,22 +13,26 @@ import Long from "../util/long";
 import UnknownMessageContent from "../messages/unknownMessageContent";
 
 import Config from '../../config'
+import { JSONObject } from '../type/types';
+import Conversation from './conversation';
+import MessageContent from '../messages/messageContent';
 
 export default class FavItem {
-    id;
-    messageUid;
+    id = 0;
+    messageUid = Long.ZERO;
     // 和消息类型对应
-    favType;
-    timestamp;
-    conversation;
-    origin;
-    sender;
-    title;
-    url;
-    thumbUrl;
-    data;
+    favType = 0;
+    type = 0;
+    timestamp = 0;
+    conversation?: Conversation;
+    origin = '';
+    sender = '';
+    title = '';
+    url = '';
+    thumbUrl = '';
+    data? = '';
 
-    static fromMessage(message) {
+    static fromMessage(message: Message) {
         let favItem = new FavItem();
         favItem.messageUid = message.messageUid;
         favItem.conversation = message.conversation;
@@ -52,27 +56,27 @@ export default class FavItem {
                 break;
         }
 
-        let data;
+        let data: JSONObject;
         switch (message.messageContent.type) {
             case MessageContentType.Text:
-                let textMessageContent = message.messageContent;
+                let textMessageContent = message.messageContent as TextMessageContent;
                 favItem.title = textMessageContent.content;
                 break;
             case MessageContentType.Image:
-                let imageContent = message.messageContent;
+                let imageContent = message.messageContent as ImageMessageContent;
                 favItem.url = imageContent.remotePath;
                 if (imageContent.thumbnail) {
-                    let data = {
+                    data = {
                         "thumb": imageContent.thumbnail,
                     }
                     favItem.data = JSON.stringify(data);
                 }
                 break;
             case MessageContentType.Video:
-                let videoContent = message.messageContent;
+                let videoContent = message.messageContent as VideoMessageContent;
                 favItem.url = videoContent.remotePath;
                 data = {
-                    duration: videoContent.duration,
+                    'duration': videoContent.duration,
                 }
                 if (videoContent.thumbnail) {
                     data['thumb'] = videoContent.thumbnail;
@@ -80,22 +84,22 @@ export default class FavItem {
                 favItem.data = JSON.stringify(data);
                 break;
             case MessageContentType.File:
-                let fileContent = message.messageContent;
+                let fileContent = message.messageContent as FileMessageContent;
                 favItem.url = fileContent.remotePath;
                 favItem.title = fileContent.name;
                 data = {
-                    size: fileContent.size,
+                    'size': fileContent.size,
                 }
                 favItem.data = JSON.stringify(data);
                 break;
             case MessageContentType.Composite_Message:
-                let compositeContent = message.messageContent;
+                let compositeContent = message.messageContent as CompositeMessageContent;
                 favItem.title = compositeContent.title;
                 let payload = compositeContent.encode();
 
                 if (payload.remoteMediaUrl) {
                     let str = wfc.b64_to_utf8(payload.binaryContent);
-                    let obj = JSON.parse(str)
+                    let obj = JSON.parse(str) as JSONObject
                     obj['remote_url'] = payload.remoteMediaUrl;
                     str = JSON.stringify(obj);
                     payload.binaryContent = wfc.utf8_to_b64(str);
@@ -104,16 +108,16 @@ export default class FavItem {
                 favItem.data = payload.binaryContent;
                 break;
             case MessageContentType.Voice:
-                let voiceContent = message.messageContent;
+                let voiceContent = message.messageContent as SoundMessageContent;
                 favItem.url = voiceContent.remotePath;
                 data = {
-                    duration: voiceContent.duration,
+                    'duration': voiceContent.duration,
                 }
                 favItem.data = JSON.stringify(data);
                 break;
-            // TODO
-            // case MessageContentType.Link:
-            //     break
+        // TODO
+        // case MessageContentType.Link:
+        //     break
             default:
                 break;
         }
@@ -123,76 +127,79 @@ export default class FavItem {
         return favItem;
     }
 
-    toMessage() {
-        if (this.messageUid) {
-            let msg = wfc.getMessageByUid(this.messageUid);
+    static toMessage(favItem: FavItem) {
+        if (favItem.messageUid) {
+            let msg = wfc.getMessageByUid(favItem.messageUid);
             if (msg) {
                 return msg;
             }
         }
-        let content;
+        let content: MessageContent;
+        let dataObj: JSONObject = {}
+        if (favItem.data && favItem.type !== MessageContentType.Composite_Message) {
+            dataObj = JSON.parse(favItem.data)
+        }
         try {
-            // @ts-ignore
-            let type = this.favType ? this.favType : this.type;
+            let type = favItem.favType ? favItem.favType : favItem.type;
             switch (type) {
                 case MessageContentType.Text:
-                    content = new TextMessageContent(this.title);
+                    content = new TextMessageContent(favItem.title);
                     break;
                 case MessageContentType.Image:
-                    content = new ImageMessageContent(null, this.url, Config.DEFAULT_THUMBNAIL_URL.split(',')[1]);
-                    if (this.data) {
-                        content.thumbnail = this.data.thumb;
+                    content = new ImageMessageContent('', favItem.url, Config.DEFAULT_THUMBNAIL_URL.split(',')[1]);
+                    if (favItem.data) {
+                        (content as ImageMessageContent).thumbnail = dataObj.thumb as string;
                     }
                     break;
                 case MessageContentType.Video:
-                    content = new VideoMessageContent(null, this.url, Config.DEFAULT_THUMBNAIL_URL.split(',')[1]);
-                    if (this.data) {
-                        content.thumbnail = this.data.thumb;
+                    content = new VideoMessageContent('', favItem.url, Config.DEFAULT_THUMBNAIL_URL.split(',')[1]);
+                    if (favItem.data) {
+                        (content as VideoMessageContent).thumbnail = dataObj.thumb as string;
                     }
                     break;
                 case MessageContentType.File:
-                    content = new FileMessageContent(null, this.url, this.title, 0);
-                    if (this.data) {
-                        content.size = this.data.size;
+                    content = new FileMessageContent('', favItem.url, favItem.title, 0);
+                    if (favItem.data) {
+                        (content as FileMessageContent).size = dataObj.size as number;
                     }
                     break;
                 case MessageContentType.Composite_Message:
                     content = new CompositeMessageContent();
-                    content.title = this.title;
+                    (content as CompositeMessageContent).title = favItem.title;
                     let payload = new MessagePayload();
-                    payload.type = this.favType;
-                    payload.content = this.title;
-                    if (this.data) {
-                        //let payloadBytes = wfc.b64_to_utf8(this.data)
-                        payload.binaryContent = this.data;
+                    payload.type = type;
+                    payload.content = favItem.title;
+                    if (favItem.data) {
+                        payload.binaryContent = favItem.data;
+                        // 兼容处理
                         try {
-                            let obj = JSON.parse(this.data);
-                            payload.remoteMediaUrl = obj['remote_url'];
-                            payload.binaryContent = null;
+                            let obj = JSON.parse(favItem.data) as JSONObject
+                            payload.remoteMediaUrl = obj['remote_url'] as string;
+                            payload.binaryContent = '';
                         } catch (e) {
                         }
                     }
                     content.decode(payload)
                     break;
                 case MessageContentType.Voice:
-                    content = new SoundMessageContent(null, this.url, 0)
-                    if (this.data) {
-                        content.duration = this.data.duration;
+                    content = new SoundMessageContent('', favItem.url, 0)
+                    if (favItem.data) {
+                        (content as SoundMessageContent).duration = dataObj.duration as number;
                     }
                     break;
-                // TODO
-                // case MessageContentType.Link:
-                //     break
+            // TODO
+            // case MessageContentType.Link:
+            //     break
                 default:
                     break;
             }
         } catch (e) {
             console.log('toMessage Error', e)
-            content = new UnknownMessageContent(null);
+            content = new UnknownMessageContent();
         }
-        let msg = new Message(this.conversation, content);
-        if (this.messageUid) {
-            msg.messageUid = Long.fromValue(this.messageUid);
+        let msg = new Message(favItem.conversation!, content!);
+        if (favItem.messageUid) {
+            msg.messageUid = Long.fromValue(favItem.messageUid);
         }
 
         return msg;

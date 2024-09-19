@@ -2283,9 +2283,7 @@ class WfcImpl {
 
         let contentType = this._getContentType(mediaType, fileName!);
         this.getUploadMediaUrl(fileName!, mediaType, contentType, (uploadUrl: string, remoteUrl: string, backUploadUrl: string, serverType: number) => {
-            // TODO
-            // FIXME
-            // uploadUrl = (self.connectedToMainNetwork() || !backUploadUrl) ? uploadUrl : backUploadUrl;
+            uploadUrl = (self.connectedToMainNetwork() || !backUploadUrl) ? uploadUrl : backUploadUrl;
             console.log('getUploadMediaUrl', uploadUrl, remoteUrl, backUploadUrl, serverType)
             if (serverType === 0) {
                 // 内置存储，不支持大文件上传
@@ -2316,13 +2314,14 @@ class WfcImpl {
                 // xhr.setRequestHeader("content-disposition", `attachment; filename="${fileName}"`);
                 // xhr.send(file);
 
-                let header = new Map<Object, string>();
-                header.set('content-type', contentType);
-                header.set('content-disposition', `attachment; filename="${fileName}"`);
+                // TODO 向华为提工单，需要支持多个 header，特别是 content-disposition
+                // let header = new Map<Object, string>();
+                // header.set('content-type', contentType);
+                // header.set('content-disposition', `attachment; filename="${fileName}"`);
 
                 let uploadRequestOptions: request.UploadConfig = {
                     url: uploadUrl,
-                    header: header,
+                    header: {'Content-Type': contentType},
                     method: 'PUT',
                     files: [{
                         filename: fileName!,

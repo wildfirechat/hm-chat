@@ -231,7 +231,9 @@ export default struct ConversationListTab {
                         }
                         .width('100%')
                         .onClick(() => {
-                            this.mainNavPathStack.pushPathByName(navigationDestinations.PCSessionPage, {} as Record<string, object>)
+                            this.mainNavPathStack.pushPathByName(navigationDestinations.PCSessionPage, {
+                                'pcOnlineInfo': info
+                            } as Record<string, object>)
                         })
                     }, (item: PCOnlineInfo, index: number) => {
                         return item.type + '-' + item.platform.platform + '-' + item.clientId

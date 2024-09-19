@@ -235,7 +235,7 @@ export default struct ConversationInputPanelView {
                         // FIXME
                         let duration = 0
                         let thumbnail = ''
-                        content = new VideoMessageContent(fileUri, '', thumbnail, duration)
+                        content = new VideoMessageContent(file, '', thumbnail, duration)
                     } else {
                         content = new FileMessageContent(file, '', name, size)
                     }

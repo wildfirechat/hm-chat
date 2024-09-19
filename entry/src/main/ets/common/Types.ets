@@ -23,3 +23,8 @@ export interface PortraitAndName {
     portrait: string,
     name: string
 }
+
+export interface VideoDurationAndThumbnail {
+    duration: number,
+    thumbnail: string,
+}

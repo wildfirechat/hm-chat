@@ -6,6 +6,8 @@ import wfc from '../wfc/client/wfc';
 import fs from '@ohos.file.fs';
 import { Context } from '@kit.AbilityKit';
 import { BusinessError } from '@kit.BasicServicesKit';
+import { VideoDurationAndThumbnail } from '../common/Types';
+
 
 /**
  *
@@ -15,7 +17,7 @@ import { BusinessError } from '@kit.BasicServicesKit';
  * @param maxImageSize 压缩后的图片大小，单位是 K，默认 20，<=0 时，不进行图片大小压缩
  * @returns
  */
-export async function videoThumbnail(context: Context, uri: string, imageWH: Size, maxImageSize = 20): Promise<string> {
+export async function videoThumbnail(context: Context, uri: string, imageWH: Size, maxImageSize = 20): Promise<VideoDurationAndThumbnail> {
 
     let phAccessHelper = photoAccessHelper.getPhotoAccessHelper(context);
     let predicates: dataSharePredicates.DataSharePredicates = new dataSharePredicates.DataSharePredicates();
@@ -28,7 +30,6 @@ export async function videoThumbnail(context: Context, uri: string, imageWH: Siz
     let fetchResult: photoAccessHelper.FetchResult<photoAccessHelper.PhotoAsset> = await phAccessHelper.getAssets(fetchOption);
     // 得到uri对应的PhotoAsset对象，读取文件的部分信息
     const asset: photoAccessHelper.PhotoAsset = await fetchResult.getFirstObject();
-    asset.photoType
 
     let base64Data = ''
     let pixelMap = await asset.getThumbnail(imageWH)
@@ -41,7 +42,10 @@ export async function videoThumbnail(context: Context, uri: string, imageWH: Siz
             base64Data = wfc.arrayBuffer_to_b64(imageData)
         }
     }
-    return base64Data;
+    return {
+        'duration': asset.get(photoAccessHelper.PhotoKeys.DURATION) as number,
+        'thumbnail': base64Data
+    };
 }
 
 /**

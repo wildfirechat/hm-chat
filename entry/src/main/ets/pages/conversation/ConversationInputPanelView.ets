@@ -26,7 +26,7 @@ import cameraPicker from '@ohos.multimedia.cameraPicker';
 import media from '@ohos.multimedia.media'
 import photoAccessHelper from '@ohos.file.photoAccessHelper'
 import ConversationInfo from '../../wfc/model/conversationInfo'
-import { imageSize, imageThumbnail } from '../../helper/imageVideoHelper'
+import { imageSize, imageThumbnail, videoThumbnail } from '../../helper/imageVideoHelper'
 import { inputMethod } from '@kit.IMEKit'
 import PickGroupMemberModal from '../group/PickGroupMemberModal'
 import FileMessageContent from '../../wfc/messages/fileMessageContent'
@@ -44,6 +44,7 @@ import PickContactModal from '../picker/PickContactModal'
 import PickSingleContactModal from '../picker/PickSingleContactModal'
 import ForwardMessageDialog from './forward/ForwardMessageDialog'
 import CardMessageContent from '../../wfc/messages/cardMessageContent'
+import fileUri from '@ohos.file.fileuri'
 
 const INPUT_ICON_WIDTH = 30
 
@@ -219,23 +220,20 @@ export default struct ConversationInputPanelView {
             icon: $r('app.media.ic_func_file'),
             action: async () => {
                 try {
-                    let fileUri = await selectFile()
-                    let name = fileNameFromFileUri(fileUri)
+                    let selectedFileUri = await selectFile()
+                    let name = fileNameFromFileUri(selectedFileUri)
                     let file = getContext(this)
                         .getApplicationContext()
                         .cacheDir + '/' + new Date().getTime() + '-' + name
-                    copyFileUri(fileUri, file);
+                    copyFileUri(selectedFileUri, file);
                     let size = fileSize(file);
                     let content: MessageContent
                     if (isImage(name.substring(name.lastIndexOf('.') + 1))) {
-                        let thumbnail = await imageThumbnail(getContext(this), fileUri, { width: 200, height: 200 })
+                        let thumbnail = await imageThumbnail(getContext(this), fileUri.getUriFromPath(file), { width: 200, height: 200 })
                         content = new ImageMessageContent(file, '', thumbnail)
                     } else if (isVideo(name.substring(name.lastIndexOf('.') + 1))) {
-                        // TODO
-                        // FIXME
-                        let duration = 0
-                        let thumbnail = ''
-                        content = new VideoMessageContent(fileUri, '', thumbnail, duration)
+                        let durationAndThumbnail = await videoThumbnail(getContext(this), fileUri.getUriFromPath(file), { width: 200, height: 200 })
+                        content = new VideoMessageContent(file, '', durationAndThumbnail.thumbnail, durationAndThumbnail.duration)
                     } else {
                         content = new FileMessageContent(file, '', name, size)
                     }

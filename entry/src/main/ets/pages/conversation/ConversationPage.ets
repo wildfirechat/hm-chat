@@ -30,11 +30,14 @@ import TestCustomNotificationMessageContent from '../../wfc_custom_message/testC
 import TestCustomMessageContentView from './custom_message/testCustomMessageContentView'
 import TestCustomNotificationMessageContentView from './custom_message/TestCustomNotificationMessageContentView'
 import UserOnlineState from '../../wfc/model/userOnlineState'
+import RecallNotificationMessageContentView from './message/RecallNotificationMessageContentView'
+import TextMessageContent from '../../wfc/messages/textMessageContent'
+import RecallMessageNotification from '../../wfc/messages/notification/recallMessageNotification'
 
 @Entry
 @Component
 export default struct ConversationPage {
-    @State text: string = ''
+    @State toReeditText: string = ''
     @State title: string = ''
     @State conversation?: Conversation = undefined
     @State conversationInfo?: ConversationInfo = undefined
@@ -308,14 +311,14 @@ export default struct ConversationPage {
     onSendMessage = (message: Message) => {
         let conversation = new Conversation(message.conversation.type, message.conversation.target, message.conversation.line)
         if (this.isDisplayMessage(message) && Conversation.equal(conversation, this.conversation!)) {
-            this.conversationMessageDataSource.appendMessages([message]);
+            this.conversationMessageDataSource.appendMessage(message);
             this.scroller.scrollEdge(Edge.Bottom)
         }
     }
     onReceiveMessage = (message: Message, hasMore: boolean) => {
         this.unreadStatusCleared = false
         if (this.isDisplayMessage(message) && Conversation.equal(message.conversation, this.conversation!)) {
-            this.conversationMessageDataSource.appendMessages([message]);
+            this.conversationMessageDataSource.appendMessage(message);
             this.scroller.scrollEdge(Edge.Bottom)
         }
     }
@@ -477,7 +480,14 @@ export default struct ConversationPage {
                                                         TestCustomNotificationMessageContentView({ message: msg })
                                                     }
                                                     // 自定义通知消息 end
-                                                    else {
+                                                    else if (msg.messageContent.type === MessageContentType.RecallMessage_Notification) {
+                                                        RecallNotificationMessageContentView({
+                                                            message: msg, onClickReedit: () => {
+                                                                let recallMsgContent = msg.messageContent as RecallMessageNotification
+                                                                this.toReeditText = recallMsgContent.originalSearchableContent
+                                                            }
+                                                        })
+                                                    } else {
                                                         SimpleNotificationMessageContentView({ message: msg })
                                                     }
                                                 }
@@ -711,6 +721,7 @@ export default struct ConversationPage {
 
             if (this.conversation) {
                 ConversationInputPanelView({
+                    text: this.toReeditText,
                     conversation: this.conversation,
                     conversationInfo: this.conversationInfo,
                     showAudioRecorderView: $showAudioRecorderView,
@@ -762,6 +773,14 @@ class ConversationMessageDataSource extends BasicDataSource<Message> {
 
     insertMessages(index: number, messages: Message[]) {
         this.messages.splice(0, 0, ...messages)
+        this.notifyDataReload();
+    }
+
+    appendMessage(message: Message) {
+        if (this.messages.findIndex(m => eq(m.messageUid, message.messageUid)) >= 0) {
+            return
+        }
+        this.messages = this.messages.concat(message)
         this.notifyDataReload();
     }
 

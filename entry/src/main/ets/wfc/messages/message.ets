@@ -58,7 +58,7 @@ export default class Message {
     content?: MessagePayload;
     messageContent: MessageContent;
     messageId = 0;
-    direction = 0;
+    direction = 0; // 0 out, 1 in
     status = 0;
     messageUid = Long.ZERO;
     timestamp = 0;

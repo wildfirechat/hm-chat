@@ -64,7 +64,7 @@ interface MultiCheckAction {
 export default struct ConversationInputPanelView {
     @Prop conversation: Conversation
     @Prop conversationInfo: ConversationInfo
-    @State text: string = ''
+    @Link text: string
     @State caretPosition: number = 0
     @State selectionStart: number = 0
     @State selectionEnd: number = 0

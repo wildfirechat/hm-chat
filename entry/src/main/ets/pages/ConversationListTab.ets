@@ -12,13 +12,16 @@ import BasicDataSource from '../common/BasicDataSource'
 import data_preferences from '@ohos.data.preferences'
 import Conversation from '../wfc/model/conversation'
 import { navigationDestinations } from './navigationConfig'
-
+import PCOnlineInfo from '../wfc/model/pcOnlineInfo'
+import { it } from '@ohos/hypium'
 
 @Component
 @Preview
 export default struct ConversationListTab {
     @State connectionStatus: number = -1
     @State connectionStatusHeader: string = ''
+    @State pcOnlineInfos: PCOnlineInfo[] = []
+    @State isMuteWhenPCOnline: boolean = false
     @Link conversationListTabUnreadCount: number
     private conversationInfoDataSource: ConversationInfoDataSource = new ConversationInfoDataSource()
     private context?: Context
@@ -29,6 +32,8 @@ export default struct ConversationListTab {
         console.log('conversationList status', wfc.getConnectionStatus())
 
         this.loadConversationList()
+        this.loadPCOnlineInfos()
+        this.isMuteWhenPCOnline = wfc.isMuteNotificationWhenPcOnline()
         this.context = getContext(this)
         wfc.eventEmitter!.on(EventType.ReceiveMessage, this.onSendMessage)
         wfc.eventEmitter!.on(EventType.SendMessage, this.onReceiveMessage)
@@ -75,6 +80,10 @@ export default struct ConversationListTab {
         this.conversationListTabUnreadCount = totalUnreadCount
     }
 
+    loadPCOnlineInfos() {
+        this.pcOnlineInfos = wfc.getPCOnlinesInfos();
+    }
+
     onConnectionStatusChange = (status: number) => {
         this.connectionStatus = status
         if (status === ConnectionStatus.ConnectionStatusTokenIncorrect
@@ -105,6 +114,7 @@ export default struct ConversationListTab {
         this.computeConnectionStatusHeader()
         if (status === ConnectionStatus.ConnectionStatusConnected) {
             this.loadConversationList();
+            this.loadPCOnlineInfos()
         } else {
             // TODO
         }
@@ -125,6 +135,8 @@ export default struct ConversationListTab {
     }
     onSettingUpdate = () => {
         this.loadConversationList()
+        this.loadPCOnlineInfos()
+        this.isMuteWhenPCOnline = wfc.isMuteNotificationWhenPcOnline()
     }
     onUserInfosUpdate = () => {
         this.loadConversationList();
@@ -206,6 +218,24 @@ export default struct ConversationListTab {
 
                     }
                     .width('100%')
+                }
+                if (this.pcOnlineInfos.length > 0) {
+                    ForEach(this.pcOnlineInfos, (info: PCOnlineInfo, index: number) => {
+                        ListItem() {
+                            Text(`${info.desc() + (this.isMuteWhenPCOnline ? '，手机通知已关闭' : '')}`)
+                                .height(40)
+                                .width('100%')
+                                .backgroundColor('#F7F7F7')
+                                .textAlign(TextAlign.Center)
+
+                        }
+                        .width('100%')
+                        .onClick(() => {
+                            this.mainNavPathStack.pushPathByName(navigationDestinations.PCSessionPage, {} as Record<string, object>)
+                        })
+                    }, (item: PCOnlineInfo, index: number) => {
+                        return item.type + '-' + item.platform.platform + '-' + item.clientId
+                    })
                 }
 
                 // TODO lazyForEach https://developer.huawei.com/consumer/cn/doc/harmonyos-guides-V2/ui-ts-performance-improvement-recommendation-0000001477981001-V2

@@ -60,6 +60,7 @@ export default struct MeTab {
                     Text(`野火号:${this.userInfo!.name}`)
                         .maxLines(1)
                         .fontSize(14)
+                        .textOverflow({ overflow: TextOverflow.Ellipsis })
                         .fontColor(Color.Gray)
                 }
                 .alignItems(HorizontalAlign.Start)

@@ -17,13 +17,33 @@ export default class PCOnlineInfo {
     static Web_Online = 1
     static WX_Online = 2
     static Pad_Online = 3
-
     type = PCOnlineInfo.PC_Online;
     platform = new Platform(0)
     isOnline = false;
     clientId = ''
     clientName = '';
     timestamp = 0;
+
+    desc() {
+        let str = ''
+        switch (this.type) {
+            case PCOnlineInfo.PC_Online:
+                str = 'PC 在线'
+                break
+            case PCOnlineInfo.Web_Online:
+                str = 'Web 在线'
+                break
+            case PCOnlineInfo.WX_Online:
+                str = '微信小程序 在线'
+                break
+            case PCOnlineInfo.Pad_Online:
+                str = 'Pad 在线'
+                break
+            default:
+                break
+        }
+        return str;
+    }
 
     static infoFromStr(value: string, type: number): PCOnlineInfo | null {
         if (!value) {

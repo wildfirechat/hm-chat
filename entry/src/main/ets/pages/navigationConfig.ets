@@ -24,7 +24,7 @@ import FavRecordPage from './me/FavRecordPage'
 import FileRecordPage from './me/FileRecordPage'
 import MessageAndNotificationPage from './me/MessageAndNotificaitonPage'
 import SettingPage from './me/SettingPage'
-import PCLoginPage from './misc/PCLoginPage'
+import PCLoginPage from './pc/PCLoginPage'
 import WebViewPage from './misc/WebViewPage'
 import OrganizationTreePage from './organization/OrganizationTreePage'
 import PickOrganizationMemberPage from './organization/PickOrganizationMemberPage'
@@ -36,6 +36,7 @@ import UpdateUserInfoPage from './user/UpdateUserInfoPage'
 import UserInfoPage from './user/UserInfoPage'
 import TextMessageContentView from './conversation/message/TextMessageContentView'
 import TextMessagePreviewPage from './conversation/TextMessagePreviewPage'
+import PCSessionPage from './pc/PCSessionPage'
 
 
 export class navigationDestinations {
@@ -76,6 +77,7 @@ export class navigationDestinations {
     static GroupInfoPage = 'groupInfoPage'
     static PCLoginPage = 'pcLoginPage'
     static TextMessagePreviewPage = 'textMessagePreviewPage'
+    static PCSessionPage = 'pcSessionPage'
 }
 
 @Builder
@@ -156,5 +158,7 @@ export function PagesMap(name: string) {
         GroupInfoPage()
     } else if (name === navigationDestinations.PCLoginPage) {
         PCLoginPage()
+    } else if (name === navigationDestinations.PCSessionPage) {
+        PCSessionPage()
     }
 }

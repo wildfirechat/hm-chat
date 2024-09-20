@@ -1,29 +1,57 @@
 import { showToast } from '../../common/utils/Toast'
 import wfc from '../../wfc/client/wfc'
 import GroupInfo from '../../wfc/model/groupInfo'
+import ModifyMyInfoEntry from '../../wfc/model/modifyMyInfoEntry';
+import ModifyMyInfoType from '../../wfc/model/modifyMyInfoType';
+import UserInfo from '../../wfc/model/userInfo';
 
 @Component
-export default struct UpdateGroupRemarkPage {
+export default struct UpdateUserNickNameOrAliasPage {
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
-    private groupInfo: GroupInfo = new GroupInfo()
+    private userInfo: UserInfo = new UserInfo()
     @State text: string = ''
     private placeHolder: string = ''
+    private isSelf: boolean = false
 
     aboutToAppear() {
         let params = this.mainNavPathStack.getParamByIndex(this.mainNavPathStack.size() - 1) as Record<string, Object>;
-        this.groupInfo = params['groupInfo'] as GroupInfo
-        this.text = this.groupInfo.remark
-        this.placeHolder = '备注'
+        this.userInfo = params['userInfo'] as UserInfo
+
+        this.isSelf = this.userInfo.uid === wfc.getUserId()
+
+
+        if (this.isSelf) {
+            this.placeHolder = this.userInfo.displayName
+        } else {
+            this.placeHolder = this.userInfo.friendAlias ? this.userInfo.friendAlias : '好友备注'
+        }
+    }
+
+    updateNickNameOrAlias() {
+        if (this.isSelf) {
+            let entry: ModifyMyInfoEntry = { type: ModifyMyInfoType.Modify_DisplayName, value: this.text.trim() }
+            wfc.modifyMyInfo([entry], () => {
+                this.mainNavPathStack.pop()
+            }, err => {
+                showToast('修改个人昵称失败 ' + err)
+            })
+        } else {
+            wfc.setFriendAlias(this.userInfo.uid, this.text.trim(), () => {
+                this.mainNavPathStack.pop()
+            }, err => {
+                showToast('修改个人好友备注失败 ' + err)
+            })
+        }
     }
 
     build() {
         NavDestination() {
             Column() {
-                Text('备注')
+                Text(this.isSelf ? '昵称' : ' 备注')
                     .fontSize(20)
                     .margin({ top: 40 })
 
-                Text('群聊的备注，仅自己可见')
+                Text(this.isSelf ? '好名字，可以让朋友更容易记住你' : '为朋友设置一个仅自己可见的备注')
                     .margin({ top: 20 })
 
                 Divider()
@@ -32,17 +60,11 @@ export default struct UpdateGroupRemarkPage {
                     .color('#EDEDED')
 
                 Row() {
-                    Image(this.groupInfo.portrait)
-                        .draggable(false)
-                        .backgroundColor(Color.Gray)
-                        .borderRadius(4)
-                        .width(40)
-                        .height(40)
-
                     TextInput({
                         text: $$this.text,
                         placeholder: this.placeHolder
                     })
+                        .defaultFocus(true)
                         .borderRadius(2)
                         .backgroundColor(Color.Transparent)
                         .maxLines(1)
@@ -55,14 +77,6 @@ export default struct UpdateGroupRemarkPage {
                     .strokeWidth(0.4)
                     .color('#EDEDED')
 
-                Text(`群聊名称：${this.groupInfo.name}`)
-                    .fontColor('#838383')
-                    .fontSize(13)
-                    .maxLines(1)
-                    .ellipsisMode(EllipsisMode.START)
-                    .textOverflow({ overflow: TextOverflow.Ellipsis })
-                    .margin({ top: 10 })
-
                 Button('完成', {
                     type: ButtonType.Normal,
                     stateEffect: true
@@ -73,12 +87,7 @@ export default struct UpdateGroupRemarkPage {
                     .borderRadius(6)
                     .margin({ top: 100 })
                     .onClick(() => {
-                        wfc.setGroupRemark(this.groupInfo.target, this.text.trim(), () => {
-                            showToast('修改群备注成功')
-                            this.mainNavPathStack.pop()
-                        }, err => {
-                            showToast('修改群备注失败' + err)
-                        })
+                        this.updateNickNameOrAlias()
                     })
             }
             .padding(30)

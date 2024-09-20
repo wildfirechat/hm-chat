@@ -37,6 +37,7 @@ import UserInfoPage from './user/UserInfoPage'
 import TextMessageContentView from './conversation/message/TextMessageContentView'
 import TextMessagePreviewPage from './conversation/TextMessagePreviewPage'
 import PCSessionPage from './pc/PCSessionPage'
+import UpdateUserNickNameOrAliasPage from './user/UpdateUserNickNameOrAliasPage'
 
 
 export class navigationDestinations {
@@ -78,6 +79,7 @@ export class navigationDestinations {
     static PCLoginPage = 'pcLoginPage'
     static TextMessagePreviewPage = 'textMessagePreviewPage'
     static PCSessionPage = 'pcSessionPage'
+    static UpdateUserNickNameOrAliasPage = 'updateUserNickNameOrAliasPage'
 }
 
 @Builder
@@ -160,5 +162,7 @@ export function PagesMap(name: string) {
         PCLoginPage()
     } else if (name === navigationDestinations.PCSessionPage) {
         PCSessionPage()
+    } else if (name === navigationDestinations.UpdateUserNickNameOrAliasPage) {
+        UpdateUserNickNameOrAliasPage()
     }
 }

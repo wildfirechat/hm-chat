@@ -11,6 +11,8 @@ import { imageThumbnail } from '../../helper/imageVideoHelper';
 import MessageContentMediaType from '../../wfc/messages/messageContentMediaType';
 import ModifyMyInfoEntry from '../../wfc/model/modifyMyInfoEntry';
 import ModifyMyInfoType from '../../wfc/model/modifyMyInfoType';
+import OptionItemView from '../../view/OptionItemView';
+import { trustedAppService } from '@kit.DeviceSecurityKit';
 
 @Entry
 @Component
@@ -111,6 +113,18 @@ export default struct UserInfoPage {
                     .width('100%')
                     .justifyContent(FlexAlign.Start)
                     .backgroundColor(Color.White)
+
+                    Divider()
+                    OptionItemView({
+                        title: '设置昵称或别名',
+                        showRightArrow: true,
+                        showDivider: false
+                    })
+                        .onClick(() => {
+                            this.mainNavPathStack.pushPathByName(navigationDestinations.UpdateUserNickNameOrAliasPage, {
+                                'userInfo': this.userInfo,
+                            } as Record<string, Object>)
+                        })
 
                     Column() {
                         Text('发消息')

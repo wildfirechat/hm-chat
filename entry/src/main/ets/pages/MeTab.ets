@@ -26,8 +26,9 @@ export default struct MeTab {
 
     onUserInfosUpdate = (usersInfos: UserInfo[]) => {
         for (const userinfo of usersInfos) {
-            if (userinfo.uid === this.userId)
+            if (userinfo.uid === this.userId) {
                 this.userInfo = userinfo
+            }
         }
     }
     onConnectionStatusChange = (status: number) => {
@@ -80,34 +81,35 @@ export default struct MeTab {
             .padding(10)
             .alignItems(VerticalAlign.Center)
             .backgroundColor(Color.White)
+            .onClick(() => {
+                this.mainNavPathStack.pushPathByName(navigationDestinations.UserInfoPage, {
+                    'userInfo': this.userInfo,
+                } as Record<string, Object>)
+            })
 
             OptionItemView({ icon: $r('app.media.ic_account'), title: '账号与安全' })
                 .margin({ top: 10, bottom: 10 })
                 .onClick(() => {
-                    this.mainNavPathStack.pushPathByName(navigationDestinations.AccountPage, {
-                    } as Record<string, Object>)
+                    this.mainNavPathStack.pushPathByName(navigationDestinations.AccountPage, {} as Record<string, Object>)
                 })
 
             OptionItemView({ icon: $r('app.media.ic_notification'), title: '消息与通知' })
                 .margin({ top: 10, bottom: 10 })
                 .onClick(() => {
-                    this.mainNavPathStack.pushPathByName(navigationDestinations.NotificationPage, {
-                    } as Record<string, Object>)
+                    this.mainNavPathStack.pushPathByName(navigationDestinations.NotificationPage, {} as Record<string, Object>)
                 })
 
             Column() {
                 OptionItemView({ icon: $r('app.media.ic_settings_file'), title: '文件' })
                     .onClick(() => {
-                        this.mainNavPathStack.pushPathByName(navigationDestinations.FileRecordPage, {
-                        } as Record<string, Object>)
+                        this.mainNavPathStack.pushPathByName(navigationDestinations.FileRecordPage, {} as Record<string, Object>)
                     })
                 Divider()
                     .margin({ left: 40 })
                     .color('#F7F7F7')
                 OptionItemView({ icon: $r('app.media.ic_star'), title: '收藏', showDivider: false })
                     .onClick(() => {
-                        this.mainNavPathStack.pushPathByName(navigationDestinations.FavRecordPage, {
-                        } as Record<string, Object>)
+                        this.mainNavPathStack.pushPathByName(navigationDestinations.FavRecordPage, {} as Record<string, Object>)
                     })
             }
             .margin({ top: 10, bottom: 10 })
@@ -124,8 +126,7 @@ export default struct MeTab {
                     .color('#F7F7F7')
                 OptionItemView({ icon: $r('app.media.ic_setting'), title: '设置', showDivider: false })
                     .onClick(() => {
-                        this.mainNavPathStack.pushPathByName(navigationDestinations.SettingPage, {
-                        } as Record<string, Object>)
+                        this.mainNavPathStack.pushPathByName(navigationDestinations.SettingPage, {} as Record<string, Object>)
                     })
             }
             .margin({ top: 10, bottom: 10 })

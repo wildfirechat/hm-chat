@@ -6,6 +6,11 @@ import UserInfo from '../../wfc/model/userInfo';
 import EventType from '../../wfc/client/wfcEvent';
 import { navigationDestinations } from '../navigationConfig';
 import ActionSheetDialog from '../../view/ActionSheetDialog';
+import { selectImage } from '../../helper/mediaHelper';
+import { imageThumbnail } from '../../helper/imageVideoHelper';
+import MessageContentMediaType from '../../wfc/messages/messageContentMediaType';
+import ModifyMyInfoEntry from '../../wfc/model/modifyMyInfoEntry';
+import ModifyMyInfoType from '../../wfc/model/modifyMyInfoType';
 
 @Entry
 @Component
@@ -40,6 +45,38 @@ export default struct UserInfoPage {
         }
     }
 
+    async updatePortrait() {
+        try {
+            let imgUris = await selectImage(1);
+            imgUris.forEach(async imgUri => {
+                let base64Data = await imageThumbnail(getContext(this), imgUri, {
+                    width: 640,
+                    height: 640
+                })
+                wfc.uploadMedia(new Date().getTime() + '.jpg', base64Data, MessageContentMediaType.Image, remoteUrl => {
+                    let modifyPortraitEntry: ModifyMyInfoEntry = {
+                        type: ModifyMyInfoType.Modify_Portrait,
+                        value: remoteUrl
+                    }
+                    wfc.modifyMyInfo([modifyPortraitEntry], () => {
+                        this.userInfo!.portrait = remoteUrl;
+                    }, err => {
+                        showToast('修改头像失败 ' + err)
+                    })
+
+                }, err => {
+                    console.log('uploadMedia err', err)
+
+                }, (progress, total) => {
+                    console.log('uploadMedia progress ', progress, total)
+
+                })
+            })
+        } catch (reason) {
+            showToast('选取照片失败: ' + reason)
+        }
+    }
+
     build() {
         NavDestination() {
             Navigation() {
@@ -49,6 +86,11 @@ export default struct UserInfoPage {
                             .width(60)
                             .height(60)
                             .borderRadius(4)
+                            .onClick(() => {
+                                if (this.userInfo?.uid === wfc.getUserId()) {
+                                    this.updatePortrait()
+                                }
+                            })
                         Column() {
                             Text(this.userInfo!.displayName)
                                 .width('100%')

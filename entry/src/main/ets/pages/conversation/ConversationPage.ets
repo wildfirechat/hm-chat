@@ -33,6 +33,7 @@ import UserOnlineState from '../../wfc/model/userOnlineState'
 import RecallNotificationMessageContentView from './message/RecallNotificationMessageContentView'
 import TextMessageContent from '../../wfc/messages/textMessageContent'
 import RecallMessageNotification from '../../wfc/messages/notification/recallMessageNotification'
+import GroupMemberType from '../../wfc/model/groupMemberType'
 
 @Entry
 @Component
@@ -278,9 +279,21 @@ export default struct ConversationPage {
     }
 
     showUserInfo(userId: string) {
-        this.mainNavPathStack.pushPathByName(navigationDestinations.UserInfoPage, {
-            'userInfo': wfc.getUserInfo(userId)
-        } as Record<string, Object>)
+        let allow = true
+        if (this.conversation?.type === ConversationType.Group) {
+            let groupInfo = wfc.getGroupInfo(this.conversation.target, false)
+            let me = wfc.getGroupMember(this.conversation.target, wfc.getUserId())
+            if (groupInfo.privateChat === 1 && [GroupMemberType.Owner, GroupMemberType.Manager].indexOf(me.type) === -1) {
+                allow = false
+            }
+        }
+        if (allow) {
+            this.mainNavPathStack.pushPathByName(navigationDestinations.UserInfoPage, {
+                'userInfo': wfc.getUserInfo(userId)
+            } as Record<string, Object>)
+        } else {
+            showToast('禁止查看用户信息')
+        }
     }
 
     isDisplayMessage(message: Message) {

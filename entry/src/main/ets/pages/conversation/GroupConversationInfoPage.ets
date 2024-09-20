@@ -141,6 +141,16 @@ export default struct GroupConversationInfoPage {
                                     .fontSize(12)
                                     .margin({ top: 5 })
                             }
+                            .onClick(() => {
+                                let me = wfc.getGroupMember(this.groupInfo.target, wfc.getUserId())
+                                if (this.groupInfo.privateChat === 1 && [GroupMemberType.Owner, GroupMemberType.Manager].indexOf(me.type) === -1) {
+                                    showToast('禁止私聊')
+                                } else {
+                                    this.mainNavPathStack.pushPathByName(navigationDestinations.UserInfoPage, {
+                                        'userInfo': wfc.getUserInfo(groupMember.memberId)
+                                    } as Record<string, Object>)
+                                }
+                            })
                             .width('20%')
                             .padding(8)
                             .justifyContent(FlexAlign.Center)

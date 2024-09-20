@@ -46,7 +46,6 @@ export default struct PickContactModal {
         }
     }
 
-
     newlyCheckedUsers(): UserInfo[] {
         return this.checkedUsers.filter(info => this.initialCheckedUserIds.indexOf(info.uid) === -1)
     }
@@ -124,8 +123,13 @@ export default struct PickContactModal {
                 .borderRadius(4)// .backgroundColor(Color.Blue)
                 .onClick(async () => {
                     let users = await this.allNewlyCheckedUsers();
-                    this.onCheckUser?.(users)
                     this.showPickContactModal = false
+                    if (this.onCheckUser) {
+                        this.onCheckUser(users)
+                    } else {
+                        LocalStorage.getShared()
+                            .setOrCreate<UserInfo[]>(PickContactModal.PICK_RESULT, this.newlyCheckedUsers());
+                    }
                 })
         }
         .height('100%')

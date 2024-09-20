@@ -319,6 +319,18 @@ struct MainPage {
     }
 
     @Builder
+    TitleBuilder() {
+        Column() {
+            Text(this.title)
+                .padding({ left: 10 })
+                .fontSize(25)
+                .width('200')
+        }
+        .height('100%')
+        .justifyContent(FlexAlign.Center)
+    }
+
+    @Builder
     NavigationMenus() {
         Row() {
             Image($r('app.media.ic_search'))
@@ -326,7 +338,6 @@ struct MainPage {
                 .height(30)
                 .padding(6)
                 .onClick(() => {
-                    let xx = this.mainNavPathStack.getAllPathName();
                     this.mainNavPathStack.pushPathByName(navigationDestinations.SearchPortalPage, {
                         'keyword': '1'
                     } as Record<string, Object>, true)
@@ -395,7 +406,7 @@ struct MainPage {
                 this.title = this.tabTitles[index]
             })
         }
-        .title(this.title)
+        .title(this.TitleBuilder())
         .titleMode(NavigationTitleMode.Mini)
         .hideBackButton(true)
         .menus(this.NavigationMenus())

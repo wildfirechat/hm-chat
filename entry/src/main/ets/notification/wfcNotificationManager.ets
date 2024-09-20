@@ -4,6 +4,7 @@ import wantAgent from '@ohos.app.ability.wantAgent';
 import { WantAgent } from '@ohos.app.ability.wantAgent';
 import Base from '@ohos.base';
 import wfc from '../wfc/client/wfc';
+import UserSettingScope from '../wfc/client/userSettingScope';
 
 class WfcNotificationManager {
     private notificationMessages: Message[] = []
@@ -18,6 +19,12 @@ class WfcNotificationManager {
         let id = this.notificationId(message);
         let title = '新消息'
         let text = message.messageContent.formatNotification(message)
+
+        let silent = wfc.isGlobalSilent()
+        let info = wfc.getConversationInfo(message.conversation)
+        if (silent || info.isSilent) {
+            return
+        }
 
         let wantAgentObj = await this.buildWantAgent(message);
         this.showNotification(id, title, text, wantAgentObj)

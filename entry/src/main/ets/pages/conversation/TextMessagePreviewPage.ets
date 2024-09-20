@@ -27,18 +27,28 @@ export default struct TextMessagePreviewPage {
     build() {
         NavDestination() {
             Column() {
-                Text(this.message?.messageContent.digest(this.message))
-                    .width('100%')
-                    .fontSize(20)
-                    .lineSpacing({ value: 12, unit: LengthUnit.VP })
+                Scroll() {
+                    Text(this.message?.messageContent.digest(this.message))
+                        .width('100%')
+                        .fontSize(20)
+                        .lineSpacing({ value: 12, unit: LengthUnit.VP })
 
-                // TODO actions
+                }
+                .scrollBar(BarState.Off)
+                .edgeEffect(EdgeEffect.Spring)
+                .width('100%')
+                .layoutWeight(1)
+
+                Row() {
+                    Text('TODO actions')
+                }
+                .height(40)
+                .width('100%')
             }
             .padding(20)
             .justifyContent(FlexAlign.Center)
             .alignItems(HorizontalAlign.Start)
             .width('100%')
-            .height('100%')
             .onClick(() => {
                 this.mainNavPathStack.pop()
             })

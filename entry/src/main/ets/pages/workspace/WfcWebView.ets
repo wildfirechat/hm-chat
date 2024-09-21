@@ -58,7 +58,7 @@ export default struct WfcWebView {
                     if (evt.url === Config.OPEN_PLATFORM_WORK_SPACE_URL) {
                         let userId = wfc.getUserId()
                         let p = await data_preferences.getPreferences(getContext(this), 'wfcstore')
-                        let openUserId = p.getSync('open-userId', '')
+                        let openUserId = p.getSync('workspace-userId', '')
                         if (userId !== openUserId) {
                             try {
                                 await this.controller?.runJavaScript('localStorage.clear()')

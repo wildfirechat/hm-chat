@@ -56,7 +56,7 @@ export default class DSBridge {
         let userId = wfc.getUserId()
         let context = GlobalContext.getContext().getObject<common.UIAbilityContext>('context');
         data_preferences.getPreferences(context, 'wfcstore').then(p => {
-            p.putSync('open-userId', userId)
+            p.putSync('workspace-userId', userId)
             p.flush()
         })
 

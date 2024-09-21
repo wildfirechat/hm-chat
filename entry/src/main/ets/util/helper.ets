@@ -130,7 +130,9 @@ export const weekFormat = (num: number): string => {
  * 会话时间显示
  */
 export const dateFormat = (date: number): string => {
-    if (!date) return ''
+    if (!date) {
+        return ''
+    }
     let today = new Date().setHours(0, 0, 0, 0);
     let that = new Date(date).setHours(0, 0, 0, 0);
     if (today === that) {
@@ -145,7 +147,9 @@ export const dateFormat = (date: number): string => {
  * 消息会话时间显示
  */
 export const timeFormat = (time: number): string => {
-    if (!time) return ''
+    if (!time) {
+        return ''
+    }
     let newtime: string;
     let nowtime = new Date()
     // if (date.constructor !== Date) {
@@ -185,5 +189,16 @@ export const timeFormat = (time: number): string => {
         }
     }
     return newtime
+}
+export const timestampFormat = (timestamp: number) => {
+    timestamp = ~~(timestamp / 1000);
+    let str = ''
+    let hour = ~~(timestamp / 3600);
+    str = hour > 0 ? ((hour < 10 ? "0" : "") + hour + ':') : '';
+    let min = ~~((timestamp % 3600) / 60);
+    str += (min < 10 ? "0" : "") + min + ':'
+    let sec = ~~((timestamp % 60));
+    str += (sec < 10 ? "0" : "") + sec
+    return str;
 }
 

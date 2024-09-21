@@ -2,6 +2,9 @@ import web_webview from '@ohos.web.webview'
 import { showToast } from '../../common/utils/Toast'
 import UserInfo from '../../wfc/model/userInfo'
 import DSBridge from './dsBridge'
+import Config from '../../config'
+import wfc from '../../wfc/client/wfc'
+import data_preferences from '@ohos.data.preferences';
 
 
 @Component
@@ -50,6 +53,21 @@ export default struct WfcWebView {
                     name: '_dsbridge',
                     methodList: ['call'],
                     controller: this.controller
+                })
+                .onPageBegin(async (evt) => {
+                    if (evt.url === Config.OPEN_PLATFORM_WORK_SPACE_URL) {
+                        let userId = wfc.getUserId()
+                        let p = await data_preferences.getPreferences(getContext(this), 'wfcstore')
+                        let openUserId = p.getSync('open-userId', '')
+                        if (userId !== openUserId) {
+                            try {
+                                await this.controller?.runJavaScript('localStorage.clear()')
+                            } catch (e) {
+                                console.log('clear localStorage error', e)
+                            }
+
+                        }
+                    }
                 })
                 .domStorageAccess(true)
                 .onPageEnd(url => {

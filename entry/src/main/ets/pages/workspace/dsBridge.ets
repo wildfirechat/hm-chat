@@ -3,6 +3,9 @@ import wfc from '../../wfc/client/wfc';
 import url from '@ohos.url';
 import UserInfo from '../../wfc/model/userInfo';
 import { navigationDestinations } from '../navigationConfig';
+import data_preferences from '@ohos.data.preferences';
+import common from '@ohos.app.ability.common';
+import { GlobalContext } from '../../globalContext';
 
 export default class DSBridge {
     private webUrl: string;
@@ -30,7 +33,6 @@ export default class DSBridge {
         }
         console.log('callbackjs', script)
         this.webviewController.runJavaScript(script)
-
     }
     private _callJs = (method: string, args?: Object[]) => {
         this.callId++;
@@ -51,6 +53,13 @@ export default class DSBridge {
         showToast(arg)
     }
     private getAuthCode = (arg: string) => {
+        let userId = wfc.getUserId()
+        let context = GlobalContext.getContext().getObject<common.UIAbilityContext>('context');
+        data_preferences.getPreferences(context, 'wfcstore').then(p => {
+            p.putSync('open-userId', userId)
+            p.flush()
+        })
+
         let args = JSON.parse(arg) as Record<string, Object>
         let data = args.data as Record<string, Object>
         wfc.getAuthCode(data.appId as string, data.appType as number, url.URL.parseURL(this.webUrl)

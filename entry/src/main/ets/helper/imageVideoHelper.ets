@@ -5,7 +5,6 @@ import image from '@ohos.multimedia.image';
 import wfc from '../wfc/client/wfc';
 import fs from '@ohos.file.fs';
 import { Context } from '@kit.AbilityKit';
-import { BusinessError } from '@kit.BasicServicesKit';
 import { VideoDurationAndThumbnail } from '../common/Types';
 
 

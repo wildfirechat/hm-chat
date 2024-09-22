@@ -6,21 +6,17 @@ import VideoMessageContent from '../../wfc/messages/videoMessageContent';
 import { exist } from '../../common/utils/FileUtil';
 import { curves, display, window } from '@kit.ArkUI';
 import { ifaa } from '@kit.OnlineAuthenticationKit';
-
-interface MMMediaEntry {
-    message: Message,
-    type: string,
-    url: string,
-    thumbnail: string,
-    videoController?: VideoController
-}
+import { MMMediaEntry } from '../../common/Types';
+import { mediaEntry } from '../../helper/messageHelper';
 
 //@Entry
 //@Component
 @CustomDialog
 export default struct MMMessagePreviewDialog {
+    // 预览组合消息里面的媒体消息时，直接设置 mediaEntries，不设置 message
     @State mediaEntries: MMMediaEntry[] = []
-    private message?: Message
+    // 预览会话里面的媒体消息时设置
+    public message?: Message
     @State index: number = 0
     @State bgColor: string = '#000000'
     @State marginTop: number = 0
@@ -35,12 +31,14 @@ export default struct MMMessagePreviewDialog {
     async aboutToAppear() {
         // const params = router.getParams() as Record<string, Object>;
         // this.message = params['message'] as Message
-        this.mediaEntries = [this.message!].map(msg => this.mediaEntry(msg))
-        let oldMsgs = await this.loadMoreMessages(this.message!, true)
-        let newMsgs = await this.loadMoreMessages(this.message!, false)
-        this.mediaEntries = oldMsgs.map(msg => this.mediaEntry(msg))
-            .concat(this.mediaEntries, newMsgs.map(msg => this.mediaEntry(msg)))
-        this.index = oldMsgs.length
+        if (this.mediaEntries.length === 0) {
+            this.mediaEntries = [this.message!].map(msg => mediaEntry(msg))
+            let oldMsgs = await this.loadMoreMessages(this.message!, true)
+            let newMsgs = await this.loadMoreMessages(this.message!, false)
+            this.mediaEntries = oldMsgs.map(msg => mediaEntry(msg))
+                .concat(this.mediaEntries, newMsgs.map(msg => mediaEntry(msg)))
+            this.index = oldMsgs.length
+        }
 
         let _display = display.getDefaultDisplaySync()
         this.displayHeight = _display.height;
@@ -67,28 +65,6 @@ export default struct MMMessagePreviewDialog {
 
     isImageMessageContent(message: Message) {
         return message.messageContent.type === MessageContentType.Image
-    }
-
-    mediaEntry(message: Message): MMMediaEntry {
-        if (this.isImageMessageContent(message)) {
-            let imageMessageContent = message.messageContent as ImageMessageContent
-            return {
-                message: message,
-                type: 'image',
-                url: imageMessageContent.localPath && exist(imageMessageContent.localPath) ? 'file://' + imageMessageContent.localPath : imageMessageContent.remotePath,
-                thumbnail: 'data:image/jpeg;base64,' + imageMessageContent.thumbnail
-            } as MMMediaEntry
-
-        } else {
-            let videoMessageContent = message.messageContent as VideoMessageContent
-            return {
-                message: message,
-                type: 'video',
-                url: videoMessageContent.localPath && exist(videoMessageContent.localPath) ? 'file://' + videoMessageContent.localPath : videoMessageContent.remotePath,
-                thumbnail: 'data:image/jpeg;base64,' + videoMessageContent.thumbnail,
-                videoController: new VideoController()
-            } as MMMediaEntry
-        }
     }
 
     onActionUpdate(event: GestureEvent) {
@@ -207,28 +183,30 @@ export default struct MMMessagePreviewDialog {
                 } else {
                     this.showVideoPlayIcon = false
                 }
-                if (index < 3) {
-                    if (this.isLoadingOldMessage) {
-                        return
-                    }
-                    this.isLoadingOldMessage = true
-                    this.loadMoreMessages(this.mediaEntries[0].message, true)
-                        .then((msgs: Message[]) => {
-                            this.index = msgs.length + this.index
-                            this.mediaEntries = msgs.map(msg => this.mediaEntry(msg)).concat(this.mediaEntries)
-                            this.isLoadingOldMessage = false
-                        })
-                } else if (index > this.mediaEntries.length - 3) {
-                    if (this.isLoadingNewMessage) {
-                        return
-                    }
-                    this.isLoadingNewMessage = true
-                    this.loadMoreMessages(this.mediaEntries[this.mediaEntries.length - 1].message, false)
-                        .then((msgs: Message[]) => {
-                            this.mediaEntries = this.mediaEntries.concat(msgs.map(msg => this.mediaEntry(msg)))
-                            this.isLoadingNewMessage = false
-                        })
+                if (this.message) {
+                    if (index < 3) {
+                        if (this.isLoadingOldMessage) {
+                            return
+                        }
+                        this.isLoadingOldMessage = true
+                        this.loadMoreMessages(this.mediaEntries[0].message, true)
+                            .then((msgs: Message[]) => {
+                                this.index = msgs.length + this.index
+                                this.mediaEntries = msgs.map(msg => mediaEntry(msg)).concat(this.mediaEntries)
+                                this.isLoadingOldMessage = false
+                            })
+                    } else if (index > this.mediaEntries.length - 3) {
+                        if (this.isLoadingNewMessage) {
+                            return
+                        }
+                        this.isLoadingNewMessage = true
+                        this.loadMoreMessages(this.mediaEntries[this.mediaEntries.length - 1].message, false)
+                            .then((msgs: Message[]) => {
+                                this.mediaEntries = this.mediaEntries.concat(msgs.map(msg => mediaEntry(msg)))
+                                this.isLoadingNewMessage = false
+                            })
 
+                    }
                 }
             })
             .onGestureSwipe(index => {

@@ -1,13 +1,18 @@
-import router from '@ohos.router'
+import { MMMediaEntry } from '../../../common/Types'
 import { exist } from '../../../common/utils/FileUtil'
 import Config from '../../../config'
+import { mediaEntry } from '../../../helper/messageHelper'
+import CompositeMessageContent from '../../../wfc/messages/compositeMessageContent'
 import Message from '../../../wfc/messages/message'
+import MessageContentType from '../../../wfc/messages/messageContentType'
 import VideoMessageContent from '../../../wfc/messages/videoMessageContent'
+import { eq } from '../../../wfc/util/longUtil'
 import MMMessagePreviewDialog from '../../mm/MMMessagePreviewDialog'
 
 @Component
 export default struct VideoMessageContentView {
     @Link message: Message
+    @Prop parentCompositeMessage: Message
     private mmPreviewDialogController?: CustomDialogController
 
     videoMessageContent() {
@@ -26,8 +31,8 @@ export default struct VideoMessageContentView {
     thumbnail() {
         let content = this.message.messageContent as VideoMessageContent;
         if (content.thumbnail) {
-        return 'data:image/jpeg;base64,' + (this.message.messageContent as VideoMessageContent).thumbnail
-    }
+            return 'data:image/jpeg;base64,' + (this.message.messageContent as VideoMessageContent).thumbnail
+        }
         return Config.DEFAULT_THUMBNAIL_URL
     }
 
@@ -39,9 +44,28 @@ export default struct VideoMessageContentView {
             .constraintSize({ maxWidth: 200 })
             .autoResize(true)
             .onClick(event => {
+                let msg: Message | undefined
+                let mediaEntries: MMMediaEntry[] = []
+                let index = 0
+                if (this.parentCompositeMessage) {
+                    let compositeContent = this.parentCompositeMessage.messageContent as CompositeMessageContent
+                    let imageVideoMsgs = compositeContent.messages.filter(m => [MessageContentType.Image, MessageContentType.Video].indexOf(m.messageContent.type) >= 0)
+                    mediaEntries = imageVideoMsgs.map(m => mediaEntry(m))
+                    msg = undefined
+                    for (let i = 0; i < imageVideoMsgs.length; i++) {
+                        if (eq(imageVideoMsgs[i].messageUid, this.message.messageUid)) {
+                            index = i;
+                            break
+                        }
+                    }
+                } else {
+                    msg = this.message
+                }
                 this.mmPreviewDialogController = new CustomDialogController({
                     builder: MMMessagePreviewDialog({
-                        message: this.message,
+                        message: msg,
+                        index: index,
+                        mediaEntries: mediaEntries,
                         controller: this.mmPreviewDialogController,
                     }),
                     alignment: DialogAlignment.TopStart,

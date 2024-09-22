@@ -1,3 +1,4 @@
+import Message from '../wfc/messages/message'
 import UserInfo from '../wfc/model/userInfo'
 import UserOnlineState from '../wfc/model/userOnlineState'
 
@@ -12,6 +13,14 @@ export interface MediaEntry {
     type: string,
     url: string,
     thumbnail: string
+}
+
+export interface MMMediaEntry {
+    message: Message,
+    type: string,
+    url: string,
+    thumbnail: string,
+    videoController?: VideoController
 }
 
 export interface SearchModule {

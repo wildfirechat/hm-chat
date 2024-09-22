@@ -67,7 +67,7 @@ export default struct CompositeMessagePreviewPage {
                                         .width('100%')
                                         .justifyContent(FlexAlign.SpaceBetween)
 
-                                        CompositeMessageContentContainerView({ message: msg })
+                                        CompositeMessageContentContainerView({ message: msg, parentCompositeMessage: this.message })
                                     }
                                     .justifyContent(FlexAlign.Start)
                                     .alignItems(HorizontalAlign.Start)

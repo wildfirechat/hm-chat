@@ -10,7 +10,10 @@ import FileMessageContentView from './FileMessageContentView'
 
 @Component
 export default struct CompositeMessageContentContainerView {
+    // 组合消息里面的具体一条消息
     @Prop message: Message
+    // 组合消息本身
+    @Prop parentCompositeMessage: Message
 
     aboutToAppear(): void {
     }
@@ -25,7 +28,7 @@ export default struct CompositeMessageContentContainerView {
             } else if (this.message!.messageContent.type === MessageContentType.Sticker) {
                 StickerMessageContentView({ message: $message })
             } else if (this.message!.messageContent.type === MessageContentType.Image) {
-                ImageMessageContentView({ message: $message })
+                ImageMessageContentView({ message: $message, parentCompositeMessage: this.parentCompositeMessage })
             } else if (this.message!.messageContent.type === MessageContentType.Video) {
                 VideoMessageContentView({ message: $message })
             } else if (this.message!.messageContent.type === MessageContentType.Voice) {

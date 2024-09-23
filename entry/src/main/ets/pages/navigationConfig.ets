@@ -38,6 +38,8 @@ import TextMessageContentView from './conversation/message/TextMessageContentVie
 import TextMessagePreviewPage from './conversation/TextMessagePreviewPage'
 import PCSessionPage from './pc/PCSessionPage'
 import UpdateUserNickNameOrAliasPage from './user/UpdateUserNickNameOrAliasPage'
+import ResetPasswordPage from './me/ResetPasswordPage'
+import ChangePasswordPage from './me/ChangePasswordPage'
 
 
 export class navigationDestinations {
@@ -80,6 +82,8 @@ export class navigationDestinations {
     static TextMessagePreviewPage = 'textMessagePreviewPage'
     static PCSessionPage = 'pcSessionPage'
     static UpdateUserNickNameOrAliasPage = 'updateUserNickNameOrAliasPage'
+    static ResetPasswordPage = 'resetPasswordPage'
+    static ChangePasswordPage = 'changePasswordPage'
 }
 
 @Builder
@@ -164,5 +168,9 @@ export function PagesMap(name: string) {
         PCSessionPage()
     } else if (name === navigationDestinations.UpdateUserNickNameOrAliasPage) {
         UpdateUserNickNameOrAliasPage()
+    } else if (name === navigationDestinations.ResetPasswordPage) {
+        ResetPasswordPage()
+    } else if (name === navigationDestinations.ChangePasswordPage) {
+        ChangePasswordPage()
     }
 }

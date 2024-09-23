@@ -107,8 +107,10 @@ class AppServer {
         } as JSONObject)
     }
 
-    requestResetPasswordAuthCode() {
-        return this._post('/send_reset_code')
+    requestResetPasswordAuthCode(phone: string) {
+        return this._post('/send_reset_code', {
+            "mobile": phone
+        } as JSONObject)
     }
 
     resetPassword(resetPasswordAuthCode: string, newPassword: string) {

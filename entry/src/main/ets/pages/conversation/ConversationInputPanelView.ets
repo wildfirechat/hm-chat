@@ -98,6 +98,7 @@ export default struct ConversationInputPanelView {
     private forwardMessageDialogController?: CustomDialogController
     private deleteMessageDialogController?: CustomDialogController
     private groupId = ''
+    @Link @Watch('onLongPressToMentionUser') longPressToMentionUser: string
     private mentions: MentionBlock[] = []
     private voipDialogController?: CustomDialogController
     @State showExtContentCoverModal: boolean = false
@@ -393,6 +394,15 @@ export default struct ConversationInputPanelView {
                 this.messageListScroller!.scrollEdge(Edge.Bottom);
             })
         }
+    }
+
+    private onLongPressToMentionUser(propName: string) {
+        if (!this.longPressToMentionUser) {
+            return
+        }
+        let userInfo = wfc.getUserInfo(this.longPressToMentionUser, false, this.groupId!)
+        this.onMentionGroupMember(userInfo)
+        this.longPressToMentionUser = ''
     }
 
     onMentionGroupMember = (userInfo: UserInfo) => {

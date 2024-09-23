@@ -69,6 +69,7 @@ export default struct ConversationPage {
     private conversationMessageDataSource: ConversationMessageDataSource = new ConversationMessageDataSource()
     @State focusMessageBackgroundColor: Color = Color.Green
     @State showGroupMemberNickName: boolean = false
+    @State longPressToMentionUser: string = ''
 
     aboutToAppear() {
         this.audioPlayerManager.init(getContext(this))
@@ -466,6 +467,12 @@ export default struct ConversationPage {
         return name
     }
 
+    onUserPortraitLongClick(userId: string) {
+        if (this.conversation?.type === ConversationType.Group) {
+            this.longPressToMentionUser = userId
+        }
+    }
+
     build() {
         NavDestination() {
             Scroll() {
@@ -558,6 +565,7 @@ export default struct ConversationPage {
                                                             .width(40)
                                                             .height(40)
                                                             .borderRadius(4)
+                                                            .draggable(false)
                                                             .margin(10)
                                                             .enabled(!this.enableMultiCheck)
                                                             .onClick(() => {
@@ -621,11 +629,19 @@ export default struct ConversationPage {
                                                             .width(40)
                                                             .height(40)
                                                             .margin(10)
+                                                            .draggable(false)
                                                             .borderRadius(4)
                                                             .enabled(!this.enableMultiCheck)
                                                             .onClick(() => {
                                                                 this.showUserInfo(msg.from)
                                                             })
+                                                            .gesture(
+                                                                LongPressGesture({ repeat: false })
+                                                                    .onAction(evt => {
+                                                                        this.onUserPortraitLongClick(msg.from)
+                                                                    })
+                                                                , GestureMask.Normal
+                                                            )
                                                         Column() {
                                                             if (this.showGroupMemberNickName) {
                                                                 Text(wfc.getGroupMemberDisplayName(this.conversation!.target, msg.from))
@@ -744,7 +760,8 @@ export default struct ConversationPage {
                     checkedMessages: $checkedMessages,
                     quotedMessage: $quotedMessage,
                     collapseConversationInputPanelViewTimestamp: $collapseConversationInputPanelViewTimestamp,
-                    messageListScroller: this.scroller
+                    messageListScroller: this.scroller,
+                    longPressToMentionUser: $longPressToMentionUser
                 })
             }
 

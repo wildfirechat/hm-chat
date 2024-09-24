@@ -14,7 +14,6 @@ import ImageMessageContentView from './ImageMessageContentView'
 import StickerMessageContentView from './StickerMessageContentView'
 import TextMessageContentView from './TextMessageContentView'
 import VideoMessageContentView from './VideoMessageContentView'
-import { HashMap } from '@kit.ArkTS'
 import GroupMember from '../../../wfc/model/groupMember'
 import FileMessageContentView from './FileMessageContentView'
 import TextMessageContent from '../../../wfc/messages/textMessageContent'
@@ -26,6 +25,7 @@ import ConferenceInviteMessageContentView from './ConferenceInviteMessageContent
 import CardMessageContentView from './CardMessageContentView'
 import appServer from '../../../api/appServer'
 import AppServerError from '../../../api/appServerError'
+import GroupMemberType from '../../../wfc/model/groupMemberType'
 
 @Component
 export default struct NormaMessageContentView {
@@ -101,6 +101,37 @@ export default struct NormaMessageContentView {
         .bindContextMenu(this.MessageContextMenuBuilder, ResponseType.LongPress)
     }
 
+    recallContextMenuFilter: () => boolean = () => {
+        if ([MessageContentType.VOIP_CONTENT_TYPE_ADD_PARTICIPANT, MessageContentType.VOIP_CONTENT_TYPE_START].indexOf(this.message.messageContent.type) >= 0) {
+            return false
+        }
+        let enableRecall: boolean = false
+        let conversation = this.message.conversation;
+        // callstart 消息不允许撤回，撤回无意义
+        if ([MessageContentType.VOIP_CONTENT_TYPE_START].indexOf(this.message.messageContent.type) >= 0) {
+            enableRecall = false
+            return enableRecall
+        } else {
+            if (conversation.type === ConversationType.Group) {
+                // TODO 撤回权限验证
+                let groupMember = wfc.getGroupMember(conversation.target, wfc.getUserId())
+                let fromMember = wfc.getGroupMember(conversation.target, this.message.from)
+                if (groupMember.type === GroupMemberType.Owner) {
+                    enableRecall = true
+                } else if (groupMember.type === GroupMemberType.Manager && [GroupMemberType.Owner, GroupMemberType.Manager].indexOf(fromMember.type) === -1) {
+                    enableRecall = true
+                }
+            }
+            if (!enableRecall) {
+                let delta = wfc.getServerDeltaTime()
+                let now = new Date().getTime()
+                if (this.message!.direction === 0 && this.message!.from === wfc.getUserId() && now - (this.message!.timestamp - delta) < Config.RECALL_TIME_LIMIT * 1000) {
+                    enableRecall = true
+                }
+            }
+            return enableRecall
+        }
+    }
     messageContextMenus = () => {
         let menus: MessageContextMenuItem[] = [
             {
@@ -148,6 +179,9 @@ export default struct NormaMessageContentView {
                             'messages': [this.message]
                         } as Record<string, Object>
                     )
+                },
+                filter: () => {
+                    return [MessageContentType.VOIP_CONTENT_TYPE_START, MessageContentType.VOIP_CONTENT_TYPE_ADD_PARTICIPANT, MessageContentType.Voice].indexOf(this.message.messageContent.type) === -1
                 }
             },
             {
@@ -155,13 +189,16 @@ export default struct NormaMessageContentView {
                 tag: 'multiCheck',
                 action: () => {
                     this.enableMultiCheck = true
-                }
+                },
             },
             {
                 title: '引用',
                 tag: 'quote',
                 action: () => {
                     this.quotedMessage = this.message;
+                },
+                filter: () => {
+                    return [MessageContentType.VOIP_CONTENT_TYPE_START, MessageContentType.VOIP_CONTENT_TYPE_ADD_PARTICIPANT].indexOf(this.message.messageContent.type) === -1
                 }
             },
             {
@@ -172,53 +209,38 @@ export default struct NormaMessageContentView {
                         .catch((e: AppServerError) => {
                             showToast('收藏消息失败 ' + e.message)
                         })
+                },
+                filter: () => {
+                    return [MessageContentType.VOIP_CONTENT_TYPE_START, MessageContentType.VOIP_CONTENT_TYPE_ADD_PARTICIPANT, MessageContentType.Sticker].indexOf(this.message.messageContent.type) === -1
                 }
-            }
-        ]
-
-        // recall
-        let enableRecall: boolean = false
-        if (this.message!.conversation.type === ConversationType.Group) {
-            // TODO 撤回权限验证
-        }
-        let delta = wfc.getServerDeltaTime()
-        let now = new Date().getTime()
-        if (this.message!.direction === 0 && this.message!.from === wfc.getUserId() && now - (this.message!.timestamp - delta) < Config.RECALL_TIME_LIMIT * 1000) {
-            enableRecall = true
-        }
-
-        if (enableRecall) {
-            menus.push({
+            },
+            {
                 title: '撤回',
                 tag: 'recall',
                 action: () => {
                     wfc.recallMessage(this.message!.messageUid, () => {
-
                     }, err => {
                         console.error('recall error', err)
                     })
-                }
-            })
-        }
-
-        // copy
-        if (this.message!.messageContent instanceof TextMessageContent) {
-            menus.push({
+                },
+                filter: this.recallContextMenuFilter
+            },
+            {
                 title: '复制',
                 tag: 'copy',
                 action: () => {
                     let pasteData: pasteboard.PasteData = pasteboard.createData(pasteboard.MIMETYPE_TEXT_PLAIN, this.message!.messageContent.digest())
                     let systemPasteboard: pasteboard.SystemPasteboard = pasteboard.getSystemPasteboard();
                     systemPasteboard.setData(pasteData)
-
+                },
+                filter: () => {
+                    return this.message.messageContent.type === MessageContentType.Text
                 }
-            })
-        }
+            }
+        ]
 
-
-        // TODO more context menus
-
-        return menus
+        // do filter
+        return menus.filter(item =>!item.filter || item.filter())
     }
 
     @Builder
@@ -275,4 +297,6 @@ interface MessageContextMenuItem {
     title: string,
     tag: string,
     action: () => void
+    // 返回 false 时，将不会被包含在最终的长按菜单列表里面
+    filter?: () => boolean
 }

@@ -49,6 +49,7 @@ export default struct ConversationInfoItemView {
                     if (this.basicMode) {
                         Image(this.conversationItemPortrait)
                             .alt($r('app.media.avatar_def'))
+                            .draggable(false)
                             .height(44)
                             .width(44)
                             .padding(2)
@@ -63,6 +64,7 @@ export default struct ConversationInfoItemView {
                         }) {
                             Image(this.conversationItemPortrait)
                                 .alt($r('app.media.avatar_def'))
+                                .draggable(false)
                                 .height(44)
                                 .width(44)
                                 .padding(2)
@@ -77,6 +79,7 @@ export default struct ConversationInfoItemView {
                         }) {
                             Image(this.conversationItemPortrait)
                                 .alt($r('app.media.avatar_def'))
+                                .draggable(false)
                                 .height(44)
                                 .width(44)
                                 .padding(2)
@@ -121,6 +124,7 @@ export default struct ConversationInfoItemView {
                                 .layoutWeight(1)
                             if (this.conversationInfo!.isSilent) {
                                 Image($r('app.media.block_notification'))
+                                    .draggable(false)
                                     .width(14)
                                     .height(14)
                                     .alt('')

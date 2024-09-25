@@ -190,6 +190,7 @@ export default struct ContactListTab {
                                     Image(header.icon)
                                         .width(40)
                                         .height(40)
+                                        .draggable(false)
                                         .borderRadius(4)
                                     if (header.badgeValue) {
                                         Badge({
@@ -252,6 +253,7 @@ export default struct ContactListTab {
                                 Row() {
                                     Image(groupedUserInfo.userInfo.portrait)
                                         .alt($r('app.media.avatar_def'))
+                                        .draggable(false)
                                         .width(40)
                                         .height(40)
                                         .borderRadius(4)

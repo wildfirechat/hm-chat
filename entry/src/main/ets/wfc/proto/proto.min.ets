@@ -56,7 +56,7 @@ import { uri } from '@kit.ArkTS';
 import { fileUri } from '@kit.CoreFileKit';
 import fs from '@ohos.file.fs';
 import { atob } from '../util/base64.min';
-
+import { deviceInfo } from '@kit.BasicServicesKit';
 
 /**
  * java long 类型在 javascript 类型的映射说明:
@@ -358,6 +358,7 @@ class WfcImpl {
         // }
         // protoProxy.invoke('setAppName', 'mychat');
         protoProxy.setLanguage(Config.LANGUAGE);
+        protoProxy.setDeviceInfo(platform, deviceInfo.productModel, deviceInfo.displayVersion, deviceInfo.marketName);
 
         this._setupEventListeners();
 
@@ -405,10 +406,6 @@ class WfcImpl {
      */
     isTcpShortLink(): boolean {
         return protoProxy.isTcpShortLink() === 1;
-    }
-
-    setPlatform(platform: number) {
-        protoProxy.setPlatform(platform);
     }
 
     connect(userId: string, token: string): number {

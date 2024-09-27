@@ -15,6 +15,7 @@ export const setBackupAddress: (host: string, port: number) => void;
 export const setUserAgent: (agent: string) => void;
 export const addHttpHeader: (header: string, value: string) => void;
 export const setPlatform: (platform: number) => void;
+export const setDeviceInfo: (platform: number, productModel: string, majorVersion: string, deviceName: string) => void;
 export const connect: (userId: string, token: string) => number;
 export const onAppResume: () => void;
 export const onAppSuspend: () => void;

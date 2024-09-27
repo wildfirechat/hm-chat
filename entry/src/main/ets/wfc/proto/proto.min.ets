@@ -349,7 +349,7 @@ class WfcImpl {
         self.eventEmitter!.emit(EventType.SecretChatMessageBurned, messageIds)
     }
 
-    init(context: common.ApplicationContext, eventHub: common.EventHub, dbPath: string) {
+    init(context: common.ApplicationContext, eventHub: common.EventHub, dbPath: string, platform: number) {
         self.context = context
         self.eventEmitter = eventHub;
         protoProxy.setDBPath(dbPath);

@@ -6,12 +6,12 @@ import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import Config from '@wfc/client/src/main/ets/config'
 import { AbilityConstant, Context, Want } from '@kit.AbilityKit';
 import { router } from '@kit.ArkUI';
-import { GlobalContext } from '../globalContext';
+import { GlobalContext } from '@wfc/uikit/src/main/ets/globalContext';
 import { pushService } from '@kit.PushKit';
 
 import EventType from '@wfc/client/src/main/ets/wfc/client/wfcEvent';
 import Message from '@wfc/client/src/main/ets/wfc/messages/message';
-import wfcNotificationManager from '../notification/wfcNotificationManager'
+import wfcNotificationManager from '@wfc/uikit/src/main/ets/notification/wfcNotificationManager'
 import { BusinessError } from '@ohos.base';
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation';
 import ConnectionStatus from '@wfc/client/src/main/ets/wfc/client/connectionStatus';

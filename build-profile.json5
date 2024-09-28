@@ -39,6 +39,10 @@
         {
             "name": "client",
             "srcPath": "./client",
+        },
+        {
+            "name": "uikit",
+            "srcPath": "./uikit",
         }
     ]
 }

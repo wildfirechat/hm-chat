@@ -1,0 +1,124 @@
+{
+    "string": [
+        {
+            "name": "module_desc",
+            "value": "module description"
+        },
+        {
+            "name": "EntryAbility_desc",
+            "value": "description"
+        },
+        {
+            "name": "EntryAbility_label",
+            "value": "野火IM"
+        },
+        {
+            "name": "refresh_text",
+            "value": "正在刷新"
+        },
+        {
+            "name": "reason_write_media",
+            "value": "保存媒体文件"
+        },
+        {
+            "name": "reason_read_media",
+            "value": "发送媒体文件"
+        },
+        {
+            "name": "reason_read_image_video",
+            "value": "发送媒体文件"
+        },
+        {
+            "name": "reason_microphone",
+            "value": "发送语音消息"
+        },
+        {
+            "name": "reason_media_location",
+            "value": "位置信息"
+        },
+        {
+            "name": "reason_floating_window",
+            "value": " 音视频通话"
+        },
+        {
+            "name": "app_about",
+            "value": "关于"
+        },
+        {
+            "name": "version_tag_s",
+            "value": "版本 %s"
+        },
+        {
+            "name": "feature_introduction",
+            "value": "功能介绍"
+        },
+        {
+            "name": "user_agreement",
+            "value": "用户协议"
+        },
+        {
+            "name": "privacy_policy",
+            "value": "隐私政策"
+        },
+        {
+            "name": "enter_verification_code",
+            "value": "请输入验证码"
+        },
+        {
+            "name": "enter_new_password",
+            "value": "请输入新密码"
+        },
+        {
+            "name": "confirm_new_password",
+            "value": "请再次输入新密码"
+        },
+        {
+            "name": "btn_reset_password",
+            "value": "重置密码"
+        },
+        {
+            "name": "verification_code",
+            "value": "验证码"
+        },
+        {
+            "name": "new_password",
+            "value": "新密码"
+        },
+        {
+            "name": "confirm_password",
+            "value": "确认密码"
+        },
+        {
+            "name": "get_verification_code",
+            "value": "获取验证码"
+        },
+        {
+            "name": "password_mismatch",
+            "value": "两次输入的密码不一致"
+        },
+        {
+            "name": "original_password",
+            "value": "原密码"
+        },
+        {
+            "name": "enter_original_password",
+            "value": "请输入原密码"
+        },
+        {
+            "name": "sms_verification_code_verification",
+            "value": "短信验证码验证"
+        },
+        {
+            "name": "password_verification",
+            "value": "密码验证"
+        },
+        {
+            "name": "password_reset_success",
+            "value": "重置密码成功"
+        },
+        {
+            "name": "password_reset_failed",
+            "value": "重置密码失败: %s"
+        }
+    ]
+}

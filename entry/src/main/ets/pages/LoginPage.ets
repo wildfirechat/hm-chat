@@ -1,9 +1,9 @@
 import common from '@ohos.app.ability.common';
-import appServer from '../api/appServer';
+import appServer from '@wfc/uikit/src/main/ets/api/appServer';
 import router from '@ohos.router';
 import data_preferences from '@ohos.data.preferences';
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc';
-import { showToast } from '../common/utils/Toast';
+import { showToast } from '@wfc/uikit/src/main/ets/common/utils/Toast';
 
 
 @Preview

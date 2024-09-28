@@ -1,29 +1,6 @@
 {
     "src": [
         "pages/LoginPage",
-        "pages/MainPage",
-        "pages/conversation/ConversationPage",
-        "pages/conversation/SingleConversationInfoPage",
-        "pages/conversation/GroupConversationInfoPage",
-        "pages/conversation/ChannelConversationInfoPage",
-        "pages/conversation/forward/ForwardMessagePage",
-        "pages/picker/PickContactPage",
-        "pages/contact/FriendRequestListPage",
-        "pages/organization/PickOrganizationMemberPage",
-        "pages/search/SearchUserPage",
-        "pages/search/SearchPortalPage",
-        "pages/user/UserInfoPage",
-        "pages/user/PickUserPage",
-        "pages/group/FavGroupListPage",
-        "pages/group/GroupMemberListPage",
-        "pages/channel/ChannelListPage",
-        "pages/channel/ChannelInfoPage",
-        "pages/mm/MMPreviewPage",
-        "pages/misc/WebViewPage",
-        "pages/misc/WebViewPageWithRouter",
-        "pages/chatroom/ChatroomListPage",
-        "pages/voip/VoipFloatingPage",
-        "pages/voip/SingleAudioCallPage",
-        "pages/TestPage"
+        "pages/MainPage"
     ]
 }

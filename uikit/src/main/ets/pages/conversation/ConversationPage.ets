@@ -43,7 +43,6 @@ export default struct ConversationPage {
     @State conversation?: Conversation = undefined
     @State conversationInfo?: ConversationInfo = undefined
     @State refreshStatus: boolean = false;
-    @State refreshText: Resource = $r('app.string.refresh_text')
     @State hasNoMoreHistoryMessage: boolean = false
     // for audioRecorderView
     @State showAudioRecorderView: boolean = false

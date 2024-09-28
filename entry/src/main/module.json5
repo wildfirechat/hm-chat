@@ -66,13 +66,6 @@
                 }
             },
             {
-                "name": "ohos.permission.READ_IMAGEVIDEO",
-                "reason": "$string:reason_read_image_video",
-                "usedScene": {
-                    "when": "inuse"
-                }
-            },
-            {
                 "name": "ohos.permission.MICROPHONE",
                 "reason": "$string:reason_microphone",
                 "usedScene": {

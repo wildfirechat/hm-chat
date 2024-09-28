@@ -6,8 +6,6 @@ import Config from '@wfc/client/src/main/ets/config';
 import { GlobalContext } from '../globalContext';
 import common from '@ohos.app.ability.common';
 import url from '@ohos.url';
-import GroupAnnouncement from './model/groupAnnouncement';
-import AppServerError from './appServerError';
 import OrgServerError from './orgServerError';
 import Organization from './model/organization';
 import OrganizationRelationShip from './model/organizationRelationShip';
@@ -20,14 +18,10 @@ class OrgServer {
     baseUrl = Config.ORGANIZATION_SERVER;
     authToken = '';
     isServiceAvailable = false;
+    private isInitialized = false
 
+    // 神奇，会比 entryAbility 的 onCreate 还早早还行
     constructor() {
-        let context = GlobalContext.getContext().getObject<common.UIAbilityContext>('context');
-        let preference = data_preferences.getPreferencesSync(context, {
-            name: 'wfcstore'
-        })
-        let _url = url.URL.parseURL(this.baseUrl)
-        this.authToken = preference.getSync(`authToken-${_url.host}-${_url.port}`, '') as string
     }
 
     login(): Promise<void> {
@@ -138,7 +132,21 @@ class OrgServer {
         return userInfo;
     }
 
+    _init() {
+        let context = GlobalContext.getContext().getObject<common.UIAbilityContext>('context');
+        let preference = data_preferences.getPreferencesSync(context, {
+            name: 'wfcstore'
+        })
+        let _url = url.URL.parseURL(this.baseUrl)
+        this.authToken = preference.getSync(`authToken-${_url.host}-${_url.port}`, '') as string
+
+    }
+
     _post(path: string, data?: string | object): Promise<object> {
+        if (!this.isInitialized) {
+            this._init()
+            this.isInitialized = true
+        }
         return new Promise((resolve, reject) => {
             let httpRequest = http.createHttp();
             // 用于订阅HTTP响应头，此接口会比request请求先返回。可以根据业务需要订阅此消息

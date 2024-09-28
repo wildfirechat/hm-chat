@@ -8,7 +8,7 @@ import { router } from '@kit.ArkUI'
 
 @Entry
 @Component
-export default struct WebViewPage {
+export default struct WebViewPageWithRouter {
     webviewController: web_webview.WebviewController = new web_webview.WebviewController()
     url: string = ''
     @State title: string = '加载中'

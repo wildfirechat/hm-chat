@@ -19,7 +19,7 @@ import MentionGroupMemberView from './mention/MentionGroupMemberView'
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType'
 import { preferences } from '@kit.ArkData'
-// import avenginekit from '../../wfc/av/internal/avenginekitImpl'
+import avenginekit from '@wfc/avenginekit'
 import MessageContent from '@wfc/client/src/main/ets/wfc/messages/messageContent'
 import VideoMessageContent from '@wfc/client/src/main/ets/wfc/messages/videoMessageContent'
 import cameraPicker from '@ohos.multimedia.cameraPicker';
@@ -148,29 +148,27 @@ export default struct ConversationInputPanelView {
                             {
                                 title: '视频通话',
                                 action: () => {
-                                    showToast('TODO')
-                                    // if (this.conversation.type === ConversationType.Single) {
-                                    //     avenginekit.startCall(this.conversation, [this.conversation.target], false)
-                                    // } else if (this.conversation.type === ConversationType.Group) {
-                                    //     this.showExtContentCoverModal = true
-                                    //     this.extContentCoverBuilderParam = this.pickGroupMemberModal
-                                    //     this.voipAudioOnly = false
-                                    // } else {
-                                    //
-                                    // }
+                                    if (this.conversation.type === ConversationType.Single) {
+                                        avenginekit.startCall(this.conversation, [this.conversation.target], false)
+                                    } else if (this.conversation.type === ConversationType.Group) {
+                                        this.showExtContentCoverModal = true
+                                        this.extContentCoverBuilderParam = this.pickGroupMemberModal
+                                        this.voipAudioOnly = false
+                                    } else {
+
+                                    }
                                 }
                             },
                             {
                                 title: '音频通话',
                                 action: () => {
-                                    showToast('TODO')
-                                    // if (this.conversation.type === ConversationType.Single) {
-                                    //     avenginekit.startCall(this.conversation, [this.conversation.target], true)
-                                    // } else if (this.conversation.type === ConversationType.Group) {
-                                    //     this.showExtContentCoverModal = true
-                                    //     this.extContentCoverBuilderParam = this.pickGroupMemberModal
-                                    //     this.voipAudioOnly = true
-                                    // }
+                                    if (this.conversation.type === ConversationType.Single) {
+                                        avenginekit.startCall(this.conversation, [this.conversation.target], true)
+                                    } else if (this.conversation.type === ConversationType.Group) {
+                                        this.showExtContentCoverModal = true
+                                        this.extContentCoverBuilderParam = this.pickGroupMemberModal
+                                        this.voipAudioOnly = true
+                                    }
                                 }
                             }
                         ]

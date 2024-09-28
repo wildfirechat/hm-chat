@@ -22,6 +22,9 @@
         "pages/chatroom/ChatroomListPage",
         "pages/voip/VoipFloatingPage",
         "pages/voip/SingleAudioCallPage",
+        "pages/voip/SingleVideoCallPage",
+        "pages/voip/MultiAudioCallPage",
+        "pages/voip/MultiVideoCallPage",
         "pages/TestPage"
     ]
 }

@@ -6,6 +6,9 @@
     "author": "",
     "license": "Apache-2.0",
     "dependencies": {
-      "@wfc/client": "file:../client"
+        "@wfc/client": "file:../client",
+        "@wfc/avenginekit": "file:./lib/avenginekit.har"
+    },
+    "devDependencies": {
     }
 }

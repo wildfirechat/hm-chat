@@ -1,1 +1,3 @@
-export { MainPage } from './src/main/ets/components/MainPage'
+import uikit from './src/main/ets/uikit'
+
+export default uikit

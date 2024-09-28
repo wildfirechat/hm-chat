@@ -2,7 +2,7 @@ import UIAbility from '@ohos.app.ability.UIAbility';
 import hilog from '@ohos.hilog';
 import window from '@ohos.window';
 import data_preferences from '@ohos.data.preferences';
-import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
+import wfc from '@wfc/client'
 import Config from '@wfc/client/src/main/ets/config'
 import { AbilityConstant, Context, Want } from '@kit.AbilityKit';
 import { router } from '@kit.ArkUI';
@@ -16,6 +16,7 @@ import { BusinessError } from '@ohos.base';
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation';
 import ConnectionStatus from '@wfc/client/src/main/ets/wfc/client/connectionStatus';
 import CustomMessageConfig from '@wfc/client/src/main/ets/wfc_custom_message/customMessageConfig';
+import uikit from '@wfc/uikit'
 
 
 export default class EntryAbility extends UIAbility {
@@ -44,6 +45,7 @@ export default class EntryAbility extends UIAbility {
                     let e: BusinessError = err as BusinessError;
                     hilog.error(0x0000, 'testTag', 'Get push token catch error: %{public}d %{public}s', e.code, e.message);
                 }
+                uikit.init(this.context)
 
             } else if ([
                 ConnectionStatus.ConnectionStatusTokenIncorrect,

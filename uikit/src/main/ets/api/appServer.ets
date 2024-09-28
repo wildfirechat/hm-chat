@@ -17,14 +17,9 @@ import { stringValue } from '@wfc/client/src/main/ets/wfc/util/longUtil';
 class AppServer {
     baseUrl = Config.APP_SERVER;
     authToken = '';
+    private isInitialized = false
 
     constructor() {
-        let context = GlobalContext.getContext().getObject<common.UIAbilityContext>('context');
-        let preference = data_preferences.getPreferencesSync(context, {
-            name: 'wfcstore'
-        })
-        let _url = url.URL.parseURL(this.baseUrl)
-        this.authToken = preference.getSync(`authToken-${_url.host}-${_url.port}`, '') as string
     }
 
     requestAuthCode(mobile: string) {
@@ -148,7 +143,20 @@ class AppServer {
         return this._post('/fav/del/' + favItemId)
     }
 
+    _init() {
+        let context = GlobalContext.getContext().getObject<common.UIAbilityContext>('context');
+        let preference = data_preferences.getPreferencesSync(context, {
+            name: 'wfcstore'
+        })
+        let _url = url.URL.parseURL(this.baseUrl)
+        this.authToken = preference.getSync(`authToken-${_url.host}-${_url.port}`, '') as string
+    }
+
     _post(path: string, data?: string | Object, rawResponseData = false): Promise<string | object> {
+        if (!this.isInitialized) {
+            this._init
+            this.isInitialized = true
+        }
         return new Promise((resolve, reject) => {
             let httpRequest = http.createHttp();
             // 用于订阅HTTP响应头，此接口会比request请求先返回。可以根据业务需要订阅此消息

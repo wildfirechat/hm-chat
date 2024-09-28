@@ -29,6 +29,10 @@
             "value": "发送媒体文件"
         },
         {
+            "name": "camera_auth_reason",
+            "value": "拍照和音视频通话"
+        },
+        {
             "name": "reason_microphone",
             "value": "发送语音消息"
         },

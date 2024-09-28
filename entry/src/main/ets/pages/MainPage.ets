@@ -34,7 +34,6 @@ const permissions: Array<Permissions> = [
     'ohos.permission.READ_MEDIA',
     'ohos.permission.WRITE_MEDIA',
     'ohos.permission.MICROPHONE',
-    'ohos.permission.READ_IMAGEVIDEO',
     'ohos.permission.SYSTEM_FLOAT_WINDOW',
     'ohos.permission.KEEP_BACKGROUND_RUNNING'
 ];

@@ -1,5 +1,5 @@
-import Conversation from '../../wfc/model/conversation';
-import ConversationType from '../../wfc/model/conversationType';
+import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation';
+import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType';
 import { navigationDestinations } from '../navigationConfig';
 
 @Entry

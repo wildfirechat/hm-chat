@@ -1,6 +1,6 @@
 import { exist } from '../../../common/utils/FileUtil'
-import Message from '../../../wfc/messages/message'
-import StickerMessageContent from '../../../wfc/messages/stickerMessageContent'
+import Message from '@wfc/client/src/main/ets/wfc/messages/message'
+import StickerMessageContent from '@wfc/client/src/main/ets/wfc/messages/stickerMessageContent'
 
 @Component
 export default struct StickerMessageContentView {

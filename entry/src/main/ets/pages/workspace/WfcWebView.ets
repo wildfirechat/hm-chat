@@ -1,9 +1,9 @@
 import web_webview from '@ohos.web.webview'
 import { showToast } from '../../common/utils/Toast'
-import UserInfo from '../../wfc/model/userInfo'
+import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
 import DSBridge from './dsBridge'
-import Config from '../../config'
-import wfc from '../../wfc/client/wfc'
+import Config from '@wfc/client/src/main/ets/config'
+import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import data_preferences from '@ohos.data.preferences';
 
 

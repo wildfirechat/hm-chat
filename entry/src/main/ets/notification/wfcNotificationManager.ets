@@ -1,10 +1,10 @@
-import Message from '../wfc/messages/message'
+import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import notificationManager from '@ohos.notificationManager';
 import wantAgent from '@ohos.app.ability.wantAgent';
 import { WantAgent } from '@ohos.app.ability.wantAgent';
 import Base from '@ohos.base';
-import wfc from '../wfc/client/wfc';
-import UserSettingScope from '../wfc/client/userSettingScope';
+import wfc from '@wfc/client/src/main/ets/wfc/client/wfc';
+import UserSettingScope from '@wfc/client/src/main/ets/wfc/client/userSettingScope';
 
 class WfcNotificationManager {
     private notificationMessages: Message[] = []

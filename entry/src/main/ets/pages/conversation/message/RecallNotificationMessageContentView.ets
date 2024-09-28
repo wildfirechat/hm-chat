@@ -1,7 +1,7 @@
 import { showToast } from '../../../common/utils/Toast'
-import Config from '../../../config'
-import wfc from '../../../wfc/client/wfc'
-import Message from '../../../wfc/messages/message'
+import Config from '@wfc/client/src/main/ets/config'
+import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
+import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 
 @Component
 export default struct RecallNotificationMessageContentView {

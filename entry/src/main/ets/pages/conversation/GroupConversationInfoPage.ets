@@ -1,13 +1,13 @@
 import router from '@ohos.router';
 import { showToast } from '../../common/utils/Toast';
 import OptionItemView from '../../view/OptionItemView';
-import wfc from '../../wfc/client/wfc';
-import ConversationInfo from '../../wfc/model/conversationInfo';
-import GroupInfo from '../../wfc/model/groupInfo';
-import GroupMember from '../../wfc/model/groupMember';
-import GroupMemberType from '../../wfc/model/groupMemberType';
-import GroupType from '../../wfc/model/groupType';
-import UserInfo from '../../wfc/model/userInfo';
+import wfc from '@wfc/client/src/main/ets/wfc/client/wfc';
+import ConversationInfo from '@wfc/client/src/main/ets/wfc/model/conversationInfo';
+import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo';
+import GroupMember from '@wfc/client/src/main/ets/wfc/model/groupMember';
+import GroupMemberType from '@wfc/client/src/main/ets/wfc/model/groupMemberType';
+import GroupType from '@wfc/client/src/main/ets/wfc/model/groupType';
+import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo';
 import ActionSheetDialog from '../../view/ActionSheetDialog';
 import AddGroupMemberModal from '../group/AddGroupMemberModal';
 import PickGroupMemberModal from '../group/PickGroupMemberModal';
@@ -15,11 +15,11 @@ import appServer from '../../api/appServer';
 import GroupAnnouncement from '../../api/model/groupAnnouncement';
 import AppServerError from '../../api/appServerError';
 import { navigationDestinations } from '../navigationConfig';
-import EventType from '../../wfc/client/wfcEvent';
+import EventType from '@wfc/client/src/main/ets/wfc/client/wfcEvent';
 import { imageThumbnail, imageThumbnailFile } from '../../helper/imageVideoHelper';
 import { selectImage } from '../../helper/mediaHelper';
-import MessageContentMediaType from '../../wfc/messages/messageContentMediaType';
-import ModifyGroupInfoType from '../../wfc/model/modifyGroupInfoType';
+import MessageContentMediaType from '@wfc/client/src/main/ets/wfc/messages/messageContentMediaType';
+import ModifyGroupInfoType from '@wfc/client/src/main/ets/wfc/model/modifyGroupInfoType';
 
 @Preview
 @Entry

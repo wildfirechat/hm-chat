@@ -1,10 +1,10 @@
-import UserInfo from '../wfc/model/userInfo'
+import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
 import { pinyin4js } from '@ohos/pinyin4js'
 import { UIUserInfo } from '../common/Types'
 import BasicDataSource from '../common/BasicDataSource'
 import UserItemView from './UserItemView'
-import wfc from '../wfc/client/wfc'
-import GroupMemberType from '../wfc/model/groupMemberType'
+import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
+import GroupMemberType from '@wfc/client/src/main/ets/wfc/model/groupMemberType'
 import { groupUserInfos } from '../helper/asyncTaskHelper'
 
 @Component

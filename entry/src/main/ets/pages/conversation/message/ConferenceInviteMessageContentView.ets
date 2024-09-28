@@ -1,6 +1,6 @@
-import ConferenceInviteMessageContent from '../../../wfc/av/messages/conferenceInviteMessageContent'
-import wfc from '../../../wfc/client/wfc'
-import Message from '../../../wfc/messages/message'
+import ConferenceInviteMessageContent from '@wfc/client/src/main/ets/wfc/av/messages/conferenceInviteMessageContent'
+import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
+import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 
 @Component
 export default struct ConferenceInviteMessageContentView {

@@ -1,6 +1,6 @@
 import CheckableUserItemView from '../view/CheckableUserItemView'
-import UserInfo from '../wfc/model/userInfo'
-import GroupInfo from '../wfc/model/groupInfo'
+import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
+import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
 import { UIUserInfo } from '../common/Types'
 import BasicDataSource from '../common/BasicDataSource'
 import { groupUserInfos } from '../helper/asyncTaskHelper'

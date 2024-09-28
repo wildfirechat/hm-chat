@@ -12,7 +12,7 @@ import { BusinessError } from '@ohos.base';
 import { dataSharePredicates } from '@kit.ArkData';
 import image from '@ohos.multimedia.image';
 import { compressImage, packing } from './imageVideoHelper';
-import wfc from '../wfc/client/wfc';
+import wfc from '@wfc/client/src/main/ets/wfc/client/wfc';
 
 export interface MediaResult {
     type: number // 1 image, 2 video

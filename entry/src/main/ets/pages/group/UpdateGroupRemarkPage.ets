@@ -1,6 +1,6 @@
 import { showToast } from '../../common/utils/Toast'
-import wfc from '../../wfc/client/wfc'
-import GroupInfo from '../../wfc/model/groupInfo'
+import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
+import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
 
 @Component
 export default struct UpdateGroupRemarkPage {

@@ -1,8 +1,8 @@
-import wfc from '../../wfc/client/wfc';
-import ImageMessageContent from '../../wfc/messages/imageMessageContent';
-import Message from '../../wfc/messages/message';
-import MessageContentType from '../../wfc/messages/messageContentType';
-import VideoMessageContent from '../../wfc/messages/videoMessageContent';
+import wfc from '@wfc/client/src/main/ets/wfc/client/wfc';
+import ImageMessageContent from '@wfc/client/src/main/ets/wfc/messages/imageMessageContent';
+import Message from '@wfc/client/src/main/ets/wfc/messages/message';
+import MessageContentType from '@wfc/client/src/main/ets/wfc/messages/messageContentType';
+import VideoMessageContent from '@wfc/client/src/main/ets/wfc/messages/videoMessageContent';
 import { exist } from '../../common/utils/FileUtil';
 import { curves, display, window } from '@kit.ArkUI';
 import { ifaa } from '@kit.OnlineAuthenticationKit';

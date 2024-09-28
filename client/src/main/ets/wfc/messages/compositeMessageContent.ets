@@ -1,12 +1,12 @@
-import MessageContentType from "../messages/messageContentType";
+import MessageContentType from "./messageContentType";
 import wfc from "../client/wfc";
-import MediaMessageContent from "../messages/mediaMessageContent";
+import MediaMessageContent from "./mediaMessageContent";
 import { stringValue } from "../util/longUtil";
-import Message from "../messages/message";
+import Message from "./message";
 import Conversation from "../model/conversation";
 import Long from "../util/long";
 import { compare } from "../util/longUtil";
-import MessagePayload from "../messages/messagePayload";
+import MessagePayload from "./messagePayload";
 import ArticlesMessageContent from "./articlesMessageContent";
 import MessageContentMediaType from "./messageContentMediaType";
 import assign from '../util/assign';

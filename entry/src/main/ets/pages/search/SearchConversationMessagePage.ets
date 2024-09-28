@@ -1,10 +1,10 @@
 import SearchResultView from './SearchPortalResultView'
 import { SearchModule } from '../../common/Types'
 import { inputMethod } from '@kit.IMEKit'
-import ConversationSearchResult from '../../wfc/model/conversationSearchResult'
-import Conversation from '../../wfc/model/conversation'
+import ConversationSearchResult from '@wfc/client/src/main/ets/wfc/model/conversationSearchResult'
+import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
 import SearchConversationMessageResultView from './SearchConversationMessageResultView'
-import Message from '../../wfc/messages/message'
+import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import { navigationDestinations } from '../navigationConfig'
 
 

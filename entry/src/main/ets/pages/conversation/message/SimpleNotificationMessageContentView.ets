@@ -1,4 +1,4 @@
-import Message from '../../../wfc/messages/message'
+import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 
 @Component
 export default struct SimpleNotificationMessageContentView {

@@ -45,8 +45,8 @@ import { encode } from '../util/base64-arraybuffer';
 import Config from '../../config';
 
 import Long from '../util/long'
-import UnsupportMessageContent from "../messages/unsupportMessageConten";
-import RecallMessageNotification from "../messages/notification/recallMessageNotification";
+import UnsupportMessageContent from "./unsupportMessageConten";
+import RecallMessageNotification from "./notification/recallMessageNotification";
 import MessageContent from './messageContent';
 import assign from '../util/assign';
 import MessagePayload from './messagePayload';

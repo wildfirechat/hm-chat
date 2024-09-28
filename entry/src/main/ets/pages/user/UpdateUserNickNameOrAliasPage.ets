@@ -1,9 +1,9 @@
 import { showToast } from '../../common/utils/Toast'
-import wfc from '../../wfc/client/wfc'
-import GroupInfo from '../../wfc/model/groupInfo'
-import ModifyMyInfoEntry from '../../wfc/model/modifyMyInfoEntry';
-import ModifyMyInfoType from '../../wfc/model/modifyMyInfoType';
-import UserInfo from '../../wfc/model/userInfo';
+import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
+import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
+import ModifyMyInfoEntry from '@wfc/client/src/main/ets/wfc/model/modifyMyInfoEntry';
+import ModifyMyInfoType from '@wfc/client/src/main/ets/wfc/model/modifyMyInfoType';
+import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo';
 
 @Component
 export default struct UpdateUserNickNameOrAliasPage {

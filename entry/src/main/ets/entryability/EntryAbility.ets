@@ -2,20 +2,20 @@ import UIAbility from '@ohos.app.ability.UIAbility';
 import hilog from '@ohos.hilog';
 import window from '@ohos.window';
 import data_preferences from '@ohos.data.preferences';
-import wfc from '../wfc/client/wfc'
-import Config from '../config'
+import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
+import Config from '@wfc/client/src/main/ets/config'
 import { AbilityConstant, Context, Want } from '@kit.AbilityKit';
 import { router } from '@kit.ArkUI';
 import { GlobalContext } from '../globalContext';
 import { pushService } from '@kit.PushKit';
 
-import EventType from '../wfc/client/wfcEvent';
-import Message from '../wfc/messages/message';
+import EventType from '@wfc/client/src/main/ets/wfc/client/wfcEvent';
+import Message from '@wfc/client/src/main/ets/wfc/messages/message';
 import wfcNotificationManager from '../notification/wfcNotificationManager'
 import { BusinessError } from '@ohos.base';
-import Conversation from '../wfc/model/conversation';
-import ConnectionStatus from '../wfc/client/connectionStatus';
-import CustomMessageConfig from '../wfc_custom_message/customMessageConfig';
+import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation';
+import ConnectionStatus from '@wfc/client/src/main/ets/wfc/client/connectionStatus';
+import CustomMessageConfig from '@wfc/client/src/main/ets/wfc_custom_message/customMessageConfig';
 
 
 export default class EntryAbility extends UIAbility {

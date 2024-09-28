@@ -1,5 +1,5 @@
-import Config from '../../config';
-import UserInfo from '../../wfc/model/userInfo';
+import Config from '@wfc/client/src/main/ets/config';
+import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo';
 
 export default class Employee {
     employeeId = '';

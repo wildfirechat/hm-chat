@@ -1,13 +1,13 @@
 import { showToast } from '../../common/utils/Toast';
 import ActionSheetDialog from '../../view/ActionSheetDialog';
 import OptionItemView from '../../view/OptionItemView';
-import wfc from '../../wfc/client/wfc';
-import Conversation from '../../wfc/model/conversation';
-import ConversationInfo from '../../wfc/model/conversationInfo';
-import ConversationType from '../../wfc/model/conversationType';
-import GroupType from '../../wfc/model/groupType';
-import UserInfo from '../../wfc/model/userInfo';
-import { FailCallbackDefault } from '../../wfc/type/types';
+import wfc from '@wfc/client/src/main/ets/wfc/client/wfc';
+import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation';
+import ConversationInfo from '@wfc/client/src/main/ets/wfc/model/conversationInfo';
+import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType';
+import GroupType from '@wfc/client/src/main/ets/wfc/model/groupType';
+import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo';
+import { FailCallbackDefault } from '@wfc/client/src/main/ets/wfc/type/types';
 import { navigationDestinations } from '../navigationConfig';
 import PickContactModal from '../picker/PickContactModal';
 

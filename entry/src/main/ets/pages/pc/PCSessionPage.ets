@@ -1,10 +1,10 @@
 import { showToast } from '../../common/utils/Toast'
-import Config from '../../config'
-import wfc from '../../wfc/client/wfc'
-import Conversation from '../../wfc/model/conversation'
-import ConversationType from '../../wfc/model/conversationType'
-import GroupInfo from '../../wfc/model/groupInfo'
-import PCOnlineInfo from '../../wfc/model/pcOnlineInfo'
+import Config from '@wfc/client/src/main/ets/config'
+import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
+import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
+import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType'
+import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
+import PCOnlineInfo from '@wfc/client/src/main/ets/wfc/model/pcOnlineInfo'
 import { navigationDestinations } from '../navigationConfig'
 
 @Entry

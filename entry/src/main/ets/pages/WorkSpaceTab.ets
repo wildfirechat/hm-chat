@@ -1,5 +1,5 @@
 import web_webview from '@ohos.web.webview'
-import Config from '../config'
+import Config from '@wfc/client/src/main/ets/config'
 import WfcWebView from './workspace/WfcWebView'
 import DSBridge from './workspace/dsBridge'
 

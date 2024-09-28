@@ -41,7 +41,7 @@ import ChannelMenu from "../model/channelMenu";
 import TextMessageContent from "../messages/textMessageContent";
 import FileMessageContent from "../messages/fileMessageContent";
 import ImageMessageContent from "../messages/imageMessageContent";
-import protoProxy from 'marswrapper'
+import protoProxy from '@wfc/marswrapper'
 // import os from "os";
 // import path from "path";
 

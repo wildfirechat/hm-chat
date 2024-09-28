@@ -1,10 +1,10 @@
 import AVSessionManager from '@ohos.multimedia.avsession';
 import { AVCastPicker } from '@kit.AVSessionKit';
 import orgServer from '../api/orgServer'
-import TestCustomMessageContent from '../wfc_custom_message/testCustomMessageContent';
-import Conversation from '../wfc/model/conversation';
-import ConversationType from '../wfc/model/conversationType';
-import wfc from '../wfc/client/wfc';
+import TestCustomMessageContent from '@wfc/client/src/main/ets/wfc_custom_message/testCustomMessageContent';
+import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation';
+import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType';
+import wfc from '@wfc/client/src/main/ets/wfc/client/wfc';
 
 
 @Entry

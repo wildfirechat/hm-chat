@@ -1,8 +1,8 @@
 import { config as emojiConfig } from './EmojiAndStickerConfig'
 import { Category, Emoji } from './emojis'
-import Conversation from '../../../wfc/model/conversation'
-import StickerMessageContent from '../../../wfc/messages/stickerMessageContent'
-import wfc from '../../../wfc/client/wfc'
+import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
+import StickerMessageContent from '@wfc/client/src/main/ets/wfc/messages/stickerMessageContent'
+import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 
 @Preview
 @Component

@@ -1,8 +1,8 @@
 import { showToast } from '../../../common/utils/Toast';
 // import avengineKit from '../../../wfc/av/internal/avenginekitImpl';
-import CallStartMessageContent from '../../../wfc/av/messages/callStartMessageContent';
-import Message from '../../../wfc/messages/message'
-import ConversationType from '../../../wfc/model/conversationType';
+import CallStartMessageContent from '@wfc/client/src/main/ets/wfc/av/messages/callStartMessageContent';
+import Message from '@wfc/client/src/main/ets/wfc/messages/message'
+import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType';
 
 @Component
 export default struct CallStartMessageContentView {

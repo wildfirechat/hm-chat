@@ -1,7 +1,7 @@
 import Utils from '../common/Utils';
 import { timeFormat } from '../util/helper';
-import wfc, { WfcManager } from '../wfc/client/wfc';
-import ConversationInfo from '../wfc/model/conversationInfo';
+import wfc, { WfcManager } from '@wfc/client/src/main/ets/wfc/client/wfc';
+import ConversationInfo from '@wfc/client/src/main/ets/wfc/model/conversationInfo';
 
 @Component
 @Preview

@@ -1,8 +1,8 @@
-import Message from '../../../wfc/messages/message'
-import SoundMessageContent from '../../../wfc/messages/soundMessageContent'
+import Message from '@wfc/client/src/main/ets/wfc/messages/message'
+import SoundMessageContent from '@wfc/client/src/main/ets/wfc/messages/soundMessageContent'
 import AudioPlayManager from '../audio/AudioPlayManager'
 import fs from '@ohos.file.fs'
-import Config from '../../../config'
+import Config from '@wfc/client/src/main/ets/config'
 
 @Component
 export default struct AudioMessageContent {

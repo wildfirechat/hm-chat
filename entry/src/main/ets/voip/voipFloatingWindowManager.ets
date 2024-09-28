@@ -1,9 +1,9 @@
-import Message from '../wfc/messages/message'
+import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import notificationManager from '@ohos.notificationManager';
 import wantAgent from '@ohos.app.ability.wantAgent';
 import { WantAgent } from '@ohos.app.ability.wantAgent';
 import Base, { BusinessError } from '@ohos.base';
-import wfc from '../wfc/client/wfc';
+import wfc from '@wfc/client/src/main/ets/wfc/client/wfc';
 import { common, Want } from '@kit.AbilityKit';
 
 class VoipFloatingWindowManager {

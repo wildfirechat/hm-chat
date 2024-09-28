@@ -1,6 +1,6 @@
 import { PortraitAndName } from '../../../common/Types'
 import Utils from '../../../common/Utils'
-import Conversation from '../../../wfc/model/conversation'
+import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
 
 @Preview
 @CustomDialog

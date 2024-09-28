@@ -1,5 +1,5 @@
 import { UIUserInfo } from '../common/Types'
-import UserInfo from '../wfc/model/userInfo'
+import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
 
 
 @Preview

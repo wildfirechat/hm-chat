@@ -1,5 +1,5 @@
-import Message from '../../../wfc/messages/message'
-import MessageContentType from '../../../wfc/messages/messageContentType'
+import Message from '@wfc/client/src/main/ets/wfc/messages/message'
+import MessageContentType from '@wfc/client/src/main/ets/wfc/messages/messageContentType'
 import CallStartMessageContentView from './CallStartMessageContentView'
 import CompositeMessageContentView from './CompositeMessageContentView'
 import ImageMessageContentView from './ImageMessageContentView'

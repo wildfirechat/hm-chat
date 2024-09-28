@@ -1,5 +1,5 @@
-import Message from '../../../wfc/messages/message'
-import TextMessageContent from '../../../wfc/messages/textMessageContent'
+import Message from '@wfc/client/src/main/ets/wfc/messages/message'
+import TextMessageContent from '@wfc/client/src/main/ets/wfc/messages/textMessageContent'
 
 @Component
 export default struct TestCustomMessageContentView {

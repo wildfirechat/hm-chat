@@ -1,7 +1,7 @@
 import { showToast } from '../../common/utils/Toast'
-import wfc from '../../wfc/client/wfc'
-import GroupInfo from '../../wfc/model/groupInfo'
-import ModifyGroupInfoType from '../../wfc/model/modifyGroupInfoType'
+import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
+import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
+import ModifyGroupInfoType from '@wfc/client/src/main/ets/wfc/model/modifyGroupInfoType'
 
 @Component
 export default struct UpdateMyGroupAliasPage {

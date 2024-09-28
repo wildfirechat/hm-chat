@@ -2,8 +2,8 @@ import OptionItemView from '../../view/OptionItemView'
 import { bundleManager } from '@kit.AbilityKit';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { LengthUnit, router } from '@kit.ArkUI';
-import Config from '../../config';
-import wfc from 'marswrapper'
+import Config from '@wfc/client/src/main/ets/config';
+import wfc from '@wfc/client'
 
 @Preview
 @Entry

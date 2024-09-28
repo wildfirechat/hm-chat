@@ -1,9 +1,9 @@
 import { MMMediaEntry } from '../common/Types'
 import { exist } from '../common/utils/FileUtil'
-import ImageMessageContent from '../wfc/messages/imageMessageContent'
-import Message from '../wfc/messages/message'
-import MessageContentType from '../wfc/messages/messageContentType'
-import VideoMessageContent from '../wfc/messages/videoMessageContent'
+import ImageMessageContent from '@wfc/client/src/main/ets/wfc/messages/imageMessageContent'
+import Message from '@wfc/client/src/main/ets/wfc/messages/message'
+import MessageContentType from '@wfc/client/src/main/ets/wfc/messages/messageContentType'
+import VideoMessageContent from '@wfc/client/src/main/ets/wfc/messages/videoMessageContent'
 
 export function mediaEntry(message: Message): MMMediaEntry {
     if (message.messageContent.type === MessageContentType.Image) {

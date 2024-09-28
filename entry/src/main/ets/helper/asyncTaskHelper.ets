@@ -1,7 +1,7 @@
 import { pinyin4js } from '@ohos/pinyin4js';
 import { UIUserInfo } from '../common/Types';
-import wfc from '../wfc/client/wfc';
-import UserInfo from '../wfc/model/userInfo';
+import wfc from '@wfc/client/src/main/ets/wfc/client/wfc';
+import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo';
 import taskpool from '@ohos.taskpool';
 
 // 文件功能说明

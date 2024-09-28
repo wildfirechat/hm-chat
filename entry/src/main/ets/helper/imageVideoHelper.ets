@@ -2,7 +2,7 @@ import { Size } from '@kit.ArkUI';
 import { dataSharePredicates } from '@kit.ArkData';
 import photoAccessHelper from '@ohos.file.photoAccessHelper';
 import image from '@ohos.multimedia.image';
-import wfc from '../wfc/client/wfc';
+import wfc from '@wfc/client/src/main/ets/wfc/client/wfc';
 import fs from '@ohos.file.fs';
 import { Context } from '@kit.AbilityKit';
 import { VideoDurationAndThumbnail } from '../common/Types';

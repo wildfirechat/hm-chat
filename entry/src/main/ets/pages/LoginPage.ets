@@ -2,7 +2,7 @@ import common from '@ohos.app.ability.common';
 import appServer from '../api/appServer';
 import router from '@ohos.router';
 import data_preferences from '@ohos.data.preferences';
-import wfc from '../wfc/client/wfc';
+import wfc from '@wfc/client/src/main/ets/wfc/client/wfc';
 import { showToast } from '../common/utils/Toast';
 
 

@@ -1,10 +1,10 @@
 import { showToast } from '../../common/utils/Toast';
 import ToggleItemView from '../../view/ToggleItemView'
-import wfc from '../../wfc/client/wfc';
-import GroupInfo from '../../wfc/model/groupInfo'
-import GroupMemberType from '../../wfc/model/groupMemberType';
-import ModifyGroupInfoType from '../../wfc/model/modifyGroupInfoType';
-import UserInfo from '../../wfc/model/userInfo';
+import wfc from '@wfc/client/src/main/ets/wfc/client/wfc';
+import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
+import GroupMemberType from '@wfc/client/src/main/ets/wfc/model/groupMemberType';
+import ModifyGroupInfoType from '@wfc/client/src/main/ets/wfc/model/modifyGroupInfoType';
+import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo';
 import PickGroupMemberModal from './PickGroupMemberModal';
 
 @Entry

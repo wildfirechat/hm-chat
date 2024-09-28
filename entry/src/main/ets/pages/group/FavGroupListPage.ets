@@ -1,8 +1,8 @@
-import wfc from '../../wfc/client/wfc'
-import EventType from '../../wfc/client/wfcEvent'
-import Conversation from '../../wfc/model/conversation'
-import ConversationType from '../../wfc/model/conversationType'
-import GroupInfo from '../../wfc/model/groupInfo'
+import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
+import EventType from '@wfc/client/src/main/ets/wfc/client/wfcEvent'
+import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
+import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType'
+import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
 import { navigationDestinations } from '../navigationConfig'
 
 @Entry

@@ -1,7 +1,7 @@
 import { showToast } from '../../../common/utils/Toast'
 import { getFiletypeIcon, humanSize } from '../../../util/helper'
-import FileMessageContent from '../../../wfc/messages/fileMessageContent'
-import Message from '../../../wfc/messages/message'
+import FileMessageContent from '@wfc/client/src/main/ets/wfc/messages/fileMessageContent'
+import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 
 @Component
 export default struct FileMessageContentView {

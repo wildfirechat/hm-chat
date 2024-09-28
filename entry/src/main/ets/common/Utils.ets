@@ -1,11 +1,11 @@
 // https://gitee.com/openharmony/docs/blob/master/zh-cn/application-dev/reference/arkui-ts/ts-universal-attributes-component-id.md
-import wfc from '../wfc/client/wfc'
-import ChannelInfo from '../wfc/model/channelInfo'
-import ChatRoomInfo from '../wfc/model/chatRoomInfo'
-import Conversation from '../wfc/model/conversation'
-import ConversationInfo from '../wfc/model/conversationInfo'
-import ConversationType from '../wfc/model/conversationType'
-import GroupInfo from '../wfc/model/groupInfo'
+import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
+import ChannelInfo from '@wfc/client/src/main/ets/wfc/model/channelInfo'
+import ChatRoomInfo from '@wfc/client/src/main/ets/wfc/model/chatRoomInfo'
+import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
+import ConversationInfo from '@wfc/client/src/main/ets/wfc/model/conversationInfo'
+import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType'
+import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
 import { PortraitAndName } from './Types'
 
 export default class Utils {

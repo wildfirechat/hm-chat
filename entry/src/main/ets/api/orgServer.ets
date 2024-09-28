@@ -1,8 +1,8 @@
 // 引入包名
 import http from '@ohos.net.http';
 import data_preferences from '@ohos.data.preferences';
-import wfc from 'marswrapper'
-import Config from '../config';
+import wfc from '@wfc/client'
+import Config from '@wfc/client/src/main/ets/config';
 import { GlobalContext } from '../globalContext';
 import common from '@ohos.app.ability.common';
 import url from '@ohos.url';
@@ -14,7 +14,7 @@ import OrganizationRelationShip from './model/organizationRelationShip';
 import OrganizationEx from './model/organizationEx';
 import Employee from './model/employee';
 import EmployeeEx from './model/employeeEx';
-import UserInfo from '../wfc/model/userInfo';
+import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo';
 
 class OrgServer {
     baseUrl = Config.ORGANIZATION_SERVER;

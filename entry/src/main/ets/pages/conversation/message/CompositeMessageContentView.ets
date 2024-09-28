@@ -1,5 +1,5 @@
-import CompositeMessageContent from '../../../wfc/messages/compositeMessageContent'
-import Message from '../../../wfc/messages/message'
+import CompositeMessageContent from '@wfc/client/src/main/ets/wfc/messages/compositeMessageContent'
+import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import { navigationDestinations } from '../../navigationConfig'
 
 @Component

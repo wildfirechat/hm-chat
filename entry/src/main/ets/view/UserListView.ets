@@ -1,4 +1,4 @@
-import UserInfo from '../wfc/model/userInfo'
+import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
 import { pinyin4js } from '@ohos/pinyin4js'
 import { UIUserInfo } from '../common/Types'
 import BasicDataSource from '../common/BasicDataSource'

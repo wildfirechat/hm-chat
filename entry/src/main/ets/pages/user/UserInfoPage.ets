@@ -1,16 +1,16 @@
 import { showToast } from '../../common/utils/Toast';
-import wfc from '../../wfc/client/wfc';
-import Conversation from '../../wfc/model/conversation';
-import ConversationType from '../../wfc/model/conversationType';
-import UserInfo from '../../wfc/model/userInfo';
-import EventType from '../../wfc/client/wfcEvent';
+import wfc from '@wfc/client/src/main/ets/wfc/client/wfc';
+import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation';
+import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType';
+import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo';
+import EventType from '@wfc/client/src/main/ets/wfc/client/wfcEvent';
 import { navigationDestinations } from '../navigationConfig';
 import ActionSheetDialog from '../../view/ActionSheetDialog';
 import { selectImage } from '../../helper/mediaHelper';
 import { imageThumbnail } from '../../helper/imageVideoHelper';
-import MessageContentMediaType from '../../wfc/messages/messageContentMediaType';
-import ModifyMyInfoEntry from '../../wfc/model/modifyMyInfoEntry';
-import ModifyMyInfoType from '../../wfc/model/modifyMyInfoType';
+import MessageContentMediaType from '@wfc/client/src/main/ets/wfc/messages/messageContentMediaType';
+import ModifyMyInfoEntry from '@wfc/client/src/main/ets/wfc/model/modifyMyInfoEntry';
+import ModifyMyInfoType from '@wfc/client/src/main/ets/wfc/model/modifyMyInfoType';
 import OptionItemView from '../../view/OptionItemView';
 import { trustedAppService } from '@kit.DeviceSecurityKit';
 

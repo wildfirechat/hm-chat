@@ -6,7 +6,7 @@ import CallEndReason from './callEndReason';
 import CallSession from './callSession';
 import { router, window } from '@kit.ArkUI';
 import AVSessionManager from '@ohos.multimedia.avsession';
-import { startContinuousTask, stopContinuousTask } from '../../../helper/continuousTaskHelper';
+import { startContinuousTask, stopContinuousTask } from 'entry/src/main/ets/helper/continuousTaskHelper';
 
 export default class AVEngineCallback {
     private context: Context

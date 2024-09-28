@@ -1,9 +1,9 @@
 import appServer from '../../api/appServer'
-import Platform from '../../wfc/client/platform'
+import Platform from '@wfc/client/src/main/ets/wfc/client/platform'
 import AppServerError from '../../api/appServerError'
 import { showToast } from '../../common/utils/Toast'
-import wfc from '../../wfc/client/wfc'
-import PCSession from '../../wfc/model/pcsession'
+import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
+import PCSession from '@wfc/client/src/main/ets/wfc/model/pcsession'
 
 @Entry
 @Component

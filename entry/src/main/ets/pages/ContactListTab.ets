@@ -1,13 +1,13 @@
-import wfc from '../wfc/client/wfc'
-import EventType from '../wfc/client/wfcEvent'
-import ConnectionStatus from '../wfc/client/connectionStatus'
+import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
+import EventType from '@wfc/client/src/main/ets/wfc/client/wfcEvent'
+import ConnectionStatus from '@wfc/client/src/main/ets/wfc/client/connectionStatus'
 import { UIUserInfo } from '../common/Types'
 import BasicDataSource from '../common/BasicDataSource'
 import { loadAndGroupContactUserInfos } from '../helper/asyncTaskHelper'
 import { navigationDestinations } from './navigationConfig'
 import orgServer from '../api/orgServer'
-import Config from '../config'
-import UserInfo from '../wfc/model/userInfo'
+import Config from '@wfc/client/src/main/ets/config'
+import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
 import { showToast } from '../common/utils/Toast'
 
 interface ContactListHeader {

@@ -1,7 +1,7 @@
 import { showToast } from '../../common/utils/Toast';
-import wfc from '../../wfc/client/wfc';
+import wfc from '@wfc/client/src/main/ets/wfc/client/wfc';
 import url from '@ohos.url';
-import UserInfo from '../../wfc/model/userInfo';
+import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo';
 import { navigationDestinations } from '../navigationConfig';
 import data_preferences from '@ohos.data.preferences';
 import common from '@ohos.app.ability.common';

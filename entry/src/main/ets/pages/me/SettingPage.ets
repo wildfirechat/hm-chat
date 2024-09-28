@@ -1,7 +1,7 @@
 import { showToast } from '../../common/utils/Toast'
 import OptionItemView from '../../view/OptionItemView'
 import data_preferences from '@ohos.data.preferences'
-import wfc from '../../wfc/client/wfc';
+import wfc from '@wfc/client/src/main/ets/wfc/client/wfc';
 import { navigationDestinations } from '../navigationConfig';
 
 @Preview

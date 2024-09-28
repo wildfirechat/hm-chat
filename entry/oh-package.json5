@@ -7,6 +7,6 @@
   "main": "",
   "version": "1.0.0",
   "dependencies": {
-    "marswrapper": "file:../marswrapper"
+    "@wfc/client": "file:../client"
   }
 }

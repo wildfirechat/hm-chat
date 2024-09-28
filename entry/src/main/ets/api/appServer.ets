@@ -1,18 +1,18 @@
 // 引入包名
 import http from '@ohos.net.http';
 import data_preferences from '@ohos.data.preferences';
-import wfc from 'marswrapper'
-import Config from '../config';
+import wfc from '@wfc/client'
+import Config from '@wfc/client/src/main/ets/config';
 import { GlobalContext } from '../globalContext';
 import common from '@ohos.app.ability.common';
 import url from '@ohos.url';
 import GroupAnnouncement from './model/groupAnnouncement';
 import AppServerError from './appServerError';
-import PCSession from '../wfc/model/pcsession';
-import { JSONObject } from '../wfc/type/types';
-import Message from '../wfc/messages/message';
-import FavItem from '../wfc/model/favItem';
-import { stringValue } from '../wfc/util/longUtil';
+import PCSession from '@wfc/client/src/main/ets/wfc/model/pcsession';
+import { JSONObject } from '@wfc/client/src/main/ets/wfc/type/types';
+import Message from '@wfc/client/src/main/ets/wfc/messages/message';
+import FavItem from '@wfc/client/src/main/ets/wfc/model/favItem';
+import { stringValue } from '@wfc/client/src/main/ets/wfc/util/longUtil';
 
 class AppServer {
     baseUrl = Config.APP_SERVER;

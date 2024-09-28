@@ -1,6 +1,6 @@
-import Message from '../wfc/messages/message'
-import UserInfo from '../wfc/model/userInfo'
-import UserOnlineState from '../wfc/model/userOnlineState'
+import Message from '@wfc/client/src/main/ets/wfc/messages/message'
+import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
+import UserOnlineState from '@wfc/client/src/main/ets/wfc/model/userOnlineState'
 
 export interface UIUserInfo {
     showCategory: boolean,

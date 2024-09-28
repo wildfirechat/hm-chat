@@ -1,12 +1,12 @@
 import { MMMediaEntry } from '../../../common/Types'
 import { exist } from '../../../common/utils/FileUtil'
-import Config from '../../../config'
+import Config from '@wfc/client/src/main/ets/config'
 import { mediaEntry } from '../../../helper/messageHelper'
-import CompositeMessageContent from '../../../wfc/messages/compositeMessageContent'
-import Message from '../../../wfc/messages/message'
-import MessageContentType from '../../../wfc/messages/messageContentType'
-import VideoMessageContent from '../../../wfc/messages/videoMessageContent'
-import { eq } from '../../../wfc/util/longUtil'
+import CompositeMessageContent from '@wfc/client/src/main/ets/wfc/messages/compositeMessageContent'
+import Message from '@wfc/client/src/main/ets/wfc/messages/message'
+import MessageContentType from '@wfc/client/src/main/ets/wfc/messages/messageContentType'
+import VideoMessageContent from '@wfc/client/src/main/ets/wfc/messages/videoMessageContent'
+import { eq } from '@wfc/client/src/main/ets/wfc/util/longUtil'
 import MMMessagePreviewDialog from '../../mm/MMMessagePreviewDialog'
 
 @Component

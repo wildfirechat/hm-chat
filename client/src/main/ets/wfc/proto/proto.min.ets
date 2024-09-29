@@ -41,7 +41,7 @@ import ChannelMenu from "../model/channelMenu";
 import TextMessageContent from "../messages/textMessageContent";
 import FileMessageContent from "../messages/fileMessageContent";
 import ImageMessageContent from "../messages/imageMessageContent";
-import protoProxy from '@wfc/marswrapper'
+import protoProxy from "libmarswrapper.so"
 // import os from "os";
 // import path from "path";
 
@@ -993,7 +993,7 @@ class WfcImpl {
     }
 
     getGroupMembersByCount(groupId: string, count: number): GroupMember[] {
-        let membersStr = protoProxy.getGroupMembersByCount(groupId, count);
+        let membersStr: string = protoProxy.getGroupMembersByCount(groupId, count);
         let members: GroupMember[] = [];
         let arr = JSON.parse(membersStr) as Record<string, Object>[];
         arr.forEach(e => {
@@ -2318,7 +2318,7 @@ class WfcImpl {
 
                 let uploadRequestOptions: request.UploadConfig = {
                     url: uploadUrl,
-                    header: {'Content-Type': contentType},
+                    header: { 'Content-Type': contentType },
                     method: 'PUT',
                     files: [{
                         filename: fileName!,

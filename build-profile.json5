@@ -25,18 +25,6 @@
             ]
         },
         {
-            "name": "marswrapper",
-            "srcPath": "./marswrapper",
-            "targets": [
-                {
-                    "name": "default",
-                    "applyToProducts": [
-                        "default"
-                    ]
-                }
-            ]
-        },
-        {
             "name": "client",
             "srcPath": "./client",
         },

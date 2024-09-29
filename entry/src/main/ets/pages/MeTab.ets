@@ -4,9 +4,10 @@ import router from '@ohos.router'
 import data_preferences from '@ohos.data.preferences'
 import EventType from '@wfc/client/src/main/ets/wfc/client/wfcEvent'
 import ConnectionStatus from '@wfc/client/src/main/ets/wfc/client/connectionStatus'
-import OptionItemView from '../view/OptionItemView'
-import { showToast } from '../common/utils/Toast'
-import { navigationDestinations } from './navigationConfig'
+import OptionItemView from '@wfc/uikit/src/main/ets/view/OptionItemView'
+import { showToast } from '@wfc/uikit/src/main/ets/common/utils/Toast'
+import { navigationDestinations } from '@wfc/uikit/src/main/ets/pages/navigationConfig'
+import { mainNavigationDestinations } from './mainNavigationConfig'
 
 
 @Component
@@ -126,7 +127,7 @@ export default struct MeTab {
                     .color('#F7F7F7')
                 OptionItemView({ icon: $r('app.media.ic_setting'), title: '设置', showDivider: false })
                     .onClick(() => {
-                        this.mainNavPathStack.pushPathByName(navigationDestinations.SettingPage, {} as Record<string, Object>)
+                        this.mainNavPathStack.pushPathByName(mainNavigationDestinations.SettingPage, {} as Record<string, Object>)
                     })
             }
             .margin({ top: 10, bottom: 10 })

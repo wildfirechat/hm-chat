@@ -1,5 +1,5 @@
-import OptionItemView from '../../view/OptionItemView'
-import { navigationDestinations } from '../navigationConfig'
+import OptionItemView from '@wfc/uikit/src/main/ets/view/OptionItemView'
+import { navigationDestinations } from '@wfc/uikit/src/main/ets/pages/navigationConfig'
 
 
 @CustomDialog

@@ -1,7 +1,7 @@
-import { showToast } from '../common/utils/Toast'
+import { showToast } from '@wfc/uikit/src/main/ets/common/utils/Toast'
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType'
-import { navigationDestinations } from './navigationConfig'
+import { navigationDestinations } from '@wfc/uikit/src/main/ets/pages/navigationConfig'
 
 @Preview
 @Component

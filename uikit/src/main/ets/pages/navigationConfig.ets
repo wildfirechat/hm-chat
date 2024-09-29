@@ -18,12 +18,9 @@ import UpdateGroupAnnouncementPage from './group/UpdateGroupAnnouncementPage'
 import UpdateGroupNamePage from './group/UpdateGroupNamePage'
 import UpdateGroupRemarkNamePage from './group/UpdateGroupRemarkPage'
 import UpdateMyGroupAliasNamePage from './group/UpdateMyGroupAliasPage'
-import AboutPage from './me/AboutPage'
-import AccountPage from './me/AccountPage'
 import FavRecordPage from './me/FavRecordPage'
 import FileRecordPage from './me/FileRecordPage'
 import MessageAndNotificationPage from './me/MessageAndNotificaitonPage'
-import SettingPage from './me/SettingPage'
 import PCLoginPage from './pc/PCLoginPage'
 import WebViewPage from './misc/WebViewPage'
 import OrganizationTreePage from './organization/OrganizationTreePage'
@@ -38,9 +35,6 @@ import TextMessageContentView from './conversation/message/TextMessageContentVie
 import TextMessagePreviewPage from './conversation/TextMessagePreviewPage'
 import PCSessionPage from './pc/PCSessionPage'
 import UpdateUserNickNameOrAliasPage from './user/UpdateUserNickNameOrAliasPage'
-import ResetPasswordPage from './me/ResetPasswordPage'
-import ChangePasswordPage from './me/ChangePasswordPage'
-
 
 export class navigationDestinations {
     static SearchPortalPage = 'searchPortalPage'
@@ -71,8 +65,6 @@ export class navigationDestinations {
     static FileRecordPage = 'fileRecordPage'
     static ConversationFileRecordPage = 'conversationFileRecordPage'
     static NotificationPage = 'messageAndNotificationPage'
-    static SettingPage = 'settingPage'
-    static AboutPage = 'aboutPage'
     static CompositeMessagePreviewPage = 'compositeMessagePreviewPage'
     static OrganizationTreePage = 'organizationTreePage'
     static PickOrganizationMemberPage = 'pickOrganizationMemberPage'
@@ -87,7 +79,7 @@ export class navigationDestinations {
 }
 
 @Builder
-export function PagesMap(name: string) {
+export function UIKitPageMap(name: string) {
     // TODO add more
     // TODO FIXME 参数使用 NavDestination.onReady 处理，而不是 aboutToAppear
     if (name == navigationDestinations.SearchPortalPage) {
@@ -136,8 +128,6 @@ export function PagesMap(name: string) {
         GroupManagerListPage()
     } else if (name === navigationDestinations.GroupMemberMuteOrAllowListPage) {
         GroupMemberMuteOrAllowListPage()
-    } else if (name === navigationDestinations.AccountPage) {
-        AccountPage()
     } else if (name === navigationDestinations.FavRecordPage) {
         FavRecordPage()
     } else if (name === navigationDestinations.FileRecordPage) {
@@ -146,10 +136,6 @@ export function PagesMap(name: string) {
         ConversationFileRecordPage()
     } else if (name === navigationDestinations.NotificationPage) {
         MessageAndNotificationPage()
-    } else if (name === navigationDestinations.SettingPage) {
-        SettingPage()
-    } else if (name === navigationDestinations.AboutPage) {
-        AboutPage()
     } else if (name === navigationDestinations.CompositeMessagePreviewPage) {
         CompositeMessagePreviewPage()
     } else if (name === navigationDestinations.TextMessagePreviewPage) {
@@ -168,9 +154,5 @@ export function PagesMap(name: string) {
         PCSessionPage()
     } else if (name === navigationDestinations.UpdateUserNickNameOrAliasPage) {
         UpdateUserNickNameOrAliasPage()
-    } else if (name === navigationDestinations.ResetPasswordPage) {
-        ResetPasswordPage()
-    } else if (name === navigationDestinations.ChangePasswordPage) {
-        ChangePasswordPage()
     }
 }

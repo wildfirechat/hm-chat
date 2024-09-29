@@ -1,4 +1,4 @@
-import OptionItemView from '../../view/OptionItemView'
+import OptionItemView from '@wfc/uikit/src/main/ets/view/OptionItemView'
 import { bundleManager } from '@kit.AbilityKit';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { LengthUnit, router } from '@kit.ArkUI';
@@ -10,7 +10,6 @@ import wfc from '@wfc/client'
 @Component
 export default struct AboutPage {
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
-
     @State version: string = 'v1.0.0'
     @State appInfo: string = ''
 
@@ -31,9 +30,9 @@ export default struct AboutPage {
                 //     info += "高级版音视频\n";
                 // } else {
                 //     info += "多人版版音视频\n";
-                    for (const ice of Config.ICE_SERVERS) {
-                        info += `${ice[0]} ${ice[1]} ${ice[2]}\n`;
-                    }
+                for (const ice of Config.ICE_SERVERS) {
+                    info += `${ice[0]} ${ice[1]} ${ice[2]}\n`;
+                }
                 // }
 
                 this.appInfo = info;
@@ -54,16 +53,16 @@ export default struct AboutPage {
                     .width(80)
 
                 Text($r('app.string.app_name'))
-                    .margin({top:8})
+                    .margin({ top: 8 })
 
                 Text($r('app.string.version_tag_s', this.version))
                     .fontColor($r('app.color.c_gray'))
                     .fontSize(12)
-                    .margin({top:4})
+                    .margin({ top: 4 })
 
                 Text(this.appInfo)
                     .textAlign(TextAlign.Start)
-                    .lineSpacing({value: 4, unit: LengthUnit.VP})
+                    .lineSpacing({ value: 4, unit: LengthUnit.VP })
                     .padding(16)
                     .width('100%')
 

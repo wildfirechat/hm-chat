@@ -1,8 +1,9 @@
-import { showToast } from '../../common/utils/Toast'
-import OptionItemView from '../../view/OptionItemView'
+import { showToast } from '@wfc/uikit/src/main/ets/common/utils/Toast'
+import OptionItemView from '@wfc/uikit/src/main/ets/view/OptionItemView'
 import data_preferences from '@ohos.data.preferences'
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc';
-import { navigationDestinations } from '../navigationConfig';
+import { navigationDestinations } from '@wfc/uikit/src/main/ets/pages/navigationConfig';
+import { mainNavigationDestinations } from '../mainNavigationConfig';
 
 @Preview
 @Entry
@@ -25,7 +26,7 @@ export default struct SettingPage {
                         title: '关于',
                         showDivider: true
                     }).onClick(() => {
-                        this.mainNavPathStack.pushPathByName(navigationDestinations.AboutPage, {} as Record<string, Object>)
+                        this.mainNavPathStack.pushPathByName(mainNavigationDestinations.AboutPage, {} as Record<string, Object>)
                     })
 
                     OptionItemView({

@@ -1,7 +1,7 @@
 import ConversationListTab from '@wfc/uikit/src/main/ets/pages/ConversationListTab'
 import ContactListTab from '@wfc/uikit/src/main/ets/pages/ContactListTab'
-import DiscoveryTab from '@wfc/uikit/src/main/ets/pages/DiscoveryTab'
-import MeTab from '@wfc/uikit/src/main/ets/pages/MeTab'
+import DiscoveryTab from './DiscoveryTab'
+import MeTab from './MeTab'
 import AbilityAccessCtrl, { Permissions } from '@ohos.abilityAccessCtrl'
 import { scanCore, scanBarcode } from '@kit.ScanKit';
 import { showToast } from '@wfc/uikit/src/main/ets/common/utils/Toast'
@@ -17,7 +17,8 @@ import Base, { BusinessError } from '@ohos.base'
 import WorkSpaceTab from '@wfc/uikit/src/main/ets/pages/WorkSpaceTab'
 import Config from '@wfc/client/src/main/ets/config'
 import { checkPermissions, requestPermissions } from '@wfc/uikit/src/main/ets/helper/permissionHelper'
-import { navigationDestinations, PagesMap } from '@wfc/uikit/src/main/ets/pages/navigationConfig'
+import { navigationDestinations} from '@wfc/uikit/src/main/ets/pages/navigationConfig'
+import { MainPageMap } from './mainNavigationConfig'
 import orgServer from '@wfc/uikit/src/main/ets/api/orgServer'
 import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
 import { url } from '@kit.ArkTS'
@@ -410,6 +411,6 @@ struct MainPage {
         .hideBackButton(true)
         .menus(this.NavigationMenus())
         .mode(NavigationMode.Stack)
-        .navDestination(PagesMap)
+        .navDestination(MainPageMap)
     }
 }

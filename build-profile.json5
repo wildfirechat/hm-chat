@@ -13,8 +13,8 @@
     },
     "modules": [
         {
-            "name": "entry",
-            "srcPath": "./entry",
+            "name": "chat",
+            "srcPath": "./chat",
             "targets": [
                 {
                     "name": "default",

@@ -9,4 +9,4 @@
 /.clang-format
 /.clang-tidy
 **/.test
-entry/patch.json
+chat/patch.json

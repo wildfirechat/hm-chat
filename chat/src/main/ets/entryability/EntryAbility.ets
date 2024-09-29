@@ -5,7 +5,6 @@ import data_preferences from '@ohos.data.preferences';
 import wfc from '@wfc/client'
 import Config from '@wfc/client/src/main/ets/config'
 import { AbilityConstant, Context, Want } from '@kit.AbilityKit';
-import { router } from '@kit.ArkUI';
 import { GlobalContext } from '@wfc/uikit/src/main/ets/globalContext';
 import { pushService } from '@kit.PushKit';
 
@@ -59,7 +58,7 @@ export default class EntryAbility extends UIAbility {
                     preference.clear()
                     preference.flush()
                 }
-                let url = 'pages/LoginPage'
+                let url = 'pages/login/LoginPage'
                 this.loadContent(url)
             }
         })
@@ -88,7 +87,7 @@ export default class EntryAbility extends UIAbility {
         this.windowStage = windowStage;
         GlobalContext.getContext().setObject('windowStage', windowStage);
 
-        let url = 'pages/LoginPage';
+        let url = 'pages/login/LoginPage';
         data_preferences.getPreferences(this.context, 'wfcstore', async (err, val) => {
             if (err) {
                 console.error("Failed to get preferences. code =" + err.code + ", message =" + err.message);

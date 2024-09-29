@@ -36,9 +36,7 @@
 ![](./assets/1.edit_configurations.png)
 2. 打开保持应用数据
 ![](./assets/2.keep_application_data.png)
-3. Deploy Multi Hap选择marswrapper
-![](./assets/3.deploy_multi_hap.png)
-4. 运行
+3. 运行
 ![](./assets/4.debug_button.png)
 
 ## 注意事项

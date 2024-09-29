@@ -1,13 +1,11 @@
 {
     "module": {
         "name": "marswrapper",
-        "type": "shared",
+        "type": "har",
         "description": "$string:shared_desc",
         "deviceTypes": [
             "phone",
             "tablet"
-        ],
-        "deliveryWithInstall": true,
-        "pages": "$profile:main_pages"
+        ]
     }
 }

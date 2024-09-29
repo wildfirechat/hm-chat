@@ -8,7 +8,7 @@ export function startContinuousTask(context: Context) {
         // 添加需要被拉起应用的bundleName和abilityName
         wants: [
             {
-                bundleName: 'cn.wildfirechat.av',
+                bundleName: 'cn.wildfirechat.messenger',
                 abilityName: 'EntryAbility',
             }
         ],

@@ -102,8 +102,8 @@ export default struct SingleAudioCallPage {
             // 添加需要被拉起应用的bundleName和abilityName
             wants: [
                 {
-                    bundleName: 'cn.wildfirechat.av',
-                    abilityName: 'cn.wildfirechat.av.EntryAbility',
+                    bundleName: 'cn.wildfirechat.messenger',
+                    abilityName: 'cn.wildfirechat.messenger.EntryAbility',
                 }
             ],
             // 指定点击通知栏消息后的动作是拉起ability

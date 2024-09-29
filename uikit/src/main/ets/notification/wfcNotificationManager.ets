@@ -4,7 +4,7 @@ import wantAgent from '@ohos.app.ability.wantAgent';
 import { WantAgent } from '@ohos.app.ability.wantAgent';
 import Base from '@ohos.base';
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc';
-import UserSettingScope from '@wfc/client/src/main/ets/wfc/client/userSettingScope';
+import uikit from 'uikit/ets/uikit';
 
 class WfcNotificationManager {
     private notificationMessages: Message[] = []
@@ -47,8 +47,8 @@ class WfcNotificationManager {
                 wants: [
                     {
                         deviceId: '',
-                        bundleName: 'cn.wildfirechat.messenger',
-                        abilityName: 'EntryAbility',
+                        bundleName: uikit.bundleName,
+                        abilityName: uikit.entryAbilityName,
                         action: '',
                         entities: [],
                         uri: '',

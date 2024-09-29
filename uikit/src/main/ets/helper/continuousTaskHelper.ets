@@ -1,6 +1,7 @@
 import { WantAgent, wantAgent } from '@kit.AbilityKit';
 import { backgroundTaskManager } from '@kit.BackgroundTasksKit';
 import { BusinessError } from '@kit.BasicServicesKit';
+import uikit from 'uikit/ets/uikit';
 
 export function startContinuousTask(context: Context) {
     let wantAgentInfo: wantAgent.WantAgentInfo = {
@@ -8,8 +9,8 @@ export function startContinuousTask(context: Context) {
         // 添加需要被拉起应用的bundleName和abilityName
         wants: [
             {
-                bundleName: 'cn.wildfirechat.messenger',
-                abilityName: 'EntryAbility',
+                bundleName: uikit.bundleName,
+                abilityName: uikit.entryAbilityName
             }
         ],
         // 指定点击通知栏消息后的动作是拉起ability

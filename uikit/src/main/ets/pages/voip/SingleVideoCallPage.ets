@@ -16,8 +16,9 @@ import { camera } from '@kit.CameraKit'
 import { showToast } from '../../common/utils/Toast'
 import { timestampFormat } from '../../util/helper'
 import { GlobalContext } from '../../globalContext'
+import uikit from '../../uikit'
 
-@Entry({routeName: 'singleVideoCallPage'})
+@Entry({ routeName: 'singleVideoCallPage' })
 @Component
 export default struct SingleVideoCallPage {
     @State targetUserInfo?: UserInfo = undefined
@@ -119,8 +120,8 @@ export default struct SingleVideoCallPage {
             // 添加需要被拉起应用的bundleName和abilityName
             wants: [
                 {
-                    bundleName: 'cn.wildfirechat.messenger',
-                    abilityName: 'cn.wildfirechat.messenger.EntryAbility',
+                    bundleName: uikit.bundleName,
+                    abilityName: uikit.entryAbilityName
                 }
             ],
             // 指定点击通知栏消息后的动作是拉起ability

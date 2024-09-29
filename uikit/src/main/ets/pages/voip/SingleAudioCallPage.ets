@@ -14,6 +14,7 @@ import { checkPermissions, requestPermissions } from '../../helper/permissionHel
 import AVCastPicker from '@ohos.multimedia.avCastPicker'
 import { showToast } from '../../common/utils/Toast'
 import { timeFormat, timestampFormat } from '../../util/helper'
+import uikit from '../../uikit'
 
 @Entry({ routeName: 'singleAudioCallPage' })
 @Component
@@ -102,8 +103,8 @@ export default struct SingleAudioCallPage {
             // 添加需要被拉起应用的bundleName和abilityName
             wants: [
                 {
-                    bundleName: 'cn.wildfirechat.messenger',
-                    abilityName: 'cn.wildfirechat.messenger.EntryAbility',
+                    bundleName: uikit.bundleName,
+                    abilityName: uikit.entryAbilityName
                 }
             ],
             // 指定点击通知栏消息后的动作是拉起ability

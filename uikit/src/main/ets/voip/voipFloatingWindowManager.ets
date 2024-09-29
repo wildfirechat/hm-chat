@@ -1,10 +1,7 @@
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
-import notificationManager from '@ohos.notificationManager';
-import wantAgent from '@ohos.app.ability.wantAgent';
-import { WantAgent } from '@ohos.app.ability.wantAgent';
 import Base, { BusinessError } from '@ohos.base';
-import wfc from '@wfc/client/src/main/ets/wfc/client/wfc';
 import { common, Want } from '@kit.AbilityKit';
+import uikit from '../uikit'
 
 class VoipFloatingWindowManager {
     private notificationMessages: Message[] = []
@@ -17,8 +14,8 @@ class VoipFloatingWindowManager {
 
         let want: Want = {
             deviceId: '', // deviceId为空表示本设备
-            bundleName: 'cn.wildfirechat.messenger',
-            abilityName: 'VoipFloatingEntryAbility',
+            bundleName: uikit.bundleName,
+            abilityName: uikit.entryAbilityName,
             action: '',
             entities: [],
             uri: '',

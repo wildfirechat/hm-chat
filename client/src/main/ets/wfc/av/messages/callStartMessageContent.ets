@@ -53,7 +53,8 @@ export default class CallStartMessageContent extends MessageContent {
             a: this.audioOnly ? 1 : 0,
             ts: this.targetIds,
             t: this.targetIds[0],
-            p: this.pin
+            p: this.pin,
+            ty: this.sdkType
         } as Data;
         payload.binaryContent = wfc.utf8_to_b64(JSON.stringify(obj));
 
@@ -82,6 +83,7 @@ export default class CallStartMessageContent extends MessageContent {
             this.targetIds = [obj.t];
         }
         this.pin = obj.p;
+        this.sdkType = obj.ty;
     }
 }
 
@@ -92,6 +94,7 @@ class Data {
     a = 0;
     ts = [] as string[]
     t = ''
-    p = '';
+    p = ''
+    ty = 0;
 }
 

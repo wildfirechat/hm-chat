@@ -601,7 +601,7 @@ export default struct ConversationInputPanelView {
             uncheckableUserIds: [wfc.getUserId()],
             showPickGroupMemberModal: $showExtContentCoverModal,
             onPickResult: (users: UserInfo[]) => {
-                // avenginekit.startCall(this.conversation, users.map(user => user.uid), this.voipAudioOnly)
+                avenginekit.startCall(this.conversation, users.map(user => user.uid), this.voipAudioOnly)
             }
         })
             .height('100%')

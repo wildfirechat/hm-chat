@@ -12,7 +12,7 @@ import MessageContentMediaType from '@wfc/client/src/main/ets/wfc/messages/messa
 import ModifyMyInfoEntry from '@wfc/client/src/main/ets/wfc/model/modifyMyInfoEntry';
 import ModifyMyInfoType from '@wfc/client/src/main/ets/wfc/model/modifyMyInfoType';
 import OptionItemView from '../../view/OptionItemView';
-import { trustedAppService } from '@kit.DeviceSecurityKit';
+import avenginekit from '@wfc/avenginekit';
 
 @Entry
 @Component
@@ -155,15 +155,15 @@ export default struct UserInfoPage {
                                             {
                                                 title: '语音通话',
                                                 action: () => {
-                                                    // TODO
-                                                    showToast('TODO')
+                                                    let conversation = new Conversation(ConversationType.Single, this.userInfo!.uid, 0)
+                                                    avenginekit.startCall(conversation, [this.userInfo!.uid], true)
                                                 }
                                             },
                                             {
                                                 title: '视频通话',
                                                 action: () => {
-                                                    // TODO
-                                                    showToast('TODO')
+                                                    let conversation = new Conversation(ConversationType.Single, this.userInfo!.uid, 0)
+                                                    avenginekit.startCall(conversation, [this.userInfo!.uid], false)
                                                 }
                                             },
                                         ]

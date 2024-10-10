@@ -1921,7 +1921,7 @@ export class WfcManager {
      * @param failCB
      * @returns {Promise<void>}
      */
-    async sendMessage(message: Message, preparedCB: CallbackWithValue_1_OrNull<number>, progressCB: CallbackWithValue_2<number, number>, uploadedCB: CallbackWithValue_1_OrNull<string>, successCB: CallbackWithValue_2<Long, number>, failCB: FailCallback) {
+    async sendMessage(message: Message, preparedCB: CallbackWithValue_1_OrNull<number>, progressCB: CallbackWithValue_2_OrNull<number, number>, uploadedCB: CallbackWithValue_1_OrNull<string>, successCB: CallbackWithValue_2_OrNull<Long, number>, failCB: FailCallbackOrNull) {
         impl.sendMessage(message, preparedCB, progressCB, uploadedCB, successCB, failCB);
     }
 
@@ -1936,7 +1936,7 @@ export class WfcManager {
      * @param failCB
      * @returns {Promise<void>}
      */
-    async sendMessageEx(message: Message, toUsers = [], preparedCB: CallbackWithValue_1<number>, progressCB: CallbackWithValue_2_OrNull<number, number>, uploadedCB: CallbackWithValue_1_OrNull<string>, successCB: CallbackWithValue_2<Long, number>, failCB: FailCallback) {
+    async sendMessageEx(message: Message, toUsers = [], preparedCB: CallbackWithValue_1<number>, progressCB: CallbackWithValue_2_OrNull<number, number>, uploadedCB: CallbackWithValue_1_OrNull<string>, successCB: CallbackWithValue_2<Long, number>, failCB: FailCallbackOrNull) {
         impl.sendMessageEx(message, toUsers, preparedCB, progressCB, uploadedCB, successCB, failCB);
     }
 

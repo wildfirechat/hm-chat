@@ -2102,14 +2102,24 @@ class WfcImpl {
                     insertedMsg.timestamp = Long.fromValue(timestamp).toNumber();
                     insertedMsg.status = MessageStatus.Sent;
                     console.log('send saved msg success', messageUid, insertedMsg);
+                    if (insertedMsg.conversation!.type !== ConversationType.ChatRoom) {
+                        self.eventEmitter!.emit(EventType.MessageStatusUpdate, insertedMsg);
+                    }
                     successCB && successCB(insertedMsg.messageUid, insertedMsg.timestamp);
                 }, (err: number) => {
+                    message.status = MessageStatus.SendFailure
+                    if (message.conversation!.type !== ConversationType.ChatRoom) {
+                        self.eventEmitter!.emit(EventType.MessageStatusUpdate, message);
+                    }
                     failCB && failCB(err)
                 })
                 mediaMessageUploadCallback && mediaMessageUploadCallback(remoteUrl);
             }, (err: number) => {
                 this.updateMessageStatus(insertedMsg.messageId, MessageStatus.SendFailure);
                 insertedMsg.status = MessageStatus.SendFailure;
+                if (insertedMsg.conversation!.type !== ConversationType.ChatRoom) {
+                    self.eventEmitter!.emit(EventType.MessageStatusUpdate, insertedMsg);
+                }
                 failCB && failCB(err);
             });
             return
@@ -2149,14 +2159,14 @@ class WfcImpl {
                     let msg = self.getMessageById(message.messageId)!;
                     message.messageContent = msg.messageContent;
                 }
-                if (message.conversation!.type === ConversationType.ChatRoom) {
+                if (message.conversation!.type !== ConversationType.ChatRoom) {
                     self.eventEmitter!.emit(EventType.MessageStatusUpdate, message);
                 }
                 successCB && successCB(Long.fromValue(messageUid), Long.fromValue(timestamp).toNumber());
             },
             (errorCode: number) => { //errorCB
                 message.status = MessageStatus.SendFailure;
-                if (message.conversation!.type === ConversationType.ChatRoom) {
+                if (message.conversation!.type !== ConversationType.ChatRoom) {
                     self.eventEmitter!.emit(EventType.MessageStatusUpdate, message);
                 }
                 failCB && failCB(errorCode);
@@ -2182,11 +2192,17 @@ class WfcImpl {
                     let msg = self.getMessageById(message.messageId)!;
                     message.messageContent = msg.messageContent;
                 }
+                if (message.conversation!.type !== ConversationType.ChatRoom) {
+                    self.eventEmitter!.emit(EventType.MessageStatusUpdate, message);
+                }
 
                 successCB && successCB(Long.fromValue(messageUid), Long.fromValue(timestamp).toNumber());
             },
             (errorCode: number) => { //errorCB
                 message.status = MessageStatus.SendFailure;
+                if (message.conversation!.type !== ConversationType.ChatRoom) {
+                    self.eventEmitter!.emit(EventType.MessageStatusUpdate, message);
+                }
                 failCB && failCB(errorCode);
             });
     }

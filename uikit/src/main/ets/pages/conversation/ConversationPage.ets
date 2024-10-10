@@ -34,6 +34,7 @@ import RecallNotificationMessageContentView from './message/RecallNotificationMe
 import TextMessageContent from '@wfc/client/src/main/ets/wfc/messages/textMessageContent'
 import RecallMessageNotification from '@wfc/client/src/main/ets/wfc/messages/notification/recallMessageNotification'
 import GroupMemberType from '@wfc/client/src/main/ets/wfc/model/groupMemberType'
+import MessageStatus from '@wfc/client/src/main/ets/wfc/messages/messageStatus'
 
 @Entry
 @Component
@@ -80,6 +81,7 @@ export default struct ConversationPage {
         this.setupConversation(conversation, title);
 
         wfc.eventEmitter!.on(EventType.SendMessage, this.onSendMessage)
+        wfc.eventEmitter!.on(EventType.MessageStatusUpdate, this.onMessageStatusUpdate)
         wfc.eventEmitter!.on(EventType.ReceiveMessage, this.onReceiveMessage)
         wfc.eventEmitter!.on(EventType.DeleteMessage, this.onDeleteMessage)
         wfc.eventEmitter!.on(EventType.MessageDeleted, this.onRemoteDeleteMessage)
@@ -120,6 +122,7 @@ export default struct ConversationPage {
         this.audioPlayerManager.release()
 
         wfc.eventEmitter!.off(EventType.SendMessage, this.onSendMessage)
+        wfc.eventEmitter!.off(EventType.MessageStatusUpdate, this.onMessageStatusUpdate)
         wfc.eventEmitter!.off(EventType.ReceiveMessage, this.onReceiveMessage)
         wfc.eventEmitter!.off(EventType.DeleteMessage, this.onDeleteMessage)
         wfc.eventEmitter!.on(EventType.MessageDeleted, this.onRemoteDeleteMessage)
@@ -328,6 +331,11 @@ export default struct ConversationPage {
             this.scroller.scrollEdge(Edge.Bottom)
         }
     }
+    onMessageStatusUpdate = (message: Message) => {
+        if (this.isDisplayMessage(message) && Conversation.equal(message.conversation, this.conversation!)) {
+            this.conversationMessageDataSource.updateMessage(message);
+        }
+    }
     onReceiveMessage = (message: Message, hasMore: boolean) => {
         this.unreadStatusCleared = false
         if (this.isDisplayMessage(message) && Conversation.equal(message.conversation, this.conversation!)) {
@@ -448,6 +456,11 @@ export default struct ConversationPage {
         return key
     }
 
+    resendMessage(message: Message) {
+        wfc.deleteMessage(message.messageId)
+        wfc.sendMessage(message, null, null, null, null, null)
+    }
+
     conversationInfoPageName(): string {
         let name: string = ''
         switch (this.conversation!.type) {
@@ -544,6 +557,30 @@ export default struct ConversationPage {
                                                             .alignItems(VerticalAlign.Center)
                                                         }
                                                         Row() {
+
+                                                            if (msg.status === MessageStatus.SendFailure) {
+                                                                // 重试
+                                                                Row() {
+                                                                    Text('重试')
+                                                                        .fontSize(12)
+                                                                        .padding({ right: 5 })
+                                                                    Image($r('app.media.img_error'))
+                                                                        .width(20)
+                                                                        .height(20)
+                                                                        .objectFit(ImageFit.ScaleDown)
+
+                                                                }
+                                                                .padding({ right: 5 })
+                                                                .alignItems(VerticalAlign.Bottom)
+                                                                .onClick(() => {
+                                                                    this.resendMessage(msg)
+                                                                })
+                                                            }
+
+                                                            if (msg.status === MessageStatus.Sending) {
+                                                                LoadingProgress().width(20).height(20)
+                                                            }
+
                                                             NormalMessageContentView({
                                                                 message: msg,
                                                                 enableMultiCheck: $enableMultiCheck,

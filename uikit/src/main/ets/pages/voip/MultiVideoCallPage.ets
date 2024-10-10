@@ -43,9 +43,9 @@ export default struct MultiVideoCallPage {
         this.callSession = callSession
         this.participantProfiles = callSession.getParticipantProfiles()
 
-        callSession.setUserXComponentId(this.selfUserInfo.uid, this.selfUserInfo.uid)
+        callSession.setUserXComponentId(this.selfUserInfo.uid, this.selfUserInfo.uid + this.callSession.callId)
         for (const p of this.participantProfiles) {
-            callSession.setUserXComponentId(p.userId, p.userId)
+            callSession.setUserXComponentId(p.userId, p.userId + this.callSession.callId)
         }
 
         this.setupSessionCallback()
@@ -164,7 +164,7 @@ export default struct MultiVideoCallPage {
         Navigation() {
             Stack() {
                 XComponent({
-                    id: this.selfUserInfo!.uid,
+                    id: this.selfUserInfo!.uid + this.callSession?.callId,
                     type: XComponentType.SURFACE,
                     libraryname: 'wfrtc',
                     controller: this.xComponentController
@@ -184,7 +184,7 @@ export default struct MultiVideoCallPage {
                     ForEach(this.targetUserInfos, (userInfo: UserInfo) => {
                         Stack() {
                             XComponent({
-                                id: userInfo.uid,
+                                id: userInfo.uid + this.callSession?.callId,
                                 type: XComponentType.SURFACE,
                                 libraryname: 'wfrtc'
                             })

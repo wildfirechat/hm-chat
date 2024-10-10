@@ -6,7 +6,6 @@ import MessageContent from '../../messages/messageContent';
 import MessageContentType from '../../messages/messageContentType';
 import wfc from "../../client/wfc"
 import MessagePayload from '../../messages/messagePayload';
-import { FaultLogger } from '@kit.PerformanceAnalysisKit';
 
 export default class CallStartMessageContent extends MessageContent {
     callId = '';

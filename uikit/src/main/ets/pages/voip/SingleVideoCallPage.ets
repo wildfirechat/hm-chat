@@ -48,8 +48,8 @@ export default struct SingleVideoCallPage {
         // this.state = callSession.status;
         this.callSession = callSession;
 
-        callSession.setUserXComponentId(this.selfUserInfo.uid, 'localXComponent')
-        callSession.setUserXComponentId(this.targetUserInfo.uid, this.targetUserInfo.uid)
+        callSession.setUserXComponentId(this.selfUserInfo.uid, 'localXComponent' + this.callSession.callId)
+        callSession.setUserXComponentId(this.targetUserInfo.uid, this.targetUserInfo.uid + this.callSession.callId)
 
         this.setupSessionCallback()
         console.log('SingleVideoCallPage aboutToAppear')
@@ -176,7 +176,7 @@ export default struct SingleVideoCallPage {
         Navigation() {
             Stack() {
                 XComponent({
-                    id: this.targetUserInfo?.uid,
+                    id: this.targetUserInfo?.uid + this.callSession!.callId,
                     type: XComponentType.SURFACE,
                     libraryname: 'wfrtc'
                 })
@@ -194,7 +194,7 @@ export default struct SingleVideoCallPage {
                 Stack() {
                     Column() {
                         XComponent({
-                            id: 'localXComponent',
+                            id: 'localXComponent' + this.callSession?.callId,
                             type: XComponentType.SURFACE,
                             libraryname: 'wfrtc',
                             controller: this.xComponentController

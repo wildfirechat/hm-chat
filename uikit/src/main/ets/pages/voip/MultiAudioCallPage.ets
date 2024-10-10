@@ -277,7 +277,7 @@ export default struct MultiAudioCallPage {
 
                             Row() {
                                 Column() {
-                                    Image(this.callSession?.videoMuted ? $r('app.media.av_mute_hover') : $r('app.media.av_mute'))
+                                    Image(this.callSession?.audioMuted ? $r('app.media.av_mute_hover') : $r('app.media.av_mute'))
                                         .draggable(false)
                                         .width(60)
                                         .height(60)

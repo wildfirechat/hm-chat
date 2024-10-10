@@ -843,7 +843,7 @@ class ConversationMessageDataSource extends BasicDataSource<Message> {
     }
 
     appendMessage(message: Message) {
-        if (this.messages.findIndex(m => eq(m.messageUid, message.messageUid)) >= 0) {
+        if (this.messages.findIndex(m => m.messageId === message.messageId) >= 0) {
             return
         }
         this.messages = this.messages.concat(message)

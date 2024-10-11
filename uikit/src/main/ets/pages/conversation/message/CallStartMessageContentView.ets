@@ -3,6 +3,7 @@ import avenginekit from '@wfc/avenginekit'
 import CallStartMessageContent from '@wfc/client/src/main/ets/wfc/av/messages/callStartMessageContent';
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType';
+import { timestampFormat } from '../../../util/helper';
 
 @Component
 export default struct CallStartMessageContentView {
@@ -17,16 +18,8 @@ export default struct CallStartMessageContentView {
         let content = this.message.messageContent as CallStartMessageContent;
         let text = '未接通'
         if (content.connectTime > 0 && content.endTime > 0) {
-            let duration = Math.ceil((content.endTime - content.connectTime) / 1000);
-            // if (duration > 3600) {
-            //     text = ``
-            // }else{
-            //     text = `通话时长`
-            // }
-            // TODO
-            text = `通话时长${duration}`
-        } else {
-
+            let duration = Math.ceil(content.endTime - content.connectTime);
+            text = `通话时长 ${timestampFormat(duration)}`
         }
         return text;
     }

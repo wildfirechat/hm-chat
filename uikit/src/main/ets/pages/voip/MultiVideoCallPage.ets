@@ -177,9 +177,9 @@ export default struct MultiVideoCallPage {
 
                 Flex({
                     direction: FlexDirection.Row,
-                    justifyContent: FlexAlign.Center,
+                    justifyContent: FlexAlign.Start,
                     alignContent: FlexAlign.Start,
-                    wrap: FlexWrap.Wrap
+                    wrap: FlexWrap.Wrap,
                 }) {
                     ForEach(this.targetUserInfos, (userInfo: UserInfo) => {
                         Stack() {
@@ -196,12 +196,13 @@ export default struct MultiVideoCallPage {
                                     .aspectRatio(1)
                             }
                         }
+                        .padding(5)
                         .width(this.participantWidth)
                     }, (userInfo: UserInfo) => userInfo.uid + '-' + userInfo.updateDt)
                 }
                 .width('100%')
                 .height('100%')
-                .padding({ top: this.statusBarHeight + 60 })
+                .padding({ top: this.statusBarHeight + 50 })
 
                 // actions
                 Column() {

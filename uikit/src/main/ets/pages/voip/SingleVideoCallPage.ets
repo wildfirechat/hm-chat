@@ -30,7 +30,6 @@ export default struct SingleVideoCallPage {
     private localSurfaceId: string = ''
     @State durationStr: string = ''
     private durationInternal = 0
-    private connectedTime = 0
     private statusBarHeight = 0
 
     aboutToAppear(): void {
@@ -71,7 +70,7 @@ export default struct SingleVideoCallPage {
     }
 
     updateDuration = () => {
-        let millis = new Date().getTime() - this.connectedTime
+        let millis = new Date().getTime() - this.callSession!.connectedTime
         this.durationStr = timestampFormat(millis)
     }
 
@@ -87,7 +86,6 @@ export default struct SingleVideoCallPage {
             this.callSession = tmp;
 
             if (status === CallState.STATUS_CONNECTED) {
-                this.connectedTime = new Date().getTime()
                 this.durationInternal = setInterval(this.updateDuration, 1000)
             }
         }

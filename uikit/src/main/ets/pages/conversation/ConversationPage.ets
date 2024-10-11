@@ -262,7 +262,8 @@ export default struct ConversationPage {
                     if (msgs.length === 0) {
                         this.hasNoMoreHistoryMessage = true
                     } else {
-                        this.conversationMessageDataSource.insertMessages(0, msgs)
+                        let filteredMsgs = msgs.filter(m => m.messageId != 0)
+                        this.conversationMessageDataSource.insertMessages(0, filteredMsgs)
                         this.scroller.scrollToIndex(msgs.length - 1, false)
                     }
                     this.refreshStatus = false;

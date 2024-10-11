@@ -1729,7 +1729,7 @@ export class WfcManager {
      * @param {[number]} contentTypes 消息类型列表，可选值参考{@link MessageContentType}
      * @param {number | Long} beforeUid 消息uid，表示拉取本条消息之前的消息
      * @param {number} count
-     * @param {function ([Message])} successCB
+     * @param {function ([Message])} successCB 返回的消息里面，包含了不存储的消息，页面展示时，需要将不存储的消息过滤掉，不存储的消息的 messageId === 0
      * @param failCB
      */
     loadRemoteConversationMessages(conversation: Conversation, contentTypes: numberArray, beforeUid: Long, count: number, successCB: CallbackWithValue_1<Message[]>, failCB: FailCallback) {

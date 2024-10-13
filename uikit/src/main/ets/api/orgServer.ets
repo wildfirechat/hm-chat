@@ -3,7 +3,6 @@ import http from '@ohos.net.http';
 import data_preferences from '@ohos.data.preferences';
 import wfc from '@wfc/client'
 import Config from '@wfc/client/src/main/ets/config';
-import { GlobalContext } from '../globalContext';
 import common from '@ohos.app.ability.common';
 import url from '@ohos.url';
 import OrgServerError from './orgServerError';
@@ -133,7 +132,7 @@ class OrgServer {
     }
 
     _init() {
-        let context = GlobalContext.getContext().getObject<common.UIAbilityContext>('context');
+        let context = AppStorage.get<common.UIAbilityContext>('context');
         let preference = data_preferences.getPreferencesSync(context, {
             name: 'wfcstore'
         })
@@ -203,8 +202,7 @@ class OrgServer {
                         }
                         if (authToken) {
                             this.authToken = authToken
-                            let context = GlobalContext.getContext()
-                                .getObject<common.ApplicationContext>('context');
+                            let context = AppStorage.get<common.ApplicationContext>('context');
                             let preference = data_preferences.getPreferencesSync(context, {
                                 name: 'wfcstore'
                             })

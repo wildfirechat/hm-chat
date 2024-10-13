@@ -15,7 +15,6 @@ import './pages/voip/SingleVideoCallPage'
 import './pages/voip/MultiAudioCallPage'
 import './pages/voip/MultiVideoCallPage'
 
-import { GlobalContext } from './globalContext';
 import { BusinessError } from '@kit.BasicServicesKit';
 
 export default class AVEngineCallbackImpl extends AVEngineCallback {
@@ -108,10 +107,8 @@ export default class AVEngineCallbackImpl extends AVEngineCallback {
             console.error('Failed to find the Window. Cause: ' + JSON.stringify(exception));
         }
 
-        let windowStage = GlobalContext.getContext()
-            .getObject('windowStage') as window.WindowStage;
-        let mainWindow = windowStage.getMainWindowSync()
-        mainWindow.setWindowKeepScreenOn(false)
+        let mainWindow = AppStorage.get<window.Window>('window')
+        mainWindow?.setWindowKeepScreenOn(false)
     }
 
     private async createAVSessionAndStartContinuousTask(audioOnly: boolean) {
@@ -126,9 +123,7 @@ export default class AVEngineCallbackImpl extends AVEngineCallback {
             console.log('startBackgroundRunning', e)
         }
 
-        let windowStage = GlobalContext.getContext()
-            .getObject('windowStage') as window.WindowStage;
-        let window = windowStage.getMainWindowSync()
-        await window.setWindowKeepScreenOn(true)
+        let window = AppStorage.get<window.Window>('window')
+        await window?.setWindowKeepScreenOn(true)
     }
 }

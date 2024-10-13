@@ -13,7 +13,6 @@ import AVCastPicker from '@ohos.multimedia.avCastPicker'
 import ParticipantProfile from '@wfc/avenginekit/src/main/ets/wfc/av/engine/participantProfile'
 import { showToast } from '../../common/utils/Toast'
 import PickGroupMemberModal from '../group/PickGroupMemberModal'
-import { GlobalContext } from '../../globalContext'
 
 @Entry({ routeName: 'multiVideoCallPage' })
 @Component
@@ -53,12 +52,12 @@ export default struct MultiVideoCallPage {
     }
 
     aboutToDisappear(): void {
-        let win = GlobalContext.getContext().getObject<window.Window>('window')
+        let win = AppStorage.get<window.Window>('window')
         win?.setWindowLayoutFullScreen(false)
     }
 
     onPageShow(): void {
-        let win = GlobalContext.getContext().getObject<window.Window>('window')
+        let win = AppStorage.get<window.Window>('window')
         win?.setWindowLayoutFullScreen(true)
     }
 

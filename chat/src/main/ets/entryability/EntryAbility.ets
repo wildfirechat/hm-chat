@@ -5,7 +5,6 @@ import data_preferences from '@ohos.data.preferences';
 import wfc from '@wfc/client'
 import Config from '@wfc/client/src/main/ets/config'
 import { AbilityConstant, Context, Want } from '@kit.AbilityKit';
-import { GlobalContext } from '@wfc/uikit/src/main/ets/globalContext';
 import { pushService } from '@kit.PushKit';
 
 import EventType from '@wfc/client/src/main/ets/wfc/client/wfcEvent';
@@ -29,7 +28,7 @@ export default class EntryAbility extends UIAbility {
 
     async onCreate(want: Want, launchParam: AbilityConstant.LaunchParam) {
         hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onCreate');
-        GlobalContext.getContext().setObject('context', this.context);
+        AppStorage.setOrCreate('context', this.context);
 
         wfc.init(this.context.getApplicationContext(), this.context.eventHub, this.context.filesDir, Config.getWFCPlatform());
         CustomMessageConfig.registerCustomMessages();
@@ -85,7 +84,7 @@ export default class EntryAbility extends UIAbility {
         // Main window is created, set main page for this ability
         hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onWindowStageCreate');
         this.windowStage = windowStage;
-        GlobalContext.getContext().setObject('windowStage', windowStage);
+        AppStorage.setOrCreate('windowStage', windowStage);
 
         let url = 'pages/login/LoginPage';
         data_preferences.getPreferences(this.context, 'wfcstore', async (err, val) => {

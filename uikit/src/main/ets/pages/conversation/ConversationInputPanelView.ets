@@ -13,7 +13,6 @@ import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import router from '@ohos.router'
 import ActionSheetDialog from '../../view/ActionSheetDialog'
 import EmojiInputPanelView from './emoji/EmojiInputPanelView'
-import { GlobalContext } from '../../globalContext'
 import { curves, KeyboardAvoidMode, window } from '@kit.ArkUI'
 import MentionGroupMemberView from './mention/MentionGroupMemberView'
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
@@ -981,11 +980,8 @@ export default struct ConversationInputPanelView {
     }
 
     setKeyboardAvoidMode(value: KeyboardAvoidMode) {
-        let windowStage = GlobalContext.getContext()
-            .getObject('windowStage') as window.WindowStage;
-        windowStage.getMainWindowSync()
-            .getUIContext()
-            .setKeyboardAvoidMode(value);
+        let windowStage = AppStorage.get<window.Window>('window')
+        windowStage?.getUIContext().setKeyboardAvoidMode(value);
     }
 }
 

@@ -15,7 +15,6 @@ import AVCastPicker from '@ohos.multimedia.avCastPicker'
 import { camera } from '@kit.CameraKit'
 import { showToast } from '../../common/utils/Toast'
 import { timestampFormat } from '../../util/helper'
-import { GlobalContext } from '../../globalContext'
 import uikit from '../../uikit'
 
 @Entry({ routeName: 'singleVideoCallPage' })

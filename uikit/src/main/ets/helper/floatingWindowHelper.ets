@@ -1,6 +1,5 @@
 import { window } from '@kit.ArkUI';
 import { BusinessError } from '@kit.BasicServicesKit';
-import { GlobalContext } from '../globalContext';
 
 // 悬浮窗需要特殊权限，请参考：https://developer.huawei.com/consumer/cn/doc/harmonyos-guides-V5/application-window-stage-0000001820999885-V5#ZH-CN_TOPIC_0000001881257813__设置悬浮窗
 export function showVoipFloatingWindow(context: Context, name: string, contentPagePath: string, width: number, height: number, x: number, y: number): Promise<window.Window> {

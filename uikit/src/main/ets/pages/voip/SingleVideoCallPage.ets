@@ -55,13 +55,29 @@ export default struct SingleVideoCallPage {
     }
 
     aboutToDisappear(): void {
-        let win = GlobalContext.getContext().getObject<window.Window>('window')
+        let win = AppStorage.get<window.Window>('window')
         win?.setWindowLayoutFullScreen(false)
+        let sysBarProps: window.SystemBarProperties = {
+            // statusBarColor: '#00000000',
+            // navigationBarColor: '#00000000',
+            // 以下两个属性从API Version 8开始支持
+            statusBarContentColor: '#000000',
+        };
+        win?.setWindowSystemBarProperties(sysBarProps)
     }
 
     onPageShow(): void {
-        let win = GlobalContext.getContext().getObject<window.Window>('window')
+        let win = AppStorage.get<window.Window>('window')
         win?.setWindowLayoutFullScreen(true)
+
+        let sysBarProps: window.SystemBarProperties = {
+            // statusBarColor: '#00000000',
+            // navigationBarColor: '#00000000',
+            // 以下两个属性从API Version 8开始支持
+            statusBarContentColor: '#ffffff',
+            navigationBarContentColor: '#ffffff'
+        };
+        win?.setWindowSystemBarProperties(sysBarProps)
     }
 
     // router 路由才生效

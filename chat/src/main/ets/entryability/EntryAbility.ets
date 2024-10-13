@@ -109,15 +109,16 @@ export default class EntryAbility extends UIAbility {
         })
 
         // 获取应用主窗口
-        let windowClass: window.Window = windowStage.getMainWindowSync();
+        let mainWin: window.Window = windowStage.getMainWindowSync();
+        AppStorage.setOrCreate('window', mainWin)
         // 获取状态栏高度
-        let statusArea = windowClass.getWindowAvoidArea(window.AvoidAreaType.TYPE_SYSTEM);
+        let statusArea = mainWin.getWindowAvoidArea(window.AvoidAreaType.TYPE_SYSTEM);
         AppStorage.setOrCreate('SafeAreaTopHeight', statusArea.topRect.height);
         // 获取导航栏高度
-        let navigationArea = windowClass.getWindowAvoidArea(window.AvoidAreaType.TYPE_NAVIGATION_INDICATOR);
+        let navigationArea = mainWin.getWindowAvoidArea(window.AvoidAreaType.TYPE_NAVIGATION_INDICATOR);
         AppStorage.setOrCreate('SafeAreaBottomHeight', navigationArea.bottomRect.height);
         // 获取软键盘高度，但这儿获取到的软键盘高度无效，后续也没有使用
-        let keyboardArea = windowClass.getWindowAvoidArea(window.AvoidAreaType.TYPE_KEYBOARD);
+        let keyboardArea = mainWin.getWindowAvoidArea(window.AvoidAreaType.TYPE_KEYBOARD);
         AppStorage.setOrCreate('SafeAreaKeyboardHeight', keyboardArea.bottomRect.height);
 
         // setConnectionStatusListener((value) => {

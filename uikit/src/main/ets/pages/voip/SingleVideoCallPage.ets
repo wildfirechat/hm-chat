@@ -16,10 +16,11 @@ import { camera } from '@kit.CameraKit'
 import { showToast } from '../../common/utils/Toast'
 import { timestampFormat } from '../../util/helper'
 import uikit from '../../uikit'
+import { HashMap } from '@kit.ArkTS'
 
 @Entry({ routeName: 'singleVideoCallPage' })
 @Component
-export default struct SingleVideoCallPage {
+struct SingleVideoCallPage {
     @State targetUserInfo?: UserInfo = undefined
     @State selfUserInfo?: UserInfo = undefined
     @State state: number = 0
@@ -30,6 +31,8 @@ export default struct SingleVideoCallPage {
     @State durationStr: string = ''
     private durationInternal = 0
     private statusBarHeight = 0
+    private userXComponentMap: HashMap<string, string> = new HashMap<string, string>()
+    private focusXComponentId: string = ''
 
     aboutToAppear(): void {
         let callSession = avengineKit.getCurrentSession();
@@ -46,11 +49,38 @@ export default struct SingleVideoCallPage {
         // this.state = callSession.status;
         this.callSession = callSession;
 
-        callSession.setUserXComponentId(this.selfUserInfo.uid, 'localXComponent' + this.callSession.callId)
-        callSession.setUserXComponentId(this.targetUserInfo.uid, this.targetUserInfo.uid + this.callSession.callId)
+        this.focusXComponentId = this.targetUserInfo.uid + this.callSession.callId
+        this.userXComponentMap.set(this.selfUserInfo.uid, this.selfUserInfo.uid + this.callSession.callId)
+        this.userXComponentMap.set(this.targetUserInfo.uid, this.focusXComponentId)
+
+        this.setupXComponentViews()
 
         this.setupSessionCallback()
         console.log('SingleVideoCallPage aboutToAppear')
+    }
+
+    swapVideo(xcomponentId: string) {
+        let nextFocusUserId = ''
+        let preFocusUserId = ''
+        this.userXComponentMap.forEach((value, key) => {
+            if (value === xcomponentId) {
+                nextFocusUserId = key!;
+            }
+            if (value === this.focusXComponentId) {
+                preFocusUserId = key!;
+            }
+        })
+
+        this.userXComponentMap.set(nextFocusUserId, this.focusXComponentId)
+        this.userXComponentMap.set(preFocusUserId, xcomponentId)
+
+        this.setupXComponentViews()
+    }
+
+    setupXComponentViews() {
+        this.userXComponentMap.forEach((xcomponentId, userId) => {
+            this.callSession?.setUserXComponentId(userId, xcomponentId)
+        })
     }
 
     aboutToDisappear(): void {
@@ -206,25 +236,27 @@ export default struct SingleVideoCallPage {
 
                 Stack() {
                     Column() {
-                        XComponent({
-                            id: 'localXComponent' + this.callSession?.callId,
-                            type: XComponentType.SURFACE,
-                            libraryname: 'wfrtc',
-                            controller: this.xComponentController
+                        Column() {
+                            XComponent({
+                                id: this.selfUserInfo!.uid + this.callSession?.callId,
+                                type: XComponentType.SURFACE,
+                                libraryname: 'wfrtc',
+                                controller: this.xComponentController
+                            })
+                                .onLoad((xComponentContext?: object | Record<string, () => void>) => {
+                                    this.localSurfaceId = this.xComponentController.getXComponentSurfaceId()
+                                })
+                                .enableAnalyzer(false)
+                                .width(this.callSession?.status === CallState.STATUS_CONNECTED ? '120' : this.previewXComponentWidth().width)
+                                .height(this.callSession?.status === CallState.STATUS_CONNECTED ? '160' : this.previewXComponentWidth().height)
+                                .margin({
+                                    left: this.callSession?.status === CallState.STATUS_CONNECTED ? 10 : 0,
+                                    top: this.callSession?.status === CallState.STATUS_CONNECTED ? this.statusBarHeight + 50 : 0
+                                })
+                        }
+                        .onClick(() => {
+                            this.swapVideo(this.selfUserInfo!.uid + this.callSession?.callId)
                         })
-                            .onClick(() => {
-                                showToast("hello")
-                            })
-                            .onLoad((xComponentContext?: object | Record<string, () => void>) => {
-                                this.localSurfaceId = this.xComponentController.getXComponentSurfaceId()
-                            })
-                            .enableAnalyzer(false)
-                            .width(this.callSession?.status === CallState.STATUS_CONNECTED ? '120' : this.previewXComponentWidth().width)
-                            .height(this.callSession?.status === CallState.STATUS_CONNECTED ? '160' : this.previewXComponentWidth().height)
-                            .margin({
-                                left: this.callSession?.status === CallState.STATUS_CONNECTED ? 10 : 0,
-                                top: this.callSession?.status === CallState.STATUS_CONNECTED ? this.statusBarHeight + 50 : 0
-                            })
                     }
                     .width('100%')
                     .height('100%')
@@ -261,6 +293,7 @@ export default struct SingleVideoCallPage {
                         .alignItems(VerticalAlign.Top)
                     }
                 }
+                .hitTestBehavior(HitTestMode.Transparent)
                 .width('100%')
                 .height('100%')
 
@@ -419,6 +452,7 @@ export default struct SingleVideoCallPage {
                 .justifyContent(FlexAlign.SpaceBetween)
                 .width('100%')
                 .height('100%')
+                .hitTestBehavior(HitTestMode.Transparent)
             }
         }
         .title('Voip Test')

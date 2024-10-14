@@ -53,9 +53,6 @@
 <img src="http://static.wildfirechat.cn/7_contact_view.png" width = 50% height = 50% />
 <img src="http://static.wildfirechat.cn/8_settings_view.png" width = 50% height = 50% />
 
-## 遗留问题
-目前还不支持实时音视频，我们还在寻找对接鸿蒙原生WebRTC的办法。demo上一些功能也不够完善。
-
 ## License
 
 1. Under the Creative Commons Attribution-NoDerivs 3.0 Unported license. See the [LICENSE](https://github.com/wildfirechat/vue-chat/blob/master/LICENSE) file for details.

@@ -25,6 +25,5 @@
         "pages/voip/SingleVideoCallPage",
         "pages/voip/MultiAudioCallPage",
         "pages/voip/MultiVideoCallPage",
-        "pages/TestPage"
     ]
 }

@@ -8,6 +8,7 @@ import OptionItemView from '@wfc/uikit/src/main/ets/view/OptionItemView'
 import { showToast } from '@wfc/uikit/src/main/ets/common/utils/Toast'
 import { navigationDestinations } from '@wfc/uikit/src/main/ets/pages/navigationConfig'
 import { mainNavigationDestinations } from './mainNavigationConfig'
+import { BusinessError } from '@kit.BasicServicesKit'
 
 
 @Component
@@ -138,6 +139,9 @@ export default struct MeTab {
                     router.pushUrl({
                         url: 'pages/TestPage'
                     })
+                        .catch((e: BusinessError) => {
+                            console.log(e.message)
+                        })
                 })
         }
         .width('100%')

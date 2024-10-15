@@ -17,6 +17,9 @@ import VideoMessageContent from '@wfc/client/src/main/ets/wfc/messages/videoMess
 import CompositeMessageContent from '@wfc/client/src/main/ets/wfc/messages/compositeMessageContent'
 import PickContactModal from '../../picker/PickContactModal'
 import GroupType from '@wfc/client/src/main/ets/wfc/model/groupType'
+import MessageContent from '@wfc/client/src/main/ets/wfc/messages/messageContent'
+import CallStartMessageContent from '@wfc/client/src/main/ets/wfc/av/messages/callStartMessageContent'
+import SoundMessageContent from '@wfc/client/src/main/ets/wfc/messages/soundMessageContent'
 
 @Entry
 @Component
@@ -112,6 +115,7 @@ export default struct ForwardMessagePage {
                         } else {
                             if (this.forwardType === 'oneByOne') {
                                 this.messages.forEach(msg => {
+                                    msg.messageContent = this.filterMessageContent(msg)
                                     wfc.sendConversationMessage(conversation, msg.messageContent)
                                 })
                             } else {
@@ -127,7 +131,11 @@ export default struct ForwardMessagePage {
                                 } else {
                                     title = '聊天记录'
                                 }
-                                composeMessageContent.setMessages(this.messages)
+                                let msgs = this.messages.map(m => {
+                                    m.messageContent = this.filterMessageContent(m)
+                                    return m
+                                })
+                                composeMessageContent.setMessages(msgs)
                                 composeMessageContent.title = title
                                 wfc.sendConversationMessage(conversation, composeMessageContent)
                             }
@@ -148,6 +156,16 @@ export default struct ForwardMessagePage {
         })
 
         this.forwardDialogController.open()
+    }
+
+    filterMessageContent(msg: Message): MessageContent {
+        let content = msg.messageContent
+        if (content instanceof CallStartMessageContent) {
+            content = new TextMessageContent(content.digest())
+        } else if (content instanceof SoundMessageContent) {
+            content = new TextMessageContent(content.digest() + ' ' + content.duration + "''")
+        }
+        return content
     }
 
     @Builder

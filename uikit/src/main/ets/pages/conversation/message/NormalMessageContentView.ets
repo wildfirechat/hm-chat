@@ -181,7 +181,9 @@ export default struct NormaMessageContentView {
                     )
                 },
                 filter: () => {
-                    return [MessageContentType.VOIP_CONTENT_TYPE_START, MessageContentType.VOIP_CONTENT_TYPE_ADD_PARTICIPANT, MessageContentType.Voice].indexOf(this.message.messageContent.type) === -1
+                    return [MessageContentType.VOIP_CONTENT_TYPE_START,
+                        MessageContentType.VOIP_CONTENT_TYPE_ADD_PARTICIPANT,
+                        MessageContentType.Voice].indexOf(this.message.messageContent.type) === -1
                 }
             },
             {
@@ -190,6 +192,10 @@ export default struct NormaMessageContentView {
                 action: () => {
                     this.enableMultiCheck = true
                 },
+                filter: () => {
+                    return [MessageContentType.VOIP_CONTENT_TYPE_START,
+                        MessageContentType.Voice].indexOf(this.message.messageContent.type) === -1
+                }
             },
             {
                 title: '引用',
@@ -198,7 +204,9 @@ export default struct NormaMessageContentView {
                     this.quotedMessage = this.message;
                 },
                 filter: () => {
-                    return [MessageContentType.VOIP_CONTENT_TYPE_START, MessageContentType.VOIP_CONTENT_TYPE_ADD_PARTICIPANT].indexOf(this.message.messageContent.type) === -1
+                    return [MessageContentType.VOIP_CONTENT_TYPE_START,
+                        MessageContentType.Voice,
+                        MessageContentType.VOIP_CONTENT_TYPE_ADD_PARTICIPANT].indexOf(this.message.messageContent.type) === -1
                 }
             },
             {
@@ -211,7 +219,9 @@ export default struct NormaMessageContentView {
                         })
                 },
                 filter: () => {
-                    return [MessageContentType.VOIP_CONTENT_TYPE_START, MessageContentType.VOIP_CONTENT_TYPE_ADD_PARTICIPANT, MessageContentType.Sticker].indexOf(this.message.messageContent.type) === -1
+                    return [MessageContentType.VOIP_CONTENT_TYPE_START,
+                        MessageContentType.VOIP_CONTENT_TYPE_ADD_PARTICIPANT,
+                        MessageContentType.Sticker].indexOf(this.message.messageContent.type) === -1
                 }
             },
             {

@@ -25,11 +25,10 @@ struct SingleVideoCallPage {
     @State selfUserInfo?: UserInfo = undefined
     @State state: number = 0
     @State callSession?: CallSession = undefined
-    xComponentController: XComponentController = new XComponentController()
-    private remoteSurfaceId: string = ''
-    private localSurfaceId: string = ''
     @State durationStr: string = ''
-    private durationInternal = 0
+    @State showActionAndDurationView: boolean = true
+    private lastTriggerToShowActionAndDurationViewTimestamp: number = 0
+    private updateActionAndDurationViewInterval = 0
     private statusBarHeight = 0
     private userXComponentMap: HashMap<string, string> = new HashMap<string, string>()
     private focusXComponentId: string = ''
@@ -114,9 +113,12 @@ struct SingleVideoCallPage {
         return true
     }
 
-    updateDuration = () => {
+    updateActionAndDurationView = () => {
         let millis = new Date().getTime() - this.callSession!.connectedTime
         this.durationStr = timestampFormat(millis)
+        if (this.lastTriggerToShowActionAndDurationViewTimestamp > 0 && Date.now() - this.lastTriggerToShowActionAndDurationViewTimestamp > 2000) {
+            this.showActionAndDurationView = false
+        }
     }
 
     setupSessionCallback() {
@@ -131,12 +133,12 @@ struct SingleVideoCallPage {
             this.callSession = tmp;
 
             if (status === CallState.STATUS_CONNECTED) {
-                this.durationInternal = setInterval(this.updateDuration, 1000)
+                this.updateActionAndDurationViewInterval = setInterval(this.updateActionAndDurationView, 1000)
             }
         }
         sessionCallback.didCallEndWithReason = reason => {
-            if (this.durationInternal) {
-                clearInterval(this.durationInternal)
+            if (this.updateActionAndDurationViewInterval) {
+                clearInterval(this.updateActionAndDurationViewInterval)
             }
             router.back()
         }
@@ -215,23 +217,186 @@ struct SingleVideoCallPage {
         }
     }
 
+    @Builder
+    actionAndDurationView() {
+        Column() {
+            if (this.callSession?.status === CallState.STATUS_CONNECTED) {
+                Row() {
+                    Image($r('app.media.av_minimize'))
+                        .draggable(false)
+                        .width(50)
+                        .height(50)
+                        .padding(10)
+                        .onClick(async () => {
+                            // this.startContinuousTask(getContext(this))
+                            let permissions: Permissions[] = ['ohos.permission.SYSTEM_FLOAT_WINDOW'];
+                            let ungrantedPermissions = await checkPermissions(getContext(this), permissions)
+                            if (ungrantedPermissions.length === 0) {
+                                showVoipFloatingWindow(getContext(this), 'voipFloatingWindow', 'pages/voip/VoipFloatingPage', 300, 400, 100, 100)
+                                    .then(() => {
+                                        router.back()
+                                    })
+                                    .catch((reason: BusinessError) => {
+                                        console.log('xxxxx', reason)
+                                        showToast('缩小到悬浮窗失败 ' + reason.code)
+                                    })
+                            } else {
+                                requestPermissions(getContext(this), ungrantedPermissions)
+                            }
+                        })
+
+                    Text(this.durationStr)
+                        .fontColor(Color.White)
+                        .textAlign(TextAlign.Center)
+                        .alignSelf(ItemAlign.Center)
+
+                    Image(false ? $r('app.media.av_camera_hover') : $r('app.media.av_camera'))
+                        .draggable(false)
+                        .width(50)
+                        .height(50)
+                        .padding(10)
+                        .onClick(() => {
+                            if (this.callSession?.status === CallState.STATUS_CONNECTED) {
+                                this.callSession?.switchCamera()
+                            }
+                        })
+                }
+                .margin({ top: this.statusBarHeight })
+                .width('100%')
+                .justifyContent(FlexAlign.SpaceBetween)
+            }
+
+            Blank()
+
+            if (this.callSession!.status === CallState.STATUS_INCOMING || this.callSession!.status === CallState.STATUS_OUTGOING) {
+                Row() {
+                    Column() {
+                        Image($r('app.media.av_hang_up'))
+                            .draggable(false)
+                            .clickEffect({ level: ClickEffectLevel.MIDDLE })
+                            .width(60)
+                            .height(60)
+                            .onClick(() => {
+                                this.callSession?.hangup()
+                            })
+                        Text('挂断')
+                            .visibility(Visibility.Hidden)
+                            .margin({ top: 10 })
+                            .fontSize(13)
+                            .fontColor(Color.White)
+                    }
+
+                    if (this.callSession?.status === CallState.STATUS_INCOMING) {
+                        Column() {
+                            Image($r('app.media.av_voice_answer'))
+                                .draggable(false)
+                                .width(60)
+                                .height(60)
+                                .clickEffect({ level: ClickEffectLevel.LIGHT })
+                                .onClick(() => {
+                                    this.callSession?.call()
+                                })
+                            Text('接听')
+                                .visibility(Visibility.Hidden)
+                                .margin({ top: 10 })
+                                .fontSize(13)
+                                .fontColor(Color.White)
+                        }
+                    }
+                }
+                .width('100%')
+                .margin({ bottom: 30 })
+                .justifyContent(FlexAlign.SpaceAround)
+
+            } else {
+                Row() {
+                    Column() {
+                        Image(this.callSession?.audioMuted ? $r('app.media.av_mute_hover') : $r('app.media.av_mute'))
+                            .draggable(false)
+                            .width(60)
+                            .height(60)
+                            .onClick(() => {
+                                if (this.callSession?.status === CallState.STATUS_CONNECTED) {
+                                    this.callSession?.muteAudio(!this.callSession?.audioMuted)
+                                }
+                            })
+                        Text('麦克风')
+                            .visibility(Visibility.Hidden)
+                            .margin({ top: 10 })
+                            .fontSize(13)
+                            .fontColor(Color.White)
+                    }
+
+                    Column() {
+                        Image($r('app.media.av_hang_up'))
+                            .draggable(false)
+                            .width(60)
+                            .height(60)
+                            .onClick(() => {
+                                this.callSession?.hangup()
+                            })
+                        Text('挂断')
+                            .visibility(Visibility.Hidden)
+                            .margin({ top: 10 })
+                            .fontSize(13)
+                            .fontColor(Color.White)
+                    }
+
+                    Column() {
+                        // Image($r('app.media.av_handfree'))
+                        //     .draggable(false)
+                        //     .width(60)
+                        //     .height(60)
+                        //     .onClick(() => {
+                        //         if (this.callSession?.status === CallState.STATUS_CONNECTED) {
+                        //             // TODO
+                        //         }
+                        //     })
+                        AVCastPicker({ normalColor: Color.White, activeColor: Color.White })
+                            .width(60)
+                            .height(60)
+                            .border({ width: 1, radius: 30, color: Color.White })
+
+                        Text('扬声器已关')
+                            .visibility(Visibility.Hidden)
+                            .margin({ top: 10 })
+                            .fontSize(13)
+                            .fontColor(Color.White)
+                    }
+                    .justifyContent(FlexAlign.Center)
+                }
+                .margin({ bottom: 30 })
+                .width('100%')
+                .justifyContent(FlexAlign.SpaceAround)
+            }
+        }
+        .justifyContent(FlexAlign.SpaceBetween)
+        .width('100%')
+        .height('100%')
+        .hitTestBehavior(HitTestMode.Transparent)
+        .transition(TransitionEffect.OPACITY
+            .animation({ duration: 400, curve: Curve.Friction, delay: 0 }))
+    }
+
     build() {
         Navigation() {
             Stack() {
-                XComponent({
-                    id: this.targetUserInfo?.uid + this.callSession!.callId,
-                    type: XComponentType.SURFACE,
-                    libraryname: 'wfrtc'
-                })
-                    .onLoad((xComponentContext?: object | Record<string, () => void>) => {
-                        if (xComponentContext) {
-
-                        }
+                // 要包一层，click 才能在 ets 层捕获到 click 事件
+                Column() {
+                    XComponent({
+                        id: this.targetUserInfo?.uid + this.callSession!.callId,
+                        type: XComponentType.SURFACE,
+                        libraryname: 'wfrtc'
                     })
-                    .enableAnalyzer(false)
-                    .width('100%')
-                    .height('100%')
-                    .backgroundColor('#e0000000')
+                        .enableAnalyzer(false)
+                        .width('100%')
+                        .height('100%')
+                        .backgroundColor('#e0000000')
+                }
+                .onClick(() => {
+                    this.showActionAndDurationView = !this.showActionAndDurationView
+                    this.lastTriggerToShowActionAndDurationViewTimestamp = Date.now()
+                })
 
 
                 Stack() {
@@ -241,11 +406,7 @@ struct SingleVideoCallPage {
                                 id: this.selfUserInfo!.uid + this.callSession?.callId,
                                 type: XComponentType.SURFACE,
                                 libraryname: 'wfrtc',
-                                controller: this.xComponentController
                             })
-                                .onLoad((xComponentContext?: object | Record<string, () => void>) => {
-                                    this.localSurfaceId = this.xComponentController.getXComponentSurfaceId()
-                                })
                                 .enableAnalyzer(false)
                                 .width(this.callSession?.status === CallState.STATUS_CONNECTED ? '120' : this.previewXComponentWidth().width)
                                 .height(this.callSession?.status === CallState.STATUS_CONNECTED ? '160' : this.previewXComponentWidth().height)
@@ -297,162 +458,9 @@ struct SingleVideoCallPage {
                 .width('100%')
                 .height('100%')
 
-                Column() {
-                    Stack() {
-                        Text(this.durationStr)
-                            .width('100%')
-                            .fontColor(Color.White)
-                            .textAlign(TextAlign.Center)
-                            .alignSelf(ItemAlign.Center)
-
-                        if (this.callSession?.status === CallState.STATUS_CONNECTED) {
-                            Row() {
-                                Image($r('app.media.av_minimize'))
-                                    .draggable(false)
-                                    .width(50)
-                                    .height(50)
-                                    .padding(10)
-                                    .onClick(async () => {
-                                        // this.startContinuousTask(getContext(this))
-                                        let permissions: Permissions[] = ['ohos.permission.SYSTEM_FLOAT_WINDOW'];
-                                        let ungrantedPermissions = await checkPermissions(getContext(this), permissions)
-                                        if (ungrantedPermissions.length === 0) {
-                                            showVoipFloatingWindow(getContext(this), 'voipFloatingWindow', 'pages/voip/VoipFloatingPage', 300, 400, 100, 100)
-                                                .then(() => {
-                                                    router.back()
-                                                })
-                                                .catch((reason: BusinessError) => {
-                                                    console.log('xxxxx', reason)
-                                                    showToast('缩小到悬浮窗失败 ' + reason.code)
-                                                })
-                                        } else {
-                                            requestPermissions(getContext(this), ungrantedPermissions)
-                                        }
-                                    })
-                                Image(false ? $r('app.media.av_camera_hover') : $r('app.media.av_camera'))
-                                    .draggable(false)
-                                    .width(60)
-                                    .height(60)
-                                    .padding(10)
-                                    .onClick(() => {
-                                        if (this.callSession?.status === CallState.STATUS_CONNECTED) {
-                                            this.callSession?.switchCamera()
-                                        }
-                                    })
-                            }
-                            .margin({ top: this.statusBarHeight })
-                            .width('100%')
-                            .justifyContent(FlexAlign.SpaceBetween)
-                        }
-                    }
-                    .width('100%')
-
-                    if (this.callSession!.status === CallState.STATUS_INCOMING || this.callSession!.status === CallState.STATUS_OUTGOING) {
-                        Row() {
-                            Column() {
-                                Image($r('app.media.av_hang_up'))
-                                    .draggable(false)
-                                    .clickEffect({ level: ClickEffectLevel.MIDDLE })
-                                    .width(60)
-                                    .height(60)
-                                    .onClick(() => {
-                                        this.callSession?.hangup()
-                                    })
-                                Text('挂断')
-                                    .visibility(Visibility.Hidden)
-                                    .margin({ top: 10 })
-                                    .fontSize(13)
-                                    .fontColor(Color.White)
-                            }
-
-                            if (this.callSession?.status === CallState.STATUS_INCOMING) {
-                                Column() {
-                                    Image($r('app.media.av_voice_answer'))
-                                        .draggable(false)
-                                        .width(60)
-                                        .height(60)
-                                        .clickEffect({ level: ClickEffectLevel.LIGHT })
-                                        .onClick(() => {
-                                            this.callSession?.call()
-                                        })
-                                    Text('接听')
-                                        .visibility(Visibility.Hidden)
-                                        .margin({ top: 10 })
-                                        .fontSize(13)
-                                        .fontColor(Color.White)
-                                }
-                            }
-                        }
-                        .width('100%')
-                        .margin({ bottom: 30 })
-                        .justifyContent(FlexAlign.SpaceAround)
-
-                    } else {
-                        Row() {
-                            Column() {
-                                Image(this.callSession?.audioMuted ? $r('app.media.av_mute_hover') : $r('app.media.av_mute'))
-                                    .draggable(false)
-                                    .width(60)
-                                    .height(60)
-                                    .onClick(() => {
-                                        if (this.callSession?.status === CallState.STATUS_CONNECTED) {
-                                            this.callSession?.muteAudio(!this.callSession?.audioMuted)
-                                        }
-                                    })
-                                Text('麦克风')
-                                    .visibility(Visibility.Hidden)
-                                    .margin({ top: 10 })
-                                    .fontSize(13)
-                                    .fontColor(Color.White)
-                            }
-
-                            Column() {
-                                Image($r('app.media.av_hang_up'))
-                                    .draggable(false)
-                                    .width(60)
-                                    .height(60)
-                                    .onClick(() => {
-                                        this.callSession?.hangup()
-                                    })
-                                Text('挂断')
-                                    .visibility(Visibility.Hidden)
-                                    .margin({ top: 10 })
-                                    .fontSize(13)
-                                    .fontColor(Color.White)
-                            }
-
-                            Column() {
-                                // Image($r('app.media.av_handfree'))
-                                //     .draggable(false)
-                                //     .width(60)
-                                //     .height(60)
-                                //     .onClick(() => {
-                                //         if (this.callSession?.status === CallState.STATUS_CONNECTED) {
-                                //             // TODO
-                                //         }
-                                //     })
-                                AVCastPicker({ normalColor: Color.White, activeColor: Color.White })
-                                    .width(60)
-                                    .height(60)
-                                    .border({ width: 1, radius: 30, color: Color.White })
-
-                                Text('扬声器已关')
-                                    .visibility(Visibility.Hidden)
-                                    .margin({ top: 10 })
-                                    .fontSize(13)
-                                    .fontColor(Color.White)
-                            }
-                            .justifyContent(FlexAlign.Center)
-                        }
-                        .margin({ bottom: 30 })
-                        .width('100%')
-                        .justifyContent(FlexAlign.SpaceAround)
-                    }
+                if (this.showActionAndDurationView) {
+                    this.actionAndDurationView()
                 }
-                .justifyContent(FlexAlign.SpaceBetween)
-                .width('100%')
-                .height('100%')
-                .hitTestBehavior(HitTestMode.Transparent)
             }
         }
         .title('Voip Test')

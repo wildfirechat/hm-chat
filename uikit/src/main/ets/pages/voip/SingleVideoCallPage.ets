@@ -88,6 +88,7 @@ struct SingleVideoCallPage {
             // statusBarColor: '#00000000',
             // navigationBarColor: '#00000000',
             // 以下两个属性从API Version 8开始支持
+            navigationBarContentColor: '#000000',
             statusBarContentColor: '#000000',
         };
         win?.setWindowSystemBarProperties(sysBarProps)

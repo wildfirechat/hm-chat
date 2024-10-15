@@ -88,11 +88,28 @@ struct MultiVideoCallPage {
     aboutToDisappear(): void {
         let win = AppStorage.get<window.Window>('window')
         win?.setWindowLayoutFullScreen(false)
+        let sysBarProps: window.SystemBarProperties = {
+            // statusBarColor: '#00000000',
+            // navigationBarColor: '#00000000',
+            // 以下两个属性从API Version 8开始支持
+            navigationBarContentColor: '#000000',
+            statusBarContentColor: '#000000',
+        };
+        win?.setWindowSystemBarProperties(sysBarProps)
     }
 
     onPageShow(): void {
         let win = AppStorage.get<window.Window>('window')
         win?.setWindowLayoutFullScreen(true)
+
+        let sysBarProps: window.SystemBarProperties = {
+            // statusBarColor: '#00000000',
+            // navigationBarColor: '#00000000',
+            // 以下两个属性从API Version 8开始支持
+            statusBarContentColor: '#ffffff',
+            navigationBarContentColor: '#ffffff'
+        };
+        win?.setWindowSystemBarProperties(sysBarProps)
     }
 
     // router 路由才生效
@@ -320,7 +337,7 @@ struct MultiVideoCallPage {
                 Column() {
                     Row() {
                         Column() {
-                            Image(this.callSession?.audioMutee? $r('app.media.av_mute_hover') : $r('app.media.av_mute'))
+                            Image(this.callSession?.audioMuted? $r('app.media.av_mute_hover') : $r('app.media.av_mute'))
                                 .draggable(false)
                                 .width(60)
                                 .height(60)

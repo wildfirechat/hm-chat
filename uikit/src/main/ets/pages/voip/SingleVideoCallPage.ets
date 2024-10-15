@@ -12,7 +12,6 @@ import { hilog } from '@kit.PerformanceAnalysisKit'
 import { showVoipFloatingWindow } from '../../helper/floatingWindowHelper'
 import { checkPermissions, requestPermissions } from '../../helper/permissionHelper'
 import AVCastPicker from '@ohos.multimedia.avCastPicker'
-import { camera } from '@kit.CameraKit'
 import { showToast } from '../../common/utils/Toast'
 import { timestampFormat } from '../../util/helper'
 import uikit from '../../uikit'
@@ -119,6 +118,15 @@ struct SingleVideoCallPage {
         if (this.lastTriggerToShowActionAndDurationViewTimestamp > 0 && Date.now() - this.lastTriggerToShowActionAndDurationViewTimestamp > 2000) {
             this.showActionAndDurationView = false
         }
+        let sysBarProps: window.SystemBarProperties = {
+            // statusBarColor: '#00000000',
+            // navigationBarColor: '#00000000',
+            // 以下两个属性从API Version 8开始支持
+            statusBarContentColor: this.showActionAndDurationView ? '#ffffff' : '#00ffffff',
+            navigationBarContentColor: this.showActionAndDurationView ? '#ffffff' : '#00ffffff'
+        };
+        let win = AppStorage.get<window.Window>('window')
+        win?.setWindowSystemBarProperties(sysBarProps)
     }
 
     setupSessionCallback() {
@@ -133,6 +141,7 @@ struct SingleVideoCallPage {
             this.callSession = tmp;
 
             if (status === CallState.STATUS_CONNECTED) {
+                this.lastTriggerToShowActionAndDurationViewTimestamp = Date.now()
                 this.updateActionAndDurationViewInterval = setInterval(this.updateActionAndDurationView, 1000)
             }
         }
@@ -407,6 +416,7 @@ struct SingleVideoCallPage {
                                 type: XComponentType.SURFACE,
                                 libraryname: 'wfrtc',
                             })
+                                .borderRadius(4)
                                 .enableAnalyzer(false)
                                 .width(this.callSession?.status === CallState.STATUS_CONNECTED ? '120' : this.previewXComponentWidth().width)
                                 .height(this.callSession?.status === CallState.STATUS_CONNECTED ? '160' : this.previewXComponentWidth().height)
@@ -462,6 +472,8 @@ struct SingleVideoCallPage {
                     this.actionAndDurationView()
                 }
             }
+            .width('100%')
+            .height('100%')
         }
         .title('Voip Test')
         .hideTitleBar(true)

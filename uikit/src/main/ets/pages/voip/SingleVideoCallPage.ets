@@ -34,7 +34,7 @@ export default struct SingleVideoCallPage {
     private focusXComponentId: string = ''
     private pipController?: PiPWindow.PiPController;
     private mXComponentController: XComponentController = new XComponentController()
-    private navigationId: string = 'singleVideo';
+    private isPageShow = false
 
     aboutToAppear(): void {
         let callSession = avengineKit.getCurrentSession();
@@ -89,6 +89,7 @@ export default struct SingleVideoCallPage {
     }
 
     onPageShow(): void {
+        this.isPageShow = true
         let win = AppStorage.get<window.Window>('window')
         win?.setWindowLayoutFullScreen(true)
 
@@ -109,6 +110,7 @@ export default struct SingleVideoCallPage {
     }
 
     onPageHide(): void {
+        this.isPageShow = false
         let win = AppStorage.get<window.Window>('window')
         win?.setWindowLayoutFullScreen(false)
         let sysBarProps: window.SystemBarProperties = {
@@ -122,14 +124,10 @@ export default struct SingleVideoCallPage {
         this.mainNavPathStack.pop()
     }
 
-    // router 路由才生效
-    onBackPress(): boolean | void {
-        return true
-    }
-
     updateActionAndDurationView = () => {
-        // TODO
-        // 页面不可见时，这些操作不用执行
+        if (!this.isPageShow) {
+            return
+        }
         let millis = new Date().getTime() - this.callSession!.connectedTime
         this.durationStr = timestampFormat(millis)
         if (this.lastTriggerToShowActionAndDurationViewTimestamp > 0 && Date.now() - this.lastTriggerToShowActionAndDurationViewTimestamp > 5000) {

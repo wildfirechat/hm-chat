@@ -151,6 +151,9 @@ struct MultiVideoCallPage {
             }
         }
         sessionCallback.didCallEndWithReason = reason => {
+            if (this.updateActionAndDurationViewInterval) {
+                clearInterval(this.updateActionAndDurationViewInterval)
+            }
             router.back()
         }
         sessionCallback.didParticipantJoined = (userId: string, isScreenSharing) => {

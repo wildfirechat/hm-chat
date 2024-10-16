@@ -24,7 +24,7 @@ export function startContinuousTask(context: Context) {
     // 通过wantAgent模块下getWantAgent方法获取WantAgent对象
     wantAgent.getWantAgent(wantAgentInfo).then((wantAgentObj: WantAgent) => {
         backgroundTaskManager.startBackgroundRunning(context,
-            backgroundTaskManager.BackgroundMode.AUDIO_PLAYBACK, wantAgentObj).then(() => {
+            backgroundTaskManager.BackgroundMode.AUDIO_RECORDING, wantAgentObj).then(() => {
             console.info(`Succeeded in operationing startBackgroundRunning.`);
         }).catch((err: BusinessError) => {
             console.error(`Failed to operation startBackgroundRunning. Code is ${err.code}, message is ${err.message}`);

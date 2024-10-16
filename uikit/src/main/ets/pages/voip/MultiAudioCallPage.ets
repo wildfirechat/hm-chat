@@ -1,7 +1,6 @@
 import CallSession from '@wfc/avenginekit/src/main/ets/wfc/av/engine/callSession'
 import CallState from '@wfc/avenginekit/src/main/ets/wfc/av/engine/callState'
 import avengineKit from '@wfc/avenginekit'
-import { router } from '@kit.ArkUI'
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
 import wfc from '@wfc/client'
 import CallSessionCallback from '@wfc/avenginekit/src/main/ets/wfc/av/engine/callSessionCallback'
@@ -14,9 +13,9 @@ import { showToast } from '../../common/utils/Toast'
 import { AVCastPicker } from '@kit.AVSessionKit'
 import { timeFormat, timestampFormat } from '../../util/helper'
 
-@Entry({ routeName: 'multiAudioCallPage' })
 @Component
 export default struct MultiAudioCallPage {
+    @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
     @State callSession?: CallSession = undefined
     @State participantUserInfosExceptSelf?: UserInfo[] = []
     @State invitor?: UserInfo = undefined
@@ -30,7 +29,7 @@ export default struct MultiAudioCallPage {
         let callSession = avengineKit.getCurrentSession();
 
         if (!callSession || callSession.status === CallState.STATUS_IDLE) {
-            router.back()
+            this.mainNavPathStack.pop()
             return
         }
 
@@ -67,7 +66,7 @@ export default struct MultiAudioCallPage {
             }
         }
         sessionCallback.didCallEndWithReason = reason => {
-            router.back()
+            this.mainNavPathStack.pop()
         }
         sessionCallback.didParticipantJoined = (userId: string, isScreenSharing) => {
             this.targetUserInfos = wfc.getUserInfos(this.callSession!.getParticipantIds()!)
@@ -105,9 +104,7 @@ export default struct MultiAudioCallPage {
         console.log('MultiAudioCallPage show')
     }
 
-    // router 路由才生效
-    onBackPress(): boolean | void {
-        return true
+    onPageHide(): void {
     }
 
     @Builder
@@ -242,20 +239,7 @@ export default struct MultiAudioCallPage {
                             .height(50)
                             .padding(10)
                             .onClick(async () => {
-                                let permissions: Permissions[] = ['ohos.permission.SYSTEM_FLOAT_WINDOW'];
-                                let ungrantedPermissions = await checkPermissions(getContext(this), permissions)
-                                if (ungrantedPermissions.length === 0) {
-                                    showVoipFloatingWindow(getContext(this), 'voipFloatingWindow', 'pages/voip/VoipFloatingPage', 300, 400, 100, 100)
-                                        .then(() => {
-                                            router.back()
-                                        })
-                                        .catch((reason: BusinessError) => {
-                                            console.log('xxxxx', reason)
-                                            showToast('缩小到悬浮窗失败 ' + reason.code)
-                                        })
-                                } else {
-                                    requestPermissions(getContext(this), ungrantedPermissions)
-                                }
+                                // TODO
                             })
                     }
                     .width('100%')
@@ -373,7 +357,7 @@ export default struct MultiAudioCallPage {
     }
 
     build() {
-        Navigation() {
+        NavDestination() {
             if (this.callSession) {
                 if (this.callSession?.status === CallState.STATUS_INCOMING) {
                     this.incomingView()
@@ -384,6 +368,13 @@ export default struct MultiAudioCallPage {
         }
         .title('Voip Test')
         .hideTitleBar(true)
+        .onShown(() => {
+            this.onPageShow()
+        })
+        .onHidden(() => {
+            this.onPageHide()
+        })
+        .onBackPressed(() => true)
         .backgroundColor('#000000')
 
         // .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM])

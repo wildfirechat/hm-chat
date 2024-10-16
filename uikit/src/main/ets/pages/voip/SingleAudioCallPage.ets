@@ -4,7 +4,6 @@ import CallState from '@wfc/avenginekit/src/main/ets/wfc/av/engine/callState'
 import avengineKit from '@wfc/avenginekit'
 import wfc from '@wfc/client'
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
-import { router } from '@kit.ArkUI'
 import { common, Permissions, Want, WantAgent, wantAgent } from '@kit.AbilityKit'
 import { backgroundTaskManager } from '@kit.BackgroundTasksKit'
 import { BusinessError } from '@kit.BasicServicesKit'
@@ -16,9 +15,9 @@ import { showToast } from '../../common/utils/Toast'
 import { timeFormat, timestampFormat } from '../../util/helper'
 import uikit from '../../uikit'
 
-@Entry({ routeName: 'singleAudioCallPage' })
 @Component
 export default struct SingleAudioCallPage {
+    @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
     @State targetUserInfo?: UserInfo = undefined
     @State selfUserInfo?: UserInfo = undefined
     @State state: number = 0
@@ -30,7 +29,7 @@ export default struct SingleAudioCallPage {
         let callSession = avengineKit.getCurrentSession();
 
         if (!callSession || callSession.status === CallState.STATUS_IDLE) {
-            router.back()
+            this.mainNavPathStack.pop()
             return
         }
         this.selfUserInfo = wfc.getUserInfo(wfc.getUserId())
@@ -47,9 +46,7 @@ export default struct SingleAudioCallPage {
     onPageShow(): void {
     }
 
-    // router 路由才生效
-    onBackPress(): boolean | void {
-        return true
+    onPageHide(): void {
     }
 
     updateDuration = () => {
@@ -76,7 +73,7 @@ export default struct SingleAudioCallPage {
             if (this.durationInternal) {
                 clearInterval(this.durationInternal)
             }
-            router.back()
+            this.mainNavPathStack.pop()
         }
         this.callSession!.sessionCallback = sessionCallback;
     }
@@ -95,45 +92,8 @@ export default struct SingleAudioCallPage {
         return desc;
     }
 
-    startContinuousTask(context: Context) {
-        let wantAgentInfo: wantAgent.WantAgentInfo = {
-            // 点击通知后，将要执行的动作列表
-            // 添加需要被拉起应用的bundleName和abilityName
-            wants: [
-                {
-                    bundleName: uikit.bundleName,
-                    abilityName: uikit.entryAbilityName
-                }
-            ],
-            // 指定点击通知栏消息后的动作是拉起ability
-            actionType: wantAgent.OperationType.START_ABILITY,
-            // 使用者自定义的一个私有值
-            requestCode: 0,
-            // 点击通知后，动作执行属性
-            wantAgentFlags: [wantAgent.WantAgentFlags.UPDATE_PRESENT_FLAG]
-        };
-
-        // 通过wantAgent模块下getWantAgent方法获取WantAgent对象
-        wantAgent.getWantAgent(wantAgentInfo).then((wantAgentObj: WantAgent) => {
-            backgroundTaskManager.startBackgroundRunning(context,
-                backgroundTaskManager.BackgroundMode.AUDIO_RECORDING, wantAgentObj).then(() => {
-                console.info(`Succeeded in operationing startBackgroundRunning.`);
-            }).catch((err: BusinessError) => {
-                console.error(`Failed to operation startBackgroundRunning. Code is ${err.code}, message is ${err.message}`);
-            });
-        });
-    }
-
-    stopContinuousTask(context: Context) {
-        backgroundTaskManager.stopBackgroundRunning(context).then(() => {
-            console.info(`Succeeded in operationing stopBackgroundRunning.`);
-        }).catch((err: BusinessError) => {
-            console.error(`Failed to operation stopBackgroundRunning. Code is ${err.code}, message is ${err.message}`);
-        });
-    }
-
     build() {
-        Navigation() {
+        NavDestination() {
             Stack() {
                 Image(this.targetUserInfo?.portrait)
                     .draggable(false)
@@ -154,21 +114,7 @@ export default struct SingleAudioCallPage {
                                 .height(50)
                                 .padding(10)
                                 .onClick(async () => {
-                                    // this.startContinuousTask(getContext(this))
-                                    let permissions: Permissions[] = ['ohos.permission.SYSTEM_FLOAT_WINDOW'];
-                                    let ungrantedPermissions = await checkPermissions(getContext(this), permissions)
-                                    if (ungrantedPermissions.length === 0) {
-                                        showVoipFloatingWindow(getContext(this), 'voipFloatingWindow', 'pages/voip/VoipFloatingPage', 300, 400, 100, 100)
-                                            .then(() => {
-                                                router.back()
-                                            })
-                                            .catch((reason: BusinessError) => {
-                                                console.log('xxxxx', reason)
-                                                showToast('缩小到悬浮窗失败 ' + reason.code)
-                                            })
-                                    } else {
-                                        requestPermissions(getContext(this), ungrantedPermissions)
-                                    }
+                                    // TODO
                                 })
                         }
                         .width('100%')
@@ -333,6 +279,13 @@ export default struct SingleAudioCallPage {
         }
         .title('Voip Test')
         .hideTitleBar(true)
+        .onShown(() => {
+            this.onPageShow()
+        })
+        .onHidden(() => {
+            this.onPageHide()
+        })
+        .onBackPressed(() => true)
         .backgroundColor('#000000')
 
         // .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM])

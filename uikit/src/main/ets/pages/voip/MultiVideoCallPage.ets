@@ -4,21 +4,16 @@ import CallState from '@wfc/avenginekit/src/main/ets/wfc/av/engine/callState'
 import avengineKit from '@wfc/avenginekit'
 import wfc from '@wfc/client'
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
-import { router, window } from '@kit.ArkUI'
-import { Permissions } from '@kit.AbilityKit'
-import { BusinessError } from '@kit.BasicServicesKit'
-import { showVoipFloatingWindow } from '../../helper/floatingWindowHelper'
-import { checkPermissions, requestPermissions } from '../../helper/permissionHelper'
 import AVCastPicker from '@ohos.multimedia.avCastPicker'
 import ParticipantProfile from '@wfc/avenginekit/src/main/ets/wfc/av/engine/participantProfile'
-import { showToast } from '../../common/utils/Toast'
 import PickGroupMemberModal from '../group/PickGroupMemberModal'
 import { HashMap } from '@kit.ArkTS'
 import { timestampFormat } from '../../util/helper'
+import { window } from '@kit.ArkUI'
 
-@Entry({ routeName: 'multiVideoCallPage' })
 @Component
-struct MultiVideoCallPage {
+export default struct MultiVideoCallPage {
+    @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
     @State targetUserInfos?: UserInfo[] = []
     @State participantProfiles?: ParticipantProfile[] = []
     @State invitor?: UserInfo = undefined
@@ -38,7 +33,7 @@ struct MultiVideoCallPage {
         let callSession = avengineKit.getCurrentSession();
 
         if (!callSession || callSession.status === CallState.STATUS_IDLE) {
-            router.back()
+            this.mainNavPathStack.pop()
             return
         }
         this.statusBarHeight = px2vp(AppStorage.get<number>('SafeAreaTopHeight')!)
@@ -112,15 +107,19 @@ struct MultiVideoCallPage {
         win?.setWindowSystemBarProperties(sysBarProps)
     }
 
-    // router 路由才生效
-    onBackPress(): boolean | void {
-        return true
+    onPageHide(): void {
+        // TODO
+    }
+
+    onPageHidden() {
+
     }
 
     updateActionAndDurationView = () => {
+        // TODO is page shown?
         let millis = new Date().getTime() - this.callSession!.connectedTime
         this.durationStr = timestampFormat(millis)
-        if (this.lastTriggerToShowActionAndDurationViewTimestamp > 0 && Date.now() - this.lastTriggerToShowActionAndDurationViewTimestamp > 2000) {
+        if (this.lastTriggerToShowActionAndDurationViewTimestamp > 0 && Date.now() - this.lastTriggerToShowActionAndDurationViewTimestamp > 5000) {
             this.showActionAndDurationView = false
         }
         let sysBarProps: window.SystemBarProperties = {
@@ -154,7 +153,7 @@ struct MultiVideoCallPage {
             if (this.updateActionAndDurationViewInterval) {
                 clearInterval(this.updateActionAndDurationViewInterval)
             }
-            router.back()
+            this.mainNavPathStack.pop()
         }
         sessionCallback.didParticipantJoined = (userId: string, isScreenSharing) => {
             this.targetUserInfos = wfc.getUserInfos(this.callSession!.getParticipantIds()!)
@@ -247,20 +246,7 @@ struct MultiVideoCallPage {
                     .height(50)
                     .padding(10)
                     .onClick(async () => {
-                        let permissions: Permissions[] = ['ohos.permission.SYSTEM_FLOAT_WINDOW'];
-                        let ungrantedPermissions = await checkPermissions(getContext(this), permissions)
-                        if (ungrantedPermissions.length === 0) {
-                            showVoipFloatingWindow(getContext(this), 'voipFloatingWindow', 'pages/voip/VoipFloatingPage', 300, 400, 100, 100)
-                                .then(() => {
-                                    router.back()
-                                })
-                                .catch((reason: BusinessError) => {
-                                    console.log('xxxxx', reason)
-                                    showToast('缩小到悬浮窗失败 ' + reason.code)
-                                })
-                        } else {
-                            requestPermissions(getContext(this), ungrantedPermissions)
-                        }
+                        // TODO
                     })
 
                 Text(this.durationStr)
@@ -340,7 +326,7 @@ struct MultiVideoCallPage {
                 Column() {
                     Row() {
                         Column() {
-                            Image(this.callSession?.audioMuted? $r('app.media.av_mute_hover') : $r('app.media.av_mute'))
+                            Image(this.callSession?.audioMuted ? $r('app.media.av_mute_hover') : $r('app.media.av_mute'))
                                 .draggable(false)
                                 .width(60)
                                 .height(60)
@@ -410,7 +396,7 @@ struct MultiVideoCallPage {
     }
 
     build() {
-        Navigation() {
+        NavDestination() {
             Stack() {
                 Column() {
                     XComponent({
@@ -470,6 +456,13 @@ struct MultiVideoCallPage {
         }
         .title('Voip Test')
         .hideTitleBar(true)
+        .onShown(() => {
+            this.onPageShow()
+        })
+        .onHidden(() => {
+            this.onPageHide()
+        })
+        .onBackPressed(() => true)
         .backgroundColor('#000000')
 
         // .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM])

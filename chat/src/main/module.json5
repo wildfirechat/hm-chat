@@ -42,7 +42,7 @@
                         ]
                     }
                 ]
-            },
+            }
         ],
         "requestPermissions": [
             {
@@ -72,7 +72,7 @@
                     "abilities": [
                         "FormAbility"
                     ],
-                    "when":"always"
+                    "when": "always"
                 }
             },
             {

@@ -17,7 +17,7 @@ import Base, { BusinessError } from '@ohos.base'
 import WorkSpaceTab from '@wfc/uikit/src/main/ets/pages/WorkSpaceTab'
 import Config from '@wfc/client/src/main/ets/config'
 import { checkPermissions, requestPermissions } from '@wfc/uikit/src/main/ets/helper/permissionHelper'
-import { navigationDestinations} from '@wfc/uikit/src/main/ets/pages/navigationConfig'
+import { navigationDestinations } from '@wfc/uikit/src/main/ets/pages/navigationConfig'
 import { MainPageMap } from './mainNavigationConfig'
 import orgServer from '@wfc/uikit/src/main/ets/api/orgServer'
 import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
@@ -27,6 +27,7 @@ import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import MessageContentType from '@wfc/client/src/main/ets/wfc/messages/messageContentType'
 import EventType from '@wfc/client/src/main/ets/wfc/client/wfcEvent'
 import PCLoginRequestMessageContent from '@wfc/client/src/main/ets/wfc/messages/pcLoginRequestMessageContent'
+import uikit from '@wfc/uikit'
 
 const TAG = 'Main';
 
@@ -55,7 +56,7 @@ struct MainPage {
     @State @Watch('onUnreadCountUpdated') discoveryTabUnreadCount: number = 0
     @State meTabUnreadCount: number = 0
     @State showPickContactModal: boolean = false
-    @Provide('mainNavPathStack') mainNavPathStack: NavPathStack = new NavPathStack()
+    @Provide('mainNavPathStack') mainNavPathStack: NavPathStack = uikit.mainNavPathStack
     @LocalStorageProp('targetConversation') @Watch('onTargetConversation') targetConversation?: Conversation = undefined
 
     onTargetConversation() {
@@ -411,6 +412,8 @@ struct MainPage {
         .hideBackButton(true)
         .menus(this.NavigationMenus())
         .mode(NavigationMode.Stack)
+        // 要和 pipController 里面配置的 navigationId 一致
+        .id(uikit.bundleName)
         .navDestination(MainPageMap)
     }
 }

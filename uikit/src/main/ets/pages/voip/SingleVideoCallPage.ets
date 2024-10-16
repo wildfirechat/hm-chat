@@ -4,7 +4,7 @@ import CallState from '@wfc/avenginekit/src/main/ets/wfc/av/engine/callState'
 import avengineKit from '@wfc/avenginekit'
 import wfc from '@wfc/client'
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
-import { router, window } from '@kit.ArkUI'
+import { PiPWindow, router, window } from '@kit.ArkUI'
 import { common, Permissions, Want, WantAgent, wantAgent } from '@kit.AbilityKit'
 import { backgroundTaskManager } from '@kit.BackgroundTasksKit'
 import { BusinessError } from '@kit.BasicServicesKit'
@@ -16,10 +16,11 @@ import { showToast } from '../../common/utils/Toast'
 import { timestampFormat } from '../../util/helper'
 import uikit from '../../uikit'
 import { HashMap } from '@kit.ArkTS'
+import { navigationDestinations } from '../navigationConfig'
 
-@Entry({ routeName: 'singleVideoCallPage' })
 @Component
-struct SingleVideoCallPage {
+export default struct SingleVideoCallPage {
+    @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
     @State targetUserInfo?: UserInfo = undefined
     @State selfUserInfo?: UserInfo = undefined
     @State state: number = 0
@@ -31,12 +32,15 @@ struct SingleVideoCallPage {
     private statusBarHeight = 0
     private userXComponentMap: HashMap<string, string> = new HashMap<string, string>()
     private focusXComponentId: string = ''
+    private pipController?: PiPWindow.PiPController;
+    private mXComponentController: XComponentController = new XComponentController()
+    private navigationId: string = 'singleVideo';
 
     aboutToAppear(): void {
         let callSession = avengineKit.getCurrentSession();
 
         if (!callSession || callSession.status === CallState.STATUS_IDLE) {
-            router.back()
+            this.mainNavPathStack.pop()
             return
         }
         this.statusBarHeight = px2vp(AppStorage.get<number>('SafeAreaTopHeight')!)
@@ -82,16 +86,6 @@ struct SingleVideoCallPage {
     }
 
     aboutToDisappear(): void {
-        let win = AppStorage.get<window.Window>('window')
-        win?.setWindowLayoutFullScreen(false)
-        let sysBarProps: window.SystemBarProperties = {
-            // statusBarColor: '#00000000',
-            // navigationBarColor: '#00000000',
-            // 以下两个属性从API Version 8开始支持
-            navigationBarContentColor: '#000000',
-            statusBarContentColor: '#000000',
-        };
-        win?.setWindowSystemBarProperties(sysBarProps)
     }
 
     onPageShow(): void {
@@ -106,6 +100,26 @@ struct SingleVideoCallPage {
             navigationBarContentColor: '#ffffff'
         };
         win?.setWindowSystemBarProperties(sysBarProps)
+        if (!this.pipController) {
+            this.createPipController()
+                .catch((reason: BusinessError) => {
+                    console.log('xxxx create pip controller error', reason.message);
+                })
+        }
+    }
+
+    onPageHide(): void {
+        let win = AppStorage.get<window.Window>('window')
+        win?.setWindowLayoutFullScreen(false)
+        let sysBarProps: window.SystemBarProperties = {
+            // statusBarColor: '#00000000',
+            // navigationBarColor: '#00000000',
+            // 以下两个属性从API Version 8开始支持
+            navigationBarContentColor: '#000000',
+            statusBarContentColor: '#000000',
+        };
+        win?.setWindowSystemBarProperties(sysBarProps)
+        this.mainNavPathStack.pop()
     }
 
     // router 路由才生效
@@ -114,9 +128,11 @@ struct SingleVideoCallPage {
     }
 
     updateActionAndDurationView = () => {
+        // TODO
+        // 页面不可见时，这些操作不用执行
         let millis = new Date().getTime() - this.callSession!.connectedTime
         this.durationStr = timestampFormat(millis)
-        if (this.lastTriggerToShowActionAndDurationViewTimestamp > 0 && Date.now() - this.lastTriggerToShowActionAndDurationViewTimestamp > 2000) {
+        if (this.lastTriggerToShowActionAndDurationViewTimestamp > 0 && Date.now() - this.lastTriggerToShowActionAndDurationViewTimestamp > 5000) {
             this.showActionAndDurationView = false
         }
         let sysBarProps: window.SystemBarProperties = {
@@ -150,7 +166,12 @@ struct SingleVideoCallPage {
             if (this.updateActionAndDurationViewInterval) {
                 clearInterval(this.updateActionAndDurationViewInterval)
             }
-            router.back()
+            this.pipController?.stopPiP()
+            this.pipController = undefined
+            let index = this.mainNavPathStack.getIndexByName(navigationDestinations.SingleVideoCallPage)
+            if (index.length) {
+                this.mainNavPathStack.pop()
+            }
         }
         this.callSession!.sessionCallback = sessionCallback;
     }
@@ -169,41 +190,86 @@ struct SingleVideoCallPage {
         return desc;
     }
 
-    startContinuousTask(context: Context) {
-        let wantAgentInfo: wantAgent.WantAgentInfo = {
-            // 点击通知后，将要执行的动作列表
-            // 添加需要被拉起应用的bundleName和abilityName
-            wants: [
-                {
-                    bundleName: uikit.bundleName,
-                    abilityName: uikit.entryAbilityName
-                }
-            ],
-            // 指定点击通知栏消息后的动作是拉起ability
-            actionType: wantAgent.OperationType.START_ABILITY,
-            // 使用者自定义的一个私有值
-            requestCode: 0,
-            // 点击通知后，动作执行属性
-            wantAgentFlags: [wantAgent.WantAgentFlags.UPDATE_PRESENT_FLAG]
-        };
-
-        // 通过wantAgent模块下getWantAgent方法获取WantAgent对象
-        wantAgent.getWantAgent(wantAgentInfo).then((wantAgentObj: WantAgent) => {
-            backgroundTaskManager.startBackgroundRunning(context,
-                backgroundTaskManager.BackgroundMode.AUDIO_RECORDING, wantAgentObj).then(() => {
-                console.info(`Succeeded in operationing startBackgroundRunning.`);
-            }).catch((err: BusinessError) => {
-                console.error(`Failed to operation startBackgroundRunning. Code is ${err.code}, message is ${err.message}`);
-            });
+    async createPipController() {
+        this.pipController = await PiPWindow.create({
+            context: getContext(this),
+            componentController: this.mXComponentController,
+            // https://developer.huawei.com/consumer/cn/doc/harmonyos-guides-V5/pipwindow-xcomponent-V5
+            // 2、UIAbility使用Router管理页面时（画中画场景不推荐该导航方式），无需设置navigationId。注意：该场景下启动画中画后，不要进行页面切换，否则还原场景可能出现异常
+            navigationId: uikit.bundleName,
+            templateType: PiPWindow.PiPTemplateType.VIDEO_MEETING
         });
+        this.pipController.on('stateChange', (state: PiPWindow.PiPState, reason: string) => {
+            this.onStateChange(state, reason);
+        });
+        this.pipController.on('controlPanelActionEvent', (event: PiPWindow.PiPActionEventType, status?: number) => {
+            this.onActionEvent(event, status);
+        });
+        this.pipController.setAutoStartEnabled(true)
+        console.log('xxxxxxxx createPipController')
     }
 
-    stopContinuousTask(context: Context) {
-        backgroundTaskManager.stopBackgroundRunning(context).then(() => {
-            console.info(`Succeeded in operationing stopBackgroundRunning.`);
-        }).catch((err: BusinessError) => {
-            console.error(`Failed to operation stopBackgroundRunning. Code is ${err.code}, message is ${err.message}`);
-        });
+    destroyPipController() {
+        if (!this.pipController) {
+            return;
+        }
+        this.pipController.off('stateChange');
+        this.pipController.off('controlPanelActionEvent');
+        this.pipController = undefined;
+    }
+
+    onStateChange(state: PiPWindow.PiPState, reason: string) {
+        console.log('xxxxx onStateChange', state, reason)
+        // switch (state) {
+        //     case PiPWindow.PiPState.ABOUT_TO_START:
+        //         this.curState = 'ABOUT_TO_START';
+        //         this.curError = $r('app.string.current_error_hint');
+        //         break;
+        //     case PiPWindow.PiPState.STARTED:
+        //         this.curState = 'STARTED';
+        //         this.curError = $r('app.string.current_error_hint');
+        //         break;
+        //     case PiPWindow.PiPState.ABOUT_TO_STOP:
+        //         this.curState = 'ABOUT_TO_STOP';
+        //         this.curError = $r('app.string.current_error_hint');
+        //         break;
+        //     case PiPWindow.PiPState.STOPPED:
+        //         this.player?.updatePlayStatus(true);
+        //         this.player?.play();
+        //         this.curState = 'STOPPED';
+        //         this.curError = $r('app.string.current_error_hint');
+        //         break;
+        //     case PiPWindow.PiPState.ABOUT_TO_RESTORE:
+        //         this.curState = 'ABOUT_TO_RESTORE';
+        //         this.curError = $r('app.string.current_error_hint');
+        //         break;
+        //     case PiPWindow.PiPState.ERROR:
+        //         this.curState = 'ERROR';
+        //         this.curError = reason;
+        //         break;
+        //     default:
+        //         break;
+        // }
+        // Logger.info(`[${TAG}] onStateChange: ${this.curState}, reason: ${reason}`);
+    }
+
+    onActionEvent(event: PiPWindow.PiPActionEventType, status: number | undefined) {
+        console.log('xxxx onActionEvent', event, status)
+        // switch (event) {
+        //     case 'playbackStateChanged':
+        //         if (status === 0) {
+        //             this.player?.updatePlayStatus(false);
+        //             this.player?.pause();
+        //         } else {
+        //             this.player?.updatePlayStatus(true);
+        //             this.player?.play();
+        //         }
+        //         break;
+        //     default:
+        //         break;
+        // }
+        // this.buttonAction = event + `-status:${status}`;
+        // Logger.info(`[${TAG}] onActionEvent: ${this.buttonAction} status:${status}}`);
     }
 
     previewXComponentWidth(): SizeT<string> {
@@ -238,21 +304,12 @@ struct SingleVideoCallPage {
                         .height(50)
                         .padding(10)
                         .onClick(async () => {
-                            // this.startContinuousTask(getContext(this))
-                            let permissions: Permissions[] = ['ohos.permission.SYSTEM_FLOAT_WINDOW'];
-                            let ungrantedPermissions = await checkPermissions(getContext(this), permissions)
-                            if (ungrantedPermissions.length === 0) {
-                                showVoipFloatingWindow(getContext(this), 'voipFloatingWindow', 'pages/voip/VoipFloatingPage', 300, 400, 100, 100)
-                                    .then(() => {
-                                        router.back()
-                                    })
-                                    .catch((reason: BusinessError) => {
-                                        console.log('xxxxx', reason)
-                                        showToast('缩小到悬浮窗失败 ' + reason.code)
-                                    })
-                            } else {
-                                requestPermissions(getContext(this), ungrantedPermissions)
-                            }
+                            this.pipController?.startPiP()
+                                .catch((reason: BusinessError) => {
+                                    console.log('xxxxxx errr', reason.message)
+                                })
+                            this.mainNavPathStack.pop()
+                            console.log('xxxx start pip')
                         })
 
                     Text(this.durationStr)
@@ -389,13 +446,14 @@ struct SingleVideoCallPage {
     }
 
     build() {
-        Navigation() {
+        NavDestination() {
             Stack() {
                 // 要包一层，click 才能在 ets 层捕获到 click 事件
                 Column() {
                     XComponent({
                         id: this.targetUserInfo?.uid + this.callSession!.callId,
-                        type: XComponentType.SURFACE,
+                        type: 'surface',
+                        controller: this.mXComponentController,
                         libraryname: 'wfrtc'
                     })
                         .enableAnalyzer(false)
@@ -476,6 +534,15 @@ struct SingleVideoCallPage {
             .width('100%')
             .height('100%')
         }
+        .onShown(() => {
+            this.onPageShow()
+        })
+        .onHidden(() => {
+            this.onPageHide()
+        })
+        .onBackPressed(() => {
+            return true
+        })
         .title('Voip Test')
         .hideTitleBar(true)
         .backgroundColor('#000000')

@@ -16,14 +16,19 @@ import './pages/voip/MultiAudioCallPage'
 import './pages/voip/MultiVideoCallPage'
 
 import { BusinessError } from '@kit.BasicServicesKit';
+import { navigationDestinations } from './pages/navigationConfig';
+import { common, StartOptions, Want, wantAgent } from '@kit.AbilityKit';
+import uikit from './uikit';
 
 export default class AVEngineCallbackImpl extends AVEngineCallback {
-    private context: Context
+    private context: common.UIAbilityContext
     private avSession?: AVSessionManager.AVSession
+    private mainNavPathStack?: NavPathStack
 
-    constructor(context: Context) {
+    constructor(context: common.UIAbilityContext, mainNavPathStack: NavPathStack) {
         super(context)
         this.context = context
+        this.mainNavPathStack = mainNavPathStack
     }
 
     /**
@@ -32,28 +37,23 @@ export default class AVEngineCallbackImpl extends AVEngineCallback {
      */
     async onReceiveCall(session: CallSession) {
         this.createAVSessionAndStartContinuousTask(session.audioOnly)
-        let url = ''
+        let name = ''
         if (session.conversation?.type === ConversationType.Single) {
             if (session.audioOnly) {
-                url = 'singleAudioCallPage'
+                name = navigationDestinations.SingleAudioCallPage
             } else {
-                url = 'singleVideoCallPage'
+                name = navigationDestinations.SingleVideoCallPage
             }
         } else if (session.conversation?.type === ConversationType.Group) {
             if (session.audioOnly) {
-                url = 'multiAudioCallPage'
+                name = navigationDestinations.MultiAudioCallPage
             } else {
-                url = 'multiVideoCallPage'
+                name = navigationDestinations.MultiVideoCallPage
             }
         } else {
             // TODO 会议
         }
-
-        router.pushNamedRoute({
-            name: url,
-        }).catch((e: BusinessError) => {
-            console.log('router to voip page error', e)
-        })
+        this.mainNavPathStack?.pushPathByName(name, {} as Record<string, object>)
     }
 
     /**
@@ -62,27 +62,23 @@ export default class AVEngineCallbackImpl extends AVEngineCallback {
      */
     onStartCall = (session: CallSession) => {
         this.createAVSessionAndStartContinuousTask(session.audioOnly)
-        let url = ''
+        let name = ''
         if (session.conversation?.type === ConversationType.Single) {
             if (session.audioOnly) {
-                url = 'singleAudioCallPage'
+                name = navigationDestinations.SingleAudioCallPage
             } else {
-                url = 'singleVideoCallPage'
+                name = navigationDestinations.SingleVideoCallPage
             }
         } else if (session.conversation?.type === ConversationType.Group) {
             if (session.audioOnly) {
-                url = 'multiAudioCallPage'
+                name = navigationDestinations.MultiAudioCallPage
             } else {
-                url = 'multiVideoCallPage'
+                name = navigationDestinations.MultiVideoCallPage
             }
         } else {
             // TODO 会议
         }
-        router.pushNamedRoute({
-            name: url,
-        }).catch((e: BusinessError) => {
-            console.error('router to voip page error', e)
-        })
+        this.mainNavPathStack?.pushPathByName(name, {} as Record<string, object>)
     }
 
     shouldStartRing(isIncoming: boolean) {

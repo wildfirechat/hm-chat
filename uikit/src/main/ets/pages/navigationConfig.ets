@@ -35,6 +35,10 @@ import TextMessageContentView from './conversation/message/TextMessageContentVie
 import TextMessagePreviewPage from './conversation/TextMessagePreviewPage'
 import PCSessionPage from './pc/PCSessionPage'
 import UpdateUserNickNameOrAliasPage from './user/UpdateUserNickNameOrAliasPage'
+import SingleVideoCallPage from './voip/SingleVideoCallPage'
+import SingleAudioCallPage from './voip/SingleAudioCallPage'
+import MultiAudioCallPage from './voip/MultiAudioCallPage'
+import MultiVideoCallPage from './voip/MultiVideoCallPage'
 
 export class navigationDestinations {
     static SearchPortalPage = 'searchPortalPage'
@@ -76,6 +80,10 @@ export class navigationDestinations {
     static UpdateUserNickNameOrAliasPage = 'updateUserNickNameOrAliasPage'
     static ResetPasswordPage = 'resetPasswordPage'
     static ChangePasswordPage = 'changePasswordPage'
+    static SingleAudioCallPage = 'singleAudioCallPage'
+    static SingleVideoCallPage = 'singleVideoCallPage'
+    static MultiAudioCallPage = 'multiAudioCallPage'
+    static MultiVideoCallPage = 'multiVideoCallPage'
 }
 
 @Builder
@@ -154,5 +162,13 @@ export function UIKitPageMap(name: string) {
         PCSessionPage()
     } else if (name === navigationDestinations.UpdateUserNickNameOrAliasPage) {
         UpdateUserNickNameOrAliasPage()
+    } else if (name === navigationDestinations.SingleVideoCallPage) {
+        SingleVideoCallPage()
+    } else if (name === navigationDestinations.SingleAudioCallPage) {
+        SingleAudioCallPage()
+    } else if (name === navigationDestinations.MultiAudioCallPage) {
+        MultiAudioCallPage()
+    } else if (name === navigationDestinations.MultiVideoCallPage) {
+        MultiVideoCallPage()
     }
 }

@@ -24,6 +24,6 @@
         "pages/voip/SingleAudioCallPage",
         "pages/voip/SingleVideoCallPage",
         "pages/voip/MultiAudioCallPage",
-        "pages/voip/MultiVideoCallPage",
+        "pages/voip/MultiVideoCallPage"
     ]
 }

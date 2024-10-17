@@ -137,7 +137,11 @@ class OrgServer {
             name: 'wfcstore'
         })
         let _url = url.URL.parseURL(this.baseUrl)
-        this.authToken = preference.getSync(`authToken-${_url.host}-${_url.port}`, '') as string
+        let port = _url.port
+        if (!port) {
+            port = this.baseUrl.startsWith('https://') ? '443' : '80'
+        }
+        this.authToken = preference.getSync(`authToken-${_url.host}-${port}`, '') as string
 
     }
 

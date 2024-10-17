@@ -44,6 +44,25 @@
                 ]
             }
         ],
+        "extensionAbilities": [
+            {
+                "description": "DemoBackupExtension",
+                "icon": "$media:app_icon",
+                "name": "BackupExtensionAbility",
+                "srcEntry": "./ets/backupExtension/BackupExtension.ets",
+                // 对应BackupExtension.ets在代码仓中的位置
+                "type": "backup",
+                // 类型需要选择backup
+                "exported": false,
+                "metadata": [
+                    // 对应注册的元数据资源
+                    {
+                        "name": "ohos.extension.backup",
+                        "resource": "$profile:backup_config"
+                    }
+                ]
+            },
+        ],
         "requestPermissions": [
             {
                 "name": "ohos.permission.INTERNET",

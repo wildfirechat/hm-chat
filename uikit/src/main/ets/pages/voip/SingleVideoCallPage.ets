@@ -79,10 +79,6 @@ export default struct SingleVideoCallPage {
         })
     }
 
-    aboutToDisappear(): void {
-        this.destroyPipController()
-    }
-
     onPageShow(): void {
         this.isPageShow = true
         let win = AppStorage.get<window.Window>('window')
@@ -96,6 +92,7 @@ export default struct SingleVideoCallPage {
             navigationBarContentColor: '#ffffff'
         };
         win?.setWindowSystemBarProperties(sysBarProps)
+
         if (!this.pipController) {
             this.createPipController()
                 .catch((reason: BusinessError) => {
@@ -159,8 +156,8 @@ export default struct SingleVideoCallPage {
             if (this.updateActionAndDurationViewInterval) {
                 clearInterval(this.updateActionAndDurationViewInterval)
             }
-            this.pipController?.stopPiP()
-            this.pipController = undefined
+            this.destroyPipController()
+
             let index = this.mainNavPathStack.getIndexByName(navigationDestinations.SingleVideoCallPage)
             if (index.length) {
                 this.mainNavPathStack.pop()
@@ -206,6 +203,7 @@ export default struct SingleVideoCallPage {
         if (!this.pipController) {
             return;
         }
+        this.pipController.stopPiP()
         this.pipController.off('stateChange');
         this.pipController.off('controlPanelActionEvent');
         this.pipController = undefined;

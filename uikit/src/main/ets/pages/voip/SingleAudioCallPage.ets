@@ -10,6 +10,7 @@ import { timestampFormat } from '../../util/helper'
 import uikit from '../../uikit'
 import { PiPWindow } from '@kit.ArkUI'
 import VoipPiPNodeController from './VoipPiPNodeController'
+import { navigationDestinations } from '../navigationConfig'
 
 @Component
 export default struct SingleAudioCallPage {
@@ -19,7 +20,7 @@ export default struct SingleAudioCallPage {
     @State state: number = 0
     @State callSession?: CallSession = undefined
     @State durationStr: string = ''
-    private durationInternal = 0
+    private durationInterval = 0
     private pipController?: PiPWindow.PiPController;
     private mXComponentController: XComponentController = new XComponentController()
     private textNodeController: VoipPiPNodeController = new VoipPiPNodeController('');
@@ -39,10 +40,6 @@ export default struct SingleAudioCallPage {
         this.setupSessionCallback()
     }
 
-    aboutToDisappear(): void {
-        this.destroyPipController()
-    }
-
     onPageShow(): void {
         if (!this.pipController) {
             this.createPipController()
@@ -50,6 +47,7 @@ export default struct SingleAudioCallPage {
     }
 
     onPageHide(): void {
+        this.mainNavPathStack.pop()
     }
 
     updateDuration = () => {
@@ -70,14 +68,20 @@ export default struct SingleAudioCallPage {
             this.callSession = tmp;
 
             if (status === CallState.STATUS_CONNECTED) {
-                this.durationInternal = setInterval(this.updateDuration, 1000)
+                this.durationInterval = setInterval(this.updateDuration, 1000)
             }
         }
         sessionCallback.didCallEndWithReason = reason => {
-            if (this.durationInternal) {
-                clearInterval(this.durationInternal)
+            if (this.durationInterval) {
+                clearInterval(this.durationInterval)
             }
-            this.mainNavPathStack.pop()
+
+            this.destroyPipController()
+
+            let index = this.mainNavPathStack.getIndexByName(navigationDestinations.SingleVideoCallPage)
+            if (index.length) {
+                this.mainNavPathStack.pop()
+            }
         }
         this.callSession!.sessionCallback = sessionCallback;
     }
@@ -120,6 +124,7 @@ export default struct SingleAudioCallPage {
         if (!this.pipController) {
             return;
         }
+        this.pipController.stopPiP()
         this.pipController.off('stateChange');
         this.pipController.off('controlPanelActionEvent');
         this.pipController = undefined;

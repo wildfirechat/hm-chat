@@ -86,6 +86,7 @@ export default struct SingleVideoCallPage {
     }
 
     aboutToDisappear(): void {
+        this.destroyPipController()
     }
 
     onPageShow(): void {
@@ -450,7 +451,7 @@ export default struct SingleVideoCallPage {
                 Column() {
                     XComponent({
                         id: this.targetUserInfo?.uid + this.callSession!.callId,
-                        type: 'surface',
+                        type: XComponentType.SURFACE,
                         controller: this.mXComponentController,
                         libraryname: 'wfrtc'
                     })

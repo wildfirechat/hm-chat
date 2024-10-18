@@ -4,16 +4,12 @@ import CallState from '@wfc/avenginekit/src/main/ets/wfc/av/engine/callState'
 import avengineKit from '@wfc/avenginekit'
 import wfc from '@wfc/client'
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
-import { common, Permissions, Want, WantAgent, wantAgent } from '@kit.AbilityKit'
-import { backgroundTaskManager } from '@kit.BackgroundTasksKit'
 import { BusinessError } from '@kit.BasicServicesKit'
-import { hilog } from '@kit.PerformanceAnalysisKit'
-import { showVoipFloatingWindow } from '../../helper/floatingWindowHelper'
-import { checkPermissions, requestPermissions } from '../../helper/permissionHelper'
 import AVCastPicker from '@ohos.multimedia.avCastPicker'
-import { showToast } from '../../common/utils/Toast'
-import { timeFormat, timestampFormat } from '../../util/helper'
+import { timestampFormat } from '../../util/helper'
 import uikit from '../../uikit'
+import { PiPWindow } from '@kit.ArkUI'
+import VoipPiPNodeController from './VoipPiPNodeController'
 
 @Component
 export default struct SingleAudioCallPage {
@@ -24,6 +20,9 @@ export default struct SingleAudioCallPage {
     @State callSession?: CallSession = undefined
     @State durationStr: string = ''
     private durationInternal = 0
+    private pipController?: PiPWindow.PiPController;
+    private mXComponentController: XComponentController = new XComponentController()
+    private textNodeController: VoipPiPNodeController = new VoipPiPNodeController('');
 
     aboutToAppear(): void {
         let callSession = avengineKit.getCurrentSession();
@@ -41,9 +40,13 @@ export default struct SingleAudioCallPage {
     }
 
     aboutToDisappear(): void {
+        this.destroyPipController()
     }
 
     onPageShow(): void {
+        if (!this.pipController) {
+            this.createPipController()
+        }
     }
 
     onPageHide(): void {
@@ -52,6 +55,7 @@ export default struct SingleAudioCallPage {
     updateDuration = () => {
         let millis = new Date().getTime() - this.callSession!.connectedTime
         this.durationStr = timestampFormat(millis)
+        this.textNodeController.update(this.durationStr)
     }
 
     setupSessionCallback() {
@@ -92,9 +96,102 @@ export default struct SingleAudioCallPage {
         return desc;
     }
 
+    async createPipController() {
+        this.pipController = await PiPWindow.create({
+            context: getContext(this),
+            componentController: this.mXComponentController,
+            customUIController: this.textNodeController,
+            navigationId: uikit.bundleName,
+            templateType: PiPWindow.PiPTemplateType.VIDEO_CALL,
+            contentWidth: 60,
+            contentHeight: 60,
+        });
+        this.pipController.on('stateChange', (state: PiPWindow.PiPState, reason: string) => {
+            this.onStateChange(state, reason);
+        });
+        this.pipController.on('controlPanelActionEvent', (event: PiPWindow.PiPActionEventType, status?: number) => {
+            this.onActionEvent(event, status);
+        });
+        this.pipController.setAutoStartEnabled(true)
+        console.log('createPipController')
+    }
+
+    destroyPipController() {
+        if (!this.pipController) {
+            return;
+        }
+        this.pipController.off('stateChange');
+        this.pipController.off('controlPanelActionEvent');
+        this.pipController = undefined;
+    }
+
+    onStateChange(state: PiPWindow.PiPState, reason: string) {
+        console.log('xxxxx onStateChange', state, reason)
+        // switch (state) {
+        //     case PiPWindow.PiPState.ABOUT_TO_START:
+        //         this.curState = 'ABOUT_TO_START';
+        //         this.curError = $r('app.string.current_error_hint');
+        //         break;
+        //     case PiPWindow.PiPState.STARTED:
+        //         this.curState = 'STARTED';
+        //         this.curError = $r('app.string.current_error_hint');
+        //         break;
+        //     case PiPWindow.PiPState.ABOUT_TO_STOP:
+        //         this.curState = 'ABOUT_TO_STOP';
+        //         this.curError = $r('app.string.current_error_hint');
+        //         break;
+        //     case PiPWindow.PiPState.STOPPED:
+        //         this.player?.updatePlayStatus(true);
+        //         this.player?.play();
+        //         this.curState = 'STOPPED';
+        //         this.curError = $r('app.string.current_error_hint');
+        //         break;
+        //     case PiPWindow.PiPState.ABOUT_TO_RESTORE:
+        //         this.curState = 'ABOUT_TO_RESTORE';
+        //         this.curError = $r('app.string.current_error_hint');
+        //         break;
+        //     case PiPWindow.PiPState.ERROR:
+        //         this.curState = 'ERROR';
+        //         this.curError = reason;
+        //         break;
+        //     default:
+        //         break;
+        // }
+        // Logger.info(`[${TAG}] onStateChange: ${this.curState}, reason: ${reason}`);
+    }
+
+    onActionEvent(event: PiPWindow.PiPActionEventType, status: number | undefined) {
+        console.log('xxxx onActionEvent', event, status)
+        // switch (event) {
+        //     case 'playbackStateChanged':
+        //         if (status === 0) {
+        //             this.player?.updatePlayStatus(false);
+        //             this.player?.pause();
+        //         } else {
+        //             this.player?.updatePlayStatus(true);
+        //             this.player?.play();
+        //         }
+        //         break;
+        //     default:
+        //         break;
+        // }
+        // this.buttonAction = event + `-status:${status}`;
+        // Logger.info(`[${TAG}] onActionEvent: ${this.buttonAction} status:${status}}`);
+    }
+
     build() {
         NavDestination() {
             Stack() {
+                // 仅仅用来实现pip
+                XComponent({
+                    id: this.targetUserInfo?.uid + this.callSession!.callId,
+                    type: XComponentType.SURFACE,
+                    controller: this.mXComponentController,
+                })
+                    .enableAnalyzer(false)
+                    .width(60)
+                    .height(60)
+                    .backgroundColor('#e0000000')
                 Image(this.targetUserInfo?.portrait)
                     .draggable(false)
                     .width('100%')
@@ -114,7 +211,11 @@ export default struct SingleAudioCallPage {
                                 .height(50)
                                 .padding(10)
                                 .onClick(async () => {
-                                    // TODO
+                                    this.pipController?.startPiP()
+                                        .catch((reason: BusinessError) => {
+                                            console.error('startPiP error', reason.code, reason.name, reason.message)
+                                        })
+                                    this.mainNavPathStack.pop()
                                 })
                         }
                         .width('100%')

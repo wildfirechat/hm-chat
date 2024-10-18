@@ -94,14 +94,6 @@ export default class AVEngineCallbackImpl extends AVEngineCallback {
         this.avSession?.destroy()
         this.avSession = undefined
         stopContinuousTask(this.context)
-        try {
-            let floatWindow = window.findWindow("voipFloatingWindow")
-            if (floatWindow) {
-                floatWindow.destroyWindow()
-            }
-        } catch (exception) {
-            console.error('Failed to find the Window. Cause: ' + JSON.stringify(exception));
-        }
 
         let mainWindow = AppStorage.get<window.Window>('window')
         mainWindow?.setWindowKeepScreenOn(false)

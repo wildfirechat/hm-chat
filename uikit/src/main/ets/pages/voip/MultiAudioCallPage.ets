@@ -5,13 +5,8 @@ import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
 import wfc from '@wfc/client'
 import CallSessionCallback from '@wfc/avenginekit/src/main/ets/wfc/av/engine/callSessionCallback'
 import ParticipantProfile from '@wfc/avenginekit/src/main/ets/wfc/av/engine/participantProfile'
-import { Permissions } from '@kit.AbilityKit'
-import { checkPermissions, requestPermissions } from '../../helper/permissionHelper'
-import { showVoipFloatingWindow } from '../../helper/floatingWindowHelper'
-import { BusinessError } from '@kit.BasicServicesKit'
-import { showToast } from '../../common/utils/Toast'
 import { AVCastPicker } from '@kit.AVSessionKit'
-import { timeFormat, timestampFormat } from '../../util/helper'
+import { timestampFormat } from '../../util/helper'
 
 @Component
 export default struct MultiAudioCallPage {

@@ -19,12 +19,14 @@ export default class BackupExtension extends BackupExtensionAbility {
      * @param bundleVersion 版本信息
      */
     async onRestore(bundleVersion: BundleVersion): Promise<void> {
-        console.log(TAG, `onRestore ok ${JSON.stringify(bundleVersion)}`);
+        console.log(TAG, `onRestore ${JSON.stringify(bundleVersion)}`);
         if (bundleVersion.name.startsWith("0.0.0.0")) {
             this.context.area = contextConstant.AreaMode.EL2;
 
             // 设置要迁移APK包的包名, 需要替换为需要迁移的APK的，下面为示例
             let apkPackageName = "cn.wildfirechat.chat";
+            // 鸿蒙版本包名
+            let hapPackageName = 'cn.wildfirechat.messenger';
 
             let ceSourcePath = this.context.backupDir + `restore/${apkPackageName}/ce/`;
 
@@ -32,13 +34,17 @@ export default class BackupExtension extends BackupExtensionAbility {
             const userId = 100;
 
             // 定义要迁移的APK沙箱目录
-            let apkSourcePath = ceSourcePath + "data/user/" + userId + "/" + apkPackageName + "/";
-            if (fs.accessSync(apkSourcePath)) {
+            //let apkSourcePath = ceSourcePath + "data/user/" + userId + "/" + apkPackageName + "/";
+            let apkSourcePath = ceSourcePath;
+            let filesDirPath = apkSourcePath + "/files/"
+            console.log(TAG, apkSourcePath, fs.accessSync(ceSourcePath))
+            if (fs.accessSync(ceSourcePath)) {
                 // 需要迁移 files/{用户id} 目录
-                let fileNames = fs.listFileSync(apkSourcePath)
+                let fileNames = fs.listFileSync(filesDirPath)
+                console.log(TAG, 'fileNames', fileNames.length)
                 let dataDirName = ''
                 for (const name of fileNames) {
-                    let stat = fs.statSync(apkSourcePath + '/' + name)
+                    let stat = fs.statSync(filesDirPath + name)
                     if (stat.isDirectory() && name !== 'xlog' && name !== 'sticker') {
                         dataDirName = name;
                         break
@@ -53,10 +59,10 @@ export default class BackupExtension extends BackupExtensionAbility {
                 const fileDestDir = this.context.getApplicationContext().filesDir + "/";
                 console.log(TAG, "fileDestDir: " + fileDestDir);
                 console.log(TAG, "start to move db folder");
-                await this.moveDirToTargetDir(apkSourcePath + "files/" + dataDirName, fileDestDir + wildfirechatDir + dataDir);
+                await this.moveDirToTargetDir(filesDirPath + dataDirName, fileDestDir + wildfirechatDir + dataDir);
                 console.log(TAG, "end to move db folder");
                 console.log(TAG, "start to move file");
-                await this.moveFileToTargetPath(apkSourcePath + "files/" + clientIdFileName, fileDestDir + wildfirechatDir + 'uuid');
+                await this.moveFileToTargetPath(filesDirPath + clientIdFileName, fileDestDir + wildfirechatDir + 'uuid');
                 console.log(TAG, "start to move file");
 
                 // preference
@@ -68,11 +74,11 @@ export default class BackupExtension extends BackupExtensionAbility {
                 const configPath = apkSourcePath + 'shared_prefs/config.xml'
                 const cookiePath = apkSourcePath + 'shared_prefs/WFC_OK_HTTP_COOKIES.xml'
 
-                let prefsArrayBuffer = new ArrayBuffer(1024 * 1024);
+                let prefsArrayBuffer = new ArrayBuffer(1024 * 2);
                 let prefsXmlSerializer = new xml.XmlSerializer(prefsArrayBuffer, "utf-8");
                 prefsXmlSerializer.setDeclaration()
                 prefsXmlSerializer.startElement('preferences')
-                prefsXmlSerializer.setAttributes('version', '"1.0"')
+                prefsXmlSerializer.setAttributes('version', '1.0')
                 let stat = fs.statSync(configPath);
                 let readTextOptions: ReadTextOptions = {
                     offset: 0,
@@ -131,7 +137,9 @@ export default class BackupExtension extends BackupExtensionAbility {
 
                 const prefsDestDir = this.context.getApplicationContext().preferencesDir + "/";
                 let prefsFile = fs.openSync(prefsDestDir + 'wfcstore', fs.OpenMode.READ_WRITE | fs.OpenMode.CREATE)
-                fs.writeSync(prefsFile.fd, prefsArrayBuffer)
+                fs.writeSync(prefsFile.fd, prefsArrayBuffer, {
+                    length: prefsArrayBuffer.byteLength
+                })
                 fs.close(prefsFile)
             }
             console.log(TAG, `HarmonyOS to HarmonyOS NEXT scenario`);

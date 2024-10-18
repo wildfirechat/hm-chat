@@ -2285,7 +2285,7 @@ class WfcImpl {
             if (!fileName) {
                 fileName = new Date().getTime() + ''
             }
-            filePath = self.context!.getApplicationContext().cacheDir + '/' + fileName
+            filePath = self.context!.cacheDir + '/' + fileName
             let file = fs.openSync(filePath, fs.OpenMode.READ_WRITE | fs.OpenMode.CREATE)
             fs.writeSync(file.fd, atob(data).buffer)
             fs.closeSync(file)

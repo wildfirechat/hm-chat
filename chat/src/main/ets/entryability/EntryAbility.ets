@@ -4,7 +4,7 @@ import window from '@ohos.window';
 import data_preferences from '@ohos.data.preferences';
 import wfc from '@wfc/client'
 import Config from '@wfc/client/src/main/ets/config'
-import { AbilityConstant, Context, Want } from '@kit.AbilityKit';
+import { AbilityConstant, common, Context, Want } from '@kit.AbilityKit';
 import { pushCommon, pushService } from '@kit.PushKit';
 
 import EventType from '@wfc/client/src/main/ets/wfc/client/wfcEvent';
@@ -25,12 +25,14 @@ export default class EntryAbility extends UIAbility {
         'targetConversation': new Conversation(0, '', 0)
     };
     private storage: LocalStorage = new LocalStorage(this.launchParams);
+    private applicationContext?: common.ApplicationContext
 
     async onCreate(want: Want, launchParam: AbilityConstant.LaunchParam) {
         hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onCreate');
         AppStorage.setOrCreate('context', this.context);
+        this.applicationContext = this.context.getApplicationContext()
 
-        wfc.init(this.context.getApplicationContext(), this.context.eventHub, this.context.filesDir, Config.getWFCPlatform());
+        wfc.init(this.applicationContext, this.context.eventHub, this.applicationContext.filesDir, Config.getWFCPlatform());
         CustomMessageConfig.registerCustomMessages();
         wfc.eventEmitter!.on(EventType.ConnectionStatusChanged, async (status: number) => {
             if (status === ConnectionStatus.ConnectionStatusConnected) {
@@ -52,7 +54,7 @@ export default class EntryAbility extends UIAbility {
                 ConnectionStatus.ConnectionStatusLogout,
                 ConnectionStatus.ConnectionStatusKickedOff
             ].indexOf(status) >= 0) {
-                let preference = await data_preferences.getPreferences(this.context, 'wfcstore')
+                let preference = await data_preferences.getPreferences(this.applicationContext!, 'wfcstore')
                 if (preference) {
                     preference.clear()
                     preference.flush()
@@ -87,7 +89,7 @@ export default class EntryAbility extends UIAbility {
         AppStorage.setOrCreate('windowStage', windowStage);
 
         let url = 'pages/login/LoginPage';
-        data_preferences.getPreferences(this.context, 'wfcstore', async (err, val) => {
+        data_preferences.getPreferences(this.applicationContext, 'wfcstore', async (err, val) => {
             if (err) {
                 console.error("Failed to get preferences. code =" + err.code + ", message =" + err.message);
             } else {

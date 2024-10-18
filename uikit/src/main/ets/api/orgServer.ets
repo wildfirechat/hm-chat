@@ -133,16 +133,19 @@ class OrgServer {
 
     _init() {
         let context = AppStorage.get<common.UIAbilityContext>('context');
-        let preference = data_preferences.getPreferencesSync(context, {
+        let preference = data_preferences.getPreferencesSync(context?.getApplicationContext(), {
             name: 'wfcstore'
         })
+
+        // 兼容 Android 端迁移过来的数据
         let _url = url.URL.parseURL(this.baseUrl)
+        let host = _url.host
+        host = host.indexOf(':') > 0 ? host.substring(0, host.indexOf(':')) : host
         let port = _url.port
         if (!port) {
             port = this.baseUrl.startsWith('https://') ? '443' : '80'
         }
-        this.authToken = preference.getSync(`authToken-${_url.host}-${port}`, '') as string
-
+        this.authToken = preference.getSync(`authToken:${host}-${port}`, '') as string
     }
 
     _post(path: string, data?: string | object): Promise<object> {
@@ -207,11 +210,11 @@ class OrgServer {
                         if (authToken) {
                             this.authToken = authToken
                             let context = AppStorage.get<common.ApplicationContext>('context');
-                            let preference = data_preferences.getPreferencesSync(context, {
+                            let preference = data_preferences.getPreferencesSync(context?.getApplicationContext(), {
                                 name: 'wfcstore'
                             })
                             let _url = url.URL.parseURL(this.baseUrl)
-                            preference.putSync(`authToken-${_url.host}-${_url.port}`, this.authToken)
+                            preference.putSync(`authToken:${_url.host}-${_url.port}`, this.authToken)
                         }
                         resolve(result.result)
                     } else {

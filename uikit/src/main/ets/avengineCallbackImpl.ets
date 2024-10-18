@@ -1,10 +1,9 @@
 /*
  * Copyright (c) 2020 WildFireChat. All rights reserved.
  */
-import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo';
 import CallEndReason from '@wfc/avenginekit/src/main/ets/wfc/av/engine/callEndReason'
 import CallSession from '@wfc/avenginekit/src/main/ets/wfc/av/engine/callSession'
-import { router, window } from '@kit.ArkUI';
+import { window } from '@kit.ArkUI';
 import AVSessionManager from '@ohos.multimedia.avsession';
 import { startContinuousTask, stopContinuousTask } from './helper/continuousTaskHelper';
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType';
@@ -15,10 +14,8 @@ import './pages/voip/SingleVideoCallPage'
 import './pages/voip/MultiAudioCallPage'
 import './pages/voip/MultiVideoCallPage'
 
-import { BusinessError } from '@kit.BasicServicesKit';
 import { navigationDestinations } from './pages/navigationConfig';
-import { common, StartOptions, Want, wantAgent } from '@kit.AbilityKit';
-import uikit from './uikit';
+import { common } from '@kit.AbilityKit';
 
 export default class AVEngineCallbackImpl extends AVEngineCallback {
     private context: common.UIAbilityContext

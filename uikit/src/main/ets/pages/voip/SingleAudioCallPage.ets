@@ -78,7 +78,7 @@ export default struct SingleAudioCallPage {
 
             this.destroyPipController()
 
-            let index = this.mainNavPathStack.getIndexByName(navigationDestinations.SingleVideoCallPage)
+            let index = this.mainNavPathStack.getIndexByName(navigationDestinations.SingleAudioCallPage)
             if (index.length) {
                 this.mainNavPathStack.pop()
             }

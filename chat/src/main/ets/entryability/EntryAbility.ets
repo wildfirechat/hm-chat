@@ -5,7 +5,7 @@ import data_preferences from '@ohos.data.preferences';
 import wfc from '@wfc/client'
 import Config from '@wfc/client/src/main/ets/config'
 import { AbilityConstant, Context, Want } from '@kit.AbilityKit';
-import { pushService } from '@kit.PushKit';
+import { pushCommon, pushService } from '@kit.PushKit';
 
 import EventType from '@wfc/client/src/main/ets/wfc/client/wfcEvent';
 import Message from '@wfc/client/src/main/ets/wfc/messages/message';
@@ -134,12 +134,14 @@ export default class EntryAbility extends UIAbility {
         // Ability has brought to foreground
         hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onForeground');
         this.isInBackground = false;
+        AppStorage.setOrCreate('isInBackground', false);
     }
 
     onBackground() {
         // Ability has back to background
         hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onBackground');
         this.isInBackground = true;
+        AppStorage.setOrCreate('isInBackground', true);
     }
 
     onBackPressed(): boolean {

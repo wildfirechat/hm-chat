@@ -2,7 +2,6 @@ import { BackupExtensionAbility, BundleVersion, ReadTextOptions } from '@kit.Cor
 import { contextConstant } from '@kit.AbilityKit';
 import fs from '@ohos.file.fs';
 import { JSON, util, xml } from '@kit.ArkTS';
-import { preferences } from '@kit.ArkData';
 
 const TAG = `BackupExtensionAbility`;
 
@@ -131,8 +130,9 @@ export default class BackupExtension extends BackupExtensionAbility {
                 prefsXmlSerializer.endElement()
 
                 const prefsDestDir = this.context.getApplicationContext().preferencesDir + "/";
-                let prefsFile = fs.openSync(prefsDestDir + 'wfcstore', fs.OpenMode.CREATE)
+                let prefsFile = fs.openSync(prefsDestDir + 'wfcstore', fs.OpenMode.READ_WRITE | fs.OpenMode.CREATE)
                 fs.writeSync(prefsFile.fd, prefsArrayBuffer)
+                fs.close(prefsFile)
             }
             console.log(TAG, `HarmonyOS to HarmonyOS NEXT scenario`);
         } else {

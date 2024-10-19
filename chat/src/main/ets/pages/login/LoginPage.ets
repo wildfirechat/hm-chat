@@ -234,7 +234,7 @@ struct LoginPage {
     async onLoginSuccess(res: Record<string, Object>) {
         console.log('login success', res);
         let context = getContext(this) as common.UIAbilityContext;
-        let preference = await data_preferences.getPreferences(context, 'wfcstore')
+        let preference = await data_preferences.getPreferences(context.getApplicationContext(), 'wfcstore')
         const userId = res['userId'] as string
         const token = res['token'] as string
         preference.put('userId', userId);

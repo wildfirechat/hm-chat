@@ -54,7 +54,7 @@ export default class DSBridge {
     private getAuthCode = (arg: string) => {
         let userId = wfc.getUserId()
         let context = AppStorage.get<common.UIAbilityContext>('context');
-        data_preferences.getPreferences(context, 'wfcstore').then(p => {
+        data_preferences.getPreferences(context?.getApplicationContext(), 'wfcstore').then(p => {
             p.putSync('workspace-userId', userId)
             p.flush()
         })

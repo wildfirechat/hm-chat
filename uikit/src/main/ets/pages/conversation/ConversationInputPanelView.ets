@@ -417,7 +417,7 @@ export default struct ConversationInputPanelView {
         window.getLastWindow(getContext(this)).then(currentWindow => {
             let property = currentWindow.getWindowProperties();
 
-            let preference = preferences.getPreferencesSync(getContext(this), { name: 'wfcstore' })
+            let preference = preferences.getPreferencesSync(getContext(this).getApplicationContext(), { name: 'wfcstore' })
             let keyboardHeight = preference.getSync('keyboardHeight', 0) as number
             if (keyboardHeight > 0) {
                 this.keyboardHeight = keyboardHeight;

@@ -3,40 +3,63 @@ import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation';
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType';
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc';
 import UserSettingScope from '@wfc/client/src/main/ets/wfc/client/userSettingScope';
+import { util, xml } from '@kit.ArkTS';
+import { PiPWindow } from '@kit.ArkUI';
+import uikit from '@wfc/uikit';
+import { BusinessError } from '@kit.BasicServicesKit';
+import TestTextNodeController from './test/TestTextNodeController';
 
 
 @Entry({ routeName: 'apiTestPage' })
 @Component
-struct TestPage {
-    async onPageShow() {
+export default struct TestPage {
+    private mXComponentController: XComponentController = new XComponentController()
+    private pipController?: PiPWindow.PiPController;
+    private textNodeController: TestTextNodeController = new TestTextNodeController('');
+
+    async aboutToAppear() {
+        this.createPipController()
     }
 
-    // 创建组件，并设置大小
+    async createPipController() {
+        this.pipController = await PiPWindow.create({
+            context: getContext(this),
+            componentController: this.mXComponentController,
+            customUIController: this.textNodeController,
+            navigationId: uikit.bundleName,
+            templateType: PiPWindow.PiPTemplateType.VIDEO_CALL,
+            contentWidth: 200,
+            contentHeight: 300,
+        });
+        this.pipController.setAutoStartEnabled(true)
+        console.log('createPipController')
+    }
+
     build() {
-        Navigation() {
+        NavDestination() {
             Column() {
-                Column() {
-                    Text('本页用于 API 功能测试')
-                }
-
-                Button('test')
+                XComponent({
+                    id: 'Test',
+                    type: XComponentType.SURFACE,
+                    controller: this.mXComponentController,
+                })
+                    .enableAnalyzer(false)
+                    .width(200)
+                    .height(300)
+                    .backgroundColor(Color.Green)
+                Text('测试123')
+                    .fontSize(20)
+                    .fontColor(Color.Red)
                     .onClick(() => {
-                        wfc.setUserSetting(UserSettingScope.HiddenNotificationDetail, '', '1', () => {
-                            console.log('update true')
-
-                        }, err => {
-                            console.log('update error', err)
-                        })
-                    })
-                Button('test2')
-                    .onClick(() => {
-                        let value = wfc.getUserSetting(UserSettingScope.HiddenNotificationDetail, '')
-                        console.log('xxxxxxxxxx', value)
+                        this.pipController?.startPiP()
+                            .catch((reason: BusinessError) => {
+                                console.error('startPiP error', reason.code, reason.name, reason.message)
+                            })
                     })
             }
+            .justifyContent(FlexAlign.Center)
+            .height('100%')
+            .width('100%')
         }
-        .title('API 测试页')
-        .titleMode(NavigationTitleMode.Mini)
-        .navBarPosition(NavBarPosition.Start)
     }
 }

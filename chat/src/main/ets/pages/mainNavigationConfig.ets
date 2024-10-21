@@ -4,6 +4,7 @@ import AccountPage from "./me/AccountPage"
 import ChangePasswordPage from "./me/ChangePasswordPage"
 import ResetPasswordPage from "./me/ResetPasswordPage"
 import SettingPage from "./me/SettingPage"
+import TestPage from "./TestPage"
 
 export class mainNavigationDestinations {
     static AboutPage = 'aboutPage'
@@ -25,6 +26,8 @@ export function MainPageMap(name: string) {
         ChangePasswordPage()
     } else if (name === mainNavigationDestinations.SettingPage) {
         SettingPage()
+    } else if (name === 'testPage') {
+        TestPage()
     } else {
         UIKitPageMap(name)
     }

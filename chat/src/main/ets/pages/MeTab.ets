@@ -136,12 +136,13 @@ export default struct MeTab {
 
             OptionItemView({ title: 'API测试页' })
                 .onClick(() => {
-                    router.pushUrl({
-                        url: 'pages/TestPage'
-                    })
-                        .catch((e: BusinessError) => {
-                            console.log(e.message)
-                        })
+                    // router.pushUrl({
+                    //     url: 'pages/TestPage'
+                    // })
+                    //     .catch((e: BusinessError) => {
+                    //         console.log(e.message)
+                    //     })
+                    this.mainNavPathStack.pushPathByName('testPage', {} as Record<string, object>)
                 })
         }
         .width('100%')

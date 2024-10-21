@@ -127,7 +127,6 @@ struct LoginPage {
                     .layoutWeight(1)
                 Text(this.isLoginByPassword ? '注册/验证码登录' : '使用密码登录')
                     .fontSize(14)
-                    .fontColor('#0C0C0C')
                     .textAlign(TextAlign.End)
                     .onClick(() => {
                         this.isLoginByPassword = !this.isLoginByPassword

@@ -12,6 +12,7 @@ import { JSONObject } from '@wfc/client/src/main/ets/wfc/type/types';
 import Message from '@wfc/client/src/main/ets/wfc/messages/message';
 import FavItem from '@wfc/client/src/main/ets/wfc/model/favItem';
 import { stringValue } from '@wfc/client/src/main/ets/wfc/util/longUtil';
+import { parseHostAndPort } from './Util';
 
 class AppServer {
     baseUrl = Config.APP_SERVER;
@@ -148,14 +149,8 @@ class AppServer {
             name: 'wfcstore'
         })
         // 兼容 Android 端迁移过来的数据
-        let _url = url.URL.parseURL(this.baseUrl)
-        let host = _url.host
-        host = host.indexOf(':') > 0 ? host.substring(0, host.indexOf(':')) : host
-        let port = _url.port
-        if (!port) {
-            port = this.baseUrl.startsWith('https://') ? '443' : '80'
-        }
-        this.authToken = preference.getSync(`authToken:${host}-${port}`, '') as string
+        let hostPort = parseHostAndPort(this.baseUrl)
+        this.authToken = preference.getSync(`authToken:${hostPort.host}-${hostPort.port}`, '') as string
     }
 
     _post(path: string, data?: string | Object, rawResponseData = false): Promise<string | object> {
@@ -226,8 +221,8 @@ class AppServer {
                                 let preference = data_preferences.getPreferencesSync(context?.getApplicationContext(), {
                                     name: 'wfcstore'
                                 })
-                                let _url = url.URL.parseURL(this.baseUrl)
-                                preference.putSync(`authToken-${_url.host}-${_url.port}`, this.authToken)
+                                let hostPort = parseHostAndPort(this.baseUrl)
+                                preference.putSync(`authToken-${hostPort.host}-${hostPort.port}`, this.authToken)
                             }
                             resolve(result.result)
                         } else {

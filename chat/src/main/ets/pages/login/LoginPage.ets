@@ -71,7 +71,7 @@ struct LoginPage {
                         .caretColor(Color.Blue)
                         .layoutWeight(1)
                         .height(40)
-                        .margin(20)
+                        .margin({ left: 20, bottom: 20, top: 20 })
                         .fontSize(14)
                         .borderRadius(4)
                         .type(InputType.Password)

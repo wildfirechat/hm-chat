@@ -221,6 +221,7 @@ export default struct SearchResultView {
                     }
                     .alignItems(HorizontalAlign.Start)
                     .padding({ left: 10 })
+                    .layoutWeight(1)
                 }
                 .width('100%')
                 .justifyContent(FlexAlign.Start)
@@ -322,6 +323,7 @@ export default struct SearchResultView {
                     }
                     .alignItems(HorizontalAlign.Start)
                     .padding({ left: 10 })
+                    .layoutWeight(1)
                 }
                 .width('100%')
                 .justifyContent(FlexAlign.Start)

@@ -90,17 +90,19 @@ export default struct SearchConversationMessageResultView {
                             .textOverflow({ overflow: TextOverflow.Ellipsis })
                     }
                     .alignItems(HorizontalAlign.Start)
+                    .layoutWeight(1)
                     .padding({ left: 10 })
 
-                    Blank()
                     Text(resultWrapper.timestamp)
                         .fontSize(11)
                         .alignSelf(ItemAlign.Start)
                 }
                 .width('100%')
                 .justifyContent(FlexAlign.Start)
+                .constraintSize({ maxWidth: '100%' })
                 .padding(10)
             }
+            .width('100%')
             .stateStyles({
                 pressed: {
                     .backgroundColor('#E5E5E5')

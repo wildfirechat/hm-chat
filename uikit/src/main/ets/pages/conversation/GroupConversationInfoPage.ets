@@ -40,6 +40,8 @@ export default struct GroupConversationInfoPage {
     private groupMember?: GroupMember
     private enableAddMember: boolean = false
     private enableRemoveMember: boolean = false
+    private maxShowGroupMemberCount = 20
+    private toShowGroupMemberCount = this.maxShowGroupMemberCount
 
     aboutToAppear() {
         let params = this.mainNavPathStack.getParamByIndex(this.mainNavPathStack.size() - 1) as Record<string, Object>;
@@ -59,11 +61,14 @@ export default struct GroupConversationInfoPage {
                 if (this.groupMember.type === GroupMemberType.Owner || this.groupMember.type === GroupMemberType.Manager) {
                     this.enableAddMember = true
                     this.enableRemoveMember = true
+                    this.toShowGroupMemberCount -= 2
                 }
             } else {
                 this.enableAddMember = true
+                this.toShowGroupMemberCount--
                 if (this.groupMember.type === GroupMemberType.Owner || this.groupMember.type === GroupMemberType.Manager) {
                     this.enableRemoveMember = true
+                    this.toShowGroupMemberCount--
                 }
             }
         }
@@ -130,7 +135,7 @@ export default struct GroupConversationInfoPage {
                         alignContent: FlexAlign.SpaceAround,
                         wrap: FlexWrap.Wrap
                     }) {
-                        ForEach(this.groupMembers, (groupMember: GroupMember) => {
+                        ForEach(this.groupMembers.slice(0, this.toShowGroupMemberCount), (groupMember: GroupMember) => {
                             Column() {
                                 Image(groupMember.getPortrait())
                                     .width(48)
@@ -224,6 +229,18 @@ export default struct GroupConversationInfoPage {
                             .padding(8)
                             .justifyContent(FlexAlign.Center)
                             .alignItems(HorizontalAlign.Center)
+                        }
+                        if (this.groupMembers.length > this.toShowGroupMemberCount) {
+                            Row() {
+                                Text('查看全部成员')
+                            }
+                            .justifyContent(FlexAlign.Center)
+                            .alignItems(VerticalAlign.Center)
+                            .width('100%')
+                            .height(60)
+                            .onClick(() => {
+                                this.mainNavPathStack.pushPathByName(navigationDestinations.GroupMemberListPage, { 'groupInfo': this.groupInfo } as Record<string, object>)
+                            })
                         }
                     }
                     .padding(10)

@@ -29,16 +29,17 @@ export default struct GroupConversationInfoPage {
     @State isTop: boolean = false
     @State isSilent: boolean = false
     @State groupMembers: GroupMember[] = []
-    private conversationInfo?: ConversationInfo
-    private enableAddMember: boolean = false
-    private enableRemoveMember: boolean = false
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
     @State showAddGroupMemberModal: boolean = false
     @State showRemoveGroupMemberModal: boolean = false
     @State groupAnnouncement: string = ''
     @State userInfo?: UserInfo = undefined
-    private clearConversationHistoryDialogController?: CustomDialogController
     @State showGroupMemberNickName: boolean = false
+    private clearConversationHistoryDialogController?: CustomDialogController
+    private conversationInfo?: ConversationInfo
+    private groupMember?: GroupMember
+    private enableAddMember: boolean = false
+    private enableRemoveMember: boolean = false
 
     aboutToAppear() {
         let params = this.mainNavPathStack.getParamByIndex(this.mainNavPathStack.size() - 1) as Record<string, Object>;
@@ -52,16 +53,16 @@ export default struct GroupConversationInfoPage {
             return
         }
 
+        this.groupMember = wfc.getGroupMember(this.groupInfo.target, wfc.getUserId())
         if (this.groupInfo.type !== GroupType.Organization) {
-            let groupMember = wfc.getGroupMember(this.groupInfo.target, wfc.getUserId())
             if (this.groupInfo.joinType === 2) {
-                if (groupMember.type === GroupMemberType.Owner || groupMember.type === GroupMemberType.Manager) {
+                if (this.groupMember.type === GroupMemberType.Owner || this.groupMember.type === GroupMemberType.Manager) {
                     this.enableAddMember = true
                     this.enableRemoveMember = true
                 }
             } else {
                 this.enableAddMember = true
-                if (groupMember.type === GroupMemberType.Owner || groupMember.type === GroupMemberType.Manager) {
+                if (this.groupMember.type === GroupMemberType.Owner || this.groupMember.type === GroupMemberType.Manager) {
                     this.enableRemoveMember = true
                 }
             }
@@ -142,8 +143,7 @@ export default struct GroupConversationInfoPage {
                                     .margin({ top: 5 })
                             }
                             .onClick(() => {
-                                let me = wfc.getGroupMember(this.groupInfo.target, wfc.getUserId())
-                                if (this.groupInfo.privateChat === 1 && [GroupMemberType.Owner, GroupMemberType.Manager].indexOf(me.type) === -1) {
+                                if (this.groupInfo.privateChat === 1 && [GroupMemberType.Owner, GroupMemberType.Manager].indexOf(this.groupMember!.type) === -1) {
                                     showToast('禁止私聊')
                                 } else {
                                     this.mainNavPathStack.pushPathByName(navigationDestinations.UserInfoPage, {
@@ -292,9 +292,13 @@ export default struct GroupConversationInfoPage {
                             subTitle: this.groupAnnouncement
                         })
                             .onClick(() => {
-                                this.mainNavPathStack.pushPathByName(navigationDestinations.UpdateGroupAnnouncementPage, {
-                                    'groupInfo': this.groupInfo
-                                } as Record<string, Object>)
+                                if ([GroupMemberType.Owner, GroupMemberType.Manager].indexOf(this.groupMember!.type) >= 0) {
+                                    this.mainNavPathStack.pushPathByName(navigationDestinations.UpdateGroupAnnouncementPage, {
+                                        'groupInfo': this.groupInfo
+                                    } as Record<string, Object>)
+                                } else {
+                                    showToast('仅管理员或群主可以设置群公告')
+                                }
                             })
                         OptionItemView({
                             title: '群备注',
@@ -305,15 +309,17 @@ export default struct GroupConversationInfoPage {
                                     'groupInfo': this.groupInfo
                                 } as Record<string, Object>)
                             })
-                        OptionItemView({
-                            title: '群管理',
-                            showDivider: false
-                        })
-                            .onClick(() => {
-                                this.mainNavPathStack.pushPathByName(navigationDestinations.GroupManagePage, {
-                                    'groupInfo': this.groupInfo
-                                } as Record<string, Object>)
+                        if ([GroupMemberType.Owner, GroupMemberType.Manager].indexOf(this.groupMember!.type) >= 0) {
+                            OptionItemView({
+                                title: '群管理',
+                                showDivider: false
                             })
+                                .onClick(() => {
+                                    this.mainNavPathStack.pushPathByName(navigationDestinations.GroupManagePage, {
+                                        'groupInfo': this.groupInfo
+                                    } as Record<string, Object>)
+                                })
+                        }
                     }
                     .margin({ top: 10 })
                     .width('100%')

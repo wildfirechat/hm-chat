@@ -42,7 +42,7 @@ export default class GroupInfo {
     //是否是超级群组
     superGroup = 0;
 
-    //是否可以搜索到该群，功能暂未实现
+    //是否可以搜索到该群
     searchable = 0
 
     //是否可以查看群历史消息, 0 不允许，1允许。仅专业版有效

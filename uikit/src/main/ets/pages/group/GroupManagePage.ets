@@ -4,17 +4,37 @@ import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType'
 import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
 import { navigationDestinations } from '../navigationConfig'
+import ActionSheetDialog from '../../view/ActionSheetDialog'
+import ModifyGroupInfoType from '@wfc/client/src/main/ets/wfc/model/modifyGroupInfoType'
+import { showToast } from '../../common/utils/Toast'
 
 @Entry
 @Component
 export default struct GroupManagePage {
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
-    private groupInfo?: GroupInfo
+    @State groupInfo?: GroupInfo = undefined
+    private customDialogController?: CustomDialogController;
 
     aboutToAppear() {
         let params = this.mainNavPathStack.getParamByIndex(this.mainNavPathStack.size() - 1) as Record<string, Object>;
         this.groupInfo = params['groupInfo'] as GroupInfo
 
+    }
+
+    joinType() {
+        let str = ''
+        switch (this.groupInfo?.joinType) {
+            case 0:
+                str = '不限制加入'
+                break;
+            case 0:
+                str = '群成员可以拉人'
+                break;
+            default:
+                str = '只能群管理拉人'
+                break
+        }
+        return str
     }
 
     build() {
@@ -63,22 +83,134 @@ export default struct GroupManagePage {
                         .width('100%')
                     OptionItemView({
                         title: '加群方式',
-                        desc: '不限制加入',
+                        desc: this.joinType(),
                         showDivider: true,
                         showRightArrow: false
                     })
+                        .onClick(() => {
+                            let func = (joinType: number) => {
+                                wfc.modifyGroupInfo(this.groupInfo!.target, ModifyGroupInfoType.Modify_Group_JoinType, joinType + '', [], null, () => {
+                                    this.groupInfo!.joinType = joinType
+                                }, err => {
+                                    showToast('修改加群方式失败')
+                                })
+                            }
+                            this.customDialogController = new CustomDialogController({
+                                builder: ActionSheetDialog({
+                                    cancel: '取消',
+                                    controller: this.customDialogController,
+                                    sheets: [
+                                        {
+                                            title: '不限制加入',
+                                            action: () => {
+                                                func(0)
+                                            }
+                                        },
+                                        {
+                                            title: '群成员可以拉人',
+                                            action: () => {
+                                                func(1)
+                                            }
+                                        },
+                                        {
+                                            title: '只能管理员拉人',
+                                            action: () => {
+                                                func(2)
+                                            }
+                                        },
+                                    ]
+                                }),
+                                autoCancel: true,
+                                alignment: DialogAlignment.Center,
+                                // gridCount: 4,
+                                customStyle: false
+                            })
+
+                            this.customDialogController.open()
+                        })
                     OptionItemView({
                         title: '查找方式',
-                        desc: '不允许查找',
+                        desc: this.groupInfo?.searchable === 0 ? '允许查找' : '不允许查找',
                         showDivider: true,
                         showRightArrow: false
                     })
+                        .onClick(() => {
+                            let func = (searchable: number) => {
+                                wfc.modifyGroupInfo(this.groupInfo!.target, ModifyGroupInfoType.Modify_Group_Searchable, searchable + '', [], null, () => {
+                                    this.groupInfo!.searchable = searchable
+                                }, err => {
+                                    showToast('修改群查找方式失败')
+                                })
+                            }
+                            this.customDialogController = new CustomDialogController({
+                                builder: ActionSheetDialog({
+                                    cancel: '取消',
+                                    controller: this.customDialogController,
+                                    sheets: [
+                                        {
+                                            title: '允许查找',
+                                            action: () => {
+                                                func(0)
+                                            }
+                                        },
+                                        {
+                                            title: '不允许查找',
+                                            action: () => {
+                                                func(1)
+                                            }
+                                        },
+                                    ]
+                                }),
+                                autoCancel: true,
+                                alignment: DialogAlignment.Center,
+                                // gridCount: 4,
+                                customStyle: false
+                            })
+
+                            this.customDialogController.open()
+                        })
                     OptionItemView({
                         title: '群历史消息',
-                        desc: '不允许新成员查看历史消息',
+                        desc: this.groupInfo?.historyMessage === 0 ? '不允许新成员查看历史消息' : '允许新成员查看历史消息',
                         showDivider: false,
                         showRightArrow: false
                     })
+                        .onClick(() => {
+                            let func = (historyMsg: number) => {
+                                wfc.modifyGroupInfo(this.groupInfo!.target, ModifyGroupInfoType.Modify_Group_History_Message, historyMsg + '', [], null, () => {
+                                    this.groupInfo!.historyMessage = historyMsg
+                                }, err => {
+                                    showToast('修改是否允许查看群历史消息失败')
+                                })
+                            }
+                            this.customDialogController = new CustomDialogController({
+                                builder: ActionSheetDialog({
+                                    cancel: '取消',
+                                    controller: this.customDialogController,
+                                    sheets: [
+                                        {
+                                            title: '不允许新成员查看历史消息',
+                                            action: () => {
+                                                func(0)
+                                            }
+                                        },
+                                        {
+                                            title: '允许新成员查看历史消息',
+                                            action: () => {
+                                                func(1)
+                                            }
+                                        },
+                                    ]
+                                }),
+                                autoCancel: true,
+                                alignment: DialogAlignment.Center,
+                                // gridCount: 4,
+                                customStyle: false
+                            })
+
+                            this.customDialogController.open()
+
+                        })
                 }
             }
             .backgroundColor(Color.White)

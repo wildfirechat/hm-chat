@@ -47,7 +47,7 @@ export default struct GroupConversationInfoPage {
         let params = this.mainNavPathStack.getParamByIndex(this.mainNavPathStack.size() - 1) as Record<string, Object>;
         this.conversationInfo = params['conversationInfo'] as ConversationInfo
         this.groupInfo = wfc.getGroupInfo(this.conversationInfo.conversation.target)
-        this.groupMembers = wfc.getGroupMembers(this.conversationInfo.conversation.target, false)
+        this.groupMembers = wfc.getGroupMembersByCount(this.conversationInfo.conversation.target, this.maxShowGroupMemberCount)
 
         if (this.groupInfo.memberDt < 0) {
             showToast('你已被移除群聊')
@@ -128,7 +128,6 @@ export default struct GroupConversationInfoPage {
     build() {
         NavDestination() {
             Scroll() {
-
                 Column() {
                     Flex({
                         justifyContent: FlexAlign.Start,
@@ -230,7 +229,7 @@ export default struct GroupConversationInfoPage {
                             .justifyContent(FlexAlign.Center)
                             .alignItems(HorizontalAlign.Center)
                         }
-                        if (this.groupMembers.length > this.toShowGroupMemberCount) {
+                        if (this.groupInfo.memberCount > this.groupMembers.length) {
                             Row() {
                                 Text('查看全部成员')
                             }

@@ -43,7 +43,8 @@ export default struct SettingPage {
                     .margin({ top: 30 })
                     .onClick(() => {
                         showToast('正在退出登录，请稍后...')
-                        data_preferences.deletePreferences(getContext(this), 'wfcstore')
+                        data_preferences.deletePreferences(getContext(this).getApplicationContext(), 'wfcstore')
+                        this.mainNavPathStack.clear(false)
                         wfc.disconnect(true, false)
                     })
             }

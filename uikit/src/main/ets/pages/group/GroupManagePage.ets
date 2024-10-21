@@ -48,6 +48,11 @@ export default struct GroupManagePage {
                         title: '成员权限',
                         showDivider: false,
                     })
+                        .onClick(() => {
+                            this.mainNavPathStack.pushPathByName(navigationDestinations.GroupMemberPermissionPage, {
+                                'groupInfo': this.groupInfo
+                            } as Record<string, Object>)
+                        })
                 }
 
                 Column() {

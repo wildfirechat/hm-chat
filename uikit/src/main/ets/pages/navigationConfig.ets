@@ -39,6 +39,7 @@ import SingleVideoCallPage from './voip/SingleVideoCallPage'
 import SingleAudioCallPage from './voip/SingleAudioCallPage'
 import MultiAudioCallPage from './voip/MultiAudioCallPage'
 import MultiVideoCallPage from './voip/MultiVideoCallPage'
+import GroupMemberPermissionPage from './group/GroupMemberPermissionPage'
 
 export class navigationDestinations {
     static SearchPortalPage = 'searchPortalPage'
@@ -84,6 +85,7 @@ export class navigationDestinations {
     static SingleVideoCallPage = 'singleVideoCallPage'
     static MultiAudioCallPage = 'multiAudioCallPage'
     static MultiVideoCallPage = 'multiVideoCallPage'
+    static GroupMemberPermissionPage = 'groupMemberPermissionPage'
 }
 
 @Builder
@@ -170,5 +172,7 @@ export function UIKitPageMap(name: string) {
         MultiAudioCallPage()
     } else if (name === navigationDestinations.MultiVideoCallPage) {
         MultiVideoCallPage()
+    } else if (name === navigationDestinations.GroupMemberPermissionPage) {
+        GroupMemberPermissionPage()
     }
 }

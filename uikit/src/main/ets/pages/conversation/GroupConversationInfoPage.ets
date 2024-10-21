@@ -248,7 +248,7 @@ export default struct GroupConversationInfoPage {
                                 } as Record<string, Object>)
                             })
                         OptionItemView({
-                            title: ' 群头像',
+                            title: '群头像',
                             imgUrl: this.groupInfo.portrait
                         })
                             .onClick(async () => {

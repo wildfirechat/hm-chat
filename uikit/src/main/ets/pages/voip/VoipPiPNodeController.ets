@@ -14,14 +14,14 @@ class Params {
 
 // 开发者可以通过@Builder装饰器实现布局构建
 @Builder
-function buildText(params: Params) {
+function buildVoipPiPNode(params: Params) {
     Column() {
         Image($r('app.media.av_float_audio'))
-            .width(40)
-            .height(40)
+            .width(vp2px(40))
+            .height(vp2px(40))
 
         Text(params.text)
-            .fontSize(20)
+            .fontSize(30)
             .fontColor(Color.White)
     }
     .padding(20)
@@ -49,7 +49,7 @@ export default class VoipPiPNodeController extends NodeController {
                 width: 100, height: 100
             }
         });
-        this.voipPipNode.build(wrapBuilder<[Params]>(buildText), new Params(this.message));
+        this.voipPipNode.build(wrapBuilder<[Params]>(buildVoipPiPNode), new Params(this.message));
         return this.voipPipNode.getFrameNode();
     }
 

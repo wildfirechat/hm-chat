@@ -107,8 +107,8 @@ export default struct SingleAudioCallPage {
             customUIController: this.textNodeController,
             navigationId: uikit.bundleName,
             templateType: PiPWindow.PiPTemplateType.VIDEO_CALL,
-            contentWidth: 60,
-            contentHeight: 60,
+            contentWidth: 200,
+            contentHeight: 300,
         });
         this.pipController.on('stateChange', (state: PiPWindow.PiPState, reason: string) => {
             this.onStateChange(state, reason);
@@ -194,8 +194,8 @@ export default struct SingleAudioCallPage {
                     controller: this.mXComponentController,
                 })
                     .enableAnalyzer(false)
-                    .width(60)
-                    .height(60)
+                    .width(200)
+                    .height(300)
                     .backgroundColor('#e0000000')
                 Image(this.targetUserInfo?.portrait)
                     .draggable(false)

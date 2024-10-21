@@ -72,7 +72,7 @@ export default struct GroupConversationInfoPage {
                 this.groupAnnouncement = groupAnnouncement.text
             })
             .catch((err: AppServerError) => {
-                // showToast('获取群公告失败 ' + err.message)
+                showToast('获取群公告失败 ' + err.message)
             })
 
         wfc.eventEmitter?.on(EventType.GroupInfosUpdate, this.onGroupInfosUpdate)

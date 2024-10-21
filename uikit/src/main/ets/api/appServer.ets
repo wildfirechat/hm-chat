@@ -222,7 +222,7 @@ class AppServer {
                                     name: 'wfcstore'
                                 })
                                 let hostPort = parseHostAndPort(this.baseUrl)
-                                preference.putSync(`authToken-${hostPort.host}-${hostPort.port}`, this.authToken)
+                                preference.putSync(`authToken:${hostPort.host}-${hostPort.port}`, this.authToken)
                             }
                             resolve(result.result)
                         } else {

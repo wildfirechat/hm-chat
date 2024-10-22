@@ -2095,7 +2095,9 @@ class WfcImpl {
                 progressCB && progressCB(uploaded, total);
             }, (remoteUrl: string) => {
                 (insertedMsg.messageContent as MediaMessageContent).remotePath = remoteUrl;
-                this.updateMessageContent(insertedMsg.messageId, insertedMsg.messageContent!);
+                if (insertedMsg.messageId > 0) {
+                    this.updateMessageContent(insertedMsg.messageId, insertedMsg.messageContent!);
+                }
                 uploadedCB && uploadedCB(remoteUrl);
                 protoProxy.sendSavedMessage(insertedMsg.messageId, 0, (messageUid: string, timestamp: string) => {
                     insertedMsg.messageUid = Long.fromValue(messageUid);
@@ -2148,6 +2150,8 @@ class WfcImpl {
                 // upload progress update
             },
             (mediaUrl: string) => {
+                let content = message.messageContent as MediaMessageContent
+                content.remotePath = mediaUrl
                 uploadedCB && uploadedCB(mediaUrl);
             },
             (messageUid: string, timestamp: string) => { //successCB
@@ -2156,8 +2160,11 @@ class WfcImpl {
                 message.timestamp = Long.fromValue(timestamp).toNumber();
                 // update remote url
                 if (message.messageContent instanceof MediaMessageContent) {
-                    let msg = self.getMessageById(message.messageId)!;
-                    message.messageContent = msg.messageContent;
+                    // 聊天室消息本地不存储，messageId 为负
+                    if (message.messageId > 0) {
+                        let msg = self.getMessageById(message.messageId)!;
+                        message.messageContent = msg.messageContent;
+                    }
                 }
                 if (message.conversation!.type !== ConversationType.ChatRoom) {
                     self.eventEmitter!.emit(EventType.MessageStatusUpdate, message);

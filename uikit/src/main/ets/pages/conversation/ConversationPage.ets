@@ -389,7 +389,7 @@ export default struct ConversationPage {
     }
     onConversationInfoUpdate = (conversationInfo: ConversationInfo) => {
         // 清空会话消息
-        if (!conversationInfo.lastMessage) {
+        if (!conversationInfo.lastMessage && conversationInfo.conversation.type !== ConversationType.ChatRoom) {
             this.conversationMessageDataSource.setMessages([])
         }
     }

@@ -474,6 +474,9 @@ export default struct ConversationPage {
             case ConversationType.Channel:
                 name = navigationDestinations.ChannelConversationInfoPage
                 break
+            case ConversationType.ChatRoom:
+                name = navigationDestinations.ChatroomConversationInfoPage
+                break
             default:
                 break
         }

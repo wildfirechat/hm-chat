@@ -41,6 +41,7 @@ import MultiAudioCallPage from './voip/MultiAudioCallPage'
 import MultiVideoCallPage from './voip/MultiVideoCallPage'
 import GroupMemberPermissionPage from './group/GroupMemberPermissionPage'
 import GroupMemberListPage from './group/GroupMemberListPage'
+import ChatroomConversationInfoPage from './conversation/ChatroomConversationInfoPage'
 
 export class navigationDestinations {
     static SearchPortalPage = 'searchPortalPage'
@@ -48,6 +49,7 @@ export class navigationDestinations {
     static SingleConversationInfoPage = 'singleConversationInfoPage'
     static GroupConversationInfoPage = 'groupConversationInfo'
     static ChannelConversationInfoPage = 'channelConversationInfoPage'
+    static ChatroomConversationInfoPage = 'chatroomConversationInfoPage'
     static UserInfoPage = 'userInfoPage'
     static FriendRequestListPage = 'friendRequestListPage'
     static SearchUserPage = 'searchUserPage'
@@ -104,6 +106,8 @@ export function UIKitPageMap(name: string) {
         GroupConversationInfoPage()
     } else if (name === navigationDestinations.ChannelConversationInfoPage) {
         ChannelConversationInfoPage()
+    } else if (name === navigationDestinations.ChatroomConversationInfoPage) {
+        ChatroomConversationInfoPage()
     } else if (name === navigationDestinations.UserInfoPage) {
         UserInfoPage()
     } else if (name === navigationDestinations.FriendRequestListPage) {

@@ -7,7 +7,7 @@ import { util, xml } from '@kit.ArkTS';
 import { PiPWindow } from '@kit.ArkUI';
 import uikit from '@wfc/uikit';
 import { BusinessError } from '@kit.BasicServicesKit';
-import TestTextNodeController from './test/TestTextNodeController';
+import TestTextNodeController from './TestTextNodeController';
 
 
 @Entry({ routeName: 'apiTestPage' })

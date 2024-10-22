@@ -4,7 +4,7 @@ import AccountPage from "./me/AccountPage"
 import ChangePasswordPage from "./me/ChangePasswordPage"
 import ResetPasswordPage from "./me/ResetPasswordPage"
 import SettingPage from "./me/SettingPage"
-import TestPage from "./TestPage"
+import TestPage from "./test/TestPage"
 
 export class mainNavigationDestinations {
     static AboutPage = 'aboutPage'

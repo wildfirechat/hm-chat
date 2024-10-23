@@ -373,7 +373,8 @@ export default struct SearchResultView {
     }
 
     build() {
-        if (this.userSearchResults.length + this.contactSearchResults.length + this.groupSearchResults.length + this.channelSearchResults.length) {
+        if (this.userSearchResults.length + this.contactSearchResults.length + this.groupSearchResults.length + this.channelSearchResults.length
+            + this.conversationSearchResults.length) {
             List() {
                 this.userSearchResultBuilder()
                 this.contactSearchResultBuilder()

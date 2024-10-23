@@ -12,6 +12,8 @@ export default class MessageContent {
     //提醒对象，mentionedType 1时有效
     mentionedTargets: string[] = [];
     extra = '';
+    // 仅超级群有效，消息是否已完整服务器加载
+    notLoaded = 0;
     pushContent = '';
 
     constructor(type = 0, mentionedType = 0, mentionedTargets: string[] = []) {
@@ -55,6 +57,7 @@ export default class MessageContent {
         this.mentionedTargets = payload.mentionedTargets;
         // }
         this.extra = payload.extra;
+        this.notLoaded = payload.notLoaded;
         this.pushContent = payload.pushContent;
     }
 }

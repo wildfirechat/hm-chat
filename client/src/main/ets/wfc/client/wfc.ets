@@ -2553,7 +2553,7 @@ export class WfcManager {
         impl.releaseLock(lockId, successCB, failCB);
     }
 
-    getPCOnlinesInfos(): PCOnlineInfo[] {
+    getPCOnlineInfos(): PCOnlineInfo[] {
         let pcOnline = this.getUserSetting(UserSettingScope.UserSettingPCOnline, "PC");
         let webOnline = this.getUserSetting(UserSettingScope.UserSettingPCOnline, "Web");
         let wxOnline = this.getUserSetting(UserSettingScope.UserSettingPCOnline, "WX");

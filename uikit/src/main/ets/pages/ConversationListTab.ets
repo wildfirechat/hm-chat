@@ -86,7 +86,7 @@ export default struct ConversationListTab {
     }
 
     loadPCOnlineInfos() {
-        this.pcOnlineInfos = wfc.getPCOnlinesInfos();
+        this.pcOnlineInfos = wfc.getPCOnlineInfos();
     }
 
     onConnectionStatusChange = (status: number) => {
@@ -153,7 +153,6 @@ export default struct ConversationListTab {
     onChannelInfosUpdate = () => {
         this.loadConversationList();
     }
-
     onMessageStatusUpdate = () => {
         this.loadConversationList();
     }

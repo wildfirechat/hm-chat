@@ -704,7 +704,7 @@ export class WfcManager {
      * @param {function (GroupInfo)} successCB 成功回调
      * @param {function (number)} failCB 失败回调
      */
-    getGroupInfoEx(groupId: string, refresh: boolean, successCB: (info:GroupInfo) => void, failCB: FailCallback) {
+    getGroupInfoEx(groupId: string, refresh: boolean, successCB: (info: GroupInfo) => void, failCB: FailCallback) {
         impl.getGroupInfoEx(groupId, refresh, (info: GroupInfo) => {
             if (!info.portrait || info.portrait.startsWith(Config.APP_SERVER)) {
                 info.portrait = this.defaultGroupPortrait(info);
@@ -2309,7 +2309,7 @@ export class WfcManager {
 
     /**
      * 获取会话中的文件记录
-     * @param {Conversation} conversation 会话
+     * @param {Conversation|undefined|null} conversation 会话，为 undefined|null 时，则获取当前用户所有收到和发出的文件记录
      * @param {String} fromUser 来源用户
      * @param {Long} beforeMessageUid 消息uid，表示获取此消息uid之前的文件记录
      * @param {int} order 排序。0 按照时间逆序；1 按照时间顺序；2 按照大小逆序；3 按照大小顺序。
@@ -2317,7 +2317,7 @@ export class WfcManager {
      * @param {function (FileRecord[])} successCB 成功回调
      * @param {function (number)} failCB 失败回调
      */
-    getConversationFileRecords(conversation: Conversation, fromUser: string, beforeMessageUid: Long, order: number, count: number, successCB: CallbackWithValue_1<FileRecord[]>, failCB: FailCallback) {
+    getConversationFileRecords(conversation: Conversation | undefined | null, fromUser: string, beforeMessageUid: Long, order: number, count: number, successCB: CallbackWithValue_1<FileRecord[]>, failCB: FailCallback) {
         impl.getConversationFileRecords(conversation, fromUser, beforeMessageUid, order, count, successCB, failCB);
     }
 

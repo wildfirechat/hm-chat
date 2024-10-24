@@ -28,7 +28,7 @@ export default struct ConversationFileRecordPage {
 
     loadConversationFileRecords(beforeMessageUid: Long) {
         this.isLoading = true
-        let fileRecords = wfc.getConversationFileRecords(this.conversation!, '', beforeMessageUid, 0, 200, fileRecords => {
+        wfc.getMyFileRecords(beforeMessageUid, 0, 200, fileRecords => {
             if (eq(beforeMessageUid, 0)) {
                 this.fileRecordDataSource.setFileRecords(fileRecords)
             } else {

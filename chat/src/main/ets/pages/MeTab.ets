@@ -104,7 +104,7 @@ export default struct MeTab {
             Column() {
                 OptionItemView({ icon: $r('app.media.ic_settings_file'), title: '文件' })
                     .onClick(() => {
-                        this.mainNavPathStack.pushPathByName(navigationDestinations.FileRecordPage, {} as Record<string, Object>)
+                        this.mainNavPathStack.pushPathByName(navigationDestinations.FileRecordPortalPage, {} as Record<string, Object>)
                     })
                 Divider()
                     .margin({ left: 40 })

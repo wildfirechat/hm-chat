@@ -19,7 +19,7 @@ import UpdateGroupNamePage from './group/UpdateGroupNamePage'
 import UpdateGroupRemarkNamePage from './group/UpdateGroupRemarkPage'
 import UpdateMyGroupAliasNamePage from './group/UpdateMyGroupAliasPage'
 import FavRecordPage from './me/FavRecordPage'
-import FileRecordPage from './me/FileRecordPage'
+import FileRecordPortalPage from './me/FileRecordPortalPage'
 import MessageAndNotificationPage from './me/MessageAndNotificaitonPage'
 import PCLoginPage from './pc/PCLoginPage'
 import WebViewPage from './misc/WebViewPage'
@@ -42,6 +42,7 @@ import MultiVideoCallPage from './voip/MultiVideoCallPage'
 import GroupMemberPermissionPage from './group/GroupMemberPermissionPage'
 import GroupMemberListPage from './group/GroupMemberListPage'
 import ChatroomConversationInfoPage from './conversation/ChatroomConversationInfoPage'
+import FileRecordPage from './me/FileRecordPage'
 
 export class navigationDestinations {
     static SearchPortalPage = 'searchPortalPage'
@@ -70,6 +71,7 @@ export class navigationDestinations {
     static GroupMemberMuteOrAllowListPage = 'groupMemberMuteOrAllowListPage'
     static AccountPage = 'accountPage'
     static FavRecordPage = 'favRecordPage'
+    static FileRecordPortalPage = 'fileRecordPortalPage'
     static FileRecordPage = 'fileRecordPage'
     static ConversationFileRecordPage = 'conversationFileRecordPage'
     static NotificationPage = 'messageAndNotificationPage'
@@ -146,6 +148,8 @@ export function UIKitPageMap(name: string) {
         GroupMemberMuteOrAllowListPage()
     } else if (name === navigationDestinations.FavRecordPage) {
         FavRecordPage()
+    } else if (name === navigationDestinations.FileRecordPortalPage) {
+        FileRecordPortalPage()
     } else if (name === navigationDestinations.FileRecordPage) {
         FileRecordPage()
     } else if (name === navigationDestinations.ConversationFileRecordPage) {

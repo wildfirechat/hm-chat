@@ -2535,8 +2535,8 @@ class WfcImpl {
         protoProxy.getUploadMediaUrl(fileName, mediaType, contentType, successCB, failCB);
     }
 
-    getConversationFileRecords(conversation: Conversation, fromUser: string, beforeUid: Long, order: number, count: number, successCB: CallbackWithValue_1<FileRecord[]>, failCB: FailCallback) {
-        protoProxy.getConversationFiles(JSON.stringify(conversation), fromUser, Long.fromValue(beforeUid)
+    getConversationFileRecords(conversation: Conversation | undefined | null, fromUser: string, beforeUid: Long, order: number, count: number, successCB: CallbackWithValue_1<FileRecord[]>, failCB: FailCallback) {
+        protoProxy.getConversationFiles(conversation ? JSON.stringify(conversation) : '', fromUser, Long.fromValue(beforeUid)
             .toString(), order, count, (frsStr: string) => {
             let frs = JSON.parse(frsStr) as Record<string, Object>[];
             let fileRecords: FileRecord[] = [];

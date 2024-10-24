@@ -2,6 +2,7 @@ import Utils from '../common/Utils';
 import { timeFormat } from '../util/helper';
 import wfc, { WfcManager } from '@wfc/client/src/main/ets/wfc/client/wfc';
 import ConversationInfo from '@wfc/client/src/main/ets/wfc/model/conversationInfo';
+import MessageStatus from '@wfc/client/src/main/ets/wfc/messages/messageStatus';
 
 @Component
 @Preview
@@ -38,6 +39,9 @@ export default struct ConversationInfoItemView {
         }
         if (this.conversationInfo?.draft) {
             spanText = '[草稿] '
+        }
+        if (this.conversationInfo?.lastMessage && this.conversationInfo.lastMessage.status === MessageStatus.Sending) {
+            spanText = '[发送中]'
         }
         return spanText;
     }
@@ -115,7 +119,7 @@ export default struct ConversationInfoItemView {
                                 }
                             }
 
-                            Text(`${this.conversationInfo!.draft ? this.conversationInfo!.draft : this.conversationInfo!.lastMessage ? this.conversationInfo!.lastMessage.messageContent!.digest(this.conversationInfo!.lastMessage) : ''}`)
+                            Text(`${this.conversationInfo!.draft ? this.conversationInfo!.draft : this.conversationInfo!.lastMessage ? (this.conversationInfo!.lastMessage.messageContent!.digest(this.conversationInfo!.lastMessage)) : ''}`)
                                 .textOverflow({ overflow: TextOverflow.Ellipsis })
                                 .fontSize(13)
                                 .fontColor('#b3b3b3')

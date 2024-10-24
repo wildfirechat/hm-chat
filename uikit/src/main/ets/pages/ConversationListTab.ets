@@ -45,6 +45,7 @@ export default struct ConversationListTab {
         wfc.eventEmitter!.on(EventType.UserInfosUpdate, this.onUserInfosUpdate)
         wfc.eventEmitter!.on(EventType.GroupInfosUpdate, this.onGroupInfosUpdate)
         wfc.eventEmitter!.on(EventType.ChannelInfosUpdate, this.onChannelInfosUpdate)
+        wfc.eventEmitter!.on(EventType.MessageStatusUpdate, this.onMessageStatusUpdate)
     }
 
     aboutToDisappear() {
@@ -58,11 +59,15 @@ export default struct ConversationListTab {
         wfc.eventEmitter!.off(EventType.UserInfosUpdate, this.onUserInfosUpdate)
         wfc.eventEmitter!.off(EventType.GroupInfosUpdate, this.onGroupInfosUpdate)
         wfc.eventEmitter!.off(EventType.ChannelInfosUpdate, this.onChannelInfosUpdate)
+        wfc.eventEmitter!.off(EventType.MessageStatusUpdate, this.onMessageStatusUpdate)
     }
 
     onPageShow() {
     }
 
+    // TODO
+    // FIXME
+    // 不是所有情况，都需要完整的重新加载会话列表
     loadConversationList() {
         if (this.connectionStatus === ConnectionStatus.ConnectionStatusConnecting) {
             return;
@@ -149,6 +154,10 @@ export default struct ConversationListTab {
         this.loadConversationList();
     }
 
+    onMessageStatusUpdate = () => {
+        this.loadConversationList();
+    }
+
     conversationKey(conversationInfo: ConversationInfo): string {
         let conversation = conversationInfo.conversation!;
         let key = conversation.type + '-' + conversation.target + '-' + conversation.line
@@ -162,7 +171,7 @@ export default struct ConversationListTab {
         key += '-' + conversationInfo.top
         key += '-' + conversationInfo.isSilent
         if (conversationInfo.lastMessage) {
-            key += '-' + conversationInfo.lastMessage.messageContent.type
+            key += '-' + conversationInfo.lastMessage.status + '-' + conversationInfo.lastMessage.messageContent.type
         } else {
             key += '-null'
         }

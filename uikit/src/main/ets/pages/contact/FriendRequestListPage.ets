@@ -44,47 +44,7 @@ export default struct FriendRequestListPage {
                         List() {
                             ForEach(this.computedRequests, (req: FriendRequestAndUserInfo) => {
                                 ListItem() {
-                                    Row() {
-                                        Image(req.userInfo.portrait)
-                                            .alt($r('app.media.avatar_def'))
-                                            .width(40)
-                                            .height(40)
-                                            .borderRadius(4)
-                                        Column() {
-                                            Text(req.userInfo.displayName)
-                                                .fontSize(14)
-                                            Text(req.request.reason)
-                                                .padding({ top: 2 })
-                                                .fontSize(12)
-                                        }
-                                        .alignItems(HorizontalAlign.Start)
-                                        .padding({ left: 10 })
-                                        .layoutWeight(1)
-
-                                        if (req.request.status === 0) {
-                                            Button('接受')
-                                                .type(ButtonType.Normal)
-                                                .fontSize(12)
-                                                .height(30)
-                                                .borderRadius(4)
-                                                .onClick(() => {
-                                                    wfc.handleFriendRequest(req.request.target, true, '', () => {
-                                                        showToast('添加好友成功')
-                                                    }, err => {
-                                                        showToast('添加好友失败 ' + err)
-                                                    })
-                                                })
-                                        } else if (req.request.status === 1) {
-                                            Text('已添加')
-                                                .fontSize(12)
-                                        } else if (req.request.status === 2) {
-                                            Text('已拒绝')
-                                                .fontSize(12)
-                                        }
-                                    }
-                                    .width('100%')
-                                    .justifyContent(FlexAlign.Start)
-                                    .padding(10)
+                                    NewFriendRequestsCard({status: req.request.status, req})
                                 }
                                 .width('100%')
                                 .onClick(() => {
@@ -124,6 +84,58 @@ export default struct FriendRequestListPage {
         .onShown(() => {
 
         })
+    }
+}
+
+@Component
+struct NewFriendRequestsCard {
+    @State status: number = 0;
+    @Prop req: FriendRequestAndUserInfo;
+
+    build() {
+        Row() {
+            Image(this.req.userInfo!!.portrait)
+                .alt($r('app.media.avatar_def'))
+                .width(40)
+                .height(40)
+                .borderRadius(4)
+            Column() {
+                Text(this.req.userInfo!!.displayName)
+                    .fontSize(14)
+                Text(this.req.request!!.reason)
+                    .padding({ top: 2 })
+                    .fontSize(12)
+            }
+            .alignItems(HorizontalAlign.Start)
+            .padding({ left: 10 })
+            .layoutWeight(1)
+
+            if (this.status === 0) {
+                Button('接受')
+                    .type(ButtonType.Normal)
+                    .fontSize(12)
+                    .height(30)
+                    .borderRadius(4)
+                    .onClick(() => {
+                        wfc.handleFriendRequest(this.req.request.target, true, '', () => {
+                            this.status = 1
+                            this.req.request.status = 1
+                            showToast('添加好友成功')
+                        }, err => {
+                            showToast('添加好友失败 ' + err)
+                        })
+                    })
+            } else if (this.status === 1) {
+                Text('已添加')
+                    .fontSize(12)
+            } else if (this.status === 2) {
+                Text('已拒绝')
+                    .fontSize(12)
+            }
+        }
+        .width('100%')
+        .justifyContent(FlexAlign.Start)
+        .padding(10)
     }
 }
 

@@ -6,12 +6,15 @@ import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationTyp
 import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
 import { navigationDestinations } from '../navigationConfig'
 import PickConversationModal from '../picker/PickConversationModal'
+import PickContactModal from '../picker/PickContactModal'
+import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
 
 @Entry
 @Component
 export default struct FileRecordPortalPage {
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
     @State showPickConversationModal: boolean = false
+    @State showPickContactModal: boolean = false
 
     aboutToAppear() {
     }
@@ -25,6 +28,23 @@ export default struct FileRecordPortalPage {
                 } as Record<string, Object>)
                 this.showPickConversationModal = false
             }
+        })
+            .height('100%')
+            .width('100%')
+            .margin({ top: px2vp(AppStorage.get<number>('SafeAreaTopHeight')) })
+            .backgroundColor(Color.White)
+    }
+
+    @Builder
+    pickSingleContactModal() {
+        PickContactModal({
+            showPickContactModal: $showPickContactModal,
+            onClickUser: (user: UserInfo) => {
+                this.mainNavPathStack.pushPathByName(navigationDestinations.FileRecordPage, {
+                    'userId': user.uid,
+                } as Record<string, Object>)
+                this.showPickContactModal = false
+            },
         })
             .height('100%')
             .width('100%')
@@ -73,8 +93,15 @@ export default struct FileRecordPortalPage {
             })
                 .margin({ top: 10 })
                 .onClick(() => {
-                    showToast('todo')
+                    this.showPickContactModal = true
                 })
+                .bindContentCover($$this.showPickContactModal,
+                    this.pickSingleContactModal(),
+                    {
+                        modalTransition: ModalTransition.DEFAULT,
+                        onDisappear: () => {
+                        }
+                    })
 
         }
         .title('文件记录')

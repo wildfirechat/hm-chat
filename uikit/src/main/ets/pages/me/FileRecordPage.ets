@@ -19,7 +19,7 @@ export default struct FileRecordPage {
     @State fileRecordDataSource: FileRecordDataSource = new FileRecordDataSource()
     public static PARAM_MY_FILE = 'myFile'
     public static PARAM_CONVERSATION = 'conversation'
-    public static PARAM_FROM_USER = 'fromUser'
+    public static PARAM_USER_ID = 'userId'
     private conversation?: Conversation
     private isLoading: boolean = false
 
@@ -27,12 +27,12 @@ export default struct FileRecordPage {
         let params = this.mainNavPathStack.getParamByIndex(this.mainNavPathStack.size() - 1) as Record<string, Object>;
         this.conversation = params[FileRecordPage.PARAM_CONVERSATION] as Conversation;
         let isMyFile = params[FileRecordPage.PARAM_MY_FILE] as boolean
-        let fromUser = params[FileRecordPage.PARAM_FROM_USER] as string
+        let userId = params[FileRecordPage.PARAM_USER_ID] as string
         if (isMyFile) {
             this.loadMyFileRecords(Long.ZERO)
         } else {
-            if (fromUser) {
-                this.conversation = new Conversation(ConversationType.Single, fromUser, 0)
+            if (userId) {
+                this.conversation = new Conversation(ConversationType.Single, userId, 0)
             }
             this.loadConversationFileRecords(Long.ZERO)
         }

@@ -40,7 +40,6 @@ import ChannelMenuEventMessageContent from '@wfc/client/src/main/ets/wfc/message
 import { navigationDestinations } from '../navigationConfig'
 import QuoteInfo from '@wfc/client/src/main/ets/wfc/model/quoteInfo'
 import PickContactModal from '../picker/PickContactModal'
-import PickSingleContactModal from '../picker/PickSingleContactModal'
 import ForwardMessageDialog from './forward/ForwardMessageDialog'
 import CardMessageContent from '@wfc/client/src/main/ets/wfc/messages/cardMessageContent'
 import fileUri from '@ohos.file.fileuri'
@@ -611,7 +610,7 @@ export default struct ConversationInputPanelView {
 
     @Builder
     pickSingleContactModal() {
-        PickSingleContactModal({
+        PickContactModal({
             showPickContactModal: $showExtContentCoverModal,
             onClickUser: (user: UserInfo) => {
                 this.showExtContentCoverModal = false

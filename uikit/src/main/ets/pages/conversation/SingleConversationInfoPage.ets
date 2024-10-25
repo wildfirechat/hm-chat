@@ -9,7 +9,7 @@ import GroupType from '@wfc/client/src/main/ets/wfc/model/groupType';
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo';
 import { FailCallbackDefault } from '@wfc/client/src/main/ets/wfc/type/types';
 import { navigationDestinations } from '../navigationConfig';
-import PickContactModal from '../picker/PickContactModal';
+import PickMultiContactModal from '../picker/PickMultiContactModal';
 
 @Preview
 @Entry
@@ -30,8 +30,8 @@ export default struct SingleConversationInfoPage {
     }
 
     @Builder
-    pickContactModal() {
-        PickContactModal({
+    pickMultiContactModal() {
+        PickMultiContactModal({
             showPickContactModal: $showPickContactModal,
             initialCheckedUserIds: [this.conversationInfo!.conversation.target],
             uncheckableUserIds: [this.conversationInfo!.conversation.target]
@@ -54,7 +54,7 @@ export default struct SingleConversationInfoPage {
                         .width(48)
                         .height(48)
                         .margin({ left: 20 })
-                        .bindContentCover(this.showPickContactModal, this.pickContactModal(), {
+                        .bindContentCover(this.showPickContactModal, this.pickMultiContactModal(), {
                             modalTransition: ModalTransition.DEFAULT,
                             onAppear: () => {
                             },
@@ -62,10 +62,10 @@ export default struct SingleConversationInfoPage {
                             onDisappear: () => {
                                 this.showPickContactModal = false
                                 let localStorage = LocalStorage.getShared();
-                                let pickUsers = localStorage.get<UserInfo[]>(PickContactModal.PICK_RESULT);
+                                let pickUsers = localStorage.get<UserInfo[]>(PickMultiContactModal.PICK_RESULT);
                                 if (pickUsers?.length) {
                                     showToast('创建群...')
-                                    localStorage.delete(PickContactModal.PICK_RESULT)
+                                    localStorage.delete(PickMultiContactModal.PICK_RESULT)
                                     let memberIds: string[] = pickUsers.map(userInfo => userInfo.uid)
                                     memberIds.push(this.conversationInfo!.conversation.target)
                                     let selfUserInfo = wfc.getUserInfo(wfc.getUserId())

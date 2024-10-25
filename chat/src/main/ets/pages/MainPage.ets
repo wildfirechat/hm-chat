@@ -5,7 +5,7 @@ import MeTab from './MeTab'
 import AbilityAccessCtrl, { Permissions } from '@ohos.abilityAccessCtrl'
 import { scanCore, scanBarcode } from '@kit.ScanKit';
 import { showToast } from '@wfc/uikit/src/main/ets/common/utils/Toast'
-import PickContactModal from '@wfc/uikit/src/main/ets/pages/picker/PickContactModal'
+import PickMultiContactModal from '@wfc/uikit/src/main/ets/pages/picker/PickMultiContactModal'
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import GroupType from '@wfc/client/src/main/ets/wfc/model/groupType'
@@ -235,8 +235,8 @@ struct MainPage {
     }
 
     @Builder
-    pickContactModal() {
-        PickContactModal({
+    pickMultiContactModal() {
+        PickMultiContactModal({
             showPickContactModal: $showPickContactModal,
             onCheckUser: (users: UserInfo[]) => {
                 this.createConversation(users)
@@ -349,7 +349,7 @@ struct MainPage {
                 .padding(6)
                 .margin({ left: 12 })
                 .bindMenu(this.SubMoreMenus())
-                .bindContentCover($$this.showPickContactModal, this.pickContactModal(), {
+                .bindContentCover($$this.showPickContactModal, this.pickMultiContactModal(), {
                     modalTransition: ModalTransition.DEFAULT,
                     onAppear: () => {
                     },

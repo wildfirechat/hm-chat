@@ -8,67 +8,19 @@ import Employee from '../../api/model/employee'
 import orgServer from '../../api/orgServer'
 import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
 import { navigationDestinations } from '../navigationConfig'
+import UserListView from '../../view/UserListView'
 
 @Component
 export default struct PickContactModal {
-    @State checkedUsers: UserInfo[] = []
-    @State checkedOrganizations: Organization[] = []
-    @State checkedEmployees: Employee[] = []
     @State userInfos?: UserInfo[] = undefined
-    @State @Watch('_onCheckFavGroup') checkedFavGroupInfo?: GroupInfo = undefined
-    initialCheckedUserIds: string[] = []
-    uncheckableUserIds: string[] = []
-    organization?: Organization
     public static PICK_RESULT: string = 'pickContactResult'
     @Link showPickContactModal: boolean
-    onCheckFavGroup?: (info: GroupInfo) => void
-    onCheckUser?: (users: UserInfo[]) => void
-
-    // TODO
-    // fixme
-    // 添加选人结束、选中favGroup 的处理方法
+    onClickUser?: (users: UserInfo) => void
 
     aboutToAppear() {
         loadContactUserInfos().then((userinfos: UserInfo[]) => {
             this.userInfos = userinfos;
-            if (this.initialCheckedUserIds) {
-                this.checkedUsers = this.userInfos.filter((info: UserInfo) => {
-                    return this.initialCheckedUserIds.indexOf(info.uid) >= 0
-                })
-            }
         })
-    }
-
-    _onCheckFavGroup() {
-        if (this.checkedFavGroupInfo) {
-            this.onCheckFavGroup?.(this.checkedFavGroupInfo)
-            this.showPickContactModal = false;
-        }
-    }
-
-    newlyCheckedUsers(): UserInfo[] {
-        return this.checkedUsers.filter(info => this.initialCheckedUserIds.indexOf(info.uid) === -1)
-    }
-
-    async allNewlyCheckedUsers(): Promise<UserInfo[]> {
-        let users = this.checkedUsers.filter(info => this.initialCheckedUserIds.indexOf(info.uid) === -1)
-        let checkedUserMap = new Map<string, UserInfo>()
-        users.forEach(u => {
-            checkedUserMap.set(u.uid, u);
-        })
-        if (this.checkedOrganizations.length > 0) {
-            let employees = await orgServer.getOrganizationEmployees(this.checkedOrganizations.map(o => o.id))
-            employees.forEach(e => {
-                let u = Employee.toUserInfo(e);
-                checkedUserMap.set(u.uid, u);
-            })
-        }
-        this.checkedEmployees.forEach(e => {
-            let u = Employee.toUserInfo(e);
-            checkedUserMap.set(u.uid, u);
-        })
-
-        return Array.from(checkedUserMap.values());
     }
 
     build() {
@@ -76,17 +28,11 @@ export default struct PickContactModal {
             Scroll() {
                 Column() {
                     if (this.userInfos) {
-                        CheckableUserListView({
-                            checkedUsers: $checkedUsers,
-                            checkedEmployees: $checkedEmployees,
-                            checkedOrganizations: $checkedOrganizations,
-                            checkedFavGroupInfo: $checkedFavGroupInfo,
+                        UserListView({
                             userInfos: this.userInfos,
-                            uncheckableUserIds: this.initialCheckedUserIds,
                             showCategory: true,
                             showSearchView: true,
-                            showFavGroup: true,
-                            showOrganization: true,
+                            onClickUser: this.onClickUser
                         })
                     } else {
                         Text('加载中..')
@@ -106,34 +52,7 @@ export default struct PickContactModal {
         .height('100%')
         .width('100%')
         .navBarPosition(NavBarPosition.Start)
-        // .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.START])
-        .menus(this.NavigationMenus())
-    }
 
-    @Builder
-    NavigationMenus() {
-        Row() {
-            Button('确定')
-                .type(ButtonType.Normal)
-                .height(30)
-                .width(60)
-                .margin({ right: 18 })
-                .enabled(this.newlyCheckedUsers().length + this.checkedOrganizations.length + this.checkedEmployees.length > 0)
-                .fontSize(14)
-                .borderRadius(4)// .backgroundColor(Color.Blue)
-                .onClick(async () => {
-                    let users = await this.allNewlyCheckedUsers();
-                    this.showPickContactModal = false
-                    if (this.onCheckUser) {
-                        this.onCheckUser(users)
-                    } else {
-                        LocalStorage.getShared()
-                            .setOrCreate<UserInfo[]>(PickContactModal.PICK_RESULT, this.newlyCheckedUsers());
-                    }
-                })
-        }
-        .height('100%')
-        .justifyContent(FlexAlign.Center)
-        .alignItems(VerticalAlign.Center)
+        // .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.START])
     }
 }

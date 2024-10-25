@@ -15,7 +15,7 @@ import { SearchModule } from '../../../common/Types'
 import ImageMessageContent from '@wfc/client/src/main/ets/wfc/messages/imageMessageContent'
 import VideoMessageContent from '@wfc/client/src/main/ets/wfc/messages/videoMessageContent'
 import CompositeMessageContent from '@wfc/client/src/main/ets/wfc/messages/compositeMessageContent'
-import PickContactModal from '../../picker/PickContactModal'
+import PickMultiContactModal from '../../picker/PickMultiContactModal'
 import GroupType from '@wfc/client/src/main/ets/wfc/model/groupType'
 import MessageContent from '@wfc/client/src/main/ets/wfc/messages/messageContent'
 import CallStartMessageContent from '@wfc/client/src/main/ets/wfc/av/messages/callStartMessageContent'
@@ -169,8 +169,8 @@ export default struct ForwardMessagePage {
     }
 
     @Builder
-    pickContactModal() {
-        PickContactModal({
+    pickMultiContactModal() {
+        PickMultiContactModal({
             showPickContactModal: $showPickContactModal,
             onCheckUser: (users: UserInfo[]) => {
                 // this.createConversation(users)
@@ -244,7 +244,7 @@ export default struct ForwardMessagePage {
                                         this.showPickContactModal = true
                                     })
                             }
-                            .bindContentCover($$this.showPickContactModal, this.pickContactModal(), {
+                            .bindContentCover($$this.showPickContactModal, this.pickMultiContactModal(), {
                                 modalTransition: ModalTransition.DEFAULT,
                                 onAppear: () => {
                                 },

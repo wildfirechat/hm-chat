@@ -1,15 +1,15 @@
-import PickContactModal from './PickContactModal'
+import PickMultiContactModal from './PickMultiContactModal'
 
 @Entry
 @Component
-export default struct PickContactPage {
+export default struct PickMultiContactPage {
     @State @Watch('onShowPickContactComponent') showPickContactComponent: boolean = true
     static TAG = 'PickContactPage'
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
 
     build() {
         NavDestination() {
-            PickContactModal({ showPickContactModal: $showPickContactComponent })
+            PickMultiContactModal({ showPickContactModal: $showPickContactComponent })
         }
         .hideTitleBar(true)
         .width('100%')

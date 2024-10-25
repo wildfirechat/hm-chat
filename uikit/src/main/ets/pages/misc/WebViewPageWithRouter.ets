@@ -2,7 +2,7 @@ import web_webview from '@ohos.web.webview'
 import WfcWebView from '../workspace/WfcWebView'
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
 import DSBridge from '../workspace/dsBridge'
-import PickContactModal from '../picker/PickContactModal'
+import PickMultiContactModal from '../picker/PickMultiContactModal'
 import { router } from '@kit.ArkUI'
 
 

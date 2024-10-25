@@ -5,7 +5,7 @@
         "pages/conversation/GroupConversationInfoPage",
         "pages/conversation/ChannelConversationInfoPage",
         "pages/conversation/forward/ForwardMessagePage",
-        "pages/picker/PickContactPage",
+        "pages/picker/PickMultiContactPage",
         "pages/contact/FriendRequestListPage",
         "pages/organization/PickOrganizationMemberPage",
         "pages/search/SearchUserPage",

@@ -25,7 +25,7 @@ import PCLoginPage from './pc/PCLoginPage'
 import WebViewPage from './misc/WebViewPage'
 import OrganizationTreePage from './organization/OrganizationTreePage'
 import PickOrganizationMemberPage from './organization/PickOrganizationMemberPage'
-import PickContactPage from './picker/PickContactPage'
+import PickMultiContactPage from './picker/PickMultiContactPage'
 import SearchConversationMessagePage from './search/SearchConversationMessagePage'
 import SearchPortalPage from './search/SearchPortalPage'
 import SearchUserPage from './search/SearchUserPage'
@@ -58,7 +58,7 @@ export class navigationDestinations {
     static ChannelListPage = 'channelListPage'
     static ChatroomListPage = 'chatroomListPage'
     static WebViewPage = 'webViewPage'
-    static PickContactPage = 'pickContactPage'
+    static PickMultiContactPage = 'pickContactPage'
     static SearchConversationMessagePage = 'searchConversationMessagePage'
     static UpdateUserInfoPage = 'updateUserInfoPage'
     static UpdateGroupAnnouncementPage = 'updateGroupAnnouncementPage'
@@ -124,8 +124,8 @@ export function UIKitPageMap(name: string) {
         ChatroomListPage()
     } else if (name === navigationDestinations.WebViewPage) {
         WebViewPage()
-    } else if (name === navigationDestinations.PickContactPage) {
-        PickContactPage()
+    } else if (name === navigationDestinations.PickMultiContactPage) {
+        PickMultiContactPage()
     } else if (name === navigationDestinations.SearchConversationMessagePage) {
         SearchConversationMessagePage()
     } else if (name === navigationDestinations.UpdateUserInfoPage) {

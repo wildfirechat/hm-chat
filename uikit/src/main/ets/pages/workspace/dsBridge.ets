@@ -106,7 +106,7 @@ export default class DSBridge {
     private chooseContacts = (arg: string) => {
         let args = JSON.parse(arg) as Record<string, Object>
         let cb = args._dscbstub as string;
-        this.mainNavPathStack.pushPathByName(navigationDestinations.PickContactPage, {} as Record<string, Object>)
+        this.mainNavPathStack.pushPathByName(navigationDestinations.PickMultiContactPage, {} as Record<string, Object>)
         this.asyncJsCallbacks[0] = cb;
 
     }

@@ -54,7 +54,6 @@ export default struct UserListView {
                 .constraintSize({ minWidth: '25%', maxWidth: this.searchInputViewMaxWidth })
                 .width('100%')
                 .height(60)
-                .margin({ left: 10, right: 10 })
             }
             List() {
                 LazyForEach(this.userInfoDataSource, (info: UIUserInfo) => {

@@ -344,7 +344,7 @@ export default struct SearchResultView {
         }, (resultWrapper: ConversationSearchResultWrapper) => this.conversationSearchResultKey(resultWrapper.conversationSearchResult))
 
         if (!this.expandConversationSearchResults && this.conversationSearchResults.length > 5) {
-            this.searchResultCategoryFooter(`展开剩余${this.channelSearchResults.length - 5}项`, () => {
+            this.searchResultCategoryFooter(`展开剩余${this.conversationSearchResults.length - 5}项`, () => {
                 this.expandConversationSearchResults = true
             })
         }

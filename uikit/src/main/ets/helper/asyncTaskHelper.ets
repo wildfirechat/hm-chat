@@ -93,16 +93,18 @@ function loadContactAndGroupTask(includeFavUser: boolean): UIUserInfo[] {
         }
     })
 
-    let favUserInfos = wfc.getUserInfos(wfc.getFavUsers())
-    let faUIUserInfos: UIUserInfo[] = favUserInfos.map(u => {
-        return {
-            showCategory: false,
-            category: '☆',
-            userInfo: u,
-        } as UIUserInfo
-    })
+    if (includeFavUser) {
+        let favUserInfos = wfc.getUserInfos(wfc.getFavUsers())
+        let faUIUserInfos: UIUserInfo[] = favUserInfos.map(u => {
+            return {
+                showCategory: false,
+                category: '☆',
+                userInfo: u,
+            } as UIUserInfo
+        })
 
-    groupedUsers.splice(0, 0, ...faUIUserInfos)
+        groupedUsers.splice(0, 0, ...faUIUserInfos)
+    }
 
     lastCategory = ''
     groupedUsers.forEach(gu => {

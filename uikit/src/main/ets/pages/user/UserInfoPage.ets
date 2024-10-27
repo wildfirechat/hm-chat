@@ -81,147 +81,155 @@ export default struct UserInfoPage {
 
     build() {
         NavDestination() {
-            Navigation() {
-                Column() {
-                    Row() {
-                        Image(this.userInfo!.portrait)
-                            .width(60)
-                            .height(60)
-                            .borderRadius(4)
-                            .onClick(() => {
-                                if (this.userInfo?.uid === wfc.getUserId()) {
-                                    this.updatePortrait()
-                                }
-                            })
-                        Column() {
-                            Text(this.userInfo!.displayName)
-                                .width('100%')
-                                .maxLines(1)
-                                .textOverflow({ overflow: TextOverflow.Ellipsis })
-                                .fontSize(20)
-                            Text(`野火ID： ${this.userInfo!.name}`)
-                                .width('100%')
-                                .maxLines(1)
-                                .textOverflow({ overflow: TextOverflow.Ellipsis })
-                                .fontSize(14)
-                        }
-                        .padding({ left: 10 })
-                        .layoutWeight(1)
-                        .alignItems(HorizontalAlign.Start)
-                    }
-                    .padding(10)
-                    .width('100%')
-                    .justifyContent(FlexAlign.Start)
-                    .backgroundColor(Color.White)
-
-                    Divider()
-                    OptionItemView({
-                        title: '设置昵称或别名',
-                        showRightArrow: true,
-                        showDivider: false
-                    })
+            Column() {
+                Row() {
+                    Image(this.userInfo!.portrait)
+                        .width(60)
+                        .height(60)
+                        .borderRadius(4)
                         .onClick(() => {
-                            this.mainNavPathStack.pushPathByName(navigationDestinations.UpdateUserNickNameOrAliasPage, {
-                                'userInfo': this.userInfo,
+                            if (this.userInfo?.uid === wfc.getUserId()) {
+                                this.updatePortrait()
+                            }
+                        })
+                    Column() {
+                        Text(this.userInfo!.displayName)
+                            .width('100%')
+                            .maxLines(1)
+                            .textOverflow({ overflow: TextOverflow.Ellipsis })
+                            .fontSize(20)
+                        Text(`野火ID： ${this.userInfo!.name}`)
+                            .width('100%')
+                            .maxLines(1)
+                            .textOverflow({ overflow: TextOverflow.Ellipsis })
+                            .fontSize(14)
+                    }
+                    .padding({ left: 10 })
+                    .layoutWeight(1)
+                    .alignItems(HorizontalAlign.Start)
+                }
+                .padding(10)
+                .width('100%')
+                .justifyContent(FlexAlign.Start)
+                .backgroundColor(Color.White)
+
+                Divider()
+                OptionItemView({
+                    title: '设置昵称或别名',
+                    showRightArrow: true,
+                    showDivider: false
+                })
+                    .onClick(() => {
+                        this.mainNavPathStack.pushPathByName(navigationDestinations.UpdateUserNickNameOrAliasPage, {
+                            'userInfo': this.userInfo,
+                        } as Record<string, Object>)
+                    })
+
+                Column() {
+                    Text('发消息')
+                        .width('100%')
+                        .padding(15)
+                        .textAlign(TextAlign.Center)
+                        .stateStyles({
+                            pressed: {
+                                .backgroundColor('#E5E5E5')
+                            },
+                            normal: {
+                                .backgroundColor(Color.White)
+                            }
+                        })
+                        .onClick(() => {
+                            this.mainNavPathStack.pushPathByName(navigationDestinations.ConversationPage, {
+                                'conversation': new Conversation(ConversationType.Single, this.userInfo!.uid, 0)
                             } as Record<string, Object>)
                         })
 
-                    Column() {
-                        Text('发消息')
-                            .width('100%')
-                            .padding(15)
-                            .textAlign(TextAlign.Center)
-                            .clickEffect({ level: ClickEffectLevel.HEAVY })
-                            .onClick(() => {
-                                this.mainNavPathStack.pushPathByName(navigationDestinations.ConversationPage, {
-                                    'conversation': new Conversation(ConversationType.Single, this.userInfo!.uid, 0)
-                                } as Record<string, Object>)
+                    Divider()
+                        .width('100%')
+
+                    Text('音视频通话')
+                        .width('100%')
+                        .padding(15)
+                        .textAlign(TextAlign.Center)
+                        .stateStyles({
+                            pressed: {
+                                .backgroundColor('#E5E5E5')
+                            },
+                            normal: {
+                                .backgroundColor(Color.White)
+                            }
+                        })
+                        .onClick(() => {
+                            this.voipDialogController = new CustomDialogController({
+                                builder: ActionSheetDialog({
+                                    cancel: '取消',
+                                    controller: this.voipDialogController,
+                                    sheets: [
+                                        {
+                                            title: '语音通话',
+                                            action: () => {
+                                                let conversation = new Conversation(ConversationType.Single, this.userInfo!.uid, 0)
+                                                avenginekit.startCall(conversation, [this.userInfo!.uid], true)
+                                            }
+                                        },
+                                        {
+                                            title: '视频通话',
+                                            action: () => {
+                                                let conversation = new Conversation(ConversationType.Single, this.userInfo!.uid, 0)
+                                                avenginekit.startCall(conversation, [this.userInfo!.uid], false)
+                                            }
+                                        },
+                                    ]
+                                }),
+                                autoCancel: true,
+                                alignment: DialogAlignment.Center,
+                                // gridCount: 4,
+                                customStyle: false
                             })
 
-                        Divider()
-                            .width('100%')
-
-                        Text('音视频通话')
-                            .width('100%')
-                            .padding(15)
-                            .textAlign(TextAlign.Center)
-                            .clickEffect({ level: ClickEffectLevel.HEAVY })
-                            .onClick(() => {
-                                this.voipDialogController = new CustomDialogController({
-                                    builder: ActionSheetDialog({
-                                        cancel: '取消',
-                                        controller: this.voipDialogController,
-                                        sheets: [
-                                            {
-                                                title: '语音通话',
-                                                action: () => {
-                                                    let conversation = new Conversation(ConversationType.Single, this.userInfo!.uid, 0)
-                                                    avenginekit.startCall(conversation, [this.userInfo!.uid], true)
-                                                }
-                                            },
-                                            {
-                                                title: '视频通话',
-                                                action: () => {
-                                                    let conversation = new Conversation(ConversationType.Single, this.userInfo!.uid, 0)
-                                                    avenginekit.startCall(conversation, [this.userInfo!.uid], false)
-                                                }
-                                            },
-                                        ]
-                                    }),
-                                    autoCancel: true,
-                                    alignment: DialogAlignment.Center,
-                                    // gridCount: 4,
-                                    customStyle: false
-                                })
-
-                                this.voipDialogController.open()
-                            })
-                    }
-                    .backgroundColor(Color.White)
-                    .margin({ top: 20 })
-
-                    if (!this.isMyFriend && this.userInfo!.uid !== wfc.getUserId()) {
-                        Text('添加到通讯录')
-                            .width('100%')
-                            .padding(15)
-                            .margin({ top: 20 })
-                            .textAlign(TextAlign.Center)
-                            .backgroundColor(Color.White)
-                            .onClick(() => {
-                                let selfUserInfo = wfc.getUserInfo(wfc.getUserId())
-                                wfc.sendFriendRequest(this.userInfo!.uid, '我是 ' + selfUserInfo.displayName, '', () => {
-                                    showToast('已发送好友请求')
-                                }, err => {
-                                    showToast('发送好友请求失败：' + err)
-
-                                })
-                            })
-                    }
+                            this.voipDialogController.open()
+                        })
                 }
-                .width('100%')
-                .height('100%')
-                .backgroundColor('#EDEDED')
+                .backgroundColor(Color.White)
+                .margin({ top: 20 })
+
+                if (!this.isMyFriend && this.userInfo!.uid !== wfc.getUserId()) {
+                    Text('添加到通讯录')
+                        .width('100%')
+                        .padding(15)
+                        .margin({ top: 20 })
+                        .textAlign(TextAlign.Center)
+                        .backgroundColor(Color.White)
+                        .onClick(() => {
+                            let selfUserInfo = wfc.getUserInfo(wfc.getUserId())
+                            wfc.sendFriendRequest(this.userInfo!.uid, '我是 ' + selfUserInfo.displayName, '', () => {
+                                showToast('已发送好友请求')
+                            }, err => {
+                                showToast('发送好友请求失败：' + err)
+
+                            })
+                        })
+                }
             }
             .width('100%')
             .height('100%')
-            .title('用户信息')
-            .titleMode(NavigationTitleMode.Mini)
-            .hideBackButton(false)
-            .menus([
-                {
-                    value: '',
-                    icon: 'resources/base/media/ic_public_more.svg',
-                    action: () => {
-                        this.mainNavPathStack.pushPathByName(navigationDestinations.UpdateUserInfoPage, {
-                            'userInfo': this.userInfo
-                        } as Record<string, Object>)
-
-                    }
-                }
-            ])
+            .backgroundColor('#EDEDED')
         }
-        .hideTitleBar(true)
+        .hideTitleBar(false)
+        .title('用户信息')
         .height('100%')
         .width('100%')
+        .menus([
+            {
+                value: '',
+                icon: 'resources/base/media/ic_public_more.svg',
+                action: () => {
+                    this.mainNavPathStack.pushPathByName(navigationDestinations.UpdateUserInfoPage, {
+                        'userInfo': this.userInfo
+                    } as Record<string, Object>)
+
+                }
+            }
+        ])
     }
 }

@@ -74,12 +74,16 @@ export default struct ContactListTab {
         wfc.eventEmitter!.on(EventType.ConnectionStatusChanged, this.onConnectionStatusChange)
         wfc.eventEmitter!.on(EventType.UserOnlineEvent, this.onUserOnlineState)
         wfc.eventEmitter?.on(EventType.UserInfosUpdate, this.onUserInfosUpdate)
+        wfc.eventEmitter?.on(EventType.SettingUpdate, this.onSettingUpdate)
+        wfc.eventEmitter?.on(EventType.FriendListUpdate, this.onFriendListUpdate)
     }
 
     aboutToDisappear() {
         wfc.eventEmitter!.off(EventType.ConnectionStatusChanged, this.onConnectionStatusChange)
         wfc.eventEmitter!.off(EventType.UserOnlineEvent, this.onUserOnlineState)
         wfc.eventEmitter?.off(EventType.UserInfosUpdate, this.onUserInfosUpdate)
+        wfc.eventEmitter?.off(EventType.SettingUpdate, this.onSettingUpdate)
+        wfc.eventEmitter?.off(EventType.FriendListUpdate, this.onFriendListUpdate)
     }
 
     onConnectionStatusChange = (status: number) => {
@@ -88,6 +92,18 @@ export default struct ContactListTab {
         }
     }
     onUserInfosUpdate = (infos: UserInfo[]) => {
+        this.loadContact()
+    }
+    // TODO
+    // 优化
+    // 仅是 FavoriteUser 时，需要更新
+    // 并且目前，星标好友时，好像未触发
+    onSettingUpdate = () => {
+        if (wfc.getConnectionStatus() === ConnectionStatus.ConnectionStatusConnected) {
+            this.loadContact()
+        }
+    }
+    onFriendListUpdate = () => {
         this.loadContact()
     }
     onUserOnlineState = (status: number) => {

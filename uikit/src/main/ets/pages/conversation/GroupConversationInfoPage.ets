@@ -20,6 +20,7 @@ import { imageThumbnail, imageThumbnailFile } from '../../helper/imageVideoHelpe
 import { selectImage } from '../../helper/mediaHelper';
 import MessageContentMediaType from '@wfc/client/src/main/ets/wfc/messages/messageContentMediaType';
 import ModifyGroupInfoType from '@wfc/client/src/main/ets/wfc/model/modifyGroupInfoType';
+import { ConfirmDialog } from '@kit.ArkUI';
 
 @Preview
 @Entry
@@ -524,38 +525,25 @@ export default struct GroupConversationInfoPage {
                             }
                         })
                         .onClick(() => {
-                            showToast('TODO')
-                            // let dialogController: CustomDialogController = new CustomDialogController({
-                            //     builder: ActionSheetDialog({
-                            //         title: 'Test',
-                            //         sheets: [
-                            //             {
-                            //                 title: '项目 1',
-                            //                 action: () => {
-                            //                     showToast('000000000')
-                            //                 }
-                            //             },
-                            //             {
-                            //                 title: '项目 2',
-                            //                 action: () => {
-                            //                     showToast('0000000002')
-                            //                 }
-                            //             },
-                            //             {
-                            //                 title: '项目 3',
-                            //                 action: () => {
-                            //                     showToast('0000000003')
-                            //                 }
-                            //             }
-                            //         ]
-                            //     }),
-                            //     autoCancel: true,
-                            //     alignment: DialogAlignment.Default,
-                            //     gridCount: 4,
-                            //     customStyle: false
-                            // })
-                            //
-                            // dialogController.open()
+                            AlertDialog.show({
+                                // title: '解散群组',
+                                message: '解散群组',
+                                primaryButton: {
+                                    value: '确定',
+                                    action: () => {
+                                        wfc.dismissGroup(this.groupInfo.target, [0], null, () => {
+                                            this.mainNavPathStack.clear()
+                                        }, err => {
+                                            showToast('解散群组失败 ' + err)
+                                        })
+                                    }
+                                },
+                                secondaryButton: {
+                                    value: '取消',
+                                    action: () => {
+                                    }
+                                }
+                            })
                         })
                     }
                     .margin({ top: 10, bottom: 20 })

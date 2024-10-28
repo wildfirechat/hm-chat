@@ -43,9 +43,8 @@ export default class DSBridge {
 
         let script = `window._handleMessageFromNative(${JSON.stringify(obj, null, '')})`
         this.webviewController.runJavaScript(script).then(value => {
-            console.log('xxxxxxx', value)
         }).catch((r: Error) => {
-            console.log('xxxxxxx ', r)
+            console.log('runJavaScript error', r)
         })
     }
     private toast = (arg: string) => {
@@ -119,7 +118,7 @@ export default class DSBridge {
         'chooseContacts': this.chooseContacts
     }
     private call = (method: string, arg: string) => {
-        console.log('xxx call', method, arg)
+        console.log('call', method, arg)
 
         let argObj = JSON.parse(arg) as Record<string, Object>;
 

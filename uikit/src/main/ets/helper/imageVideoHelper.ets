@@ -79,7 +79,6 @@ export async function imageThumbnailFile(context: Context, uri: string, wh: Size
             let packOpts: image.PackingOption = { format: "image/jpeg", quality: 50 };
             const imagePackerApi = image.createImagePacker();
             await imagePackerApi.packToFile(pixelMap, file.fd, packOpts)
-            console.log('xxxxxx', fs.statSync(file.fd).size)
             fs.closeSync(file)
             return path;
         } catch (e) {

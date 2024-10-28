@@ -111,7 +111,6 @@ export struct ImageItemView {
      * 在图片消失时，将当前图片的信息设置为默认值
      */
     resetCurrentImageInfo(): void {
-        console.log('xxxxxxxxx reset')
         this.imageScaleInfo.reset();
         this.imageOffsetInfo.reset();
         this.matrix = matrix4.identity().copy();
@@ -146,7 +145,7 @@ export struct ImageItemView {
                     y: this.imageOffsetInfo.currentY
                 })
                 .onTouch(() => {
-                    console.log('xxxx image on touch')
+                    console.log('image on touch')
                 })
             // .hitTestBehavior(this.isEnableSwipe ? HitTestMode.Transparent: HitTestMode.Default)
         }
@@ -155,7 +154,7 @@ export struct ImageItemView {
             this.resetCurrentImageInfo();
         })
         .onTouch(event => {
-            console.log('xxxx stack on touch')
+            console.log('stack on touch')
         })
         .hitTestBehavior(this.isEnableSwipe ? HitTestMode.Transparent : HitTestMode.Default)
 

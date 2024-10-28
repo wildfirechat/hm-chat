@@ -131,7 +131,7 @@ export default struct SingleAudioCallPage {
     }
 
     onStateChange(state: PiPWindow.PiPState, reason: string) {
-        console.log('xxxxx onStateChange', state, reason)
+        console.log('onStateChange', state, reason)
         // switch (state) {
         //     case PiPWindow.PiPState.ABOUT_TO_START:
         //         this.curState = 'ABOUT_TO_START';
@@ -166,7 +166,7 @@ export default struct SingleAudioCallPage {
     }
 
     onActionEvent(event: PiPWindow.PiPActionEventType, status: number | undefined) {
-        console.log('xxxx onActionEvent', event, status)
+        console.log('onActionEvent', event, status)
         // switch (event) {
         //     case 'playbackStateChanged':
         //         if (status === 0) {

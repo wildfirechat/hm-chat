@@ -96,7 +96,7 @@ export default struct SingleVideoCallPage {
         if (!this.pipController) {
             this.createPipController()
                 .catch((reason: BusinessError) => {
-                    console.log('xxxx create pip controller error', reason.message);
+                    console.log('create pip controller error', reason.message);
                 })
         }
     }
@@ -198,7 +198,7 @@ export default struct SingleVideoCallPage {
             this.onActionEvent(event, status);
         });
         this.pipController.setAutoStartEnabled(true)
-        console.log('xxxxxxxx createPipController')
+        console.log('createPipController')
     }
 
     destroyPipController() {
@@ -212,7 +212,7 @@ export default struct SingleVideoCallPage {
     }
 
     onStateChange(state: PiPWindow.PiPState, reason: string) {
-        console.log('xxxxx onStateChange', state, reason)
+        console.log('onStateChange', state, reason)
         // switch (state) {
         //     case PiPWindow.PiPState.ABOUT_TO_START:
         //         this.curState = 'ABOUT_TO_START';
@@ -247,7 +247,7 @@ export default struct SingleVideoCallPage {
     }
 
     onActionEvent(event: PiPWindow.PiPActionEventType, status: number | undefined) {
-        console.log('xxxx onActionEvent', event, status)
+        console.log('onActionEvent', event, status)
         // switch (event) {
         //     case 'playbackStateChanged':
         //         if (status === 0) {
@@ -299,10 +299,10 @@ export default struct SingleVideoCallPage {
                         .onClick(async () => {
                             this.pipController?.startPiP()
                                 .catch((reason: BusinessError) => {
-                                    console.log('xxxxxx errr', reason.message)
+                                    console.log('startPiP errr', reason.message)
                                 })
                             this.mainNavPathStack.pop()
-                            console.log('xxxx start pip')
+                            console.log('stop pip')
                         })
 
                     Text(this.durationStr)

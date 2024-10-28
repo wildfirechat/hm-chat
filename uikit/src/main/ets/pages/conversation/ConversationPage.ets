@@ -361,7 +361,6 @@ export default struct ConversationPage {
     }
     onReadMessage = (readEntries: ReadEntry[]) => {
         this.readEntries = wfc.getConversationRead(this.conversation!);
-        console.log('xxxx onReadMessage')
     }
     onUserInfosUpdate = (userInfos: UserInfo[]) => {
         if (this.conversation?.type === ConversationType.Single) {

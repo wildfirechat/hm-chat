@@ -1416,7 +1416,6 @@ class WfcImpl {
 
     getConversationInfoList(types: number[], lines: number[]): ConversationInfo[] {
         let conversationListStr: string = protoProxy.getConversationInfos(types, lines);
-        console.log('xxxxxxxxxxxxxxx', conversationListStr);
         // TODO convert to conversationInfo, messageContent
 
         let conversationInfoList: ConversationInfo[] = [];

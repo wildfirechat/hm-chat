@@ -20,10 +20,8 @@ import { imageThumbnail, imageThumbnailFile } from '../../helper/imageVideoHelpe
 import { selectImage } from '../../helper/mediaHelper';
 import MessageContentMediaType from '@wfc/client/src/main/ets/wfc/messages/messageContentMediaType';
 import ModifyGroupInfoType from '@wfc/client/src/main/ets/wfc/model/modifyGroupInfoType';
-import { ConfirmDialog } from '@kit.ArkUI';
 
 @Preview
-@Entry
 @Component
 export default struct GroupConversationInfoPage {
     @State groupInfo: GroupInfo = {} as GroupInfo
@@ -351,8 +349,8 @@ export default struct GroupConversationInfoPage {
                             })
                         OptionItemView({ title: '文件记录', showDivider: false })
                             .onClick(() => {
-                                this.mainNavPathStack.pushPathByName(navigationDestinations.ConversationFileRecordPage, {
-                                    'conversation': this.conversationInfo?.conversation
+                                this.mainNavPathStack.pushPathByName(navigationDestinations.FileRecordPage, {
+                                    'conversation': this.conversationInfo?.conversation,
                                 } as Record<string, Object>)
                             })
                     }

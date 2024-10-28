@@ -146,8 +146,8 @@ export default struct SingleConversationInfoPage {
                         })
                     OptionItemView({ title: '文件记录' })
                         .onClick(() => {
-                            this.mainNavPathStack.pushPathByName(navigationDestinations.ConversationFileRecordPage, {
-                                'conversation': this.conversationInfo?.conversation
+                            this.mainNavPathStack.pushPathByName(navigationDestinations.FileRecordPage, {
+                                'conversation': this.conversationInfo?.conversation,
                             } as Record<string, Object>)
                         })
                 }

@@ -2,7 +2,6 @@ import ChannelListPage from './channel/ChannelListPage'
 import ChatroomListPage from './chatroom/ChatroomListPage'
 import FriendRequestListPage from './contact/FriendRequestListPage'
 import ChannelConversationInfoPage from './conversation/ChannelConversationInfoPage'
-import ConversationFileRecordPage from './conversation/ConversationFileRecordPage'
 import ConversationPage from './conversation/ConversationPage'
 import ForwardMessagePage from './conversation/forward/ForwardMessagePage'
 import GroupConversationInfoPage from './conversation/GroupConversationInfoPage'
@@ -73,7 +72,6 @@ export class navigationDestinations {
     static FavRecordPage = 'favRecordPage'
     static FileRecordPortalPage = 'fileRecordPortalPage'
     static FileRecordPage = 'fileRecordPage'
-    static ConversationFileRecordPage = 'conversationFileRecordPage'
     static NotificationPage = 'messageAndNotificationPage'
     static CompositeMessagePreviewPage = 'compositeMessagePreviewPage'
     static OrganizationTreePage = 'organizationTreePage'
@@ -152,8 +150,6 @@ export function UIKitPageMap(name: string) {
         FileRecordPortalPage()
     } else if (name === navigationDestinations.FileRecordPage) {
         FileRecordPage()
-    } else if (name === navigationDestinations.ConversationFileRecordPage) {
-        ConversationFileRecordPage()
     } else if (name === navigationDestinations.NotificationPage) {
         MessageAndNotificationPage()
     } else if (name === navigationDestinations.CompositeMessagePreviewPage) {

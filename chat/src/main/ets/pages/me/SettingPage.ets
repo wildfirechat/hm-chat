@@ -20,6 +20,9 @@ export default struct SettingPage {
                 OptionItemView({
                     title: '隐私设置'
                 })
+                    .onClick(() => {
+                        showToast('TODO')
+                    })
 
                 Column() {
                     OptionItemView({
@@ -32,6 +35,9 @@ export default struct SettingPage {
                     OptionItemView({
                         title: ' 诊断'
                     })
+                        .onClick(() => {
+                            showToast('TODO')
+                        })
                 }
                 .margin({ top: 10 })
                 .backgroundColor(Color.White)

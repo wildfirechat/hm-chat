@@ -82,6 +82,9 @@ export default struct UpdateUserInfoPage {
                     .onClick(() => {
                         wfc.deleteFriend(this.userInfo!.uid, () => {
                             showToast('删除好友成功')
+                            wfc.setFavUser(this.userInfo!.uid, false, () => {
+                            }, err => {
+                            })
                             this.mainNavPathStack.clear()
                         }, err => {
                             showToast('删除好友失败 ' + err)

@@ -4,6 +4,7 @@ import { BusinessError } from '@kit.BasicServicesKit';
 import { LengthUnit, router } from '@kit.ArkUI';
 import Config from '@wfc/client/src/main/ets/config';
 import wfc from '@wfc/client'
+import { navigationDestinations } from '@wfc/uikit/src/main/ets/pages/navigationConfig';
 
 @Preview
 @Entry
@@ -71,36 +72,27 @@ export default struct AboutPage {
                         title: getContext().resourceManager.getStringSync($r('app.string.feature_introduction').id),
                         showDivider: true
                     }).onClick(() => {
-                        router.pushUrl({
-                            url: 'pages/misc/WebViewPageWithRouter',
-                            params: {
-                                url: 'https://docs.wildfirechat.cn/',
-                                title: '野火IM功能介绍'
-                            }
-                        }, router.RouterMode.Standard)
+                        this.mainNavPathStack.pushPathByName(navigationDestinations.WebViewPage, {
+                            'url': 'https://docs.wildfirechat.cn/',
+                            'title': '野火IM功能介绍'
+                        } as Record<string, Object>)
                     })
                     OptionItemView({
                         title: getContext().resourceManager.getStringSync($r('app.string.user_agreement').id),
                         showDivider: true
                     }).onClick(() => {
-                        router.pushUrl({
-                            url: 'pages/misc/WebViewPageWithRouter',
-                            params: {
-                                url: 'https://www.wildfirechat.net/wildfirechat_user_agreement.html',
-                                title: '野火IM用户协议'
-                            }
-                        }, router.RouterMode.Standard)
+                        this.mainNavPathStack.pushPathByName(navigationDestinations.WebViewPage, {
+                            'url': 'https://www.wildfirechat.net/wildfirechat_user_agreement.html',
+                            'title': '野火IM用户协议'
+                        } as Record<string, Object>)
                     })
                     OptionItemView({
                         title: getContext().resourceManager.getStringSync($r('app.string.privacy_policy').id),
                     }).onClick(() => {
-                        router.pushUrl({
-                            url: 'pages/misc/WebViewPageWithRouter',
-                            params: {
-                                url: 'https://www.wildfirechat.net/wildfirechat_user_privacy.html',
-                                title: '野火IM个人信息保护政策'
-                            }
-                        }, router.RouterMode.Standard)
+                        this.mainNavPathStack.pushPathByName(navigationDestinations.WebViewPage, {
+                            'url': 'https://www.wildfirechat.net/wildfirechat_user_privacy.html',
+                            'title': '野火IM个人信息保护政策'
+                        } as Record<string, Object>)
                     })
                 }
                 .backgroundColor(Color.White)

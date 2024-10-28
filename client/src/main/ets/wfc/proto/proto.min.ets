@@ -57,6 +57,7 @@ import { fileUri } from '@kit.CoreFileKit';
 import fs from '@ohos.file.fs';
 import { atob } from '../util/base64.min';
 import { deviceInfo } from '@kit.BasicServicesKit';
+import UserSettingEntry from '../model/userSettingEntry';
 
 /**
  * java long 类型在 javascript 类型的映射说明:
@@ -532,10 +533,10 @@ class WfcImpl {
     getMyGroupList(): GroupInfo[] {
         let settings = this.getUserSettings(UserSettingScope.FavoriteGroup);
         let groupInfos = settings.filter(setting => {
-            return Object.values(setting)[1] === '1'
+            return setting.value === '1'
         })
             .map(setting => {
-                let groupId = Object.values(setting)[0]
+                let groupId = setting.key
                 return this.getGroupInfo(groupId, false)
             });
         return groupInfos;
@@ -689,6 +690,7 @@ class WfcImpl {
             if (successCB) {
                 successCB();
             }
+            this.onSettingUpdate()
         }, (errorCode: number) => {
             if (failCB) {
                 failCB(errorCode);
@@ -1172,9 +1174,9 @@ class WfcImpl {
         return protoProxy.getUserSetting(scope, key);
     }
 
-    getUserSettings(scope: number): Record<string, string>[] {
+    getUserSettings(scope: number): UserSettingEntry[] {
         let result: string = protoProxy.getUserSettings(scope);
-        return JSON.parse(result);
+        return JSON.parse(result) as UserSettingEntry[];
     }
 
     async setUserSetting(scope: number, key: string, value: string, successCB: SuccessCallback, failCB: FailCallback) {
@@ -1414,7 +1416,7 @@ class WfcImpl {
 
     getConversationInfoList(types: number[], lines: number[]): ConversationInfo[] {
         let conversationListStr: string = protoProxy.getConversationInfos(types, lines);
-        // console.log(conversationListStr);
+        console.log('xxxxxxxxxxxxxxx', conversationListStr);
         // TODO convert to conversationInfo, messageContent
 
         let conversationInfoList: ConversationInfo[] = [];

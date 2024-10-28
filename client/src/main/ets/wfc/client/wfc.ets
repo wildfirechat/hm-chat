@@ -42,6 +42,7 @@ import UserOnlineState from '../model/userOnlineState';
 import UserSettingScope from './userSettingScope';
 import PCOnlineInfo from '../model/pcOnlineInfo';
 import fs from '@ohos.file.fs';
+import UserSettingEntry from '../model/userSettingEntry';
 
 const textEncoder = new util.TextEncoder('utf-8')
 
@@ -1008,7 +1009,7 @@ export class WfcManager {
      * @param scope 命名空间，可选值参考{@link UserSettingScope}
      * @returns {Map} key-value
      */
-    getUserSettings(scope: number): Record<string, string>[] {
+    getUserSettings(scope: number): UserSettingEntry[] {
         return impl.getUserSettings(scope);
     }
 

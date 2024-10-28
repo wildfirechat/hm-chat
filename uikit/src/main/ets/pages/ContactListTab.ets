@@ -9,6 +9,7 @@ import orgServer from '../api/orgServer'
 import Config from '@wfc/client/src/main/ets/config'
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
 import { showToast } from '../common/utils/Toast'
+import UserSettingScope from '@wfc/client/src/main/ets/wfc/client/userSettingScope'
 
 interface ContactListHeader {
     title: string,
@@ -21,14 +22,7 @@ interface ContactListHeader {
 
 @Component
 export default struct ContactListTab {
-    private contactDataSource: ContactDataSource = new ContactDataSource()
     @Link contactTabUnreadCount: number
-    private contactCategories = [
-        '↑', '☆', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
-        'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R',
-        'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '#'
-    ]
-    private scroller: Scroller = new Scroller()
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
     @State contactListHeaders: ContactListHeader[] = [
         {
@@ -62,6 +56,14 @@ export default struct ContactListTab {
             }
         },
     ]
+    private contactDataSource: ContactDataSource = new ContactDataSource()
+    private contactCategories = [
+        '↑', '☆', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+        'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R',
+        'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '#'
+    ]
+    private scroller: Scroller = new Scroller()
+    private lastFavUserCount = 0
 
     aboutToAppear() {
         let unreadFriendRequestCount = wfc.getUnreadFriendRequestCount()
@@ -76,6 +78,9 @@ export default struct ContactListTab {
         wfc.eventEmitter?.on(EventType.UserInfosUpdate, this.onUserInfosUpdate)
         wfc.eventEmitter?.on(EventType.SettingUpdate, this.onSettingUpdate)
         wfc.eventEmitter?.on(EventType.FriendListUpdate, this.onFriendListUpdate)
+
+        let record: Record<string, string> = { "a": "b" }
+        this.lastFavUserCount = wfc.getUserSettings(UserSettingScope.FavoriteUser).filter(record => record.value === '1').length
     }
 
     aboutToDisappear() {
@@ -92,15 +97,17 @@ export default struct ContactListTab {
         }
     }
     onUserInfosUpdate = (infos: UserInfo[]) => {
-        this.loadContact()
-    }
-    // TODO
-    // 优化
-    // 仅是 FavoriteUser 时，需要更新
-    // 并且目前，星标好友时，好像未触发
-    onSettingUpdate = () => {
         if (wfc.getConnectionStatus() === ConnectionStatus.ConnectionStatusConnected) {
             this.loadContact()
+        }
+    }
+    onSettingUpdate = () => {
+        let favUserCount = wfc.getUserSettings(UserSettingScope.FavoriteUser).filter(record => record.value === '1').length
+        if (this.lastFavUserCount !== favUserCount) {
+            this.lastFavUserCount = favUserCount
+            if (wfc.getConnectionStatus() === ConnectionStatus.ConnectionStatusConnected) {
+                this.loadContact()
+            }
         }
     }
     onFriendListUpdate = () => {

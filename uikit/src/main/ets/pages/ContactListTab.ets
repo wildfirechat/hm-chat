@@ -79,7 +79,6 @@ export default struct ContactListTab {
         wfc.eventEmitter?.on(EventType.SettingUpdate, this.onSettingUpdate)
         wfc.eventEmitter?.on(EventType.FriendListUpdate, this.onFriendListUpdate)
 
-        let record: Record<string, string> = { "a": "b" }
         this.lastFavUserCount = wfc.getUserSettings(UserSettingScope.FavoriteUser).filter(record => record.value === '1').length
     }
 

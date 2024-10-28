@@ -62,7 +62,7 @@
         ],
         "extensionAbilities": [
             {
-                "description": "DemoBackupExtension",
+                "description": "WfcBackupExtension",
                 "icon": "$media:app_icon",
                 "name": "BackupExtensionAbility",
                 "srcEntry": "./ets/backupExtension/BackupExtension.ets",

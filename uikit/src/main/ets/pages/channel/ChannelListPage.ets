@@ -93,7 +93,7 @@ export default struct ChannelListPage {
             .menus([
                 {
                     value: '',
-                    icon: "common/image/ic_add.png",
+                    icon: "resources/base/media/ic_add.png",
                     action: () => {
                         this.mainNavPathStack.pushPathByName(navigationDestinations.SearchPortalPage, {
                             'channel': true

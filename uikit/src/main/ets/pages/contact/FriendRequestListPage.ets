@@ -4,7 +4,6 @@ import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import FriendRequest from '@wfc/client/src/main/ets/wfc/model/friendRequest'
 import { navigationDestinations } from '../navigationConfig'
 
-@Entry
 @Component
 @Preview
 export default struct FriendRequestListPage {
@@ -71,7 +70,7 @@ export default struct FriendRequestListPage {
             .menus([
                 {
                     value: '',
-                    icon: "common/image/ic_add.png",
+                    icon: "resources/base/media/ic_add.png",
                     action: () => {
                         this.mainNavPathStack.pushPathByName(navigationDestinations.SearchUserPage, {} as Record<string, Object>)
                     }

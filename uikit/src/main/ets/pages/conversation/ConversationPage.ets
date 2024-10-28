@@ -88,6 +88,7 @@ export default struct ConversationPage {
         wfc.eventEmitter!.on(EventType.RecallMessage, this.onRecallMessage)
         wfc.eventEmitter!.on(EventType.MessageRead, this.onReadMessage)
         wfc.eventEmitter!.on(EventType.UserInfosUpdate, this.onUserInfosUpdate)
+        wfc.eventEmitter!.on(EventType.FriendListUpdate, this.onFriendListUpdate)
         wfc.eventEmitter!.on(EventType.GroupInfosUpdate, this.onGroupInfosUpdate)
         wfc.eventEmitter!.on(EventType.ChannelInfosUpdate, this.onChannelInfosUpdate)
         wfc.eventEmitter!.on(EventType.ConversationInfoUpdate, this.onConversationInfoUpdate)
@@ -134,6 +135,7 @@ export default struct ConversationPage {
             wfc.quitChatroom(this.conversation!.target, null, null)
         }
         wfc.eventEmitter!.off(EventType.UserInfosUpdate, this.onUserInfosUpdate)
+        wfc.eventEmitter!.off(EventType.FriendListUpdate, this.onFriendListUpdate)
         wfc.eventEmitter!.off(EventType.GroupInfosUpdate, this.onGroupInfosUpdate)
         wfc.eventEmitter!.off(EventType.ChannelInfosUpdate, this.onChannelInfosUpdate)
         wfc.eventEmitter!.off(EventType.ConversationInfoUpdate, this.onConversationInfoUpdate)
@@ -361,6 +363,17 @@ export default struct ConversationPage {
     }
     onReadMessage = (readEntries: ReadEntry[]) => {
         this.readEntries = wfc.getConversationRead(this.conversation!);
+    }
+    onFriendListUpdate = (friendIds: string[]) => {
+        if (this.conversation?.type === ConversationType.Single) {
+            let index = friendIds.findIndex(id => id === this.conversation?.target)
+            if (index >= 0) {
+                Utils.computeConversationItemPortraitAndName(this.conversation)
+                    .then(value => {
+                        this.title = value.name
+                    })
+            }
+        }
     }
     onUserInfosUpdate = (userInfos: UserInfo[]) => {
         if (this.conversation?.type === ConversationType.Single) {

@@ -30,7 +30,10 @@ export default class Utils {
         Utils.rect_right = JSON.parse('[' + rectInfo[1] + ']')[0]
         Utils.rect_bottom = JSON.parse('[' + rectInfo[1] + ']')[1]
         return Utils.rect_value = {
-            "left": Utils.rect_left, "top": Utils.rect_top, "right": Utils.rect_right, "bottom": Utils.rect_bottom
+            "left": Utils.rect_left,
+            "top": Utils.rect_top,
+            "right": Utils.rect_right,
+            "bottom": Utils.rect_bottom
         }
     }
 
@@ -41,7 +44,7 @@ export default class Utils {
                 let userInfo = wfc.getUserInfo(conversation.target)
                 resolve({
                     portrait: userInfo.portrait,
-                    name: userInfo.displayName
+                    name: userInfo.friendAlias ? userInfo.friendAlias : userInfo.displayName
                 })
                 // fixme
                 // wfc.getUserInfoEx(conversation.target, false, (info: UserInfo) => {

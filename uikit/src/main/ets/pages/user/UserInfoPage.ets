@@ -32,16 +32,27 @@ export default struct UserInfoPage {
         this.isMyFriend = wfc.isMyFriend(this.userInfo!.uid)
 
         wfc.eventEmitter!.on(EventType.UserInfosUpdate, this.onUserInfosUpdate)
+        // 更新好友备注时，也会触发本通知
+        wfc.eventEmitter!.on(EventType.FriendListUpdate, this.onFriendListUpdate)
     }
 
     aboutToDisappear() {
         wfc.eventEmitter!.off(EventType.UserInfosUpdate, this.onUserInfosUpdate)
+        wfc.eventEmitter!.off(EventType.FriendListUpdate, this.onFriendListUpdate)
     }
 
     onUserInfosUpdate = (infos: UserInfo[]) => {
         for (let info of infos) {
             if (info.uid === this.userInfo!.uid) {
                 this.userInfo = info
+                break
+            }
+        }
+    }
+    onFriendListUpdate = (ids: string[]) => {
+        for (let id of ids) {
+            if (id === this.userInfo!.uid) {
+                this.userInfo = wfc.getUserInfo(id)
                 break
             }
         }
@@ -93,7 +104,7 @@ export default struct UserInfoPage {
                             }
                         })
                     Column() {
-                        Text(this.userInfo!.displayName)
+                        Text(this.userInfo!.friendAlias ? this.userInfo?.friendAlias : this.userInfo?.displayName)
                             .width('100%')
                             .maxLines(1)
                             .textOverflow({ overflow: TextOverflow.Ellipsis })

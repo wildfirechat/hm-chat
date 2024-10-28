@@ -20,7 +20,6 @@
         "pages/misc/WebViewPage",
         "pages/misc/WebViewPageWithRouter",
         "pages/chatroom/ChatroomListPage",
-        "pages/voip/VoipFloatingPage",
         "pages/voip/SingleAudioCallPage",
         "pages/voip/SingleVideoCallPage",
         "pages/voip/MultiAudioCallPage",

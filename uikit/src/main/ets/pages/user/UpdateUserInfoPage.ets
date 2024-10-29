@@ -1,12 +1,7 @@
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
-import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
-import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType'
-import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
 import { showToast } from '../../common/utils/Toast'
-import OptionItemView from '../../view/OptionItemView'
 import ToggleItemView from '../../view/ToggleItemView'
-import { navigationDestinations } from '../navigationConfig'
 
 @Entry
 @Component

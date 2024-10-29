@@ -339,12 +339,14 @@ export default struct ConversationPage {
             this.conversationMessageDataSource.updateMessage(message);
         }
     }
-    onReceiveMessage = (message: Message, hasMore: boolean) => {
+    onReceiveMessage = (messages: Message[], hasMore: boolean) => {
         this.unreadStatusCleared = false
-        if (this.isDisplayMessage(message) && Conversation.equal(message.conversation, this.conversation!)) {
-            this.conversationMessageDataSource.appendMessage(message);
-            this.scroller.scrollEdge(Edge.Bottom)
-        }
+        messages.forEach(message => {
+            if (this.isDisplayMessage(message) && Conversation.equal(message.conversation, this.conversation!)) {
+                this.conversationMessageDataSource.appendMessage(message);
+                this.scroller.scrollEdge(Edge.Bottom)
+            }
+        })
     }
     onDeleteMessage = (messageId: number) => {
         this.conversationMessageDataSource.removeMessageById(messageId)

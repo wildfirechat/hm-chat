@@ -5,8 +5,8 @@
 export default class EventType {
     // function (message) {}
     static SendMessage = 'sendMsg';
-    // function (message, hasMore) {}
-    static ReceiveMessage = 'receiveMsg';
+    // function ([message], hasMore)
+    static ReceiveMessage = 'receiveMsgs';
     // function (Map(userId, receiveTime)) {}
     static MessageReceived = 'msgReceived';
     // function ([readEntry]) {}

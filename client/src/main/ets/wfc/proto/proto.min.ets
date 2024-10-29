@@ -135,8 +135,9 @@ class WfcImpl {
             return;
         }
 
-        let msgs: Record<string, Object>[] = JSON.parse(messages)
-        msgs.forEach(m => {
+        let objMsgs: Record<string, Object>[] = JSON.parse(messages)
+        let msgs: Message[] = []
+        objMsgs.forEach(m => {
             let msg = Message.fromProtoMessage(m);
             if (!msg) {
                 return
@@ -147,10 +148,11 @@ class WfcImpl {
                 //protoProxy.setLastReceivedMessageUnRead(JSON.stringify(conversation), stringValue(markMsg.messageUid), stringValue(markMsg.timestamp));
                 protoProxy.setLastReceivedMessageUnRead(JSON.stringify(conversation));
             }
-            if (msg) {
-                self.eventEmitter!.emit(EventType.ReceiveMessage, msg);
-            }
+            msgs.push(msg)
         });
+        if (msgs.length > 0) {
+            self.eventEmitter!.emit(EventType.ReceiveMessage, msgs, hasMore);
+        }
     }
 
     onConferenceEvent(event: string) {
@@ -354,6 +356,8 @@ class WfcImpl {
         self.context = context
         self.eventEmitter = eventHub;
         protoProxy.setDBPath(dbPath);
+        //this.bundleName = context.abilityInfo.bundleName
+        protoProxy.setPackageName(context.applicationInfo.name)
         // if(process.platform === 'win32'){
         //     protoProxy.invoke('setDBPath', process.cwd());
         // }

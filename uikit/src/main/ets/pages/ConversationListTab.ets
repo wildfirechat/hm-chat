@@ -35,8 +35,8 @@ export default struct ConversationListTab {
         this.loadPCOnlineInfos()
         this.isMuteWhenPCOnline = wfc.isMuteNotificationWhenPcOnline()
         this.context = getContext(this)
-        wfc.eventEmitter!.on(EventType.ReceiveMessage, this.onSendMessage)
-        wfc.eventEmitter!.on(EventType.SendMessage, this.onReceiveMessage)
+        wfc.eventEmitter!.on(EventType.ReceiveMessage, this.onReceiveMessage)
+        wfc.eventEmitter!.on(EventType.SendMessage, this.onSendMessage)
         wfc.eventEmitter!.on(EventType.RecallMessage, this.onRecallMessage)
         wfc.eventEmitter!.on(EventType.ConnectionStatusChanged, this.onConnectionStatusChange)
         wfc.eventEmitter!.on(EventType.ConversationInfoUpdate, this.onConversationInfoUpdate)
@@ -131,8 +131,10 @@ export default struct ConversationListTab {
     }
     // why？
     // 不用箭头函数的话，evenHub 里面调用时，this 并不是当前组件
-    onReceiveMessage = (msg: Message) => {
-        this.loadConversationList()
+    onReceiveMessage = (msgs: Message[], hasMore: boolean) => {
+        if (!hasMore) {
+            this.loadConversationList()
+        }
     }
     onRecallMessage = (operator: string, messageUid: object) => {
         this.loadConversationList()
@@ -140,6 +142,8 @@ export default struct ConversationListTab {
     onSendMessage = (msg: Message) => {
         this.loadConversationList()
     }
+    // TODO 有的 setting 更新是不需要重新拉取会话列表的
+    // [ConversationSilent,ConversationTop,Conversation_Sync,UserSettingConversationReaded,ConversationClearMessage,ConversationDraft, GroupRemark]
     onSettingUpdate = () => {
         this.loadConversationList()
         this.loadPCOnlineInfos()

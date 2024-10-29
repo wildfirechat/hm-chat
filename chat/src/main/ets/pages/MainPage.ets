@@ -133,13 +133,14 @@ struct MainPage {
 
     }
 
-    onReceiveMessage = (msg: Message) => {
-        if (msg.content?.type === MessageContentType.PC_Login_Request) {
-            let pcLoginRequest = msg.messageContent as PCLoginRequestMessageContent
-            this.showPCLoginPage(pcLoginRequest.sessionId, true, pcLoginRequest.platform)
-
-        } else {
-            // DO NOTHING
+    onReceiveMessage = (msgs: Message[], hasMore: boolean) => {
+        for (const msg of msgs) {
+            if (msg.content?.type === MessageContentType.PC_Login_Request) {
+                let pcLoginRequest = msg.messageContent as PCLoginRequestMessageContent
+                this.showPCLoginPage(pcLoginRequest.sessionId, true, pcLoginRequest.platform)
+            } else {
+                // DO NOTHING
+            }
         }
     }
 

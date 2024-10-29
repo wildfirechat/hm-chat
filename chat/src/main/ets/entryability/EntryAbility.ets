@@ -64,9 +64,11 @@ export default class EntryAbility extends UIAbility {
             }
         })
 
-        wfc.eventEmitter!.on(EventType.ReceiveMessage, (message: Message, hasMore: boolean) => {
+        wfc.eventEmitter!.on(EventType.ReceiveMessage, (messages: Message[], hasMore: boolean) => {
             if (this.isInBackground) {
-                wfcNotificationManager.onReceiveMessage(message, hasMore);
+                for (const message of messages) {
+                    wfcNotificationManager.onReceiveMessage(message, hasMore);
+                }
             }
         })
 

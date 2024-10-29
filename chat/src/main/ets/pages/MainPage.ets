@@ -36,7 +36,6 @@ const permissions: Array<Permissions> = [
     'ohos.permission.READ_MEDIA',
     'ohos.permission.WRITE_MEDIA',
     'ohos.permission.MICROPHONE',
-    'ohos.permission.KEEP_BACKGROUND_RUNNING'
 ];
 
 let storage = LocalStorage.getShared()

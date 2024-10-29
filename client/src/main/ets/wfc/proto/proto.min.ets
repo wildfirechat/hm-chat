@@ -356,7 +356,6 @@ class WfcImpl {
         self.context = context
         self.eventEmitter = eventHub;
         protoProxy.setDBPath(dbPath);
-        //this.bundleName = context.abilityInfo.bundleName
         protoProxy.setPackageName(context.applicationInfo.name)
         // if(process.platform === 'win32'){
         //     protoProxy.invoke('setDBPath', process.cwd());

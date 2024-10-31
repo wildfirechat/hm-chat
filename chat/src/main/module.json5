@@ -43,22 +43,22 @@
                     }
                 ]
             },
-            {
-                "name": "PushMessageAbility",
-                "srcEntry": "./ets/entryability/PushMessageAbility.ets",
-                "launchType": "singleton",
-                "description": "Voip PushMessageAbility",
-                "startWindowIcon": "$media:icon",
-                "startWindowBackground": "$color:start_window_background",
-                "exported": false,
-                "skills": [
-                    {
-                        "actions": [
-                            "action.ohos.push.listener"
-                        ]
-                    }
-                ]
-            }
+//            {
+//                "name": "PushMessageAbility",
+//                "srcEntry": "./ets/entryability/PushMessageAbility.ets",
+//                "launchType": "singleton",
+//                "description": "Voip PushMessageAbility",
+//                "startWindowIcon": "$media:icon",
+//                "startWindowBackground": "$color:start_window_background",
+//                "exported": false,
+//                "skills": [
+//                    {
+//                        "actions": [
+//                            "action.ohos.push.listener"
+//                        ]
+//                    }
+//                ]
+//            }
         ],
         "extensionAbilities": [
             {

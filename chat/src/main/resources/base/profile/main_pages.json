@@ -2,6 +2,6 @@
     "src": [
         "pages/login/LoginPage",
         "pages/MainPage",
-      "pages/test/TestPage"
+        "pages/test/TestPage"
     ]
 }

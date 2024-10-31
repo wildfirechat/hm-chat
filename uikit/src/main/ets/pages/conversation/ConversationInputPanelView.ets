@@ -111,20 +111,20 @@ export default struct ConversationInputPanelView {
                     let results = await selectMedia2(getContext());
                     results.forEach(async result => {
                         if (result.type === 2) {
-                            let file = getContext(this)
+                            let filePath = getContext(this)
                                 .getApplicationContext()
                                 .cacheDir + '/' + new Date().getTime() + '.mp4'
-                            copyFileUri(result.uri, file);
-                            let content = new VideoMessageContent(file, '', result.thumbnail, result.duration)
+                            copyFileUri(result.uri, filePath);
+                            let content = new VideoMessageContent(result.uri, '', result.thumbnail, result.duration)
                             wfc.sendConversationMessage(this.conversation, content, [], null, null, null, null, null);
                             return
                         } else {
                             // 通过request包上传时，只能使用 applicationContext.cacheDir 目录下的文件
-                            let file = getContext(this)
+                            let filePath = getContext(this)
                                 .getApplicationContext()
                                 .cacheDir + '/' + new Date().getTime() + '.jpg'
-                            copyFileUri(result.uri, file);
-                            let content = new ImageMessageContent(file, '', result.thumbnail)
+                            copyFileUri(result.uri, filePath);
+                            let content = new ImageMessageContent(result.uri, '', result.thumbnail)
                             content.imageWidth = result.width;
                             content.imageHeight = result.height;
                             wfc.sendConversationMessage(this.conversation, content, [], null, null, null, null, null);
@@ -188,20 +188,20 @@ export default struct ConversationInputPanelView {
                     let results = await takePhoto(getContext() as common.UIAbilityContext)
                     results.forEach(async result => {
                         if (result.type === 2) {
-                            let file = getContext(this)
+                            let filePath = getContext(this)
                                 .getApplicationContext()
                                 .cacheDir + '/' + new Date().getTime() + '.mp4'
-                            copyFileUri(result.uri, file);
-                            let content = new VideoMessageContent(file, '', result.thumbnail, result.duration)
+                            copyFileUri(result.uri, filePath);
+                            let content = new VideoMessageContent(filePath, '', result.thumbnail, result.duration)
                             wfc.sendConversationMessage(this.conversation, content, [], null, null, null, null, null);
                             return
                         } else {
                             // 通过request包上传时，只能使用 applicationContext.cacheDir 目录下的文件
-                            let file = getContext(this)
+                            let filePath = getContext(this)
                                 .getApplicationContext()
                                 .cacheDir + '/' + new Date().getTime() + '.jpg'
-                            copyFileUri(result.uri, file);
-                            let content = new ImageMessageContent(file, '', result.thumbnail)
+                            copyFileUri(result.uri, filePath);
+                            let content = new ImageMessageContent(filePath, '', result.thumbnail)
                             content.imageWidth = result.width;
                             content.imageHeight = result.height;
                             wfc.sendConversationMessage(this.conversation, content, [], null, null, null, null, null);
@@ -219,20 +219,20 @@ export default struct ConversationInputPanelView {
                 try {
                     let selectedFileUri = await selectFile()
                     let name = fileNameFromFileUri(selectedFileUri)
-                    let file = getContext(this)
+                    let filePath = getContext(this)
                         .getApplicationContext()
                         .cacheDir + '/' + new Date().getTime() + '-' + name
-                    copyFileUri(selectedFileUri, file);
-                    let size = fileSize(file);
+                    copyFileUri(selectedFileUri, filePath);
+                    let size = fileSize(filePath);
                     let content: MessageContent
                     if (isImage(name.substring(name.lastIndexOf('.') + 1))) {
-                        let thumbnail = await imageThumbnail(getContext(this), fileUri.getUriFromPath(file), { width: 200, height: 200 })
-                        content = new ImageMessageContent(file, '', thumbnail)
+                        let thumbnail = await imageThumbnail(getContext(this), fileUri.getUriFromPath(filePath), { width: 200, height: 200 })
+                        content = new ImageMessageContent(filePath, '', thumbnail)
                     } else if (isVideo(name.substring(name.lastIndexOf('.') + 1))) {
-                        let durationAndThumbnail = await videoThumbnail(getContext(this), fileUri.getUriFromPath(file), { width: 200, height: 200 })
-                        content = new VideoMessageContent(file, '', durationAndThumbnail.thumbnail, durationAndThumbnail.duration)
+                        let durationAndThumbnail = await videoThumbnail(getContext(this), fileUri.getUriFromPath(filePath), { width: 200, height: 200 })
+                        content = new VideoMessageContent(filePath, '', durationAndThumbnail.thumbnail, durationAndThumbnail.duration)
                     } else {
-                        content = new FileMessageContent(file, '', name, size)
+                        content = new FileMessageContent(filePath, '', name, size)
                     }
                     wfc.sendConversationMessage(this.conversation, content);
                 } catch (reason) {

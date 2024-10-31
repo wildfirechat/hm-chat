@@ -131,9 +131,9 @@ class WfcImpl {
             return;
         }
         // receiving
-        if (self.connectionStatus === 2) {
-            return;
-        }
+        // if (self.connectionStatus === 2) {
+        //     return;
+        // }
 
         let objMsgs: Record<string, Object>[] = JSON.parse(messages)
         let msgs: Message[] = []

@@ -132,7 +132,7 @@ export default struct ConversationListTab {
     // why？
     // 不用箭头函数的话，evenHub 里面调用时，this 并不是当前组件
     onReceiveMessage = (msgs: Message[], hasMore: boolean) => {
-        if (!hasMore) {
+        if (!hasMore && wfc.getConnectionStatus() === ConnectionStatus.ConnectionStatusConnected) {
             this.loadConversationList()
         }
     }

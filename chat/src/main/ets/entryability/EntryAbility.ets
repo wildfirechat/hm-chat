@@ -34,6 +34,8 @@ export default class EntryAbility extends UIAbility {
 
         wfc.init(this.applicationContext, this.context.eventHub, this.applicationContext.filesDir, Config.getWFCPlatform());
         CustomMessageConfig.registerCustomMessages();
+        uikit.init(this.context)
+
         wfc.eventEmitter!.on(EventType.ConnectionStatusChanged, async (status: number) => {
             if (status === ConnectionStatus.ConnectionStatusConnected) {
                 try {
@@ -45,7 +47,6 @@ export default class EntryAbility extends UIAbility {
                     let e: BusinessError = err as BusinessError;
                     hilog.error(0x0000, 'testTag', 'Get push token catch error: %{public}d %{public}s', e.code, e.message);
                 }
-                uikit.init(this.context)
 
             } else if ([
                 ConnectionStatus.ConnectionStatusTokenIncorrect,
@@ -64,8 +65,12 @@ export default class EntryAbility extends UIAbility {
             }
         })
 
+        // TODO
+        // FIXME
+        // 这儿可能永远不会触发，切到后台时，都会走推送
         wfc.eventEmitter!.on(EventType.ReceiveMessage, (messages: Message[], hasMore: boolean) => {
             if (this.isInBackground) {
+                console.log('receive message in background')
                 for (const message of messages) {
                     wfcNotificationManager.onReceiveMessage(message, hasMore);
                 }

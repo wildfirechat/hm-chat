@@ -2121,7 +2121,6 @@ class WfcImpl {
                 })
                 mediaMessageUploadCallback && mediaMessageUploadCallback(remoteUrl);
             }, (err: number) => {
-                this.updateMessageStatus(insertedMsg.messageId, MessageStatus.SendFailure);
                 insertedMsg.status = MessageStatus.SendFailure;
                 if (insertedMsg.conversation!.type !== ConversationType.ChatRoom) {
                     self.eventEmitter!.emit(EventType.MessageStatusUpdate, insertedMsg);

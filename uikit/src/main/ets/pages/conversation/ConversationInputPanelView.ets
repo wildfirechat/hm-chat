@@ -115,7 +115,7 @@ export default struct ConversationInputPanelView {
                                 .getApplicationContext()
                                 .cacheDir + '/' + new Date().getTime() + '.mp4'
                             copyFileUri(result.uri, filePath);
-                            let content = new VideoMessageContent(result.uri, '', result.thumbnail, result.duration)
+                            let content = new VideoMessageContent(filePath, '', result.thumbnail, result.duration)
                             wfc.sendConversationMessage(this.conversation, content, [], null, null, null, null, null);
                             return
                         } else {
@@ -124,7 +124,7 @@ export default struct ConversationInputPanelView {
                                 .getApplicationContext()
                                 .cacheDir + '/' + new Date().getTime() + '.jpg'
                             copyFileUri(result.uri, filePath);
-                            let content = new ImageMessageContent(result.uri, '', result.thumbnail)
+                            let content = new ImageMessageContent(filePath, '', result.thumbnail)
                             content.imageWidth = result.width;
                             content.imageHeight = result.height;
                             wfc.sendConversationMessage(this.conversation, content, [], null, null, null, null, null);

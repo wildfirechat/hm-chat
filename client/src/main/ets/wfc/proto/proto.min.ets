@@ -2381,6 +2381,7 @@ class WfcImpl {
 
             if (!uploadRequestOptions) {
                 console.error(`not support serverType ${serverType}`)
+                failCB && failCB(-1)
                 return
             }
 

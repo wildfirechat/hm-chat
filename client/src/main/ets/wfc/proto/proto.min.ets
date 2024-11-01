@@ -2308,16 +2308,18 @@ class WfcImpl {
         this.getUploadMediaUrl(fileName!, mediaType, contentType, (uploadUrl: string, remoteUrl: string, backUploadUrl: string, serverType: number) => {
             uploadUrl = (self.connectedToMainNetwork() || !backUploadUrl) ? uploadUrl : backUploadUrl;
             console.log('getUploadMediaUrl', uploadUrl, remoteUrl, backUploadUrl, serverType)
+
+            let uploadRequestOptions: request.UploadConfig | undefined = undefined
             if (serverType === 0) {
                 // 内置存储，不支持大文件上传
             } else if (serverType === 1) {
                 // qiniu
                 // TODO
                 // FIXME
-                // let ss = uploadUrl.split('?');
-                // let url = ss[0];
-                // let token = ss[1];
-                // let key = ss[2];
+                let ss = uploadUrl.split('?');
+                let url = ss[0];
+                let token = ss[1];
+                let key = ss[2];
                 // xhr = this._uploadXMLHttpRequest(message ? message.messageId : 0, fileName, remoteUrl, progressCB, successCB, failCB);
                 //
                 // let formData = new FormData();
@@ -2328,6 +2330,26 @@ class WfcImpl {
                 // xhr.setRequestHeader('content-type', contentType);
                 // xhr.setRequestHeader("content-disposition", `attachment; filename="${fileName}"`);
                 // xhr.send(formData);
+                uploadRequestOptions = {
+                    url: url,
+                    header: {},
+                    method: 'POST',
+                    files: [{
+                        filename: fileName!,
+                        //uri前缀internal://cache 对应applicationCache.cacheDir目录
+                        name: 'file',
+                        uri: `internal://${filePath!.substring(filePath!.indexOf('/cache') + 1)}`,
+                        type: contentType
+                    }],
+                    data: [{
+                        name: 'key',
+                        value: key,
+                    },
+                        {
+                            name: 'token',
+                            value: token
+                        }]
+                };
             } else {
                 // 野火专业存储或阿里云
                 // xhr = this._uploadXMLHttpRequest(message ? message.messageId : 0, fileName, remoteUrl, progressCB, successCB, failCB);
@@ -2342,7 +2364,7 @@ class WfcImpl {
                 // header.set('content-type', contentType);
                 // header.set('content-disposition', `attachment; filename="${fileName}"`);
 
-                let uploadRequestOptions: request.UploadConfig = {
+                uploadRequestOptions = {
                     url: uploadUrl,
                     header: { 'Content-Type': contentType },
                     method: 'PUT',
@@ -2355,37 +2377,42 @@ class WfcImpl {
                     }],
                     data: []
                 };
-
-                // Upload the file.
-                request.uploadFile(self.context, uploadRequestOptions).then((data: request.UploadTask) => {
-                    if (message) {
-                        self.uploadingMap.set(message.messageId, data)
-                    }
-
-                    data.on('complete', (result: Array<request.TaskState>) => {
-                        message && self.uploadingMap.delete(message!.messageId)
-                        if (result && result.length >= 1) {
-                            if (result[0].responseCode === 0) {
-                                successCB(remoteUrl)
-                            } else {
-                                failCB(result[0].responseCode)
-                            }
-                        }
-                    });
-                    data.on('fail', (result: Array<request.TaskState>) => {
-                        message && self.uploadingMap.delete(message.messageId)
-                        if (result && result.length >= 1) {
-                            // serverData.msg = '上传失败'
-                            // reject(serverData);
-                        }
-                        failCB(-1)
-                    })
-                }).catch((err: Error) => {
-                    // reject(serverData);
-                    console.error('upload File error', err)
-                    failCB(-1)
-                });
             }
+
+            if (!uploadRequestOptions) {
+                console.error(`not support serverType ${serverType}`)
+                return
+            }
+
+            // Upload the file.
+            request.uploadFile(self.context, uploadRequestOptions).then((data: request.UploadTask) => {
+                if (message) {
+                    self.uploadingMap.set(message.messageId, data)
+                }
+
+                data.on('complete', (result: Array<request.TaskState>) => {
+                    message && self.uploadingMap.delete(message!.messageId)
+                    if (result && result.length >= 1) {
+                        if (result[0].responseCode === 0) {
+                            successCB(remoteUrl)
+                        } else {
+                            failCB(result[0].responseCode)
+                        }
+                    }
+                });
+                data.on('fail', (result: Array<request.TaskState>) => {
+                    message && self.uploadingMap.delete(message.messageId)
+                    if (result && result.length >= 1) {
+                        // serverData.msg = '上传失败'
+                        // reject(serverData);
+                    }
+                    failCB(-1)
+                })
+            }).catch((err: Error) => {
+                // reject(serverData);
+                console.error('upload File error', err)
+                failCB(-1)
+            });
 
         }, (e: number) => {
             console.log('getUploadMediaUrl e', e)

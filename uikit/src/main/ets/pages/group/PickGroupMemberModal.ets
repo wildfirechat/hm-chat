@@ -24,6 +24,13 @@ export default struct PickGroupMemberModal {
     aboutToAppear() {
         let groupMemberIds = wfc.getGroupMemberIds(this.groupId, false)
         this.userInfos = wfc.getUserInfos(groupMemberIds, '')
+
+        let selfUserId = wfc.getUserId()
+        this.uncheckableUserIds.push(selfUserId)
+        let groupInfo = wfc.getGroupInfo(this.groupId)
+        if (groupInfo.owner !== selfUserId) {
+            this.uncheckableUserIds.push(groupInfo.owner)
+        }
     }
 
     onCheckUser = (info: UserInfo, checked?: boolean) => {
@@ -93,8 +100,8 @@ export default struct PickGroupMemberModal {
                     if (this.onPickResult) {
                         this.onPickResult(this.newlyCheckedUsers())
                     } else {
-                    LocalStorage.getShared()
-                        .setOrCreate<UserInfo[]>(PickGroupMemberModal.PICK_RESULT, this.newlyCheckedUsers());
+                        LocalStorage.getShared()
+                            .setOrCreate<UserInfo[]>(PickGroupMemberModal.PICK_RESULT, this.newlyCheckedUsers());
                     }
                     this.showPickGroupMemberModal = false;
                 })

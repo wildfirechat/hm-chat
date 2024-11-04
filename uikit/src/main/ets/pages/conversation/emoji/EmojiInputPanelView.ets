@@ -148,7 +148,6 @@ export default struct EmojiInputPanelView {
                                         })
                                     }, (emoji: Emoji, index: number) => index + '')
                                 }
-                                .height('100%')
                             }
                             .scrollable(ScrollDirection.Vertical)
                             .scrollBar(BarState.Off)

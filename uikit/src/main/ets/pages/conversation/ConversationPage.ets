@@ -264,7 +264,9 @@ export default struct ConversationPage {
                     if (msgs.length === 0) {
                         this.hasNoMoreHistoryMessage = true
                     } else {
-                        let filteredMsgs = msgs.filter(m => m.messageId != 0)
+                        let filteredMsgs = msgs.filter(m => {
+                            return m.messageId != 0 && this.conversationMessageDataSource.getMessages().findIndex(dm => eq(dm.messageUid, m.messageUid)) === -1
+                        })
                         this.conversationMessageDataSource.insertMessages(0, filteredMsgs)
                         this.scroller.scrollToIndex(msgs.length - 1, false)
                     }
@@ -853,6 +855,10 @@ class ConversationMessageDataSource extends BasicDataSource<Message> {
     setMessages(messages: Message[]): void {
         this.messages = messages
         this.notifyDataReload()
+    }
+
+    getMessages() {
+        return this.messages
     }
 
     insertMessages(index: number, messages: Message[]) {

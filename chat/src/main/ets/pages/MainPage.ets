@@ -142,6 +142,9 @@ struct MainPage {
             }
         }
     }
+    onFriendRequestUpdate = (ids: string[]) => {
+        this.contactTabUnreadCount = wfc.getUnreadFriendRequestCount()
+    }
 
     async aboutToAppear() {
         this.enableNotification();
@@ -158,11 +161,14 @@ struct MainPage {
             orgServer.login()
         }
 
+        this.contactTabUnreadCount = wfc.getUnreadFriendRequestCount()
         wfc.eventEmitter?.on(EventType.ReceiveMessage, this.onReceiveMessage)
+        wfc.eventEmitter?.on(EventType.FriendRequestUpdate, this.onFriendRequestUpdate)
     }
 
     aboutToDisappear(): void {
-        wfc.eventEmitter?.off(EventType.ReceiveMessage)
+        wfc.eventEmitter?.off(EventType.ReceiveMessage, this.onReceiveMessage)
+        wfc.eventEmitter?.off(EventType.FriendRequestUpdate, this.onFriendRequestUpdate)
     }
 
     showPCLoginPage(token: string, isConfirmPCLogin = false, platform = 0) {

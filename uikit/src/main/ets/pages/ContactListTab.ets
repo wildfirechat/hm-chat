@@ -33,7 +33,10 @@ export default struct ContactListTab {
             action: () => {
                 wfc.clearUnreadFriendRequestStatus()
                 this.contactTabUnreadCount = 0
-                this.contactListHeaders[0].badgeCount = 0
+                let header = this.contactListHeaders[0]
+                header.badgeCount = 0
+                // 强制触发刷新
+                this.contactListHeaders.splice(0, 1, header)
                 this.mainNavPathStack.pushPathByName(navigationDestinations.FriendRequestListPage, {} as Record<string, Object>)
             }
         },
@@ -66,10 +69,7 @@ export default struct ContactListTab {
     private lastFavUserCount = 0
 
     aboutToAppear() {
-        let unreadFriendRequestCount = wfc.getUnreadFriendRequestCount()
-        this.contactTabUnreadCount = unreadFriendRequestCount
-        this.contactListHeaders[0].badgeCount = unreadFriendRequestCount
-
+        this.contactListHeaders[0].badgeCount = this.contactTabUnreadCount
 
         this.loadContact()
         this.loadMyOrganization()
@@ -78,6 +78,7 @@ export default struct ContactListTab {
         wfc.eventEmitter?.on(EventType.UserInfosUpdate, this.onUserInfosUpdate)
         wfc.eventEmitter?.on(EventType.SettingUpdate, this.onSettingUpdate)
         wfc.eventEmitter?.on(EventType.FriendListUpdate, this.onFriendListUpdate)
+        wfc.eventEmitter?.on(EventType.FriendRequestUpdate, this.onFriendRequestUpdate)
 
         this.lastFavUserCount = wfc.getUserSettings(UserSettingScope.FavoriteUser).filter(record => record.value === '1').length
     }
@@ -88,6 +89,7 @@ export default struct ContactListTab {
         wfc.eventEmitter?.off(EventType.UserInfosUpdate, this.onUserInfosUpdate)
         wfc.eventEmitter?.off(EventType.SettingUpdate, this.onSettingUpdate)
         wfc.eventEmitter?.off(EventType.FriendListUpdate, this.onFriendListUpdate)
+        wfc.eventEmitter?.off(EventType.FriendRequestUpdate, this.onFriendRequestUpdate)
     }
 
     onConnectionStatusChange = (status: number) => {
@@ -112,6 +114,9 @@ export default struct ContactListTab {
     onFriendListUpdate = () => {
         this.loadContact()
     }
+    onFriendRequestUpdate = () => {
+        this.loadUnreadFriendRequestCount()
+    }
     onUserOnlineState = (status: number) => {
         let userOnlineStateMap = wfc.getUserOnlineStateMap();
 
@@ -131,6 +136,14 @@ export default struct ContactListTab {
             })
             this.contactDataSource.setContactInfos(groupedContactUserInfos)
         })
+    }
+
+    loadUnreadFriendRequestCount() {
+        let unreadFriendRequestCount = wfc.getUnreadFriendRequestCount()
+        let header = this.contactListHeaders[0]
+        header.badgeCount = unreadFriendRequestCount
+        // 强制触发刷新
+        this.contactListHeaders.splice(0, 1, header)
     }
 
     async loadMyOrganization() {

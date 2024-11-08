@@ -390,7 +390,7 @@ export class WfcManager {
      */
     getUserInfo(userId: string, refresh = false, groupId = ''): UserInfo {
         let userInfo = impl.getUserInfo(userId, refresh, groupId);
-        if (!userInfo.portrait || userInfo.portrait.startsWith(Config.APP_SERVER)) {
+        if (!userInfo.portrait) {
             userInfo.portrait = this.defaultUserPortrait(userInfo);
         }
         return userInfo;
@@ -405,7 +405,7 @@ export class WfcManager {
      */
     getUserInfoEx(userId: string, refresh: boolean, success: (userInfo: UserInfo) => void, fail: (err: number) => void) {
         impl.getUserInfoEx(userId, refresh, (info: UserInfo) => {
-            if (!info.portrait || info.portrait.startsWith(Config.APP_SERVER)) {
+            if (!info.portrait) {
                 info.portrait = this.defaultUserPortrait(info);
             }
             success && success(info);
@@ -421,7 +421,7 @@ export class WfcManager {
     getUserInfos(userIds: string[], groupId?: string): UserInfo[] {
         let userInfos = impl.getUserInfos(userIds, groupId);
         userInfos.forEach((u) => {
-            if (!u.portrait || u.portrait.startsWith(Config.APP_SERVER)) {
+            if (!u.portrait) {
                 u.portrait = this.defaultUserPortrait(u)
             }
         });
@@ -440,7 +440,7 @@ export class WfcManager {
     async searchUser(keyword: string, searchType: number, page: number, successCB: (keyword: string, userInfos: UserInfo[]) => void, failCB: (err: number) => void) {
         impl.searchUser(keyword, searchType, page, (keyword: string, userInfos: UserInfo[]) => {
             userInfos.forEach((u) => {
-                if (!u.portrait || u.portrait.startsWith(Config.APP_SERVER)) {
+                if (!u.portrait) {
                     u.portrait = this.defaultUserPortrait(u)
                 }
             });
@@ -675,7 +675,7 @@ export class WfcManager {
      */
     getGroupInfo(groupId: string, refresh = false): GroupInfo {
         let info = impl.getGroupInfo(groupId, refresh);
-        if (!info.portrait || info.portrait.startsWith(Config.APP_SERVER)) {
+        if (!info.portrait) {
             info.portrait = this.defaultGroupPortrait(info);
         }
         return info;
@@ -691,7 +691,7 @@ export class WfcManager {
     getGroupInfos(groupIds: string[], refresh = false) {
         let infos = impl.getGroupInfos(groupIds, refresh);
         infos.forEach(info => {
-            if (!info.portrait || info.portrait.startsWith(Config.APP_SERVER)) {
+            if (!info.portrait) {
                 info.portrait = this.defaultGroupPortrait(info);
             }
         })
@@ -707,7 +707,7 @@ export class WfcManager {
      */
     getGroupInfoEx(groupId: string, refresh: boolean, successCB: (info: GroupInfo) => void, failCB: FailCallback) {
         impl.getGroupInfoEx(groupId, refresh, (info: GroupInfo) => {
-            if (!info.portrait || info.portrait.startsWith(Config.APP_SERVER)) {
+            if (!info.portrait) {
                 info.portrait = this.defaultGroupPortrait(info);
             }
             successCB && successCB(info);
@@ -2633,6 +2633,9 @@ export class WfcManager {
     // }
 
     defaultUserPortrait(userInfo: UserInfo): string {
+        if (!userInfo.updateDt) {
+            return Config.DEFAULT_PORTRAIT_URL
+        }
         return `${Config.APP_SERVER}/avatar?name=${encodeURIComponent(userInfo.displayName)}`
         // return `http://localhost:8888/avatar?name=${encodeURIComponent(userInfo.displayName)}`
     }
@@ -2646,7 +2649,7 @@ export class WfcManager {
             'members': [] as Record<string, Object>[]
         }
         let pending = false;
-        members.forEach(m => {
+        for (const m of members) {
             if (m.portrait && !m.portrait.startsWith(`${Config.APP_SERVER}`)) {
                 (req['members'] as Record<string, Object>[]).push({
                     'avatarUrl': m.portrait
@@ -2658,10 +2661,11 @@ export class WfcManager {
             }
             if (m instanceof NullUserInfo) {
                 pending = true;
+                break
             }
-        })
+        }
         if (members.length === 0 || pending) {
-            return '';
+            return Config.DEFAULT_GROUP_PORTRAIT_URL;
         }
 
         let reqStr = JSON.stringify(req, null, '');

@@ -421,20 +421,26 @@ export default struct ConversationInputPanelView {
             if (keyboardHeight > 0) {
                 this.keyboardHeight = keyboardHeight;
             }
-            currentWindow.on('avoidAreaChange', async data => {
-                let property = currentWindow.getWindowProperties();
-                if (data.type === window.AvoidAreaType.TYPE_KEYBOARD) {
-                    this.messageListScroller!.scrollEdge(Edge.Bottom);
-                    if (data.area.bottomRect.height > 0) {
-                        if (this.keyboardHeight === 0) {
-                            let type = window.AvoidAreaType.TYPE_NAVIGATION_INDICATOR; // 底部导航条
-                            let navIndicatorAvoidArea = currentWindow.getWindowAvoidArea(type);
-                            this.keyboardHeight = px2vp(data.area.bottomRect.height - navIndicatorAvoidArea.bottomRect.height);
-                            preference.put('keyboardHeight', this.keyboardHeight);
-                        }
-                        this.scrollMessageListToBottom()
+            // currentWindow.on('avoidAreaChange', async data => {
+            //     if (data.type === window.AvoidAreaType.TYPE_KEYBOARD) {
+            //         this.messageListScroller!.scrollEdge(Edge.Bottom);
+            //         if (data.area.bottomRect.height > 0) {
+            //             this.scrollMessageListToBottom()
+            //         }
+            //     }
+            // })
+            currentWindow.on('keyboardHeightChange', async (data: number) => {
+
+                if (data > 0) {
+                    let type = window.AvoidAreaType.TYPE_NAVIGATION_INDICATOR; // 底部导航条
+                    let navIndicatorAvoidArea = currentWindow.getWindowAvoidArea(type);
+                    let h = px2vp(data - navIndicatorAvoidArea.bottomRect.height);
+                    if (this.keyboardHeight !== h) {
+                        this.keyboardHeight = h
+                        preference.put('keyboardHeight', h);
                     }
                 }
+                this.scrollMessageListToBottom()
             })
         })
 

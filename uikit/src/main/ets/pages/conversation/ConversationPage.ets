@@ -341,8 +341,26 @@ export default struct ConversationPage {
             this.conversationMessageDataSource.updateMessage(message);
         }
     }
-    onReceiveMessage = (messages: Message[], hasMore: boolean) => {
+    onReceiveMessage = (messages: Message[]) => {
         this.unreadStatusCleared = false
+        let hasUnloadMsg = false
+        if (this.conversation?.type === ConversationType.Group && wfc.isCommercialServer()) {
+            for (const msg of messages) {
+                if (msg.messageContent.notLoaded) {
+                    hasUnloadMsg = true
+                    break
+                }
+            }
+        }
+        if (hasUnloadMsg) {
+            messages = messages.slice(messages.length - 15)
+            if (Conversation.equal(messages[0].conversation, this.conversation!)) {
+                this.conversationMessageDataSource.setMessages(messages);
+                this.scroller.scrollEdge(Edge.Bottom)
+            }
+            return
+        }
+
         messages.forEach(message => {
             if (this.isDisplayMessage(message) && Conversation.equal(message.conversation, this.conversation!)) {
                 this.conversationMessageDataSource.appendMessage(message);

@@ -3,9 +3,12 @@ import SoundMessageContent from '@wfc/client/src/main/ets/wfc/messages/soundMess
 import AudioPlayManager from '../audio/AudioPlayManager'
 import fs from '@ohos.file.fs'
 import Config from '@wfc/client/src/main/ets/config'
+import MessageStatus from '@wfc/client/src/main/ets/wfc/messages/messageStatus'
+import WfcAVEngineKit from '@wfc/avenginekit/src/main/ets/wfc/av/engine/avenginekit'
+import wfc, { WfcManager } from '@wfc/client/src/main/ets/wfc/client/wfc'
 
 @Component
-export default struct AudioMessageContent {
+export default struct AudioMessageContentView {
     @Link message: Message
     @State imageUrl: Resource = $r('app.media.audio_animation_list_right_1')
     private animatorInternal: number = 0
@@ -65,41 +68,53 @@ export default struct AudioMessageContent {
 
     build() {
         Row() {
-            Image(this.imageUrl)
-                .width(20)
-                .height(20)
-            Text(`${this.soundMessageContent().duration} ''`)
-                .margin({ left: 10 })
-        }
-        .width(`${this.soundMessageContent().duration / 60 * 100}%`)
-        .backgroundColor(Color.White)
-        .alignItems(VerticalAlign.Center)
-        .height(40)
-        .padding(5)
-        .borderRadius(4)
-        .constraintSize({ minWidth: 60 })
-        .margin({ top: 4 }) // portrait 的高度是 48, (48 - 40) / 2
-        .onClick(() => {
-            let content = this.message.messageContent as SoundMessageContent
-            // audioPlayManager.audioPlayer.on('stateChange', async (state: media.AVPlayerState) => {
-            //     switch (state.toString()) {
-            //         case 'initialized':
-            //         // TODO
-            //             break
-            //         default:
-            //             break
-            //     }
-            //
-            // })
-            this.startAudioPlayingAnimation()
-            let url: string = content.remotePath;
-            if (this.message.direction === 1) {
-                url = Config.AMR_TO_MP3_SERVER_ADDRESS + content.remotePath;
+            Row() {
+                Image(this.imageUrl)
+                    .width(20)
+                    .height(20)
+                Text(`${this.soundMessageContent().duration} ''`)
+                    .margin({ left: 10 })
             }
-            this.audioPlayManager!.play(url, true, (err?: Error) => {
-                this.stopAudioPlayingAnimation()
+            .width(`${this.soundMessageContent().duration / 60 * 100}%`)
+            .backgroundColor(Color.White)
+            .alignItems(VerticalAlign.Center)
+            .height(40)
+            .padding(5)
+            .borderRadius(4)
+            .constraintSize({ minWidth: 60 })
+            .margin({ top: 4 }) // portrait 的高度是 48, (48 - 40) / 2
+            .onClick(() => {
+                let content = this.message.messageContent as SoundMessageContent
+                // audioPlayManager.audioPlayer.on('stateChange', async (state: media.AVPlayerState) => {
+                //     switch (state.toString()) {
+                //         case 'initialized':
+                //         // TODO
+                //             break
+                //         default:
+                //             break
+                //     }
+                //
+                // })
+                this.startAudioPlayingAnimation()
+                let url: string = content.remotePath;
+                if (this.message.direction === 1) {
+                    url = Config.AMR_TO_MP3_SERVER_ADDRESS + content.remotePath;
+                }
+                wfc.updateMessageStatus(this.message.messageId, MessageStatus.Played)
+                this.message.status = MessageStatus.Played
+                this.audioPlayManager!.play(url, true, (err?: Error) => {
+                    this.stopAudioPlayingAnimation()
+                })
             })
 
-        })
+            if (this.message.direction === 1 && this.message.status !== MessageStatus.Played) {
+                Text()
+                    .width(8)
+                    .height(8)
+                    .margin({ left: 8 })
+                    .backgroundColor(Color.Red)
+                    .borderRadius(8)
+            }
+        }
     }
 }

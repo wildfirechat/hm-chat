@@ -7,7 +7,7 @@ import MessageContentType from '@wfc/client/src/main/ets/wfc/messages/messageCon
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType'
 import AudioPlayManager from '../audio/AudioPlayManager'
 import ReadReceipt from '../model/readReceipt'
-import AudioMessageContent from './AudioMessageContentView'
+import AudioMessageContentView from './AudioMessageContentView'
 import CallStartMessageContentView from './CallStartMessageContentView'
 import CompositeMessageContentView from './CompositeMessageContentView'
 import ImageMessageContentView from './ImageMessageContentView'
@@ -55,7 +55,7 @@ export default struct NormaMessageContentView {
             } else if (this.message!.messageContent.type === MessageContentType.Video) {
                 VideoMessageContentView({ message: $message })
             } else if (this.message!.messageContent.type === MessageContentType.Voice) {
-                AudioMessageContent({ message: $message, audioPlayManager: this.audioPlayManager })
+                AudioMessageContentView({ message: $message, audioPlayManager: this.audioPlayManager })
             } else if (this.message!.messageContent.type === MessageContentType.VOIP_CONTENT_TYPE_START) {
                 CallStartMessageContentView({ message: $message })
             } else if (this.message!.messageContent.type === MessageContentType.Composite_Message) {

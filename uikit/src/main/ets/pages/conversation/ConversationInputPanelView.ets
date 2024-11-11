@@ -707,6 +707,7 @@ export default struct ConversationInputPanelView {
                                     .height('100%')// .padding(10)
                                     .layoutWeight(1)
                                     .textAlign(TextAlign.Center)
+                                    .borderRadius(4)
                                     .stateStyles({
                                         pressed: {
                                             .backgroundColor('#E5E5E5')
@@ -895,7 +896,7 @@ export default struct ConversationInputPanelView {
                         }
                     }
                 }
-                .alignItems(VerticalAlign.Bottom)
+                .alignItems(VerticalAlign.Center)
                 .padding(10)
                 .width('100%')
 

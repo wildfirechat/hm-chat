@@ -43,6 +43,12 @@ export default struct SingleAudioCallPage {
     onPageShow(): void {
         if (!this.pipController) {
             this.createPipController()
+                .then(() => {
+                    console.log('xxxxxxx create pip success')
+                })
+                .catch((reason: BusinessError) => {
+                    console.log('xxxxxxxx create pip controller error', reason.message);
+                })
         }
     }
 
@@ -124,9 +130,10 @@ export default struct SingleAudioCallPage {
         if (!this.pipController) {
             return;
         }
-        this.pipController.stopPiP()
+        this.pipController.setAutoStartEnabled(false)
         this.pipController.off('stateChange');
         this.pipController.off('controlPanelActionEvent');
+        this.pipController.stopPiP()
         this.pipController = undefined;
     }
 

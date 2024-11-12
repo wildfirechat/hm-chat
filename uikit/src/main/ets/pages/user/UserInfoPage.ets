@@ -13,6 +13,7 @@ import ModifyMyInfoEntry from '@wfc/client/src/main/ets/wfc/model/modifyMyInfoEn
 import ModifyMyInfoType from '@wfc/client/src/main/ets/wfc/model/modifyMyInfoType';
 import OptionItemView from '../../view/OptionItemView';
 import avenginekit from '@wfc/avenginekit';
+import { checkAndRequestPermission } from '../../helper/permissionHelper';
 
 @Entry
 @Component
@@ -178,16 +179,27 @@ export default struct UserInfoPage {
                                     sheets: [
                                         {
                                             title: '语音通话',
-                                            action: () => {
-                                                let conversation = new Conversation(ConversationType.Single, this.userInfo!.uid, 0)
-                                                avenginekit.startCall(conversation, [this.userInfo!.uid], true)
+                                            action: async () => {
+                                                let granted = await checkAndRequestPermission(getContext(this), 'ohos.permission.MICROPHONE')
+                                                if (granted) {
+                                                    let conversation = new Conversation(ConversationType.Single, this.userInfo!.uid, 0)
+                                                    avenginekit.startCall(conversation, [this.userInfo!.uid], true)
+                                                } else {
+                                                    showToast('请授予麦克风权限')
+                                                }
                                             }
                                         },
                                         {
                                             title: '视频通话',
-                                            action: () => {
-                                                let conversation = new Conversation(ConversationType.Single, this.userInfo!.uid, 0)
-                                                avenginekit.startCall(conversation, [this.userInfo!.uid], false)
+                                            action: async () => {
+                                                let cameraGranted = await checkAndRequestPermission(getContext(this), 'ohos.permission.CAMERA')
+                                                let microphoneGranted = await checkAndRequestPermission(getContext(this), 'ohos.permission.MICROPHONE')
+                                                if (cameraGranted && microphoneGranted) {
+                                                    let conversation = new Conversation(ConversationType.Single, this.userInfo!.uid, 0)
+                                                    avenginekit.startCall(conversation, [this.userInfo!.uid], false)
+                                                } else {
+                                                    showToast('请授予摄像头和麦克风权限')
+                                                }
                                             }
                                         },
                                     ]

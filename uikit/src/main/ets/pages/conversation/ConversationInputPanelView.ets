@@ -43,6 +43,8 @@ import PickContactModal from '../picker/PickContactModal'
 import ForwardMessageDialog from './forward/ForwardMessageDialog'
 import CardMessageContent from '@wfc/client/src/main/ets/wfc/messages/cardMessageContent'
 import fileUri from '@ohos.file.fileuri'
+import { checkAndRequestPermission } from '../../helper/permissionHelper'
+import { Permissions } from '@kit.AbilityKit'
 
 const INPUT_ICON_WIDTH = 30
 
@@ -145,27 +147,38 @@ export default struct ConversationInputPanelView {
                         sheets: [
                             {
                                 title: '视频通话',
-                                action: () => {
-                                    if (this.conversation.type === ConversationType.Single) {
-                                        avenginekit.startCall(this.conversation, [this.conversation.target], false)
-                                    } else if (this.conversation.type === ConversationType.Group) {
-                                        this.showExtContentCoverModal = true
-                                        this.extContentCoverBuilderParam = this.pickGroupMemberModal
-                                        this.voipAudioOnly = false
-                                    } else {
+                                action: async () => {
+                                    let cameraGranted = await checkAndRequestPermission(getContext(this), 'ohos.permission.CAMERA')
+                                    let microphoneGranted = await checkAndRequestPermission(getContext(this), 'ohos.permission.MICROPHONE')
+                                    if (cameraGranted && microphoneGranted) {
+                                        if (this.conversation.type === ConversationType.Single) {
+                                            avenginekit.startCall(this.conversation, [this.conversation.target], false)
+                                        } else if (this.conversation.type === ConversationType.Group) {
+                                            this.showExtContentCoverModal = true
+                                            this.extContentCoverBuilderParam = this.pickGroupMemberModal
+                                            this.voipAudioOnly = false
+                                        } else {
 
+                                        }
+                                    } else {
+                                        showToast('请授予摄像头和麦克风权限')
                                     }
                                 }
                             },
                             {
                                 title: '音频通话',
-                                action: () => {
-                                    if (this.conversation.type === ConversationType.Single) {
-                                        avenginekit.startCall(this.conversation, [this.conversation.target], true)
-                                    } else if (this.conversation.type === ConversationType.Group) {
-                                        this.showExtContentCoverModal = true
-                                        this.extContentCoverBuilderParam = this.pickGroupMemberModal
-                                        this.voipAudioOnly = true
+                                action: async () => {
+                                    let granted = await checkAndRequestPermission(getContext(this), 'ohos.permission.MICROPHONE')
+                                    if (granted) {
+                                        if (this.conversation.type === ConversationType.Single) {
+                                            avenginekit.startCall(this.conversation, [this.conversation.target], true)
+                                        } else if (this.conversation.type === ConversationType.Group) {
+                                            this.showExtContentCoverModal = true
+                                            this.extContentCoverBuilderParam = this.pickGroupMemberModal
+                                            this.voipAudioOnly = true
+                                        }
+                                    } else {
+                                        showToast('请授予麦克风权限')
                                     }
                                 }
                             }

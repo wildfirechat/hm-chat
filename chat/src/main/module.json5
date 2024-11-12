@@ -104,9 +104,6 @@
                 "name": "ohos.permission.CAMERA",
                 "reason": "$string:camera_auth_reason",
                 "usedScene": {
-                    "abilities": [
-                        "FormAbility"
-                    ],
                     "when": "always"
                 }
             },

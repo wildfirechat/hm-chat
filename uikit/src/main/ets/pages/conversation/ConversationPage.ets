@@ -300,7 +300,7 @@ export default struct ConversationPage {
                 'userInfo': wfc.getUserInfo(userId)
             } as Record<string, Object>)
         } else {
-            showToast('禁止查看用户信息')
+            showToast('禁止私聊')
         }
     }
 

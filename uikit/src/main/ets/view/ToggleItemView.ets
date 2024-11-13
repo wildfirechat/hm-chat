@@ -1,12 +1,12 @@
 @Preview
 @Component
 export default struct ToggleItemView {
-    private title: string = '测试标题'
-    private paddingLeft: number = 10
-    private paddingRight: number = 10
-    private showDivider: boolean = false
+    title: string = '测试标题'
+    paddingLeft: number = 10
+    paddingRight: number = 10
+    showDivider: boolean = false
     @Prop isOn: boolean = false
-    private onChange?: (isOn: boolean) => void = undefined
+    onChange?: (isOn: boolean) => void = undefined
 
     build() {
         Column() {

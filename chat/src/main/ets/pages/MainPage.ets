@@ -150,11 +150,7 @@ struct MainPage {
         this.enableNotification();
         let ungrantedPermissions = await checkPermissions(getContext(this), permissions)
         if (ungrantedPermissions.length > 0) {
-            await requestPermissions(getContext(this), ungrantedPermissions)
-            ungrantedPermissions = await checkPermissions(getContext(this), permissions)
-            if (ungrantedPermissions.length > 0) {
-                showToast(`请授予相关权限，否则不能正常工作 ${ungrantedPermissions[0]}`)
-            }
+            showToast(`请授予相关权限，否则不能正常工作 ${ungrantedPermissions[0]}`)
         }
 
         if (Config.ORGANIZATION_SERVER) {

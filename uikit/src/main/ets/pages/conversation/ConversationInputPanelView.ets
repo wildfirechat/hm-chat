@@ -43,7 +43,7 @@ import PickContactModal from '../picker/PickContactModal'
 import ForwardMessageDialog from './forward/ForwardMessageDialog'
 import CardMessageContent from '@wfc/client/src/main/ets/wfc/messages/cardMessageContent'
 import fileUri from '@ohos.file.fileuri'
-import { checkAndRequestPermission } from '../../helper/permissionHelper'
+import { checkAndRequestPermission, checkPermissions } from '../../helper/permissionHelper'
 import { Permissions } from '@kit.AbilityKit'
 
 const INPUT_ICON_WIDTH = 30
@@ -823,25 +823,35 @@ export default struct ConversationInputPanelView {
                                         .backgroundColor(Color.White)
                                     }
                                 })
-                                .onTouch(event => {
+                                .onTouch(async event => {
                                     event.stopPropagation()
                                     if (event.type === TouchType.Down) {
-                                        this.startRecordAudio()
-                                        this.showAudioRecorderView = true
-                                        this.showCancelRecordIndicator = false
-                                        this.recordTouchDownY = event.touches[0].screenY
-                                    } else if (event.type === TouchType.Up) {
-                                        this.stopRecordAudio(this.showCancelRecordIndicator)
-                                        this.showAudioRecorderView = false
-                                        this.showCancelRecordIndicator = false
-                                    } else if (event.type === TouchType.Move) {
-                                        let y = event.touches[0].screenY;
-                                        if (this.recordTouchDownY - y > 100) {
-                                            this.showCancelRecordIndicator = true;
+                                        let deniedPermissions = await checkPermissions(getContext(this), ['ohos.permission.MICROPHONE'])
+                                        if (deniedPermissions.length === 0) {
+                                            this.startRecordAudio()
+                                            this.showAudioRecorderView = true
+                                            this.showCancelRecordIndicator = false
+                                            this.recordTouchDownY = event.touches[0].screenY
                                         } else {
-                                            this.showCancelRecordIndicator = false;
+                                            checkAndRequestPermission(getContext(this), 'ohos.permission.MICROPHONE')
                                         }
-                                    } else if (event.type === TouchType.Cancel) {
+                                    } else {
+                                        if (!this.showAudioRecorderView) {
+                                            return
+                                        }
+                                        if (event.type === TouchType.Up) {
+                                            this.stopRecordAudio(this.showCancelRecordIndicator)
+                                            this.showAudioRecorderView = false
+                                            this.showCancelRecordIndicator = false
+                                        } else if (event.type === TouchType.Move) {
+                                            let y = event.touches[0].screenY;
+                                            if (this.recordTouchDownY - y > 100) {
+                                                this.showCancelRecordIndicator = true;
+                                            } else {
+                                                this.showCancelRecordIndicator = false;
+                                            }
+                                        } else if (event.type === TouchType.Cancel) {
+                                        }
                                     }
                                 })
                         }

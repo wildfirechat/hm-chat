@@ -9,10 +9,12 @@ import GroupMemberType from '@wfc/client/src/main/ets/wfc/model/groupMemberType'
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
 import { navigationDestinations } from '../navigationConfig'
 import PickGroupMemberModal from './PickGroupMemberModal'
+import ActionSheetDialog from '../../view/ActionSheetDialog'
 
 @Entry
 @Component
 export default struct GroupManagerListPage {
+    private customDialogController?: CustomDialogController
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
     @State groupOwnerUerInfo?: UserInfo = undefined
     @State groupManagerUserInfos: UserInfo[] = []
@@ -28,13 +30,14 @@ export default struct GroupManagerListPage {
     }
 
     @Builder
-    pickGroupMemberModal() {
+    pickGroupMemberModal(onPickResult: (userInfos: UserInfo[]) => void) {
         PickGroupMemberModal({
             groupId: this.groupInfo?.target,
             title: '添加管理员',
             showPickGroupMemberModal: $showPickGroupMemberModal,
             uncheckableUserIds: [this.groupOwnerUerInfo!.uid].concat(this.groupManagerUserInfos.map(u => u.uid)),
-            initialCheckedUserIds: [this.groupOwnerUerInfo!.uid].concat(this.groupManagerUserInfos.map(u => u.uid))
+            initialCheckedUserIds: [this.groupOwnerUerInfo!.uid].concat(this.groupManagerUserInfos.map(u => u.uid)),
+            onPickResult: onPickResult
 
         })
             .height('100%')
@@ -94,6 +97,32 @@ export default struct GroupManagerListPage {
                                         .backgroundColor(Color.White)
                                     }
                                 })
+                                .onClick(() => {
+                                    this.customDialogController = new CustomDialogController({
+                                        builder: ActionSheetDialog({
+                                            controller: this.customDialogController,
+                                            sheets: [
+                                                {
+                                                    title: '移除管理员',
+                                                    action: () => {
+                                                        wfc.setGroupManager(this.groupInfo!.target, false, [info.uid], [], null, () => {
+                                                            this.groupManagerUserInfos = this.groupManagerUserInfos.filter(u => u.uid !== info.uid)
+                                                        }, err => {
+                                                            showToast('移除管理员失败 ' + err)
+
+                                                        })
+                                                    }
+                                                },
+                                            ]
+                                        }),
+                                        autoCancel: true,
+                                        alignment: DialogAlignment.Center,
+                                        // gridCount: 4,
+                                        customStyle: false
+                                    })
+
+                                    this.customDialogController.open()
+                                })
                             }
                         }, (info: UserInfo) => info.uid + info.updateDt)
                     }
@@ -116,27 +145,26 @@ export default struct GroupManagerListPage {
                             .maxLines(1)
                     }
                     .margin({ top: 20 })
-                    .bindContentCover(this.showPickGroupMemberModal, this.pickGroupMemberModal(), {
+                    .bindContentCover(this.showPickGroupMemberModal, this.pickGroupMemberModal((userInfos: UserInfo[]) => {
+                        this.showPickGroupMemberModal = false
+                        let pickUsers = userInfos
+                        if (pickUsers?.length) {
+                            let uids = pickUsers.map(info => info.uid)
+                            wfc.setGroupManager(this.groupInfo!.target, true, uids, [0], null, () => {
+                                let groupManagers = wfc.getGroupMembersByType(this.groupInfo!.target, GroupMemberType.Manager);
+                                this.groupManagerUserInfos = wfc.getUserInfos(groupManagers.map(m => m.memberId), this.groupInfo!.target)
+                                this.showPickGroupMemberModal = false
+                            }, err => {
+                                showToast('添加群管理员失败：' + err)
+                                this.showPickGroupMemberModal = false
+                            })
+                        }
+                    }), {
                         modalTransition: ModalTransition.DEFAULT,
                         onAppear: () => {
                         },
 
                         onDisappear: () => {
-                            this.showPickGroupMemberModal = false
-                            let localStorage = LocalStorage.getShared();
-                            let pickUsers = localStorage.get<UserInfo[]>(PickGroupMemberModal.PICK_RESULT);
-                            if (pickUsers?.length) {
-                                localStorage.delete(PickGroupMemberModal.PICK_RESULT)
-                                let uids = pickUsers.map(info => info.uid)
-                                wfc.setGroupManager(this.groupInfo?.target, true, uids, [0], null, () => {
-                                    let groupManagers = wfc.getGroupMembersByType(this.groupInfo?.target, GroupMemberType.Manager);
-                                    this.groupManagerUserInfos = wfc.getUserInfos(groupManagers.map(m => m.memberId), this.groupInfo!.target)
-                                    this.showPickGroupMemberModal = false
-                                }, err => {
-                                    showToast('移除群成员失败：' + err)
-                                    this.showPickGroupMemberModal = false
-                                })
-                            }
                         }
                     })
                     .onClick(() => {

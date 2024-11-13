@@ -62,7 +62,7 @@ export default struct UpdateUserInfoPage {
                 Text('删除')
                     .margin({ top: 20 })
                     .width('100%')
-                    .height(60)
+                    .height(56)
                     .textAlign(TextAlign.Center)
                     .backgroundColor(Color.White)
                     .fontColor(Color.Red)
@@ -75,14 +75,27 @@ export default struct UpdateUserInfoPage {
                         }
                     })
                     .onClick(() => {
-                        wfc.deleteFriend(this.userInfo!.uid, () => {
-                            showToast('删除好友成功')
-                            wfc.setFavUser(this.userInfo!.uid, false, () => {
-                            }, err => {
-                            })
-                            this.mainNavPathStack.clear()
-                        }, err => {
-                            showToast('删除好友失败 ' + err)
+                        AlertDialog.show({
+                            message: '删除好友',
+                            primaryButton: {
+                                value: '确定',
+                                action: () => {
+                                    wfc.deleteFriend(this.userInfo!.uid, () => {
+                                        showToast('删除好友成功')
+                                        wfc.setFavUser(this.userInfo!.uid, false, () => {
+                                        }, err => {
+                                        })
+                                        this.mainNavPathStack.clear()
+                                    }, err => {
+                                        showToast('删除好友失败 ' + err)
+                                    })
+                                }
+                            },
+                            secondaryButton: {
+                                value: '取消',
+                                action: () => {
+                                }
+                            }
                         })
                     })
             }

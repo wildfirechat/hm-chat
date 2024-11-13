@@ -16,7 +16,6 @@ import TextMessageContentView from './TextMessageContentView'
 import VideoMessageContentView from './VideoMessageContentView'
 import GroupMember from '@wfc/client/src/main/ets/wfc/model/groupMember'
 import FileMessageContentView from './FileMessageContentView'
-import TextMessageContent from '@wfc/client/src/main/ets/wfc/messages/textMessageContent'
 import pasteboard from '@ohos.pasteboard'
 import CustomMessageContentType from '@wfc/client/src/main/ets/wfc_custom_message/customMessageContentType'
 import TestCustomMessageContentView from '../custom_message/testCustomMessageContentView'
@@ -37,7 +36,6 @@ export default struct NormaMessageContentView {
     @Prop @Watch('updateMessageReadReceipt') readEntries: Map<string, number> = new Map();
     @Prop groupMembers: GroupMember[] = []
     private enableReceipt: boolean = false
-    private deleteMessageDialogController?: CustomDialogController
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
 
     aboutToAppear(): void {
@@ -138,20 +136,21 @@ export default struct NormaMessageContentView {
                 title: '删除',
                 tag: 'delete',
                 action: () => {
-                    this.deleteMessageDialogController = new CustomDialogController({
+                    let deleteMessageDialogController = new CustomDialogController({
                         builder: ActionSheetDialog({
                             title: '删除消息?',
-                            controller: this.deleteMessageDialogController,
                             sheets: [
                                 {
                                     title: '删除本地消息',
                                     action: () => {
+                                        deleteMessageDialogController.close()
                                         wfc.deleteMessage(this.message!.messageId)
                                     }
                                 },
                                 {
                                     title: '删除远程消息',
                                     action: () => {
+                                        deleteMessageDialogController.close()
                                         wfc.deleteRemoteMessageByUid(this.message!.messageUid, () => {
 
                                         }, (err: number) => {
@@ -167,7 +166,7 @@ export default struct NormaMessageContentView {
                         customStyle: false
                     })
 
-                    this.deleteMessageDialogController.open()
+                    deleteMessageDialogController.open()
                 }
             },
             {

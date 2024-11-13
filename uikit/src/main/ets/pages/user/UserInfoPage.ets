@@ -21,7 +21,6 @@ export default struct UserInfoPage {
     @State userInfo?: UserInfo = undefined
     private isMyFriend: boolean = false
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
-    private voipDialogController?: CustomDialogController
 
     aboutToAppear() {
         let params = this.mainNavPathStack.getParamByIndex(this.mainNavPathStack.size() - 1) as Record<string, Object>;
@@ -172,14 +171,19 @@ export default struct UserInfoPage {
                             }
                         })
                         .onClick(() => {
-                            this.voipDialogController = new CustomDialogController({
+                            let voipDialogController = new CustomDialogController({
                                 builder: ActionSheetDialog({
-                                    cancel: '取消',
-                                    controller: this.voipDialogController,
+                                    cancel: {
+                                        title: '取消',
+                                        action: () => {
+                                            voipDialogController.close()
+                                        }
+                                    },
                                     sheets: [
                                         {
                                             title: '语音通话',
                                             action: async () => {
+                                                voipDialogController.close()
                                                 let granted = await checkAndRequestPermission(getContext(this), 'ohos.permission.MICROPHONE')
                                                 if (granted) {
                                                     let conversation = new Conversation(ConversationType.Single, this.userInfo!.uid, 0)
@@ -192,6 +196,7 @@ export default struct UserInfoPage {
                                         {
                                             title: '视频通话',
                                             action: async () => {
+                                                voipDialogController.close()
                                                 let cameraGranted = await checkAndRequestPermission(getContext(this), 'ohos.permission.CAMERA')
                                                 let microphoneGranted = await checkAndRequestPermission(getContext(this), 'ohos.permission.MICROPHONE')
                                                 if (cameraGranted && microphoneGranted) {
@@ -210,7 +215,7 @@ export default struct UserInfoPage {
                                 customStyle: false
                             })
 
-                            this.voipDialogController.open()
+                            voipDialogController.open()
                         })
                 }
                 .backgroundColor(Color.White)

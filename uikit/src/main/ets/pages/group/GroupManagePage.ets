@@ -1,7 +1,5 @@
 import OptionItemView from '../../view/OptionItemView'
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
-import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
-import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType'
 import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
 import { navigationDestinations } from '../navigationConfig'
 import ActionSheetDialog from '../../view/ActionSheetDialog'
@@ -13,7 +11,6 @@ import { showToast } from '../../common/utils/Toast'
 export default struct GroupManagePage {
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
     @State groupInfo?: GroupInfo = undefined
-    private customDialogController?: CustomDialogController;
 
     aboutToAppear() {
         let params = this.mainNavPathStack.getParamByIndex(this.mainNavPathStack.size() - 1) as Record<string, Object>;
@@ -89,16 +86,21 @@ export default struct GroupManagePage {
                     })
                         .onClick(() => {
                             let func = (joinType: number) => {
+                                customDialogController.close()
                                 wfc.modifyGroupInfo(this.groupInfo!.target, ModifyGroupInfoType.Modify_Group_JoinType, joinType + '', [], null, () => {
                                     this.groupInfo!.joinType = joinType
                                 }, err => {
                                     showToast('修改加群方式失败')
                                 })
                             }
-                            this.customDialogController = new CustomDialogController({
+                            let customDialogController = new CustomDialogController({
                                 builder: ActionSheetDialog({
-                                    cancel: '取消',
-                                    controller: this.customDialogController,
+                                    cancel: {
+                                        title: '取消',
+                                        action: () => {
+                                            customDialogController.close()
+                                        }
+                                    },
                                     sheets: [
                                         {
                                             title: '不限制加入',
@@ -126,7 +128,7 @@ export default struct GroupManagePage {
                                 customStyle: false
                             })
 
-                            this.customDialogController.open()
+                            customDialogController.open()
                         })
                     OptionItemView({
                         title: '查找方式',
@@ -136,16 +138,21 @@ export default struct GroupManagePage {
                     })
                         .onClick(() => {
                             let func = (searchable: number) => {
+                                customDialogController.close()
                                 wfc.modifyGroupInfo(this.groupInfo!.target, ModifyGroupInfoType.Modify_Group_Searchable, searchable + '', [], null, () => {
                                     this.groupInfo!.searchable = searchable
                                 }, err => {
                                     showToast('修改群查找方式失败')
                                 })
                             }
-                            this.customDialogController = new CustomDialogController({
+                            let customDialogController = new CustomDialogController({
                                 builder: ActionSheetDialog({
-                                    cancel: '取消',
-                                    controller: this.customDialogController,
+                                    cancel: {
+                                        title: '取消',
+                                        action: () => {
+                                            customDialogController.close()
+                                        }
+                                    },
                                     sheets: [
                                         {
                                             title: '允许查找',
@@ -167,7 +174,7 @@ export default struct GroupManagePage {
                                 customStyle: false
                             })
 
-                            this.customDialogController.open()
+                            customDialogController.open()
                         })
                     OptionItemView({
                         title: '群历史消息',
@@ -177,16 +184,21 @@ export default struct GroupManagePage {
                     })
                         .onClick(() => {
                             let func = (historyMsg: number) => {
+                                customDialogController.close()
                                 wfc.modifyGroupInfo(this.groupInfo!.target, ModifyGroupInfoType.Modify_Group_History_Message, historyMsg + '', [], null, () => {
                                     this.groupInfo!.historyMessage = historyMsg
                                 }, err => {
                                     showToast('修改是否允许查看群历史消息失败')
                                 })
                             }
-                            this.customDialogController = new CustomDialogController({
+                            let customDialogController = new CustomDialogController({
                                 builder: ActionSheetDialog({
-                                    cancel: '取消',
-                                    controller: this.customDialogController,
+                                    cancel: {
+                                        title: '取消',
+                                        action: () => {
+                                            customDialogController.close()
+                                        }
+                                    },
                                     sheets: [
                                         {
                                             title: '不允许新成员查看历史消息',
@@ -208,7 +220,7 @@ export default struct GroupManagePage {
                                 customStyle: false
                             })
 
-                            this.customDialogController.open()
+                            customDialogController.open()
 
                         })
                 }

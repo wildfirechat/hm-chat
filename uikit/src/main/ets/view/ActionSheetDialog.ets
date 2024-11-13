@@ -2,10 +2,10 @@
 @CustomDialog
 export default struct ActionSheetDialog {
     title: string = ''
-    cancel: string = ''
+    cancel?: SheetInfo
     sheets: SheetInfo[] = []
     // 若尝试在CustomDialog中传入多个其他的Controller，以实现在CustomDialog中打开另一个或另一些CustomDialog，那么此处需要将指向自己的controller放在最后
-    controller: CustomDialogController
+    controller?: CustomDialogController
 
     build() {
         Column() {
@@ -51,7 +51,7 @@ export default struct ActionSheetDialog {
                     })
                     .onClick(() => {
                         sheet.action()
-                        this.controller.close()
+                        this.controller?.close()
                     })
                 }, (sheet: SheetInfo, index: number) => index + '')
             }
@@ -61,25 +61,35 @@ export default struct ActionSheetDialog {
                 Column() {
                     Divider()
                         .width('90%')
-                    Text(this.cancel)
-                        .fontColor(Color.Red)
-                        .fontSize(15)
-                        .height(40)
-                        .width('90%')
-                        .borderRadius(10)
-                        .margin({ top: 10, bottom: 10 })
-                        .textAlign(TextAlign.Center)
-                        .stateStyles({
-                            pressed: {
-                                .backgroundColor('#E5E5E5')
-                            },
-                            normal: {
-                                .backgroundColor(Color.White)
-                            }
-                        })
-                        .onClick(() => {
-                            this.controller.close()
-                        })
+                    Row() {
+                        if (this.cancel.icon) {
+                            Image(this.cancel.icon)
+                                .width(20)
+                                .height(20)
+                        }
+                        Text(this.cancel.title)
+                            .fontSize(15)
+                            .textAlign(TextAlign.Center)
+                            .fontColor(Color.Red)
+                    }
+                    .justifyContent(FlexAlign.Center)
+                    .align(Alignment.Center)
+                    .width('90%')
+                    .height(50)
+                    .margin({ top: 10, bottom: 10 })
+                    .borderRadius(10)
+                    .stateStyles({
+                        pressed: {
+                            .backgroundColor('#E5E5E5')
+                        },
+                        normal: {
+                            .backgroundColor(Color.White)
+                        }
+                    })
+                    .onClick(() => {
+                        this.cancel?.action()
+                        this.controller?.close()
+                    })
                 }
                 .justifyContent(FlexAlign.Center)
                 .align(Alignment.Center)

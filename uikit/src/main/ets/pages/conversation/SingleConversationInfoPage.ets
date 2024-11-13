@@ -7,7 +7,6 @@ import ConversationInfo from '@wfc/client/src/main/ets/wfc/model/conversationInf
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType';
 import GroupType from '@wfc/client/src/main/ets/wfc/model/groupType';
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo';
-import { FailCallbackDefault } from '@wfc/client/src/main/ets/wfc/type/types';
 import { navigationDestinations } from '../navigationConfig';
 import PickMultiContactModal from '../picker/PickMultiContactModal';
 
@@ -21,7 +20,6 @@ export default struct SingleConversationInfoPage {
     @State isSilent: boolean = false
     @State showPickContactModal: boolean = false
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
-    private clearConversationHistoryDialogController?: CustomDialogController
 
     aboutToAppear() {
         let params = this.mainNavPathStack.getParamByIndex(this.mainNavPathStack.size() - 1) as Record<string, Object>;
@@ -158,20 +156,21 @@ export default struct SingleConversationInfoPage {
                 Column() {
                     OptionItemView({ title: '清空聊天记录' })
                         .onClick(event => {
-                            this.clearConversationHistoryDialogController = new CustomDialogController({
+                            let clearConversationHistoryDialogController = new CustomDialogController({
                                 builder: ActionSheetDialog({
                                     title: '清空聊天记录?',
-                                    controller: this.clearConversationHistoryDialogController,
                                     sheets: [
                                         {
                                             title: '清除本地聊天记录',
                                             action: () => {
+                                                clearConversationHistoryDialogController.close()
                                                 wfc.clearMessages(this.conversationInfo!.conversation)
                                             }
                                         },
                                         {
                                             title: '清除远程聊天记录',
                                             action: () => {
+                                                clearConversationHistoryDialogController.close()
                                                 wfc.clearRemoteConversationMessages(this.conversationInfo!.conversation, () => {
                                                     showToast('清除远程远程会话消息失败')
                                                 }, err => {
@@ -187,7 +186,7 @@ export default struct SingleConversationInfoPage {
                                 customStyle: false
                             })
 
-                            this.clearConversationHistoryDialogController.open()
+                            clearConversationHistoryDialogController.open()
                         })
                 }
                 .margin({ top: 10 })

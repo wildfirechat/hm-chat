@@ -34,7 +34,6 @@ export default struct GroupConversationInfoPage {
     @State groupAnnouncement: string = ''
     @State userInfo?: UserInfo = undefined
     @State showGroupMemberNickName: boolean = false
-    private clearConversationHistoryDialogController?: CustomDialogController
     private conversationInfo?: ConversationInfo
     private groupMember?: GroupMember
     private enableAddMember: boolean = false
@@ -482,20 +481,21 @@ export default struct GroupConversationInfoPage {
                             }
                         })
                         .onClick(event => {
-                            this.clearConversationHistoryDialogController = new CustomDialogController({
+                            let clearConversationHistoryDialogController = new CustomDialogController({
                                 builder: ActionSheetDialog({
                                     title: '清空聊天记录?',
-                                    controller: this.clearConversationHistoryDialogController,
                                     sheets: [
                                         {
                                             title: '清除本地聊天记录',
                                             action: () => {
+                                                clearConversationHistoryDialogController.close()
                                                 wfc.clearMessages(this.conversationInfo!.conversation)
                                             }
                                         },
                                         {
                                             title: '清除远程聊天记录',
                                             action: () => {
+                                                clearConversationHistoryDialogController.close()
                                                 wfc.clearRemoteConversationMessages(this.conversationInfo!.conversation, () => {
                                                     showToast('清除远程远程会话消息失败')
                                                 }, err => {
@@ -511,7 +511,7 @@ export default struct GroupConversationInfoPage {
                                 customStyle: false
                             })
 
-                            this.clearConversationHistoryDialogController.open()
+                            clearConversationHistoryDialogController.open()
                         })
 
                         Divider()

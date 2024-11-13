@@ -1,13 +1,8 @@
 import { showToast } from '../../common/utils/Toast'
-import OptionItemView from '../../view/OptionItemView'
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
-import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
-import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType'
 import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
-import GroupMember from '@wfc/client/src/main/ets/wfc/model/groupMember'
 import GroupMemberType from '@wfc/client/src/main/ets/wfc/model/groupMemberType'
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
-import { navigationDestinations } from '../navigationConfig'
 import PickGroupMemberModal from './PickGroupMemberModal'
 import ActionSheetDialog from '../../view/ActionSheetDialog'
 
@@ -98,9 +93,8 @@ export default struct GroupManagerListPage {
                                     }
                                 })
                                 .onClick(() => {
-                                    this.customDialogController = new CustomDialogController({
+                                    let customDialogController: CustomDialogController = new CustomDialogController({
                                         builder: ActionSheetDialog({
-                                            controller: this.customDialogController,
                                             sheets: [
                                                 {
                                                     title: '移除管理员',
@@ -111,9 +105,10 @@ export default struct GroupManagerListPage {
                                                             showToast('移除管理员失败 ' + err)
 
                                                         })
+                                                        customDialogController.close()
                                                     }
                                                 },
-                                            ]
+                                            ],
                                         }),
                                         autoCancel: true,
                                         alignment: DialogAlignment.Center,
@@ -121,7 +116,7 @@ export default struct GroupManagerListPage {
                                         customStyle: false
                                     })
 
-                                    this.customDialogController.open()
+                                    customDialogController.open()
                                 })
                             }
                         }, (info: UserInfo) => info.uid + info.updateDt)

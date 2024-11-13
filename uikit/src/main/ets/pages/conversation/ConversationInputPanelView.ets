@@ -100,7 +100,6 @@ export default struct ConversationInputPanelView {
     private groupId = ''
     @Link @Watch('onLongPressToMentionUser') longPressToMentionUser: string
     private mentions: MentionBlock[] = []
-    private voipDialogController?: CustomDialogController
     @State showExtContentCoverModal: boolean = false
     private voipAudioOnly: boolean = false
     private forwardDialogController?: CustomDialogController
@@ -141,13 +140,13 @@ export default struct ConversationInputPanelView {
             title: '视频通话',
             icon: $r('app.media.ic_func_video'),
             action: () => {
-                this.voipDialogController = new CustomDialogController({
+                let voipDialogController = new CustomDialogController({
                     builder: ActionSheetDialog({
-                        controller: this.voipDialogController,
                         sheets: [
                             {
                                 title: '视频通话',
                                 action: async () => {
+                                    voipDialogController.close()
                                     let cameraGranted = await checkAndRequestPermission(getContext(this), 'ohos.permission.CAMERA')
                                     let microphoneGranted = await checkAndRequestPermission(getContext(this), 'ohos.permission.MICROPHONE')
                                     if (cameraGranted && microphoneGranted) {
@@ -168,6 +167,7 @@ export default struct ConversationInputPanelView {
                             {
                                 title: '音频通话',
                                 action: async () => {
+                                    voipDialogController.close()
                                     let granted = await checkAndRequestPermission(getContext(this), 'ohos.permission.MICROPHONE')
                                     if (granted) {
                                         if (this.conversation.type === ConversationType.Single) {
@@ -190,7 +190,7 @@ export default struct ConversationInputPanelView {
                     customStyle: false
                 })
 
-                this.voipDialogController.open()
+                voipDialogController.open()
             }
         },
         {

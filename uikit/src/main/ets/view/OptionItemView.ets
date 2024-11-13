@@ -3,14 +3,14 @@
 export default struct OptionItemView {
     // TODO 应该用 @prop，但是不允许可选，故
     private icon: ResourceStr = ''
-    private title: string = ''
+    title: string = ''
     @Prop desc: string = ''
     @Prop subTitle: string = ''
     @Prop imgUrl: string = ''
-    private showRightArrow: boolean = true
+    showRightArrow: boolean = true
     private paddingLeft: number = 10
     private paddingRight: number = 10
-    private showDivider: boolean = true
+    showDivider: boolean = true
 
     build() {
         Column() {

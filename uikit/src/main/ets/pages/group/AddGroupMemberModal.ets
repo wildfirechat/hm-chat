@@ -11,11 +11,11 @@ export default struct AddGroupMemberModal {
     @State checkedEmployees: Employee[] = []
     @State checkedOrganizations: Organization[] = []
     @State checkedFavGroupInfo?: GroupInfo = undefined
+    groupInfo?: GroupInfo
     private userInfos: UserInfo[] = []
     private initialCheckedUserIds: string[] = []
     private uncheckableUserIds: string[] = []
     public static TAG: string = 'addGroupMember'
-    private groupInfo?: GroupInfo
     @Link showAddGroupMemberModal: boolean
     public static PICK_RESULT = 'pickResult'
 

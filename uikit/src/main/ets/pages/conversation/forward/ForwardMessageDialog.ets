@@ -5,10 +5,10 @@ import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
 @Preview
 @CustomDialog
 export default struct ForwardMessageDialog {
-    private targetConversations: Conversation[] = []
-    private textValue: string = ''
-    private forwardMessageDesc: string = ''
-    private forwardMessageImageUri: string = ''
+    targetConversations: Conversation[] = []
+    textValue: string = ''
+    forwardMessageDesc: string = ''
+    forwardMessageImageUri: string = ''
     @State targetConversationPortraitAndNames: PortraitAndName[] = []
     controller: CustomDialogController
     // 若尝试在CustomDialog中传入多个其他的Controller，以实现在CustomDialog中打开另一个或另一些CustomDialog，那么此处需要将指向自己的controller放在最后

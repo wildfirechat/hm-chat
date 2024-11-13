@@ -111,11 +111,24 @@ export default struct GroupConversationInfoPage {
             .backgroundColor(Color.White)
     }
 
+    private unremovableGroupMemberIds() {
+        let selfUid = wfc.getUserId()
+        let uids: string[] = [selfUid]
+        if (this.groupMember?.type === GroupMemberType.Manager) {
+            let otherManagerIds = this.groupMembers.filter(m => m.type === GroupMemberType.Manager || m.type === GroupMemberType.Owner)
+                .filter(m => m.memberId !== selfUid)
+                .map(m => m.memberId)
+            uids.push(...otherManagerIds)
+        }
+        return uids
+    }
+
     @Builder
     removeGroupMemberModal() {
         PickGroupMemberModal({
             groupId: this.groupInfo.target,
             showPickGroupMemberModal: $showRemoveGroupMemberModal,
+            uncheckableUserIds: this.unremovableGroupMemberIds(),
             title: '移除群成员'
         })
             .height('100%')

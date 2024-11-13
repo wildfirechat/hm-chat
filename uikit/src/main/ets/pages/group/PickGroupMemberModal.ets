@@ -7,30 +7,27 @@ import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
 
 @Component
 export default struct PickGroupMemberModal {
+    public static TAG: string = 'pickGroupMember'
+    public static PICK_RESULT = 'pickGroupMembers'
+
+    public groupId: string = ''
+    public title: string = ''
+
     @State checkedUsers: UserInfo[] = []
     @State checkedEmployees: Employee[] = []
     @State checkedOrganizations: Organization[] = []
     @State checkedFavGroupInfo?: GroupInfo = undefined
-    private userInfos: UserInfo[] = []
-    private initialCheckedUserIds: string[] = []
-    private uncheckableUserIds: string[] = []
-    public static TAG: string = 'pickGroupMember'
-    public groupId: string = ''
     @Link showPickGroupMemberModal: boolean
+
+    uncheckableUserIds: string[] = []
+    initialCheckedUserIds: string[] = []
     onPickResult?: (users: UserInfo[]) => void = undefined
-    public static PICK_RESULT = 'pickGroupMembers'
-    public title: string = ''
+
+    private userInfos: UserInfo[] = []
 
     aboutToAppear() {
         let groupMemberIds = wfc.getGroupMemberIds(this.groupId, false)
         this.userInfos = wfc.getUserInfos(groupMemberIds, '')
-
-        let selfUserId = wfc.getUserId()
-        this.uncheckableUserIds.push(selfUserId)
-        let groupInfo = wfc.getGroupInfo(this.groupId)
-        if (groupInfo.owner !== selfUserId) {
-            this.uncheckableUserIds.push(groupInfo.owner)
-        }
     }
 
     onCheckUser = (info: UserInfo, checked?: boolean) => {

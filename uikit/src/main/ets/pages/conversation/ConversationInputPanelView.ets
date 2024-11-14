@@ -1,7 +1,7 @@
 import common from '@ohos.app.ability.common'
 import { copyFileUri, fileNameFromFileUri, fileSize } from '../../common/utils/FileUtil'
 import { showToast } from '../../common/utils/Toast'
-import { selectFile, selectMedia2, takePhoto } from '../../helper/mediaHelper'
+import { selectFile, selectMedia, takePhoto } from '../../helper/mediaHelper'
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import ImageMessageContent from '@wfc/client/src/main/ets/wfc/messages/imageMessageContent'
 import TextMessageContent from '@wfc/client/src/main/ets/wfc/messages/textMessageContent'
@@ -109,7 +109,7 @@ export default struct ConversationInputPanelView {
             icon: $r('app.media.ic_func_pic'),
             action: async () => {
                 try {
-                    let results = await selectMedia2(getContext());
+                    let results = await selectMedia(getContext());
                     results.forEach(async result => {
                         if (result.type === 2) {
                             let filePath = getContext(this)

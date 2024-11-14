@@ -10,9 +10,11 @@ import cameraPicker from '@ohos.multimedia.cameraPicker';
 import camera from '@ohos.multimedia.camera';
 import { BusinessError } from '@ohos.base';
 import { dataSharePredicates } from '@kit.ArkData';
-import image from '@ohos.multimedia.image';
 import { compressImage, packing } from './imageVideoHelper';
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc';
+import { fileIo } from '@kit.CoreFileKit';
+import { showToast } from '../common/utils/Toast';
+import { request } from '@kit.BasicServicesKit';
 
 export interface MediaResult {
     type: number // 1 image, 2 video
@@ -114,8 +116,40 @@ export async function takePhoto(context: common.UIAbilityContext): Promise<Media
     return []
 }
 
-export function saveMedia() {
-
+export function saveMedia(context: Context, url: string, type: 'image' | 'video') {
+    request.downloadFile(context, { url: url, filePath: context.cacheDir + '/' + Date.now() })
+        .then((data: request.DownloadTask) => {
+            let downloadTask: request.DownloadTask = data;
+            let completeCallback = async () => {
+                let downloadInfo = await downloadTask.getTaskInfo()
+                downloadInfo.targetURI
+            };
+            downloadTask.on('complete', async () => {
+                let downloadInfo = await downloadTask.getTaskInfo()
+                let helper = photoAccessHelper.getPhotoAccessHelper(context)
+                let uri: string
+                let extension = url.substring(url.lastIndexOf('.') + 1)
+                if (type === 'image') {
+                    uri = await helper.createAsset(photoAccessHelper.PhotoType.IMAGE, extension)
+                } else {
+                    uri = await helper.createAsset(photoAccessHelper.PhotoType.VIDEO, extension)
+                }
+                let sourceFile = await fileIo.open(downloadInfo.filePath, fileIo.OpenMode.READ_ONLY)
+                let targetFile = await fileIo.open(uri, fileIo.OpenMode.READ_WRITE | fileIo.OpenMode.CREATE);
+                fileIo.copyFileSync(sourceFile.fd, targetFile.fd);
+                await fileIo.close(targetFile.fd)
+                await fileIo.close(sourceFile.fd)
+                await fileIo.unlink(sourceFile.path)
+                showToast('保存成功')
+            });
+            downloadTask.on('fail', (data) => {
+                showToast('下载媒体失败' + data)
+            })
+        })
+        .catch((e: BusinessError) => {
+            console.log('saveMedia error', e.name, e.message)
+            showToast('保存媒体失败' + e.message);
+        })
 }
 
 async function _uri2MediaResult(context: Context, photoUris: string[], thumbnailWH: Size = { width: 200, height: 200 }, maxThumbnailSize: number = 20) {

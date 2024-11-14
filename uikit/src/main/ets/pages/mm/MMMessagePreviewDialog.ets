@@ -8,6 +8,9 @@ import { curves, display, window } from '@kit.ArkUI';
 import { ifaa } from '@kit.OnlineAuthenticationKit';
 import { MMMediaEntry } from '../../common/Types';
 import { mediaEntry } from '../../helper/messageHelper';
+import resourceManager from '@ohos.resourceManager';
+import { saveMedia } from '../../helper/mediaHelper';
+import { showToast } from '../../common/utils/Toast';
 
 //@Entry
 //@Component
@@ -234,6 +237,21 @@ export default struct MMMessagePreviewDialog {
                 .alignItems(HorizontalAlign.Center)
                 .margin({ top: this.marginTop })
             }
+
+            Column() {
+                SaveButton()
+                    .onClick(() => {
+                        showToast('正在保存...')
+                        let entry = this.mediaEntries[this.index];
+                        saveMedia(getContext(this), entry.url, entry.type)
+                    })
+            }
+            .hitTestBehavior(HitTestMode.Transparent)
+            .justifyContent(FlexAlign.End)
+            .alignItems(HorizontalAlign.End)
+            .width('100%')
+            .height('100%')
+            .padding(10)
 
         }
         // }

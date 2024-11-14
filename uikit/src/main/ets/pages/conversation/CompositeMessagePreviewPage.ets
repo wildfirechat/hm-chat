@@ -10,7 +10,6 @@ import { eq, stringValue } from '@wfc/client/src/main/ets/wfc/util/longUtil'
 import CompositeMessageContentContainerView from './message/CompositeMessageContentContainerView'
 import { http } from '@kit.NetworkKit'
 
-@Entry
 @Component
 export default struct CompositeMessagePreviewPage {
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
@@ -114,7 +113,7 @@ export default struct CompositeMessagePreviewPage {
     loadMediaCompositeMessageContent() {
         let compositeMessageContent: CompositeMessageContent = this.message?.messageContent as CompositeMessageContent;
         if (compositeMessageContent.remotePath) {
-            get(compositeMessageContent.remotePath, undefined, undefined, http.HttpDataType.STRING)
+            get(compositeMessageContent.remotePath, undefined, http.HttpDataType.STRING)
                 .then((data) => {
                     compositeMessageContent._decodeMessages(data as string)
                     this.compositeMessageDataSource?.setMessages(compositeMessageContent.messages)

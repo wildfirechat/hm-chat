@@ -10,14 +10,14 @@ export interface UIUserInfo {
 }
 
 export interface MediaEntry {
-    type: string,
+    type: 'image' | 'video',
     url: string,
     thumbnail: string
 }
 
 export interface MMMediaEntry {
     message: Message,
-    type: string,
+    type: 'image' | 'video',
     url: string,
     thumbnail: string,
     videoController?: VideoController

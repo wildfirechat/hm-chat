@@ -15,6 +15,8 @@ import wfc from '@wfc/client/src/main/ets/wfc/client/wfc';
 import { fileIo } from '@kit.CoreFileKit';
 import { showToast } from '../common/utils/Toast';
 import { request } from '@kit.BasicServicesKit';
+import Long from '@wfc/client/src/main/ets/wfc/util/long';
+import { stringValue } from '@wfc/client/src/main/ets/wfc/util/longUtil';
 
 export interface MediaResult {
     type: number // 1 image, 2 video
@@ -116,38 +118,54 @@ export async function takePhoto(context: common.UIAbilityContext): Promise<Media
     return []
 }
 
-export function saveMedia(context: Context, url: string, type: 'image' | 'video') {
-    request.downloadFile(context, { url: url, filePath: context.cacheDir + '/' + Date.now() })
-        .then((data: request.DownloadTask) => {
-            let downloadTask: request.DownloadTask = data;
-            let completeCallback = async () => {
-                let downloadInfo = await downloadTask.getTaskInfo()
-                downloadInfo.targetURI
-            };
-            downloadTask.on('complete', async () => {
-                let downloadInfo = await downloadTask.getTaskInfo()
-                let helper = photoAccessHelper.getPhotoAccessHelper(context)
-                let uri: string
-                let extension = url.substring(url.lastIndexOf('.') + 1)
-                if (type === 'image') {
-                    uri = await helper.createAsset(photoAccessHelper.PhotoType.IMAGE, extension)
-                } else {
-                    uri = await helper.createAsset(photoAccessHelper.PhotoType.VIDEO, extension)
-                }
-                let sourceFile = await fileIo.open(downloadInfo.filePath, fileIo.OpenMode.READ_ONLY)
-                let targetFile = await fileIo.open(uri, fileIo.OpenMode.READ_WRITE | fileIo.OpenMode.CREATE);
-                fileIo.copyFileSync(sourceFile.fd, targetFile.fd);
-                await fileIo.close(targetFile.fd)
-                await fileIo.close(sourceFile.fd)
-                await fileIo.unlink(sourceFile.path)
-                showToast('保存成功')
-            });
-            downloadTask.on('fail', (data) => {
-                showToast('下载媒体失败' + data)
+export function downloadMedia(context: Context, messageUid: Long, url: string, progressCB?: (receivedSize: number, totalSize: number) => void): Promise<string> {
+    return new Promise<string>(async (resolve, reject) => {
+        let suffix = url.substring(url.lastIndexOf('.'))
+        let filePath = context.cacheDir + '/' + messageUid.toString() + suffix
+        if (await fileIo.access(filePath)) {
+            resolve(filePath)
+            return
+        }
+        request.downloadFile(context, { url: url, filePath: filePath })
+            .then((data: request.DownloadTask) => {
+                let downloadTask: request.DownloadTask = data;
+                downloadTask.on('complete', async () => {
+                    let downloadInfo = await downloadTask.getTaskInfo()
+                    resolve(downloadInfo.filePath)
+                });
+                downloadTask.on('fail', (data) => {
+                    reject(new Error('download error: ' + data))
+                })
+                downloadTask.on('progress', (receivedSize: number, totalSize: number) => {
+                    progressCB?.(receivedSize, totalSize)
+                })
             })
+            .catch((e: BusinessError) => {
+                reject(e.message)
+            })
+    })
+}
+
+export function saveMedia(context: Context, messageUid: Long, url: string, type: 'image' | 'video') {
+    downloadMedia(context, messageUid, url)
+        .then(async filePath => {
+            let helper = photoAccessHelper.getPhotoAccessHelper(context)
+            let uri: string
+            let extension = url.substring(url.lastIndexOf('.') + 1)
+            if (type === 'image') {
+                uri = await helper.createAsset(photoAccessHelper.PhotoType.IMAGE, extension)
+            } else {
+                uri = await helper.createAsset(photoAccessHelper.PhotoType.VIDEO, extension)
+            }
+            let sourceFile = await fileIo.open(filePath, fileIo.OpenMode.READ_ONLY)
+            let targetFile = await fileIo.open(uri, fileIo.OpenMode.READ_WRITE | fileIo.OpenMode.CREATE);
+            fileIo.copyFileSync(sourceFile.fd, targetFile.fd);
+            await fileIo.close(targetFile.fd)
+            await fileIo.close(sourceFile.fd)
+            await fileIo.unlink(sourceFile.path)
+            showToast('保存成功')
         })
-        .catch((e: BusinessError) => {
-            console.log('saveMedia error', e.name, e.message)
+        .catch((e: Error) => {
             showToast('保存媒体失败' + e.message);
         })
 }

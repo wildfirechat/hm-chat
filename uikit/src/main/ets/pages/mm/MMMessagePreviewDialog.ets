@@ -243,7 +243,7 @@ export default struct MMMessagePreviewDialog {
                     .onClick(() => {
                         showToast('正在保存...')
                         let entry = this.mediaEntries[this.index];
-                        saveMedia(getContext(this), entry.url, entry.type)
+                        saveMedia(getContext(this), entry.message.messageUid, entry.url, entry.type)
                     })
             }
             .hitTestBehavior(HitTestMode.Transparent)

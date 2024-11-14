@@ -2,6 +2,11 @@ import { showToast } from '../../../common/utils/Toast'
 import { getFiletypeIcon, humanSize } from '../../../util/helper'
 import FileMessageContent from '@wfc/client/src/main/ets/wfc/messages/fileMessageContent'
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
+import { filePreview } from '@kit.PreviewKit';
+import { downloadMedia } from '../../../helper/mediaHelper';
+import { getConnectionStatus } from '@wfc/client/src/main/types/libmarswrapper';
+import { fileUri } from '@kit.CoreFileKit';
+import { uniformTypeDescriptor } from '@kit.ArkData';
 
 @Component
 export default struct FileMessageContentView {
@@ -35,7 +40,23 @@ export default struct FileMessageContentView {
         .borderRadius(4)
         .justifyContent(FlexAlign.Start)
         .onClick(() => {
-            showToast('TODO 预览文件')
+            let context = getContext(this)
+            downloadMedia(context, this.message.messageUid, this.fileMessageContent().remotePath)
+                .then(async filePath => {
+                    let canPreview = await filePreview.canPreview(context, fileUri.getUriFromPath(filePath))
+                    if (canPreview) {
+                        let title = this.fileMessageContent().name
+                        let uri = fileUri.getUriFromPath(filePath)
+                        let typeId = uniformTypeDescriptor.getUniformDataTypeByFilenameExtension(filePath.substring(filePath.lastIndexOf('.')));
+                        let typeObj = uniformTypeDescriptor.getTypeDescriptor(typeId);
+                        let mimeTypes = typeObj.mimeTypes;
+                        filePreview.openPreview(context, {
+                            title: title,
+                            uri: uri,
+                            mimeType: mimeTypes[0],
+                        })
+                    }
+                })
         })
     }
 }

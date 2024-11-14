@@ -1,14 +1,5 @@
-import BasicDataSource from '../../common/BasicDataSource'
-import { get } from '../../helper/httpHelper'
-import { timeFormat } from '../../util/helper'
-import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
-import CompositeMessageContent from '@wfc/client/src/main/ets/wfc/messages/compositeMessageContent'
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
-import Long from '@wfc/client/src/main/ets/wfc/util/long'
-import { eq } from '@wfc/client/src/main/ets/wfc/util/longUtil'
-import CompositeMessageContentContainerView from './message/CompositeMessageContentContainerView'
-import { http } from '@kit.NetworkKit'
 import { LengthUnit } from '@kit.ArkUI'
 
 @Entry

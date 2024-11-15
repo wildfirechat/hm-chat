@@ -9,12 +9,19 @@ import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import MessageContentType from '@wfc/client/src/main/ets/wfc/messages/messageContentType'
 import { eq } from '@wfc/client/src/main/ets/wfc/util/longUtil'
 import MMMessagePreviewDialog from '../../mm/MMMessagePreviewDialog'
+import { getImageSizeByOrgSizeToWeChat } from '../../../util/wechatImageUtil'
 
 @Component
 export default struct ImageMessageContentView {
     @Link message: Message
     @Prop parentCompositeMessage: Message
     private mmPreviewDialogController?: CustomDialogController
+    private scaledSize?: Size;
+
+    aboutToAppear(): void {
+        let content = this.message.messageContent as ImageMessageContent
+        this.scaledSize = getImageSizeByOrgSizeToWeChat(content.imageWidth, content.imageHeight)
+    }
 
     imageMessageContent() {
         return this.message.messageContent as ImageMessageContent
@@ -37,21 +44,13 @@ export default struct ImageMessageContentView {
         return Config.DEFAULT_THUMBNAIL_URL
     }
 
-    imageWidth() {
-        let content = this.message.messageContent as ImageMessageContent;
-        if (content.imageWidth) {
-            return content.imageWidth
-        }
-        return -1
-    }
-
     build() {
         Image(this.imageUrl())
             .alt(this.thumbnail())
             .draggable(false)
-            .objectFit(ImageFit.Contain)
-            .width(this.imageWidth())
-            .constraintSize({ minWidth: 100, maxWidth: 200 })
+            .objectFit(ImageFit.Fill)
+            .width(px2vp(this.scaledSize?.width))
+            .height(px2vp(this.scaledSize?.height))
             .borderRadius(4)
             .onClick(event => {
                 let msg: Message | undefined

@@ -1,4 +1,3 @@
-import { numberValue } from '@wfc/client/src/main/ets/wfc/util/longUtil'
 
 export const humanSize = (size: number): string => {
     let value = (size / 1024).toFixed(1);

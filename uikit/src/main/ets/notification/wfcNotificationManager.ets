@@ -4,7 +4,7 @@ import wantAgent from '@ohos.app.ability.wantAgent';
 import { WantAgent } from '@ohos.app.ability.wantAgent';
 import Base from '@ohos.base';
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc';
-import uikit from 'uikit/ets/uikit';
+import uikit from '../uikit';
 
 class WfcNotificationManager {
     private notificationMessages: Message[] = []

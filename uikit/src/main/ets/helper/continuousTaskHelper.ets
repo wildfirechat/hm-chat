@@ -1,7 +1,7 @@
 import { WantAgent, wantAgent } from '@kit.AbilityKit';
 import { backgroundTaskManager } from '@kit.BackgroundTasksKit';
 import { BusinessError } from '@kit.BasicServicesKit';
-import uikit from 'uikit/ets/uikit';
+import uikit from '../uikit';
 
 export function startContinuousTask(context: Context) {
     let wantAgentInfo: wantAgent.WantAgentInfo = {

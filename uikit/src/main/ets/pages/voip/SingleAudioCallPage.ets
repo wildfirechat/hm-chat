@@ -110,7 +110,7 @@ export default struct SingleAudioCallPage {
         this.pipController = await PiPWindow.create({
             context: getContext(this),
             componentController: this.mXComponentController,
-            customUIController: this.textNodeController,
+            // customUIController: this.textNodeController,
             navigationId: uikit.bundleName,
             templateType: PiPWindow.PiPTemplateType.VIDEO_CALL,
             contentWidth: 200,
@@ -200,7 +200,7 @@ export default struct SingleAudioCallPage {
                     type: XComponentType.SURFACE,
                     controller: this.mXComponentController,
                 })
-                    .enableAnalyzer(false)
+                    // .enableAnalyzer(false)
                     .width(200)
                     .height(300)
                     .backgroundColor('#e0000000')

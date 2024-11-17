@@ -1,7 +1,6 @@
 import OptionItemView from "../../view/OptionItemView";
 import ToggleItemView from "../../view/ToggleItemView";
 import ConferenceInfo from "@wfc/avenginekit/src/main/ets/wfc/av/model/conferenceInfo";
-import { trustedAppService } from "@kit.DeviceSecurityKit";
 
 @Component
 export default struct ConferenceInfoPage {

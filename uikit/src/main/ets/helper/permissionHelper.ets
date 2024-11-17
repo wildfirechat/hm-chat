@@ -65,9 +65,9 @@ export async function checkAndRequestPermissions(context: Context, permissions: 
         for (let i = 0; i < permissions.length; i++) {
             if (result.authResults[i] === AbilityAccessCtrl.GrantStatus.PERMISSION_DENIED) {
                 deniedPermissions.push(permissions[i])
-                if (result.dialogShownResults && result.dialogShownResults[i] === false) {
-                    notShowDialogCount++
-                }
+                // if (result.dialogShownResults && result.dialogShownResults[i] === false) {
+                //     notShowDialogCount++
+                // }
             }
         }
         if (deniedPermissions.length) {
@@ -75,15 +75,15 @@ export async function checkAndRequestPermissions(context: Context, permissions: 
             if (deniedPermissions.length === notShowDialogCount) {
                 try {
 
-                    let grantStatusList = await atManager.requestPermissionOnSetting(context, deniedPermissions)
-                    let allGranted = true
-                    for (const grantStatus of grantStatusList) {
-                        if (grantStatus === -1) {
-                            allGranted = false
-                            break
-                        }
-                    }
-                    return allGranted
+                    // let grantStatusList = await atManager.requestPermissionOnSetting(context, deniedPermissions)
+                    // let allGranted = true
+                    // for (const grantStatus of grantStatusList) {
+                    //     if (grantStatus === -1) {
+                    //         allGranted = false
+                    //         break
+                    //     }
+                    // }
+                    return false
                 } catch (e) {
                     console.error('requestPermissionOnSetting', deniedPermissions, e)
                     return false

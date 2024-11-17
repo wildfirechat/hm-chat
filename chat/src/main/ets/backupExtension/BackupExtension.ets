@@ -1,7 +1,7 @@
 import { BackupExtensionAbility, BundleVersion, ReadTextOptions } from '@kit.CoreFileKit';
 import { contextConstant } from '@kit.AbilityKit';
 import fs from '@ohos.file.fs';
-import { JSON, util, xml } from '@kit.ArkTS';
+import { util, xml } from '@kit.ArkTS';
 
 const TAG = `BackupExtensionAbility`;
 
@@ -28,7 +28,8 @@ export default class BackupExtension extends BackupExtensionAbility {
             // 鸿蒙版本包名
             let hapPackageName = 'cn.wildfirechat.messenger';
 
-            let ceSourcePath = this.context.backupDir + `restore/${apkPackageName}/ce/`;
+            // let ceSourcePath = this.context.backupDir + `restore/${apkPackageName}/ce/`;
+            let ceSourcePath = ''
 
             // 其中<USERID>当前固定为100, 参考文档：https://developer.huawei.com/consumer/cn/doc/harmonyos-guides-V5/app-sandbox-directory-V5#应用沙箱路径和真实物理路径的对应关系
             const userId = 100;

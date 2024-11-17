@@ -1,3 +1,5 @@
+import { Size } from "@kit.ArkUI";
+
 /**
  * 获取类似微信的缩放后的宽高
  *

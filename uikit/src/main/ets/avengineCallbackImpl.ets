@@ -97,7 +97,7 @@ export default class AVEngineCallbackImpl extends AVEngineCallback {
     }
 
     private async createAVSessionAndStartContinuousTask(audioOnly: boolean) {
-        let type: AVSessionManager.AVSessionType = audioOnly ? 'voice_call' : 'video_call';
+        let type: AVSessionManager.AVSessionType = audioOnly ? 'voice_call' : 'voice_call';
         this.avSession = await AVSessionManager.createAVSession(this.context, 'voip', type);
         console.log('AVSession成功：' + JSON.stringify(this.avSession))
         // 激活接口要在元数据、控制命令注册完成之后再执行

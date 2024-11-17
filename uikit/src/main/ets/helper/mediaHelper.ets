@@ -17,6 +17,7 @@ import { showToast } from '../common/utils/Toast';
 import { request } from '@kit.BasicServicesKit';
 import Long from '@wfc/client/src/main/ets/wfc/util/long';
 import { stringValue } from '@wfc/client/src/main/ets/wfc/util/longUtil';
+import { Size } from '@kit.ArkUI';
 
 export interface MediaResult {
     type: number // 1 image, 2 video
@@ -187,16 +188,16 @@ async function _uri2MediaResult(context: Context, photoUris: string[], thumbnail
         asset.photoType
 
         let base64Data = ''
-        let pixelMap = await asset.getThumbnail(thumbnailWH)
-        if (pixelMap) {
-            if (maxThumbnailSize > 0) {
-                let compressedImageData = await compressImage(pixelMap!, maxThumbnailSize)
-                base64Data = wfc.arrayBuffer_to_b64(compressedImageData)
-            } else {
-                let imageData = await packing(pixelMap, 50)
-                base64Data = wfc.arrayBuffer_to_b64(imageData)
-            }
-        }
+        // let pixelMap = await asset.getThumbnail(thumbnailWH)
+        // if (pixelMap) {
+        //     if (maxThumbnailSize > 0) {
+        //         let compressedImageData = await compressImage(pixelMap!, maxThumbnailSize)
+        //         base64Data = wfc.arrayBuffer_to_b64(compressedImageData)
+        //     } else {
+        //         let imageData = await packing(pixelMap, 50)
+        //         base64Data = wfc.arrayBuffer_to_b64(imageData)
+        //     }
+        // }
         console.info('asset width: ', asset.get(photoAccessHelper.PhotoKeys.WIDTH));
         console.info('asset height: ', asset.get(photoAccessHelper.PhotoKeys.HEIGHT));
 

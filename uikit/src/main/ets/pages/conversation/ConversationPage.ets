@@ -795,8 +795,8 @@ export default struct ConversationPage {
                     .onRefreshing(() => {
                         this.loadHistoryMessage()
                     })
-                    .refreshOffset(64)
-                    .pullToRefresh(true)
+                    // .refreshOffset(64)
+                    // .pullToRefresh(true)
 
                     if (this.showAudioRecorderView) {
                         AudioRecorderView({
@@ -851,17 +851,17 @@ export default struct ConversationPage {
         })
         .mode(NavDestinationMode.STANDARD)
         .title(this.title)
-        .menus([
-            {
-                value: '',
-                icon: 'resources/base/media/ic_public_more.svg',
-                action: () => {
-                    this.mainNavPathStack.pushPathByName(this.conversationInfoPageName(), {
-                        'conversationInfo': this.conversationInfo
-                    } as Record<string, Object>, true)
-                }
-            }
-        ])
+        // .menus([
+        //     {
+        //         value: '',
+        //         icon: 'resources/base/media/ic_public_more.svg',
+        //         action: () => {
+        //             this.mainNavPathStack.pushPathByName(this.conversationInfoPageName(), {
+        //                 'conversationInfo': this.conversationInfo
+        //             } as Record<string, Object>, true)
+        //         }
+        //     }
+        // ])
         .height('100%')
         .width('100%')
     }

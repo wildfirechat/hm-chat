@@ -1,6 +1,6 @@
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
-import { LengthUnit } from '@kit.ArkUI'
+// import { LengthUnit } from '@kit.ArkUI'
 
 @Entry
 @Component
@@ -22,7 +22,7 @@ export default struct TextMessagePreviewPage {
                     Text(this.message?.messageContent.digest(this.message))
                         .width('100%')
                         .fontSize(20)
-                        .lineSpacing({ value: 12, unit: LengthUnit.VP })
+                        // .lineSpacing({ value: 12, unit: LengthUnit.VP })
 
                 }
                 .scrollBar(BarState.Off)

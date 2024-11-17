@@ -5,7 +5,6 @@ import MessageContentType from '@wfc/client/src/main/ets/wfc/messages/messageCon
 import VideoMessageContent from '@wfc/client/src/main/ets/wfc/messages/videoMessageContent';
 import { exist } from '../../common/utils/FileUtil';
 import { curves, display, window } from '@kit.ArkUI';
-import { ifaa } from '@kit.OnlineAuthenticationKit';
 import { MMMediaEntry } from '../../common/Types';
 import { mediaEntry } from '../../helper/messageHelper';
 import resourceManager from '@ohos.resourceManager';
@@ -176,7 +175,7 @@ export default struct MMMessagePreviewDialog {
                 let entry = this.mediaEntries[this.index];
                 if (entry.type === 'video') {
                     entry.videoController?.stop()
-                    entry.videoController?.reset()
+                    // entry.videoController?.reset()
                     this.isVideoPlaying = false
                 }
                 this.index = index

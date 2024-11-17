@@ -9,7 +9,7 @@ import FavItem from '@wfc/client/src/main/ets/wfc/model/favItem'
 import { JSONObject } from '@wfc/client/src/main/ets/wfc/type/types'
 import { _reverseToJsLongString } from '@wfc/client/src/main/ets/wfc/util/longUtil'
 import { navigationDestinations } from '../navigationConfig'
-import { LengthUnit } from '@kit.ArkUI'
+// import { LengthUnit } from '@kit.ArkUI'
 import CompositeMessageContent from '@wfc/client/src/main/ets/wfc/messages/compositeMessageContent'
 import { getFiletypeIcon, humanSize, timeFormat } from '../../util/helper'
 import VideoMessageContent from '@wfc/client/src/main/ets/wfc/messages/videoMessageContent'
@@ -47,6 +47,9 @@ export default struct FavRecordPage {
             })
     }
 
+    // TODO
+    // FIXME
+    // 此函数会导致页面卡顿
     compositeMessageText(favItem: FavItem) {
         let content = FavItem.toMessage(favItem).messageContent as CompositeMessageContent
         let text = ''
@@ -134,14 +137,14 @@ export default struct FavRecordPage {
                                     Text(favItem.title)
                                         .fontSize(15)
                                     Text(this.compositeMessageText(favItem))
-                                        .lineSpacing({ value: 4, unit: LengthUnit.VP })
+                                        // .lineSpacing({ value: 4, unit: LengthUnit.VP })
                                         .fontSize(15)
                                         .fontColor('#252525')
                                         .maxLines(5)
                                         .textOverflow({ overflow: TextOverflow.Ellipsis })
                                 } else {
                                     Text(favItem.title)
-                                        .lineSpacing({ value: 4, unit: LengthUnit.VP })
+                                        // .lineSpacing({ value: 4, unit: LengthUnit.VP })
                                         .fontSize(15)
                                         .fontColor('#252525')
                                         .maxLines(6)

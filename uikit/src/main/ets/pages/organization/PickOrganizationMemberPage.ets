@@ -213,7 +213,7 @@ export default struct PickOrganizationMemberPage{
         .title(this.title)
         .height('100%')
         .width('100%')
-        .menus(this.NavigationMenus)
+        // .menus(this.NavigationMenus)
     }
 
     @Builder

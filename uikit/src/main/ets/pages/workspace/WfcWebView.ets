@@ -44,9 +44,9 @@ export default struct WfcWebView {
                     console.log('title:' + event!.title)
                     this.onTitleReceive && this.onTitleReceive(event?.title)
                 })
-                .onProgressChange((data: OnProgressChangeEvent) => {
-                    this.progress = data.newProgress
-                })
+                // .onProgressChange((data: OnProgressChangeEvent) => {
+                //     this.progress = data.newProgress
+                // })
                 .javaScriptAccess(true)
                 .javaScriptProxy({
                     object: this.dsBridge,
@@ -55,19 +55,19 @@ export default struct WfcWebView {
                     controller: this.controller
                 })
                 .onPageBegin(async (evt) => {
-                    if (evt.url === Config.OPEN_PLATFORM_WORK_SPACE_URL) {
-                        let userId = wfc.getUserId()
-                        let p = await data_preferences.getPreferences(getContext(this).getApplicationContext(), 'wfcstore')
-                        let openUserId = p.getSync('workspace-userId', '')
-                        if (userId !== openUserId) {
-                            try {
-                                await this.controller?.runJavaScript('localStorage.clear()')
-                            } catch (e) {
-                                console.log('clear localStorage error', e)
-                            }
-
-                        }
-                    }
+                    // if (evt.url === Config.OPEN_PLATFORM_WORK_SPACE_URL) {
+                    //     let userId = wfc.getUserId()
+                    //     let p = await data_preferences.getPreferences(getContext(this).getApplicationContext(), 'wfcstore')
+                    //     let openUserId = p.getSync('workspace-userId', '')
+                    //     if (userId !== openUserId) {
+                    //         try {
+                    //             await this.controller?.runJavaScript('localStorage.clear()')
+                    //         } catch (e) {
+                    //             console.log('clear localStorage error', e)
+                    //         }
+                    //
+                    //     }
+                    // }
                 })
                 .domStorageAccess(true)
                 .onPageEnd(url => {

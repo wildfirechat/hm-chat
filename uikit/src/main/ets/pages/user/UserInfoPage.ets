@@ -247,17 +247,17 @@ export default struct UserInfoPage {
         .title('用户信息')
         .height('100%')
         .width('100%')
-        .menus([
-            {
-                value: '',
-                icon: 'resources/base/media/ic_public_more.svg',
-                action: () => {
-                    this.mainNavPathStack.pushPathByName(navigationDestinations.UpdateUserInfoPage, {
-                        'userInfo': this.userInfo
-                    } as Record<string, Object>)
-
-                }
-            }
-        ])
+        // .menus([
+        //     {
+        //         value: '',
+        //         icon: 'resources/base/media/ic_public_more.svg',
+        //         action: () => {
+        //             this.mainNavPathStack.pushPathByName(navigationDestinations.UpdateUserInfoPage, {
+        //                 'userInfo': this.userInfo
+        //             } as Record<string, Object>)
+        //
+        //         }
+        //     }
+        // ])
     }
 }

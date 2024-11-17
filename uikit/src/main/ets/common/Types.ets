@@ -37,3 +37,8 @@ export interface VideoDurationAndThumbnail {
     duration: number,
     thumbnail: string,
 }
+
+export interface SizeT<T> {
+    width: T,
+    height: T
+}

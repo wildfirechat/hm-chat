@@ -1,13 +1,7 @@
-import TestCustomMessageContent from '@wfc/client/src/main/ets/wfc_custom_message/testCustomMessageContent';
-import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation';
-import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType';
-import wfc from '@wfc/client/src/main/ets/wfc/client/wfc';
-import UserSettingScope from '@wfc/client/src/main/ets/wfc/client/userSettingScope';
-import { util, xml } from '@kit.ArkTS';
 import { PiPWindow } from '@kit.ArkUI';
 import uikit from '@wfc/uikit';
-import { BusinessError } from '@kit.BasicServicesKit';
 import TestTextNodeController from './TestTextNodeController';
+import { BusinessError } from '@kit.BasicServicesKit';
 
 
 @Entry({ routeName: 'apiTestPage' })
@@ -25,7 +19,7 @@ export default struct TestPage {
         this.pipController = await PiPWindow.create({
             context: getContext(this),
             componentController: this.mXComponentController,
-            customUIController: this.textNodeController,
+            // customUIController: this.textNodeController,
             navigationId: uikit.bundleName,
             templateType: PiPWindow.PiPTemplateType.VIDEO_CALL,
             contentWidth: 200,
@@ -43,7 +37,7 @@ export default struct TestPage {
                     type: XComponentType.SURFACE,
                     controller: this.mXComponentController,
                 })
-                    .enableAnalyzer(false)
+                    // .enableAnalyzer(false)
                     .width(200)
                     .height(300)
                     .backgroundColor(Color.Green)

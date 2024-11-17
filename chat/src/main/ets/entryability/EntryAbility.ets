@@ -5,7 +5,7 @@ import data_preferences from '@ohos.data.preferences';
 import wfc from '@wfc/client'
 import Config from '@wfc/client/src/main/ets/config'
 import { AbilityConstant, common, Context, Want } from '@kit.AbilityKit';
-import { pushCommon, pushService } from '@kit.PushKit';
+// import { pushCommon, pushService } from '@kit.PushKit';
 
 import EventType from '@wfc/client/src/main/ets/wfc/client/wfcEvent';
 import Message from '@wfc/client/src/main/ets/wfc/messages/message';
@@ -39,10 +39,10 @@ export default class EntryAbility extends UIAbility {
         wfc.eventEmitter!.on(EventType.ConnectionStatusChanged, async (status: number) => {
             if (status === ConnectionStatus.ConnectionStatusConnected) {
                 try {
-                    const pushToken: string = await pushService.getToken();
-                    // huawei harmony
-                    wfc.setDeviceToken(8, pushToken);
-                    hilog.info(0x0000, 'testTag', 'Get push token successfully: %{public}s', pushToken);
+                    // const pushToken: string = await pushService.getToken();
+                    // // huawei harmony
+                    // wfc.setDeviceToken(8, pushToken);
+                    // hilog.info(0x0000, 'testTag', 'Get push token successfully: %{public}s', pushToken);
                 } catch (err) {
                     let e: BusinessError = err as BusinessError;
                     hilog.error(0x0000, 'testTag', 'Get push token catch error: %{public}d %{public}s', e.code, e.message);

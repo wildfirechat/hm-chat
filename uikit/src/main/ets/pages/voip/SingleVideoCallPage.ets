@@ -11,6 +11,7 @@ import { timestampFormat } from '../../util/helper'
 import uikit from '../../uikit'
 import { HashMap } from '@kit.ArkTS'
 import { navigationDestinations } from '../navigationConfig'
+import { SizeT } from '../../common/Types'
 
 @Component
 export default struct SingleVideoCallPage {
@@ -454,7 +455,7 @@ export default struct SingleVideoCallPage {
                         controller: this.mXComponentController,
                         libraryname: 'wfrtc'
                     })
-                        .enableAnalyzer(false)
+                        // .enableAnalyzer(false)
                         .width('100%')
                         .height('100%')
                         .backgroundColor('#e0000000')
@@ -474,7 +475,7 @@ export default struct SingleVideoCallPage {
                                 libraryname: 'wfrtc',
                             })
                                 .borderRadius(4)
-                                .enableAnalyzer(false)
+                                // .enableAnalyzer(false)
                                 .width(this.callSession?.status === CallState.STATUS_CONNECTED ? '120' : this.previewXComponentWidth().width)
                                 .height(this.callSession?.status === CallState.STATUS_CONNECTED ? '160' : this.previewXComponentWidth().height)
                                 .margin({

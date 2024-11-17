@@ -1,7 +1,7 @@
 import OptionItemView from '@wfc/uikit/src/main/ets/view/OptionItemView'
 import { bundleManager } from '@kit.AbilityKit';
 import { BusinessError } from '@kit.BasicServicesKit';
-import { LengthUnit, router } from '@kit.ArkUI';
+// import { LengthUnit, router } from '@kit.ArkUI';
 import Config from '@wfc/client/src/main/ets/config';
 import wfc from '@wfc/client'
 import { navigationDestinations } from '@wfc/uikit/src/main/ets/pages/navigationConfig';
@@ -63,7 +63,7 @@ export default struct AboutPage {
 
                 Text(this.appInfo)
                     .textAlign(TextAlign.Start)
-                    .lineSpacing({ value: 4, unit: LengthUnit.VP })
+                    // .lineSpacing({ value: 4, unit: LengthUnit.VP })
                     .padding(16)
                     .width('100%')
 

@@ -3,7 +3,7 @@ import ContactListTab from '@wfc/uikit/src/main/ets/pages/ContactListTab'
 import DiscoveryTab from './DiscoveryTab'
 import MeTab from './MeTab'
 import AbilityAccessCtrl, { Permissions } from '@ohos.abilityAccessCtrl'
-import { scanCore, scanBarcode } from '@kit.ScanKit';
+// import { scanCore, scanBarcode } from '@kit.ScanKit';
 import { showToast } from '@wfc/uikit/src/main/ets/common/utils/Toast'
 import PickMultiContactModal from '@wfc/uikit/src/main/ets/pages/picker/PickMultiContactModal'
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
@@ -274,47 +274,47 @@ struct MainPage {
             MenuItem({ startIcon: $r('app.media.saoyisao1_iconfont'), content: "扫一扫" })
                 .onClick(() => {
                     showToast('扫一扫')
-                    // 定义扫码参数options
-                    let options: scanBarcode.ScanOptions = {
-                        scanTypes: [scanCore.ScanType.QR_CODE],
-                        enableMultiMode: true,
-                        enableAlbum: true
-                    };
-                    // 可调用getContext接口获取当前页面关联的UIAbilityContext
-                    scanBarcode.startScanForResult(getContext(this), options).then((result: scanBarcode.ScanResult) => {
-                        // 解析码值结果跳转应用服务页
-
-                        let qrcode = result.originalValue;
-                        let prefix = qrcode.substring(0, qrcode.lastIndexOf('/') + 1)
-                        let value = qrcode.substring(qrcode.lastIndexOf('/') + 1)
-                        try {
-                            let _url = url.URL.parseURL(qrcode)
-                        } catch (e) {
-                        }
-
-                        switch (prefix) {
-                            case WfcScheme.QR_CODE_PREFIX_PC_SESSION:
-                                this.showPCLoginPage(value)
-                                break
-                            case WfcScheme.QR_CODE_PREFIX_USER:
-                                this.showUser(value)
-                                break
-                            case WfcScheme.QR_CODE_PREFIX_GROUP:
-                                this.showGroup(value)
-                                break
-                                break
-                        // case WfcScheme.QR_CODE_PREFIX_CHANNEL:
-                        //     break
-                        // case WfcScheme.QR_CODE_PREFIX_CONFERENCE:
-                        //     break
-                            default:
-                                showToast('qrcode: ' + qrcode);
-                                break
-                        }
-
-                    }).catch((error: BusinessError) => {
-                        // TODO
-                    });
+                    // // 定义扫码参数options
+                    // let options: scanBarcode.ScanOptions = {
+                    //     scanTypes: [scanCore.ScanType.QR_CODE],
+                    //     enableMultiMode: true,
+                    //     enableAlbum: true
+                    // };
+                    // // 可调用getContext接口获取当前页面关联的UIAbilityContext
+                    // scanBarcode.startScanForResult(getContext(this), options).then((result: scanBarcode.ScanResult) => {
+                    //     // 解析码值结果跳转应用服务页
+                    //
+                    //     let qrcode = result.originalValue;
+                    //     let prefix = qrcode.substring(0, qrcode.lastIndexOf('/') + 1)
+                    //     let value = qrcode.substring(qrcode.lastIndexOf('/') + 1)
+                    //     try {
+                    //         let _url = url.URL.parseURL(qrcode)
+                    //     } catch (e) {
+                    //     }
+                    //
+                    //     switch (prefix) {
+                    //         case WfcScheme.QR_CODE_PREFIX_PC_SESSION:
+                    //             this.showPCLoginPage(value)
+                    //             break
+                    //         case WfcScheme.QR_CODE_PREFIX_USER:
+                    //             this.showUser(value)
+                    //             break
+                    //         case WfcScheme.QR_CODE_PREFIX_GROUP:
+                    //             this.showGroup(value)
+                    //             break
+                    //             break
+                    //     // case WfcScheme.QR_CODE_PREFIX_CHANNEL:
+                    //     //     break
+                    //     // case WfcScheme.QR_CODE_PREFIX_CONFERENCE:
+                    //     //     break
+                    //         default:
+                    //             showToast('qrcode: ' + qrcode);
+                    //             break
+                    //     }
+                    //
+                    // }).catch((error: BusinessError) => {
+                    //     // TODO
+                    // });
 
                 })
         }

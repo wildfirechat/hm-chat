@@ -10,6 +10,7 @@ import MessageContentType from '@wfc/client/src/main/ets/wfc/messages/messageCon
 import { eq } from '@wfc/client/src/main/ets/wfc/util/longUtil'
 import MMMessagePreviewDialog from '../../mm/MMMessagePreviewDialog'
 import { getImageSizeByOrgSizeToWeChat } from '../../../util/wechatImageUtil'
+import { Size } from '@kit.ArkUI'
 
 @Component
 export default struct ImageMessageContentView {

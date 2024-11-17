@@ -2,7 +2,7 @@ import { showToast } from '../../../common/utils/Toast'
 import { getFiletypeIcon, humanSize } from '../../../util/helper'
 import FileMessageContent from '@wfc/client/src/main/ets/wfc/messages/fileMessageContent'
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
-import { filePreview } from '@kit.PreviewKit';
+// import { filePreview } from '@kit.PreviewKit';
 import { downloadMedia } from '../../../helper/mediaHelper';
 import { getConnectionStatus } from '@wfc/client/src/main/types/libmarswrapper';
 import { fileUri } from '@kit.CoreFileKit';
@@ -43,18 +43,19 @@ export default struct FileMessageContentView {
             let context = getContext(this)
             downloadMedia(context, this.message.messageUid, this.fileMessageContent().remotePath)
                 .then(async filePath => {
-                    let canPreview = await filePreview.canPreview(context, fileUri.getUriFromPath(filePath))
+                    // let canPreview = await filePreview.canPreview(context, fileUri.getUriFromPath(filePath))
+                    let canPreview = false
                     if (canPreview) {
                         let title = this.fileMessageContent().name
                         let uri = fileUri.getUriFromPath(filePath)
                         let typeId = uniformTypeDescriptor.getUniformDataTypeByFilenameExtension(filePath.substring(filePath.lastIndexOf('.')));
                         let typeObj = uniformTypeDescriptor.getTypeDescriptor(typeId);
-                        let mimeTypes = typeObj.mimeTypes;
-                        filePreview.openPreview(context, {
-                            title: title,
-                            uri: uri,
-                            mimeType: mimeTypes[0],
-                        })
+                        // let mimeTypes = typeObj.mimeTypes;
+                        // filePreview.openPreview(context, {
+                        //     title: title,
+                        //     uri: uri,
+                        //     mimeType: mimeTypes[0],
+                        // })
                     }
                 })
         })

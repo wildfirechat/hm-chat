@@ -7,6 +7,7 @@ import Config from '@wfc/client/src/main/ets/config'
 import { AbilityConstant, common, Context, Want } from '@kit.AbilityKit';
 // import { pushCommon, pushService } from '@kit.PushKit';
 
+
 import EventType from '@wfc/client/src/main/ets/wfc/client/wfcEvent';
 import Message from '@wfc/client/src/main/ets/wfc/messages/message';
 import wfcNotificationManager from '@wfc/uikit/src/main/ets/notification/wfcNotificationManager'

@@ -10,7 +10,6 @@ import ConversationSearchResult from '@wfc/client/src/main/ets/wfc/model/convers
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType'
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
 import Utils from '../../common/Utils'
-import { drawing } from '@kit.ArkGraphics2D'
 
 @Component
 @Preview

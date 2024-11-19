@@ -4,7 +4,6 @@ import AudioPlayManager from '../audio/AudioPlayManager'
 import fs from '@ohos.file.fs'
 import Config from '@wfc/client/src/main/ets/config'
 import MessageStatus from '@wfc/client/src/main/ets/wfc/messages/messageStatus'
-import WfcAVEngineKit from '@wfc/avenginekit/src/main/ets/wfc/av/engine/avenginekit'
 import wfc, { WfcManager } from '@wfc/client/src/main/ets/wfc/client/wfc'
 
 @Component

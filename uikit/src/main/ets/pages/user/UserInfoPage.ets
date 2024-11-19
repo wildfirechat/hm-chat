@@ -12,7 +12,7 @@ import MessageContentMediaType from '@wfc/client/src/main/ets/wfc/messages/messa
 import ModifyMyInfoEntry from '@wfc/client/src/main/ets/wfc/model/modifyMyInfoEntry';
 import ModifyMyInfoType from '@wfc/client/src/main/ets/wfc/model/modifyMyInfoType';
 import OptionItemView from '../../view/OptionItemView';
-import avenginekit from '@wfc/avenginekit';
+// import avenginekit from '@wfc/avenginekit';
 import { checkAndRequestPermission } from '../../helper/permissionHelper';
 
 @Entry
@@ -187,7 +187,7 @@ export default struct UserInfoPage {
                                                 let granted = await checkAndRequestPermission(getContext(this), 'ohos.permission.MICROPHONE')
                                                 if (granted) {
                                                     let conversation = new Conversation(ConversationType.Single, this.userInfo!.uid, 0)
-                                                    avenginekit.startCall(conversation, [this.userInfo!.uid], true)
+                                                    // avenginekit.startCall(conversation, [this.userInfo!.uid], true)
                                                 } else {
                                                     showToast('请授予麦克风权限')
                                                 }
@@ -201,7 +201,7 @@ export default struct UserInfoPage {
                                                 let microphoneGranted = await checkAndRequestPermission(getContext(this), 'ohos.permission.MICROPHONE')
                                                 if (cameraGranted && microphoneGranted) {
                                                     let conversation = new Conversation(ConversationType.Single, this.userInfo!.uid, 0)
-                                                    avenginekit.startCall(conversation, [this.userInfo!.uid], false)
+                                                    // avenginekit.startCall(conversation, [this.userInfo!.uid], false)
                                                 } else {
                                                     showToast('请授予摄像头和麦克风权限')
                                                 }

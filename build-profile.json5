@@ -1,40 +1,52 @@
 {
-    "app": {
-        "signingConfigs": [
-        ],
-        "products": [
-            {
-                "name": "default",
-                "signingConfig": "default",
-//                "compatibleSdkVersion": "4.1.0(11)",
-//                "runtimeOS": "HarmonyOS"
-                "compileSdkVersion": 11,
-                "compatibleSdkVersion": 11,
-                "runtimeOS": "OpenHarmony"
-//
-            }
-        ]
-    },
-    "modules": [
-        {
-            "name": "chat",
-            "srcPath": "./chat",
-            "targets": [
-                {
-                    "name": "default",
-                    "applyToProducts": [
-                        "default"
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "client",
-            "srcPath": "./client",
-        },
-        {
-            "name": "uikit",
-            "srcPath": "./uikit",
+  "app": {
+    "signingConfigs": [
+      {
+        "name": "default",
+        "material": {
+          "certpath": "C:/Users/imndx/.ohos/config/openharmony/default_hm-chat_TAYBAXMWVylODcuVP-YT150xNZZ568CFBF1r_JrD25U=.cer",
+          "storePassword": "0000001B82D72C8125A9A0DDD381C2C2BC8989DD9C5F6973BF7570D24404091AFC7339977403E81D330E6E",
+          "keyAlias": "debugKey",
+          "keyPassword": "0000001B3392AA398708A49B838825477A5E0A9772EFA1B892C24DE985AD4D9F21ADBE048D8248D212B3C4",
+          "profile": "C:/Users/imndx/.ohos/config/openharmony/default_hm-chat_TAYBAXMWVylODcuVP-YT150xNZZ568CFBF1r_JrD25U=.p7b",
+          "signAlg": "SHA256withECDSA",
+          "storeFile": "C:/Users/imndx/.ohos/config/openharmony/default_hm-chat_TAYBAXMWVylODcuVP-YT150xNZZ568CFBF1r_JrD25U=.p12"
         }
+      }
+    ],
+    "products": [
+      {
+        "name": "default",
+        "signingConfig": "default",
+        //                "compatibleSdkVersion": "4.1.0(11)",
+        //                "runtimeOS": "HarmonyOS"
+        "compileSdkVersion": 11,
+        "compatibleSdkVersion": 11,
+        "runtimeOS": "OpenHarmony"
+        //
+      }
     ]
+  },
+  "modules": [
+    {
+      "name": "chat",
+      "srcPath": "./chat",
+      "targets": [
+        {
+          "name": "default",
+          "applyToProducts": [
+            "default"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "client",
+      "srcPath": "./client",
+    },
+    {
+      "name": "uikit",
+      "srcPath": "./uikit",
+    }
+  ]
 }

@@ -18,7 +18,7 @@ import MentionGroupMemberView from './mention/MentionGroupMemberView'
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType'
 import { preferences } from '@kit.ArkData'
-import avenginekit from '@wfc/avenginekit'
+// import avenginekit from '@wfc/avenginekit'
 import MessageContent from '@wfc/client/src/main/ets/wfc/messages/messageContent'
 import VideoMessageContent from '@wfc/client/src/main/ets/wfc/messages/videoMessageContent'
 import cameraPicker from '@ohos.multimedia.cameraPicker';
@@ -151,7 +151,7 @@ export default struct ConversationInputPanelView {
                                     let microphoneGranted = await checkAndRequestPermission(getContext(this), 'ohos.permission.MICROPHONE')
                                     if (cameraGranted && microphoneGranted) {
                                         if (this.conversation.type === ConversationType.Single) {
-                                            avenginekit.startCall(this.conversation, [this.conversation.target], false)
+                                            // avenginekit.startCall(this.conversation, [this.conversation.target], false)
                                         } else if (this.conversation.type === ConversationType.Group) {
                                             this.showExtContentCoverModal = true
                                             this.extContentCoverBuilderParam = this.pickGroupMemberModal
@@ -171,7 +171,7 @@ export default struct ConversationInputPanelView {
                                     let granted = await checkAndRequestPermission(getContext(this), 'ohos.permission.MICROPHONE')
                                     if (granted) {
                                         if (this.conversation.type === ConversationType.Single) {
-                                            avenginekit.startCall(this.conversation, [this.conversation.target], true)
+                                            // avenginekit.startCall(this.conversation, [this.conversation.target], true)
                                         } else if (this.conversation.type === ConversationType.Group) {
                                             this.showExtContentCoverModal = true
                                             this.extContentCoverBuilderParam = this.pickGroupMemberModal
@@ -618,7 +618,7 @@ export default struct ConversationInputPanelView {
             uncheckableUserIds: [wfc.getUserId()],
             showPickGroupMemberModal: $showExtContentCoverModal,
             onPickResult: (users: UserInfo[]) => {
-                avenginekit.startCall(this.conversation, users.map(user => user.uid), this.voipAudioOnly)
+                // avenginekit.startCall(this.conversation, users.map(user => user.uid), this.voipAudioOnly)
             }
         })
             .height('100%')

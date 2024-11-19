@@ -1,5 +1,5 @@
 import { showToast } from '../../../common/utils/Toast';
-import avenginekit from '@wfc/avenginekit'
+// import avenginekit from '@wfc/avenginekit'
 import CallStartMessageContent from '@wfc/client/src/main/ets/wfc/av/messages/callStartMessageContent';
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType';
@@ -40,7 +40,7 @@ export default struct CallStartMessageContentView {
         .onClick(() => {
             if (this.message.conversation.type === ConversationType.Single) {
                 let content = this.message.messageContent as CallStartMessageContent;
-                avenginekit.startCall(this.message.conversation, [this.message.conversation.target], content.audioOnly)
+                // avenginekit.startCall(this.message.conversation, [this.message.conversation.target], content.audioOnly)
             } else {
                 showToast(' TODO')
             }

@@ -87,7 +87,7 @@ export class WfcManager {
     init(context: common.ApplicationContext, eventHub: common.EventHub, dbPath: string, platform: number) {
         this.eventEmitter = eventHub;
         impl.init(context, eventHub, dbPath, platform);
-        this.startLog();
+        //this.startLog();
         // if (Config.ENABLE_PTT) {
         //     pttClient.init();
         // }

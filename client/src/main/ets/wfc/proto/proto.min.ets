@@ -362,7 +362,7 @@ class WfcImpl {
         // }
         // protoProxy.invoke('setAppName', 'mychat');
         protoProxy.setLanguage(Config.LANGUAGE);
-        protoProxy.setDeviceInfo(platform, deviceInfo.productModel, deviceInfo.displayVersion, deviceInfo.marketName);
+        //protoProxy.setDeviceInfo(platform, deviceInfo.productModel, deviceInfo.displayVersion, deviceInfo.marketName);
 
         this._setupEventListeners();
 

@@ -34,10 +34,10 @@ import TextMessageContentView from './conversation/message/TextMessageContentVie
 import TextMessagePreviewPage from './conversation/TextMessagePreviewPage'
 import PCSessionPage from './pc/PCSessionPage'
 import UpdateUserNickNameOrAliasPage from './user/UpdateUserNickNameOrAliasPage'
-import SingleVideoCallPage from './voip/SingleVideoCallPage'
-import SingleAudioCallPage from './voip/SingleAudioCallPage'
-import MultiAudioCallPage from './voip/MultiAudioCallPage'
-import MultiVideoCallPage from './voip/MultiVideoCallPage'
+// import SingleVideoCallPage from './voip/SingleVideoCallPage'
+// import SingleAudioCallPage from './voip/SingleAudioCallPage'
+// import MultiAudioCallPage from './voip/MultiAudioCallPage'
+// import MultiVideoCallPage from './voip/MultiVideoCallPage'
 import GroupMemberPermissionPage from './group/GroupMemberPermissionPage'
 import GroupMemberListPage from './group/GroupMemberListPage'
 import ChatroomConversationInfoPage from './conversation/ChatroomConversationInfoPage'
@@ -171,13 +171,13 @@ export function UIKitPageMap(name: string) {
     } else if (name === navigationDestinations.UpdateUserNickNameOrAliasPage) {
         UpdateUserNickNameOrAliasPage()
     } else if (name === navigationDestinations.SingleVideoCallPage) {
-        SingleVideoCallPage()
-    } else if (name === navigationDestinations.SingleAudioCallPage) {
-        SingleAudioCallPage()
-    } else if (name === navigationDestinations.MultiAudioCallPage) {
-        MultiAudioCallPage()
-    } else if (name === navigationDestinations.MultiVideoCallPage) {
-        MultiVideoCallPage()
+    //     SingleVideoCallPage()
+    // } else if (name === navigationDestinations.SingleAudioCallPage) {
+    //     SingleAudioCallPage()
+    // } else if (name === navigationDestinations.MultiAudioCallPage) {
+    //     MultiAudioCallPage()
+    // } else if (name === navigationDestinations.MultiVideoCallPage) {
+    //     MultiVideoCallPage()
     } else if (name === navigationDestinations.GroupMemberPermissionPage) {
         GroupMemberPermissionPage()
     } else if (name === navigationDestinations.GroupMemberListPage) {

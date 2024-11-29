@@ -5,8 +5,8 @@
         "description": "$string:module_desc",
         "mainElement": "EntryAbility",
         "deviceTypes": [
-            "phone",
-            "tablet"
+          "default",
+          "tablet"
         ],
         "deliveryWithInstall": true,
         "installationFree": false,
@@ -42,7 +42,7 @@
                         ]
                     }
                 ]
-            },
+            }
 //            {
 //                "name": "PushMessageAbility",
 //                "srcEntry": "./ets/entryability/PushMessageAbility.ets",
@@ -77,7 +77,7 @@
                         "resource": "$profile:backup_config"
                     }
                 ]
-            },
+            }
         ],
         "requestPermissions": [
             {

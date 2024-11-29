@@ -5,7 +5,6 @@ import MessageContentType from '@wfc/client/src/main/ets/wfc/messages/messageCon
 import VideoMessageContent from '@wfc/client/src/main/ets/wfc/messages/videoMessageContent';
 import { exist } from '../../common/utils/FileUtil';
 import { curves, display, window } from '@kit.ArkUI';
-import { ifaa } from '@kit.OnlineAuthenticationKit';
 import { MMMediaEntry } from '../../common/Types';
 import { mediaEntry } from '../../helper/messageHelper';
 import resourceManager from '@ohos.resourceManager';

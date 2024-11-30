@@ -67,6 +67,8 @@ export default struct GroupMemberMuteOrAllowListPage {
                                 this.groupInfo!.mute = isOn ? 1 : 0
                                 this.allowGroupMemberUsers = []
                                 this.mutedGroupMemberUsers = []
+                                // 需要刷新数据
+                                this.loadMuteOrAllowGroupMembers()
                             }, err => {
                                 showToast((isOn ? '设置全局禁言失败 ' : '取消全局禁言失败') + " " + err)
                             })
@@ -122,7 +124,7 @@ export default struct GroupMemberMuteOrAllowListPage {
                             } else {
                                 wfc.muteGroupMembers(this.groupInfo!.target, true, uids, [0], null, () => {
                                     let userInfos = wfc.getUserInfos(uids, this.groupInfo!.target)
-                                    this.mutedGroupMemberUsers = this.allowGroupMemberUsers.concat(userInfos)
+                                    this.mutedGroupMemberUsers = this.mutedGroupMemberUsers.concat(userInfos)
                                 }, err => {
                                     showToast('添加黑名单失败 ' + err)
                                 })

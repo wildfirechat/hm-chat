@@ -33,8 +33,6 @@ const TAG = 'Main';
 
 const permissions: Array<Permissions> = [
     'ohos.permission.INTERNET',
-    'ohos.permission.READ_MEDIA',
-    'ohos.permission.WRITE_MEDIA',
     'ohos.permission.MICROPHONE',
 ];
 

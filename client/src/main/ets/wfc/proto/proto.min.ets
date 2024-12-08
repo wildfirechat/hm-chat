@@ -2553,7 +2553,7 @@ class WfcImpl {
         return this.getUserSetting(UserSettingScope.DisableSyncDraft, '') === '1';
     }
 
-    getAuthorizedMediaUrl(messageUid: Long, mediaType: number, mediaPath: string, successCB: CallbackWithValue_1<string>, failCB: FailCallback) {
+    getAuthorizedMediaUrl(messageUid: Long, mediaType: number, mediaPath: string, successCB: CallbackWithValue_2<string, string>, failCB: FailCallback) {
         protoProxy.getAuthorizedMediaUrl(stringValue(messageUid), mediaType, mediaPath, successCB, failCB);
     }
 

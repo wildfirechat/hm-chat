@@ -2159,7 +2159,7 @@ export class WfcManager {
      * @param successCB
      * @param failCB
      */
-    getAuthorizedMediaUrl(messageUid: Long, mediaType: number, mediaPath: string, successCB: CallbackWithValue_1<string>, failCB: FailCallback) {
+    getAuthorizedMediaUrl(messageUid: Long, mediaType: number, mediaPath: string, successCB: CallbackWithValue_2<string, string>, failCB: FailCallback) {
         impl.getAuthorizedMediaUrl(messageUid, mediaType, mediaPath, successCB, failCB)
     }
 

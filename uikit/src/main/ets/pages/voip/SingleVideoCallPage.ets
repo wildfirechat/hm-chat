@@ -192,8 +192,8 @@ export default struct SingleVideoCallPage {
             // 2、UIAbility使用Router管理页面时（画中画场景不推荐该导航方式），无需设置navigationId。注意：该场景下启动画中画后，不要进行页面切换，否则还原场景可能出现异常
             navigationId: uikit.bundleName,
             templateType: PiPWindow.PiPTemplateType.VIDEO_MEETING,
-            contentWidth:200,
-            contentHeight:300,
+            contentWidth: 200,
+            contentHeight: 300,
         });
         this.pipController.on('stateChange', (state: PiPWindow.PiPState, reason: string) => {
             this.onStateChange(state, reason);
@@ -460,6 +460,9 @@ export default struct SingleVideoCallPage {
                         .backgroundColor('#e0000000')
                 }
                 .onClick(() => {
+                    if (this.callSession?.status !== CallState.STATUS_CONNECTED) {
+                        return
+                    }
                     this.showActionAndDurationView = !this.showActionAndDurationView
                     this.lastTriggerToShowActionAndDurationViewTimestamp = Date.now()
                 })

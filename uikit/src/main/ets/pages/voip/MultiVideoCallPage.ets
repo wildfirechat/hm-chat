@@ -408,6 +408,9 @@ export default struct MultiVideoCallPage {
                         .height('100%')
                 }
                 .onClick(() => {
+                    if (this.callSession?.status !== CallState.STATUS_CONNECTED) {
+                        return
+                    }
                     this.showActionAndDurationView = !this.showActionAndDurationView
                     this.lastTriggerToShowActionAndDurationViewTimestamp = Date.now()
                 })

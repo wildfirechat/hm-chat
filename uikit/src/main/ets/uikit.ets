@@ -12,6 +12,10 @@ export class UIKit {
         this.entryAbilityName = context.abilityInfo.name
         avenginekit.setup(context, new AVEngineCallbackImpl(context, this.mainNavPathStack));
     }
+
+    isSupportConference() {
+        return avenginekit.isSupportConference()
+    }
 }
 
 const self = new UIKit()

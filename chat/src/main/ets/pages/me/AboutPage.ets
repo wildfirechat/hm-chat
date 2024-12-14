@@ -5,6 +5,7 @@ import { LengthUnit, router } from '@kit.ArkUI';
 import Config from '@wfc/client/src/main/ets/config';
 import wfc from '@wfc/client'
 import { navigationDestinations } from '@wfc/uikit/src/main/ets/pages/navigationConfig';
+import uikit from '@wfc/uikit';
 
 @Preview
 @Entry
@@ -24,17 +25,17 @@ export default struct AboutPage {
                     + `${versionNo} ${this.version}\n`
                     + `${wfc.getProtoRevision()}\n`
                     // + `${Config.IM_SERVER_HOST}\n`
-                    + `${Config.APP_SERVER}\n`;
+                    + `${Config.APP_SERVER}\n`
+                    + `${Config.ORGANIZATION_SERVER}\n`;
 
-                // todo
-                // if (wfc.isSupportConference()) {
-                //     info += "高级版音视频\n";
-                // } else {
-                //     info += "多人版版音视频\n";
-                for (const ice of Config.ICE_SERVERS) {
-                    info += `${ice[0]} ${ice[1]} ${ice[2]}\n`;
+                if (uikit.isSupportConference && uikit.isSupportConference()) {
+                    info += "高级版音视频\n";
+                } else {
+                    info += "多人版版音视频\n";
+                    for (const ice of Config.ICE_SERVERS) {
+                        info += `${ice[0]} ${ice[1]} ${ice[2]}\n`;
+                    }
                 }
-                // }
 
                 this.appInfo = info;
 

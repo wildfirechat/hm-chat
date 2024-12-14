@@ -50,14 +50,19 @@ export async function videoThumbnail(context: Context, uri: string, imageWH: Siz
 /**
  *
  * @param context
- * @param uri 图片文件原始 uri
+ * @param uri 图片文件原始 uri 或沙箱路径
  * @param imageWH 压缩的目标宽高
  * @param maxImageSize 压缩后的图片大小，单位是 K，默认 20，<=0 时，不进行图片大小压缩
  * @returns
  */
 export async function imageThumbnail(context: Context, uri: string, imageWH: Size, maxImageSize = 20): Promise<string> {
     let base64Data = ''
-    let pixelMap = await _imageThumbnail(context, uri, imageWH)
+    let pixelMap: image.PixelMap | null = null
+    if (uri.startsWith("file://")) {
+        pixelMap = await _imageThumbnail(context, uri, imageWH)
+    } else {
+        pixelMap = await _imageThumbnailFromFile(context, uri, imageWH)
+    }
     if (pixelMap) {
         if (maxImageSize > 0) {
             let compressedImageData = await compressImage(pixelMap!, maxImageSize)
@@ -109,6 +114,20 @@ async function _imageThumbnail(context: Context, uri: string, size: Size): Promi
         console.error('getAssets failed with err: ' + err);
         return null
     }
+}
+
+async function _imageThumbnailFromFile(context: Context, filePath: string, size: Size): Promise<image.PixelMap | null> {
+    try {
+        let file = await fs.open(filePath, fs.OpenMode.READ_ONLY)
+        const imageSource: image.ImageSource = image.createImageSource(file.fd);
+        let opts: image.InitializationOptions = { size: { height: size.height, width: size.width } }
+        const pixelMap: image.PixelMap = await imageSource.createPixelMap(opts);
+        fs.close(file)
+        return pixelMap
+    } catch (e) {
+        console.error('_imageThumbnailFromFile error', e)
+    }
+    return null
 }
 
 export async function imageSize(uri: string): Promise<Size> {

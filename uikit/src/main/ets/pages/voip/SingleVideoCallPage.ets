@@ -117,7 +117,6 @@ export default struct SingleVideoCallPage {
             statusBarContentColor: '#000000',
         };
         win?.setWindowSystemBarProperties(sysBarProps)
-        this.mainNavPathStack.pop()
     }
 
     updateActionAndDurationView = () => {
@@ -218,6 +217,9 @@ export default struct SingleVideoCallPage {
 
     onStateChange(state: PiPWindow.PiPState, reason: string) {
         console.log('onStateChange', state, reason)
+        if(state === PiPWindow.PiPState.ABOUT_TO_START){
+            this.mainNavPathStack.pop()
+        }
         // switch (state) {
         //     case PiPWindow.PiPState.ABOUT_TO_START:
         //         this.curState = 'ABOUT_TO_START';
@@ -306,7 +308,6 @@ export default struct SingleVideoCallPage {
                                 .catch((reason: BusinessError) => {
                                     console.log('startPiP errr', reason.message)
                                 })
-                            this.mainNavPathStack.pop()
                             console.log('stop pip')
                         })
 

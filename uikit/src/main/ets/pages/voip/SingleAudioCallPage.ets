@@ -53,7 +53,6 @@ export default struct SingleAudioCallPage {
     }
 
     onPageHide(): void {
-        this.mainNavPathStack.pop()
     }
 
     updateDuration = () => {
@@ -139,6 +138,10 @@ export default struct SingleAudioCallPage {
 
     onStateChange(state: PiPWindow.PiPState, reason: string) {
         console.log('onStateChange', state, reason)
+        if (state === PiPWindow.PiPState.ABOUT_TO_START) {
+            this.mainNavPathStack.pop()
+        }
+
         // switch (state) {
         //     case PiPWindow.PiPState.ABOUT_TO_START:
         //         this.curState = 'ABOUT_TO_START';

@@ -1,14 +1,12 @@
 import web_webview from '@ohos.web.webview'
 import WfcWebView from '../workspace/WfcWebView'
-import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
-import DSBridge from '../workspace/dsBridge'
-import PickMultiContactModal from '../picker/PickMultiContactModal'
 import { router } from '@kit.ArkUI'
 
-
-@Entry
+@Entry({
+    routeName: 'webViewPageWithRouter'
+})
 @Component
-export default struct WebViewPageWithRouter {
+export struct WebViewPageWithRouter {
     webviewController: web_webview.WebviewController = new web_webview.WebviewController()
     url: string = ''
     @State title: string = '加载中'

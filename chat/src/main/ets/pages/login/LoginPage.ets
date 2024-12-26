@@ -4,6 +4,7 @@ import router from '@ohos.router';
 import data_preferences from '@ohos.data.preferences';
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc';
 import { showToast } from '@wfc/uikit/src/main/ets/common/utils/Toast';
+import('@wfc/uikit/src/main/ets/pages/misc/WebViewPageWithRouter') //引入共享包中的命名路由页面
 
 
 @Preview
@@ -197,8 +198,8 @@ struct LoginPage {
                     .fontColor(Color.Blue)
                     .fontSize(12)
                     .onClick(() => {
-                        router.pushUrl({
-                            url: 'pages/misc/WebViewPageWithRouter',
+                        router.pushNamedRoute({
+                            name: 'webViewPageWithRouter',
                             params: {
                                 url: 'https://www.wildfirechat.net/wildfirechat_user_agreement.html',
                                 title: '野火IM用户协议'
@@ -211,8 +212,8 @@ struct LoginPage {
                     .fontColor(Color.Blue)
                     .fontSize(12)
                     .onClick(() => {
-                        router.pushUrl({
-                            url: 'pages/misc/WebViewPageWithRouter',
+                        router.pushNamedRoute({
+                            name: 'webViewPageWithRouter',
                             params: {
                                 url: 'https://www.wildfirechat.net/wildfirechat_user_privacy.html',
                                 title: '野火IM个人信息保护政策'

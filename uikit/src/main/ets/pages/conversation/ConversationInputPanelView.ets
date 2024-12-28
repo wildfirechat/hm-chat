@@ -752,7 +752,7 @@ export default struct ConversationInputPanelView {
                             })
                         if (!this.showAudioRecorderButton) {
                             Column() {
-                                TextInput({ text: this.text, controller: this.textInputController })
+                                TextArea({ text: this.text, controller: this.textInputController })
                                     .id('textInput')
                                     .onChange(value => {
                                         // TODO 优化，mentionview 弹出逻辑
@@ -779,7 +779,9 @@ export default struct ConversationInputPanelView {
                                         this.selectionEnd = selectionEnd;
                                         this.caretPosition = selectionStart;
                                     })
-                                    .height(40)
+                                    .textOverflow(TextOverflow.Clip)
+                                    .wordBreak(WordBreak.BREAK_ALL)
+                                    .constraintSize({ maxHeight: 80 })
                                     .borderRadius(4)
                                     .backgroundColor('#FDFDFD')
 
@@ -919,7 +921,7 @@ export default struct ConversationInputPanelView {
                         }
                     }
                 }
-                .alignItems(VerticalAlign.Center)
+                .alignItems(VerticalAlign.Bottom)
                 .padding(10)
                 .width('100%')
 

@@ -27,7 +27,7 @@ export default struct ResetPasswordPage {
         NavDestination() {
             Column() {
                 Row() {
-                    Text($r('app.string.verification_code')).width(50)
+                    Text($r('app.string.verification_code')).width(70)
                     TextInput({
                         text: this.verificationCode,
                         placeholder: $r('app.string.enter_verification_code'),
@@ -59,7 +59,7 @@ export default struct ResetPasswordPage {
                 }
 
                 Row() {
-                    Text($r('app.string.new_password')).width(50)
+                    Text($r('app.string.new_password')).width(70)
                     TextInput({
                         text: this.password,
                         placeholder: $r('app.string.enter_new_password'),
@@ -82,7 +82,7 @@ export default struct ResetPasswordPage {
                 }.margin({top: 16})
 
                 Row() {
-                    Text($r('app.string.confirm_password')).width(50)
+                    Text($r('app.string.confirm_password')).width(70)
                     TextInput({
                         text: this.confirmPassword,
                         placeholder: $r('app.string.confirm_new_password'),

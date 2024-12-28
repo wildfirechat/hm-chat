@@ -33,6 +33,7 @@ export default struct TextMessagePreviewPage {
                 Row() {
                     Text('TODO actions')
                 }
+                .visibility(Visibility.Hidden)
                 .height(40)
                 .width('100%')
             }

@@ -63,6 +63,7 @@ export default struct MeTab {
                     Text(`野火号:${this.userInfo!.name}`)
                         .maxLines(1)
                         .fontSize(14)
+                        .wordBreak(WordBreak.BREAK_ALL)
                         .textOverflow({ overflow: TextOverflow.Ellipsis })
                         .fontColor(Color.Gray)
                 }

@@ -112,6 +112,7 @@ export default struct UserInfoPage {
                         Text(`野火ID： ${this.userInfo!.name}`)
                             .width('100%')
                             .maxLines(1)
+                            .wordBreak(WordBreak.BREAK_ALL)
                             .textOverflow({ overflow: TextOverflow.Ellipsis })
                             .fontSize(14)
                     }

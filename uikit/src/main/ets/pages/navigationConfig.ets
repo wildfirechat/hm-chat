@@ -42,6 +42,7 @@ import GroupMemberPermissionPage from './group/GroupMemberPermissionPage'
 import GroupMemberListPage from './group/GroupMemberListPage'
 import ChatroomConversationInfoPage from './conversation/ChatroomConversationInfoPage'
 import FileRecordPage from './me/FileRecordPage'
+import ConferenceInfoPage from './voip/ConferenceInfoPage'
 
 export class navigationDestinations {
     static SearchPortalPage = 'searchPortalPage'
@@ -90,6 +91,7 @@ export class navigationDestinations {
     static MultiVideoCallPage = 'multiVideoCallPage'
     static GroupMemberPermissionPage = 'groupMemberPermissionPage'
     static GroupMemberListPage = 'groupMemberListPage'
+    static ConferenceInfoPage = 'conferenceInfoPage'
 }
 
 @Builder
@@ -182,5 +184,7 @@ export function UIKitPageMap(name: string) {
         GroupMemberPermissionPage()
     } else if (name === navigationDestinations.GroupMemberListPage) {
         GroupMemberListPage()
+    } else if (name === navigationDestinations.ConferenceInfoPage) {
+        ConferenceInfoPage()
     }
 }

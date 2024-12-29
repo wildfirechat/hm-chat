@@ -1,11 +1,13 @@
 import ConferenceInviteMessageContent from '@wfc/client/src/main/ets/wfc/av/messages/conferenceInviteMessageContent'
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
+import { navigationDestinations } from '../../navigationConfig'
 
 @Component
 export default struct ConferenceInviteMessageContentView {
     @Link message: Message
     @State hostPortrait: string = ''
+    @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
 
     aboutToAppear(): void {
         let content = this.message.messageContent as ConferenceInviteMessageContent
@@ -49,6 +51,11 @@ export default struct ConferenceInviteMessageContentView {
                 .fontSize(12)
                 .margin({ left: 10, bottom: 10 })
         }
+        .onClick(() => {
+            this.mainNavPathStack.pushPathByName(navigationDestinations.ConferenceInfoPage, {
+                'message': this.message
+            } as Record<string, object>)
+        })
         .width(200)
         .alignItems(HorizontalAlign.Start)
         .backgroundColor(Color.White)

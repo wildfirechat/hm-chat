@@ -121,6 +121,7 @@ export default struct ConversationInfoItemView {
 
                             Text(`${this.conversationInfo!.draft ? this.conversationInfo!.draft : this.conversationInfo!.lastMessage ? (this.conversationInfo!.lastMessage.messageContent!.digest(this.conversationInfo!.lastMessage)) : ''}`)
                                 .textOverflow({ overflow: TextOverflow.Ellipsis })
+                                .wordBreak(WordBreak.BREAK_ALL)
                                 .fontSize(13)
                                 .fontColor('#b3b3b3')
                                 .margin({ right: 10 })

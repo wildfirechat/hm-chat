@@ -41,7 +41,7 @@ export default struct VideoMessageContentView {
             .draggable(false)
             .objectFit(ImageFit.Contain)
             .borderRadius(4)
-            .constraintSize({ maxWidth: 100 })
+            .constraintSize({ maxWidth: 200 })
             .autoResize(true)
             .onClick(event => {
                 let msg: Message | undefined

@@ -51,6 +51,7 @@ export default struct ImageMessageContentView {
             .objectFit(ImageFit.Fill)
             .width(px2vp(this.scaledSize?.width))
             .height(px2vp(this.scaledSize?.height))
+            .constraintSize({maxWidth: 200})
             .borderRadius(4)
             .onClick(event => {
                 let msg: Message | undefined

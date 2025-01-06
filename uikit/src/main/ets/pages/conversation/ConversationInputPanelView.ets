@@ -881,7 +881,7 @@ export default struct ConversationInputPanelView {
                                 .height(INPUT_ICON_WIDTH)
                                 .borderRadius(4)
                                 .onClick(() => {
-                                    let textMessageContent = new TextMessageContent(this.text);
+                                    let textMessageContent = new TextMessageContent(this.text.trim());
                                     if (this.mentions.length > 0) {
                                         for (const mention of this.mentions) {
                                             if (this.text.indexOf(mention.text) >= 0) {

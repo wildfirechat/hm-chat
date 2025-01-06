@@ -12,7 +12,7 @@ export default struct WfcWebView {
     controller?: web_webview.WebviewController
     url: string = ''
     onTitleReceive?: (title?: string) => void
-    private dsBridge?: DSBridge
+    dsBridge?: DSBridge
     @State progress: number = 0
     @State @Watch('onPickUser') pickedUser: SubscribedAbstractProperty<UserInfo[]> = LocalStorage.getShared()
         .link('pickUserResult');

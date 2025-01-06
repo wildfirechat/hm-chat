@@ -72,7 +72,7 @@ class Data {
     datas = [] as NData[]
 }
 
-class NData {
+export class NData {
     key = '';
     value = '';
     color = ''

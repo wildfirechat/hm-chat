@@ -35,6 +35,8 @@ import TextMessageContent from '@wfc/client/src/main/ets/wfc/messages/textMessag
 import RecallMessageNotification from '@wfc/client/src/main/ets/wfc/messages/notification/recallMessageNotification'
 import GroupMemberType from '@wfc/client/src/main/ets/wfc/model/groupMemberType'
 import MessageStatus from '@wfc/client/src/main/ets/wfc/messages/messageStatus'
+import RichNotificationMessageContent from '@wfc/client/src/main/ets/wfc/messages/notification/richNotificationMessageContent'
+import RichNotificationMessageContentView from './message/RichNotificationMessageContentView'
 
 @Entry
 @Component
@@ -557,6 +559,8 @@ export default struct ConversationPage {
                                                                 this.toReeditText = recallMsgContent.originalSearchableContent
                                                             }
                                                         })
+                                                    } else if (msg.messageContent instanceof RichNotificationMessageContent) {
+                                                        RichNotificationMessageContentView({ message: msg })
                                                     } else {
                                                         SimpleNotificationMessageContentView({ message: msg })
                                                     }

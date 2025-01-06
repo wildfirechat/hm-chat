@@ -32,7 +32,8 @@ export default struct ConferenceInviteMessageContentView {
                 Column() {
                     Text(this.conferenceInviteMessageContent().title)
                         .textOverflow({ overflow: TextOverflow.Ellipsis })
-                        .fontSize(18)
+                        .width(120)
+                        .fontSize(14)
                         .maxLines(1)
                     Text(this.conferenceInviteMessageContent().desc)
                         .fontSize(12)

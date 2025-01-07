@@ -9,6 +9,7 @@ import { showToast } from '@wfc/uikit/src/main/ets/common/utils/Toast'
 import { navigationDestinations } from '@wfc/uikit/src/main/ets/pages/navigationConfig'
 import { mainNavigationDestinations } from './mainNavigationConfig'
 import { BusinessError } from '@kit.BasicServicesKit'
+import BuildProfile from 'BuildProfile'
 
 
 @Component
@@ -135,16 +136,18 @@ export default struct MeTab {
             .margin({ top: 10, bottom: 10 })
             .backgroundColor(Color.White)
 
-            OptionItemView({ title: 'API测试页' })
-                .onClick(() => {
-                    // router.pushUrl({
-                    //     url: 'pages/TestPage'
-                    // })
-                    //     .catch((e: BusinessError) => {
-                    //         console.log(e.message)
-                    //     })
-                    this.mainNavPathStack.pushPathByName('testPage', {} as Record<string, object>)
-                })
+            if (BuildProfile.DEBUG) {
+                OptionItemView({ title: 'API测试页' })
+                    .onClick(() => {
+                        // router.pushUrl({
+                        //     url: 'pages/TestPage'
+                        // })
+                        //     .catch((e: BusinessError) => {
+                        //         console.log(e.message)
+                        //     })
+                        this.mainNavPathStack.pushPathByName('testPage', {} as Record<string, object>)
+                    })
+            }
         }
         .width('100%')
         .height('100%')

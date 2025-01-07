@@ -4,6 +4,8 @@ import router from '@ohos.router';
 import data_preferences from '@ohos.data.preferences';
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc';
 import { showToast } from '@wfc/uikit/src/main/ets/common/utils/Toast';
+import { inputMethod } from '@kit.IMEKit';
+
 import('@wfc/uikit/src/main/ets/pages/misc/WebViewPageWithRouter') //引入共享包中的命名路由页面
 
 
@@ -23,6 +25,8 @@ struct LoginPage {
 
     // 密码登陆
     @State password: string = ''
+
+    @State isAgreeUserAgreementAndPrivacyPolicy: boolean = false
 
     controller: TextInputController = new TextInputController()
 
@@ -154,6 +158,11 @@ struct LoginPage {
                 .width('100%')
                 .borderRadius(4)
                 .onClick(() => {
+                    inputMethod.getController().stopInputSession()
+                    if(!this.isAgreeUserAgreementAndPrivacyPolicy){
+                        showToast('请同意用户协议及隐私政策')
+                        return
+                    }
                     this.isLogin = true
                     if (this.isLoginByPassword) {
                         console.info('login_pwd', this.phoneNumber, appServer)
@@ -192,6 +201,11 @@ struct LoginPage {
                 .layoutWeight(1)
 
             Row() {
+                Checkbox()
+                    .select(this.isAgreeUserAgreementAndPrivacyPolicy)
+                    .onChange(checked => {
+                        this.isAgreeUserAgreementAndPrivacyPolicy = checked
+                    })
                 Text('登录即代表同意')
                     .fontSize(12)
                 Text('《野火IM用户协议》')

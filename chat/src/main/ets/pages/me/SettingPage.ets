@@ -35,7 +35,7 @@ export default struct SettingPage {
                     })
 
                     OptionItemView({
-                        title: ' 诊断'
+                        title: '诊断'
                     })
                         .onClick(() => {
                             showToast('TODO')
@@ -67,6 +67,27 @@ export default struct SettingPage {
                 }
                 .margin({ top: 10 })
                 .backgroundColor(Color.White)
+
+                OptionItemView({ title: '注销' })
+                    .onClick(event => {
+                        AlertDialog.show({
+                            title: "提示",
+                            message: "账号注销之后，所有数据将被删除，无法恢复，请慎重！",
+                            primaryButton: {
+                                value: "注销",
+                                fontColor: Color.Red,
+                                action: () => {
+                                    this.mainNavPathStack.pushPathByName(mainNavigationDestinations.DestroyAccountPage, {} as Record<string, Object>)
+                                },
+                            },
+                            secondaryButton: {
+                                value: '取消',
+                                action: () => {
+
+                                }
+                            }
+                        })
+                    })
 
                 Button('退出')
                     .width(200)

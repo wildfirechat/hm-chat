@@ -26,6 +26,10 @@ class AppServer {
         return this._post('/send_code', { 'mobile': mobile } as Record<string, string>)
     }
 
+    requestDestroyAuthCode() {
+        return this._post('/send_destroy_code')
+    }
+
     loginWithAuthCode(phone: string, authCode: string) {
         let obj = {
             'mobile': phone,
@@ -44,6 +48,13 @@ class AppServer {
             'clientId': wfc.getClientId(),
         } as Record<string, Object>
         return this._post('/login_pwd', obj)
+    }
+
+    destroy(authCode: string) {
+        let obj = {
+            'code': authCode,
+        } as Record<string, Object>
+        return this._post('/destroy', obj)
     }
 
     async getGroupAnnouncement(groupId: string): Promise<GroupAnnouncement> {

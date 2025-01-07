@@ -2,6 +2,7 @@ import { showToast } from '@wfc/uikit/src/main/ets/common/utils/Toast'
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType'
 import { navigationDestinations } from '@wfc/uikit/src/main/ets/pages/navigationConfig'
+import BuildProfile from 'BuildProfile'
 
 @Preview
 @Component
@@ -24,38 +25,40 @@ export default struct DiscoveryTab {
             List() {
                 // TODO lazyForEach https://developer.huawei.com/consumer/cn/doc/harmonyos-guides-V2/ui-ts-performance-improvement-recommendation-0000001477981001-V2
                 ListItemGroup() {
-                    ListItem() {
-                        Row() {
-                            Image($r('app.media.ic_moment'))
-                                .width(20)
-                                .height(20)
-                                .objectFit(ImageFit.Contain)
-                            Badge({
-                                position: BadgePosition.Right,
-                                maxCount: 99,
-                                count: this.unreadMomentCount,
-                                style: { badgeSize: 14, badgeColor: '#FA2A2D' }
-                            }) {
-                                Text('朋友圈')
-                                    .padding({ left: 10 })
+                    if (BuildProfile.DEBUG) {
+                        ListItem() {
+                            Row() {
+                                Image($r('app.media.ic_moment'))
+                                    .width(20)
+                                    .height(20)
+                                    .objectFit(ImageFit.Contain)
+                                Badge({
+                                    position: BadgePosition.Right,
+                                    maxCount: 99,
+                                    count: this.unreadMomentCount,
+                                    style: { badgeSize: 14, badgeColor: '#FA2A2D' }
+                                }) {
+                                    Text('朋友圈')
+                                        .padding({ left: 10 })
+                                }
+                                .padding({ left: 20 })
                             }
-                            .padding({ left: 20 })
+                            .onClick(() => {
+                                showToast('TODO')
+                            })
+                            .padding({ left: 10, right: 10 })
+                            .width('100%')
+                            .height(56)
                         }
-                        .onClick(() => {
-                            showToast('TODO')
+                        .stateStyles({
+                            pressed: {
+                                .backgroundColor('#E5E5E5')
+                            },
+                            normal: {
+                                .backgroundColor(Color.White)
+                            }
                         })
-                        .padding({ left: 10, right: 10 })
-                        .width('100%')
-                        .height(56)
                     }
-                    .stateStyles({
-                        pressed: {
-                            .backgroundColor('#E5E5E5')
-                        },
-                        normal: {
-                            .backgroundColor(Color.White)
-                        }
-                    })
 
                     ListItem() {
                         Row() {
@@ -67,8 +70,7 @@ export default struct DiscoveryTab {
                                 .padding({ left: 10 })
                         }
                         .onClick(() => {
-                            this.mainNavPathStack.pushPathByName(navigationDestinations.ChatroomListPage, {
-                            } as Record<string, Object>)
+                            this.mainNavPathStack.pushPathByName(navigationDestinations.ChatroomListPage, {} as Record<string, Object>)
                         })
                         .padding({ left: 10, right: 10 })
                         .width('100%')

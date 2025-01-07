@@ -6,6 +6,7 @@ import { navigationDestinations } from '@wfc/uikit/src/main/ets/pages/navigation
 import { mainNavigationDestinations } from '../mainNavigationConfig';
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation';
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType';
+import BuildProfile from 'BuildProfile';
 
 @Preview
 @Entry
@@ -34,12 +35,14 @@ export default struct SettingPage {
                         this.mainNavPathStack.pushPathByName(mainNavigationDestinations.AboutPage, {} as Record<string, Object>)
                     })
 
-                    OptionItemView({
-                        title: '诊断'
-                    })
-                        .onClick(() => {
-                            showToast('TODO')
+                    if (BuildProfile.DEBUG) {
+                        OptionItemView({
+                            title: '诊断'
                         })
+                            .onClick(() => {
+                                showToast('TODO')
+                            })
+                    }
                     OptionItemView({ title: '举报' })
                         .onClick(event => {
                             AlertDialog.show({

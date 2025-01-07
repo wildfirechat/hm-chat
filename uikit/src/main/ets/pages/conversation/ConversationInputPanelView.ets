@@ -253,13 +253,13 @@ export default struct ConversationInputPanelView {
                 }
             }
         },
-        {
-            title: '位置',
-            icon: $r('app.media.ic_func_location'),
-            action: () => {
-                showToast('TODO')
-            }
-        },
+        // {
+        //     title: '位置',
+        //     icon: $r('app.media.ic_func_location'),
+        //     action: () => {
+        //         showToast('暂未实现')
+        //     }
+        // },
         {
             title: '名片',
             icon: $r('app.media.ic_user_card'),

@@ -188,6 +188,30 @@ export default struct SingleConversationInfoPage {
 
                             clearConversationHistoryDialogController.open()
                         })
+                    OptionItemView({ title: '举报' })
+                        .onClick(event => {
+                            AlertDialog.show({
+                                title: "举报",
+                                message: $r("app.string.complaint"),
+                                primaryButton: {
+                                    value: "举报",
+                                    fontColor: Color.Red,
+                                    action: () => {
+                                        let conversation = new Conversation(ConversationType.Single, 'cgc8c8VV', 0)
+                                        this.mainNavPathStack.popToName(navigationDestinations.ConversationPage)
+                                        this.mainNavPathStack.replacePathByName(navigationDestinations.ConversationPage, {
+                                            'conversation': conversation
+                                        } as Record<string, Object>)
+                                    },
+                                },
+                                secondaryButton: {
+                                    value: '取消',
+                                    action: () => {
+
+                                    }
+                                }
+                            })
+                        })
                 }
                 .margin({ top: 10 })
                 .width('100%')

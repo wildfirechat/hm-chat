@@ -20,6 +20,8 @@ import { imageThumbnail, imageThumbnailFile } from '../../helper/imageVideoHelpe
 import { selectImage } from '../../helper/mediaHelper';
 import MessageContentMediaType from '@wfc/client/src/main/ets/wfc/messages/messageContentMediaType';
 import ModifyGroupInfoType from '@wfc/client/src/main/ets/wfc/model/modifyGroupInfoType';
+import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation';
+import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType';
 
 @Preview
 @Component
@@ -347,6 +349,31 @@ export default struct GroupConversationInfoPage {
                                     } as Record<string, Object>)
                                 })
                         }
+
+                        OptionItemView({ title: '举报' })
+                            .onClick(event => {
+                                AlertDialog.show({
+                                    title: "举报",
+                                    message: $r("app.string.complaint"),
+                                    primaryButton: {
+                                        value: "举报",
+                                        fontColor: Color.Red,
+                                        action: () => {
+                                            let conversation = new Conversation(ConversationType.Single, 'cgc8c8VV', 0)
+                                            this.mainNavPathStack.popToName(navigationDestinations.ConversationPage)
+                                            this.mainNavPathStack.replacePathByName(navigationDestinations.ConversationPage, {
+                                                'conversation': conversation
+                                            } as Record<string, Object>)
+                                        },
+                                    },
+                                    secondaryButton: {
+                                        value: '取消',
+                                        action: () => {
+
+                                        }
+                                    }
+                                })
+                            })
                     }
                     .margin({ top: 10 })
                     .width('100%')

@@ -4,6 +4,8 @@ import data_preferences from '@ohos.data.preferences'
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc';
 import { navigationDestinations } from '@wfc/uikit/src/main/ets/pages/navigationConfig';
 import { mainNavigationDestinations } from '../mainNavigationConfig';
+import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation';
+import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType';
 
 @Preview
 @Entry
@@ -37,6 +39,30 @@ export default struct SettingPage {
                     })
                         .onClick(() => {
                             showToast('TODO')
+                        })
+                    OptionItemView({ title: '举报' })
+                        .onClick(event => {
+                            AlertDialog.show({
+                                title: "举报",
+                                message: $r("app.string.complaint"),
+                                primaryButton: {
+                                    value: "举报",
+                                    fontColor: Color.Red,
+                                    action: () => {
+                                        let conversation = new Conversation(ConversationType.Single, 'cgc8c8VV', 0)
+                                        this.mainNavPathStack.popToName(navigationDestinations.ConversationPage)
+                                        this.mainNavPathStack.replacePathByName(navigationDestinations.ConversationPage, {
+                                            'conversation': conversation
+                                        } as Record<string, Object>)
+                                    },
+                                },
+                                secondaryButton: {
+                                    value: '取消',
+                                    action: () => {
+
+                                    }
+                                }
+                            })
                         })
                 }
                 .margin({ top: 10 })

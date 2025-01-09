@@ -1,7 +1,7 @@
 {
-    "name": "client",
+    "name": "@wfc/client",
     "version": "1.0.0",
-    "description": "Please describe the basic information.",
+    "description": "野火IM Client，包含即时通讯能力",
     "main": "Index.ets",
     "author": "",
     "license": "Apache-2.0",

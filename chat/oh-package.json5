@@ -2,8 +2,8 @@
     "license": "",
     "devDependencies": {},
     "author": "",
-    "name": "chat",
-    "description": "Please describe the basic information.",
+    "name": "@wfc/chat",
+    "description": "野火IM 应用",
     "main": "",
     "version": "1.0.0",
     "dependencies": {

@@ -1,7 +1,7 @@
 {
-    "name": "uikit",
+    "name": "@wfc/uikit",
     "version": "1.0.0",
-    "description": "Please describe the basic information.",
+    "description": "野火IM UIKit，包含一些通过 UI",
     "main": "Index.ets",
     "author": "",
     "license": "Apache-2.0",

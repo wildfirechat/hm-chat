@@ -28,6 +28,7 @@ import MessageContentType from '@wfc/client/src/main/ets/wfc/messages/messageCon
 import EventType from '@wfc/client/src/main/ets/wfc/client/wfcEvent'
 import PCLoginRequestMessageContent from '@wfc/client/src/main/ets/wfc/messages/pcLoginRequestMessageContent'
 import uikit from '@wfc/uikit'
+import { common } from '@kit.AbilityKit'
 
 const TAG = 'Main';
 
@@ -114,7 +115,7 @@ struct MainPage {
         notificationManager.isNotificationEnabled().then((data: boolean) => {
             console.info("isNotificationEnabled success, data: " + JSON.stringify(data));
             if (!data) {
-                notificationManager.requestEnableNotification().then(() => {
+                notificationManager.requestEnableNotification(getContext(this) as common.UIAbilityContext).then(() => {
                     console.info(`[ANS] requestEnableNotification success`);
                 }).catch((err: Base.BusinessError) => {
                     if (1600004 == err.code) {

@@ -41,7 +41,7 @@ export default struct WebViewPage {
                 controller: this.webviewController,
                 dsBridge: this.dsbridge,
                 onTitleReceive: (title?: string) => {
-                    if (title) {
+                    if (!this.title && title) {
                         this.title = title!;
                     }
                 }

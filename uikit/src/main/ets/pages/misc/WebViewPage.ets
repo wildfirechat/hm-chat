@@ -10,10 +10,11 @@ import PickMultiContactModal from '../picker/PickMultiContactModal'
 export default struct WebViewPage {
     webviewController: web_webview.WebviewController = new web_webview.WebviewController()
     url: string = ''
-    @State title: string = '加载中'
+    @State title: string = ''
     isNewPickContact = true;
     dsbridge?: DSBridge
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
+    private defaultTitle: string = '加载中'
 
     aboutToAppear() {
         let params = this.mainNavPathStack.getParamByIndex(this.mainNavPathStack.size() - 1) as Record<string, Object>;
@@ -49,7 +50,7 @@ export default struct WebViewPage {
                 .width('100%')
                 .height('100%')
         }
-        .title(this.title)
+        .title(this.title ? this.title : this.defaultTitle)
         .height('100%')
         .width('100%')
         .onShown(() => {

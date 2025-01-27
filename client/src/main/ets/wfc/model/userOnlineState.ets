@@ -46,7 +46,9 @@ export default class UserOnlineState {
                 onlineClientDesc += ps[s.platform] + ' '
             } else if ([1, 2, 8, 9].indexOf(s.platform) >= 0) {
                 // TODO
-                lastSeenDesc += ps[s.platform] + ' ';
+                if (lastSeenDesc.indexOf(ps[s.platform]) === -1) {
+                    lastSeenDesc += ps[s.platform] + ' ';
+                }
             }
         });
 

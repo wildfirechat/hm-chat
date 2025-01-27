@@ -33,8 +33,7 @@ import { common } from '@kit.AbilityKit'
 const TAG = 'Main';
 
 const permissions: Array<Permissions> = [
-    'ohos.permission.INTERNET',
-    'ohos.permission.MICROPHONE',
+    'ohos.permission.INTERNET'
 ];
 
 let storage = LocalStorage.getShared()

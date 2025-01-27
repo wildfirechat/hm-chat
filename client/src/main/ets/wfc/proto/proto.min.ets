@@ -2169,9 +2169,7 @@ class WfcImpl {
                         message.messageContent = msg.messageContent;
                     }
                 }
-                if (message.conversation!.type !== ConversationType.ChatRoom) {
-                    self.eventEmitter!.emit(EventType.MessageStatusUpdate, message);
-                }
+                self.eventEmitter!.emit(EventType.MessageStatusUpdate, message);
                 successCB && successCB(Long.fromValue(messageUid), Long.fromValue(timestamp).toNumber());
             },
             (errorCode: number) => { //errorCB

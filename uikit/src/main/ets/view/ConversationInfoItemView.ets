@@ -153,6 +153,6 @@ export default struct ConversationInfoItemView {
                 .color(!this.basicMode && this.conversationInfo!.top ? '#E5E5E5' : '#F7F7F7')
         }
         .width('100%')
-        .backgroundColor(!this.basicMode && this.conversationInfo!.top ? 0xEBEBEB : '')
+        .backgroundColor(!this.basicMode && this.conversationInfo!.top ? '#EEEEEE' : '')
     }
 }

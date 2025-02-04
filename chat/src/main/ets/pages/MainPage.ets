@@ -408,6 +408,7 @@ struct MainPage {
         }
         .title(this.TitleBuilder())
         .titleMode(NavigationTitleMode.Mini)
+        .backgroundColor('#EEEEEE')
         .hideBackButton(true)
         .menus(this.NavigationMenus())
         .mode(NavigationMode.Stack)

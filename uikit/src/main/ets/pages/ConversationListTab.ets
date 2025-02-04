@@ -223,7 +223,7 @@ export default struct ConversationListTab {
     build() {
         Column() {
             Divider()
-                .color('#F7F7F7')
+                .color('#ECECEC')
             List() {
                 // headers
                 if (this.connectionStatusHeader) {
@@ -283,6 +283,7 @@ export default struct ConversationListTab {
             .width('100%')
             .cachedCount(5)
         }
+        .backgroundColor('#EEEEEE')
         .width('100%')
         .height('100%')
     }

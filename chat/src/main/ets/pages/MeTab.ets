@@ -92,13 +92,13 @@ export default struct MeTab {
             })
 
             OptionItemView({ icon: $r('app.media.ic_account'), title: '账号与安全' })
-                .margin({ top: 10, bottom: 10 })
+                .margin({ top: 10 })
                 .onClick(() => {
                     this.mainNavPathStack.pushPathByName(navigationDestinations.AccountPage, {} as Record<string, Object>)
                 })
 
             OptionItemView({ icon: $r('app.media.ic_notification'), title: '消息与通知' })
-                .margin({ top: 10, bottom: 10 })
+                .margin({ top: 10 })
                 .onClick(() => {
                     this.mainNavPathStack.pushPathByName(navigationDestinations.NotificationPage, {} as Record<string, Object>)
                 })
@@ -116,7 +116,7 @@ export default struct MeTab {
                         this.mainNavPathStack.pushPathByName(navigationDestinations.FavRecordPage, {} as Record<string, Object>)
                     })
             }
-            .margin({ top: 10, bottom: 10 })
+            .margin({ top: 10 })
             .backgroundColor(Color.White)
 
             Column() {

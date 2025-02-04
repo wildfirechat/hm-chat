@@ -868,6 +868,7 @@ export default struct ConversationPage {
         ])
         .height('100%')
         .width('100%')
+        .backgroundColor('#EEEEEE')
     }
 }
 

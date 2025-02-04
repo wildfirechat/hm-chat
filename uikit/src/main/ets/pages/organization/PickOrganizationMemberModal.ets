@@ -209,9 +209,9 @@ export default struct PickOrganizationMemberModal {
                     .height('100%')
                 }
                 .layoutWeight(1)
-                .backgroundColor(Color.White)
             }
         }
+        .backgroundColor('#EEEEEE')
         .title(this.title)
         .titleMode(NavigationTitleMode.Mini)
         .hideBackButton(false)

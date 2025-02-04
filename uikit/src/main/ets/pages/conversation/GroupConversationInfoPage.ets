@@ -592,8 +592,8 @@ export default struct GroupConversationInfoPage {
             .scrollBar(BarState.Off)
             .width('100%')
             .height('100%')
-            .backgroundColor('#EDEDED')
         }
+        .backgroundColor('#EEEEEE')
         .title('会话详情')
         .height('100%')
         .width('100%')

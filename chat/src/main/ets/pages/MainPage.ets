@@ -226,7 +226,6 @@ struct MainPage {
         }
         .width('100%')
         .height(60)
-        .backgroundColor('#F7F7F7')
         .justifyContent(FlexAlign.Center)
         .onClick(() => {
             this.currentIndex = targetIndex
@@ -401,6 +400,7 @@ struct MainPage {
                     .tabBar(this.TabBuilder(this.tabTitles[4], 4, $r('app.media.me_press'), $r('app.media.me_normal')))
                 }
             }
+            .backgroundColor('#EEEEEE')
             .onChange(index => {
                 this.currentIndex = index
                 this.title = this.tabTitles[index]

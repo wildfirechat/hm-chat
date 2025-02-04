@@ -23,7 +23,7 @@ export default struct AudioMessageContentView {
         $r('app.media.audio_animation_list_left_2'),
         $r('app.media.audio_animation_list_left_3')
     ]
-    private audioPlayManager?: AudioPlayManager
+    audioPlayManager?: AudioPlayManager
 
     soundMessageContent() {
         return this.message.messageContent as SoundMessageContent

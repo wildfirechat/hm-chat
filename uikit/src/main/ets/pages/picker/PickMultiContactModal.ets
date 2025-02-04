@@ -98,8 +98,8 @@ export default struct PickMultiContactModal {
             }
             .width('100%')
             .height('100%')
-            .padding({ top: 5 })
         }
+        .backgroundColor('#EEEEEE')
         .title('选取联系人')
         .titleMode(NavigationTitleMode.Mini)
         .hideBackButton(false)

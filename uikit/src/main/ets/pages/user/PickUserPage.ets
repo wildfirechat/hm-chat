@@ -69,6 +69,7 @@ export default struct PickUserPage {
             .height('100%')
             .padding({ top: 5 })
         }
+        .backgroundColor('#EEEEEE')
         .title('选取联系人')
         .titleMode(NavigationTitleMode.Mini)
         .hideBackButton(false)

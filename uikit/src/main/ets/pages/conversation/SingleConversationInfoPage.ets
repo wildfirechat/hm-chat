@@ -219,8 +219,8 @@ export default struct SingleConversationInfoPage {
             }
             .width('100%')
             .height('100%')
-            .backgroundColor('#EDEDED')
         }
+        .backgroundColor('#EEEEEE')
         .title('会话详情')
         // .hideBackButton(false)
         .height('100%')

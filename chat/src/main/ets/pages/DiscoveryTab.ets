@@ -152,6 +152,5 @@ export default struct DiscoveryTab {
         .height('100%')
         .width('100%')
         .justifyContent(FlexAlign.Start)
-        .padding({ top: 5 })
     }
 }

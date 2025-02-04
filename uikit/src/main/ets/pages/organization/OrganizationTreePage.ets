@@ -151,9 +151,9 @@ export default struct OrganizationTreePage {
                     .height('100%')
                 }
                 .layoutWeight(1)
-                .backgroundColor(Color.White)
             }
         }
+        .backgroundColor('#EEEEEE')
         .title(this.title)
         .height('100%')
         .width('100%')

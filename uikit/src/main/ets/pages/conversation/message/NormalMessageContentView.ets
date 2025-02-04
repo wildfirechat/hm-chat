@@ -31,11 +31,11 @@ export default struct NormaMessageContentView {
     @Prop message: Message
     @Link enableMultiCheck: boolean
     @Link quotedMessage: Message
-    private audioPlayManager?: AudioPlayManager
+    audioPlayManager?: AudioPlayManager
     @State readReceipt: ReadReceipt | null = null
     @Prop @Watch('updateMessageReadReceipt') readEntries: Map<string, number> = new Map();
     @Prop groupMembers: GroupMember[] = []
-    private enableReceipt: boolean = false
+    enableReceipt: boolean = false
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
 
     aboutToAppear(): void {

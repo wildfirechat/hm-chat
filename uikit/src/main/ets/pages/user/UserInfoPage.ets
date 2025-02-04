@@ -244,6 +244,7 @@ export default struct UserInfoPage {
             .height('100%')
             .backgroundColor('#EDEDED')
         }
+        .backgroundColor('#EEEEEE')
         .hideTitleBar(false)
         .title('用户信息')
         .height('100%')

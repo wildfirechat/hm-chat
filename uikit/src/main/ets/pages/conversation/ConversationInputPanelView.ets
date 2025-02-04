@@ -997,7 +997,7 @@ export default struct ConversationInputPanelView {
             .onAppear(() => {
                 this.enable = true
             })
-            .backgroundColor('#F7F7F7')
+            .backgroundColor('#EEEEEE')
 
             .bindSheet(this.showMentionSheet, MentionGroupMemberView(this.groupId, this.onMentionGroupMember), {
                 height: '70%',

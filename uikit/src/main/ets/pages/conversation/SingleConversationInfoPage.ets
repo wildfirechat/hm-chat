@@ -197,7 +197,7 @@ export default struct SingleConversationInfoPage {
                                     value: "举报",
                                     fontColor: Color.Red,
                                     action: () => {
-                                        let conversation = new Conversation(ConversationType.Single, 'cgc8c8VV', 0)
+                                        let conversation = new Conversation(ConversationType.Single, 'uiuJuJcc', 0)
                                         this.mainNavPathStack.popToName(navigationDestinations.ConversationPage)
                                         this.mainNavPathStack.replacePathByName(navigationDestinations.ConversationPage, {
                                             'conversation': conversation

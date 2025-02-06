@@ -400,7 +400,7 @@ struct MainPage {
                     .tabBar(this.TabBuilder(this.tabTitles[4], 4, $r('app.media.me_press'), $r('app.media.me_normal')))
                 }
             }
-            .backgroundColor('#EEEEEE')
+            .backgroundColor('#F0F1F3')
             .onChange(index => {
                 this.currentIndex = index
                 this.title = this.tabTitles[index]

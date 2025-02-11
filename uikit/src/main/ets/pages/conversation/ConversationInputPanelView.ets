@@ -464,7 +464,10 @@ export default struct ConversationInputPanelView {
             this.channelInfo = wfc.getChannelInfo(this.conversation.target)
         }
 
-        this.setKeyboardAvoidMode(KeyboardAvoidMode.RESIZE);
+        // 避免点击会话列表项进入会话界面时，看起来底部 tabBar 向下移位现象（该现象不明显）
+        setTimeout(() => {
+            this.setKeyboardAvoidMode(KeyboardAvoidMode.RESIZE);
+        }, 100)
 
         if (this.conversationInfo.draft) {
             this.text = this.conversationInfo.draft;

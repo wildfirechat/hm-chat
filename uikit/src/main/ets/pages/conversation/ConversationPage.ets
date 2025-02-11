@@ -37,6 +37,7 @@ import GroupMemberType from '@wfc/client/src/main/ets/wfc/model/groupMemberType'
 import MessageStatus from '@wfc/client/src/main/ets/wfc/messages/messageStatus'
 import RichNotificationMessageContent from '@wfc/client/src/main/ets/wfc/messages/notification/richNotificationMessageContent'
 import RichNotificationMessageContentView from './message/RichNotificationMessageContentView'
+import { window, KeyboardAvoidMode } from '@kit.ArkUI'
 
 @Entry
 @Component
@@ -852,6 +853,10 @@ export default struct ConversationPage {
         })
         .onShown(() => {
             this.onPageShow();
+        })
+        .onWillDisappear(() => {
+            let windowStage = AppStorage.get<window.Window>('window')
+            windowStage?.getUIContext().setKeyboardAvoidMode(KeyboardAvoidMode.OFFSET);
         })
         .mode(NavDestinationMode.STANDARD)
         .title(this.title)

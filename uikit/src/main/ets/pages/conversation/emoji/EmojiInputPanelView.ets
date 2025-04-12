@@ -16,6 +16,7 @@ export default struct EmojiInputPanelView {
     @Link caretPosition: number
     @Prop selectionStart: number
     @Prop selectionEnd: number
+    private scroller: Scroller = new Scroller()
 
     aboutToAppear() {
         let config = emojiConfig();
@@ -49,15 +50,14 @@ export default struct EmojiInputPanelView {
                             .width(24)
                             .height(24)
                     }
-                    .width(44)
-                    .height(40)
+                    .padding(8)
                     .borderRadius(4)
                     .stateStyles({
                         pressed: {
                             .backgroundColor('#E5E5E5')
                         },
                         normal: {
-                            .backgroundColor(this.currentCategoryIndex === index ? '#E5E5E5' : Color.White)
+                            .backgroundColor(this.currentCategoryIndex === index ? '#E5E5E5' : Color.Transparent)
                         }
                     })
                     .onClick(() => {
@@ -70,89 +70,78 @@ export default struct EmojiInputPanelView {
             .alignListItem(ListItemAlign.Center)
             .width('100%')
             .height(40)
+            .padding({ left: 10, right: 10 })
 
             Stack() {
                 Swiper() {
                     ForEach(this.emojiCategories, (category: Category) => {
                         if (category.name === 'Peoples') {
-                            Scroll() {
-                                Flex({
-                                    direction: FlexDirection.Row,
-                                    justifyContent: FlexAlign.SpaceAround,
-                                    wrap: FlexWrap.Wrap,
-                                    alignItems: ItemAlign.Start
-                                }) {
-                                    ForEach(this.emojis, (emoji: Emoji) => {
-                                        Row() {
-                                            Text(emoji.data)
-                                                .fontSize(22)
+                            Grid(this.scroller) {
+                                ForEach(this.emojis, (emoji: Emoji) => {
+                                    GridItem() {
+                                        Text(emoji.data)
+                                            .fontSize(22)
+                                    }
+                                    .width(44)
+                                    .height(44)
+                                    .borderRadius(4)
+                                    .align(Alignment.Center)
+                                    .stateStyles({
+                                        pressed: {
+                                            .backgroundColor('#E5E5E5')
+                                        },
+                                        normal: {
+                                            .backgroundColor(Color.Transparent)
                                         }
-                                        .width(44)
-                                        .height(44)
-                                        .borderRadius(4)
-                                        .alignItems(VerticalAlign.Center)
-                                        .justifyContent(FlexAlign.Center)
-                                        .stateStyles({
-                                            pressed: {
-                                                .backgroundColor('#E5E5E5')
-                                            },
-                                            normal: {
-                                                .backgroundColor(Color.White)
-                                            }
-                                        })
-                                        .onClick(() => {
-                                            this.text = this.text.slice(0, this.selectionStart) + emoji.data + this.text.slice(this.selectionEnd)
-                                            this.caretPosition = this.selectionStart + emoji.data.length;
-                                            this.selectionStart = this.selectionStart + emoji.data.length
-                                            this.selectionEnd = this.selectionStart;
-                                        })
-                                    }, (emoji: Emoji, index: number) => index + '')
-                                }
+                                    })
+                                    .onClick(() => {
+                                        this.text = this.text.slice(0, this.selectionStart) + emoji.data + this.text.slice(this.selectionEnd)
+                                        this.caretPosition = this.selectionStart + emoji.data.length;
+                                        this.selectionStart = this.selectionStart + emoji.data.length
+                                        this.selectionEnd = this.selectionStart;
+                                    })
+                                }, (emoji: Emoji, index: number) => index + '')
                             }
-                            .scrollable(ScrollDirection.Vertical)
+                            .enableScrollInteraction(true)
+                            .columnsTemplate('1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr')
                             .scrollBar(BarState.Off)
                             .padding({ bottom: 40 })
+                            .edgeEffect(EdgeEffect.Spring)
                             .height('100%')
 
                         } else {
-                            Scroll() {
-                                Flex({
-                                    direction: FlexDirection.Row,
-                                    justifyContent: FlexAlign.SpaceAround,
-                                    wrap: FlexWrap.Wrap,
-                                    alignItems: ItemAlign.Start
-                                }) {
-                                    ForEach(this.emojiAndStickers.filter(emoji => emoji.category === category.name), (emoji: Emoji) => {
-                                        Row() {
-                                            Image(emoji.data)
-                                                .height(64)
-                                                .width(64)
-                                                .draggable(false)
+                            Grid() {
+                                ForEach(this.emojiAndStickers.filter(emoji => emoji.category === category.name), (emoji: Emoji) => {
+                                    GridItem() {
+                                        Image(emoji.data)
+                                            .height(64)
+                                            .width(64)
+                                            .draggable(false)
+                                    }
+                                    .width(70)
+                                    .height(70)
+                                    .borderRadius(4)
+                                    .stateStyles({
+                                        pressed: {
+                                            .backgroundColor('#E5E5E5')
+                                        },
+                                        normal: {
+                                            .backgroundColor(Color.Transparent)
                                         }
-                                        .width(70)
-                                        .height(70)
-                                        .borderRadius(4)
-                                        .alignItems(VerticalAlign.Center)
-                                        .justifyContent(FlexAlign.Center)
-                                        .stateStyles({
-                                            pressed: {
-                                                .backgroundColor('#E5E5E5')
-                                            },
-                                            normal: {
-                                                .backgroundColor(Color.White)
-                                            }
-                                        })
-                                        .onClick(() => {
-                                            let stickerMessageContent = new StickerMessageContent('', emoji.data, 200, 200)
-                                            wfc.sendConversationMessage(this.conversation!, stickerMessageContent)
-                                        })
-                                    }, (emoji: Emoji, index: number) => index + '')
-                                }
+                                    })
+                                    .onClick(() => {
+                                        let stickerMessageContent = new StickerMessageContent('', emoji.data, 200, 200)
+                                        wfc.sendConversationMessage(this.conversation!, stickerMessageContent)
+                                    })
+                                }, (emoji: Emoji, index: number) => index + '')
                             }
-                            .scrollable(ScrollDirection.Vertical)
+                            .columnsTemplate('1fr 1fr 1fr 1fr 1fr')
                             .scrollBar(BarState.Off)
                             .padding({ top: 10 })
                             .height('100%')
+                            .edgeEffect(EdgeEffect.Spring, {
+                                alwaysEnabled: true,
+                            })
                         }
                     }, (category: Category, index: number) => index + '')
                 }
@@ -174,7 +163,6 @@ export default struct EmojiInputPanelView {
                     .height(40)
                     .justifyContent(FlexAlign.Center)
                     .alignItems(VerticalAlign.Center)
-                    .backgroundColor(Color.Red)
                     .borderRadius(4)
                     .stateStyles({
                         pressed: {
@@ -196,10 +184,11 @@ export default struct EmojiInputPanelView {
                     })
                 }
             }
+            .padding(10)
             .layoutWeight(1)
+            .backgroundColor(Color.Transparent)
             .alignContent(Alignment.BottomEnd)
         }
-        .padding(10)
         .width('100%')
         .height('100%')
     }

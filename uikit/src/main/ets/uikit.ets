@@ -13,7 +13,7 @@ export class UIKit {
         avenginekit.setup(context, new AVEngineCallbackImpl(context, this.mainNavPathStack));
     }
 
-    isSupportConference() {
+    isSupportConference(): boolean {
         return avenginekit.isSupportConference()
     }
 }

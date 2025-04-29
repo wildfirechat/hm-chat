@@ -26,7 +26,7 @@ export default class BackupExtension extends BackupExtensionAbility {
             // 设置要迁移APK包的包名, 需要替换为需要迁移的APK的，下面为示例
             let apkPackageName = "cn.wildfirechat.chat";
             // 鸿蒙版本包名
-            let hapPackageName = 'cn.wildfirechat.messenger';
+            let hapPackageName = 'cn.wildfirechat.messenger.open';
 
             let ceSourcePath = this.context.backupDir + `restore/${apkPackageName}/ce/`;
 

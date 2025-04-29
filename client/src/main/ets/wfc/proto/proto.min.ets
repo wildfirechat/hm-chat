@@ -2070,11 +2070,9 @@ class WfcImpl {
                     this.sendConversationMessage(message.conversation!, textMessageContent);
                 }
                 let name = latestLogFilePath.substring((latestLogFilePath.lastIndexOf('/') + 1));
-                // todo
-                // fixme
-                // size: require('fs').statSync(latestLogFilePath).size
+                let size = fs.statSync(latestLogFilePath).size
 
-                let mediaMessageContent = new FileMessageContent(latestLogFilePath, '', name, 0)
+                let mediaMessageContent = new FileMessageContent(latestLogFilePath, '', name, size)
                 message.messageContent = mediaMessageContent;
                 message.content = mediaMessageContent.encode();
             }
@@ -2933,13 +2931,10 @@ class WfcImpl {
     }
 
     _getLatestLogFilePath() {
-        // TODO
-        // FIXME
-        // let appPath = this.getAppPath();
-        // const fileNames = require('fs').readdirSync(appPath)
-        // const logFiles = fileNames.filter(fn => fn.endsWith(".xlog")).sort((a, b) => a > b ? 1 : -1)
-        // return logFiles.length > 0 ? appPath + '/' + logFiles[logFiles.length - 1] : null;
-        return ''
+        let appPath = this.getAppPath();
+        const fileNames = fs.listFileSync(appPath)
+        const logFiles = fileNames.filter(fn => fn.endsWith(".xlog")).sort((a, b) => a > b ? 1 : -1)
+        return logFiles.length > 0 ? appPath + '/' + logFiles[logFiles.length - 1] : null;
     }
 
     // 预加载数据

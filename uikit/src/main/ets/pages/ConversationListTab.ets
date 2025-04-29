@@ -92,6 +92,7 @@ export default struct ConversationListTab {
     }
 
     onConnectionStatusChange = (status: number) => {
+        console.log('onConnectionStatusChange', status);
         this.connectionStatus = status
         if (status === ConnectionStatus.ConnectionStatusTokenIncorrect
             || status === ConnectionStatus.ConnectionStatusSecretKeyMismatch

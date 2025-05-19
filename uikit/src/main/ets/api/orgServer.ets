@@ -183,7 +183,7 @@ class OrgServer {
                     readTimeout: 60000, // 可选，默认为60000ms
                     usingProtocol: http.HttpProtocol.HTTP1_1, // 可选，协议类型默认值由系统自动指定
                 }, (err, data) => {
-                if (!err) {
+                if (!err && data.responseCode == 200) {
                     // data.result为HTTP响应内容，可根据业务需要进行解析
                     console.info('Result:' + JSON.stringify(data.result));
                     console.info('code:' + JSON.stringify(data.responseCode));

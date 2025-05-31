@@ -79,6 +79,7 @@ class WfcImpl {
     defaultSilentWhenPCOnline = true;
     doubleNetworkStrategy = 0;
     _connectedToMainNetwork = false;
+    _startLog = false;
     eventEmitter?: common.EventHub;
     context?: common.ApplicationContext;
     uploadingMap: Map<number, request.UploadTask> = new Map();
@@ -389,11 +390,15 @@ class WfcImpl {
     }
 
     startLog() {
-        protoProxy.startLog();
+        if (this.userId) {
+            protoProxy.startLog();
+        }
+        this._startLog = true;
     }
 
     stopLog() {
         protoProxy.stopLog();
+        this._startLog = false;
     }
 
     setLiteMode(liteMode: boolean) {
@@ -428,6 +433,9 @@ class WfcImpl {
         // 超过一周没有活跃，就预加载数据
         if (new Date().getTime() / 1000 - lastActiveTime > 7 * 24 * 60 * 60) {
             self.needPreloadDefaultData = true;
+        }
+        if (this._startLog) {
+            protoProxy.startLog();
         }
         return lastActiveTime;
         // for testing your code
@@ -2930,11 +2938,17 @@ class WfcImpl {
         protoProxy.setSecretMessageBurnStateListener(self.onSecretMessageStartBurningListener, self.onSecretMessageBurnedListener);
     }
 
-    _getLatestLogFilePath() {
+    _getLatestLogFilePath(): string | null {
         let appPath = this.getAppPath();
         const fileNames = fs.listFileSync(appPath)
         const logFiles = fileNames.filter(fn => fn.endsWith(".xlog")).sort((a, b) => a > b ? 1 : -1)
-        return logFiles.length > 0 ? appPath + '/' + logFiles[logFiles.length - 1] : null;
+        let logFilePath = logFiles.length > 0 ? appPath + '/' + logFiles[logFiles.length - 1] : null;
+        if (logFilePath) {
+            let cacheLogFilePath = self.context!.cacheDir + '/' + logFilePath.substring(logFilePath.lastIndexOf('/') + 1);
+            fs.copyFileSync(logFilePath, cacheLogFilePath);
+            return cacheLogFilePath;
+        }
+        return null;
     }
 
     // 预加载数据

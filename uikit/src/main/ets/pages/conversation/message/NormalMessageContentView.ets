@@ -288,14 +288,18 @@ export default struct NormaMessageContentView {
             let readReceipt: ReadReceipt = new ReadReceipt()
             readReceipt.conversationType = ConversationType.Group
 
-            let readCount = 0
+            // sender
+            let readCount = 1
             this.readEntries.forEach(readDt => {
                 if (readDt! >= message.timestamp) {
                     readCount++
                 }
             })
             readReceipt.readCount = readCount
-            let groupMembersJoinBeforeMessage = this.groupMembers.filter(member => member.createDt < message.timestamp)
+            // 未读列表，默认包含消息发送之后，加入的群成员
+            // 如果需要不包含的话，请过滤一下
+            //let groupMembersJoinBeforeMessage = this.groupMembers.filter(member => member.createDt < message.timestamp)
+            let groupMembersJoinBeforeMessage = this.groupMembers
             readReceipt.unreadCount = groupMembersJoinBeforeMessage.length - readCount
             this.readReceipt = readReceipt
         }

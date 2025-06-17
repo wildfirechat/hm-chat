@@ -8,8 +8,8 @@ export default struct OptionItemView {
     @Prop subTitle: string = ''
     @Prop imgUrl: string = ''
     showRightArrow: boolean = true
-    private paddingLeft: number = 10
-    private paddingRight: number = 10
+    paddingLeft: number = 10
+    paddingRight: number = 10
     showDivider: boolean = true
 
     build() {

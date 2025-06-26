@@ -30,17 +30,19 @@ export default struct ArticleMessageContentView {
                 .padding(10)
             if (this.articlesMessageContent().subArticles.length > 0) {
                 ForEach(this.articlesMessageContent().subArticles, (item: Article, index) => {
-                    Column() {
+                    Row() {
+                        Text(this.articlesMessageContent().topArticle?.title)
+                            .maxLines(2)
+                            .layoutWeight(1)
+                            .padding(10)
                         Image(this.articlesMessageContent().topArticle!.cover)
-                            .height(160)
+                            .height(60)
+                            .width(60)
                             .objectFit(ImageFit.CENTER)
                             .borderRadius({
                                 topLeft: 5,
                                 topRight: 5
                             })
-                        Text(this.articlesMessageContent().topArticle?.title)
-                            .maxLines(2)
-                            .padding(10)
                     }
                 }, (item: Article, index) => index + '')
             }

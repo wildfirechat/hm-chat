@@ -25,6 +25,7 @@ import CardMessageContentView from './CardMessageContentView'
 import appServer from '../../../api/appServer'
 import AppServerError from '../../../api/appServerError'
 import GroupMemberType from '@wfc/client/src/main/ets/wfc/model/groupMemberType'
+import ArticleMessageContentView from './ArticlesMessageContentView'
 
 @Component
 export default struct NormaMessageContentView {
@@ -64,6 +65,8 @@ export default struct NormaMessageContentView {
                 ConferenceInviteMessageContentView({ message: $message })
             } else if (this.message.messageContent.type === MessageContentType.UserCard) {
                 CardMessageContentView({ message: $message })
+            } else if (this.message.messageContent.type === MessageContentType.Articles) {
+                ArticleMessageContentView({ message: $message })
             }
             // 自定义消息配置 start
             else if (this.message!.messageContent.type === CustomMessageContentType.MESSAGE_CONTENT_TYPE_CUSTOM_MESSAGE_TEST) {
@@ -249,7 +252,7 @@ export default struct NormaMessageContentView {
         ]
 
         // do filter
-        return menus.filter(item =>!item.filter || item.filter())
+        return menus.filter(item => !item.filter || item.filter())
     }
 
     @Builder

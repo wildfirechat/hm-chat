@@ -65,8 +65,6 @@ export default struct NormaMessageContentView {
                 ConferenceInviteMessageContentView({ message: $message })
             } else if (this.message.messageContent.type === MessageContentType.UserCard) {
                 CardMessageContentView({ message: $message })
-            } else if (this.message.messageContent.type === MessageContentType.Articles) {
-                ArticleMessageContentView({ message: $message })
             }
             // 自定义消息配置 start
             else if (this.message!.messageContent.type === CustomMessageContentType.MESSAGE_CONTENT_TYPE_CUSTOM_MESSAGE_TEST) {

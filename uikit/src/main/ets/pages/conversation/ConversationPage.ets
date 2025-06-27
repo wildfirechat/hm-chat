@@ -38,6 +38,9 @@ import MessageStatus from '@wfc/client/src/main/ets/wfc/messages/messageStatus'
 import RichNotificationMessageContent from '@wfc/client/src/main/ets/wfc/messages/notification/richNotificationMessageContent'
 import RichNotificationMessageContentView from './message/RichNotificationMessageContentView'
 import { window, KeyboardAvoidMode } from '@kit.ArkUI'
+import ArticlesMessageContent from '@wfc/client/src/main/ets/wfc/messages/articlesMessageContent'
+import ArticleMessageContentView from './message/ArticlesMessageContentView'
+import ContextableNotificationMessageContentView from './message/ContextableNotificationMessageContentView'
 
 @Entry
 @Component
@@ -569,6 +572,10 @@ export default struct ConversationPage {
                                                 .width('100%')
                                                 .justifyContent(FlexAlign.Center)
 
+                                                // contextable notificaiton like messages
+                                                // 支持长按菜单的类通知消息，居中显示，不显示发送者，长按支持显示菜单
+                                            } else if (msg.messageContent instanceof ArticlesMessageContent) {
+                                                ContextableNotificationMessageContentView({ message: msg, enableMultiCheck: this.enableMultiCheck })
                                                 // out
                                             } else if (msg.direction === 0) {
                                                 Column() {

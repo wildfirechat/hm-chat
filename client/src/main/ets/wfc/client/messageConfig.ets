@@ -70,6 +70,8 @@ import ModifyGroupSettingNotification from "../messages/notification/modifyGroup
 import MessageContent from '../messages/messageContent';
 import { DEFAULT } from '@ohos/hypium';
 import PCLoginRequestMessageContent from '../messages/pcLoginRequestMessageContent';
+import StreamingTextGeneratingMessageContent from '../messages/streamingTextGeneratingMessageContent';
+import StreamingTextGeneratedMessageContent from '../messages/streamingTextGeneratedMessageContent';
 
 export default class MessageConfig {
     static getMessageContentFlag(type: number) {
@@ -291,6 +293,12 @@ export default class MessageConfig {
                 break
             case MessageContentType.PC_Login_Request:
                 content = new PCLoginRequestMessageContent()
+                break
+            case MessageContentType.Streaming_Text_Generating:
+                content = new StreamingTextGeneratingMessageContent()
+                break
+            case MessageContentType.Streaming_Text_Generated:
+                content = new StreamingTextGeneratedMessageContent()
                 break
             default:
                 content = new UnknownMessageContent()

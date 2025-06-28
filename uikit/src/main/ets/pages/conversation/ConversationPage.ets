@@ -41,6 +41,8 @@ import { window, KeyboardAvoidMode } from '@kit.ArkUI'
 import ArticlesMessageContent from '@wfc/client/src/main/ets/wfc/messages/articlesMessageContent'
 import ArticleMessageContentView from './message/ArticlesMessageContentView'
 import ContextableNotificationMessageContentView from './message/ContextableNotificationMessageContentView'
+import StreamingTextGeneratingMessageContent from '@wfc/client/src/main/ets/wfc/messages/streamingTextGeneratingMessageContent'
+import StreamingTextGeneratedMessageContent from '@wfc/client/src/main/ets/wfc/messages/streamingTextGeneratedMessageContent'
 
 @Entry
 @Component
@@ -338,7 +340,7 @@ export default struct ConversationPage {
     onSendMessage = (message: Message) => {
         let conversation = new Conversation(message.conversation.type, message.conversation.target, message.conversation.line)
         if (this.isDisplayMessage(message) && Conversation.equal(conversation, this.conversation!)) {
-            this.conversationMessageDataSource.appendMessage(message);
+            this.conversationMessageDataSource.appendOrUpdateMessage(message);
             this.scroller.scrollEdge(Edge.Bottom)
         }
     }
@@ -369,7 +371,7 @@ export default struct ConversationPage {
 
         messages.forEach(message => {
             if (this.isDisplayMessage(message) && Conversation.equal(message.conversation, this.conversation!)) {
-                this.conversationMessageDataSource.appendMessage(message);
+                this.conversationMessageDataSource.appendOrUpdateMessage(message);
                 this.scroller.scrollEdge(Edge.Bottom)
             }
         })
@@ -478,7 +480,7 @@ export default struct ConversationPage {
         // type 撤回消息时，会更新 type
         // receipt status： 已读、未读，不支持送达报告
 
-        let key: string = message.messageContent.type + '-' + message.messageId + '-' + message.status
+        let key: string = message.messageContent.type + '-' + message.messageId + '-' + message.status + '-' + message.timestamp
         if (this.enableReceipt && this.readEntries && this.readEntries.size > 0) {
             if (this.conversation!.type === ConversationType.Group) {
                 if (this.enableGroupReceipt) {
@@ -901,9 +903,28 @@ class ConversationMessageDataSource extends BasicDataSource<Message> {
         this.notifyDataReload();
     }
 
-    appendMessage(message: Message) {
-        if (this.messages.findIndex(m => m.messageId === message.messageId) >= 0) {
-            return
+    appendOrUpdateMessage(message: Message) {
+        let index = this.messages.findIndex(m => {
+            if (m.messageId > 0) {
+                return m.messageId === message.messageId
+            } else if (m.messageContent.type === MessageContentType.Streaming_Text_Generating) {
+                let curStreamingTextMessageContent = m.messageContent as StreamingTextGeneratingMessageContent;
+                if (message.messageContent.type === MessageContentType.Streaming_Text_Generating) {
+                    let newStreamingTextMessageContent = message.messageContent as StreamingTextGeneratingMessageContent;
+                    return curStreamingTextMessageContent.streamId === newStreamingTextMessageContent.streamId;
+                } else if (message.messageContent.type === MessageContentType.Streaming_Text_Generated) {
+                    let newStreamingTextMessageContent = message.messageContent as StreamingTextGeneratedMessageContent;
+                    return curStreamingTextMessageContent.streamId === newStreamingTextMessageContent.streamId;
+                } else {
+                    return false;
+                }
+            }
+            return false;
+        });
+        if (index >= 0) {
+            this.messages[index] = message;
+            this.notifyDataChange(index)
+            return;
         }
         this.messages = this.messages.concat(message)
         this.notifyDataReload();

@@ -26,6 +26,7 @@ import appServer from '../../../api/appServer'
 import AppServerError from '../../../api/appServerError'
 import GroupMemberType from '@wfc/client/src/main/ets/wfc/model/groupMemberType'
 import ArticleMessageContentView from './ArticlesMessageContentView'
+import LinkMessageContentView from './LinkMessageContentView'
 
 @Component
 export default struct NormaMessageContentView {
@@ -65,6 +66,8 @@ export default struct NormaMessageContentView {
                 ConferenceInviteMessageContentView({ message: $message })
             } else if (this.message.messageContent.type === MessageContentType.UserCard) {
                 CardMessageContentView({ message: $message })
+            } else if (this.message.messageContent.type === MessageContentType.Link) {
+                LinkMessageContentView({ message: $message })
             }
             // 自定义消息配置 start
             else if (this.message!.messageContent.type === CustomMessageContentType.MESSAGE_CONTENT_TYPE_CUSTOM_MESSAGE_TEST) {

@@ -293,7 +293,7 @@ export default struct ContactListTab {
                                         .height(40)
                                         .borderRadius(4)
                                     Column() {
-                                        Text(groupedUserInfo.userInfo.displayName)
+                                        Text(groupedUserInfo.userInfo.friendAlias ? groupedUserInfo.userInfo.friendAlias : groupedUserInfo.userInfo.displayName)
                                             .maxLines(1)
                                             .padding({ left: 10 })
                                         if (groupedUserInfo.onlineState) {
@@ -325,7 +325,7 @@ export default struct ContactListTab {
                                 .backgroundColor(Color.White)
                             }
                         })
-                    }, (info: UIUserInfo) => info.category + '-' + info.userInfo.uid + '-' + info.userInfo.updateDt)
+                    }, (info: UIUserInfo) => info.category + '-' + info.userInfo.uid + '-' + info.userInfo.updateDt + '-' + info.userInfo.friendAlias)
                 }
                 .divider({
                     strokeWidth: 1,

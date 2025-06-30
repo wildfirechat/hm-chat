@@ -59,7 +59,8 @@ function loadContactAndGroupTask(includeFavUser: boolean): UIUserInfo[] {
     let lastCategory: string = '';
 
     userInfos.forEach(user => {
-        let category: string = pinyin4js.getShortPinyin(user.displayName.substring(0, 1)).toUpperCase() as string
+        let sortName = user.friendAlias ? user.friendAlias : user.displayName;
+        let category: string = pinyin4js.getShortPinyin(sortName.substring(0, 1)).toUpperCase() as string
         if (category < 'A' || category > 'Z') {
             category = '#'
         }
@@ -128,7 +129,8 @@ function groupUserInfoTask(userIds: string[], groupId = ''): UIUserInfo[] {
 
     let userInfos = wfc.getUserInfos(userIds, groupId)
     userInfos.forEach(user => {
-        let category: string = pinyin4js.getShortPinyin(user.displayName.substring(0, 1)).toUpperCase() as string
+        let sortName = groupId ? user.groupAlias : (user.friendAlias ? user.friendAlias : user.displayName);
+        let category: string = pinyin4js.getShortPinyin(sortName.substring(0, 1)).toUpperCase() as string
         if (category < 'A' || category > 'Z') {
             category = '#'
         }

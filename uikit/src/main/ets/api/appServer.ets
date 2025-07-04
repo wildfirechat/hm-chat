@@ -13,6 +13,7 @@ import Message from '@wfc/client/src/main/ets/wfc/messages/message';
 import FavItem from '@wfc/client/src/main/ets/wfc/model/favItem';
 import { stringValue } from '@wfc/client/src/main/ets/wfc/util/longUtil';
 import { parseHostAndPort } from './Util';
+import ConferenceInfo from '@wfc/avenginekit/src/main/ets/wfc/av/model/conferenceInfo';
 
 class AppServer {
     baseUrl = Config.APP_SERVER;
@@ -152,6 +153,23 @@ class AppServer {
 
     delFav(favItemId: number) {
         return this._post('/fav/del/' + favItemId)
+    }
+
+    getMyPrivateConferenceId(): Promise<string> {
+        return this._post('/conference/get_my_id') as Promise<string>
+    }
+
+    createConference(conferenceInfo: ConferenceInfo): Promise<string> {
+        return this._post('/conference/create', conferenceInfo) as Promise<string>
+    }
+
+    async queryConferenceInfo(conferenceId: string, password: string): Promise<ConferenceInfo> {
+        let result = await this._post('/conference/info', { 'conferenceId': conferenceId, 'password': password } as Record<string, Object>)
+        return result as ConferenceInfo
+    }
+
+    destroyConference(conferenceId: string) {
+        return this._post(`/conference/destroy/${conferenceId}`);
     }
 
     _init() {

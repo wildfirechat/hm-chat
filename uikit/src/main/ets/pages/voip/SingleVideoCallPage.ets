@@ -79,7 +79,7 @@ export default struct SingleVideoCallPage {
 
     setupXComponentViews() {
         this.userXComponentMap.forEach((xcomponentId, userId) => {
-            this.callSession?.setUserXComponentId(userId, xcomponentId)
+            this.callSession?.setUserXComponentId(userId!, xcomponentId!)
         })
     }
 

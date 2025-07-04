@@ -1,25 +1,116 @@
+import avenginekitImpl from '@wfc/avenginekit'
 import wfc from '@wfc/client'
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType'
 import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
 import { navigationDestinations } from '../navigationConfig'
+import appServer from '../../api/appServer';
+import ConferenceInfo from '@wfc/avenginekit/src/main/ets/wfc/av/model/conferenceInfo'
 
 @Entry
 @Component
 export default struct ConferencePortalPage {
-    @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
+    @Consume('mainNavPathStack') mainNavPathStack: NavPathStack
 
     aboutToAppear() {
     }
 
     build() {
         NavDestination() {
-            Text('TODO ')
+            Row() {
+                Column() {
+                    Image($r('app.media.av_join_conference'))
+                        .height(60)
+                        .width(60)
+                        .borderRadius(4)
+                    Text('加入会议')
+                        .padding({ top: 5 })
+                }
+                .onClick(() => {
+
+                })
+
+                Column() {
+                    Image($r('app.media.av_start_conference'))
+                        .height(60)
+                        .width(60)
+                        .borderRadius(4)
+                    Text('发起会议')
+                        .padding({ top: 5 })
+                }
+                .onClick(async () => {
+                    let conferenceInfo = new ConferenceInfo();
+                    conferenceInfo.conferenceTitle = 'Test';
+                    conferenceInfo.pin = '123456'
+                    conferenceInfo.owner = wfc.getUserId()
+                    conferenceInfo.startTime = Math.ceil(new Date().getTime() / 1000)
+                    conferenceInfo.endTime = Math.ceil(new Date().getTime() / 1000 + 3600)
+                    let conferenceId = await appServer.createConference(conferenceInfo)
+                    avenginekitImpl.startConference(conferenceId, false, conferenceInfo.pin, wfc.getUserId(), conferenceInfo.conferenceTitle, 'desc', false, false)
+                })
+
+                Column() {
+                    Image($r('app.media.av_book_conference'))
+                        .height(60)
+                        .width(60)
+                        .borderRadius(4)
+                    Text('预定会议')
+                        .padding({ top: 5 })
+                }
+                .onClick(() => {
+
+                })
+            }
+            .width('100%')
+            .padding({ top: 10, bottom: 10 })
+            .justifyContent(FlexAlign.SpaceAround)
+
+            Stack() {
+                List() {
+                    ListItem() {
+                        Row() {
+                            Text('会议 1')
+                        }
+                    }
+
+                    ListItem() {
+                        Row() {
+                            Text('会议 2')
+                        }
+                    }
+
+                    ListItem() {
+                        Row() {
+                            Text('会议 3')
+                        }
+                    }
+
+                    ListItem() {
+                        Row() {
+                            Text('会议 4')
+                        }
+                    }
+
+                    ListItem() {
+                        Row() {
+                            Text('会议 5')
+                        }
+                    }
+
+                }
                 .width('100%')
-                .fontSize(13)
-                .fontColor('#989898')
                 .padding(10)
-                .backgroundColor('#E5E5E5')
+
+                Row() {
+                    Text('会议记录')
+                        .padding({ right: 10 })
+                        .fontColor('#3B62E0')
+                }
+                .width('100%')
+                .justifyContent(FlexAlign.End)
+
+            }
+            .width('100%')
 
         }
         .title('会议')

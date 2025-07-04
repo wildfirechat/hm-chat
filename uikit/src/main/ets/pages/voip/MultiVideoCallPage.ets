@@ -50,7 +50,7 @@ export default struct MultiVideoCallPage {
         for (const p of this.participantProfiles) {
             this.userXComponentMap.set(p.userId, p.userId + this.callSession.callId);
         }
-        this.setupXComponentViews()
+        this.setupInitialXComponentViews()
 
         this.setupSessionCallback()
         console.log('MultiAudioCallPage aboutToAppear')
@@ -71,12 +71,12 @@ export default struct MultiVideoCallPage {
         this.userXComponentMap.set(nextFocusUserId, this.focusXComponentId)
         this.userXComponentMap.set(preFocusUserId, xcomponentId)
 
-        this.setupXComponentViews()
+        this.setupInitialXComponentViews()
     }
 
-    setupXComponentViews() {
+    setupInitialXComponentViews() {
         this.userXComponentMap.forEach((xcomponentId, userId) => {
-            this.callSession?.setUserXComponentId(userId, xcomponentId)
+            this.callSession?.setUserXComponentId(userId!, xcomponentId!)
         })
     }
 
@@ -158,6 +158,8 @@ export default struct MultiVideoCallPage {
         sessionCallback.didParticipantJoined = (userId: string, isScreenSharing) => {
             this.targetUserInfos = wfc.getUserInfos(this.callSession!.getParticipantIds()!)
             this.participantProfiles = this.callSession?.getParticipantProfiles();
+
+            this.callSession?.setUserXComponentId(userId!, userId + this.callSession.callId)
         }
         sessionCallback.didParticipantLeft = (userId: string, callEndReason: number, screenSharing = false) => {
             this.targetUserInfos = wfc.getUserInfos(this.callSession?.getParticipantIds()!)

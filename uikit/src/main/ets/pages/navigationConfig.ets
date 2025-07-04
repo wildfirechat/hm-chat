@@ -43,6 +43,8 @@ import GroupMemberListPage from './group/GroupMemberListPage'
 import ChatroomConversationInfoPage from './conversation/ChatroomConversationInfoPage'
 import FileRecordPage from './me/FileRecordPage'
 import ConferenceInfoPage from './voip/ConferenceInfoPage'
+import ConferencePortalPage from './voip/ConferencePortalPage'
+import ConferencePage from './voip/ConferencePage'
 
 export class navigationDestinations {
     static SearchPortalPage = 'searchPortalPage'
@@ -89,9 +91,11 @@ export class navigationDestinations {
     static SingleVideoCallPage = 'singleVideoCallPage'
     static MultiAudioCallPage = 'multiAudioCallPage'
     static MultiVideoCallPage = 'multiVideoCallPage'
+    static ConferencePage = 'conferencePage'
     static GroupMemberPermissionPage = 'groupMemberPermissionPage'
     static GroupMemberListPage = 'groupMemberListPage'
     static ConferenceInfoPage = 'conferenceInfoPage'
+    static ConferencePortalPage = 'conferencePortalPage'
 }
 
 @Builder
@@ -172,6 +176,10 @@ export function UIKitPageMap(name: string) {
         PCSessionPage()
     } else if (name === navigationDestinations.UpdateUserNickNameOrAliasPage) {
         UpdateUserNickNameOrAliasPage()
+    } else if (name === navigationDestinations.GroupMemberPermissionPage) {
+        GroupMemberPermissionPage()
+    } else if (name === navigationDestinations.GroupMemberListPage) {
+        GroupMemberListPage()
     } else if (name === navigationDestinations.SingleVideoCallPage) {
         SingleVideoCallPage()
     } else if (name === navigationDestinations.SingleAudioCallPage) {
@@ -180,11 +188,11 @@ export function UIKitPageMap(name: string) {
         MultiAudioCallPage()
     } else if (name === navigationDestinations.MultiVideoCallPage) {
         MultiVideoCallPage()
-    } else if (name === navigationDestinations.GroupMemberPermissionPage) {
-        GroupMemberPermissionPage()
-    } else if (name === navigationDestinations.GroupMemberListPage) {
-        GroupMemberListPage()
+    } else if (name === navigationDestinations.ConferencePortalPage) {
+        ConferencePortalPage()
     } else if (name === navigationDestinations.ConferenceInfoPage) {
         ConferenceInfoPage()
+    } else if (name === navigationDestinations.ConferencePage) {
+        ConferencePage()
     }
 }

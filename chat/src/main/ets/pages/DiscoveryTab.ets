@@ -3,6 +3,7 @@ import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType'
 import { navigationDestinations } from '@wfc/uikit/src/main/ets/pages/navigationConfig'
 import BuildProfile from 'BuildProfile'
+import uikit from '@wfc/uikit'
 
 @Preview
 @Component
@@ -99,6 +100,36 @@ export default struct DiscoveryTab {
                             this.mainNavPathStack.pushPathByName(navigationDestinations.ConversationPage, {
                                 'conversation': conversation
                             } as Record<string, Object>)
+                        })
+                        .padding({ left: 10, right: 10 })
+                        .width('100%')
+                        .height(56)
+                    }
+                    .stateStyles({
+                        pressed: {
+                            .backgroundColor('#E5E5E5')
+                        },
+                        normal: {
+                            .backgroundColor(Color.White)
+                        }
+                    })
+
+                    ListItem() {
+                        Row() {
+                            Image($r('app.media.ic_conference'))
+                                .width(20)
+                                .height(20)
+                                .objectFit(ImageFit.Contain)
+                            Text('会议')
+                                .padding({ left: 10 })
+                        }
+                        .onClick(() => {
+                            if (uikit.isSupportConference()) {
+                                this.mainNavPathStack.pushPathByName(navigationDestinations.ConferencePortalPage, {} as Record<string, Object>)
+                            } else {
+                                showToast('不支持音视频会议')
+                                this.mainNavPathStack.pushPathByName(navigationDestinations.ConferencePortalPage, {} as Record<string, Object>)
+                            }
                         })
                         .padding({ left: 10, right: 10 })
                         .width('100%')

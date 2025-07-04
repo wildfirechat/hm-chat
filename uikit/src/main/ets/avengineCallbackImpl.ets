@@ -78,6 +78,14 @@ export default class AVEngineCallbackImpl extends AVEngineCallback {
         this.mainNavPathStack?.pushPathByName(name, {} as Record<string, object>)
     }
 
+    /**
+     *  加入会议
+     * @param session 会话信息
+     */
+    onJoinConference(session: CallSession) {
+        this.mainNavPathStack?.pushPathByName(navigationDestinations.ConferencePage, {} as Record<string, object>)
+    }
+
     shouldStartRing(isIncoming: boolean) {
         // TODO
     }

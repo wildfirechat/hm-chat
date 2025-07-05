@@ -69,7 +69,7 @@ export default struct StartConferencePage {
                         desc: this.conferenceInfo ? new Date(this.conferenceInfo!.endTime * 1000).toString() : '',
                         paddingLeft: 20,
                         showDivider: false,
-                        showRightArrow: false
+                        showRightArrow: true
                     })
                         .onClick(() => {
                             TimePickerDialog.show({

@@ -6,11 +6,13 @@ import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
 import { navigationDestinations } from '../navigationConfig'
 import appServer from '../../api/appServer';
 import ConferenceInfo from '@wfc/avenginekit/src/main/ets/wfc/av/model/conferenceInfo'
+import JoinConferenceDialog from './JoinConferenceDialog'
 
 @Entry
 @Component
 export default struct ConferencePortalPage {
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack
+    private joinConferenceDialogController?: CustomDialogController
 
     aboutToAppear() {
     }
@@ -27,7 +29,13 @@ export default struct ConferencePortalPage {
                         .padding({ top: 5 })
                 }
                 .onClick(() => {
-
+                    this.joinConferenceDialogController = new CustomDialogController({
+                        builder: JoinConferenceDialog({
+                            controller: this.joinConferenceDialogController,
+                        }),
+                        alignment: DialogAlignment.Center,
+                    })
+                    this.joinConferenceDialogController.open()
                 })
 
                 Column() {

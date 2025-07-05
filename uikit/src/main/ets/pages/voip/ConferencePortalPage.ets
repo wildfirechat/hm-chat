@@ -39,14 +39,16 @@ export default struct ConferencePortalPage {
                         .padding({ top: 5 })
                 }
                 .onClick(async () => {
-                    let conferenceInfo = new ConferenceInfo();
-                    conferenceInfo.conferenceTitle = 'Test';
-                    conferenceInfo.pin = '123456'
-                    conferenceInfo.owner = wfc.getUserId()
-                    conferenceInfo.startTime = Math.ceil(new Date().getTime() / 1000)
-                    conferenceInfo.endTime = Math.ceil(new Date().getTime() / 1000 + 3600)
-                    let conferenceId = await appServer.createConference(conferenceInfo)
-                    avenginekitImpl.startConference(conferenceId, false, conferenceInfo.pin, wfc.getUserId(), conferenceInfo.conferenceTitle, 'desc', false, false)
+                    // let conferenceInfo = new ConferenceInfo();
+                    // conferenceInfo.conferenceTitle = 'Test';
+                    // conferenceInfo.pin = '123456'
+                    // conferenceInfo.owner = wfc.getUserId()
+                    // conferenceInfo.startTime = Math.ceil(new Date().getTime() / 1000)
+                    // conferenceInfo.endTime = Math.ceil(new Date().getTime() / 1000 + 3600)
+                    // let conferenceId = await appServer.createConference(conferenceInfo)
+                    // avenginekitImpl.startConference(conferenceId, false, conferenceInfo.pin, wfc.getUserId(), conferenceInfo.conferenceTitle, 'desc', false, false)
+                    this.mainNavPathStack.pushPathByName(navigationDestinations.StartConferencePage, {} as Record<string, Object>)
+
                 })
 
                 Column() {

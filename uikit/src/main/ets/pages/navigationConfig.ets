@@ -45,6 +45,7 @@ import FileRecordPage from './me/FileRecordPage'
 import ConferenceInfoPage from './voip/ConferenceInfoPage'
 import ConferencePortalPage from './voip/ConferencePortalPage'
 import ConferencePage from './voip/ConferencePage'
+import StartConferencePage from './voip/StartConferencePage'
 
 export class navigationDestinations {
     static SearchPortalPage = 'searchPortalPage'
@@ -96,6 +97,7 @@ export class navigationDestinations {
     static GroupMemberListPage = 'groupMemberListPage'
     static ConferenceInfoPage = 'conferenceInfoPage'
     static ConferencePortalPage = 'conferencePortalPage'
+    static StartConferencePage = 'startConferencePage'
 }
 
 @Builder
@@ -194,5 +196,7 @@ export function UIKitPageMap(name: string) {
         ConferenceInfoPage()
     } else if (name === navigationDestinations.ConferencePage) {
         ConferencePage()
+    } else if (name === navigationDestinations.StartConferencePage) {
+        StartConferencePage()
     }
 }

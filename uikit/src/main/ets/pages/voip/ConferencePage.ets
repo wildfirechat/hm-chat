@@ -155,7 +155,7 @@ export default struct ConferencePage {
             }
             this.mainNavPathStack.pop()
         }
-        sessionCallback.didParticipantJoined = (userId: string, isScreenSharing: boolean) => {
+        sessionCallback.didParticipantJoined = (userId: string, isScreenSharing?: boolean) => {
             this.targetUserInfos = wfc.getUserInfos(this.callSession!.getParticipantIds()!)
             this.participantProfiles = this.callSession?.getParticipantProfiles();
 
@@ -165,7 +165,7 @@ export default struct ConferencePage {
             this.targetUserInfos = wfc.getUserInfos(this.callSession?.getParticipantIds()!)
             this.participantProfiles = this.callSession?.getParticipantProfiles();
         }
-        sessionCallback.didParticipantConnected = (userId: string, isScreenSharing: boolean) => {
+        sessionCallback.didParticipantConnected = (userId: string, isScreenSharing?: boolean) => {
             this.targetUserInfos = wfc.getUserInfos(this.callSession?.getParticipantIds()!)
             this.participantProfiles = this.callSession?.getParticipantProfiles();
         }

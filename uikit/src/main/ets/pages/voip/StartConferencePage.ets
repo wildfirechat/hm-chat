@@ -1,12 +1,13 @@
 import OptionItemView from "../../view/OptionItemView";
 import ToggleItemView from "../../view/ToggleItemView";
 import ConferenceInfo from "@wfc/avenginekit/src/main/ets/wfc/av/model/conferenceInfo";
-import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
-import ConferenceInviteMessageContent from '@wfc/client/src/main/ets/wfc/av/messages/conferenceInviteMessageContent'
 import avengineKit from '@wfc/avenginekit'
 import appServer from '../../api/appServer';
 import { faceDetector } from "@kit.CoreVisionKit";
+import { showToast } from "../../common/utils/Toast";
+import wfc from "@wfc/client";
+import ConferencePasswordDialog from "./ConferencePasswordDialog";
 
 @Component
 export default struct StartConferencePage {
@@ -15,16 +16,15 @@ export default struct StartConferencePage {
     @State muteVideo: boolean = false
     @State muteAudio: boolean = false
     @State hostUserInfo: UserInfo | undefined = undefined
-    @State enableAudio: boolean = true;
-    @State enableVideo: boolean = false;
-    private conferenceInviteContent ?: ConferenceInviteMessageContent
+    @State endTime: number = new Date().getTime();
+    @State modeSwitch: boolean = false
+    @State audienceSwitch: boolean = false
+    @State passwordSwitch: boolean = false
+    @State advancedSwitch: boolean = false
+    @State password: string = ''
+    private conferencePasswordDialogController?: CustomDialogController
 
     async aboutToAppear() {
-        let params = this.mainNavPathStack.getParamByIndex(this.mainNavPathStack.size() - 1) as Record<string, Object>;
-        let conferenceInviteMessage = params['message'] as Message;
-        this.conferenceInviteContent = conferenceInviteMessage.messageContent as ConferenceInviteMessageContent;
-
-        this.conferenceInfo = await appServer.queryConferenceInfo(this.conferenceInviteContent.callId, this.conferenceInviteContent.password)
     }
 
     build() {
@@ -66,7 +66,7 @@ export default struct StartConferencePage {
                     })
                     OptionItemView({
                         title: '结束时间',
-                        desc: this.conferenceInfo ? new Date(this.conferenceInfo!.endTime * 1000).toString() : '',
+                        desc: this.endTime + '',
                         paddingLeft: 20,
                         showDivider: false,
                         showRightArrow: true
@@ -83,7 +83,7 @@ export default struct StartConferencePage {
                 Column() {
                     ToggleItemView({
                         title: '参与者开启摄像头、麦克风入会',
-                        isOn: this.enableVideo,
+                        isOn: this.audienceSwitch,
                         showDivider: true,
                         paddingLeft: 20,
                         onChange: value => {
@@ -92,7 +92,7 @@ export default struct StartConferencePage {
                     })
                     ToggleItemView({
                         title: '允许参与者自主开启摄像头、麦克风',
-                        isOn: this.enableAudio,
+                        isOn: this.modeSwitch,
                         paddingLeft: 20,
                         onChange: value => {
 
@@ -106,11 +106,28 @@ export default struct StartConferencePage {
                 Column() {
                     ToggleItemView({
                         title: '启用会议密码',
-                        isOn: this.enableVideo,
+                        desc: this.password,
+                        isOn: this.passwordSwitch,
                         showDivider: true,
                         paddingLeft: 20,
                         onChange: value => {
-
+                            if (value) {
+                                this.conferencePasswordDialogController = new CustomDialogController({
+                                    builder: ConferencePasswordDialog({
+                                        controller: this.conferencePasswordDialogController,
+                                        onConfirm: (password: string) => {
+                                            this.password = password;
+                                            showToast('TODO ' + password)
+                                        }
+                                    }),
+                                    cancel: () => {
+                                        this.passwordSwitch = false
+                                    }
+                                })
+                                this.conferencePasswordDialogController.open()
+                            } else {
+                                this.password = ''
+                            }
                         }
                     })
                 }
@@ -121,7 +138,7 @@ export default struct StartConferencePage {
                     ToggleItemView({
                         title: '大规模会议',
                         desc: '参会人数大于 50 人',
-                        isOn: this.enableVideo,
+                        isOn: this.advancedSwitch,
                         showDivider: false,
                         paddingLeft: 20,
                         onChange: value => {
@@ -139,8 +156,29 @@ export default struct StartConferencePage {
                         .borderRadius(4)
                         .width('50%')
                         .onClick(() => {
-                            let inviteContent = this.conferenceInviteContent!;
-                            avengineKit.joinConference(inviteContent.callId, inviteContent.audioOnly, inviteContent.pin, inviteContent.host, inviteContent.title, inviteContent.desc, false, inviteContent.advanced, false, false, '', '')
+                            // ConferenceInfo info = new ConferenceInfo();
+                            // Toast.makeText(this, R.string.conference_creating, Toast.LENGTH_SHORT).show();
+                            // info.setPassword(password);
+                            // info.setConferenceTitle(titleEditText.getText().toString());
+                            // Random random = new Random();
+                            // String pin = String.format("%d%d%d%d", random.nextInt() % 10, random.nextInt() % 10, random.nextInt() % 10, random.nextInt() % 10);
+                            // info.setPin(pin);
+                            //
+                            // info.setOwner(ChatManager.Instance().getUserId());
+                            // info.setStartTime(System.currentTimeMillis() / 1000);
+                            // info.setEndTime(endDateTime.getTime() / 1000);
+                            // info.setAudience(!audienceSwitch.isChecked());
+                            // info.setAllowTurnOnMic(modeSwitch.isChecked());
+                            // info.setAdvance(advancedSwitch.isChecked());
+                            // // 可根据实际情况调整
+                            // info.setMaxParticipants(20);
+                            //
+                            let conference = new ConferenceInfo();
+                            conference.owner = wfc.getUserId()
+                            conference.startTime = new Date().getTime();
+                            //avengineKit.joinConference(inviteContent.callId, inviteContent.audioOnly, inviteContent.pin, inviteContent.host, inviteContent.title, inviteContent.desc, false, inviteContent.advanced, false, false, '', '')
+                            // appServer.createConference()
+                            showToast('TODO')
                         })
                 }
                 .width('100%')

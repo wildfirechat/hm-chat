@@ -3,12 +3,12 @@ import { Core } from "@ohos/hypium"
 @Preview
 @Component
 export default struct ToggleItemView {
-    desc?: string = ''
     title: string = '测试标题'
     paddingLeft: number = 10
     paddingRight: number = 10
     showDivider: boolean = false
     @Prop isOn: boolean = false
+    @Prop desc?: string = ''
     onChange?: (isOn: boolean) => void = undefined
 
     build() {

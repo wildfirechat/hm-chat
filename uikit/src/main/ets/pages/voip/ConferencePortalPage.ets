@@ -7,6 +7,7 @@ import { navigationDestinations } from '../navigationConfig'
 import appServer from '../../api/appServer';
 import ConferenceInfo from '@wfc/avenginekit/src/main/ets/wfc/av/model/conferenceInfo'
 import JoinConferenceDialog from './JoinConferenceDialog'
+import { showToast } from '../../common/utils/Toast'
 
 @Entry
 @Component
@@ -32,6 +33,9 @@ export default struct ConferencePortalPage {
                     this.joinConferenceDialogController = new CustomDialogController({
                         builder: JoinConferenceDialog({
                             controller: this.joinConferenceDialogController,
+                            onConfirm: (conferenceId: string, password: string) => {
+                                showToast('TODO ' + conferenceId + ' ' + password)
+                            }
                         }),
                         alignment: DialogAlignment.Center,
                     })
@@ -68,7 +72,7 @@ export default struct ConferencePortalPage {
                         .padding({ top: 5 })
                 }
                 .onClick(() => {
-
+                    showToast('TODO')
                 })
             }
             .width('100%')

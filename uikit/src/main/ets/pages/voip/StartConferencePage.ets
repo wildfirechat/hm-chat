@@ -12,10 +12,7 @@ import ConferencePasswordDialog from "./ConferencePasswordDialog";
 @Component
 export default struct StartConferencePage {
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
-    @State conferenceInfo: ConferenceInfo | undefined = undefined
-    @State muteVideo: boolean = false
-    @State muteAudio: boolean = false
-    @State hostUserInfo: UserInfo | undefined = undefined
+    @State title: string = ''
     @State endTime: number = new Date().getTime();
     @State modeSwitch: boolean = false
     @State audienceSwitch: boolean = false
@@ -25,6 +22,7 @@ export default struct StartConferencePage {
     private conferencePasswordDialogController?: CustomDialogController
 
     async aboutToAppear() {
+        this.title = wfc.getUserInfo(wfc.getUserId()).displayName + ' 发起的会议'
     }
 
     build() {
@@ -32,7 +30,7 @@ export default struct StartConferencePage {
             Column() {
                 Column() {
                     Text('会议主题')
-                    TextInput()
+                    TextInput({ text: this.title })
                         .borderRadius(0)
                         .backgroundColor(Color.White)
                         .border({ color: Color.Black })
@@ -45,6 +43,9 @@ export default struct StartConferencePage {
                         .maxLines(1)
                         .maxLength(50)
                         .padding({ left: 0, right: 0 })
+                        .onChange(value => {
+                            this.title = value;
+                        })
                 }
                 .alignItems(HorizontalAlign.Start)
                 .padding({
@@ -87,6 +88,7 @@ export default struct StartConferencePage {
                         showDivider: true,
                         paddingLeft: 20,
                         onChange: value => {
+                            this.audienceSwitch = value;
 
                         }
                     })
@@ -95,7 +97,7 @@ export default struct StartConferencePage {
                         isOn: this.modeSwitch,
                         paddingLeft: 20,
                         onChange: value => {
-
+                            this.modeSwitch = value;
                         }
                     })
                 }
@@ -142,6 +144,7 @@ export default struct StartConferencePage {
                         showDivider: false,
                         paddingLeft: 20,
                         onChange: value => {
+                            this.advancedSwitch = value;
                         }
                     })
                 }
@@ -156,6 +159,10 @@ export default struct StartConferencePage {
                         .borderRadius(4)
                         .width('50%')
                         .onClick(() => {
+                            if (this.title.trim().length === 0) {
+                                showToast('请输入会议主题')
+                                return
+                            }
                             // ConferenceInfo info = new ConferenceInfo();
                             // Toast.makeText(this, R.string.conference_creating, Toast.LENGTH_SHORT).show();
                             // info.setPassword(password);
@@ -173,12 +180,24 @@ export default struct StartConferencePage {
                             // // 可根据实际情况调整
                             // info.setMaxParticipants(20);
                             //
-                            let conference = new ConferenceInfo();
-                            conference.owner = wfc.getUserId()
-                            conference.startTime = new Date().getTime();
-                            //avengineKit.joinConference(inviteContent.callId, inviteContent.audioOnly, inviteContent.pin, inviteContent.host, inviteContent.title, inviteContent.desc, false, inviteContent.advanced, false, false, '', '')
-                            // appServer.createConference()
-                            showToast('TODO')
+                            let info = new ConferenceInfo();
+                            info.password = this.passwordSwitch ? this.password : ''
+                            info.conferenceTitle = this.title;
+                            info.pin = `${Math.floor(Math.random() * 10)}${Math.floor(Math.random() * 10)}${Math.floor(Math.random() * 10)}${Math.floor(Math.random() * 10)}`
+                            info.owner = wfc.getUserId()
+                            info.startTime = Math.ceil(new Date().getTime() / 1000);
+                            info.startTime = Math.ceil(this.endTime / 1000);
+                            info.audience = this.audienceSwitch;
+                            info.allowSwitchMode = this.modeSwitch;
+                            info.advance = this.advancedSwitch;
+                            appServer.createConference(info)
+                                .then(conferenceId => {
+                                    avengineKit.joinConference(conferenceId, false, info.pin, info.owner, info.conferenceTitle, '', false, info.advance, false, false, '', '')
+                                })
+                                .catch((reason: Error) => {
+                                    showToast('发起会议失败 ' + reason);
+                                })
+
                         })
                 }
                 .width('100%')

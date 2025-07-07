@@ -54,8 +54,9 @@ export default struct ConferenceInviteMessageContentView {
         }
         .onClick(() => {
             this.mainNavPathStack.pushPathByName(navigationDestinations.ConferenceInfoPage, {
-                'message': this.message
-            } as Record<string, object>)
+                'conferenceId': this.conferenceInviteMessageContent().callId,
+                'password': this.conferenceInviteMessageContent().password
+            } as Record<string, string>)
         })
         .width(200)
         .alignItems(HorizontalAlign.Start)

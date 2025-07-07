@@ -1,29 +1,40 @@
 import OptionItemView from "../../view/OptionItemView";
 import ToggleItemView from "../../view/ToggleItemView";
 import ConferenceInfo from "@wfc/avenginekit/src/main/ets/wfc/av/model/conferenceInfo";
-import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
-import ConferenceInviteMessageContent from '@wfc/client/src/main/ets/wfc/av/messages/conferenceInviteMessageContent'
 import avengineKit from '@wfc/avenginekit'
 import appServer from '../../api/appServer';
+import { showToast } from "../../common/utils/Toast";
+import wfc from "@wfc/client";
 
 @Component
 export default struct ConferenceInfoPage {
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
     @State conferenceInfo: ConferenceInfo | undefined = undefined
-    @State muteVideo: boolean = false
-    @State muteAudio: boolean = false
-    @State hostUserInfo: UserInfo | undefined = undefined
     @State enableAudio: boolean = true;
     @State enableVideo: boolean = false;
-    private conferenceInviteContent ?: ConferenceInviteMessageContent
+    @State ownerUserInfo: UserInfo | undefined = undefined
+    @State expired: boolean = false
 
-    async aboutToAppear() {
+    aboutToAppear() {
         let params = this.mainNavPathStack.getParamByIndex(this.mainNavPathStack.size() - 1) as Record<string, Object>;
-        let conferenceInviteMessage = params['message'] as Message;
-        this.conferenceInviteContent = conferenceInviteMessage.messageContent as ConferenceInviteMessageContent;
+        let conferenceId = params['conferenceId'] as string;
+        let password = params['password'] as string;
 
-        this.conferenceInfo = await appServer.queryConferenceInfo(this.conferenceInviteContent.callId, this.conferenceInviteContent.password)
+        appServer.queryConferenceInfo(conferenceId, password)
+            .then(conferenceInfo => {
+                this.conferenceInfo = conferenceInfo;
+                this.expired = this.conferenceInfo.endTime * 1000 < new Date().getTime()
+                wfc.getUserInfoEx(conferenceInfo.owner, false, userInfo => {
+                    this.ownerUserInfo = userInfo
+                }, err => {
+
+                })
+            })
+            .catch((e: Error) => {
+                showToast('获取会议详情失败 ' + e)
+                this.mainNavPathStack.pop()
+            })
     }
 
     build() {
@@ -32,7 +43,7 @@ export default struct ConferenceInfoPage {
                 Column() {
                     OptionItemView({
                         title: '会议主题',
-                        desc: this.conferenceInviteContent?.title,
+                        desc: this.conferenceInfo?.conferenceTitle,
                         paddingLeft: 20,
                         showDivider: true,
                         showRightArrow: false
@@ -40,7 +51,7 @@ export default struct ConferenceInfoPage {
 
                     OptionItemView({
                         title: '发起人',
-                        desc: this.conferenceInfo?.owner,
+                        desc: this.ownerUserInfo?.displayName,
                         paddingLeft: 20,
                         showDivider: true,
                         showRightArrow: false
@@ -106,14 +117,14 @@ export default struct ConferenceInfoPage {
                 .backgroundColor(Color.White)
 
                 Column() {
-                    Button('加入会议')
-                        .enabled(true)
+                    Button(this.expired ? '会议已过期' : '加入会议')
+                        .enabled(!this.expired)
                         .type(ButtonType.Normal)
                         .borderRadius(4)
                         .width('50%')
                         .onClick(() => {
-                            let inviteContent = this.conferenceInviteContent!;
-                            avengineKit.joinConference(inviteContent.callId, inviteContent.audioOnly, inviteContent.pin, inviteContent.host, inviteContent.title, inviteContent.desc, false, inviteContent.advanced, false, false, '', '')
+                            let info = this.conferenceInfo
+                            avengineKit.joinConference(info?.conferenceId, false, info?.pin, info?.owner, info?.conferenceTitle, '', false, info?.advance, false, false, '', '')
                         })
                 }
                 .width('100%')

@@ -34,7 +34,10 @@ export default struct ConferencePortalPage {
                         builder: JoinConferenceDialog({
                             controller: this.joinConferenceDialogController,
                             onConfirm: (conferenceId: string, password: string) => {
-                                showToast('TODO ' + conferenceId + ' ' + password)
+                                this.mainNavPathStack.pushPathByName(navigationDestinations.ConferenceInfoPage, {
+                                    'conferenceId': conferenceId,
+                                    'password': password
+                                } as Record<string, string>)
                             }
                         }),
                         alignment: DialogAlignment.Center,

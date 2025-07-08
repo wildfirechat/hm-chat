@@ -10,6 +10,9 @@ import PickGroupMemberModal from '../group/PickGroupMemberModal'
 import { HashMap } from '@kit.ArkTS'
 import { timestampFormat } from '../../util/helper'
 import { window } from '@kit.ArkUI'
+import ConferenceInfo from '@wfc/avenginekit/src/main/ets/wfc/av/model/conferenceInfo'
+import { showToast } from '../../common/utils/Toast'
+import { WHITE_FILTER } from '../../api/Util'
 
 @Component
 export default struct ConferencePage {
@@ -28,6 +31,7 @@ export default struct ConferencePage {
     private focusXComponentId: string = ''
     private lastTriggerToShowActionAndDurationViewTimestamp: number = 0
     private updateActionAndDurationViewInterval = 0
+    private conferenceInfo?: ConferenceInfo
 
     aboutToAppear(): void {
         let callSession = avengineKit.getCurrentSession();
@@ -242,96 +246,79 @@ export default struct ConferencePage {
         Column() {
             // top actions
             Row() {
-                Image($r('app.media.av_minimize'))
+                AVCastPicker({ normalColor: Color.White, activeColor: Color.White })
+                    .width(50)
+                    .height(50)
+                    .padding({ left: 10, right: 10 })
+                    .border({ width: 1, radius: 4, color: Color.White })
+
+                Image($r('app.media.av_conference_switch_camera'))
                     .draggable(false)
                     .width(50)
                     .height(50)
-                    .padding(10)
+                    .colorFilter(WHITE_FILTER)
+                    .objectFit(ImageFit.Contain)
+                    .padding({ left: 10, right: 10 })
                     .onClick(async () => {
                         // TODO
                     })
 
-                Text(this.durationStr)
-                    .fontColor(Color.White)
-                    .textAlign(TextAlign.Center)
-                    .alignSelf(ItemAlign.Center)
+                Column() {
+                    Text('会议标题')
+                        .fontColor(Color.White)
+                        .textAlign(TextAlign.Center)
+                        .alignSelf(ItemAlign.Center)
+                    Text(this.durationStr)
+                        .fontColor(Color.White)
+                        .textAlign(TextAlign.Center)
+                        .alignSelf(ItemAlign.Center)
+                }
+                .layoutWeight(1)
 
-                Image($r('app.media.ic_tab_add'))
-                    .fillColor(Color.Red)
+                Image($r('app.media.av_conference_hangup'))
                     .draggable(false)
+                    .clickEffect({ level: ClickEffectLevel.MIDDLE })
                     .width(50)
                     .height(50)
-                    .padding(10)
+                    .objectFit(ImageFit.Contain)
+                    .padding({ left: 10, right: 10 })
+                    .margin({ right: 10 })
                     .onClick(() => {
-                        this.showPickGroupMemberModal = true;
+                        this.callSession?.hangup()
                     })
-                    .bindContentCover(this.showPickGroupMemberModal, this.pickGroupMemberModal(), {
-                        modalTransition: ModalTransition.DEFAULT,
-                        onAppear: () => {
-                        },
-
-                        onDisappear: () => {
-                            this.showPickGroupMemberModal = false
-                        }
-                    })
+                // Image($r('app.media.ic_tab_add'))
+                //     .fillColor(Color.Red)
+                //     .draggable(false)
+                //     .width(50)
+                //     .height(50)
+                //     .padding(10)
+                //     .onClick(() => {
+                //         this.showPickGroupMemberModal = true;
+                //     })
+                //     .bindContentCover(this.showPickGroupMemberModal, this.pickGroupMemberModal(), {
+                //         modalTransition: ModalTransition.DEFAULT,
+                //         onAppear: () => {
+                //         },
+                //
+                //         onDisappear: () => {
+                //             this.showPickGroupMemberModal = false
+                //         }
+                //     })
             }
             .justifyContent(FlexAlign.SpaceBetween)
             .width('100%')
             .margin({ top: this.statusBarHeight })
 
             // bottom actions
-            if (this.callSession!.status === CallState.STATUS_INCOMING || this.callSession!.status === CallState.STATUS_OUTGOING) {
+            if (this.callSession!.status === CallState.STATUS_CONNECTED) {
                 Column() {
                     Row() {
                         Column() {
-                            Image($r('app.media.av_hang_up'))
+                            Image(this.callSession?.audioMuted ? $r('app.media.av_conference_audio_mute') : $r('app.media.av_conference_audio'))
                                 .draggable(false)
-                                .clickEffect({ level: ClickEffectLevel.MIDDLE })
-                                .width(60)
-                                .height(60)
-                                .onClick(() => {
-                                    this.callSession?.hangup()
-                                })
-                            Text('挂断')
-                                .margin({ top: 10 })
-                                .fontSize(13)
-                                .fontColor(Color.White)
-                        }
-
-                        if (this.callSession?.status === CallState.STATUS_INCOMING) {
-                            Column() {
-                                Image($r('app.media.av_voice_answer'))
-                                    .draggable(false)
-                                    .width(60)
-                                    .height(60)
-                                    .clickEffect({ level: ClickEffectLevel.LIGHT })
-                                    .onClick(() => {
-                                        this.callSession?.call()
-                                    })
-                                Text('接听')
-                                    .margin({ top: 10 })
-                                    .fontSize(13)
-                                    .fontColor(Color.White)
-                            }
-                        }
-                    }
-                    .padding({ top: 20 })
-                    .width('100%')
-                    .justifyContent(FlexAlign.SpaceAround)
-
-                }
-                .width('100%')
-                .margin({ bottom: 30 })
-                .flexGrow(1)
-                .justifyContent(FlexAlign.End)
-            } else {
-                Column() {
-                    Row() {
-                        Column() {
-                            Image(this.callSession?.audioMuted ? $r('app.media.av_mute_hover') : $r('app.media.av_mute'))
-                                .draggable(false)
-                                .width(60)
-                                .height(60)
+                                .width(30)
+                                .height(30)
+                                .colorFilter(WHITE_FILTER)
                                 .onClick(() => {
                                     if (this.callSession?.status === CallState.STATUS_CONNECTED) {
                                         this.callSession?.muteAudio(!this.callSession?.audioMuted)
@@ -344,35 +331,60 @@ export default struct ConferencePage {
                         }
 
                         Column() {
-                            Image($r('app.media.av_hang_up'))
+                            Image($r('app.media.av_conference_video'))
                                 .draggable(false)
-                                .width(60)
-                                .height(60)
+                                .width(30)
+                                .height(30)
+                                .colorFilter(WHITE_FILTER)
                                 .onClick(() => {
-                                    this.callSession?.hangup()
+                                    // TODO
                                 })
-                            Text('挂断')
+                            Text('视频')
                                 .margin({ top: 10 })
                                 .fontSize(13)
                                 .fontColor(Color.White)
                         }
 
                         Column() {
-                            // Image($r('app.media.av_handfree'))
-                            //     .draggable(false)
-                            //     .width(60)
-                            //     .height(60)
-                            //     .onClick(() => {
-                            //         if (this.callSession?.status === CallState.STATUS_CONNECTED) {
-                            //             // TODO
-                            //         }
-                            //     })
-                            AVCastPicker({ normalColor: Color.White, activeColor: Color.White })
-                                .width(60)
-                                .height(60)
-                                .border({ width: 1, radius: 30, color: Color.White })
+                            Image($r('app.media.av_conference_screen_sharing'))
+                                .draggable(false)
+                                .width(30)
+                                .height(30)
+                                .colorFilter(WHITE_FILTER)
+                                .onClick(() => {
+                                    showToast('TODO')
+                                })
+                            Text('共享屏幕')
+                                .margin({ top: 10 })
+                                .fontSize(13)
+                                .fontColor(Color.White)
+                        }
 
-                            Text('扬声器已关')
+                        Column() {
+                            Image($r('app.media.av_conference_members'))
+                                .draggable(false)
+                                .width(30)
+                                .height(30)
+                                .colorFilter(WHITE_FILTER)
+                                .onClick(() => {
+                                    showToast('TODO')
+                                })
+                            Text('管理')
+                                .margin({ top: 10 })
+                                .fontSize(13)
+                                .fontColor(Color.White)
+                        }
+
+                        Column() {
+                            Image($r('app.media.av_conference_more'))
+                                .draggable(false)
+                                .width(30)
+                                .height(30)
+                                .colorFilter(WHITE_FILTER)
+                                .onClick(() => {
+                                    showToast('TODO')
+                                })
+                            Text('更多')
                                 .margin({ top: 10 })
                                 .fontSize(13)
                                 .fontColor(Color.White)
@@ -451,6 +463,8 @@ export default struct ConferencePage {
                 .height('100%')
                 .padding({ top: this.statusBarHeight + 50 })
                 .hitTestBehavior(HitTestMode.Transparent)
+
+                // .backgroundColor('#000000')
 
                 if (this.showActionAndDurationView) {
                     this.actionAndDurationView()

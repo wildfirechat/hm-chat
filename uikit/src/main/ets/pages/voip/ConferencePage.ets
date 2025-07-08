@@ -48,16 +48,15 @@ export default struct ConferencePage {
         this.callSession = callSession
         this.participantProfiles = callSession.getParticipantProfiles()
 
-        this.focusXComponentId = this.selfUserInfo.uid + this.callSession.callId
+        this.focusXComponentId = this.selfUserInfo.uid
         this.userXComponentMap.set(this.selfUserInfo.uid, this.focusXComponentId)
 
         for (const p of this.participantProfiles) {
-            this.userXComponentMap.set(`${p.userId}-${p.screenSharing}`, `${p.userId} - ${p.screenSharing} - ${this.callSession.callId}`);
+            this.userXComponentMap.set(`${p.userId}-${p.screenSharing}`, `${p.userId}-${p.screenSharing}`);
         }
         this.setupInitialXComponentViews()
 
         this.setupSessionCallback()
-        console.log('MultiAudioCallPage aboutToAppear')
     }
 
     swapVideo(xcomponentId: string) {
@@ -160,10 +159,10 @@ export default struct ConferencePage {
             this.mainNavPathStack.pop()
         }
         sessionCallback.didParticipantJoined = (userId: string, isScreenSharing?: boolean) => {
+            this.callSession?.setUserXComponentId(`${userId}-${isScreenSharing}`, `${userId}-${isScreenSharing}`)
+
             this.targetUserInfos = wfc.getUserInfos(this.callSession!.getParticipantIds()!)
             this.participantProfiles = this.callSession?.getParticipantProfiles();
-
-            this.callSession?.setUserXComponentId(`${userId}-${isScreenSharing}`, `${userId} - ${isScreenSharing} - ${this.callSession.callId}`)
         }
         sessionCallback.didParticipantLeft = (userId: string, callEndReason: number, screenSharing = false) => {
             this.targetUserInfos = wfc.getUserInfos(this.callSession?.getParticipantIds()!)
@@ -247,9 +246,8 @@ export default struct ConferencePage {
             // top actions
             Row() {
                 AVCastPicker({ normalColor: Color.White, activeColor: Color.White })
-                    .width(50)
-                    .height(50)
-                    .padding({ left: 10, right: 10 })
+                    .width(30)
+                    .height(30)
                     .border({ width: 1, radius: 4, color: Color.White })
 
                 Image($r('app.media.av_conference_switch_camera'))
@@ -282,7 +280,6 @@ export default struct ConferencePage {
                     .height(50)
                     .objectFit(ImageFit.Contain)
                     .padding({ left: 10, right: 10 })
-                    .margin({ right: 10 })
                     .onClick(() => {
                         this.callSession?.hangup()
                     })
@@ -306,6 +303,7 @@ export default struct ConferencePage {
                 //     })
             }
             .justifyContent(FlexAlign.SpaceBetween)
+            .padding({ left: 10, right: 10 })
             .width('100%')
             .margin({ top: this.statusBarHeight })
 
@@ -414,7 +412,7 @@ export default struct ConferencePage {
             Stack() {
                 Column() {
                     XComponent({
-                        id: this.selfUserInfo!.uid + this.callSession?.callId,
+                        id: this.selfUserInfo!.uid,
                         type: XComponentType.SURFACE,
                         libraryname: 'wfrtc',
                     })
@@ -438,7 +436,7 @@ export default struct ConferencePage {
                     ForEach(this.participantProfiles, (p: ParticipantProfile) => {
                         Stack() {
                             XComponent({
-                                id: `${p.userId} - ${p.screenSharing}} - ${this.callSession?.callId}`,
+                                id: `${p.userId}-${p.screenSharing}`,
                                 type: XComponentType.SURFACE,
                                 libraryname: 'wfrtc'
                             })
@@ -452,19 +450,17 @@ export default struct ConferencePage {
                         }
                         .onClick(() => {
                             if (this.callSession?.status === CallState.STATUS_CONNECTED) {
-                                this.swapVideo(`${p.userId} - ${p.screenSharing}} - ${this.callSession?.callId}`)
+                                this.swapVideo(`${p.userId}-${p.screenSharing}}`)
                             }
                         })
                         .padding(5)
                         .width(this.participantWidth)
-                    }, (userInfo: UserInfo) => userInfo.uid + '-' + userInfo.updateDt)
+                    }, (p: ParticipantProfile) => p.userId)
                 }
                 .width('100%')
                 .height('100%')
                 .padding({ top: this.statusBarHeight + 50 })
                 .hitTestBehavior(HitTestMode.Transparent)
-
-                // .backgroundColor('#000000')
 
                 if (this.showActionAndDurationView) {
                     this.actionAndDurationView()

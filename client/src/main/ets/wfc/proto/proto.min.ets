@@ -2405,6 +2405,9 @@ class WfcImpl {
                         }
                     }
                 });
+                data.on('progress', (uploaded:number, total:number) => {
+                   progressCB && progressCB(uploaded, total)
+                });
                 data.on('fail', (result: Array<request.TaskState>) => {
                     message && self.uploadingMap.delete(message.messageId)
                     if (result && result.length >= 1) {

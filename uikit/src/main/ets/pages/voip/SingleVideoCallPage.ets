@@ -545,7 +545,7 @@ export default struct SingleVideoCallPage {
         .onBackPressed(() => {
             return true
         })
-        .title('Voip Test')
+        .title('VOIP Single')
         .hideTitleBar(true)
         .backgroundColor('#000000')
 

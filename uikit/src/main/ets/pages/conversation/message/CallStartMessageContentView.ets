@@ -4,10 +4,14 @@ import CallStartMessageContent from '@wfc/client/src/main/ets/wfc/av/messages/ca
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType';
 import { timestampFormat } from '../../../util/helper';
+import PickGroupMemberModal from '../../group/PickGroupMemberModal';
+import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
+import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
 
 @Component
 export default struct CallStartMessageContentView {
     @Link message: Message
+    @State showPickGroupMemberToStartCallCoverModal: boolean = false
 
     icon(): ResourceStr {
         let content = this.message.messageContent as CallStartMessageContent;
@@ -42,8 +46,36 @@ export default struct CallStartMessageContentView {
                 let content = this.message.messageContent as CallStartMessageContent;
                 avenginekit.startCall(this.message.conversation, [this.message.conversation.target], content.audioOnly)
             } else {
-                showToast(' TODO')
+                this.showPickGroupMemberToStartCallCoverModal = true;
             }
         })
+        .bindContentCover(this.showPickGroupMemberToStartCallCoverModal, this.pickGroupMemberToStartCallModal, {
+            modalTransition: ModalTransition.DEFAULT,
+            onAppear: () => {
+            },
+
+            onDisappear: () => {
+                this.showPickGroupMemberToStartCallCoverModal = false
+            }
+        })
+    }
+
+    @Builder
+    pickGroupMemberToStartCallModal() {
+        PickGroupMemberModal({
+            groupId: this.message.conversation.target,
+            title: '选择群成员',
+            initialCheckedUserIds: [wfc.getUserId()],
+            uncheckableUserIds: [wfc.getUserId()],
+            showPickGroupMemberModal: $showPickGroupMemberToStartCallCoverModal,
+            onPickResult: (users: UserInfo[]) => {
+                let content = this.message.messageContent as CallStartMessageContent;
+                avenginekit.startCall(this.message.conversation, users.map(user => user.uid), content.audioOnly)
+            }
+        })
+            .height('100%')
+            .width('100%')
+            .margin({ top: px2vp(AppStorage.get<number>('SafeAreaTopHeight')) })
+            .backgroundColor(Color.White)
     }
 }

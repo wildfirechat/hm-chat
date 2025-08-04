@@ -83,6 +83,7 @@ export default class AVEngineCallbackImpl extends AVEngineCallback {
      * @param session 会话信息
      */
     onJoinConference(session: CallSession) {
+        this.createAVSessionAndStartContinuousTask(session.audioOnly)
         this.mainNavPathStack?.pushPathByName(navigationDestinations.ConferencePage, {} as Record<string, object>)
     }
 
@@ -94,7 +95,7 @@ export default class AVEngineCallbackImpl extends AVEngineCallback {
         // TODO
     }
 
-    didCallEnded(reason: CallEndReason, duration: number) {
+    didCallEnded(session: CallSession) {
         this.avSession?.deactivate()
         this.avSession?.destroy()
         this.avSession = undefined

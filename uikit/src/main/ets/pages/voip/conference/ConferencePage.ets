@@ -244,6 +244,7 @@ export default struct ConferencePage {
         }
         sessionCallback.didChangeType = (userId: string, audience: boolean, screenSharing?: boolean) => {
             this.participantProfiles = this.callSession?.getParticipantProfiles();
+            this.selfProfile = this.callSession?.getSelfProfile()!;
             this.updateFocusAndPreviewView()
         }
 
@@ -403,6 +404,7 @@ export default struct ConferencePage {
                                 .height(30)
                                 .colorFilter(WHITE_FILTER)
                                 .onClick(() => {
+                                    this.lastTriggerToShowActionAndDurationViewTimestamp = Date.now()
                                     let toMute = !this.callSession?.audioMuted
                                     if (this.callSession?.status === CallState.STATUS_CONNECTED) {
                                         if (toMute) {
@@ -411,14 +413,13 @@ export default struct ConferencePage {
                                             }
                                             this.callSession?.muteAudio(true)
                                         } else {
-                                            // TODO
                                             let participantFull = false
                                             if (this.callSession.audience && participantFull) {
                                                 showToast('超过最大互动者人数')
                                                 return;
                                             } else {
                                                 this.callSession.muteAudio(false)
-                                                if (this.callSession.videoMuted || this.callSession.audience) {
+                                                if (this.callSession.audience) {
                                                     this.callSession.switchAudience(false)
                                                 }
                                             }
@@ -437,7 +438,9 @@ export default struct ConferencePage {
                                 .width(30)
                                 .height(30)
                                 .colorFilter(WHITE_FILTER)
+                                .hitTestBehavior(HitTestMode.Block)
                                 .onClick(() => {
+                                    this.lastTriggerToShowActionAndDurationViewTimestamp = Date.now()
                                     let toMute = !this.callSession?.videoMuted
                                     if (this.callSession?.status === CallState.STATUS_CONNECTED) {
                                         if (toMute) {
@@ -453,7 +456,7 @@ export default struct ConferencePage {
                                                 return;
                                             } else {
                                                 this.callSession.muteVideo(false)
-                                                if (this.callSession.audioMuted || this.callSession.audience) {
+                                                if (this.callSession.audience) {
                                                     this.callSession.switchAudience(false)
                                                 }
                                             }

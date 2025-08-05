@@ -47,7 +47,7 @@ export default struct ConferenceParticipantView {
                             this.onXComponentLoadCallback()
                         } else {
                             if (this.swiperIndex === this.currentSwiperIndex || (this.swiperIndex === 0 && this.currentSwiperIndex === -1)) {
-                                this.callSession.setUserXComponentId(this.p.xcomponentUserId(), this.xcomponentId ? this.xcomponentId : this.p.xcomponentId())
+                                this.callSession?.setUserXComponentId(this.p.xcomponentUserId(), this.xcomponentId ? this.xcomponentId : this.p.xcomponentId())
                             }
                         }
                     })

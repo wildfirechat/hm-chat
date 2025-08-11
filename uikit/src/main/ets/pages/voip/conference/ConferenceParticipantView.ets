@@ -34,7 +34,7 @@ export default struct ConferenceParticipantView {
             // if (!this.p.audience && this.p.status === CallState.STATUS_CONNECTED && !this.p.videoMuted && (this.swiperIndex === this.currentSwiperIndex || (this.swiperIndex === 0 && this.currentSwiperIndex === -1))) {
             if (!this.p.audience && this.p.status === CallState.STATUS_CONNECTED && !this.p.videoMuted) {
                 XComponent({
-                    id: this.xcomponentId ? this.xcomponentId : this.p.xcomponentId(),
+                    id: this.xcomponentId ? this.xcomponentId : this.p.getAndUpdateXComponentId(),
                     type: XComponentType.SURFACE,
                     libraryname: 'wfrtc',
                 })
@@ -42,17 +42,17 @@ export default struct ConferenceParticipantView {
                     .height('100%')
                     .enableAnalyzer(false)
                     .onLoad(() => {
-                        console.log('XComponent debug', 'onLoad', this.p.xcomponentUserId(), this.p.xcomponentId())
+                        console.log('XComponent debug', 'onLoad', this.p.xcomponentUserId(), this.p.currentXComponentId())
                         if (this.onXComponentLoadCallback) {
                             this.onXComponentLoadCallback()
                         } else {
                             if (this.swiperIndex === this.currentSwiperIndex || (this.swiperIndex === 0 && this.currentSwiperIndex === -1)) {
-                                this.callSession?.setUserXComponentId(this.p.xcomponentUserId(), this.xcomponentId ? this.xcomponentId : this.p.xcomponentId())
+                                this.callSession?.setUserXComponentId(this.p.xcomponentUserId(), this.xcomponentId ? this.xcomponentId : this.p.currentXComponentId())
                             }
                         }
                     })
                     .onDestroy(() => {
-                        console.log('XComponent debug', 'onDestroy', this.p.xcomponentUserId(), this.p.xcomponentId())
+                        console.log('XComponent debug', 'onDestroy', this.p.xcomponentUserId(), this.p.currentXComponentId())
                     })
             } else {
                 Stack() {

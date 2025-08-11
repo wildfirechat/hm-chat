@@ -126,12 +126,12 @@ export default struct ConferencePage {
             this.setupFocusAndPreviewXComponentId()
         } else if (swiperIndex == 1) {
             let selfProfile = this.callSession?.getSelfProfile()!
-            this.callSession?.setUserXComponentId(selfProfile?.xcomponentUserId(), unset ? '' : selfProfile?.xcomponentId())
+            this.callSession?.setUserXComponentId(selfProfile?.xcomponentUserId(), unset ? '' : selfProfile?.currentXComponentId())
             for (let i = 0; i < ConferencePage.COUNT_PER_PAGE - 1; i++) {
                 let index = (swiperIndex - 1) * ConferencePage.COUNT_PER_PAGE + i
                 if (index < this.participantProfiles!.length) {
                     let p = this.participantProfiles![index]
-                    this.callSession?.setUserXComponentId(p.xcomponentUserId(), unset ? '' : p.xcomponentId())
+                    this.callSession?.setUserXComponentId(p.xcomponentUserId(), unset ? '' : p.currentXComponentId())
                 }
             }
         } else if (swiperIndex > 1) {
@@ -139,7 +139,7 @@ export default struct ConferencePage {
                 let index = (swiperIndex - 1) * ConferencePage.COUNT_PER_PAGE + i
                 if (index < this.participantProfiles!.length) {
                     let p = this.participantProfiles![index]
-                    this.callSession?.setUserXComponentId(p.xcomponentUserId(), unset ? '' : p.xcomponentId())
+                    this.callSession?.setUserXComponentId(p.xcomponentUserId(), unset ? '' : p.currentXComponentId())
                 }
             }
         }

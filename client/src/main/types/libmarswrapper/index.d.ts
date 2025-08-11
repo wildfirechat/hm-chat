@@ -2,6 +2,7 @@ export const add: (a: number, b: number, c: string) => number;
 export const getRoutePort: () => number;
 export const useSM4: () => void;
 export const useAES256: () => void;
+export const setTimeOffset: (offset: number) => void;
 export const useTcpShortLink: () => void;
 export const isTcpShortLink: () => number;
 export const startLog: () => void;
@@ -107,6 +108,8 @@ export const insertMessageEx: (messageUid: string, conversationStr: string, from
 export const updateMessage: (messageId: number, content: string) => void;
 export const updateMessageStatus: (messageId: number, status: number) => void;
 export const getMessageCount: (conversationStr: string) => number;
+export const getConversationMessageCount: (conversationTypes: number[], lines: number[]) => number;
+export const getMessageCountByDay: (conversationStr: string, contentTypes: number[], startTime: number, endTime: number) => string;
 export const getUserInfo: (userId: string, refresh: boolean, groupId: string) => string;
 export const getUserInfos: (userIds: string[], groupId: string) => string;
 export const getUserInfoEx: (userId: string, refresh: boolean, successCB: Function, errorCB: Function) => void;

@@ -136,6 +136,13 @@ export class WfcManager {
     }
 
     /*
+     * 添加设置时间偏移接口，可以让时间不正确的设备能够正常运行
+     */
+    setTimeOffset(offset: number) {
+        impl.setTimeOffset(offset);
+    }
+
+    /*
      * 开启日志，需要在connect之前调用。如果有设置包名或者其他connect之前调用的操作，需要放到这些操作之后。
      */
     startLog() {
@@ -2130,6 +2137,28 @@ export class WfcManager {
      */
     getMessageCount(conversation: Conversation): number {
         return impl.getMessageCount(conversation);
+    }
+
+    /**
+     * 获取指定会话类型内的消息总数。
+     * @param types
+     * @param lines
+     * @returns
+     */
+    getConversationMessageCount(types: numberArray, lines: numberArray): number {
+        return impl.getConversationMessageCount(types, lines);
+    }
+
+    /**
+     * 按照天获取会话内消息的数量。
+     * @param conversation
+     * @param contentTypes
+     * @param startTime
+     * @param endTime
+     * @returns
+     */
+    getMessageCountByDay(conversation: Conversation, contentTypes: numberArray, startTime: number, endTime: number): Map<string, number> {
+        return impl.getMessageCountByDay(conversation, contentTypes, startTime, endTime);
     }
 
     /**

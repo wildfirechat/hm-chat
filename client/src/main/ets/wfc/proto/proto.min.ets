@@ -389,6 +389,10 @@ class WfcImpl {
         protoProxy.useAES256();
     }
 
+    setTimeOffset(offset: number) {
+        protoProxy.setTimeOffset(offset);
+    }
+
     startLog() {
         if (this.userId) {
             protoProxy.startLog();
@@ -2699,6 +2703,23 @@ class WfcImpl {
 
     getMessageCount(conversation: Conversation): number {
         return protoProxy.getMessageCount(JSON.stringify(conversation));
+    }
+
+    getConversationMessageCount(types: number[], lines: number[]): number {
+        return protoProxy.getConversationMessageCount(types, lines);
+    }
+
+    getMessageCountByDay(conversation: Conversation, contentTypes: number[], startTime: number, endTime: number): Map<string, number> {
+        let readedStr: string = protoProxy.getMessageCountByDay(JSON.stringify(conversation), contentTypes, startTime, endTime);
+        let readedArr = JSON.parse(readedStr) as Record<string, Object>[];
+        let result: Map<string, number> = new Map();
+        if (readedArr) {
+            readedArr.forEach(e => {
+                let values = Object.values(e)
+                result.set(values[0] as string, values[1] as number)
+            })
+        }
+        return result;
     }
 
     async uploadMedia(fileName: string, fileOrData: string, mediaType: number, successCB: CallbackWithValue_1<string>, failCB: FailCallback, progressCB: CallbackWithValue_2<number, number>) {

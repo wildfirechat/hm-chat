@@ -36,10 +36,6 @@ export default struct ConferencePage {
     private updateActionAndDurationViewInterval = 0
     private conferenceInfo?: ConferenceInfo
     static COUNT_PER_PAGE = 4;
-    private focusXComponentIdPrefix: string = 'focus-xcp'
-    private focusXComponentId: string = this.focusXComponentIdPrefix + new Date().getTime()
-    private previewXComponentIdPrefix: string = 'preview-xcp'
-    private previewXComponentId: string = this.previewXComponentIdPrefix + new Date().getTime()
 
     aboutToAppear(): void {
         let callSession = avengineKit.getCurrentSession();
@@ -82,9 +78,9 @@ export default struct ConferencePage {
     }
 
     setupFocusAndPreviewXComponentId() {
-        this.callSession?.setUserXComponentId(this.focusProfile?.xcomponentUserId()!, this.focusXComponentId)
+        this.callSession?.setUserXComponentId(CallSession.xcomponentUserId(this.focusProfile!), CallSession.currentPrefixXComponentId('focus-xcp')!)
         if (this.previewProfile) {
-            this.callSession?.setUserXComponentId(this.previewProfile.xcomponentUserId(), this.previewXComponentId)
+            this.callSession?.setUserXComponentId(CallSession.xcomponentUserId(this.previewProfile!), CallSession.currentPrefixXComponentId('preview-xcp')!)
         }
     }
 
@@ -126,12 +122,12 @@ export default struct ConferencePage {
             this.setupFocusAndPreviewXComponentId()
         } else if (swiperIndex == 1) {
             let selfProfile = this.callSession?.getSelfProfile()!
-            this.callSession?.setUserXComponentId(selfProfile?.xcomponentUserId(), unset ? '' : selfProfile?.currentXComponentId())
+            this.callSession?.setUserXComponentId(CallSession.xcomponentUserId(selfProfile), unset ? '' : CallSession.currentXComponentId(selfProfile))
             for (let i = 0; i < ConferencePage.COUNT_PER_PAGE - 1; i++) {
                 let index = (swiperIndex - 1) * ConferencePage.COUNT_PER_PAGE + i
                 if (index < this.participantProfiles!.length) {
                     let p = this.participantProfiles![index]
-                    this.callSession?.setUserXComponentId(p.xcomponentUserId(), unset ? '' : p.currentXComponentId())
+                    this.callSession?.setUserXComponentId(CallSession.xcomponentUserId(p), unset ? '' : CallSession.currentXComponentId(p))
                 }
             }
         } else if (swiperIndex > 1) {
@@ -139,7 +135,7 @@ export default struct ConferencePage {
                 let index = (swiperIndex - 1) * ConferencePage.COUNT_PER_PAGE + i
                 if (index < this.participantProfiles!.length) {
                     let p = this.participantProfiles![index]
-                    this.callSession?.setUserXComponentId(p.xcomponentUserId(), unset ? '' : p.currentXComponentId())
+                    this.callSession?.setUserXComponentId(CallSession.xcomponentUserId(p), unset ? '' : CallSession.currentXComponentId(p))
                 }
             }
         }
@@ -550,7 +546,7 @@ export default struct ConferencePage {
                         ConferenceParticipantView({
                             callSession: this.callSession,
                             p: this.focusProfile,
-                            xcomponentId: this.focusXComponentId,
+                            xcomponentIdPrefix: 'focus-xcp',
                             swiperIndex: 0,
                             currentSwiperIndex: this.currentSwiperIndex,
                             onXComponentLoadCallback: () => {
@@ -565,9 +561,6 @@ export default struct ConferencePage {
                                 this.showActionAndDurationView = !this.showActionAndDurationView
                                 this.lastTriggerToShowActionAndDurationViewTimestamp = Date.now()
                             })
-                            .onDisAppear(() => {
-                                this.focusXComponentId = this.focusXComponentIdPrefix + new Date().getTime()
-                            })
                     }
 
                     // preview
@@ -575,7 +568,7 @@ export default struct ConferencePage {
                         ConferenceParticipantView({
                             callSession: this.callSession,
                             p: this.previewProfile,
-                            xcomponentId: this.previewXComponentId,
+                            xcomponentIdPrefix: 'preview-xcp',
                             swiperIndex: 0,
                             currentSwiperIndex: this.currentSwiperIndex,
                             onXComponentLoadCallback: () => {
@@ -590,9 +583,6 @@ export default struct ConferencePage {
                                 if (this.callSession?.status === CallState.STATUS_CONNECTED) {
                                     // this.swapVideo(`${p.userId}-${this.callSession.callId}`)
                                 }
-                            })
-                            .onDisAppear(() => {
-                                this.previewXComponentId = this.previewXComponentIdPrefix + new Date().getTime()
                             })
                     }
 

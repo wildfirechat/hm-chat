@@ -10,10 +10,11 @@ export default struct ConferenceParticipantView {
     @Prop p: ParticipantProfile
     @Prop callSession: CallSession
     @State participantUserInfo: UserInfo | undefined = undefined
-    xcomponentId: string = ''
+    xcomponentIdPrefix: string = ''
     swiperIndex: number = 0
     @Prop currentSwiperIndex: number = 0
     onXComponentLoadCallback?: () => void
+    _xcomponentId = ''
 
     aboutToAppear(): void {
         wfc.getUserInfoEx(this.p.userId, false, info => {
@@ -21,6 +22,13 @@ export default struct ConferenceParticipantView {
         }, err => {
             console.error('getUserInfoEx error', this.p.userId, err)
         })
+    }
+
+    xcomponentId(){
+        if(!this._xcomponentId){
+            this._xcomponentId = this.xcomponentIdPrefix ? CallSession.nextPrefixXComponentId(this.xcomponentIdPrefix) :  CallSession.nextXComponentId(this.p);
+        }
+        return this._xcomponentId
     }
 
     build() {
@@ -34,25 +42,29 @@ export default struct ConferenceParticipantView {
             // if (!this.p.audience && this.p.status === CallState.STATUS_CONNECTED && !this.p.videoMuted && (this.swiperIndex === this.currentSwiperIndex || (this.swiperIndex === 0 && this.currentSwiperIndex === -1))) {
             if (!this.p.audience && this.p.status === CallState.STATUS_CONNECTED && !this.p.videoMuted) {
                 XComponent({
-                    id: this.xcomponentId ? this.xcomponentId : this.p.getAndUpdateXComponentId(),
+                    id: this.xcomponentId(),
                     type: XComponentType.SURFACE,
                     libraryname: 'wfrtc',
                 })
                     .width('100%')
                     .height('100%')
                     .enableAnalyzer(false)
-                    .onLoad(() => {
-                        console.log('XComponent debug', 'onLoad', this.p.xcomponentUserId(), this.p.currentXComponentId())
+                    .onAttach(() => {
+                        console.log('xxxx onAttach')
+                    })
+                    .onLoad((event:object) => {
+                        console.log('xxxx XComponent debug', 'onLoad', CallSession.xcomponentUserId(this.p), this._xcomponentId)
                         if (this.onXComponentLoadCallback) {
                             this.onXComponentLoadCallback()
                         } else {
                             if (this.swiperIndex === this.currentSwiperIndex || (this.swiperIndex === 0 && this.currentSwiperIndex === -1)) {
-                                this.callSession?.setUserXComponentId(this.p.xcomponentUserId(), this.xcomponentId ? this.xcomponentId : this.p.currentXComponentId())
+                                this.callSession?.setUserXComponentId(CallSession.xcomponentUserId(this.p), this._xcomponentId)
                             }
                         }
                     })
                     .onDestroy(() => {
-                        console.log('XComponent debug', 'onDestroy', this.p.xcomponentUserId(), this.p.currentXComponentId())
+                        this._xcomponentId = ''
+                        console.log('xxxx XComponent debug', 'onDestroy', CallSession.xcomponentUserId(this.p))
                     })
             } else {
                 Stack() {

@@ -128,7 +128,6 @@ export default struct DiscoveryTab {
                                 this.mainNavPathStack.pushPathByName(navigationDestinations.ConferencePortalPage, {} as Record<string, Object>)
                             } else {
                                 showToast('不支持音视频会议')
-                                this.mainNavPathStack.pushPathByName(navigationDestinations.ConferencePortalPage, {} as Record<string, Object>)
                             }
                         })
                         .padding({ left: 10, right: 10 })

@@ -34,7 +34,6 @@ export default struct SingleVideoCallPage {
     private focusXComponentController: WFCVideoRenderController = new WFCVideoRenderController()
     private previewXComponentController: WFCVideoRenderController = new WFCVideoRenderController()
     private isPageShow = false
-
     private voipPiPNodeController: VoipPiPNodeController = new VoipPiPNodeController('');
 
     aboutToAppear(): void {
@@ -69,7 +68,7 @@ export default struct SingleVideoCallPage {
     swapVideo() {
         if (!this.selfUserInfo || !this.targetUserInfo || !this.callSession) {
             return
-            }
+        }
         let previewUserId = this.focusUserId
         let focusUserId = this.focusUserId === this.selfUserInfo.uid ? this.targetUserInfo.uid : this.selfUserInfo.uid
 
@@ -163,8 +162,10 @@ export default struct SingleVideoCallPage {
             }
         }
         sessionCallback.didCreateLocalVideoTrack = (track: VideoTrack, screenSharing: boolean) => {
-            this.previewXComponentController.setVideoTrack(track)
-            this.previewXComponentController.setScalingMode(ScalingMode.AspectFill)
+
+            let controller = this.focusUserId === this.selfUserInfo?.uid ? this.focusXComponentController : this.previewXComponentController
+            controller.setVideoTrack(track)
+            controller.setScalingMode(ScalingMode.AspectFill)
         }
         sessionCallback.didReceiveRemoteVideoTrack = (userId: string, track: VideoTrack, screenSharing: boolean) => {
             this.focusXComponentController.setVideoTrack(track)
@@ -436,9 +437,9 @@ export default struct SingleVideoCallPage {
                         type: XComponentType.SURFACE,
                         controller: this.focusXComponentController,
                     })
-                        // .onLoad(() => {
-                        //     this.focusXComponentController.setVideoTrack(this.localVideoTrack!)
-                        // })
+                    // .onLoad(() => {
+                    //     this.focusXComponentController.setVideoTrack(this.localVideoTrack!)
+                    // })
                         .enableAnalyzer(false)
                         .width('100%')
                         .height('100%')

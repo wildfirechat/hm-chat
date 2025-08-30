@@ -204,6 +204,7 @@ export default struct StartConferencePage {
                                     let params = {} as Record<string, Object>
                                     params['conferenceInfo'] = info
                                     this.mainNavPathStack.pushPathByName(navigationDestinations.ConferencePage, params)
+                                    this.mainNavPathStack.removeByName(navigationDestinations.StartConferencePage)
                                 } else {
                                     showToast('加入会议失败');
                                 }

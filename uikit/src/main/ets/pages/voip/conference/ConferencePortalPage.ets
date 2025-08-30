@@ -90,30 +90,6 @@ export default struct ConferencePortalPage {
                         }
                     }
 
-                    ListItem() {
-                        Row() {
-                            Text('会议 2')
-                        }
-                    }
-
-                    ListItem() {
-                        Row() {
-                            Text('会议 3')
-                        }
-                    }
-
-                    ListItem() {
-                        Row() {
-                            Text('会议 4')
-                        }
-                    }
-
-                    ListItem() {
-                        Row() {
-                            Text('会议 5')
-                        }
-                    }
-
                 }
                 .width('100%')
                 .padding(10)
@@ -122,6 +98,9 @@ export default struct ConferencePortalPage {
                     Text('会议记录')
                         .padding({ right: 10 })
                         .fontColor('#3B62E0')
+                        .onClick(() => {
+                            showToast('TODO')
+                        })
                 }
                 .width('100%')
                 .justifyContent(FlexAlign.End)

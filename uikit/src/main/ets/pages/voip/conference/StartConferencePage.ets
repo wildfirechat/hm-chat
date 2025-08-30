@@ -12,7 +12,7 @@ import { navigationDestinations } from "../../navigationConfig";
 export default struct StartConferencePage {
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
     @State title: string = ''
-    @State endTime: number = new Date().getTime();
+    @State endTime: Date = new Date(new Date().getTime() + 60 * 60 * 1000)
     @State modeSwitch: boolean = false
     @State audienceSwitch: boolean = false
     @State passwordSwitch: boolean = false
@@ -66,14 +66,21 @@ export default struct StartConferencePage {
                     })
                     OptionItemView({
                         title: '结束时间',
-                        desc: this.endTime + '',
+                        desc: this.endTime.toString(),
                         paddingLeft: 20,
                         showDivider: false,
                         showRightArrow: true
                     })
                         .onClick(() => {
-                            TimePickerDialog.show({
-                                useMilitaryTime: true
+                            this.getUIContext().showDatePickerDialog({
+                                showTime: true,
+                                onDateAccept: (date: Date) => {
+                                    if (date.getTime() <= new Date().getTime()) {
+                                        showToast('结束时间，不能小于当前时间')
+                                        return
+                                    }
+                                    this.endTime = date
+                                }
                             })
                         })
                 }
@@ -185,7 +192,7 @@ export default struct StartConferencePage {
                             info.pin = `${Math.floor(Math.random() * 10)}${Math.floor(Math.random() * 10)}${Math.floor(Math.random() * 10)}${Math.floor(Math.random() * 10)}`
                             info.owner = wfc.getUserId()
                             info.startTime = Math.ceil(new Date().getTime() / 1000);
-                            info.startTime = Math.ceil(this.endTime / 1000);
+                            info.endTime = Math.ceil(this.endTime.getTime() / 1000);
                             info.audience = this.audienceSwitch;
                             info.allowSwitchMode = this.modeSwitch;
                             info.advance = this.advancedSwitch;

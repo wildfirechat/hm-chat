@@ -1,3 +1,4 @@
+import { Core } from "@ohos/hypium"
 @Preview
 @Component
 export default struct ToggleItemView {
@@ -6,12 +7,22 @@ export default struct ToggleItemView {
     paddingRight: number = 10
     showDivider: boolean = false
     @Prop isOn: boolean = false
+    @Prop desc?: string = ''
     onChange?: (isOn: boolean) => void = undefined
 
     build() {
         Column() {
             Row() {
+                Column() {
                 Text(this.title)
+                    if (this.desc) {
+                        Text(this.desc)
+                            .fontColor(Color.Gray)
+                            .fontSize(13)
+                            .padding({ top: 5 })
+                    }
+                }
+                .alignItems(HorizontalAlign.Start)
                 Toggle({ type: ToggleType.Switch, isOn: this.isOn })
                     .onChange(this.onChange)
             }

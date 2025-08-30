@@ -2,7 +2,7 @@
 @Component
 export default struct OptionItemView {
     // TODO 应该用 @prop，但是不允许可选，故
-    private icon: ResourceStr = ''
+    icon: ResourceStr = ''
     title: string = ''
     @Prop desc: string = ''
     @Prop subTitle: string = ''

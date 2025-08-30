@@ -39,7 +39,7 @@ export default struct WfcWebView {
                     .width('100%')
                     .height(4)
             }
-            Web({ src: this.url, controller: this.controller })
+            Web({ src: this.url, controller: this.controller! })
                 .onTitleReceive((event) => {
                     console.log('title:' + event!.title)
                     this.onTitleReceive && this.onTitleReceive(event?.title)

@@ -8,15 +8,15 @@ import AVSessionManager from '@ohos.multimedia.avsession';
 import { startContinuousTask, stopContinuousTask } from './helper/continuousTaskHelper';
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType';
 import AVEngineCallback from '@wfc/avenginekit/src/main/ets/wfc/av/engine/avengineCallback';
-// 一定要引入，否则不能弹出对应页面
-import './pages/voip/SingleAudioCallPage'
-import './pages/voip/SingleVideoCallPage'
-import './pages/voip/MultiAudioCallPage'
-import './pages/voip/MultiVideoCallPage'
 
 import { navigationDestinations } from './pages/navigationConfig';
 import { common } from '@kit.AbilityKit';
 
+// 一定要引入，否则不能弹出对应页面
+import ('./pages/voip/SingleAudioCallPage')
+import ('./pages/voip/SingleVideoCallPage')
+import ('./pages/voip/MultiAudioCallPage')
+import ('./pages/voip/MultiVideoCallPage')
 export default class AVEngineCallbackImpl extends AVEngineCallback {
     private context: common.UIAbilityContext
     private avSession?: AVSessionManager.AVSession
@@ -78,6 +78,15 @@ export default class AVEngineCallbackImpl extends AVEngineCallback {
         this.mainNavPathStack?.pushPathByName(name, {} as Record<string, object>)
     }
 
+    /**
+     *  加入会议
+     * @param session 会话信息
+     */
+    onJoinConference(session: CallSession) {
+        this.createAVSessionAndStartContinuousTask(session.audioOnly)
+        // 不加载页面，仅仅开始 avSession
+    }
+
     shouldStartRing(isIncoming: boolean) {
         // TODO
     }
@@ -86,7 +95,7 @@ export default class AVEngineCallbackImpl extends AVEngineCallback {
         // TODO
     }
 
-    didCallEnded(reason: CallEndReason, duration: number) {
+    didCallEnded(session: CallSession) {
         this.avSession?.deactivate()
         this.avSession?.destroy()
         this.avSession = undefined

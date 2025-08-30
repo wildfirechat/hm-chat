@@ -3,6 +3,7 @@ import CallSessionCallback from '@wfc/avenginekit/src/main/ets/wfc/av/engine/cal
 import CallState from '@wfc/avenginekit/src/main/ets/wfc/av/engine/callState'
 import avengineKit from '@wfc/avenginekit'
 import wfc from '@wfc/client'
+import Config from '@wfc/client/src/main/ets/config'
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
 import { BusinessError } from '@kit.BasicServicesKit'
 import AVCastPicker from '@ohos.multimedia.avCastPicker'
@@ -21,9 +22,10 @@ export default struct SingleAudioCallPage {
     @State callSession?: CallSession = undefined
     @State durationStr: string = ''
     private durationInterval = 0
+
     private pipController?: PiPWindow.PiPController;
-    private mXComponentController: XComponentController = new XComponentController()
-    private textNodeController: VoipPiPNodeController = new VoipPiPNodeController('');
+    private voipPiPNodeController: VoipPiPNodeController = new VoipPiPNodeController('');
+    private dummyXComponentController: XComponentController = new XComponentController()
 
     aboutToAppear(): void {
         let callSession = avengineKit.getCurrentSession();
@@ -58,7 +60,6 @@ export default struct SingleAudioCallPage {
     updateDuration = () => {
         let millis = new Date().getTime() - this.callSession!.connectedTime
         this.durationStr = timestampFormat(millis)
-        this.textNodeController.update(this.durationStr)
     }
 
     setupSessionCallback() {
@@ -108,8 +109,8 @@ export default struct SingleAudioCallPage {
     async createPipController() {
         this.pipController = await PiPWindow.create({
             context: getContext(this),
-            componentController: this.mXComponentController,
-            customUIController: this.textNodeController,
+            componentController: this.dummyXComponentController,
+            customUIController: this.voipPiPNodeController,
             navigationId: uikit.bundleName,
             templateType: PiPWindow.PiPTemplateType.VIDEO_CALL,
             contentWidth: 200,
@@ -141,7 +142,6 @@ export default struct SingleAudioCallPage {
         if (state === PiPWindow.PiPState.ABOUT_TO_START) {
             this.mainNavPathStack.pop()
         }
-
         // switch (state) {
         //     case PiPWindow.PiPState.ABOUT_TO_START:
         //         this.curState = 'ABOUT_TO_START';
@@ -201,7 +201,7 @@ export default struct SingleAudioCallPage {
                 XComponent({
                     id: this.targetUserInfo?.uid + this.callSession!.callId,
                     type: XComponentType.SURFACE,
-                    controller: this.mXComponentController,
+                    controller: this.dummyXComponentController,
                 })
                     .enableAnalyzer(false)
                     .width(200)
@@ -240,7 +240,7 @@ export default struct SingleAudioCallPage {
 
                     if (this.callSession!.status === CallState.STATUS_INCOMING || this.callSession!.status === CallState.STATUS_OUTGOING) {
                         Column() {
-                            Image(this.targetUserInfo?.portrait)
+                            Image(this.targetUserInfo?.portrait|| Config.DEFAULT_PORTRAIT_URL)
                                 .draggable(false)
                                 .borderRadius(6)
                                 .width(100)
@@ -303,7 +303,7 @@ export default struct SingleAudioCallPage {
                         .justifyContent(FlexAlign.SpaceAround)
                     } else {
                         Column() {
-                            Image(this.targetUserInfo?.portrait)
+                            Image(this.targetUserInfo?.portrait || Config.DEFAULT_PORTRAIT_URL)
                                 .draggable(false)
                                 .borderRadius(6)
                                 .width(100)

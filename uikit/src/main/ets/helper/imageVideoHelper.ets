@@ -42,9 +42,9 @@ export async function videoThumbnail(context: Context, uri: string, imageWH: Siz
         }
     }
     return {
-        'duration': asset.get(photoAccessHelper.PhotoKeys.DURATION) as number,
-        'thumbnail': base64Data
-    };
+        duration: asset.get(photoAccessHelper.PhotoKeys.DURATION) as number,
+        thumbnail: base64Data
+    } as VideoDurationAndThumbnail;
 }
 
 /**

@@ -14,10 +14,10 @@ export default struct MentionGroupMemberListView {
     private userInfos: UserInfo[] = []
     private userInfoDataSource: UserInfoDataSource = new UserInfoDataSource()
     private enableMentionAll = false;
-    private groupId: string = '';
-    private showCategory: boolean = false
-    private showSearchView: boolean = false
-    private onClickUser?: (userInfo: UserInfo) => void
+    groupId: string = '';
+    showCategory: boolean = false
+    showSearchView: boolean = false
+    onClickUser?: (userInfo: UserInfo) => void
 
     aboutToAppear() {
         let groupMembers = wfc.getGroupMembers(this.groupId, false)

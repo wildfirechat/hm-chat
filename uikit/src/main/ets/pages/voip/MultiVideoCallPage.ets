@@ -9,7 +9,13 @@ import ParticipantProfile from '@wfc/avenginekit/src/main/ets/wfc/av/engine/part
 import PickGroupMemberModal from '../group/PickGroupMemberModal'
 import { HashMap } from '@kit.ArkTS'
 import { timestampFormat } from '../../util/helper'
-import { window } from '@kit.ArkUI'
+import { PiPWindow, window } from '@kit.ArkUI'
+import WFCVideoRenderController, { ScalingMode } from '@wfc/avenginekit/src/main/ets/wfc/av/xcomponent/WFCVideoRenderController'
+import { VideoTrack } from '@ohos/webrtc/src/main/libohos_webrtc/webrtc'
+import VoipPiPNodeController from './VoipPiPNodeController'
+import uikit from '../../uikit'
+import { BusinessError } from '@kit.BasicServicesKit'
+import { navigationDestinations } from '../navigationConfig'
 
 @Component
 export default struct MultiVideoCallPage {
@@ -24,10 +30,14 @@ export default struct MultiVideoCallPage {
     @State durationStr: string = ''
     @State showActionAndDurationView: boolean = true
     private statusBarHeight = 0
-    private userXComponentMap: HashMap<string, string> = new HashMap<string, string>()
-    private focusXComponentId: string = ''
+    private focusUserId: string = ''
     private lastTriggerToShowActionAndDurationViewTimestamp: number = 0
     private updateActionAndDurationViewInterval = 0
+    // not include self
+    private focusVideoRenderController = new WFCVideoRenderController('focus-xcp')
+    private participantVideoRenderControllerMap = new Map<string, WFCVideoRenderController>()
+    private pipController?: PiPWindow.PiPController;
+    private voipPiPNodeController: VoipPiPNodeController = new VoipPiPNodeController('');
 
     aboutToAppear(): void {
         let callSession = avengineKit.getCurrentSession();
@@ -42,42 +52,53 @@ export default struct MultiVideoCallPage {
         this.targetUserInfos = wfc.getUserInfos(callSession?.getParticipantIds()!)
 
         this.callSession = callSession
-        this.participantProfiles = callSession.getParticipantProfiles()
+        this.getParticipantProfilesAndUpdateVideoRenderControllerMap()
 
-        this.focusXComponentId = this.selfUserInfo.uid + this.callSession.callId
-        this.userXComponentMap.set(this.selfUserInfo.uid, this.focusXComponentId)
-
-        for (const p of this.participantProfiles) {
-            this.userXComponentMap.set(p.userId, p.userId + this.callSession.callId);
-        }
-        this.setupXComponentViews()
+        this.focusUserId = this.selfUserInfo.uid
 
         this.setupSessionCallback()
         console.log('MultiAudioCallPage aboutToAppear')
     }
 
-    swapVideo(xcomponentId: string) {
-        let nextFocusUserId = ''
-        let preFocusUserId = ''
-        this.userXComponentMap.forEach((value, key) => {
-            if (value === xcomponentId) {
-                nextFocusUserId = key!;
+    // 交换逻辑
+    //
+    swapVideo(userId: string) {
+        if (!this.callSession || !this.selfUserInfo) {
+            return;
+        }
+        let userVideoRenderController = this.participantVideoRenderControllerMap.get(userId)
+        let userVideoTrack = this.callSession.getParticipantVideoTrack(userId)
+        if (!userVideoRenderController || !userVideoTrack) {
+            return
+        }
+
+        if (userId === this.focusUserId) {
+            // 当前 xcomponent 原始对应的用户，已经是焦点用户
+
+            // 将用户的视频流，渲染到原始为止
+            let localVideoTrack = this.callSession.getParticipantVideoTrack(this.selfUserInfo.uid)
+            this.focusVideoRenderController.setVideoTrack(localVideoTrack)
+
+            // 将自己的本地视频流，渲染到焦点位置
+            userVideoRenderController?.setVideoTrack(userVideoTrack)
+            this.focusUserId = this.selfUserInfo.uid;
+        } else {
+            // 之前 focus 的用户，恢复到该用户原来的位置
+            if (this.focusUserId !== this.selfUserInfo.uid) {
+                let lastFocusUserVideoRenderController = this.participantVideoRenderControllerMap.get(this.focusUserId)
+                let lastFocusVideoTrack = this.callSession.getParticipantVideoTrack(this.focusUserId)
+                lastFocusUserVideoRenderController?.setVideoTrack(lastFocusVideoTrack)
             }
-            if (value === this.focusXComponentId) {
-                preFocusUserId = key!;
-            }
-        })
 
-        this.userXComponentMap.set(nextFocusUserId, this.focusXComponentId)
-        this.userXComponentMap.set(preFocusUserId, xcomponentId)
+            // 将新的焦点用户，渲染到大屏
+            this.focusVideoRenderController.setVideoTrack(userVideoTrack)
 
-        this.setupXComponentViews()
-    }
+            // 将自己的本地视频流，渲染到新的焦点用户原来的位置
+            let localVideoTrack = this.callSession.getParticipantVideoTrack(this.selfUserInfo.uid)
+            userVideoRenderController?.setVideoTrack(localVideoTrack)
 
-    setupXComponentViews() {
-        this.userXComponentMap.forEach((xcomponentId, userId) => {
-            this.callSession?.setUserXComponentId(userId, xcomponentId)
-        })
+            this.focusUserId = userId;
+        }
     }
 
     aboutToDisappear(): void {
@@ -105,6 +126,16 @@ export default struct MultiVideoCallPage {
             navigationBarContentColor: '#ffffff'
         };
         win?.setWindowSystemBarProperties(sysBarProps)
+
+        if (!this.pipController) {
+            this.createPipController()
+                .then(() => {
+                    console.log('xxxxxxx create pip success')
+                })
+                .catch((reason: BusinessError) => {
+                    console.log('xxxxxxxx create pip controller error', reason.message);
+                })
+        }
     }
 
     onPageHide(): void {
@@ -153,33 +184,71 @@ export default struct MultiVideoCallPage {
             if (this.updateActionAndDurationViewInterval) {
                 clearInterval(this.updateActionAndDurationViewInterval)
             }
-            this.mainNavPathStack.pop()
+            this.destroyPipController()
+
+            let index = this.mainNavPathStack.getIndexByName(navigationDestinations.MultiVideoCallPage)
+            if (index.length) {
+                this.mainNavPathStack.pop()
+            }
         }
         sessionCallback.didParticipantJoined = (userId: string, isScreenSharing) => {
             this.targetUserInfos = wfc.getUserInfos(this.callSession!.getParticipantIds()!)
-            this.participantProfiles = this.callSession?.getParticipantProfiles();
+            this.getParticipantProfilesAndUpdateVideoRenderControllerMap()
         }
         sessionCallback.didParticipantLeft = (userId: string, callEndReason: number, screenSharing = false) => {
             this.targetUserInfos = wfc.getUserInfos(this.callSession?.getParticipantIds()!)
-            this.participantProfiles = this.callSession?.getParticipantProfiles();
+            this.getParticipantProfilesAndUpdateVideoRenderControllerMap()
         }
         sessionCallback.didParticipantConnected = (userId: string, isScreenSharing) => {
             this.targetUserInfos = wfc.getUserInfos(this.callSession?.getParticipantIds()!)
-            this.participantProfiles = this.callSession?.getParticipantProfiles();
+            this.getParticipantProfilesAndUpdateVideoRenderControllerMap()
         }
         sessionCallback.didChangeMode = state => {
 
         }
         sessionCallback.didVideoMuted = (userId: string, muted: boolean) => {
-            this.participantProfiles = this.callSession?.getParticipantProfiles();
+            this.getParticipantProfilesAndUpdateVideoRenderControllerMap()
         }
-        // 一下回调高级版音视频 SDK 生效
+
+        sessionCallback.didCreateLocalVideoTrack = (videoTrack: VideoTrack, screenSharing: boolean) => {
+            this.focusVideoRenderController?.setVideoTrack(videoTrack)
+            this.focusVideoRenderController?.setScalingMode(ScalingMode.AspectFit)
+        }
+
+        sessionCallback.didReceiveRemoteVideoTrack = (userId: string, videoTrack: VideoTrack, screenSharing: boolean) => {
+            let controller = this.participantVideoRenderControllerMap.get(userId)
+            controller?.setVideoTrack(videoTrack)
+            controller?.setScalingMode(ScalingMode.AspectFit)
+        }
+
+        // 以下回调高级版音视频 SDK 生效
         sessionCallback.didMuteStateChanged = participants => {
 
         }
 
         // end
         this.callSession!.sessionCallback = sessionCallback;
+    }
+
+    getParticipantProfilesAndUpdateVideoRenderControllerMap() {
+        this.participantProfiles = this.callSession!.getParticipantProfiles()
+        if (!this.callSession!.audioOnly) {
+            let map = new Map<string, WFCVideoRenderController>()
+            this.participantProfiles?.forEach(p => {
+                let pid = this._participantId(p.userId, p.screenSharing);
+                let controller = this.participantVideoRenderControllerMap.get(pid)
+                if (!controller) {
+                    controller = new WFCVideoRenderController(pid)
+                }
+                map.set(pid, controller);
+            })
+            this.participantVideoRenderControllerMap = map;
+        }
+    }
+
+    // 其实是不支持屏幕共享的
+    _participantId(userId: string, screenSharing: boolean) {
+        return screenSharing ? 'screen_sharing_' + userId : userId
     }
 
     tip() {
@@ -246,7 +315,11 @@ export default struct MultiVideoCallPage {
                     .height(50)
                     .padding(10)
                     .onClick(async () => {
-                        // TODO
+                        this.pipController?.startPiP()
+                            .catch((reason: BusinessError) => {
+                                console.error('startPiP error', reason.code, reason.name, reason.message)
+                            })
+                        this.mainNavPathStack.pop()
                     })
 
                 Text(this.durationStr)
@@ -402,10 +475,15 @@ export default struct MultiVideoCallPage {
                     XComponent({
                         id: this.selfUserInfo!.uid + this.callSession?.callId,
                         type: XComponentType.SURFACE,
-                        libraryname: 'wfrtc',
+                        controller: this.focusVideoRenderController
                     })
                         .width('100%')
                         .height('100%')
+                        .onLoad(() => {
+                            let uid = this.selfUserInfo!.uid
+                            this.focusVideoRenderController?.setVideoTrack(this.callSession?.getParticipantVideoTrack(uid))
+                            this.focusVideoRenderController.setScalingMode(ScalingMode.AspectFit)
+                        })
                 }
                 .onClick(() => {
                     if (this.callSession?.status !== CallState.STATUS_CONNECTED) {
@@ -426,10 +504,14 @@ export default struct MultiVideoCallPage {
                             XComponent({
                                 id: userInfo.uid + this.callSession?.callId,
                                 type: XComponentType.SURFACE,
-                                libraryname: 'wfrtc'
+                                controller: this.participantVideoRenderControllerMap.get(userInfo.uid)
                             })
                                 .width('100%')
                                 .aspectRatio(1)
+                                .onLoad(() => {
+                                    let controller = this.participantVideoRenderControllerMap.get(userInfo.uid)
+                                    controller?.setVideoTrack(this.callSession?.getParticipantVideoTrack(userInfo.uid))
+                                })
                             if (this.participantStatus(userInfo) !== 4) {
                                 Image(userInfo.portrait)
                                     .width('100%')
@@ -438,7 +520,7 @@ export default struct MultiVideoCallPage {
                         }
                         .onClick(() => {
                             if (this.callSession?.status === CallState.STATUS_CONNECTED) {
-                                this.swapVideo(userInfo.uid + this.callSession?.callId)
+                                this.swapVideo(userInfo.uid)
                             }
                         })
                         .padding(5)
@@ -469,5 +551,36 @@ export default struct MultiVideoCallPage {
         .backgroundColor('#000000')
 
         // .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM])
+    }
+
+    async createPipController() {
+        this.pipController = await PiPWindow.create({
+            context: getContext(this),
+            componentController: this.focusVideoRenderController,
+            customUIController: this.voipPiPNodeController,
+            navigationId: uikit.bundleName,
+            templateType: PiPWindow.PiPTemplateType.VIDEO_CALL,
+            contentWidth: 200,
+            contentHeight: 300,
+        });
+        this.pipController.on('stateChange', (state: PiPWindow.PiPState, reason: string) => {
+            // this.onStateChange(state, reason);
+        });
+        this.pipController.on('controlPanelActionEvent', (event: PiPWindow.PiPActionEventType, status?: number) => {
+            // this.onActionEvent(event, status);
+        });
+        this.pipController.setAutoStartEnabled(true)
+        console.log('createPipController')
+    }
+
+    destroyPipController() {
+        if (!this.pipController) {
+            return;
+        }
+        this.pipController.setAutoStartEnabled(false)
+        this.pipController.off('stateChange');
+        this.pipController.off('controlPanelActionEvent');
+        this.pipController.stopPiP()
+        this.pipController = undefined;
     }
 }

@@ -115,7 +115,7 @@ export default class CompositeMessageContent extends MediaMessageContent {
                 'ms': arr,
             }
             let str = JSON.stringify(obj);
-            str = str.replace(/"uid":"([0-9]+)"/, "\"uid\":$1");
+            str = str.replace(new RegExp('"uid":"([0-9]+)"'), "\"uid\":$1");
             // str = str.replace(/"serverTime":"([0-9]+)"/, "\"serverTime\":$1");
 
             this.localPath = getContext(this).getApplicationContext()
@@ -141,7 +141,7 @@ export default class CompositeMessageContent extends MediaMessageContent {
         }
 
         let str = JSON.stringify(obj);
-        str = str.replace(/"uid":"([0-9]+)"/, "\"uid\":$1");
+        str = str.replace(new RegExp('"uid":"([0-9]+)"'), "\"uid\":$1");
         // str = str.replace(/"serverTime":"([0-9]+)"/, "\"serverTime\":$1");
 
         payload.binaryContent = wfc.utf8_to_b64(str)
@@ -167,7 +167,7 @@ export default class CompositeMessageContent extends MediaMessageContent {
         this.messages = [];
         // FIXME node 环境，decodeURIComponent 方法，有时候会在最后添加上@字符，目前尚未找到原因，先规避
         // str = str.substring(0, str.lastIndexOf('}') + 1);
-        str = str.replace(/"uid":([0-9]+)/g, "\"uid\":\"$1\"");
+        str = str.replace(new RegExp('"uid":([0-9]+)', 'g'), "\"uid\":\"$1\"");
         // str = str.replace(/"serverTime":([0-9]+)/g, "\"serverTime\":\"$1\"");
         let obj = JSON.parse(str) as Record<string, Object>;
         (obj.ms as Array<Record<string, Object>>).forEach(o => {

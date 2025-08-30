@@ -31,7 +31,7 @@ export default class TextMessageContent extends MessageContent {
             }
             // JSON.parse 和 JSON.stringify 不能处理java long
             let orgStr = JSON.stringify(obj);
-            let str = orgStr.replace(/"u":"([0-9]+)"/, "\"u\":$1");
+            let str = orgStr.replace(new RegExp('"u":"([0-9]+)"'), "\"u\":$1");
 
             payload.binaryContent = wfc.utf8_to_b64(str);
         }
@@ -46,7 +46,7 @@ export default class TextMessageContent extends MessageContent {
             let quoteInfoStr = wfc.b64_to_utf8(payload.binaryContent)
             // FIXME node 环境，decodeURIComponent 方法，有时候会在最后添加上@字符，目前尚未找到原因，先规避
             quoteInfoStr = quoteInfoStr.substring(0, quoteInfoStr.lastIndexOf('}') + 1)
-            quoteInfoStr = quoteInfoStr.replace(/"u":([0-9]+),/, '"u":"$1",')
+            quoteInfoStr = quoteInfoStr.replace(new RegExp('"u":([0-9]+),'), '"u":"$1",')
             let obj = JSON.parse(quoteInfoStr) as Record<string, QuoteInfoPayload>
 
             this.quoteInfo = new QuoteInfo();

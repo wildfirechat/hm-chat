@@ -20,3 +20,10 @@ export const parseHostAndPort = (urlStr: string): HostPortPair => {
         port
     }
 }
+//https://developer.huawei.com/consumer/cn/doc/harmonyos-references-V5/ts-basic-components-image-V5#colorfilter9
+export const WHITE_FILTER = [
+    0, 0, 0, 0, 157,
+    0, 0, 0, 0, 171,
+    0, 0, 0, 0, 192,
+    0, 0, 0, 1, 0
+]

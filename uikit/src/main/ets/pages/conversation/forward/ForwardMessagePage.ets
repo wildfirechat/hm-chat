@@ -20,6 +20,7 @@ import GroupType from '@wfc/client/src/main/ets/wfc/model/groupType'
 import MessageContent from '@wfc/client/src/main/ets/wfc/messages/messageContent'
 import CallStartMessageContent from '@wfc/client/src/main/ets/wfc/av/messages/callStartMessageContent'
 import SoundMessageContent from '@wfc/client/src/main/ets/wfc/messages/soundMessageContent'
+import { window } from '@kit.ArkUI'
 
 @Entry
 @Component
@@ -39,9 +40,18 @@ export default struct ForwardMessagePage {
         if (params) {
             let msgs: Message[] = params['messages'] as Message[]
             // 通过 params 传递的对象，会丢失方法，故
-            this.messages = msgs.map(msg => wfc.getMessageById(msg.messageId)!)
+            this.messages = msgs.map(msg => {
+                if (msg.messageId > 0) {
+                    return wfc.getMessageById(msg.messageId)!
+                } else {
+                    return msg
+                }
+
+            })
             this.forwardType = params['forwardType'] as 'oneByOne' | 'compose'
         }
+        let win = AppStorage.get<window.Window>('window')
+        win?.setWindowLayoutFullScreen(false)
     }
 
     private searchModules: SearchModule[] = [

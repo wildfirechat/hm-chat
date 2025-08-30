@@ -154,7 +154,7 @@ export default struct ConversationInputPanelView {
                                             avenginekit.startCall(this.conversation, [this.conversation.target], false)
                                         } else if (this.conversation.type === ConversationType.Group) {
                                             this.showExtContentCoverModal = true
-                                            this.extContentCoverBuilderParam = this.pickGroupMemberModal
+                                            this.extContentCoverBuilderParam = this.pickGroupMemberToStartCallModal
                                             this.voipAudioOnly = false
                                         } else {
 
@@ -174,7 +174,7 @@ export default struct ConversationInputPanelView {
                                             avenginekit.startCall(this.conversation, [this.conversation.target], true)
                                         } else if (this.conversation.type === ConversationType.Group) {
                                             this.showExtContentCoverModal = true
-                                            this.extContentCoverBuilderParam = this.pickGroupMemberModal
+                                            this.extContentCoverBuilderParam = this.pickGroupMemberToStartCallModal
                                             this.voipAudioOnly = true
                                         }
                                     } else {
@@ -613,7 +613,7 @@ export default struct ConversationInputPanelView {
     @BuilderParam extContentCoverBuilderParam: () => void = this.dummyContentCoverBuilder
 
     @Builder
-    pickGroupMemberModal() {
+    pickGroupMemberToStartCallModal() {
         PickGroupMemberModal({
             groupId: this.conversation.target,
             title: '选择群成员',

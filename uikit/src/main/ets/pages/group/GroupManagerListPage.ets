@@ -48,7 +48,7 @@ export default struct GroupManagerListPage {
                     .padding(10)
                     .width('100%')
                 Row() {
-                    Image(this.groupOwnerUerInfo?.portrait)
+                    Image(this.groupOwnerUerInfo!.portrait)
                         .width(40)
                         .height(40)
                         .margin(10)

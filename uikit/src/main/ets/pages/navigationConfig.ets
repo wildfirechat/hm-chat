@@ -42,7 +42,11 @@ import GroupMemberPermissionPage from './group/GroupMemberPermissionPage'
 import GroupMemberListPage from './group/GroupMemberListPage'
 import ChatroomConversationInfoPage from './conversation/ChatroomConversationInfoPage'
 import FileRecordPage from './me/FileRecordPage'
-import ConferenceInfoPage from './voip/ConferenceInfoPage'
+import ConferenceInfoPage from './voip/conference/ConferenceInfoPage'
+import ConferencePortalPage from './voip/conference/ConferencePortalPage'
+import ConferencePage from './voip/conference/ConferencePage'
+import StartConferencePage from './voip/conference/StartConferencePage'
+import ConferenceParticipantListPage from './voip/conference/ConferenceParticipantListPage'
 
 export class navigationDestinations {
     static SearchPortalPage = 'searchPortalPage'
@@ -89,9 +93,13 @@ export class navigationDestinations {
     static SingleVideoCallPage = 'singleVideoCallPage'
     static MultiAudioCallPage = 'multiAudioCallPage'
     static MultiVideoCallPage = 'multiVideoCallPage'
+    static ConferencePage = 'conferencePage'
     static GroupMemberPermissionPage = 'groupMemberPermissionPage'
     static GroupMemberListPage = 'groupMemberListPage'
     static ConferenceInfoPage = 'conferenceInfoPage'
+    static ConferencePortalPage = 'conferencePortalPage'
+    static StartConferencePage = 'startConferencePage'
+    static ConferenceParticipantListPage = 'conferenceParticipantListPage'
 }
 
 @Builder
@@ -172,6 +180,10 @@ export function UIKitPageMap(name: string) {
         PCSessionPage()
     } else if (name === navigationDestinations.UpdateUserNickNameOrAliasPage) {
         UpdateUserNickNameOrAliasPage()
+    } else if (name === navigationDestinations.GroupMemberPermissionPage) {
+        GroupMemberPermissionPage()
+    } else if (name === navigationDestinations.GroupMemberListPage) {
+        GroupMemberListPage()
     } else if (name === navigationDestinations.SingleVideoCallPage) {
         SingleVideoCallPage()
     } else if (name === navigationDestinations.SingleAudioCallPage) {
@@ -180,11 +192,15 @@ export function UIKitPageMap(name: string) {
         MultiAudioCallPage()
     } else if (name === navigationDestinations.MultiVideoCallPage) {
         MultiVideoCallPage()
-    } else if (name === navigationDestinations.GroupMemberPermissionPage) {
-        GroupMemberPermissionPage()
-    } else if (name === navigationDestinations.GroupMemberListPage) {
-        GroupMemberListPage()
+    } else if (name === navigationDestinations.ConferencePortalPage) {
+        ConferencePortalPage()
     } else if (name === navigationDestinations.ConferenceInfoPage) {
         ConferenceInfoPage()
+    } else if (name === navigationDestinations.ConferencePage) {
+        ConferencePage()
+    } else if (name === navigationDestinations.StartConferencePage) {
+        StartConferencePage()
+    } else if (name === navigationDestinations.ConferenceParticipantListPage) {
+        ConferenceParticipantListPage()
     }
 }

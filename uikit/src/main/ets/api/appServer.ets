@@ -184,8 +184,9 @@ class AppServer {
         return this._post('/conference/is_fav/' + conferenceId);
     }
 
-    getFavConferences() {
-        return this._post('/conference/fav_conferences');
+    async getFavConferences() {
+        let result = await this._post('/conference/fav_conferences');
+        return result as ConferenceInfo[]
     }
 
     updateConference(conferenceInfo: ConferenceInfo) {

@@ -186,7 +186,7 @@ export default struct OrderConferencePage {
                             info.conferenceTitle = this.title;
                             info.pin = `${Math.floor(Math.random() * 10)}${Math.floor(Math.random() * 10)}${Math.floor(Math.random() * 10)}${Math.floor(Math.random() * 10)}`
                             info.owner = wfc.getUserId()
-                            info.startTime = Math.ceil(new Date().getTime() / 1000);
+                            info.startTime = Math.ceil(this.startTime.getTime() / 1000);
                             info.endTime = Math.ceil(this.endTime.getTime() / 1000);
                             info.audience = this.audienceSwitch;
                             info.allowSwitchMode = this.modeSwitch;

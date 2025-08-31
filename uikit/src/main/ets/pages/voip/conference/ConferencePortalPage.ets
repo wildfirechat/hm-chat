@@ -8,14 +8,26 @@ import appServer from '../../../api/appServer';
 import ConferenceInfo from '@wfc/avenginekit/src/main/ets/wfc/av/model/conferenceInfo'
 import JoinConferenceDialog from './JoinConferenceDialog'
 import { showToast } from '../../../common/utils/Toast'
+import OptionItemView from '../../../view/OptionItemView'
 
 @Entry
 @Component
 export default struct ConferencePortalPage {
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack
+    @State favConferenceInfos: ConferenceInfo[] = []
     private joinConferenceDialogController?: CustomDialogController
 
     aboutToAppear() {
+        this.loadFavConferences()
+    }
+
+    loadFavConferences() {
+        appServer.getFavConferences()
+            .then(infos => {
+                this.favConferenceInfos = infos.filter(info => {
+                    return info.endTime * 1000 > new Date().getTime()
+                });
+            })
     }
 
     build() {
@@ -75,7 +87,7 @@ export default struct ConferencePortalPage {
                         .padding({ top: 5 })
                 }
                 .onClick(() => {
-                    this.mainNavPathStack.pushPathByName(navigationDestinations.OrderConferencePage , {} as Record<string, Object>)
+                    this.mainNavPathStack.pushPathByName(navigationDestinations.OrderConferencePage, {} as Record<string, Object>)
                 })
             }
             .width('100%')
@@ -84,15 +96,28 @@ export default struct ConferencePortalPage {
 
             Stack() {
                 List() {
-                    ListItem() {
-                        Row() {
-                            Text('会议 1')
+                    ForEach(this.favConferenceInfos, (info: ConferenceInfo, index: number) => {
+                        ListItem() {
+                            OptionItemView({
+                                title: info.conferenceTitle,
+                                subTitle: info.startTime * 1000 < new Date().getTime() ? '会议已开始，请尽快加入' : '会议尚未开始',
+                                showRightArrow: false
+                            })
                         }
-                    }
+                        .onClick(() => {
+                            this.mainNavPathStack.pushPathByName(navigationDestinations.ConferenceInfoPage, {
+                                'conferenceId': info.conferenceId,
+                                'password': info.password
+                            } as Record<string, string>)
 
+                        })
+
+                    }, (info: ConferenceInfo, index: number) => {
+                        return index + ''
+                    })
                 }
                 .width('100%')
-                .padding(10)
+                .height('100%')
 
                 Row() {
                     Text('会议记录')
@@ -102,6 +127,7 @@ export default struct ConferencePortalPage {
                             showToast('TODO')
                         })
                 }
+                .visibility(Visibility.Hidden)
                 .width('100%')
                 .justifyContent(FlexAlign.End)
 
@@ -109,6 +135,9 @@ export default struct ConferencePortalPage {
             .width('100%')
 
         }
+        .onShown(() => {
+            this.loadFavConferences()
+        })
         .title('会议')
         .height('100%')
         .width('100%')

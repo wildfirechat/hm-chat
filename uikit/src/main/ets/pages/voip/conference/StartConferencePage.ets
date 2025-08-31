@@ -169,38 +169,10 @@ export default struct StartConferencePage {
                                 showToast('请输入会议主题')
                                 return
                             }
-                            // ConferenceInfo info = new ConferenceInfo();
-                            // Toast.makeText(this, R.string.conference_creating, Toast.LENGTH_SHORT).show();
-                            // info.setPassword(password);
-                            // info.setConferenceTitle(titleEditText.getText().toString());
-                            // Random random = new Random();
-                            // String pin = String.format("%d%d%d%d", random.nextInt() % 10, random.nextInt() % 10, random.nextInt() % 10, random.nextInt() % 10);
-                            // info.setPin(pin);
-                            //
-                            // info.setOwner(ChatManager.Instance().getUserId());
-                            // info.setStartTime(System.currentTimeMillis() / 1000);
-                            // info.setEndTime(endDateTime.getTime() / 1000);
-                            // info.setAudience(!audienceSwitch.isChecked());
-                            // info.setAllowTurnOnMic(modeSwitch.isChecked());
-                            // info.setAdvance(advancedSwitch.isChecked());
-                            // // 可根据实际情况调整
-                            // info.setMaxParticipants(20);
-                            //
-                            let info = new ConferenceInfo();
-                            info.password = this.passwordSwitch ? this.password : ''
-                            info.conferenceTitle = this.title;
-                            info.pin = `${Math.floor(Math.random() * 10)}${Math.floor(Math.random() * 10)}${Math.floor(Math.random() * 10)}${Math.floor(Math.random() * 10)}`
-                            info.owner = wfc.getUserId()
-                            info.startTime = Math.ceil(new Date().getTime() / 1000);
-                            info.endTime = Math.ceil(this.endTime.getTime() / 1000);
-                            info.audience = this.audienceSwitch;
-                            info.allowSwitchMode = this.modeSwitch;
-                            info.advance = this.advancedSwitch;
                             try {
-                                let conferenceId = await appServer.createConference(info)
-                                let callSession = avengineKit.joinConference(conferenceId, false, info.pin, info.owner, info.conferenceTitle, '', false, info.advance, false, true, '', '')
+                                let info = await this.createConference()
+                                let callSession = avengineKit.joinConference(info.conferenceId, false, info.pin, info.owner, info.conferenceTitle, '', false, info.advance, false, true, '', '')
                                 if (callSession) {
-                                    info.conferenceId = conferenceId
                                     let params = {} as Record<string, Object>
                                     params['conferenceInfo'] = info
                                     this.mainNavPathStack.pushPathByName(navigationDestinations.ConferencePage, params)
@@ -242,12 +214,38 @@ export default struct StartConferencePage {
                 .borderRadius(4)// .backgroundColor(Color.Blue)
                 .backgroundColor(Color.Transparent)
                 .fontColor(Color.Blue)
-                .onClick(() => {
+                .onClick(async () => {
+                    if (this.title.trim().length === 0) {
+                        showToast('请输入会议主题')
+                        return
+                    }
+                    try {
+                        await this.createConference()
+                    } catch (e) {
+                        console.log('创建会议失败', e)
+                        showToast('创建会议失败')
+                    }
                     this.mainNavPathStack.pop()
                 })
         }
         .height('100%')
         .justifyContent(FlexAlign.Center)
         .alignItems(VerticalAlign.Center)
+    }
+
+    async createConference(): Promise<ConferenceInfo> {
+        let info = new ConferenceInfo();
+        info.password = this.passwordSwitch ? this.password : ''
+        info.conferenceTitle = this.title;
+        info.pin = `${Math.floor(Math.random() * 10)}${Math.floor(Math.random() * 10)}${Math.floor(Math.random() * 10)}${Math.floor(Math.random() * 10)}`
+        info.owner = wfc.getUserId()
+        info.startTime = Math.ceil(new Date().getTime() / 1000);
+        info.endTime = Math.ceil(this.endTime.getTime() / 1000);
+        info.audience = this.audienceSwitch;
+        info.allowSwitchMode = this.modeSwitch;
+        info.advance = this.advancedSwitch;
+        let conferenceId = await appServer.createConference(info)
+        info.conferenceId = conferenceId
+        return info
     }
 }

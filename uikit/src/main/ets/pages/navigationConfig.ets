@@ -46,6 +46,7 @@ import ConferenceInfoPage from './voip/conference/ConferenceInfoPage'
 import ConferencePortalPage from './voip/conference/ConferencePortalPage'
 import ConferencePage from './voip/conference/ConferencePage'
 import StartConferencePage from './voip/conference/StartConferencePage'
+import OrderConferencePage from './voip/conference/OrderConferencePage'
 import ConferenceParticipantListPage from './voip/conference/ConferenceParticipantListPage'
 
 export class navigationDestinations {
@@ -99,6 +100,7 @@ export class navigationDestinations {
     static ConferenceInfoPage = 'conferenceInfoPage'
     static ConferencePortalPage = 'conferencePortalPage'
     static StartConferencePage = 'startConferencePage'
+    static OrderConferencePage = 'orderConferencePage'
     static ConferenceParticipantListPage = 'conferenceParticipantListPage'
 }
 
@@ -200,6 +202,8 @@ export function UIKitPageMap(name: string) {
         ConferencePage()
     } else if (name === navigationDestinations.StartConferencePage) {
         StartConferencePage()
+    } else if (name === navigationDestinations.OrderConferencePage) {
+        OrderConferencePage()
     } else if (name === navigationDestinations.ConferenceParticipantListPage) {
         ConferenceParticipantListPage()
     }

@@ -75,7 +75,7 @@ export default struct ConferencePortalPage {
                         .padding({ top: 5 })
                 }
                 .onClick(() => {
-                    showToast('TODO')
+                    this.mainNavPathStack.pushPathByName(navigationDestinations.OrderConferencePage , {} as Record<string, Object>)
                 })
             }
             .width('100%')

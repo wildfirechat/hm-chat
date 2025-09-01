@@ -129,7 +129,7 @@ export default class VoipPiPNodeController extends NodeController {
                 }
             }
             if (audioOnly) {
-                audioOnly = callSession.videoMuted
+                audioOnly = callSession.videoMuted || callSession.isScreenSharing()
             }
         }
         return audioOnly

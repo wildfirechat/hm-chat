@@ -7,12 +7,11 @@ import { ScalingMode, VideoRenderController } from '@ohos/webrtc'
 import { VideoTrack } from '@ohos/webrtc/src/main/libohos_webrtc/webrtc';
 import Config from '@wfc/client/src/main/ets/config'
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
-import { PiPWindow, router, window } from '@kit.ArkUI'
+import { PiPWindow, router, UIContext, window } from '@kit.ArkUI'
 import { BusinessError } from '@kit.BasicServicesKit'
 import AVCastPicker from '@ohos.multimedia.avCastPicker'
 import { timestampFormat } from '../../util/helper'
-import uikit from '../../uikit'
-import { HashMap } from '@kit.ArkTS'
+import pipHelper from './pipHelper'
 import { navigationDestinations } from '../navigationConfig'
 import WFCVideoRenderController from '@wfc/avenginekit/src/main/ets/wfc/av/xcomponent/WFCVideoRenderController'
 import VoipPiPNodeController from './VoipPiPNodeController'
@@ -58,6 +57,12 @@ export default struct SingleVideoCallPage {
         let localTrack = this.callSession.getParticipantVideoTrack(this.selfUserInfo.uid)
         if (localTrack) {
             this.previewXComponentController.setVideoTrack(localTrack)
+        }
+
+        let remoteTrack = this.callSession.getParticipantVideoTrack(this.targetUserInfo.uid)
+        if(remoteTrack){
+            this.focusXComponentController.setScalingMode(ScalingMode.AspectFit)
+            this.focusXComponentController.setVideoTrack(remoteTrack)
         }
     }
 
@@ -189,40 +194,20 @@ export default struct SingleVideoCallPage {
     }
 
     async createPipController() {
-        this.pipController = await PiPWindow.create({
-            context: getContext(this),
-            componentController: this.focusXComponentController,
-            customUIController: this.voipPiPNodeController,
-            navigationId: uikit.bundleName,
-            templateType: PiPWindow.PiPTemplateType.VIDEO_MEETING,
-            contentWidth: 200,
-            contentHeight: 300,
-        });
-        this.pipController.on('stateChange', (state: PiPWindow.PiPState, reason: string) => {
-            this.onStateChange(state, reason);
-        });
-        this.pipController.on('controlPanelActionEvent', (event: PiPWindow.PiPActionEventType, status?: number) => {
-            this.onActionEvent(event, status);
-        });
-        this.pipController.setAutoStartEnabled(true)
-        console.log('createPipController')
+        this.pipController = await pipHelper.createPipController(this.getUIContext(), this.focusXComponentController, this.voipPiPNodeController, this.mainNavPathStack, navigationDestinations.SingleVideoCallPage)
     }
 
     destroyPipController() {
         if (!this.pipController) {
             return;
         }
-        this.pipController.setAutoStartEnabled(false)
-        this.pipController.off('stateChange');
-        this.pipController.off('controlPanelActionEvent');
-        this.pipController.stopPiP()
+        pipHelper.destroyPipController()
         this.pipController = undefined;
     }
 
     onStateChange(state: PiPWindow.PiPState, reason: string) {
         console.log('onStateChange', state, reason)
         if (state === PiPWindow.PiPState.ABOUT_TO_START) {
-            this.mainNavPathStack.pop()
         }
         // switch (state) {
         //     case PiPWindow.PiPState.ABOUT_TO_START:
@@ -291,6 +276,7 @@ export default struct SingleVideoCallPage {
                                 .catch((reason: BusinessError) => {
                                     console.log('startPiP errr', reason.message)
                                 })
+                            this.mainNavPathStack.pop()
                             console.log('stop pip')
                         })
 

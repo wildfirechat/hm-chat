@@ -1,7 +1,8 @@
 import CallSession from '@wfc/avenginekit/src/main/ets/wfc/av/engine/callSession'
 import CallSessionCallback from '@wfc/avenginekit/src/main/ets/wfc/av/engine/callSessionCallback'
 import CallState from '@wfc/avenginekit/src/main/ets/wfc/av/engine/callState'
-import avengineKit from '@wfc/avenginekit'
+import avengineKitImpl from '@wfc/avenginekit'
+import avengineKit from '@wfc/avenginekit/src/main/ets/wfc/av/engine/avenginekit'
 import wfc from '@wfc/client'
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
 import AVCastPicker from '@ohos.multimedia.avCastPicker'
@@ -52,7 +53,7 @@ export default struct ConferencePage {
     static COUNT_PER_PAGE = 4;
 
     aboutToAppear(): void {
-        let callSession = avengineKit.getCurrentSession();
+        let callSession = avengineKitImpl.getCurrentSession();
 
         if (!callSession || callSession.status === CallState.STATUS_IDLE) {
             this.mainNavPathStack.pop()
@@ -482,6 +483,10 @@ export default struct ConferencePage {
                                 .height(30)
                                 .colorFilter(WHITE_FILTER)
                                 .onClick(() => {
+                                    if (this.callSession?.isScreenSharing() && avengineKit.SCREEN_SHARING_REPLACE_MODE) {
+                                        showToast('正在进行屏幕共享，请先结束共享')
+                                        return
+                                    }
                                     this.lastTriggerToShowActionAndDurationViewTimestamp = Date.now()
                                     let toMute = !this.callSession?.audioMuted
                                     if (this.callSession?.status === CallState.STATUS_CONNECTED) {
@@ -554,7 +559,16 @@ export default struct ConferencePage {
                                 .height(30)
                                 .colorFilter(WHITE_FILTER)
                                 .onClick(() => {
-                                    this.callSession?.startScreenShare()
+                                    if(this.callSession?.audience){
+                                        showToast('请先切换为互动者')
+                                        return
+                                    }
+                                    if (this.callSession?.isScreenSharing()) {
+                                        this.callSession?.stopScreenShare()
+                                    } else {
+                                        this.callSession?.startScreenShare()
+                                        this.minimize()
+                                    }
                                 })
                             Text('共享屏幕')
                                 .margin({ top: 10 })
@@ -712,7 +726,6 @@ export default struct ConferencePage {
                                         swiperIndex: participantFlexIndex + 1,
                                         currentSwiperIndex: this.currentSwiperIndex,
                                         xcomponentController: this.participantVideoRenderControllerMap.get(this.participantProfiles![participantFlexIndex * 3 + flexIndex].userId)
-                                        // xcomponentController: new VideoRenderController()
                                     })
                                         .width('50%')
                                         .height('50%')

@@ -119,6 +119,13 @@
                 "usedScene": {
                     "when": "inuse"
                 }
+            },
+            {
+                "name": "ohos.permission.KEEP_BACKGROUND_RUNNING",
+                "reason": "$string:reason_voip",
+                "usedScene": {
+                    "when": "inuse"
+                }
             }
         ]
     }

@@ -41,6 +41,10 @@
             "value": "位置信息"
         },
         {
+            "name": "reason_voip",
+            "value": "音视频通话"
+        },
+        {
             "name": "reason_floating_window",
             "value": " 音视频通话"
         },

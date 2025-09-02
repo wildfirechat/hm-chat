@@ -13,6 +13,7 @@ class PiPHelper {
     async createPipController(context: UIContext, componentController: XComponentController, customUIController: NodeController, mainNavPathStack: NavPathStack, navDestinationName: string) {
         console.log(PiPHelper.TAG, 'createPipController')
         if (this.pipController) {
+            console.log(PiPHelper.TAG, 'current pipController is valid')
             return
         }
         this.mainNavPathStack = mainNavPathStack

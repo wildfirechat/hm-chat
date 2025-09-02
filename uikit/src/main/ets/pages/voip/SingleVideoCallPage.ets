@@ -29,7 +29,6 @@ export default struct SingleVideoCallPage {
     private updateActionAndDurationViewInterval = 0
     private statusBarHeight = 0
     private focusUserId: string = ''
-    private pipController?: PiPWindow.PiPController;
     private focusXComponentController: WFCVideoRenderController = new WFCVideoRenderController()
     private previewXComponentController: WFCVideoRenderController = new WFCVideoRenderController()
     private isPageShow = false
@@ -60,7 +59,7 @@ export default struct SingleVideoCallPage {
         }
 
         let remoteTrack = this.callSession.getParticipantVideoTrack(this.targetUserInfo.uid)
-        if(remoteTrack){
+        if (remoteTrack) {
             this.focusXComponentController.setScalingMode(ScalingMode.AspectFit)
             this.focusXComponentController.setVideoTrack(remoteTrack)
         }
@@ -97,12 +96,7 @@ export default struct SingleVideoCallPage {
         };
         win?.setWindowSystemBarProperties(sysBarProps)
 
-        if (!this.pipController) {
-            this.createPipController()
-                .catch((reason: BusinessError) => {
-                    console.log('create pip controller error', reason.message);
-                })
-        }
+        this.createPipController()
     }
 
     onPageHide(): void {
@@ -194,15 +188,11 @@ export default struct SingleVideoCallPage {
     }
 
     async createPipController() {
-        this.pipController = await pipHelper.createPipController(this.getUIContext(), this.focusXComponentController, this.voipPiPNodeController, this.mainNavPathStack, navigationDestinations.SingleVideoCallPage)
+        await pipHelper.createPipController(this.getUIContext(), this.focusXComponentController, this.voipPiPNodeController, this.mainNavPathStack, navigationDestinations.SingleVideoCallPage)
     }
 
     destroyPipController() {
-        if (!this.pipController) {
-            return;
-        }
         pipHelper.destroyPipController()
-        this.pipController = undefined;
     }
 
     onStateChange(state: PiPWindow.PiPState, reason: string) {
@@ -272,12 +262,8 @@ export default struct SingleVideoCallPage {
                         .height(50)
                         .padding(10)
                         .onClick(async () => {
-                            this.pipController?.startPiP()
-                                .catch((reason: BusinessError) => {
-                                    console.log('startPiP errr', reason.message)
-                                })
+                            pipHelper.startPiP()
                             this.mainNavPathStack.pop()
-                            console.log('stop pip')
                         })
 
                     Text(this.durationStr)

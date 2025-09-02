@@ -10,6 +10,7 @@ import AVCastPicker from '@ohos.multimedia.avCastPicker'
 import { timestampFormat } from '../../util/helper'
 import uikit from '../../uikit'
 import { PiPWindow } from '@kit.ArkUI'
+import pipHelper from './pipHelper'
 import VoipPiPNodeController from './VoipPiPNodeController'
 import { navigationDestinations } from '../navigationConfig'
 
@@ -23,7 +24,6 @@ export default struct SingleAudioCallPage {
     @State durationStr: string = ''
     private durationInterval = 0
 
-    private pipController?: PiPWindow.PiPController;
     private voipPiPNodeController: VoipPiPNodeController = new VoipPiPNodeController('');
     private dummyXComponentController: XComponentController = new XComponentController()
 
@@ -43,7 +43,6 @@ export default struct SingleAudioCallPage {
     }
 
     onPageShow(): void {
-        if (!this.pipController) {
             this.createPipController()
                 .then(() => {
                     console.log('xxxxxxx create pip success')
@@ -51,7 +50,6 @@ export default struct SingleAudioCallPage {
                 .catch((reason: BusinessError) => {
                     console.log('xxxxxxxx create pip controller error', reason.message);
                 })
-        }
     }
 
     onPageHide(): void {
@@ -107,34 +105,11 @@ export default struct SingleAudioCallPage {
     }
 
     async createPipController() {
-        this.pipController = await PiPWindow.create({
-            context: getContext(this),
-            componentController: this.dummyXComponentController,
-            customUIController: this.voipPiPNodeController,
-            navigationId: uikit.bundleName,
-            templateType: PiPWindow.PiPTemplateType.VIDEO_CALL,
-            contentWidth: 200,
-            contentHeight: 300,
-        });
-        this.pipController.on('stateChange', (state: PiPWindow.PiPState, reason: string) => {
-            this.onStateChange(state, reason);
-        });
-        this.pipController.on('controlPanelActionEvent', (event: PiPWindow.PiPActionEventType, status?: number) => {
-            this.onActionEvent(event, status);
-        });
-        this.pipController.setAutoStartEnabled(true)
-        console.log('createPipController')
+        pipHelper.createPipController(this.getUIContext(), this.dummyXComponentController, this.voipPiPNodeController, this.mainNavPathStack, navigationDestinations.SingleVideoCallPage)
     }
 
     destroyPipController() {
-        if (!this.pipController) {
-            return;
-        }
-        this.pipController.setAutoStartEnabled(false)
-        this.pipController.off('stateChange');
-        this.pipController.off('controlPanelActionEvent');
-        this.pipController.stopPiP()
-        this.pipController = undefined;
+        pipHelper.destroyPipController()
     }
 
     onStateChange(state: PiPWindow.PiPState, reason: string) {
@@ -226,10 +201,7 @@ export default struct SingleAudioCallPage {
                                 .height(50)
                                 .padding(10)
                                 .onClick(async () => {
-                                    this.pipController?.startPiP()
-                                        .catch((reason: BusinessError) => {
-                                            console.error('startPiP error', reason.code, reason.name, reason.message)
-                                        })
+                                    pipHelper.startPiP()
                                     this.mainNavPathStack.pop()
                                 })
                         }

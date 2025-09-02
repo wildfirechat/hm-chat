@@ -3,14 +3,17 @@ import { backgroundTaskManager } from '@kit.BackgroundTasksKit';
 import { BusinessError } from '@kit.BasicServicesKit';
 import uikit from '../uikit';
 
-export function startContinuousTask(context: Context) {
+export function startContinuousTask(context: Context, continuousTaskLabel: string) {
     let wantAgentInfo: wantAgent.WantAgentInfo = {
         // 点击通知后，将要执行的动作列表
         // 添加需要被拉起应用的bundleName和abilityName
         wants: [
             {
                 bundleName: uikit.bundleName,
-                abilityName: uikit.entryAbilityName
+                abilityName: uikit.entryAbilityName,
+                parameters: {
+                    continuousTaskLabel: continuousTaskLabel,
+                }
             }
         ],
         // 指定点击通知栏消息后的动作是拉起ability

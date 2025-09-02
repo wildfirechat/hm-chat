@@ -9,5 +9,6 @@
     "dependencies": {
         "@wfc/client": "file:../client",
         "@wfc/uikit": "file:../uikit",
+        "@wfc/avenginekit": "file:../uikit/libs/avenginekit.har"
     }
 }

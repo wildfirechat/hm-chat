@@ -174,10 +174,11 @@ export default class EntryAbility extends UIAbility {
     }
 
     private parseLaunchParamsAndThen(want: Want) {
-        let conversation = want.parameters?.conversation as Conversation
-        if (conversation) {
-            this.storage.setOrCreate<Conversation>('targetConversation', conversation);
-        }
+        // let conversation = want.parameters?.conversation as Conversation
+        // let params: Record<string, Object> = {}
+        // if (conversation) {
+        this.storage.setOrCreate<Record<string, Object>>('wantParams', want.parameters);
+        // }
         // TODO more，比如跳转到加好友、voip 相关页面
     }
 }

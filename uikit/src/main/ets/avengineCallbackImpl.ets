@@ -33,7 +33,7 @@ export default class AVEngineCallbackImpl extends AVEngineCallback {
      * @param {CallSession} session 会话信息
      */
     async onReceiveCall(session: CallSession) {
-        this.createAVSessionAndStartContinuousTask(session.audioOnly)
+        this.createAVSessionAndStartContinuousTask(session)
         let name = ''
         if (session.conversation?.type === ConversationType.Single) {
             if (session.audioOnly) {
@@ -58,7 +58,7 @@ export default class AVEngineCallbackImpl extends AVEngineCallback {
      * @param session 会话信息
      */
     onStartCall = (session: CallSession) => {
-        this.createAVSessionAndStartContinuousTask(session.audioOnly)
+        this.createAVSessionAndStartContinuousTask(session)
         let name = ''
         if (session.conversation?.type === ConversationType.Single) {
             if (session.audioOnly) {
@@ -83,7 +83,7 @@ export default class AVEngineCallbackImpl extends AVEngineCallback {
      * @param session 会话信息
      */
     onJoinConference(session: CallSession) {
-        this.createAVSessionAndStartContinuousTask(session.audioOnly)
+        this.createAVSessionAndStartContinuousTask(session)
         // 不加载页面，仅仅开始 avSession
     }
 
@@ -105,14 +105,14 @@ export default class AVEngineCallbackImpl extends AVEngineCallback {
         mainWindow?.setWindowKeepScreenOn(false)
     }
 
-    private async createAVSessionAndStartContinuousTask(audioOnly: boolean) {
-        let type: AVSessionManager.AVSessionType = audioOnly ? 'voice_call' : 'video_call';
+    private async createAVSessionAndStartContinuousTask(callSession: CallSession) {
+        let type: AVSessionManager.AVSessionType = callSession.audioOnly ? 'voice_call' : 'video_call';
         this.avSession = await AVSessionManager.createAVSession(this.context, 'voip', type);
         console.log('AVSession成功：' + JSON.stringify(this.avSession))
         // 激活接口要在元数据、控制命令注册完成之后再执行
         await this.avSession.activate();
         try {
-            startContinuousTask(this.context)
+            startContinuousTask(this.context, 'voip')
         } catch (e) {
             console.log('startBackgroundRunning', e)
         }

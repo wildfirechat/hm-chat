@@ -29,6 +29,8 @@ import EventType from '@wfc/client/src/main/ets/wfc/client/wfcEvent'
 import PCLoginRequestMessageContent from '@wfc/client/src/main/ets/wfc/messages/pcLoginRequestMessageContent'
 import uikit from '@wfc/uikit'
 import { common } from '@kit.AbilityKit'
+import avengineKit from '@wfc/avenginekit'
+import pipHelper from '@wfc/uikit/src/main/ets/pages/voip/pipHelper'
 
 const TAG = 'Main';
 
@@ -53,10 +55,10 @@ struct MainPage {
     @State meTabUnreadCount: number = 0
     @State showPickContactModal: boolean = false
     @Provide('mainNavPathStack') mainNavPathStack: NavPathStack = uikit.mainNavPathStack
-    @LocalStorageProp('targetConversation') @Watch('onTargetConversation') targetConversation?: Conversation = undefined
+    @LocalStorageProp('wantParams') @Watch('onWantParams') wantParams?: Record<string, Object> = undefined
 
-    onTargetConversation() {
-        let conversation = this.targetConversation
+    onWantParams() {
+        let conversation = this.wantParams?.conversation as Conversation
         if (conversation) {
             storage.delete('targetConversation')
             wfc.clearConversationUnreadStatus(conversation!)
@@ -74,6 +76,14 @@ struct MainPage {
                     'conversation': conversation
                 } as Record<string, Object>)
             }
+        }
+        let voip = this.wantParams?.continuousTaskLabel as string
+        if (voip) {
+            let callSession = avengineKit.getCurrentSession();
+            if (!callSession) {
+                return
+            }
+            pipHelper.stopPiP()
         }
     }
 
@@ -300,10 +310,10 @@ struct MainPage {
                                 this.showGroup(value)
                                 break
                                 break
-                        // case WfcScheme.QR_CODE_PREFIX_CHANNEL:
-                        //     break
-                        // case WfcScheme.QR_CODE_PREFIX_CONFERENCE:
-                        //     break
+                            // case WfcScheme.QR_CODE_PREFIX_CHANNEL:
+                            //     break
+                            // case WfcScheme.QR_CODE_PREFIX_CONFERENCE:
+                            //     break
                             default:
                                 showToast('qrcode: ' + qrcode);
                                 break

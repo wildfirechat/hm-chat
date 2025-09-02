@@ -195,62 +195,6 @@ export default struct SingleVideoCallPage {
         pipHelper.destroyPipController()
     }
 
-    onStateChange(state: PiPWindow.PiPState, reason: string) {
-        console.log('onStateChange', state, reason)
-        if (state === PiPWindow.PiPState.ABOUT_TO_START) {
-        }
-        // switch (state) {
-        //     case PiPWindow.PiPState.ABOUT_TO_START:
-        //         this.curState = 'ABOUT_TO_START';
-        //         this.curError = $r('app.string.current_error_hint');
-        //         break;
-        //     case PiPWindow.PiPState.STARTED:
-        //         this.curState = 'STARTED';
-        //         this.curError = $r('app.string.current_error_hint');
-        //         break;
-        //     case PiPWindow.PiPState.ABOUT_TO_STOP:
-        //         this.curState = 'ABOUT_TO_STOP';
-        //         this.curError = $r('app.string.current_error_hint');
-        //         break;
-        //     case PiPWindow.PiPState.STOPPED:
-        //         this.player?.updatePlayStatus(true);
-        //         this.player?.play();
-        //         this.curState = 'STOPPED';
-        //         this.curError = $r('app.string.current_error_hint');
-        //         break;
-        //     case PiPWindow.PiPState.ABOUT_TO_RESTORE:
-        //         this.curState = 'ABOUT_TO_RESTORE';
-        //         this.curError = $r('app.string.current_error_hint');
-        //         break;
-        //     case PiPWindow.PiPState.ERROR:
-        //         this.curState = 'ERROR';
-        //         this.curError = reason;
-        //         break;
-        //     default:
-        //         break;
-        // }
-        // Logger.info(`[${TAG}] onStateChange: ${this.curState}, reason: ${reason}`);
-    }
-
-    onActionEvent(event: PiPWindow.PiPActionEventType, status: number | undefined) {
-        console.log('onActionEvent', event, status)
-        // switch (event) {
-        //     case 'playbackStateChanged':
-        //         if (status === 0) {
-        //             this.player?.updatePlayStatus(false);
-        //             this.player?.pause();
-        //         } else {
-        //             this.player?.updatePlayStatus(true);
-        //             this.player?.play();
-        //         }
-        //         break;
-        //     default:
-        //         break;
-        // }
-        // this.buttonAction = event + `-status:${status}`;
-        // Logger.info(`[${TAG}] onActionEvent: ${this.buttonAction} status:${status}}`);
-    }
-
     @Builder
     actionAndDurationView() {
         Column() {

@@ -15,6 +15,7 @@ import VoipPiPNodeController from './VoipPiPNodeController'
 import uikit from '../../uikit'
 import { BusinessError } from '@kit.BasicServicesKit'
 import { navigationDestinations } from '../navigationConfig'
+import pipHelper from './pipHelper'
 
 @Component
 export default struct MultiVideoCallPage {
@@ -35,7 +36,6 @@ export default struct MultiVideoCallPage {
     // not include self
     private focusVideoRenderController = new WFCVideoRenderController('focus-xcp')
     private participantVideoRenderControllerMap = new Map<string, WFCVideoRenderController>()
-    private pipController?: PiPWindow.PiPController;
     private voipPiPNodeController: VoipPiPNodeController = new VoipPiPNodeController('');
 
     aboutToAppear(): void {
@@ -126,15 +126,13 @@ export default struct MultiVideoCallPage {
         };
         win?.setWindowSystemBarProperties(sysBarProps)
 
-        if (!this.pipController) {
-            this.createPipController()
-                .then(() => {
-                    console.log('xxxxxxx create pip success')
-                })
-                .catch((reason: BusinessError) => {
-                    console.log('xxxxxxxx create pip controller error', reason.message);
-                })
-        }
+        this.createPipController()
+            .then(() => {
+                console.log('xxxxxxx create pip success')
+            })
+            .catch((reason: BusinessError) => {
+                console.log('xxxxxxxx create pip controller error', reason.message);
+            })
     }
 
     onPageHide(): void {
@@ -314,10 +312,7 @@ export default struct MultiVideoCallPage {
                     .height(50)
                     .padding(10)
                     .onClick(async () => {
-                        this.pipController?.startPiP()
-                            .catch((reason: BusinessError) => {
-                                console.error('startPiP error', reason.code, reason.name, reason.message)
-                            })
+                        pipHelper.startPiP()
                         this.mainNavPathStack.pop()
                     })
 
@@ -553,33 +548,10 @@ export default struct MultiVideoCallPage {
     }
 
     async createPipController() {
-        this.pipController = await PiPWindow.create({
-            context: getContext(this),
-            componentController: this.focusVideoRenderController,
-            customUIController: this.voipPiPNodeController,
-            navigationId: uikit.bundleName,
-            templateType: PiPWindow.PiPTemplateType.VIDEO_CALL,
-            contentWidth: 200,
-            contentHeight: 300,
-        });
-        this.pipController.on('stateChange', (state: PiPWindow.PiPState, reason: string) => {
-            // this.onStateChange(state, reason);
-        });
-        this.pipController.on('controlPanelActionEvent', (event: PiPWindow.PiPActionEventType, status?: number) => {
-            // this.onActionEvent(event, status);
-        });
-        this.pipController.setAutoStartEnabled(true)
-        console.log('createPipController')
+        await pipHelper.createPipController(this.getUIContext(), this.focusVideoRenderController, this.voipPiPNodeController, this.mainNavPathStack, navigationDestinations.MultiVideoCallPage)
     }
 
     destroyPipController() {
-        if (!this.pipController) {
-            return;
-        }
-        this.pipController.setAutoStartEnabled(false)
-        this.pipController.off('stateChange');
-        this.pipController.off('controlPanelActionEvent');
-        this.pipController.stopPiP()
-        this.pipController = undefined;
+        pipHelper.destroyPipController()
     }
 }

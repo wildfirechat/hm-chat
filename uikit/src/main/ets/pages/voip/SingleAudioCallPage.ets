@@ -8,7 +8,6 @@ import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
 import { BusinessError } from '@kit.BasicServicesKit'
 import AVCastPicker from '@ohos.multimedia.avCastPicker'
 import { timestampFormat } from '../../util/helper'
-import uikit from '../../uikit'
 import { PiPWindow } from '@kit.ArkUI'
 import pipHelper from './pipHelper'
 import VoipPiPNodeController from './VoipPiPNodeController'
@@ -105,68 +104,11 @@ export default struct SingleAudioCallPage {
     }
 
     async createPipController() {
-        pipHelper.createPipController(this.getUIContext(), this.dummyXComponentController, this.voipPiPNodeController, this.mainNavPathStack, navigationDestinations.SingleVideoCallPage)
+        pipHelper.createPipController(this.getUIContext(), this.dummyXComponentController, this.voipPiPNodeController, this.mainNavPathStack, navigationDestinations.SingleAudioCallPage)
     }
 
     destroyPipController() {
         pipHelper.destroyPipController()
-    }
-
-    onStateChange(state: PiPWindow.PiPState, reason: string) {
-        console.log('onStateChange', state, reason)
-        if (state === PiPWindow.PiPState.ABOUT_TO_START) {
-            this.mainNavPathStack.pop()
-        }
-        // switch (state) {
-        //     case PiPWindow.PiPState.ABOUT_TO_START:
-        //         this.curState = 'ABOUT_TO_START';
-        //         this.curError = $r('app.string.current_error_hint');
-        //         break;
-        //     case PiPWindow.PiPState.STARTED:
-        //         this.curState = 'STARTED';
-        //         this.curError = $r('app.string.current_error_hint');
-        //         break;
-        //     case PiPWindow.PiPState.ABOUT_TO_STOP:
-        //         this.curState = 'ABOUT_TO_STOP';
-        //         this.curError = $r('app.string.current_error_hint');
-        //         break;
-        //     case PiPWindow.PiPState.STOPPED:
-        //         this.player?.updatePlayStatus(true);
-        //         this.player?.play();
-        //         this.curState = 'STOPPED';
-        //         this.curError = $r('app.string.current_error_hint');
-        //         break;
-        //     case PiPWindow.PiPState.ABOUT_TO_RESTORE:
-        //         this.curState = 'ABOUT_TO_RESTORE';
-        //         this.curError = $r('app.string.current_error_hint');
-        //         break;
-        //     case PiPWindow.PiPState.ERROR:
-        //         this.curState = 'ERROR';
-        //         this.curError = reason;
-        //         break;
-        //     default:
-        //         break;
-        // }
-        // Logger.info(`[${TAG}] onStateChange: ${this.curState}, reason: ${reason}`);
-    }
-
-    onActionEvent(event: PiPWindow.PiPActionEventType, status: number | undefined) {
-        console.log('onActionEvent', event, status)
-        // switch (event) {
-        //     case 'playbackStateChanged':
-        //         if (status === 0) {
-        //             this.player?.updatePlayStatus(false);
-        //             this.player?.pause();
-        //         } else {
-        //             this.player?.updatePlayStatus(true);
-        //             this.player?.play();
-        //         }
-        //         break;
-        //     default:
-        //         break;
-        // }
-        // this.buttonAction = event + `-status:${status}`;
-        // Logger.info(`[${TAG}] onActionEvent: ${this.buttonAction} status:${status}}`);
     }
 
     build() {

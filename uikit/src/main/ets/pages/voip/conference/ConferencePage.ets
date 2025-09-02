@@ -24,6 +24,7 @@ import { navigationDestinations } from '../../navigationConfig'
 import ConferenceInviteMessageContent from '@wfc/client/src/main/ets/wfc/av/messages/conferenceInviteMessageContent'
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
+import pipHelper from '../pipHelper'
 
 @Component
 export default struct ConferencePage {
@@ -48,7 +49,6 @@ export default struct ConferencePage {
     private participantVideoRenderControllerMap = new Map<string, WFCVideoRenderController>()
     private focusXComponentController: WFCVideoRenderController = new WFCVideoRenderController('focus-xcp')
     private previewXComponentController: WFCVideoRenderController = new WFCVideoRenderController('preview-xcp')
-    pipController?: PiPWindow.PiPController;
     private voipPiPNodeController: VoipPiPNodeController = new VoipPiPNodeController('');
     static COUNT_PER_PAGE = 4;
 
@@ -209,7 +209,6 @@ export default struct ConferencePage {
         };
         win?.setWindowSystemBarProperties(sysBarProps)
 
-        if (!this.pipController) {
             this.createPipController()
                 .then(() => {
                     console.log('xxxxxxx create pip success')
@@ -217,7 +216,6 @@ export default struct ConferencePage {
                 .catch((reason: BusinessError) => {
                     console.log('xxxxxxxx create pip controller error', reason.message);
                 })
-        }
     }
 
     onPageHide(): void {
@@ -765,42 +763,16 @@ export default struct ConferencePage {
 
     minimize() {
         this.showConferenceMoreActionSheet = false
-        this.pipController?.startPiP()
-            .catch((reason: BusinessError) => {
-                console.error('startPiP error', reason.code, reason.name, reason.message)
-            })
+        pipHelper.startPiP()
         this.mainNavPathStack.pop()
     }
 
     async createPipController() {
-        this.pipController = await PiPWindow.create({
-            context: this.getUIContext().getHostContext(),
-            componentController: this.focusXComponentController,
-            customUIController: this.voipPiPNodeController,
-            navigationId: uikit.bundleName,
-            templateType: PiPWindow.PiPTemplateType.VIDEO_CALL,
-            contentWidth: 200,
-            contentHeight: 300,
-        });
-        this.pipController.on('stateChange', (state: PiPWindow.PiPState, reason: string) => {
-            // this.onStateChange(state, reason);
-        });
-        this.pipController.on('controlPanelActionEvent', (event: PiPWindow.PiPActionEventType, status?: number) => {
-            // this.onActionEvent(event, status);
-        });
-        this.pipController.setAutoStartEnabled(true)
-        console.log('createPipController')
+        await pipHelper.createPipController(this.getUIContext(), this.focusXComponentController, this.voipPiPNodeController, this.mainNavPathStack, navigationDestinations.ConferencePage)
     }
 
     destroyPipController() {
-        if (!this.pipController) {
-            return;
-        }
-        this.pipController.setAutoStartEnabled(false)
-        this.pipController.off('stateChange');
-        this.pipController.off('controlPanelActionEvent');
-        this.pipController.stopPiP()
-        this.pipController = undefined;
+        pipHelper.destroyPipController()
     }
 
     inviteNewParticipant() {

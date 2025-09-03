@@ -12,7 +12,7 @@ export default struct ConferenceMoreActionView {
                 this.conferencePage?.inviteNewParticipant()
             })
             this.actionItem($r('app.media.av_conference_chat'), '聊天', () => {
-                showToast('聊天 TODO')
+                this.conferencePage?.conferenceChat()
             })
             this.actionItem($r('app.media.av_conference_handup'), '举手', () => {
                 showToast('举手 TODO')

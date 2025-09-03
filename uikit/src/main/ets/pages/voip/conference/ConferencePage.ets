@@ -788,4 +788,13 @@ export default struct ConferencePage {
             } as Record<string, Object>
         )
     }
+
+    conferenceChat() {
+        this.showConferenceMoreActionSheet = false
+        let callId = this.callSession!.callId
+        let conversation = new Conversation(ConversationType.ChatRoom, callId, 0)
+        this.mainNavPathStack.pushPathByName(navigationDestinations.ConversationPage, {
+            'conversation': conversation
+        } as Record<string, Object>)
+    }
 }

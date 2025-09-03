@@ -8,7 +8,6 @@
     "version": "1.0.0",
     "dependencies": {
         "@wfc/client": "file:../client",
-        "@wfc/uikit": "file:../uikit",
-        "@wfc/avenginekit": "file:../uikit/libs/avenginekit.har"
+        "@wfc/uikit": "file:../uikit"
     }
 }

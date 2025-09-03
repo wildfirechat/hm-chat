@@ -2,7 +2,7 @@ import ConversationListTab from '@wfc/uikit/src/main/ets/pages/ConversationListT
 import ContactListTab from '@wfc/uikit/src/main/ets/pages/ContactListTab'
 import DiscoveryTab from './DiscoveryTab'
 import MeTab from './MeTab'
-import AbilityAccessCtrl, { Permissions } from '@ohos.abilityAccessCtrl'
+import { Permissions } from '@ohos.abilityAccessCtrl'
 import { scanCore, scanBarcode } from '@kit.ScanKit';
 import { showToast } from '@wfc/uikit/src/main/ets/common/utils/Toast'
 import PickMultiContactModal from '@wfc/uikit/src/main/ets/pages/picker/PickMultiContactModal'
@@ -29,7 +29,6 @@ import EventType from '@wfc/client/src/main/ets/wfc/client/wfcEvent'
 import PCLoginRequestMessageContent from '@wfc/client/src/main/ets/wfc/messages/pcLoginRequestMessageContent'
 import uikit from '@wfc/uikit'
 import { common } from '@kit.AbilityKit'
-import avengineKit from '@wfc/avenginekit'
 import pipHelper from '@wfc/uikit/src/main/ets/pages/voip/pipHelper'
 
 const TAG = 'Main';
@@ -79,10 +78,6 @@ struct MainPage {
         }
         let voip = this.wantParams?.continuousTaskLabel as string
         if (voip) {
-            let callSession = avengineKit.getCurrentSession();
-            if (!callSession) {
-                return
-            }
             pipHelper.stopPiP()
         }
     }

@@ -20,7 +20,6 @@ import GroupType from '@wfc/client/src/main/ets/wfc/model/groupType'
 import MessageContent from '@wfc/client/src/main/ets/wfc/messages/messageContent'
 import CallStartMessageContent from '@wfc/client/src/main/ets/wfc/av/messages/callStartMessageContent'
 import SoundMessageContent from '@wfc/client/src/main/ets/wfc/messages/soundMessageContent'
-import { window } from '@kit.ArkUI'
 
 @Entry
 @Component
@@ -50,8 +49,6 @@ export default struct ForwardMessagePage {
             })
             this.forwardType = params['forwardType'] as 'oneByOne' | 'compose'
         }
-        let win = AppStorage.get<window.Window>('window')
-        win?.setWindowLayoutFullScreen(false)
     }
 
     private searchModules: SearchModule[] = [

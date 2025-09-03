@@ -30,7 +30,7 @@ export default struct SingleVideoCallPage {
     private focusUserId: string = ''
     private focusXComponentController: WFCVideoRenderController = new WFCVideoRenderController()
     private previewXComponentController: WFCVideoRenderController = new WFCVideoRenderController()
-    private isPageShow = false
+    private isPageShown = false
     private voipPiPNodeController: VoipPiPNodeController = new VoipPiPNodeController('');
 
     aboutToAppear(): void {
@@ -81,8 +81,8 @@ export default struct SingleVideoCallPage {
         this.focusUserId = focusUserId
     }
 
-    onPageShow(): void {
-        this.isPageShow = true
+    onPageShown(): void {
+        this.isPageShown = true
         let win = AppStorage.get<window.Window>('window')
         win?.setWindowLayoutFullScreen(true)
 
@@ -98,8 +98,8 @@ export default struct SingleVideoCallPage {
         this.createPipController()
     }
 
-    onPageHide(): void {
-        this.isPageShow = false
+    onPageHidde(): void {
+        this.isPageShown = false
         let win = AppStorage.get<window.Window>('window')
         win?.setWindowLayoutFullScreen(false)
         let sysBarProps: window.SystemBarProperties = {
@@ -113,7 +113,7 @@ export default struct SingleVideoCallPage {
     }
 
     updateActionAndDurationView = () => {
-        if (!this.isPageShow) {
+        if (!this.isPageShown) {
             return
         }
         let millis = new Date().getTime() - this.callSession!.connectedTime
@@ -438,10 +438,10 @@ export default struct SingleVideoCallPage {
             .height('100%')
         }
         .onShown(() => {
-            this.onPageShow()
+            this.onPageShown()
         })
         .onHidden(() => {
-            this.onPageHide()
+            this.onPageHidde()
         })
         .onBackPressed(() => {
             return true

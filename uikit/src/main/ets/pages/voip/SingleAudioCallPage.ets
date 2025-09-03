@@ -41,7 +41,7 @@ export default struct SingleAudioCallPage {
         this.setupSessionCallback()
     }
 
-    onPageShow(): void {
+    onPageShown(): void {
             this.createPipController()
                 .then(() => {
                     console.log('xxxxxxx create pip success')
@@ -51,7 +51,7 @@ export default struct SingleAudioCallPage {
                 })
     }
 
-    onPageHide(): void {
+    onPageHidde(): void {
     }
 
     updateDuration = () => {
@@ -310,10 +310,10 @@ export default struct SingleAudioCallPage {
         .title('Voip Test')
         .hideTitleBar(true)
         .onShown(() => {
-            this.onPageShow()
+            this.onPageShown()
         })
         .onHidden(() => {
-            this.onPageHide()
+            this.onPageHidde()
         })
         .onBackPressed(() => true)
         .backgroundColor('#000000')

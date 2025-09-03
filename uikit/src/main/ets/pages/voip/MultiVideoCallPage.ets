@@ -29,6 +29,7 @@ export default struct MultiVideoCallPage {
     @State durationStr: string = ''
     @State showActionAndDurationView: boolean = true
     private statusBarHeight = 0
+    private isPageShown = false
     private focusUserId: string = ''
     private lastTriggerToShowActionAndDurationViewTimestamp: number = 0
     private updateActionAndDurationViewInterval = 0
@@ -100,19 +101,10 @@ export default struct MultiVideoCallPage {
     }
 
     aboutToDisappear(): void {
-        let win = AppStorage.get<window.Window>('window')
-        win?.setWindowLayoutFullScreen(false)
-        let sysBarProps: window.SystemBarProperties = {
-            // statusBarColor: '#00000000',
-            // navigationBarColor: '#00000000',
-            // 以下两个属性从API Version 8开始支持
-            navigationBarContentColor: '#000000',
-            statusBarContentColor: '#000000',
-        };
-        win?.setWindowSystemBarProperties(sysBarProps)
     }
 
-    onPageShow(): void {
+    onPageShown(): void {
+        this.isPageShown = true
         let win = AppStorage.get<window.Window>('window')
         win?.setWindowLayoutFullScreen(true)
 
@@ -135,11 +127,20 @@ export default struct MultiVideoCallPage {
     }
 
     onPageHide(): void {
-        // TODO
     }
 
     onPageHidden() {
-
+        this.isPageShown = false
+        let win = AppStorage.get<window.Window>('window')
+        win?.setWindowLayoutFullScreen(false)
+        let sysBarProps: window.SystemBarProperties = {
+            // statusBarColor: '#00000000',
+            // navigationBarColor: '#00000000',
+            // 以下两个属性从API Version 8开始支持
+            navigationBarContentColor: '#000000',
+            statusBarContentColor: '#000000',
+        };
+        win?.setWindowSystemBarProperties(sysBarProps)
     }
 
     updateActionAndDurationView = () => {
@@ -148,6 +149,9 @@ export default struct MultiVideoCallPage {
         this.durationStr = timestampFormat(millis)
         if (this.lastTriggerToShowActionAndDurationViewTimestamp > 0 && Date.now() - this.lastTriggerToShowActionAndDurationViewTimestamp > 5000) {
             this.showActionAndDurationView = false
+        }
+        if(!this.isPageShown){
+            return
         }
         let sysBarProps: window.SystemBarProperties = {
             // statusBarColor: '#00000000',
@@ -535,10 +539,10 @@ export default struct MultiVideoCallPage {
         .title('Voip Test')
         .hideTitleBar(true)
         .onShown(() => {
-            this.onPageShow()
+            this.onPageShown()
         })
         .onHidden(() => {
-            this.onPageHide()
+            this.onPageHidden()
         })
         .onBackPressed(() => true)
         .backgroundColor('#000000')

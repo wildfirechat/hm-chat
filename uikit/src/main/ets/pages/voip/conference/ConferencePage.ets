@@ -24,6 +24,7 @@ import ConferenceInviteMessageContent from '@wfc/client/src/main/ets/wfc/av/mess
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
 import pipHelper from '../pipHelper'
+import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType'
 
 @Component
 export default struct ConferencePage {
@@ -42,6 +43,7 @@ export default struct ConferencePage {
     @State selfProfile?: ParticipantProfile = undefined
     @State currentSwiperIndex: number = -1;
     private statusBarHeight = 0
+    private isPageShown = false
     private lastTriggerToShowActionAndDurationViewTimestamp: number = 0
     private updateActionAndDurationViewInterval = 0
     private conferenceInfo?: ConferenceInfo
@@ -182,20 +184,8 @@ export default struct ConferencePage {
         // }
     }
 
-    aboutToDisappear(): void {
-        let win = AppStorage.get<window.Window>('window')
-        win?.setWindowLayoutFullScreen(false)
-        let sysBarProps: window.SystemBarProperties = {
-            // statusBarColor: '#00000000',
-            // navigationBarColor: '#00000000',
-            // 以下两个属性从API Version 8开始支持
-            navigationBarContentColor: '#000000',
-            statusBarContentColor: '#000000',
-        };
-        win?.setWindowSystemBarProperties(sysBarProps)
-    }
-
-    onPageShow(): void {
+    onPageShown(): void {
+        this.isPageShown = true
         let win = AppStorage.get<window.Window>('window')
         win?.setWindowLayoutFullScreen(true)
 
@@ -208,21 +198,28 @@ export default struct ConferencePage {
         };
         win?.setWindowSystemBarProperties(sysBarProps)
 
-            this.createPipController()
-                .then(() => {
-                    console.log('xxxxxxx create pip success')
-                })
-                .catch((reason: BusinessError) => {
-                    console.log('xxxxxxxx create pip controller error', reason.message);
-                })
-    }
-
-    onPageHide(): void {
-        // TODO
+        this.createPipController()
+            .then(() => {
+                console.log('xxxxxxx create pip success')
+            })
+            .catch((reason: BusinessError) => {
+                console.log('xxxxxxxx create pip controller error', reason.message);
+            })
     }
 
     onPageHidden() {
+        this.isPageShown = false
+        let win = AppStorage.get<window.Window>('window')
+        win?.setWindowLayoutFullScreen(false)
 
+        let sysBarProps: window.SystemBarProperties = {
+            // statusBarColor: '#00000000',
+            // navigationBarColor: '#00000000',
+            // 以下两个属性从API Version 8开始支持
+            navigationBarContentColor: '#000000',
+            statusBarContentColor: '#000000',
+        };
+        win?.setWindowSystemBarProperties(sysBarProps)
     }
 
     updateActionAndDurationView = () => {
@@ -231,6 +228,10 @@ export default struct ConferencePage {
         this.durationStr = timestampFormat(millis)
         if (this.lastTriggerToShowActionAndDurationViewTimestamp > 0 && !this.showConferenceMoreActionSheet && Date.now() - this.lastTriggerToShowActionAndDurationViewTimestamp > 5000) {
             this.showActionAndDurationView = false
+        }
+
+        if (!this.isPageShown) {
+            return
         }
         let sysBarProps: window.SystemBarProperties = {
             // statusBarColor: '#00000000',
@@ -556,7 +557,7 @@ export default struct ConferencePage {
                                 .height(30)
                                 .colorFilter(WHITE_FILTER)
                                 .onClick(() => {
-                                    if(this.callSession?.audience){
+                                    if (this.callSession?.audience) {
                                         showToast('请先切换为互动者')
                                         return
                                     }
@@ -749,10 +750,10 @@ export default struct ConferencePage {
         .title('VOIP Conference')
         .hideTitleBar(true)
         .onShown(() => {
-            this.onPageShow()
+            this.onPageShown()
         })
         .onHidden(() => {
-            this.onPageHide()
+            this.onPageHidden()
         })
         .onBackPressed(() => true)
         .backgroundColor('#000000')

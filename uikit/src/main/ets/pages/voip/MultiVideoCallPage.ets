@@ -8,13 +8,13 @@ import AVCastPicker from '@ohos.multimedia.avCastPicker'
 import ParticipantProfile from '@wfc/avenginekit/src/main/ets/wfc/av/engine/participantProfile'
 import PickGroupMemberModal from '../group/PickGroupMemberModal'
 import { timestampFormat } from '../../util/helper'
-import { window } from '@kit.ArkUI'
+import { PiPWindow, window } from '@kit.ArkUI'
 import WFCVideoRenderController, { ScalingMode } from '@wfc/avenginekit/src/main/ets/wfc/av/xcomponent/WFCVideoRenderController'
 import { VideoTrack } from '@ohos/webrtc/src/main/libohos_webrtc/webrtc'
 import VoipPiPNodeController from './VoipPiPNodeController'
+import uikit from '../../uikit'
 import { BusinessError } from '@kit.BasicServicesKit'
 import { navigationDestinations } from '../navigationConfig'
-import pipHelper from './pipHelper'
 
 @Component
 export default struct MultiVideoCallPage {
@@ -29,13 +29,13 @@ export default struct MultiVideoCallPage {
     @State durationStr: string = ''
     @State showActionAndDurationView: boolean = true
     private statusBarHeight = 0
-    private isPageShown = false
     private focusUserId: string = ''
     private lastTriggerToShowActionAndDurationViewTimestamp: number = 0
     private updateActionAndDurationViewInterval = 0
     // not include self
     private focusVideoRenderController = new WFCVideoRenderController('focus-xcp')
     private participantVideoRenderControllerMap = new Map<string, WFCVideoRenderController>()
+    private pipController?: PiPWindow.PiPController;
     private voipPiPNodeController: VoipPiPNodeController = new VoipPiPNodeController('');
 
     aboutToAppear(): void {
@@ -101,36 +101,6 @@ export default struct MultiVideoCallPage {
     }
 
     aboutToDisappear(): void {
-    }
-
-    onPageShown(): void {
-        this.isPageShown = true
-        let win = AppStorage.get<window.Window>('window')
-        win?.setWindowLayoutFullScreen(true)
-
-        let sysBarProps: window.SystemBarProperties = {
-            // statusBarColor: '#00000000',
-            // navigationBarColor: '#00000000',
-            // 以下两个属性从API Version 8开始支持
-            statusBarContentColor: '#ffffff',
-            navigationBarContentColor: '#ffffff'
-        };
-        win?.setWindowSystemBarProperties(sysBarProps)
-
-        this.createPipController()
-            .then(() => {
-                console.log('xxxxxxx create pip success')
-            })
-            .catch((reason: BusinessError) => {
-                console.log('xxxxxxxx create pip controller error', reason.message);
-            })
-    }
-
-    onPageHide(): void {
-    }
-
-    onPageHidden() {
-        this.isPageShown = false
         let win = AppStorage.get<window.Window>('window')
         win?.setWindowLayoutFullScreen(false)
         let sysBarProps: window.SystemBarProperties = {
@@ -143,15 +113,44 @@ export default struct MultiVideoCallPage {
         win?.setWindowSystemBarProperties(sysBarProps)
     }
 
+    onPageShow(): void {
+        let win = AppStorage.get<window.Window>('window')
+        win?.setWindowLayoutFullScreen(true)
+
+        let sysBarProps: window.SystemBarProperties = {
+            // statusBarColor: '#00000000',
+            // navigationBarColor: '#00000000',
+            // 以下两个属性从API Version 8开始支持
+            statusBarContentColor: '#ffffff',
+            navigationBarContentColor: '#ffffff'
+        };
+        win?.setWindowSystemBarProperties(sysBarProps)
+
+        if (!this.pipController) {
+            this.createPipController()
+                .then(() => {
+                    console.log('xxxxxxx create pip success')
+                })
+                .catch((reason: BusinessError) => {
+                    console.log('xxxxxxxx create pip controller error', reason.message);
+                })
+        }
+    }
+
+    onPageHide(): void {
+        // TODO
+    }
+
+    onPageHidden() {
+
+    }
+
     updateActionAndDurationView = () => {
         // TODO is page shown?
         let millis = new Date().getTime() - this.callSession!.connectedTime
         this.durationStr = timestampFormat(millis)
         if (this.lastTriggerToShowActionAndDurationViewTimestamp > 0 && Date.now() - this.lastTriggerToShowActionAndDurationViewTimestamp > 5000) {
             this.showActionAndDurationView = false
-        }
-        if(!this.isPageShown){
-            return
         }
         let sysBarProps: window.SystemBarProperties = {
             // statusBarColor: '#00000000',
@@ -315,7 +314,10 @@ export default struct MultiVideoCallPage {
                     .height(50)
                     .padding(10)
                     .onClick(async () => {
-                        pipHelper.startPiP()
+                        this.pipController?.startPiP()
+                            .catch((reason: BusinessError) => {
+                                console.error('startPiP error', reason.code, reason.name, reason.message)
+                            })
                         this.mainNavPathStack.pop()
                     })
 
@@ -539,10 +541,10 @@ export default struct MultiVideoCallPage {
         .title('Voip Test')
         .hideTitleBar(true)
         .onShown(() => {
-            this.onPageShown()
+            this.onPageShow()
         })
         .onHidden(() => {
-            this.onPageHidden()
+            this.onPageHide()
         })
         .onBackPressed(() => true)
         .backgroundColor('#000000')
@@ -551,10 +553,33 @@ export default struct MultiVideoCallPage {
     }
 
     async createPipController() {
-        await pipHelper.createPipController(this.getUIContext(), this.focusVideoRenderController, this.voipPiPNodeController, this.mainNavPathStack, navigationDestinations.MultiVideoCallPage)
+        this.pipController = await PiPWindow.create({
+            context: getContext(this),
+            componentController: this.focusVideoRenderController,
+            customUIController: this.voipPiPNodeController,
+            navigationId: uikit.bundleName,
+            templateType: PiPWindow.PiPTemplateType.VIDEO_CALL,
+            contentWidth: 200,
+            contentHeight: 300,
+        });
+        this.pipController.on('stateChange', (state: PiPWindow.PiPState, reason: string) => {
+            // this.onStateChange(state, reason);
+        });
+        this.pipController.on('controlPanelActionEvent', (event: PiPWindow.PiPActionEventType, status?: number) => {
+            // this.onActionEvent(event, status);
+        });
+        this.pipController.setAutoStartEnabled(true)
+        console.log('createPipController')
     }
 
     destroyPipController() {
-        pipHelper.destroyPipController()
+        if (!this.pipController) {
+            return;
+        }
+        this.pipController.setAutoStartEnabled(false)
+        this.pipController.off('stateChange');
+        this.pipController.off('controlPanelActionEvent');
+        this.pipController.stopPiP()
+        this.pipController = undefined;
     }
 }

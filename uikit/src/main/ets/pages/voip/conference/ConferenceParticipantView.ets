@@ -1,4 +1,3 @@
-import { VideoRenderController } from "@ohos/webrtc"
 import avenginekit from "@wfc/avenginekit"
 import CallSession from "@wfc/avenginekit/src/main/ets/wfc/av/engine/callSession"
 import CallState from "@wfc/avenginekit/src/main/ets/wfc/av/engine/callState"
@@ -59,14 +58,6 @@ export default struct ConferenceParticipantView {
                         console.log('xxxx XComponent debug', 'onLoad',  this._xcomponentId)
                         this.xcomponentController?.setVideoTrack(avenginekit.getCurrentSession()!.getParticipantVideoTrack(this.p.userId, this.p.screenSharing))
                         this.xcomponentController?.setScalingMode(ScalingMode.AspectFit)
-                        // if (this.onXComponentLoadCallback) {
-                        //     this.onXComponentLoadCallback()
-                        // } else {
-                        //     if (this.swiperIndex === this.currentSwiperIndex || (this.swiperIndex === 0 && this.currentSwiperIndex === -1)) {
-                        //         // this.callSession?.setUserXComponentId(CallSession.xcomponentUserId(this.p), this._xcomponentId)
-                        //         // this.xcomponentController?.setVideoTrack(this.p!.videoTrack)
-                        //     }
-                        // }
                     })
                     .onDestroy(() => {
                         this._xcomponentId = ''

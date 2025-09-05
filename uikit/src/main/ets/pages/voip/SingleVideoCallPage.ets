@@ -3,11 +3,12 @@ import CallSessionCallback from '@wfc/avenginekit/src/main/ets/wfc/av/engine/cal
 import CallState from '@wfc/avenginekit/src/main/ets/wfc/av/engine/callState'
 import avengineKit from '@wfc/avenginekit'
 import wfc from '@wfc/client'
-import { ScalingMode } from '@ohos/webrtc'
+import { ScalingMode, VideoRenderController } from '@ohos/webrtc'
 import { VideoTrack } from '@ohos/webrtc/src/main/libohos_webrtc/webrtc';
 import Config from '@wfc/client/src/main/ets/config'
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
-import { window } from '@kit.ArkUI'
+import { PiPWindow, router, UIContext, window } from '@kit.ArkUI'
+import { BusinessError } from '@kit.BasicServicesKit'
 import AVCastPicker from '@ohos.multimedia.avCastPicker'
 import { timestampFormat } from '../../util/helper'
 import pipHelper from './pipHelper'
@@ -28,9 +29,10 @@ export default struct SingleVideoCallPage {
     private updateActionAndDurationViewInterval = 0
     private statusBarHeight = 0
     private focusUserId: string = ''
-    private focusXComponentController: WFCVideoRenderController = new WFCVideoRenderController()
-    private previewXComponentController: WFCVideoRenderController = new WFCVideoRenderController()
-    private isPageShown = false
+    private pipController?: PiPWindow.PiPController;
+    private focusXComponentController: WFCVideoRenderController = new WFCVideoRenderController('focus-xcp')
+    private previewXComponentController: WFCVideoRenderController = new WFCVideoRenderController('preview-xcp')
+    private isPageShow = false
     private voipPiPNodeController: VoipPiPNodeController = new VoipPiPNodeController('');
 
     aboutToAppear(): void {
@@ -58,7 +60,7 @@ export default struct SingleVideoCallPage {
         }
 
         let remoteTrack = this.callSession.getParticipantVideoTrack(this.targetUserInfo.uid)
-        if (remoteTrack) {
+        if(remoteTrack){
             this.focusXComponentController.setScalingMode(ScalingMode.AspectFit)
             this.focusXComponentController.setVideoTrack(remoteTrack)
         }
@@ -81,8 +83,8 @@ export default struct SingleVideoCallPage {
         this.focusUserId = focusUserId
     }
 
-    onPageShown(): void {
-        this.isPageShown = true
+    onPageShow(): void {
+        this.isPageShow = true
         let win = AppStorage.get<window.Window>('window')
         win?.setWindowLayoutFullScreen(true)
 
@@ -95,11 +97,16 @@ export default struct SingleVideoCallPage {
         };
         win?.setWindowSystemBarProperties(sysBarProps)
 
-        this.createPipController()
+        if (!this.pipController) {
+            this.createPipController()
+                .catch((reason: BusinessError) => {
+                    console.log('create pip controller error', reason.message);
+                })
+        }
     }
 
-    onPageHidde(): void {
-        this.isPageShown = false
+    onPageHide(): void {
+        this.isPageShow = false
         let win = AppStorage.get<window.Window>('window')
         win?.setWindowLayoutFullScreen(false)
         let sysBarProps: window.SystemBarProperties = {
@@ -113,7 +120,7 @@ export default struct SingleVideoCallPage {
     }
 
     updateActionAndDurationView = () => {
-        if (!this.isPageShown) {
+        if (!this.isPageShow) {
             return
         }
         let millis = new Date().getTime() - this.callSession!.connectedTime
@@ -187,11 +194,71 @@ export default struct SingleVideoCallPage {
     }
 
     async createPipController() {
-        await pipHelper.createPipController(this.getUIContext(), this.focusXComponentController, this.voipPiPNodeController, this.mainNavPathStack, navigationDestinations.SingleVideoCallPage)
+        this.pipController = await pipHelper.createPipController(this.getUIContext(), this.focusXComponentController, this.voipPiPNodeController, this.mainNavPathStack, navigationDestinations.SingleVideoCallPage)
     }
 
     destroyPipController() {
+        if (!this.pipController) {
+            return;
+        }
         pipHelper.destroyPipController()
+        this.pipController = undefined;
+    }
+
+    onStateChange(state: PiPWindow.PiPState, reason: string) {
+        console.log('onStateChange', state, reason)
+        if (state === PiPWindow.PiPState.ABOUT_TO_START) {
+        }
+        // switch (state) {
+        //     case PiPWindow.PiPState.ABOUT_TO_START:
+        //         this.curState = 'ABOUT_TO_START';
+        //         this.curError = $r('app.string.current_error_hint');
+        //         break;
+        //     case PiPWindow.PiPState.STARTED:
+        //         this.curState = 'STARTED';
+        //         this.curError = $r('app.string.current_error_hint');
+        //         break;
+        //     case PiPWindow.PiPState.ABOUT_TO_STOP:
+        //         this.curState = 'ABOUT_TO_STOP';
+        //         this.curError = $r('app.string.current_error_hint');
+        //         break;
+        //     case PiPWindow.PiPState.STOPPED:
+        //         this.player?.updatePlayStatus(true);
+        //         this.player?.play();
+        //         this.curState = 'STOPPED';
+        //         this.curError = $r('app.string.current_error_hint');
+        //         break;
+        //     case PiPWindow.PiPState.ABOUT_TO_RESTORE:
+        //         this.curState = 'ABOUT_TO_RESTORE';
+        //         this.curError = $r('app.string.current_error_hint');
+        //         break;
+        //     case PiPWindow.PiPState.ERROR:
+        //         this.curState = 'ERROR';
+        //         this.curError = reason;
+        //         break;
+        //     default:
+        //         break;
+        // }
+        // Logger.info(`[${TAG}] onStateChange: ${this.curState}, reason: ${reason}`);
+    }
+
+    onActionEvent(event: PiPWindow.PiPActionEventType, status: number | undefined) {
+        console.log('onActionEvent', event, status)
+        // switch (event) {
+        //     case 'playbackStateChanged':
+        //         if (status === 0) {
+        //             this.player?.updatePlayStatus(false);
+        //             this.player?.pause();
+        //         } else {
+        //             this.player?.updatePlayStatus(true);
+        //             this.player?.play();
+        //         }
+        //         break;
+        //     default:
+        //         break;
+        // }
+        // this.buttonAction = event + `-status:${status}`;
+        // Logger.info(`[${TAG}] onActionEvent: ${this.buttonAction} status:${status}}`);
     }
 
     @Builder
@@ -205,8 +272,12 @@ export default struct SingleVideoCallPage {
                         .height(50)
                         .padding(10)
                         .onClick(async () => {
-                            pipHelper.startPiP()
+                            this.pipController?.startPiP()
+                                .catch((reason: BusinessError) => {
+                                    console.log('startPiP errr', reason.message)
+                                })
                             this.mainNavPathStack.pop()
+                            console.log('stop pip')
                         })
 
                     Text(this.durationStr)
@@ -438,10 +509,10 @@ export default struct SingleVideoCallPage {
             .height('100%')
         }
         .onShown(() => {
-            this.onPageShown()
+            this.onPageShow()
         })
         .onHidden(() => {
-            this.onPageHidde()
+            this.onPageHide()
         })
         .onBackPressed(() => {
             return true

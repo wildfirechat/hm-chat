@@ -7,10 +7,11 @@ import CallSessionCallback from '@wfc/avenginekit/src/main/ets/wfc/av/engine/cal
 import ParticipantProfile from '@wfc/avenginekit/src/main/ets/wfc/av/engine/participantProfile'
 import { AVCastPicker } from '@kit.AVSessionKit'
 import { timestampFormat } from '../../util/helper'
+import { PiPWindow } from '@kit.ArkUI'
 import VoipPiPNodeController from './VoipPiPNodeController'
+import uikit from '../../uikit'
 import { BusinessError } from '@kit.BasicServicesKit'
 import { navigationDestinations } from '../navigationConfig'
-import pipHelper from './pipHelper'
 
 @Component
 export default struct MultiAudioCallPage {
@@ -23,6 +24,8 @@ export default struct MultiAudioCallPage {
     @State participantProfiles?: ParticipantProfile[] = []
     @State duration: string = '00:00'
     private updateDurationInterval: number = 0
+
+    private pipController?: PiPWindow.PiPController;
     private voipPiPNodeController: VoipPiPNodeController = new VoipPiPNodeController('');
     private dummyXComponentController: XComponentController = new XComponentController()
 
@@ -108,13 +111,15 @@ export default struct MultiAudioCallPage {
 
     onPageShow(): void {
         console.log('MultiAudioCallPage show')
-        this.createPipController()
-            .then(() => {
-                console.log('xxxxxxx create pip success')
-            })
-            .catch((reason: BusinessError) => {
-                console.log('xxxxxxxx create pip controller error', reason.message);
-            })
+        if (!this.pipController) {
+            this.createPipController()
+                .then(() => {
+                    console.log('xxxxxxx create pip success')
+                })
+                .catch((reason: BusinessError) => {
+                    console.log('xxxxxxxx create pip controller error', reason.message);
+                })
+        }
     }
 
     onPageHide(): void {
@@ -252,8 +257,7 @@ export default struct MultiAudioCallPage {
                             .height(50)
                             .padding(10)
                             .onClick(async () => {
-                                pipHelper.startPiP()
-                                this.mainNavPathStack.pop()
+                                // TODO
                             })
                     }
                     .width('100%')
@@ -406,10 +410,33 @@ export default struct MultiAudioCallPage {
     }
 
     async createPipController() {
-        await pipHelper.createPipController(this.getUIContext(), this.dummyXComponentController, this.voipPiPNodeController, this.mainNavPathStack, navigationDestinations.MultiAudioCallPage)
+        this.pipController = await PiPWindow.create({
+            context: this.getUIContext().getHostContext(),
+            componentController: this.dummyXComponentController,
+            customUIController: this.voipPiPNodeController,
+            navigationId: uikit.bundleName,
+            templateType: PiPWindow.PiPTemplateType.VIDEO_CALL,
+            contentWidth: 200,
+            contentHeight: 300,
+        });
+        this.pipController.on('stateChange', (state: PiPWindow.PiPState, reason: string) => {
+            // this.onStateChange(state, reason);
+        });
+        this.pipController.on('controlPanelActionEvent', (event: PiPWindow.PiPActionEventType, status?: number) => {
+            // this.onActionEvent(event, status);
+        });
+        this.pipController.setAutoStartEnabled(true)
+        console.log('createPipController')
     }
 
     destroyPipController() {
-        pipHelper.destroyPipController()
+        if (!this.pipController) {
+            return;
+        }
+        this.pipController.setAutoStartEnabled(false)
+        this.pipController.off('stateChange');
+        this.pipController.off('controlPanelActionEvent');
+        this.pipController.stopPiP()
+        this.pipController = undefined;
     }
 }

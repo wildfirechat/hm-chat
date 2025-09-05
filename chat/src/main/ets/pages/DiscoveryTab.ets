@@ -127,7 +127,7 @@ export default struct DiscoveryTab {
                             if (uikit.isSupportConference()) {
                                 this.mainNavPathStack.pushPathByName(navigationDestinations.ConferencePortalPage, {} as Record<string, Object>)
                             } else {
-                                showToast('不支持音视频会议')
+                                showToast('多人版音视频 SDK，不支持会议功能')
                             }
                         })
                         .padding({ left: 10, right: 10 })

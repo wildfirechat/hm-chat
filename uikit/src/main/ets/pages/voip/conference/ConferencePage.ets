@@ -9,7 +9,7 @@ import AVCastPicker from '@ohos.multimedia.avCastPicker'
 import ParticipantProfile from '@wfc/avenginekit/src/main/ets/wfc/av/engine/participantProfile'
 import PickGroupMemberModal from '../../group/PickGroupMemberModal'
 import { timestampFormat } from '../../../util/helper'
-import { window } from '@kit.ArkUI'
+import { window, PiPWindow } from '@kit.ArkUI'
 import ConferenceInfo from '@wfc/avenginekit/src/main/ets/wfc/av/model/conferenceInfo'
 import { showToast } from '../../../common/utils/Toast'
 import { WHITE_FILTER } from '../../../api/Util'
@@ -18,13 +18,13 @@ import ConferenceMoreActionView from './ConferenceMoreActionView'
 import { VideoTrack } from '@ohos/webrtc/src/main/libohos_webrtc/webrtc'
 import WFCVideoRenderController, { ScalingMode } from '@wfc/avenginekit/src/main/ets/wfc/av/xcomponent/WFCVideoRenderController'
 import VoipPiPNodeController from '../VoipPiPNodeController'
+import uikit from '../../../uikit'
 import { BusinessError } from '@kit.BasicServicesKit'
 import { navigationDestinations } from '../../navigationConfig'
 import ConferenceInviteMessageContent from '@wfc/client/src/main/ets/wfc/av/messages/conferenceInviteMessageContent'
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
-import pipHelper from '../pipHelper'
-import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType'
+import VideoType from '@wfc/avenginekit/src/main/ets/wfc/av/engine/videoType'
 
 @Component
 export default struct ConferencePage {
@@ -43,13 +43,13 @@ export default struct ConferencePage {
     @State selfProfile?: ParticipantProfile = undefined
     @State currentSwiperIndex: number = -1;
     private statusBarHeight = 0
-    private isPageShown = false
     private lastTriggerToShowActionAndDurationViewTimestamp: number = 0
     private updateActionAndDurationViewInterval = 0
     private conferenceInfo?: ConferenceInfo
     private participantVideoRenderControllerMap = new Map<string, WFCVideoRenderController>()
     private focusXComponentController: WFCVideoRenderController = new WFCVideoRenderController('focus-xcp')
     private previewXComponentController: WFCVideoRenderController = new WFCVideoRenderController('preview-xcp')
+    pipController?: PiPWindow.PiPController;
     private voipPiPNodeController: VoipPiPNodeController = new VoipPiPNodeController('');
     static COUNT_PER_PAGE = 4;
 
@@ -119,7 +119,7 @@ export default struct ConferencePage {
         // console.log('setupFocusAndPreviewXComponentId focus', this.focusProfile!.videoTrack?.id)
         if (this.focusProfile) {
             this.focusXComponentController.setVideoTrack(this.callSession?.getParticipantVideoTrack(this.focusProfile.userId, this.focusProfile.screenSharing))
-            this.focusXComponentController.setScalingMode(ScalingMode.AspectFill)
+            this.focusXComponentController.setScalingMode(ScalingMode.AspectFit)
             if (this.previewProfile) {
                 this.previewXComponentController.setVideoTrack(this.callSession?.getParticipantVideoTrack(this.previewProfile.userId, this.previewProfile.screenSharing))
                 this.previewXComponentController.setScalingMode(ScalingMode.AspectFit)
@@ -135,12 +135,23 @@ export default struct ConferencePage {
             // TODO
             // 用户主动设置的焦点视频流
             let foundFocusProfile = false
+            let preFocusProfile = this.focusProfile
             for (let i = 0; i < this.participantProfiles.length; i++) {
                 if (!this.participantProfiles[i].audience && !this.participantProfiles[i].videoMuted) {
                     this.focusProfile = this.participantProfiles[i]
                     this.previewProfile = this.selfProfile
                     foundFocusProfile = true
                     break
+                }
+            }
+
+            if (foundFocusProfile) {
+                if (this.focusProfile) {
+                    console.log('av-c', 'oooooo found focusProfile', this.focusProfile.userId)
+                    this.callSession?.setParticipantVideoType(this.focusProfile.userId, this.focusProfile.screenSharing, VideoType.BIG_STREAM)
+                }
+                if (preFocusProfile && preFocusProfile.userId !== this.focusProfile?.userId) {
+                    this.callSession?.setParticipantVideoType(preFocusProfile.userId, preFocusProfile.screenSharing, VideoType.SMALL_STREAM)
                 }
             }
 
@@ -158,34 +169,20 @@ export default struct ConferencePage {
         }
     }
 
-    // 支持 unset
-    setupParticipantFlexXComponentIds(swiperIndex: number, unset: boolean) {
-        // 0 is focus/preview view
-        // if (swiperIndex === 0) {
-        //     this.setupFocusAndPreviewVideoTrack()
-        // } else if (swiperIndex == 1) {
-        //     let selfProfile = this.callSession?.getSelfProfile()!
-        //     this.callSession?.setUserXComponentId(CallSession.xcomponentUserId(selfProfile), unset ? '' : CallSession.currentXComponentId(selfProfile))
-        //     for (let i = 0; i < ConferencePage.COUNT_PER_PAGE - 1; i++) {
-        //         let index = (swiperIndex - 1) * ConferencePage.COUNT_PER_PAGE + i
-        //         if (index < this.participantProfiles!.length) {
-        //             let p = this.participantProfiles![index]
-        //             this.callSession?.setUserXComponentId(CallSession.xcomponentUserId(p), unset ? '' : CallSession.currentXComponentId(p))
-        //         }
-        //     }
-        // } else if (swiperIndex > 1) {
-        //     for (let i = 0; i < ConferencePage.COUNT_PER_PAGE; i++) {
-        //         let index = (swiperIndex - 1) * ConferencePage.COUNT_PER_PAGE + i
-        //         if (index < this.participantProfiles!.length) {
-        //             let p = this.participantProfiles![index]
-        //             this.callSession?.setUserXComponentId(CallSession.xcomponentUserId(p), unset ? '' : CallSession.currentXComponentId(p))
-        //         }
-        //     }
-        // }
+    aboutToDisappear(): void {
+        let win = AppStorage.get<window.Window>('window')
+        win?.setWindowLayoutFullScreen(false)
+        let sysBarProps: window.SystemBarProperties = {
+            // statusBarColor: '#00000000',
+            // navigationBarColor: '#00000000',
+            // 以下两个属性从API Version 8开始支持
+            navigationBarContentColor: '#000000',
+            statusBarContentColor: '#000000',
+        };
+        win?.setWindowSystemBarProperties(sysBarProps)
     }
 
-    onPageShown(): void {
-        this.isPageShown = true
+    onPageShow(): void {
         let win = AppStorage.get<window.Window>('window')
         win?.setWindowLayoutFullScreen(true)
 
@@ -198,28 +195,23 @@ export default struct ConferencePage {
         };
         win?.setWindowSystemBarProperties(sysBarProps)
 
-        this.createPipController()
-            .then(() => {
-                console.log('xxxxxxx create pip success')
-            })
-            .catch((reason: BusinessError) => {
-                console.log('xxxxxxxx create pip controller error', reason.message);
-            })
+        if (!this.pipController) {
+            this.createPipController()
+                .then(() => {
+                    console.log('xxxxxxx create pip success')
+                })
+                .catch((reason: BusinessError) => {
+                    console.log('xxxxxxxx create pip controller error', reason.message);
+                })
+        }
+    }
+
+    onPageHide(): void {
+        // TODO
     }
 
     onPageHidden() {
-        this.isPageShown = false
-        let win = AppStorage.get<window.Window>('window')
-        win?.setWindowLayoutFullScreen(false)
 
-        let sysBarProps: window.SystemBarProperties = {
-            // statusBarColor: '#00000000',
-            // navigationBarColor: '#00000000',
-            // 以下两个属性从API Version 8开始支持
-            navigationBarContentColor: '#000000',
-            statusBarContentColor: '#000000',
-        };
-        win?.setWindowSystemBarProperties(sysBarProps)
     }
 
     updateActionAndDurationView = () => {
@@ -228,10 +220,6 @@ export default struct ConferencePage {
         this.durationStr = timestampFormat(millis)
         if (this.lastTriggerToShowActionAndDurationViewTimestamp > 0 && !this.showConferenceMoreActionSheet && Date.now() - this.lastTriggerToShowActionAndDurationViewTimestamp > 5000) {
             this.showActionAndDurationView = false
-        }
-
-        if (!this.isPageShown) {
-            return
         }
         let sysBarProps: window.SystemBarProperties = {
             // statusBarColor: '#00000000',
@@ -646,10 +634,6 @@ export default struct ConferencePage {
                             swiperIndex: 0,
                             currentSwiperIndex: this.currentSwiperIndex,
                             xcomponentController: this.focusXComponentController,
-                            onXComponentLoadCallback: () => {
-                                // this.setupFocusAndPreviewVideoTrack()
-                            }
-
                         })
                             .onClick(() => {
                                 if (this.callSession?.status !== CallState.STATUS_CONNECTED) {
@@ -669,14 +653,12 @@ export default struct ConferencePage {
                             swiperIndex: 0,
                             currentSwiperIndex: this.currentSwiperIndex,
                             xcomponentController: this.previewXComponentController,
-                            onXComponentLoadCallback: () => {
-                                // this.setupFocusAndPreviewVideoTrack()
-                            }
                         })
                             .padding(5)
                             .margin({ top: this.statusBarHeight + 50 })
-                            .width(100)
-                            .height(200)
+                            .width(120)
+                            .height(160)
+                            .borderRadius(4)
                             .onClick(() => {
                                 if (this.callSession?.status === CallState.STATUS_CONNECTED) {
                                     // this.swapVideo(`${p.userId}-${this.callSession.callId}`)
@@ -740,20 +722,16 @@ export default struct ConferencePage {
             .vertical(false)
             .onChange(index => {
                 console.log('swiper onChange', this.currentSwiperIndex, index)
-                if (this.currentSwiperIndex != -1) {
-                    this.setupParticipantFlexXComponentIds(this.currentSwiperIndex, true)
-                }
                 this.currentSwiperIndex = index
-                this.setupParticipantFlexXComponentIds(index, false)
             })
         }
         .title('VOIP Conference')
         .hideTitleBar(true)
         .onShown(() => {
-            this.onPageShown()
+            this.onPageShow()
         })
         .onHidden(() => {
-            this.onPageHidden()
+            this.onPageHide()
         })
         .onBackPressed(() => true)
         .backgroundColor('#000000')
@@ -763,16 +741,42 @@ export default struct ConferencePage {
 
     minimize() {
         this.showConferenceMoreActionSheet = false
-        pipHelper.startPiP()
+        this.pipController?.startPiP()
+            .catch((reason: BusinessError) => {
+                console.error('startPiP error', reason.code, reason.name, reason.message)
+            })
         this.mainNavPathStack.pop()
     }
 
     async createPipController() {
-        await pipHelper.createPipController(this.getUIContext(), this.focusXComponentController, this.voipPiPNodeController, this.mainNavPathStack, navigationDestinations.ConferencePage)
+        this.pipController = await PiPWindow.create({
+            context: this.getUIContext().getHostContext(),
+            componentController: this.focusXComponentController,
+            customUIController: this.voipPiPNodeController,
+            navigationId: uikit.bundleName,
+            templateType: PiPWindow.PiPTemplateType.VIDEO_CALL,
+            contentWidth: 200,
+            contentHeight: 300,
+        });
+        this.pipController.on('stateChange', (state: PiPWindow.PiPState, reason: string) => {
+            // this.onStateChange(state, reason);
+        });
+        this.pipController.on('controlPanelActionEvent', (event: PiPWindow.PiPActionEventType, status?: number) => {
+            // this.onActionEvent(event, status);
+        });
+        this.pipController.setAutoStartEnabled(true)
+        console.log('createPipController')
     }
 
     destroyPipController() {
-        pipHelper.destroyPipController()
+        if (!this.pipController) {
+            return;
+        }
+        this.pipController.setAutoStartEnabled(false)
+        this.pipController.off('stateChange');
+        this.pipController.off('controlPanelActionEvent');
+        this.pipController.stopPiP()
+        this.pipController = undefined;
     }
 
     inviteNewParticipant() {
@@ -787,14 +791,5 @@ export default struct ConferencePage {
                 'messages': [message]
             } as Record<string, Object>
         )
-    }
-
-    conferenceChat() {
-        this.showConferenceMoreActionSheet = false
-        let callId = this.callSession!.callId
-        let conversation = new Conversation(ConversationType.ChatRoom, callId, 0)
-        this.mainNavPathStack.pushPathByName(navigationDestinations.ConversationPage, {
-            'conversation': conversation
-        } as Record<string, Object>)
     }
 }

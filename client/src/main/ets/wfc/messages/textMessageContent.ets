@@ -8,6 +8,7 @@ import wfc from '../client/wfc'
 import QuoteInfo from "../model/quoteInfo";
 import MessagePayload from './messagePayload';
 import QuoteInfoPayload from '../model/quoteInfoPayload';
+import { _patchToJavaLong, _reverseToJsLongString } from '../util/longUtil';
 
 export default class TextMessageContent extends MessageContent {
     content = '';
@@ -30,8 +31,8 @@ export default class TextMessageContent extends MessageContent {
                 "quote": this.quoteInfo.encode()
             }
             // JSON.parse 和 JSON.stringify 不能处理java long
-            let orgStr = JSON.stringify(obj);
-            let str = orgStr.replace(new RegExp('"u":"([0-9]+)"'), "\"u\":$1");
+            let str = JSON.stringify(obj);
+            str = _patchToJavaLong(str, 'u');
 
             payload.binaryContent = wfc.utf8_to_b64(str);
         }
@@ -46,7 +47,7 @@ export default class TextMessageContent extends MessageContent {
             let quoteInfoStr = wfc.b64_to_utf8(payload.binaryContent)
             // FIXME node 环境，decodeURIComponent 方法，有时候会在最后添加上@字符，目前尚未找到原因，先规避
             quoteInfoStr = quoteInfoStr.substring(0, quoteInfoStr.lastIndexOf('}') + 1)
-            quoteInfoStr = quoteInfoStr.replace(new RegExp('"u":([0-9]+),'), '"u":"$1",')
+            quoteInfoStr = _reverseToJsLongString(quoteInfoStr, 'u')
             let obj = JSON.parse(quoteInfoStr) as Record<string, QuoteInfoPayload>
             if(obj){
                 this.quoteInfo = new QuoteInfo();

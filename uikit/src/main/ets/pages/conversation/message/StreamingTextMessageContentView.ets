@@ -25,13 +25,13 @@ export default struct StreamingTextMessageContentView {
             Text(this.streamingMessageContent())
                 .constraintSize({ minHeight: 40 })
                 .backgroundColor(Color.White)
+                .padding(10)
                 .borderRadius(4)
                 .enableDataDetector(true)
             if (!this.isGenerated()) {
                 LoadingProgress().width(20).height(20)
             }
         }
-        .padding(10)
         .alignItems(HorizontalAlign.Start)
     }
 }

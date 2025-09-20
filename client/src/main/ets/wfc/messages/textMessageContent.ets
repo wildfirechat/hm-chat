@@ -48,9 +48,10 @@ export default class TextMessageContent extends MessageContent {
             quoteInfoStr = quoteInfoStr.substring(0, quoteInfoStr.lastIndexOf('}') + 1)
             quoteInfoStr = quoteInfoStr.replace(new RegExp('"u":([0-9]+),'), '"u":"$1",')
             let obj = JSON.parse(quoteInfoStr) as Record<string, QuoteInfoPayload>
-
-            this.quoteInfo = new QuoteInfo();
-            this.quoteInfo.decode(obj.quote as QuoteInfoPayload);
+            if(obj){
+                this.quoteInfo = new QuoteInfo();
+                this.quoteInfo.decode(obj.quote as QuoteInfoPayload);
+            }
         }
     }
 

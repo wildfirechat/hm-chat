@@ -2409,9 +2409,8 @@ export class WfcManager {
     }
 
 
-    getEncodedClientId() {
-        // fixme
-        //return impl.getEncodedClientId();
+    getEncodedClientId():string {
+        return impl.getEncodedClientId();
     }
 
     /**
@@ -2420,10 +2419,7 @@ export class WfcManager {
      * @returns {string} 编码结果，base64格式
      */
     encodeData(data: string): string {
-        // TODO
-        // fixme
-        // return impl.encodeData(data);
-        return ''
+        return impl.encodeData(data);
     }
 
     /**
@@ -2432,9 +2428,7 @@ export class WfcManager {
      * @returns {null | string} 解码之后的数据
      */
     decodeData(encodedData: string): string {
-        // fixme
-        // return impl.decodeData(encodedData);
-        return ''
+        return impl.decodeData(encodedData);
     }
 
     /**

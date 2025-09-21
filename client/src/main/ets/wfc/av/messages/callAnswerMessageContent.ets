@@ -14,8 +14,8 @@ export default class CallAnswerMessageContent extends MessageContent {
     audioOnly = false;
     inviteMessageUid = Long.ZERO;
 
-    constructor(mentionedType = 0, mentionedTargets = []) {
-        super(MessageContentType.VOIP_CONTENT_TYPE_ACCEPT, mentionedType, mentionedTargets);
+    constructor() {
+        super(MessageContentType.VOIP_CONTENT_TYPE_ACCEPT);
     }
 
     digest() {

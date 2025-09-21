@@ -484,6 +484,18 @@ class WfcImpl {
         return protoProxy.getClientId();
     }
 
+    getEncodedClientId(): string {
+        return protoProxy.encodedCid();
+    }
+
+    encodeData(data: string): string {
+        return protoProxy.encodeData(data);
+    }
+
+    decodeData(encodedData: string): string {
+        return protoProxy.decodeData(encodedData);
+    }
+
     getProtoRevision(): string {
         return protoProxy.getProtoRevision();
     }

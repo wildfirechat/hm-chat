@@ -39,13 +39,9 @@ import wfc from '../client/wfc'
 import MessageConfig from '../client/messageConfig';
 import UnknownMessageContent from './unknownMessageContent';
 import PersistFlag from './persistFlag';
-import MessageStatus from './messageStatus';
-import ConversationType from '../model/conversationType';
-import { encode } from '../util/base64-arraybuffer';
 import Config from '../../config';
 
 import Long from '../util/long'
-import UnsupportMessageContent from "./unsupportMessageConten";
 import RecallMessageNotification from "./notification/recallMessageNotification";
 import MessageContent from './messageContent';
 import assign from '../util/assign';

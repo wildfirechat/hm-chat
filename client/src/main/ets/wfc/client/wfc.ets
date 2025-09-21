@@ -25,8 +25,6 @@ import GroupSearchResult from '../model/groupSearchResult';
 import GroupInfo from '../model/groupInfo';
 import ConversationInfo from '../model/conversationInfo';
 import Conversation from '../model/conversation';
-import AddGroupMemberNotification from '../messages/notification/addGroupMemberNotification';
-import KickoffGroupMemberNotification from '../messages/notification/kickoffGroupMemberNotification';
 import Message from '../messages/message';
 import ChatRoomInfo from '../model/chatRoomInfo';
 import MessageContent from '../messages/messageContent';
@@ -41,8 +39,8 @@ import FileRecord from '../model/fileRecord';
 import UserOnlineState from '../model/userOnlineState';
 import UserSettingScope from './userSettingScope';
 import PCOnlineInfo from '../model/pcOnlineInfo';
-import fs from '@ohos.file.fs';
 import UserSettingEntry from '../model/userSettingEntry';
+import { fileIo } from '@kit.CoreFileKit';
 
 const textEncoder = new util.TextEncoder('utf-8')
 
@@ -230,13 +228,18 @@ export class WfcManager {
     }
 
     /**
-     * 获取日志文件的路径列表。只有startLo之后才会生成日志。
+     * 获取日志文件的路径列表。只有startLog之后才会生成日志。
      * @returns 日志文件的路径列表
      */
     getLogFilesPath(): string[] {
         let logPath = this.getAppPath();
         let filesPath: string[] = [];
-        //Todo 遍历logPath目录，找出来所有protocol开头，xlog结尾的所有文件
+        let files = fileIo.listFileSync(logPath)
+        for (const file of files) {
+            if (file.startsWith('protocol') && file.endsWith('.xlog')) {
+                filesPath.push(logPath + '/' + file)
+            }
+        }
         return filesPath;
     }
 
@@ -1944,7 +1947,7 @@ export class WfcManager {
      * @param failCB
      * @returns {Promise<void>}
      */
-    async sendMessageEx(message: Message, toUsers = [], preparedCB: CallbackWithValue_1<number>, progressCB: CallbackWithValue_2_OrNull<number, number>, uploadedCB: CallbackWithValue_1_OrNull<string>, successCB: CallbackWithValue_2<Long, number>, failCB: FailCallbackOrNull) {
+    async sendMessageEx(message: Message, toUsers: string[], preparedCB: CallbackWithValue_1<number>, progressCB: CallbackWithValue_2_OrNull<number, number>, uploadedCB: CallbackWithValue_1_OrNull<string>, successCB: CallbackWithValue_2<Long, number>, failCB: FailCallbackOrNull) {
         impl.sendMessageEx(message, toUsers, preparedCB, progressCB, uploadedCB, successCB, failCB);
     }
 
@@ -2409,7 +2412,7 @@ export class WfcManager {
     }
 
 
-    getEncodedClientId():string {
+    getEncodedClientId(): string {
         return impl.getEncodedClientId();
     }
 

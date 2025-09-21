@@ -3042,7 +3042,7 @@ class WfcImpl {
         // 每 10 个群 2 秒
         estimatedTime += Math.round(groupIdIds.length / 10) * 2
 
-        return estimatedTime * 1000;
+        return (estimatedTime > 60 ? 60 : estimatedTime) * 1000;
     }
 
     _preloadGroupMemberUserInfos(memberIds: string[]) {

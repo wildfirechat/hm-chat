@@ -6,7 +6,6 @@ import Employee from '../../api/model/employee'
 import Organization from '../../api/model/organization'
 import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
 
-@Entry
 @Component
 export default struct PickUserPage {
     @State message: string = 'Hello ContactList'

@@ -9,7 +9,6 @@ import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationTyp
 import BuildProfile from 'BuildProfile';
 
 @Preview
-@Entry
 @Component
 export default struct SettingPage {
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;

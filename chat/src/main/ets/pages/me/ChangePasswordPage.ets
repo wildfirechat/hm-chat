@@ -3,7 +3,6 @@ import { showToast } from '@wfc/uikit/src/main/ets/common/utils/Toast';
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc';
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo';
 
-@Entry
 @Component
 export default struct ChangePasswordPage {
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;

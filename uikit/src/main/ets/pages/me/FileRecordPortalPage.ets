@@ -9,7 +9,6 @@ import PickConversationModal from '../picker/PickConversationModal'
 import PickContactModal from '../picker/PickContactModal'
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
 
-@Entry
 @Component
 export default struct FileRecordPortalPage {
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;

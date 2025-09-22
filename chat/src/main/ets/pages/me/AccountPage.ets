@@ -26,7 +26,6 @@ struct CustomListDialog {
     }
 }
 
-@Entry
 @Component
 export default struct AccountPage {
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;

@@ -15,7 +15,6 @@ import OptionItemView from '../../view/OptionItemView';
 import avenginekit from '@wfc/avenginekit';
 import { checkAndRequestPermission } from '../../helper/permissionHelper';
 
-@Entry
 @Component
 export default struct UserInfoPage {
     @State userInfo?: UserInfo = undefined

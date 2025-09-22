@@ -13,7 +13,6 @@ import Config from '@wfc/client/src/main/ets/config'
 import FileMessageContent from '@wfc/client/src/main/ets/wfc/messages/fileMessageContent'
 import { showToast } from '../../common/utils/Toast'
 
-@Entry
 @Component
 export default struct FavRecordPage {
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;

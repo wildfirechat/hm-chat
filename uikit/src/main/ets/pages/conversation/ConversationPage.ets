@@ -44,7 +44,6 @@ import ContextableNotificationMessageContentView from './message/ContextableNoti
 import StreamingTextGeneratingMessageContent from '@wfc/client/src/main/ets/wfc/messages/streamingTextGeneratingMessageContent'
 import StreamingTextGeneratedMessageContent from '@wfc/client/src/main/ets/wfc/messages/streamingTextGeneratedMessageContent'
 
-@Entry
 @Component
 export default struct ConversationPage {
     @State toReeditText: string = ''

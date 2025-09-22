@@ -6,7 +6,6 @@ import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
 import PickGroupMemberModal from './PickGroupMemberModal'
 import ActionSheetDialog from '../../view/ActionSheetDialog'
 
-@Entry
 @Component
 export default struct GroupManagerListPage {
     private customDialogController?: CustomDialogController

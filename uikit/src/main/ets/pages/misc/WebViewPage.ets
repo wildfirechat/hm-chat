@@ -5,7 +5,6 @@ import DSBridge from '../workspace/dsBridge'
 import PickMultiContactModal from '../picker/PickMultiContactModal'
 
 
-@Entry
 @Component
 export default struct WebViewPage {
     webviewController: web_webview.WebviewController = new web_webview.WebviewController()

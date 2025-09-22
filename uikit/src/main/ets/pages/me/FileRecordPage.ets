@@ -12,7 +12,6 @@ import Long from '@wfc/client/src/main/ets/wfc/util/long'
 import { eq, stringValue } from '@wfc/client/src/main/ets/wfc/util/longUtil'
 import { navigationDestinations } from '../navigationConfig'
 
-@Entry
 @Component
 export default struct FileRecordPage {
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;

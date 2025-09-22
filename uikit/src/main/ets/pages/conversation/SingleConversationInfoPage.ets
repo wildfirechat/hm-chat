@@ -11,7 +11,6 @@ import { navigationDestinations } from '../navigationConfig';
 import PickMultiContactModal from '../picker/PickMultiContactModal';
 
 @Preview
-@Entry
 @Component
 export default struct SingleConversationInfoPage {
     @State targetUserInfo: UserInfo = {} as UserInfo

@@ -8,7 +8,6 @@ import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import { navigationDestinations } from '../navigationConfig'
 
 
-@Entry
 @Component
 @Preview
 export default struct SearchConversationMessagePage {

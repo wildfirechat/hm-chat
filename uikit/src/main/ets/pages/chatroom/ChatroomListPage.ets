@@ -2,7 +2,6 @@ import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation';
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType';
 import { navigationDestinations } from '../navigationConfig';
 
-@Entry
 @Component
 export default struct ChatroomListPage {
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;

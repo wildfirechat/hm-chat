@@ -11,7 +11,6 @@ import ConversationSearchResult from '@wfc/client/src/main/ets/wfc/model/convers
 import { navigationDestinations } from '../navigationConfig'
 
 
-@Entry
 @Component
 @Preview
 export default struct SearchPortalPage {

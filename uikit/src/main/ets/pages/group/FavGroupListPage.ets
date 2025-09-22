@@ -5,7 +5,6 @@ import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationTyp
 import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
 import { navigationDestinations } from '../navigationConfig'
 
-@Entry
 @Component
 export default struct FavGroupListPage {
     @State favGroupList: GroupInfo[] = []

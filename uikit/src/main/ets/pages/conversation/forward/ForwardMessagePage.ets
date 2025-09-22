@@ -22,7 +22,6 @@ import CallStartMessageContent from '@wfc/client/src/main/ets/wfc/av/messages/ca
 import SoundMessageContent from '@wfc/client/src/main/ets/wfc/messages/soundMessageContent'
 import { window } from '@kit.ArkUI'
 
-@Entry
 @Component
 @Preview
 export default struct ForwardMessagePage {

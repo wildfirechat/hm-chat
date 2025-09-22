@@ -5,7 +5,6 @@ import orgServer from '../../api/orgServer';
 import { showToast } from '../../common/utils/Toast';
 import { navigationDestinations } from '../navigationConfig';
 
-@Entry
 @Component
 export default struct OrganizationTreePage {
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;

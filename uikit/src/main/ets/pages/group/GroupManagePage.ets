@@ -6,7 +6,6 @@ import ActionSheetDialog from '../../view/ActionSheetDialog'
 import ModifyGroupInfoType from '@wfc/client/src/main/ets/wfc/model/modifyGroupInfoType'
 import { showToast } from '../../common/utils/Toast'
 
-@Entry
 @Component
 export default struct GroupManagePage {
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;

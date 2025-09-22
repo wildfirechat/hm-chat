@@ -7,7 +7,6 @@ import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
 import PCOnlineInfo from '@wfc/client/src/main/ets/wfc/model/pcOnlineInfo'
 import { navigationDestinations } from '../navigationConfig'
 
-@Entry
 @Component
 export default struct PCSessionPage {
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;

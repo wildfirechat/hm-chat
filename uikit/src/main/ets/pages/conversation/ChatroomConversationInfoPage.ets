@@ -3,7 +3,6 @@ import ConversationType from "@wfc/client/src/main/ets/wfc/model/conversationTyp
 import OptionItemView from "../../view/OptionItemView";
 import { navigationDestinations } from "../navigationConfig";
 
-@Entry
 @Component
 export default struct ChatroomConversationInfoPage {
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;

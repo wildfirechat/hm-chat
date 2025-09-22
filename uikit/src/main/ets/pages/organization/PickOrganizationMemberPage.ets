@@ -4,7 +4,6 @@ import OrganizationEx from '../../api/model/organizationEx';
 import orgServer from '../../api/orgServer';
 import { router } from '@kit.ArkUI';
 
-@Entry
 @Component
 export default struct PickOrganizationMemberPage{
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;

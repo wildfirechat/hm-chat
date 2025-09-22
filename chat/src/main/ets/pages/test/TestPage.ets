@@ -10,7 +10,6 @@ import { BusinessError } from '@kit.BasicServicesKit';
 import TestTextNodeController from './TestTextNodeController';
 
 
-@Entry({ routeName: 'apiTestPage' })
 @Component
 export default struct TestPage {
     private mXComponentController: XComponentController = new XComponentController()

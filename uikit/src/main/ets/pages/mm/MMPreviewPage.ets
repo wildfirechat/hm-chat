@@ -1,7 +1,6 @@
 import router from '@ohos.router';
 import { MediaEntry } from '../../common/Types';
 
-@Entry
 @Component
 export default struct MMPreviewPage {
     @State mediaEntries: MediaEntry[] = []

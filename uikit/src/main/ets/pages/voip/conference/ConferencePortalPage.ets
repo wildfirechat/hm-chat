@@ -10,7 +10,6 @@ import JoinConferenceDialog from './JoinConferenceDialog'
 import { showToast } from '../../../common/utils/Toast'
 import OptionItemView from '../../../view/OptionItemView'
 
-@Entry
 @Component
 export default struct ConferencePortalPage {
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack

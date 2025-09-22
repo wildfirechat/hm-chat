@@ -8,7 +8,6 @@ import { navigationDestinations } from '@wfc/uikit/src/main/ets/pages/navigation
 import uikit from '@wfc/uikit';
 
 @Preview
-@Entry
 @Component
 export default struct AboutPage {
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;

@@ -5,7 +5,6 @@ import { showToast } from '../../common/utils/Toast'
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import PCSession from '@wfc/client/src/main/ets/wfc/model/pcsession'
 
-@Entry
 @Component
 @Preview
 export default struct PCLoginPage {

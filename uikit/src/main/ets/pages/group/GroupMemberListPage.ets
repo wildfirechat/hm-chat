@@ -5,7 +5,6 @@ import GroupMemberType from "@wfc/client/src/main/ets/wfc/model/groupMemberType"
 import { showToast } from "../../common/utils/Toast";
 import { navigationDestinations } from "../navigationConfig";
 
-@Entry
 @Component
 export default struct GroupMemberListPage {
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;

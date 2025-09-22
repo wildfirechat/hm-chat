@@ -3,7 +3,6 @@ import SearchResultView from './SearchPortalResultView'
 import { SearchModule } from '../../common/Types'
 import { navigationDestinations } from '../navigationConfig'
 
-@Entry
 @Component
 @Preview
 export default struct SearchUserPage {

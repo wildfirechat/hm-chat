@@ -11,8 +11,6 @@ import resourceManager from '@ohos.resourceManager';
 import { saveMedia } from '../../helper/mediaHelper';
 import { showToast } from '../../common/utils/Toast';
 
-//@Entry
-//@Component
 @CustomDialog
 export default struct MMMessagePreviewDialog {
     // 预览组合消息里面的媒体消息时，直接设置 mediaEntries，不设置 message

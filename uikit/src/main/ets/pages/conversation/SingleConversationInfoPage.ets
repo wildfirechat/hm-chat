@@ -30,6 +30,7 @@ export default struct SingleConversationInfoPage {
     pickMultiContactModal() {
         PickMultiContactModal({
             showPickContactModal: $showPickContactModal,
+            showFavGroup:false,
             initialCheckedUserIds: [this.conversationInfo!.conversation.target],
             uncheckableUserIds: [this.conversationInfo!.conversation.target]
 

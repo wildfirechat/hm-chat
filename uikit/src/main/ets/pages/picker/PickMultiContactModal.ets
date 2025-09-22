@@ -16,13 +16,16 @@ export default struct PickMultiContactModal {
     @State checkedEmployees: Employee[] = []
     @State userInfos?: UserInfo[] = undefined
     @State @Watch('_onCheckFavGroup') checkedFavGroupInfo?: GroupInfo = undefined
+    @Link showPickContactModal: boolean
+
     initialCheckedUserIds: string[] = []
     uncheckableUserIds: string[] = []
     organization?: Organization
-    public static PICK_RESULT: string = 'pickContactResult'
-    @Link showPickContactModal: boolean
     onCheckFavGroup?: (info: GroupInfo) => void
     onCheckUser?: (users: UserInfo[]) => void
+    showFavGroup:boolean = true
+
+    public static PICK_RESULT: string = 'pickContactResult'
 
     // TODO
     // fixme
@@ -85,7 +88,7 @@ export default struct PickMultiContactModal {
                             uncheckableUserIds: this.initialCheckedUserIds,
                             showCategory: true,
                             showSearchView: true,
-                            showFavGroup: true,
+                            showFavGroup: this.showFavGroup,
                             showOrganization: true,
                         })
                     } else {

@@ -9,6 +9,7 @@
                 "compatibleSdkVersion": "5.0.0(12)",
                 "runtimeOS": "HarmonyOS",
                 "arkTSVersion": "1.0",
+                "targetSdkVersion": "6.0.0(20)"
             }
         ]
     },

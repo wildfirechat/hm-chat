@@ -86,20 +86,6 @@
                 }
             },
             {
-                "name": "ohos.permission.WRITE_MEDIA",
-                "reason": "$string:reason_write_media",
-                "usedScene": {
-                    "when": "always"
-                }
-            },
-            {
-                "name": "ohos.permission.READ_MEDIA",
-                "reason": "$string:reason_write_media",
-                "usedScene": {
-                    "when": "always"
-                }
-            },
-            {
                 "name": "ohos.permission.CAMERA",
                 "reason": "$string:camera_auth_reason",
                 "usedScene": {

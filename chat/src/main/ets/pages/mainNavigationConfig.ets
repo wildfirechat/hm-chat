@@ -1,4 +1,6 @@
 import { UIKitPageMap, UIKIT_NAV_DESTINATION_PREFIX } from "@wfc/uikit/src/main/ets/pages/uikitNavigationConfig"
+// 如果需要支持朋友圈时，请取消注释
+import { MomentPageMap, MOMENT_NAV_DESTINATION_PREFIX } from "@wfc/momentkit"
 import AboutPage from "./me/AboutPage"
 import AccountPage from "./me/AccountPage"
 import ChangePasswordPage from "./me/ChangePasswordPage"
@@ -43,6 +45,9 @@ export function MainPageMap(name: string) {
         AppPageMap(name)
     } else if (name.startsWith(UIKIT_NAV_DESTINATION_PREFIX)) {
         UIKitPageMap(name)
+        // 如果需要支持朋友圈时，请取消注释
+    } else if (name.startsWith(MOMENT_NAV_DESTINATION_PREFIX)) {
+        MomentPageMap(name);
     } else {
         NavDestination() {
             Column() {

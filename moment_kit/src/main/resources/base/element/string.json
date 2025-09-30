@@ -1,0 +1,16 @@
+{
+    "string": [
+        {
+            "name": "module_desc",
+            "value": "module description"
+        },
+        {
+            "name": "Moment_kitAbility_desc",
+            "value": "description"
+        },
+        {
+            "name": "Moment_kitAbility_label",
+            "value": "label"
+        }
+    ]
+}

@@ -5,6 +5,9 @@ import { uikitNavigationDestinations } from '@wfc/uikit/src/main/ets/pages/uikit
 import BuildProfile from 'BuildProfile'
 import uikit from '@wfc/uikit'
 
+// 如果需要支持朋友圈时，请取消注释
+import { momentNavigationDestinations } from '@wfc/momentkit'
+
 @Preview
 @Component
 export default struct DiscoveryTab {
@@ -45,7 +48,9 @@ export default struct DiscoveryTab {
                                 .padding({ left: 20 })
                             }
                             .onClick(() => {
-                                showToast('TODO')
+                                showToast('当前版本不支持朋友圈功能')
+                                // 如果需要支持朋友圈时，请取消注释
+                                this.mainNavPathStack.pushPathByName(momentNavigationDestinations.FeedListPage, {} as Record<string, Object>)
                             })
                             .padding({ left: 10, right: 10 })
                             .width('100%')

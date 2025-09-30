@@ -1,0 +1,14 @@
+{
+    "name": "@wfc/moment_kit",
+    "version": "1.0.0",
+    "description": "Please describe the basic information.",
+    "main": "Index.ets",
+    "author": "",
+    "license": "",
+    "dependencies": {
+//        "@wfc/moment_client": "file:../moment_client",
+        "@wfc/moment_client": "file:./libs/moment_client.har",
+        "@wfc/client": "file:../client"
+    }
+}
+

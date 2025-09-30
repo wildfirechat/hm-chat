@@ -1,0 +1,11 @@
+{
+    "module": {
+        "name": "moment_kit",
+        "type": "har",
+        "description": "$string:module_desc",
+        "deviceTypes": [
+            "default",
+            "tablet"
+        ],
+    }
+}

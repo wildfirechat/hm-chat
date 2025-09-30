@@ -33,6 +33,10 @@
         {
             "name": "uikit",
             "srcPath": "./uikit",
+        },
+        {
+            "name": "moment_kit",
+            "srcPath": "./moment_kit"
         }
     ]
 }

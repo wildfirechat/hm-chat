@@ -1,14 +1,11 @@
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
-import router from '@ohos.router'
-import data_preferences from '@ohos.data.preferences'
 import EventType from '@wfc/client/src/main/ets/wfc/client/wfcEvent'
 import ConnectionStatus from '@wfc/client/src/main/ets/wfc/client/connectionStatus'
 import OptionItemView from '@wfc/uikit/src/main/ets/view/OptionItemView'
 import { showToast } from '@wfc/uikit/src/main/ets/common/utils/Toast'
-import { navigationDestinations } from '@wfc/uikit/src/main/ets/pages/navigationConfig'
-import { mainNavigationDestinations } from './mainNavigationConfig'
-import { BusinessError } from '@kit.BasicServicesKit'
+import { uikitNavigationDestinations } from '@wfc/uikit/src/main/ets/pages/uikitNavigationConfig'
+import { appNavigationDestinations } from './mainNavigationConfig'
 import BuildProfile from 'BuildProfile'
 
 
@@ -86,7 +83,7 @@ export default struct MeTab {
             .alignItems(VerticalAlign.Center)
             .backgroundColor(Color.White)
             .onClick(() => {
-                this.mainNavPathStack.pushPathByName(navigationDestinations.UserInfoPage, {
+                this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.UserInfoPage, {
                     'userInfo': this.userInfo,
                 } as Record<string, Object>)
             })
@@ -94,26 +91,26 @@ export default struct MeTab {
             OptionItemView({ icon: $r('app.media.ic_account'), title: '账号与安全' })
                 .margin({ top: 10 })
                 .onClick(() => {
-                    this.mainNavPathStack.pushPathByName(navigationDestinations.AccountPage, {} as Record<string, Object>)
+                    this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.AccountPage, {} as Record<string, Object>)
                 })
 
             OptionItemView({ icon: $r('app.media.ic_notification'), title: '消息与通知' })
                 .margin({ top: 10 })
                 .onClick(() => {
-                    this.mainNavPathStack.pushPathByName(navigationDestinations.NotificationPage, {} as Record<string, Object>)
+                    this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.NotificationPage, {} as Record<string, Object>)
                 })
 
             Column() {
                 OptionItemView({ icon: $r('app.media.ic_settings_file'), title: '文件' })
                     .onClick(() => {
-                        this.mainNavPathStack.pushPathByName(navigationDestinations.FileRecordPortalPage, {} as Record<string, Object>)
+                        this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.FileRecordPortalPage, {} as Record<string, Object>)
                     })
                 Divider()
                     .margin({ left: 40 })
                     .color('#F7F7F7')
                 OptionItemView({ icon: $r('app.media.ic_star'), title: '收藏', showDivider: false })
                     .onClick(() => {
-                        this.mainNavPathStack.pushPathByName(navigationDestinations.FavRecordPage, {} as Record<string, Object>)
+                        this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.FavRecordPage, {} as Record<string, Object>)
                     })
             }
             .margin({ top: 10 })
@@ -130,7 +127,7 @@ export default struct MeTab {
                     .color('#F7F7F7')
                 OptionItemView({ icon: $r('app.media.ic_setting'), title: '设置', showDivider: false })
                     .onClick(() => {
-                        this.mainNavPathStack.pushPathByName(mainNavigationDestinations.SettingPage, {} as Record<string, Object>)
+                        this.mainNavPathStack.pushPathByName(appNavigationDestinations.SettingPage, {} as Record<string, Object>)
                     })
             }
             .margin({ top: 10, bottom: 10 })

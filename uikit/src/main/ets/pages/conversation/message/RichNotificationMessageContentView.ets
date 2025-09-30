@@ -1,6 +1,6 @@
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import RichNotificationMessageContent, { NData } from '@wfc/client/src/main/ets/wfc/messages/notification/richNotificationMessageContent'
-import { navigationDestinations } from '../../navigationConfig';
+import { uikitNavigationDestinations } from '../../uikitNavigationConfig';
 
 @Component
 export default struct RichNotificationMessageContentView {
@@ -40,7 +40,7 @@ export default struct RichNotificationMessageContentView {
         .constraintSize({ maxWidth: 300 })
         .borderRadius(4)
         .onClick(() => {
-            this.mainNavPathStack.pushPathByName(navigationDestinations.WebViewPage, {
+            this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.WebViewPage, {
                 'url': this.richNotificationMessageContent().exUrl,
                 'title': this.richNotificationMessageContent().title
             } as Record<string, Object>)

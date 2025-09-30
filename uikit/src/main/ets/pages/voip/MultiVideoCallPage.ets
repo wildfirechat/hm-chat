@@ -14,7 +14,7 @@ import { VideoTrack } from '@ohos/webrtc/src/main/libohos_webrtc/webrtc'
 import VoipPiPNodeController from './VoipPiPNodeController'
 import uikit from '../../uikit'
 import { BusinessError } from '@kit.BasicServicesKit'
-import { navigationDestinations } from '../navigationConfig'
+import { uikitNavigationDestinations } from '../uikitNavigationConfig'
 
 @Component
 export default struct MultiVideoCallPage {
@@ -185,7 +185,7 @@ export default struct MultiVideoCallPage {
             }
             this.destroyPipController()
 
-            let index = this.mainNavPathStack.getIndexByName(navigationDestinations.MultiVideoCallPage)
+            let index = this.mainNavPathStack.getIndexByName(uikitNavigationDestinations.MultiVideoCallPage)
             if (index.length) {
                 this.mainNavPathStack.pop()
             }

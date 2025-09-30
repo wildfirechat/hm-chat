@@ -2,8 +2,8 @@ import { showToast } from '@wfc/uikit/src/main/ets/common/utils/Toast'
 import OptionItemView from '@wfc/uikit/src/main/ets/view/OptionItemView'
 import data_preferences from '@ohos.data.preferences'
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc';
-import { navigationDestinations } from '@wfc/uikit/src/main/ets/pages/navigationConfig';
-import { mainNavigationDestinations } from '../mainNavigationConfig';
+import { uikitNavigationDestinations } from '@wfc/uikit/src/main/ets/pages/uikitNavigationConfig';
+import { appNavigationDestinations } from '../mainNavigationConfig';
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation';
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType';
 import BuildProfile from 'BuildProfile';
@@ -31,7 +31,7 @@ export default struct SettingPage {
                         title: '关于',
                         showDivider: true
                     }).onClick(() => {
-                        this.mainNavPathStack.pushPathByName(mainNavigationDestinations.AboutPage, {} as Record<string, Object>)
+                        this.mainNavPathStack.pushPathByName(appNavigationDestinations.AboutPage, {} as Record<string, Object>)
                     })
 
                     if (BuildProfile.DEBUG) {
@@ -52,8 +52,8 @@ export default struct SettingPage {
                                     fontColor: Color.Red,
                                     action: () => {
                                         let conversation = new Conversation(ConversationType.Single, 'cgc8c8VV', 0)
-                                        this.mainNavPathStack.popToName(navigationDestinations.ConversationPage)
-                                        this.mainNavPathStack.replacePathByName(navigationDestinations.ConversationPage, {
+                                        this.mainNavPathStack.popToName(uikitNavigationDestinations.ConversationPage)
+                                        this.mainNavPathStack.replacePathByName(uikitNavigationDestinations.ConversationPage, {
                                             'conversation': conversation
                                         } as Record<string, Object>)
                                     },
@@ -79,7 +79,7 @@ export default struct SettingPage {
                                 value: "注销",
                                 fontColor: Color.Red,
                                 action: () => {
-                                    this.mainNavPathStack.pushPathByName(mainNavigationDestinations.DestroyAccountPage, {} as Record<string, Object>)
+                                    this.mainNavPathStack.pushPathByName(appNavigationDestinations.DestroyAccountPage, {} as Record<string, Object>)
                                 },
                             },
                             secondaryButton: {

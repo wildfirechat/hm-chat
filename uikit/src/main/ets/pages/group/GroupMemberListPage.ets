@@ -3,7 +3,7 @@ import GroupInfo from "@wfc/client/src/main/ets/wfc/model/groupInfo";
 import GroupMember from "@wfc/client/src/main/ets/wfc/model/groupMember";
 import GroupMemberType from "@wfc/client/src/main/ets/wfc/model/groupMemberType";
 import { showToast } from "../../common/utils/Toast";
-import { navigationDestinations } from "../navigationConfig";
+import { uikitNavigationDestinations } from "../uikitNavigationConfig";
 
 @Component
 export default struct GroupMemberListPage {
@@ -49,7 +49,7 @@ export default struct GroupMemberListPage {
                                 if (this.groupInfo!.privateChat === 1 && [GroupMemberType.Owner, GroupMemberType.Manager].indexOf(this.groupMember!.type) === -1) {
                                     showToast('禁止私聊')
                                 } else {
-                                    this.mainNavPathStack.pushPathByName(navigationDestinations.UserInfoPage, {
+                                    this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.UserInfoPage, {
                                         'userInfo': wfc.getUserInfo(groupMember.memberId)
                                     } as Record<string, Object>)
                                 }

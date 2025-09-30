@@ -17,7 +17,7 @@ import Base, { BusinessError } from '@ohos.base'
 import WorkSpaceTab from '@wfc/uikit/src/main/ets/pages/WorkSpaceTab'
 import Config from '@wfc/client/src/main/ets/config'
 import { checkPermissions, requestPermissions } from '@wfc/uikit/src/main/ets/helper/permissionHelper'
-import { navigationDestinations } from '@wfc/uikit/src/main/ets/pages/navigationConfig'
+import { uikitNavigationDestinations } from '@wfc/uikit/src/main/ets/pages/uikitNavigationConfig'
 import { MainPageMap } from './mainNavigationConfig'
 import orgServer from '@wfc/uikit/src/main/ets/api/orgServer'
 import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
@@ -66,13 +66,13 @@ struct MainPage {
             // FIXME
             // https://developer.huawei.com/consumer/cn/doc/harmonyos-references-V5/js-apis-arkui-observer-V5?catalogVersion=V5
             //  会话页面，监听 observer.on('navDestinationUpdate')
-            let index = this.mainNavPathStack.popToName(navigationDestinations.ConversationPage)
+            let index = this.mainNavPathStack.popToName(uikitNavigationDestinations.ConversationPage)
             if (index >= 0) {
-                this.mainNavPathStack.replacePathByName(navigationDestinations.ConversationPage, {
+                this.mainNavPathStack.replacePathByName(uikitNavigationDestinations.ConversationPage, {
                     'conversation': conversation
                 } as Record<string, Object>)
             } else {
-                this.mainNavPathStack.pushPathByName(navigationDestinations.ConversationPage, {
+                this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ConversationPage, {
                     'conversation': conversation
                 } as Record<string, Object>)
             }
@@ -101,7 +101,7 @@ struct MainPage {
 
     createConversation(users: UserInfo[]) {
         if (users.length === 1) {
-            this.mainNavPathStack.pushPathByName(navigationDestinations.ConversationPage, {
+            this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ConversationPage, {
                 'conversation': new Conversation(ConversationType.Single, users[0].uid, 0)
             } as Record<string, Object>)
         } else {
@@ -114,7 +114,7 @@ struct MainPage {
             })
             groupName = groupName.substring(0, groupName.length - 1)
             wfc.createGroup('', GroupType.Normal, groupName, '', '', memberIds, '', [0], null, (groupId) => {
-                this.mainNavPathStack.pushPathByName(navigationDestinations.ConversationPage, {
+                this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ConversationPage, {
                     'conversation': new Conversation(ConversationType.Group, groupId, 0)
                 } as Record<string, Object>)
             }, err => {
@@ -184,7 +184,7 @@ struct MainPage {
     }
 
     showPCLoginPage(token: string, isConfirmPCLogin = false, platform = 0) {
-        this.mainNavPathStack.pushPathByName(navigationDestinations.PCLoginPage, {
+        this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.PCLoginPage, {
             'token': token,
             'isConfirmPCLogin': isConfirmPCLogin,
             'platform': platform
@@ -193,13 +193,13 @@ struct MainPage {
 
     showUser(userId: string) {
         let userInfo = wfc.getUserInfo(userId)
-        this.mainNavPathStack.pushPathByName(navigationDestinations.UserInfoPage, {
+        this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.UserInfoPage, {
             'userInfo': userInfo
         } as Record<string, Object>)
     }
 
     showGroup(groupId: string) {
-        this.mainNavPathStack.pushPathByName(navigationDestinations.GroupInfoPage, {
+        this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.GroupInfoPage, {
             'groupId': groupId
         } as Record<string, Object>)
     }
@@ -259,7 +259,7 @@ struct MainPage {
                 this.createConversation(users)
             },
             onCheckFavGroup: (groupInfo: GroupInfo) => {
-                this.mainNavPathStack.pushPathByName(navigationDestinations.ConversationPage, {
+                this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ConversationPage, {
                     'conversation': new Conversation(ConversationType.Group, groupInfo.target, 0)
                 } as Record<string, Object>)
             }
@@ -284,7 +284,7 @@ struct MainPage {
                 })
             MenuItem({ startIcon: $r('app.media.tianjiapengyou_iconfont'), content: "添加朋友" })
                 .onClick(() => {
-                    this.mainNavPathStack.pushPathByName(navigationDestinations.SearchUserPage, {} as Record<string, Object>)
+                    this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.SearchUserPage, {} as Record<string, Object>)
                 })
             MenuItem({ startIcon: $r('app.media.saoyisao1_iconfont'), content: "扫一扫" })
                 .onClick(() => {
@@ -355,7 +355,7 @@ struct MainPage {
                 .height(30)
                 .padding(6)
                 .onClick(() => {
-                    this.mainNavPathStack.pushPathByName(navigationDestinations.SearchPortalPage, {
+                    this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.SearchPortalPage, {
                         'keyword': '1'
                     } as Record<string, Object>, true)
                 })

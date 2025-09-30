@@ -5,7 +5,7 @@ import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import MessageContentType from '@wfc/client/src/main/ets/wfc/messages/messageContentType'
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType'
-import { navigationDestinations } from '../../navigationConfig'
+import { uikitNavigationDestinations } from '../../uikitNavigationConfig'
 import appServer from '../../../api/appServer'
 import AppServerError from '../../../api/appServerError'
 import GroupMemberType from '@wfc/client/src/main/ets/wfc/model/groupMemberType'
@@ -102,7 +102,7 @@ export default struct ContextableNotificationMessageContentView {
                 title: '转发',
                 tag: 'forward',
                 action: () => {
-                    this.mainNavPathStack.pushPathByName(navigationDestinations.ForwardMessagePage,
+                    this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ForwardMessagePage,
                         {
                             'messages': [this.message]
                         } as Record<string, Object>

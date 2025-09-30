@@ -9,7 +9,7 @@ import { startContinuousTask, stopContinuousTask } from './helper/continuousTask
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType';
 import AVEngineCallback from '@wfc/avenginekit/src/main/ets/wfc/av/engine/avengineCallback';
 
-import { navigationDestinations } from './pages/navigationConfig';
+import { uikitNavigationDestinations } from './pages/uikitNavigationConfig';
 import { common } from '@kit.AbilityKit';
 
 // 一定要引入，否则不能弹出对应页面
@@ -37,15 +37,15 @@ export default class AVEngineCallbackImpl extends AVEngineCallback {
         let name = ''
         if (session.conversation?.type === ConversationType.Single) {
             if (session.audioOnly) {
-                name = navigationDestinations.SingleAudioCallPage
+                name = uikitNavigationDestinations.SingleAudioCallPage
             } else {
-                name = navigationDestinations.SingleVideoCallPage
+                name = uikitNavigationDestinations.SingleVideoCallPage
             }
         } else if (session.conversation?.type === ConversationType.Group) {
             if (session.audioOnly) {
-                name = navigationDestinations.MultiAudioCallPage
+                name = uikitNavigationDestinations.MultiAudioCallPage
             } else {
-                name = navigationDestinations.MultiVideoCallPage
+                name = uikitNavigationDestinations.MultiVideoCallPage
             }
         } else {
             // TODO 会议
@@ -62,15 +62,15 @@ export default class AVEngineCallbackImpl extends AVEngineCallback {
         let name = ''
         if (session.conversation?.type === ConversationType.Single) {
             if (session.audioOnly) {
-                name = navigationDestinations.SingleAudioCallPage
+                name = uikitNavigationDestinations.SingleAudioCallPage
             } else {
-                name = navigationDestinations.SingleVideoCallPage
+                name = uikitNavigationDestinations.SingleVideoCallPage
             }
         } else if (session.conversation?.type === ConversationType.Group) {
             if (session.audioOnly) {
-                name = navigationDestinations.MultiAudioCallPage
+                name = uikitNavigationDestinations.MultiAudioCallPage
             } else {
-                name = navigationDestinations.MultiVideoCallPage
+                name = uikitNavigationDestinations.MultiVideoCallPage
             }
         } else {
             // TODO 会议

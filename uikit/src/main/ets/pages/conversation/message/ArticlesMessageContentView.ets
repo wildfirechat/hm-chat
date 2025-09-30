@@ -1,6 +1,6 @@
 import ArticlesMessageContent, { Article } from "@wfc/client/src/main/ets/wfc/messages/articlesMessageContent";
 import Message from "@wfc/client/src/main/ets/wfc/messages/message";
-import { navigationDestinations } from "../../navigationConfig";
+import { uikitNavigationDestinations } from "../../uikitNavigationConfig";
 
 @Component
 export default struct ArticleMessageContentView {
@@ -31,7 +31,7 @@ export default struct ArticleMessageContentView {
             .alignItems(HorizontalAlign.Start)
             .width('100%')
             .onClick(() => {
-                this.mainNavPathStack.pushPathByName(navigationDestinations.WebViewPage, {
+                this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.WebViewPage, {
                     'url': this.articlesMessageContent().topArticle?.url,
                     'title': this.articlesMessageContent().topArticle?.title
                 } as Record<string, Object>)

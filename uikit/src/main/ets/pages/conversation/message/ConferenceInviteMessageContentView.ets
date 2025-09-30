@@ -1,7 +1,7 @@
 import ConferenceInviteMessageContent from '@wfc/client/src/main/ets/wfc/av/messages/conferenceInviteMessageContent'
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
-import { navigationDestinations } from '../../navigationConfig'
+import { uikitNavigationDestinations } from '../../uikitNavigationConfig'
 
 @Component
 export default struct ConferenceInviteMessageContentView {
@@ -53,7 +53,7 @@ export default struct ConferenceInviteMessageContentView {
                 .margin({ left: 10, bottom: 10 })
         }
         .onClick(() => {
-            this.mainNavPathStack.pushPathByName(navigationDestinations.ConferenceInfoPage, {
+            this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ConferenceInfoPage, {
                 'conferenceId': this.conferenceInviteMessageContent().callId,
                 'password': this.conferenceInviteMessageContent().password
             } as Record<string, string>)

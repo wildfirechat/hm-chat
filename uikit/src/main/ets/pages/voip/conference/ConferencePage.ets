@@ -20,7 +20,7 @@ import WFCVideoRenderController, { ScalingMode } from '@wfc/avenginekit/src/main
 import VoipPiPNodeController from '../VoipPiPNodeController'
 import uikit from '../../../uikit'
 import { BusinessError } from '@kit.BasicServicesKit'
-import { navigationDestinations } from '../../navigationConfig'
+import { uikitNavigationDestinations } from '../../uikitNavigationConfig'
 import ConferenceInviteMessageContent from '@wfc/client/src/main/ets/wfc/av/messages/conferenceInviteMessageContent'
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
@@ -257,7 +257,7 @@ export default struct ConferencePage {
             }
             this.destroyPipController()
 
-            let index = this.mainNavPathStack.getIndexByName(navigationDestinations.ConferencePage)
+            let index = this.mainNavPathStack.getIndexByName(uikitNavigationDestinations.ConferencePage)
             if (index.length) {
                 this.mainNavPathStack.pop()
             }
@@ -572,7 +572,7 @@ export default struct ConferencePage {
                                     let params = {} as Record<string, Object>
                                     params['callId'] = this.callSession!.callId
                                     params['conferenceInfo'] = this.conferenceInfo!
-                                    this.mainNavPathStack.pushPathByName(navigationDestinations.ConferenceParticipantListPage, params)
+                                    this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ConferenceParticipantListPage, params)
                                 })
                             Text('管理')
                                 .margin({ top: 10 })
@@ -786,7 +786,7 @@ export default struct ConferencePage {
         let inviteMessageContent = new ConferenceInviteMessageContent(info.conferenceId, info.owner, info.conferenceTitle, '', info.startTime, false, false, info.advance, info.pin, info.password)
         let dummyConversation = new Conversation(0, '', 0)
         let message = new Message(dummyConversation, inviteMessageContent)
-        this.mainNavPathStack.pushPathByName(navigationDestinations.ForwardMessagePage,
+        this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ForwardMessagePage,
             {
                 'messages': [message]
             } as Record<string, Object>

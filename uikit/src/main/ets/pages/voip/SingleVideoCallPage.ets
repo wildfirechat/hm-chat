@@ -12,7 +12,7 @@ import { BusinessError } from '@kit.BasicServicesKit'
 import AVCastPicker from '@ohos.multimedia.avCastPicker'
 import { timestampFormat } from '../../util/helper'
 import pipHelper from './pipHelper'
-import { navigationDestinations } from '../navigationConfig'
+import { uikitNavigationDestinations } from '../uikitNavigationConfig'
 import WFCVideoRenderController from '@wfc/avenginekit/src/main/ets/wfc/av/xcomponent/WFCVideoRenderController'
 import VoipPiPNodeController from './VoipPiPNodeController'
 
@@ -161,7 +161,7 @@ export default struct SingleVideoCallPage {
             }
             this.destroyPipController()
 
-            let index = this.mainNavPathStack.getIndexByName(navigationDestinations.SingleVideoCallPage)
+            let index = this.mainNavPathStack.getIndexByName(uikitNavigationDestinations.SingleVideoCallPage)
             if (index.length) {
                 this.mainNavPathStack.pop()
             }
@@ -194,7 +194,7 @@ export default struct SingleVideoCallPage {
     }
 
     async createPipController() {
-        this.pipController = await pipHelper.createPipController(this.getUIContext(), this.focusXComponentController, this.voipPiPNodeController, this.mainNavPathStack, navigationDestinations.SingleVideoCallPage)
+        this.pipController = await pipHelper.createPipController(this.getUIContext(), this.focusXComponentController, this.voipPiPNodeController, this.mainNavPathStack, uikitNavigationDestinations.SingleVideoCallPage)
     }
 
     destroyPipController() {

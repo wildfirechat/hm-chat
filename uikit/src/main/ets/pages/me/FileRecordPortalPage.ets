@@ -4,7 +4,7 @@ import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType'
 import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
-import { navigationDestinations } from '../navigationConfig'
+import { uikitNavigationDestinations } from '../uikitNavigationConfig'
 import PickConversationModal from '../picker/PickConversationModal'
 import PickContactModal from '../picker/PickContactModal'
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
@@ -22,7 +22,7 @@ export default struct FileRecordPortalPage {
     pickConversationModal() {
         PickConversationModal({
             onClickConversation: conversation => {
-                this.mainNavPathStack.pushPathByName(navigationDestinations.FileRecordPage, {
+                this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.FileRecordPage, {
                     'conversation': conversation.conversation,
                 } as Record<string, Object>)
                 this.showPickConversationModal = false
@@ -39,7 +39,7 @@ export default struct FileRecordPortalPage {
         PickContactModal({
             showPickContactModal: $showPickContactModal,
             onClickUser: (user: UserInfo) => {
-                this.mainNavPathStack.pushPathByName(navigationDestinations.FileRecordPage, {
+                this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.FileRecordPage, {
                     'userId': user.uid,
                 } as Record<string, Object>)
                 this.showPickContactModal = false
@@ -59,7 +59,7 @@ export default struct FileRecordPortalPage {
             })
                 .margin({ top: 10 })
                 .onClick(() => {
-                    this.mainNavPathStack.pushPathByName(navigationDestinations.FileRecordPage, {} as Record<string, Object>)
+                    this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.FileRecordPage, {} as Record<string, Object>)
                 })
             OptionItemView({
                 title: '我的文件',
@@ -67,7 +67,7 @@ export default struct FileRecordPortalPage {
             })
                 .margin({ top: 10 })
                 .onClick(() => {
-                    this.mainNavPathStack.pushPathByName(navigationDestinations.FileRecordPage, {
+                    this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.FileRecordPage, {
                         'myFile': true
                     } as Record<string, Object>)
                 })

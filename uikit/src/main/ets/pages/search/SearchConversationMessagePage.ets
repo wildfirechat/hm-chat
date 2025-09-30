@@ -5,7 +5,7 @@ import ConversationSearchResult from '@wfc/client/src/main/ets/wfc/model/convers
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
 import SearchConversationMessageResultView from './SearchConversationMessageResultView'
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
-import { navigationDestinations } from '../navigationConfig'
+import { uikitNavigationDestinations } from '../uikitNavigationConfig'
 
 
 @Component
@@ -21,7 +21,7 @@ export default struct SearchConversationMessagePage {
                 // TODO
                 // 跳转到对应消息
                 let message = value as Message
-                this.mainNavPathStack.pushPathByName(navigationDestinations.ConversationPage, {
+                this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ConversationPage, {
                     'conversation': this.conversation,
                     'focusMessageId': message.messageId
                 } as Record<string, Object>)

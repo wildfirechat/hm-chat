@@ -3,7 +3,7 @@ import wfc from '@wfc/client'
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType'
 import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
-import { navigationDestinations } from '../../navigationConfig'
+import { uikitNavigationDestinations } from '../../uikitNavigationConfig'
 import appServer from '../../../api/appServer';
 import ConferenceInfo from '@wfc/avenginekit/src/main/ets/wfc/av/model/conferenceInfo'
 import JoinConferenceDialog from './JoinConferenceDialog'
@@ -45,7 +45,7 @@ export default struct ConferencePortalPage {
                         builder: JoinConferenceDialog({
                             controller: this.joinConferenceDialogController,
                             onConfirm: (conferenceId: string, password: string) => {
-                                this.mainNavPathStack.pushPathByName(navigationDestinations.ConferenceInfoPage, {
+                                this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ConferenceInfoPage, {
                                     'conferenceId': conferenceId,
                                     'password': password
                                 } as Record<string, string>)
@@ -73,7 +73,7 @@ export default struct ConferencePortalPage {
                     // conferenceInfo.endTime = Math.ceil(new Date().getTime() / 1000 + 3600)
                     // let conferenceId = await appServer.createConference(conferenceInfo)
                     // avenginekitImpl.startConference(conferenceId, false, conferenceInfo.pin, wfc.getUserId(), conferenceInfo.conferenceTitle, 'desc', false, false)
-                    this.mainNavPathStack.pushPathByName(navigationDestinations.StartConferencePage, {} as Record<string, Object>)
+                    this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.StartConferencePage, {} as Record<string, Object>)
 
                 })
 
@@ -86,7 +86,7 @@ export default struct ConferencePortalPage {
                         .padding({ top: 5 })
                 }
                 .onClick(() => {
-                    this.mainNavPathStack.pushPathByName(navigationDestinations.OrderConferencePage, {} as Record<string, Object>)
+                    this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.OrderConferencePage, {} as Record<string, Object>)
                 })
             }
             .width('100%')
@@ -104,7 +104,7 @@ export default struct ConferencePortalPage {
                             })
                         }
                         .onClick(() => {
-                            this.mainNavPathStack.pushPathByName(navigationDestinations.ConferenceInfoPage, {
+                            this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ConferenceInfoPage, {
                                 'conferenceId': info.conferenceId,
                                 'password': info.password
                             } as Record<string, string>)

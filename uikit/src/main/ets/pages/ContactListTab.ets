@@ -4,7 +4,7 @@ import ConnectionStatus from '@wfc/client/src/main/ets/wfc/client/connectionStat
 import { UIUserInfo } from '../common/Types'
 import BasicDataSource from '../common/BasicDataSource'
 import { loadAndGroupContactUserInfos } from '../helper/asyncTaskHelper'
-import { navigationDestinations } from './navigationConfig'
+import { uikitNavigationDestinations } from './uikitNavigationConfig'
 import orgServer from '../api/orgServer'
 import Config from '@wfc/client/src/main/ets/config'
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
@@ -37,7 +37,7 @@ export default struct ContactListTab {
                 header.badgeCount = 0
                 // 强制触发刷新
                 this.contactListHeaders.splice(0, 1, header)
-                this.mainNavPathStack.pushPathByName(navigationDestinations.FriendRequestListPage, {} as Record<string, Object>)
+                this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.FriendRequestListPage, {} as Record<string, Object>)
             }
         },
         {
@@ -46,7 +46,7 @@ export default struct ContactListTab {
             badgeCount: 0,
             badgeValue: '',
             action: () => {
-                this.mainNavPathStack.pushPathByName(navigationDestinations.FavGroupListPage, {} as Record<string, Object>)
+                this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.FavGroupListPage, {} as Record<string, Object>)
             }
         },
         {
@@ -55,7 +55,7 @@ export default struct ContactListTab {
             badgeCount: 0,
             badgeValue: '',
             action: () => {
-                this.mainNavPathStack.pushPathByName(navigationDestinations.ChannelListPage, {} as Record<string, Object>)
+                this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ChannelListPage, {} as Record<string, Object>)
             }
         },
     ]
@@ -158,7 +158,7 @@ export default struct ContactListTab {
                 badgeCount: 0,
                 badgeValue: '',
                 action: () => {
-                    this.mainNavPathStack.pushPathByName(navigationDestinations.OrganizationTreePage, { 'organization': org } as Record<string, Object>)
+                    this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.OrganizationTreePage, { 'organization': org } as Record<string, Object>)
                 }
             })
         })
@@ -173,7 +173,7 @@ export default struct ContactListTab {
                 badgeCount: 0,
                 badgeValue: '',
                 action: () => {
-                    this.mainNavPathStack.pushPathByName(navigationDestinations.OrganizationTreePage, { 'organization': org } as Record<string, Object>)
+                    this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.OrganizationTreePage, { 'organization': org } as Record<string, Object>)
                 }
             })
 
@@ -309,7 +309,7 @@ export default struct ContactListTab {
                                 .width('100%')
                                 .padding({ left: 10, right: 10 })
                                 .onClick(() => {
-                                    this.mainNavPathStack.pushPathByName(navigationDestinations.UserInfoPage, {
+                                    this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.UserInfoPage, {
                                         'userInfo': groupedUserInfo.userInfo
                                     } as Record<string, Object>)
                                 })

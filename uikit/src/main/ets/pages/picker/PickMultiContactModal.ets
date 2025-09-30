@@ -7,7 +7,7 @@ import Organization from '../../api/model/organization'
 import Employee from '../../api/model/employee'
 import orgServer from '../../api/orgServer'
 import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
-import { navigationDestinations } from '../navigationConfig'
+import { uikitNavigationDestinations } from '../uikitNavigationConfig'
 
 @Component
 export default struct PickMultiContactModal {

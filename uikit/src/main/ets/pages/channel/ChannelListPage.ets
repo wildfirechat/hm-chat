@@ -4,7 +4,7 @@ import EventType from '@wfc/client/src/main/ets/wfc/client/wfcEvent'
 import ChannelInfo from '@wfc/client/src/main/ets/wfc/model/channelInfo'
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType'
-import { navigationDestinations } from '../navigationConfig'
+import { uikitNavigationDestinations } from '../uikitNavigationConfig'
 
 @Component
 export default struct ChannelListPage {
@@ -69,7 +69,7 @@ export default struct ChannelListPage {
                             .width('100%')
                             .padding({ left: 10, right: 10 })
                             .onClick(() => {
-                                this.mainNavPathStack.pushPathByName(navigationDestinations.ConversationPage, {
+                                this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ConversationPage, {
                                     'conversation': new Conversation(ConversationType.Channel, channelInfo.channelId, 0)
                                 } as Record<string, Object>)
                             })
@@ -94,7 +94,7 @@ export default struct ChannelListPage {
                     value: '',
                     icon: "resources/base/media/ic_add.png",
                     action: () => {
-                        this.mainNavPathStack.pushPathByName(navigationDestinations.SearchPortalPage, {
+                        this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.SearchPortalPage, {
                             'channel': true
                         } as Record<string, Object>)
                     }

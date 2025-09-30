@@ -4,7 +4,7 @@ import avengineKit from '@wfc/avenginekit'
 import CallSession from "@wfc/avenginekit/src/main/ets/wfc/av/engine/callSession";
 import wfc from "@wfc/client";
 import EventType from '@wfc/client/src/main/ets/wfc/client/wfcEvent'
-import { navigationDestinations } from "../../navigationConfig";
+import { uikitNavigationDestinations } from "../../uikitNavigationConfig";
 import ConferenceInviteMessageContent from '@wfc/client/src/main/ets/wfc/av/messages/conferenceInviteMessageContent'
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
@@ -95,7 +95,7 @@ export default struct ConferenceParticipantListPage {
         let inviteMessageContent = new ConferenceInviteMessageContent(info.conferenceId, info.owner, info.conferenceTitle, '', info.startTime, false, false, info.advance, info.pin, info.password)
         let dummyConversation = new Conversation(0, '', 0)
         let message = new Message(dummyConversation, inviteMessageContent)
-        this.mainNavPathStack.pushPathByName(navigationDestinations.ForwardMessagePage,
+        this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ForwardMessagePage,
             {
                 'messages': [message]
             } as Record<string, Object>

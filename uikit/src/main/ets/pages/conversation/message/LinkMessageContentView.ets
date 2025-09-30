@@ -1,6 +1,6 @@
 import LinkMessageContent from "@wfc/client/src/main/ets/wfc/messages/linkMessageContent";
 import Message from "@wfc/client/src/main/ets/wfc/messages/message";
-import { navigationDestinations } from "../../navigationConfig";
+import { uikitNavigationDestinations } from "../../uikitNavigationConfig";
 
 @Component
 export default struct LinkMessageContentView {
@@ -35,7 +35,7 @@ export default struct LinkMessageContentView {
         .backgroundColor(Color.White)
         .borderRadius(4)
         .onClick(() => {
-            this.mainNavPathStack.pushPathByName(navigationDestinations.WebViewPage, {
+            this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.WebViewPage, {
                 'url': this.linkMessageContent().url,
                 'title': this.linkMessageContent().title
             } as Record<string, Object>)

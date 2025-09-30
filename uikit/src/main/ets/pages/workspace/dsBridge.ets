@@ -2,7 +2,7 @@ import { showToast } from '../../common/utils/Toast';
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc';
 import url from '@ohos.url';
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo';
-import { navigationDestinations } from '../navigationConfig';
+import { uikitNavigationDestinations } from '../uikitNavigationConfig';
 import data_preferences from '@ohos.data.preferences';
 import common from '@ohos.app.ability.common';
 
@@ -92,7 +92,7 @@ export default class DSBridge {
         let args = JSON.parse(arg) as Record<string, Object>
         let url = args.data
 
-        this.mainNavPathStack.pushPathByName(navigationDestinations.WebViewPage, {
+        this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.WebViewPage, {
             'url': url
         } as Record<string, Object>)
     }
@@ -105,7 +105,7 @@ export default class DSBridge {
     private chooseContacts = (arg: string) => {
         let args = JSON.parse(arg) as Record<string, Object>
         let cb = args._dscbstub as string;
-        this.mainNavPathStack.pushPathByName(navigationDestinations.PickMultiContactPage, {} as Record<string, Object>)
+        this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.PickMultiContactPage, {} as Record<string, Object>)
         this.asyncJsCallbacks[0] = cb;
 
     }

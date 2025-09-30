@@ -19,7 +19,7 @@ import FileMessageContentView from './FileMessageContentView'
 import pasteboard from '@ohos.pasteboard'
 import CustomMessageContentType from '@wfc/client/src/main/ets/wfc_custom_message/customMessageContentType'
 import TestCustomMessageContentView from '../custom_message/testCustomMessageContentView'
-import { navigationDestinations } from '../../navigationConfig'
+import { uikitNavigationDestinations } from '../../uikitNavigationConfig'
 import ConferenceInviteMessageContentView from './ConferenceInviteMessageContentView'
 import CardMessageContentView from './CardMessageContentView'
 import appServer from '../../../api/appServer'
@@ -182,7 +182,7 @@ export default struct NormaMessageContentView {
                 title: '转发',
                 tag: 'forward',
                 action: () => {
-                    this.mainNavPathStack.pushPathByName(navigationDestinations.ForwardMessagePage,
+                    this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ForwardMessagePage,
                         {
                             'messages': [this.message]
                         } as Record<string, Object>

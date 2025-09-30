@@ -6,7 +6,7 @@ import appServer from '../../../api/appServer';
 import { showToast } from "../../../common/utils/Toast";
 import wfc from "@wfc/client";
 import ConferencePasswordDialog from "./ConferencePasswordDialog";
-import { navigationDestinations } from "../../navigationConfig";
+import { uikitNavigationDestinations } from "../../uikitNavigationConfig";
 
 @Component
 export default struct StartConferencePage {
@@ -175,8 +175,8 @@ export default struct StartConferencePage {
                                 if (callSession) {
                                     let params = {} as Record<string, Object>
                                     params['conferenceInfo'] = info
-                                    this.mainNavPathStack.pushPathByName(navigationDestinations.ConferencePage, params)
-                                    this.mainNavPathStack.removeByName(navigationDestinations.StartConferencePage)
+                                    this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ConferencePage, params)
+                                    this.mainNavPathStack.removeByName(uikitNavigationDestinations.StartConferencePage)
                                 } else {
                                     showToast('加入会议失败');
                                 }

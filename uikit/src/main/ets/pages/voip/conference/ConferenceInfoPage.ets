@@ -6,7 +6,7 @@ import avengineKit from '@wfc/avenginekit'
 import appServer from '../../../api/appServer';
 import { showToast } from "../../../common/utils/Toast";
 import wfc from "@wfc/client";
-import { navigationDestinations } from "../../navigationConfig";
+import { uikitNavigationDestinations } from "../../uikitNavigationConfig";
 
 @Component
 export default struct ConferenceInfoPage {
@@ -129,7 +129,7 @@ export default struct ConferenceInfoPage {
                             if (callSession) {
                                 let params = {} as Record<string, Object>
                                 params['conferenceInfo'] = info
-                                this.mainNavPathStack.pushPathByName(navigationDestinations.ConferencePage, params)
+                                this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ConferencePage, params)
                             } else {
                                 showToast('加入会议失败');
                             }

@@ -3,7 +3,7 @@ import ConferenceInviteMessageContent from '@wfc/client/src/main/ets/wfc/av/mess
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import CardMessageContent from '@wfc/client/src/main/ets/wfc/messages/cardMessageContent'
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
-import { navigationDestinations } from '../../navigationConfig'
+import { uikitNavigationDestinations } from '../../uikitNavigationConfig'
 
 @Component
 export default struct CardMessageContentView {
@@ -43,7 +43,7 @@ export default struct CardMessageContentView {
         let cardMsg = this.cardMessageContent()
         switch (cardMsg.cardType) {
             case 0:
-                this.mainNavPathStack.pushPathByName(navigationDestinations.UserInfoPage, {
+                this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.UserInfoPage, {
                     'userInfo': wfc.getUserInfo(cardMsg.target)
                 } as Record<string, Object>)
                 break;

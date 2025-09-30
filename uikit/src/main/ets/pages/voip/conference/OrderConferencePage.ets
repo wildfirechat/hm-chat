@@ -6,7 +6,7 @@ import appServer from '../../../api/appServer';
 import { showToast } from "../../../common/utils/Toast";
 import wfc from "@wfc/client";
 import ConferencePasswordDialog from "./ConferencePasswordDialog";
-import { navigationDestinations } from "../../navigationConfig";
+import { uikitNavigationDestinations } from "../../uikitNavigationConfig";
 
 @Component
 export default struct OrderConferencePage {

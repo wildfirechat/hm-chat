@@ -1,7 +1,7 @@
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
 import SearchResultView from './SearchPortalResultView'
 import { SearchModule } from '../../common/Types'
-import { navigationDestinations } from '../navigationConfig'
+import { uikitNavigationDestinations } from '../uikitNavigationConfig'
 
 @Component
 @Preview
@@ -13,7 +13,7 @@ export default struct SearchUserPage {
             tag: 'user',
             onSearchResultItemClick: value => {
                 let userInfo = value as UserInfo
-                this.mainNavPathStack.pushPathByName(navigationDestinations.UserInfoPage, {
+                this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.UserInfoPage, {
                     'userInfo': userInfo
                 } as Record<string, Object>)
             }

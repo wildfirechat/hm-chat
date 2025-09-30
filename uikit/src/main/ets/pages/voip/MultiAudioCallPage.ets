@@ -11,7 +11,7 @@ import { PiPWindow } from '@kit.ArkUI'
 import VoipPiPNodeController from './VoipPiPNodeController'
 import uikit from '../../uikit'
 import { BusinessError } from '@kit.BasicServicesKit'
-import { navigationDestinations } from '../navigationConfig'
+import { uikitNavigationDestinations } from '../uikitNavigationConfig'
 
 @Component
 export default struct MultiAudioCallPage {
@@ -72,7 +72,7 @@ export default struct MultiAudioCallPage {
         sessionCallback.didCallEndWithReason = reason => {
             this.destroyPipController()
 
-            let index = this.mainNavPathStack.getIndexByName(navigationDestinations.MultiAudioCallPage)
+            let index = this.mainNavPathStack.getIndexByName(uikitNavigationDestinations.MultiAudioCallPage)
             if (index.length) {
                 this.mainNavPathStack.pop()
             }

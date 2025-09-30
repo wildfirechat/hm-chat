@@ -25,7 +25,7 @@ import BasicDataSource from '../../common/BasicDataSource'
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
 import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
 import ChannelInfo from '@wfc/client/src/main/ets/wfc/model/channelInfo'
-import { navigationDestinations } from '../navigationConfig'
+import { uikitNavigationDestinations } from '../uikitNavigationConfig'
 import TestCustomNotificationMessageContent from '@wfc/client/src/main/ets/wfc_custom_message/testCustomNotificationMessageContent'
 import TestCustomMessageContentView from './custom_message/testCustomMessageContentView'
 import TestCustomNotificationMessageContentView from './custom_message/TestCustomNotificationMessageContentView'
@@ -303,7 +303,7 @@ export default struct ConversationPage {
             }
         }
         if (allow) {
-            this.mainNavPathStack.pushPathByName(navigationDestinations.UserInfoPage, {
+            this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.UserInfoPage, {
                 'userInfo': wfc.getUserInfo(userId)
             } as Record<string, Object>)
         } else {
@@ -507,16 +507,16 @@ export default struct ConversationPage {
         let name: string = ''
         switch (this.conversation!.type) {
             case ConversationType.Single:
-                name = navigationDestinations.SingleConversationInfoPage
+                name = uikitNavigationDestinations.SingleConversationInfoPage
                 break
             case ConversationType.Group:
-                name = navigationDestinations.GroupConversationInfoPage
+                name = uikitNavigationDestinations.GroupConversationInfoPage
                 break
             case ConversationType.Channel:
-                name = navigationDestinations.ChannelConversationInfoPage
+                name = uikitNavigationDestinations.ChannelConversationInfoPage
                 break
             case ConversationType.ChatRoom:
-                name = navigationDestinations.ChatroomConversationInfoPage
+                name = uikitNavigationDestinations.ChatroomConversationInfoPage
                 break
             default:
                 break

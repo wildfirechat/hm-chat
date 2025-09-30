@@ -11,7 +11,7 @@ import { timestampFormat } from '../../util/helper'
 import uikit from '../../uikit'
 import { PiPWindow } from '@kit.ArkUI'
 import VoipPiPNodeController from './VoipPiPNodeController'
-import { navigationDestinations } from '../navigationConfig'
+import { uikitNavigationDestinations } from '../uikitNavigationConfig'
 
 @Component
 export default struct SingleAudioCallPage {
@@ -84,7 +84,7 @@ export default struct SingleAudioCallPage {
 
             this.destroyPipController()
 
-            let index = this.mainNavPathStack.getIndexByName(navigationDestinations.SingleAudioCallPage)
+            let index = this.mainNavPathStack.getIndexByName(uikitNavigationDestinations.SingleAudioCallPage)
             if (index.length) {
                 this.mainNavPathStack.pop()
             }

@@ -37,7 +37,7 @@ import EventType from '@wfc/client/src/main/ets/wfc/client/wfcEvent'
 import ChannelInfo from '@wfc/client/src/main/ets/wfc/model/channelInfo'
 import ChannelMenu from '@wfc/client/src/main/ets/wfc/model/channelMenu'
 import ChannelMenuEventMessageContent from '@wfc/client/src/main/ets/wfc/messages/channelMenuEventMessageContent'
-import { navigationDestinations } from '../navigationConfig'
+import { uikitNavigationDestinations } from '../uikitNavigationConfig'
 import QuoteInfo from '@wfc/client/src/main/ets/wfc/model/quoteInfo'
 import PickContactModal from '../picker/PickContactModal'
 import ForwardMessageDialog from './forward/ForwardMessageDialog'
@@ -344,7 +344,7 @@ export default struct ConversationInputPanelView {
                             {
                                 title: '逐条转发',
                                 action: () => {
-                                    this.mainNavPathStack.pushPathByName(navigationDestinations.ForwardMessagePage, {
+                                    this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ForwardMessagePage, {
                                         'messages': this.checkedMessages,
                                         'forwardType': 'oneByOne',
                                     } as Record<string, Object>)
@@ -356,7 +356,7 @@ export default struct ConversationInputPanelView {
                             {
                                 title: '合并转发',
                                 action: () => {
-                                    this.mainNavPathStack.pushPathByName(navigationDestinations.ForwardMessagePage, {
+                                    this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ForwardMessagePage, {
                                         'messages': this.checkedMessages,
                                         'forwardType': 'compose',
                                     } as Record<string, Object>)
@@ -575,7 +575,7 @@ export default struct ConversationInputPanelView {
         switch (menu.type) {
             case 'view':
                 if (menu.url) {
-                    this.mainNavPathStack.pushPathByName(navigationDestinations.WebViewPage, {
+                    this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.WebViewPage, {
                         'url': menu.url,
                         'title': menu.name
                     } as Record<string, Object>)

@@ -4,7 +4,6 @@ import FileMessageContent from '@wfc/client/src/main/ets/wfc/messages/fileMessag
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import { filePreview } from '@kit.PreviewKit';
 import { downloadMedia } from '../../../helper/mediaHelper';
-import { getConnectionStatus } from '@wfc/client/src/main/types/libmarswrapper';
 import { fileUri } from '@kit.CoreFileKit';
 import { uniformTypeDescriptor } from '@kit.ArkData';
 

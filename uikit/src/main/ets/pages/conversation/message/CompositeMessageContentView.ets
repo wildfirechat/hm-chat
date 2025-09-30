@@ -1,6 +1,6 @@
 import CompositeMessageContent from '@wfc/client/src/main/ets/wfc/messages/compositeMessageContent'
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
-import { navigationDestinations } from '../../navigationConfig'
+import { uikitNavigationDestinations } from '../../uikitNavigationConfig'
 
 @Component
 export default struct CompositeMessageContentView {
@@ -36,7 +36,7 @@ export default struct CompositeMessageContentView {
         .borderRadius(4)
         .backgroundColor(Color.White)
         .onClick(() => {
-            this.mainNavPathStack.pushPathByName(navigationDestinations.CompositeMessagePreviewPage, {
+            this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.CompositeMessagePreviewPage, {
                 'message': this.message
             } as Record<string, Object>)
         })

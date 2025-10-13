@@ -1,6 +1,19 @@
 {
     "app": {
         "signingConfigs": [
+            {
+                "name": "default",
+                "type": "HarmonyOS",
+                "material": {
+                    "certpath": "/Users/jiangecho/.ohos/config/default_hm-chat_xqdh1u3OLsxetaLqcNGvPoqc9pkc3zq3lwuG8tgZvt4=.cer",
+                    "keyAlias": "debugKey",
+                    "keyPassword": "0000001B4846B3031688EA51DCFF9D05806773EEF6CE2C61B59B08C0EF6F907E957022B345CA0258A5B221",
+                    "profile": "/Users/jiangecho/.ohos/config/default_hm-chat_xqdh1u3OLsxetaLqcNGvPoqc9pkc3zq3lwuG8tgZvt4=.p7b",
+                    "signAlg": "SHA256withECDSA",
+                    "storeFile": "/Users/jiangecho/.ohos/config/default_hm-chat_xqdh1u3OLsxetaLqcNGvPoqc9pkc3zq3lwuG8tgZvt4=.p12",
+                    "storePassword": "0000001B8A915EB83D71211952DDDB96702489DC0C6F27537F780D58DF60646E7078B2255324EC2E60B6C7"
+                }
+            }
         ],
         "products": [
             {
@@ -8,8 +21,7 @@
                 "signingConfig": "default",
                 "compatibleSdkVersion": "5.0.0(12)",
                 "runtimeOS": "HarmonyOS",
-                "arkTSVersion": "1.0",
-                "targetSdkVersion": "6.0.0(20)"
+                "arkTSVersion": "1.0"
             }
         ]
     },

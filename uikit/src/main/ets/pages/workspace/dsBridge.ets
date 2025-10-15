@@ -61,7 +61,7 @@ export default class DSBridge {
         let args = JSON.parse(arg) as Record<string, Object>
         let data = args.data as Record<string, Object>
         wfc.getAuthCode(data.appId as string, data.appType as number, url.URL.parseURL(this.webUrl)
-            .host, (authCode: string) => {
+            .hostname, (authCode: string) => {
             let cb = args._dscbstub as string;
             this._callbackJs(cb, 0, authCode)
         }, err => {

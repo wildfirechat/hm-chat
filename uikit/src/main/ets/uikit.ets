@@ -1,5 +1,6 @@
 import avenginekitImpl from '@wfc/avenginekit';
 import avenginekit from '@wfc/avenginekit/src/main/ets/wfc/av/engine/avenginekit';
+// import VideoProfile from '@wfc/avenginekit/src/main/ets/wfc/av/engine/videoProfile';
 import AVEngineCallbackImpl from './avengineCallbackImpl';
 import { common } from '@kit.AbilityKit';
 
@@ -13,6 +14,8 @@ export class UIKit {
         this.entryAbilityName = context.abilityInfo.name
         avenginekitImpl.setup(context, new AVEngineCallbackImpl(context, this.mainNavPathStack));
         avenginekit.SCREEN_SHARING_REPLACE_MODE = true;
+        // 仅高级版音视频 SDK 支持
+        // avenginekit.VIDEO_PROFILE = VideoProfile.VP360P_8;
     }
 
     isSupportConference(): boolean {

@@ -7,34 +7,45 @@ import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import GroupMemberType from '@wfc/client/src/main/ets/wfc/model/groupMemberType'
 import { groupUserInfos } from '../helper/asyncTaskHelper'
 import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
+import Config from '@wfc/client/src/main/ets/config'
+import { it } from '@ohos/hypium'
 
 @Component
 export default struct MentionGroupMemberListView {
-    @State filteredUserInfos: UserInfo[] = []
+    @State filteredGroupMemberUserInfos: UserInfo[] = []
+    @State filteredRobotUserInfos: UserInfo[] = []
     @State searchInputViewMaxWidth: string = '100%'
-    private userInfos: UserInfo[] = []
+    private groupMemberUserInfos: UserInfo[] = []
+    private robotUserInfos: UserInfo[] = []
     private userInfoDataSource: UserInfoDataSource = new UserInfoDataSource()
     private enableMentionAll = true;
     private groupInfo?: GroupInfo
     groupId: string = '';
     showCategory: boolean = false
     showSearchView: boolean = false
-    onClickUser?: (userInfo: UserInfo) => void
+    onClickGroupMemberUser?: (userInfo: UserInfo) => void
+    onClickRobotMemberUser?: (userInfo: UserInfo) => void
     onClickMentionAll?: () => void
 
     aboutToAppear() {
-        let groupMembers = wfc.getGroupMembers(this.groupId, false)
-        this.groupInfo = wfc.getGroupInfo(this.groupId)
-        let groupMemberIds = groupMembers.map(member => member.memberId);
-        let userInfos = wfc.getUserInfos(groupMemberIds, this.groupId);
-        this.userInfos = userInfos;
-        this.filteredUserInfos = this.userInfos
+        if (Config.AI_ROBOT) {
+            let robots = [Config.AI_ROBOT];
+            this.robotUserInfos = wfc.getUserInfos(robots)
+            this.filteredRobotUserInfos = this.robotUserInfos;
+        }
+        if (this.groupId) {
+            let groupMembers = wfc.getGroupMembers(this.groupId, false)
+            this.groupInfo = wfc.getGroupInfo(this.groupId)
+            let groupMemberIds = groupMembers.map(member => member.memberId);
+            this.groupMemberUserInfos = wfc.getUserInfos(groupMemberIds, this.groupId);
+        }
+        this.filteredGroupMemberUserInfos = this.groupMemberUserInfos
         let groupMember = wfc.getGroupMember(this.groupId, wfc.getUserId())
         if ([GroupMemberType.Owner, GroupMemberType.Manager].indexOf(groupMember.type) >= 0) {
             this.enableMentionAll = true;
         }
 
-        groupUserInfos(this.filteredUserInfos.map(u => u.uid), this.groupId)
+        groupUserInfos(this.filteredGroupMemberUserInfos.map(u => u.uid), this.groupId)
             .then(infos => {
                 this.userInfoDataSource.setUserInfos(infos)
             })
@@ -43,16 +54,22 @@ export default struct MentionGroupMemberListView {
     filter(key: string) {
         key = key.trim()
         if (key) {
-            this.filteredUserInfos = this.userInfos.filter((userInfo: UserInfo) => {
-                // TODO
-                // 优化搜索
+            // TODO
+            // 优化搜索
+            // 拼音、首字母
+            this.filteredGroupMemberUserInfos = this.groupMemberUserInfos.filter((userInfo: UserInfo) => {
+                return userInfo.displayName.indexOf(key) >= 0
+            })
+
+            this.filteredRobotUserInfos = this.robotUserInfos.filter((userInfo: UserInfo) => {
                 return userInfo.displayName.indexOf(key) >= 0
             })
         } else {
-            this.filteredUserInfos = this.userInfos
+            this.filteredGroupMemberUserInfos = this.groupMemberUserInfos
+            this.filteredRobotUserInfos = this.robotUserInfos
         }
 
-        groupUserInfos(this.filteredUserInfos.map(u => u.uid), this.groupId)
+        groupUserInfos(this.filteredGroupMemberUserInfos.map(u => u.uid), this.groupId)
             .then(infos => {
                 this.userInfoDataSource.setUserInfos(infos)
             })
@@ -75,34 +92,61 @@ export default struct MentionGroupMemberListView {
                 .margin({ left: 10, right: 10 })
             }
             List() {
-                if (this.enableMentionAll) {
+                ForEach(this.filteredRobotUserInfos, (item: UserInfo, index: number) => {
+                    UserItemView({
+                        uiUserInfo: {
+                            showCategory: index === 0,
+                            category: 'AI Robot',
+                            userInfo: item,
+                        } as UIUserInfo,
+                        paddingLeft: 10,
+                        paddingRight: 10,
+                        onClickUser: this.onClickRobotMemberUser,
+                    })
+                }, (item: UserInfo, index) => {
+                    return 'ai-' + item.uid;
+                })
+                if (this.groupId && this.enableMentionAll) {
                     ListItem() {
-                        Row() {
-                            Image(this.groupInfo?.portrait)
-                                .alt($r('app.media.avatar_def'))
-                                .width(40)
-                                .height(40)
-                                .borderRadius(4)
-                                .margin({ left: 10, right: 10 })
-                            Text('所有人')
-                                .maxLines(1)
-                                .fontSize(15)
-                                .layoutWeight(1)
-                        }
-                        .width('100%')
-                        .height(60)
-                        .padding({ left: 10, right: 10 })
-                        .onClick(event => {
-                            this.onClickMentionAll?.();
-                        })
-                        .stateStyles({
-                            pressed: {
-                                .backgroundColor('#E5E5E5')
-                            },
-                            normal: {
-                                .backgroundColor(Color.White)
+                        Column() {
+                            Row() {
+                                Text('群成员')
+                                    .width('100%')
+                                    .fontSize(13)
+                                    .fontColor('#828282')
                             }
-                        })
+                            .height(30)
+                            .padding({ left: 10 })
+                            .alignItems(VerticalAlign.Center)
+                            .backgroundColor('#EDEDED')
+
+                            Row() {
+                                Image(this.groupInfo?.portrait)
+                                    .alt($r('app.media.avatar_def'))
+                                    .width(40)
+                                    .height(40)
+                                    .borderRadius(4)
+                                    .margin({ left: 10, right: 10 })
+                                Text('所有人')
+                                    .maxLines(1)
+                                    .fontSize(15)
+                                    .layoutWeight(1)
+                            }
+                            .width('100%')
+                            .height(60)
+                            .padding({ left: 10, right: 10 })
+                            .onClick(event => {
+                                this.onClickMentionAll?.();
+                            })
+                            .stateStyles({
+                                pressed: {
+                                    .backgroundColor('#E5E5E5')
+                                },
+                                normal: {
+                                    .backgroundColor(Color.White)
+                                }
+                            })
+                        }
                     }
                     .key('mentionAll')
                 }
@@ -113,7 +157,7 @@ export default struct MentionGroupMemberListView {
                             uiUserInfo: info,
                             paddingLeft: 10,
                             paddingRight: 10,
-                            onClickUser: this.onClickUser,
+                            onClickUser: this.onClickGroupMemberUser,
                         })
                     }
                     .key(info.userInfo.uid + info.userInfo.updateDt)

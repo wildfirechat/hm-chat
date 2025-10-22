@@ -434,6 +434,16 @@ export default struct ConversationInputPanelView {
         })
     }
 
+    onMentionRobot= (userInfo: UserInfo) => {
+        this.showMentionSheet = false;
+        let mentionText = '@' + userInfo.displayName
+        this.text = this.text + mentionText + ' ';
+        this.mentions.push({
+            target: userInfo.uid,
+            text: mentionText
+        })
+    }
+
     aboutToAppear() {
         // 计算软键盘高度
         window.getLastWindow(getContext(this)).then(currentWindow => {
@@ -768,9 +778,7 @@ export default struct ConversationInputPanelView {
                                 TextArea({ text: this.text, controller: this.textInputController })
                                     .id('textInput')
                                     .onChange(value => {
-                                        // TODO 优化，mentionview 弹出逻辑
-                                        // FIXME
-                                        if (this.text + "@" === value && this.conversation.type === ConversationType.Group) {
+                                        if (this.text + "@" === value) {
                                             this.showMentionSheet = true;
                                         } else {
                                             this.text = value
@@ -905,6 +913,7 @@ export default struct ConversationInputPanelView {
                                                     if (textMessageContent.mentionedTargets.indexOf(mention.target) === -1) {
                                                         textMessageContent.mentionedTargets.push(mention.target)
                                                     }
+                                                    textMessageContent.mentionedType = 1;
                                                 }
                                             }
                                         }
@@ -1012,7 +1021,7 @@ export default struct ConversationInputPanelView {
             })
             .backgroundColor('#EEEEEE')
 
-            .bindSheet(this.showMentionSheet, MentionGroupMemberView(this.groupId, this.onMentionGroupMember, this.onMentionAll), {
+            .bindSheet(this.showMentionSheet, MentionGroupMemberView(this.groupId, this.onMentionGroupMember, this.onMentionRobot, this.onMentionAll), {
                 height: '70%',
                 dragBar: false,
                 showClose: false,

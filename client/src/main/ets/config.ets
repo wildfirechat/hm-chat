@@ -78,6 +78,9 @@ export default class Config {
     // 发送日志命令，当发送此文本消息时，会把协议栈日志发送到当前会话中，为空时关闭此功能。
     static SEND_LOG_COMMAND = '*#marslog#';
 
+    // AI机器人ID
+    static AI_ROBOT = "FireRobot";
+
     static getWFCPlatform() {
         return Config.CURRENT_PLATFORM;
     }

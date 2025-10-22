@@ -6,6 +6,7 @@ import UserItemView from './UserItemView'
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import GroupMemberType from '@wfc/client/src/main/ets/wfc/model/groupMemberType'
 import { groupUserInfos } from '../helper/asyncTaskHelper'
+import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
 
 @Component
 export default struct MentionGroupMemberListView {
@@ -13,14 +14,17 @@ export default struct MentionGroupMemberListView {
     @State searchInputViewMaxWidth: string = '100%'
     private userInfos: UserInfo[] = []
     private userInfoDataSource: UserInfoDataSource = new UserInfoDataSource()
-    private enableMentionAll = false;
+    private enableMentionAll = true;
+    private groupInfo?: GroupInfo
     groupId: string = '';
     showCategory: boolean = false
     showSearchView: boolean = false
     onClickUser?: (userInfo: UserInfo) => void
+    onClickMentionAll?: () => void
 
     aboutToAppear() {
         let groupMembers = wfc.getGroupMembers(this.groupId, false)
+        this.groupInfo = wfc.getGroupInfo(this.groupId)
         let groupMemberIds = groupMembers.map(member => member.memberId);
         let userInfos = wfc.getUserInfos(groupMemberIds, this.groupId);
         this.userInfos = userInfos;
@@ -71,6 +75,38 @@ export default struct MentionGroupMemberListView {
                 .margin({ left: 10, right: 10 })
             }
             List() {
+                if (this.enableMentionAll) {
+                    ListItem() {
+                        Row() {
+                            Image(this.groupInfo?.portrait)
+                                .alt($r('app.media.avatar_def'))
+                                .width(40)
+                                .height(40)
+                                .borderRadius(4)
+                                .margin({ left: 10, right: 10 })
+                            Text('所有人')
+                                .maxLines(1)
+                                .fontSize(15)
+                                .layoutWeight(1)
+                        }
+                        .width('100%')
+                        .height(60)
+                        .padding({ left: 10, right: 10 })
+                        .onClick(event => {
+                            this.onClickMentionAll?.();
+                        })
+                        .stateStyles({
+                            pressed: {
+                                .backgroundColor('#E5E5E5')
+                            },
+                            normal: {
+                                .backgroundColor(Color.White)
+                            }
+                        })
+                    }
+                    .key('mentionAll')
+                }
+
                 LazyForEach(this.userInfoDataSource, (info: UIUserInfo) => {
                     ListItem() {
                         UserItemView({

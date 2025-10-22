@@ -424,6 +424,16 @@ export default struct ConversationInputPanelView {
         })
     }
 
+    onMentionAll = () => {
+        this.showMentionSheet = false;
+        let mentionText = '@' + '所有人'
+        this.text = this.text + mentionText + ' ';
+        this.mentions.push({
+            target: '@all',
+            text: mentionText
+        })
+    }
+
     aboutToAppear() {
         // 计算软键盘高度
         window.getLastWindow(getContext(this)).then(currentWindow => {
@@ -1002,7 +1012,7 @@ export default struct ConversationInputPanelView {
             })
             .backgroundColor('#EEEEEE')
 
-            .bindSheet(this.showMentionSheet, MentionGroupMemberView(this.groupId, this.onMentionGroupMember), {
+            .bindSheet(this.showMentionSheet, MentionGroupMemberView(this.groupId, this.onMentionGroupMember, this.onMentionAll), {
                 height: '70%',
                 dragBar: false,
                 showClose: false,

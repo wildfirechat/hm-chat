@@ -1,9 +1,13 @@
 import { showToast } from "../../../common/utils/Toast"
 import ConferencePage from "./ConferencePage"
 import { BusinessError } from "@kit.BasicServicesKit"
+import { uikitNavigationDestinations} from "../../uikitNavigationConfig";
+import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
+import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType'
 
 @Component
 export default struct ConferenceMoreActionView {
+    @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
     conferencePage?: ConferencePage
 
     build() {
@@ -12,7 +16,9 @@ export default struct ConferenceMoreActionView {
                 this.conferencePage?.inviteNewParticipant()
             })
             this.actionItem($r('app.media.av_conference_chat'), '聊天', () => {
-                showToast('聊天 TODO')
+                this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ConversationPage, {
+                    'conversation': new Conversation(ConversationType.ChatRoom, '', 0)
+                } as Record<string, Object>)
             })
             this.actionItem($r('app.media.av_conference_handup'), '举手', () => {
                 showToast('举手 TODO')

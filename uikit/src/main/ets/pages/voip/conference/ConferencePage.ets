@@ -24,7 +24,11 @@ import { uikitNavigationDestinations } from '../../uikitNavigationConfig'
 import ConferenceInviteMessageContent from '@wfc/client/src/main/ets/wfc/av/messages/conferenceInviteMessageContent'
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
+import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType'
+import TextMessageContent from '@wfc/client/src/main/ets/wfc/messages/textMessageContent'
+import EventType from '@wfc/client/src/main/ets/wfc/client/wfcEvent'
 import VideoType from '@wfc/avenginekit/src/main/ets/wfc/av/engine/videoType'
+import ConferenceMessageInputDialog from './ConferenceMessageInputDialog'
 
 @Component
 export default struct ConferencePage {
@@ -51,6 +55,8 @@ export default struct ConferencePage {
     private previewXComponentController: WFCVideoRenderController = new WFCVideoRenderController('preview-xcp')
     pipController?: PiPWindow.PiPController;
     private voipPiPNodeController: VoipPiPNodeController = new VoipPiPNodeController('');
+    private conferenceMessageInputDialogController?: CustomDialogController
+    private latest5ConferenceChatroomMessages: Message[] = []
     static COUNT_PER_PAGE = 4;
 
     aboutToAppear(): void {
@@ -77,6 +83,7 @@ export default struct ConferencePage {
         this.updateFocusAndPreviewProfile()
 
         this.setupSessionCallback()
+        wfc.eventEmitter?.on(EventType.ReceiveMessage, this.onReceiveMessage)
     }
 
     getParticipantProfilesAndUpdateVideoRenderControllerMap() {
@@ -180,6 +187,7 @@ export default struct ConferencePage {
             statusBarContentColor: '#000000',
         };
         win?.setWindowSystemBarProperties(sysBarProps)
+        wfc.eventEmitter?.off(EventType.ReceiveMessage, this.onReceiveMessage)
     }
 
     onPageShow(): void {
@@ -246,6 +254,11 @@ export default struct ConferencePage {
             if (status === CallState.STATUS_CONNECTED) {
                 this.lastTriggerToShowActionAndDurationViewTimestamp = Date.now()
                 this.updateActionAndDurationViewInterval = setInterval(this.updateActionAndDurationView, 1000)
+                wfc.joinChatroom(this.callSession!.callId, () => {
+                    console.log('join conference chatroom success')
+                }, err => {
+                    console.error('join conference chatroom fail', err)
+                })
             }
             this.selfProfile = this.callSession?.getSelfProfile()!;
 
@@ -623,6 +636,83 @@ export default struct ConferencePage {
             .animation({ duration: 400, curve: Curve.Friction, delay: 0 }))
     }
 
+    onReceiveMessage = (messages: Message[]) => {
+        if(!this.callSession){
+            return
+        }
+        for (const msg of messages) {
+            if (msg.conversation.type === ConversationType.ChatRoom && msg.conversation.target === this.callSession.callId) {
+                this.latest5ConferenceChatroomMessages.push(msg)
+            }
+        }
+        let len = this.latest5ConferenceChatroomMessages.length
+        if (len > 5) {
+            this.latest5ConferenceChatroomMessages = this.latest5ConferenceChatroomMessages.slice(len - 5, len)
+        }
+    }
+
+    @Builder
+    chatroomView() {
+        Column() {
+            List() {
+                ForEach(this.latest5ConferenceChatroomMessages, (msg: Message, index: number) => {
+                    ListItem() {
+                        Row() {
+                            Text(wfc.getUserInfo(msg.from).displayName)
+                                .width(40)
+                            Text(msg.messageContent.digest(msg))
+                        }
+                    }
+                }, (msg: Message, index: number) => {
+                    return msg.messageId + ''
+                })
+            }
+            .width('100%')
+
+            Text('说点什么')
+                .fontColor(Color.Gray)
+                .onClick(() => {
+                    this.conferenceMessageInputDialogController = new CustomDialogController({
+                        builder: ConferenceMessageInputDialog({
+                            controller: this.conferenceMessageInputDialogController,
+                            onConfirm: (text: string) => {
+                                let textMsgContent = new TextMessageContent(text)
+                                let conversation = new Conversation(ConversationType.ChatRoom, this.callSession!.callId, 0)
+                                wfc.sendConversationMessage(conversation, textMsgContent, [], msgId => {
+
+                                }, undefined, undefined, (msgUid, timestamp) => {
+                                    let msg = wfc.getMessageByUid(msgUid);
+                                    this.latest5ConferenceChatroomMessages.push(msg)
+                                    let len = this.latest5ConferenceChatroomMessages.length
+                                    if (len > 5) {
+                                        this.latest5ConferenceChatroomMessages = this.latest5ConferenceChatroomMessages.slice(len - 5, len)
+                                    }
+                                })
+                            }
+                        }),
+                        cancel: () => {
+                            this.conferenceMessageInputDialogController = undefined
+                        },
+                        autoCancel: true,
+                        alignment: DialogAlignment.Center,
+                        gridCount: 6,
+                        customStyle: false
+                    })
+                    this.conferenceMessageInputDialogController.open()
+                })
+        }
+        .alignItems(HorizontalAlign.Start)
+        .width('40%')
+        .height('100%')
+        .padding({
+            left: 10,
+            top: 10,
+            right: 10,
+            bottom: 100
+        })
+        .justifyContent(FlexAlign.End)
+    }
+
     build() {
         NavDestination() {
             Swiper() {
@@ -669,6 +759,7 @@ export default struct ConferencePage {
                     if (this.showActionAndDurationView) {
                         this.actionAndDurationView()
                     }
+                    this.chatroomView()
                 }
                 .width('100%')
                 .height('100%')

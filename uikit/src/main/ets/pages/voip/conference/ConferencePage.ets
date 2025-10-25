@@ -759,7 +759,7 @@ export default struct ConferencePage {
                     if (this.showActionAndDurationView) {
                         this.actionAndDurationView()
                     }
-                    this.chatroomView()
+                    // this.chatroomView()
                 }
                 .width('100%')
                 .height('100%')

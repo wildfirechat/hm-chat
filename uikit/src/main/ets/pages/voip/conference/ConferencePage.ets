@@ -796,7 +796,7 @@ export default struct ConferencePage {
                                         p: this.participantProfiles![participantFlexIndex * 3 + flexIndex],
                                         swiperIndex: participantFlexIndex + 1,
                                         currentSwiperIndex: this.currentSwiperIndex,
-                                        xcomponentController: this.participantVideoRenderControllerMap.get(this.participantProfiles![participantFlexIndex * 3 + flexIndex].userId)
+                                        xcomponentController: this.participantVideoRenderControllerMap.get(this._participantId(this.participantProfiles![participantFlexIndex * 3 + flexIndex].userId,this.participantProfiles![participantFlexIndex * 3 + flexIndex].screenSharing ))
                                     })
                                         .width('50%')
                                         .height('50%')

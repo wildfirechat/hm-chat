@@ -7,6 +7,7 @@ import appServer from '../../../api/appServer';
 import { showToast } from "../../../common/utils/Toast";
 import wfc from "@wfc/client";
 import { uikitNavigationDestinations } from "../../uikitNavigationConfig";
+import { checkAndRequestPermission } from "../../../helper/permissionHelper";
 
 @Component
 export default struct ConferenceInfoPage {
@@ -123,7 +124,12 @@ export default struct ConferenceInfoPage {
                         .type(ButtonType.Normal)
                         .borderRadius(4)
                         .width('50%')
-                        .onClick(() => {
+                        .onClick(async () => {
+                            let cameraGranted = await checkAndRequestPermission(this.getUIContext().getHostContext(), 'ohos.permission.CAMERA')
+                            let microphoneGranted = await checkAndRequestPermission(this.getUIContext().getHostContext(), 'ohos.permission.MICROPHONE')
+                            if (!cameraGranted || !microphoneGranted) {
+                                showToast('请授予摄像头和麦克风权限')
+                            }
                             let info = this.conferenceInfo!
                             let callSession = avengineKit.joinConference(info?.conferenceId, false, info?.pin, info?.owner, info?.conferenceTitle, '', false, info?.advance, !this.enableAudio, !this.enableVideo, '', '')
                             if (callSession) {

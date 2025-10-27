@@ -87,10 +87,10 @@ export default struct ConferencePage {
     }
 
     getParticipantProfilesAndUpdateVideoRenderControllerMap() {
-        this.participantProfiles = this.callSession!.getParticipantProfiles()
+         let newProfiles = this.callSession!.getParticipantProfiles()
         if (!this.callSession!.audioOnly) {
             let map = new Map<string, WFCVideoRenderController>()
-            let profiles = [this.selfProfile!, ...this.participantProfiles]
+            let profiles = [this.selfProfile!, ... newProfiles]
             profiles.forEach(p => {
                 let pid = this._participantId(p.userId, p.screenSharing);
                 let controller = this.participantVideoRenderControllerMap.get(pid)
@@ -101,6 +101,7 @@ export default struct ConferencePage {
             })
             this.participantVideoRenderControllerMap = map;
         }
+        this.participantProfiles = newProfiles
     }
 
     swapVideo(xcomponentId: string) {
@@ -154,7 +155,7 @@ export default struct ConferencePage {
 
             if (foundFocusProfile) {
                 if (this.focusProfile) {
-                    console.log('av-c', 'oooooo found focusProfile', this.focusProfile.userId)
+                    console.log('av-c', 'found focusProfile', this.focusProfile.userId)
                     this.callSession?.setParticipantVideoType(this.focusProfile.userId, this.focusProfile.screenSharing, VideoType.BIG_STREAM)
                 }
                 if (preFocusProfile && preFocusProfile.userId !== this.focusProfile?.userId) {
@@ -784,7 +785,7 @@ export default struct ConferencePage {
                                     .height('50%')
                             }
 
-                            ForEach(this.participantProfiles, (item: number, flexIndex) => {
+                            ForEach(this.participantProfiles, (item: ParticipantProfile , flexIndex) => {
                                 if (participantFlexIndex * ConferencePage.COUNT_PER_PAGE + flexIndex > this.participantProfiles!.length) {
                                     // 占位
                                     Column()
@@ -801,7 +802,7 @@ export default struct ConferencePage {
                                         .width('50%')
                                         .height('50%')
                                 }
-                            }, (item: number, flexIndex) => flexIndex + '')
+                            }, (item: ParticipantProfile, flexIndex) => item.joinTime +  flexIndex + '')
                         }
                         .backgroundColor(Color.Orange)
                         .width('100%')

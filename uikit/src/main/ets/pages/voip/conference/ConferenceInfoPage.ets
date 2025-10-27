@@ -129,6 +129,7 @@ export default struct ConferenceInfoPage {
                             let microphoneGranted = await checkAndRequestPermission(this.getUIContext().getHostContext(), 'ohos.permission.MICROPHONE')
                             if (!cameraGranted || !microphoneGranted) {
                                 showToast('请授予摄像头和麦克风权限')
+                                return;
                             }
                             let info = this.conferenceInfo!
                             let callSession = avengineKit.joinConference(info?.conferenceId, false, info?.pin, info?.owner, info?.conferenceTitle, '', false, info?.advance, !this.enableAudio, !this.enableVideo, '', '')

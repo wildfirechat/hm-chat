@@ -7,6 +7,7 @@ import { timestampFormat } from '../../../util/helper';
 import PickGroupMemberModal from '../../group/PickGroupMemberModal';
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
+import { checkAndRequestPermission } from '../../../helper/permissionHelper';
 
 @Component
 export default struct CallStartMessageContentView {
@@ -41,9 +42,16 @@ export default struct CallStartMessageContentView {
         .backgroundColor(Color.White)
         .align(Alignment.Center)
         .borderRadius(4)
-        .onClick(() => {
+        .onClick(async () => {
+            let content = this.message.messageContent as CallStartMessageContent;
+
+            let cameraGranted = content.audioOnly ? true : await checkAndRequestPermission(this.getUIContext().getHostContext(), 'ohos.permission.CAMERA')
+            let microphoneGranted = await checkAndRequestPermission(this.getUIContext().getHostContext(), 'ohos.permission.MICROPHONE')
+            if (!cameraGranted || !microphoneGranted) {
+                showToast('请授予摄像头和麦克风权限')
+                return
+            }
             if (this.message.conversation.type === ConversationType.Single) {
-                let content = this.message.messageContent as CallStartMessageContent;
                 avenginekit.startCall(this.message.conversation, [this.message.conversation.target], content.audioOnly)
             } else {
                 this.showPickGroupMemberToStartCallCoverModal = true;

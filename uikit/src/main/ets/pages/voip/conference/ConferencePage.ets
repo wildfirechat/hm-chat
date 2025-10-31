@@ -487,6 +487,10 @@ export default struct ConferencePage {
                                         showToast('正在进行屏幕共享，请先结束共享')
                                         return
                                     }
+                                    if(!this.conferenceInfo?.allowSwitchMode){
+                                        showToast('主持人不允许主动开启麦克风')
+                                        return
+                                    }
                                     this.lastTriggerToShowActionAndDurationViewTimestamp = Date.now()
                                     let toMute = !this.callSession?.audioMuted
                                     if (this.callSession?.status === CallState.STATUS_CONNECTED) {
@@ -523,6 +527,10 @@ export default struct ConferencePage {
                                 .colorFilter(WHITE_FILTER)
                                 .hitTestBehavior(HitTestMode.Block)
                                 .onClick(() => {
+                                    if(!this.conferenceInfo?.allowSwitchMode){
+                                        showToast('主持人不允许主动开启摄像头')
+                                        return
+                                    }
                                     this.lastTriggerToShowActionAndDurationViewTimestamp = Date.now()
                                     let toMute = !this.callSession?.videoMuted
                                     if (this.callSession?.status === CallState.STATUS_CONNECTED) {

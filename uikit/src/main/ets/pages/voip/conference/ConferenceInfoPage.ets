@@ -99,7 +99,8 @@ export default struct ConferenceInfoPage {
                 Column() {
                     ToggleItemView({
                         title: '开启视频',
-                        isOn: this.enableVideo,
+                        enable: this.conferenceInfo?.allowSwitchMode,
+                        isOn: this.enableVideo && this.conferenceInfo?.allowSwitchMode,
                         showDivider: true,
                         paddingLeft: 20,
                         onChange: value => {
@@ -108,7 +109,8 @@ export default struct ConferenceInfoPage {
                     })
                     ToggleItemView({
                         title: '开启音频',
-                        isOn: this.enableAudio,
+                        enable: this.conferenceInfo?.allowSwitchMode,
+                        isOn: this.enableAudio && this.conferenceInfo?.allowSwitchMode,
                         paddingLeft: 20,
                         onChange: value => {
                             this.enableAudio = value;
@@ -132,7 +134,7 @@ export default struct ConferenceInfoPage {
                                 return;
                             }
                             let info = this.conferenceInfo!
-                            let callSession = avengineKit.joinConference(info?.conferenceId, false, info?.pin, info?.owner, info?.conferenceTitle, '', false, info?.advance, !this.enableAudio, !this.enableVideo, '', '')
+                            let callSession = avengineKit.joinConference(info?.conferenceId, false, info?.pin, info?.owner, info?.conferenceTitle, '', info?.audience, info?.advance, !this.enableAudio || !info?.allowSwitchMode, !this.enableVideo || !info?.allowSwitchMode, '', '')
                             if (callSession) {
                                 let params = {} as Record<string, Object>
                                 params['conferenceInfo'] = info

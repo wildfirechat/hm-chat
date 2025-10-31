@@ -7,6 +7,7 @@ export default struct ToggleItemView {
     paddingRight: number = 10
     showDivider: boolean = false
     @Prop isOn: boolean = false
+    @Prop enable: boolean = true
     @Prop desc?: string = ''
     onChange?: (isOn: boolean) => void = undefined
 
@@ -24,6 +25,7 @@ export default struct ToggleItemView {
                 }
                 .alignItems(HorizontalAlign.Start)
                 Toggle({ type: ToggleType.Switch, isOn: this.isOn })
+                    .enabled(this.enable)
                     .onChange(this.onChange)
             }
             .padding({ left: this.paddingLeft, right: this.paddingRight })

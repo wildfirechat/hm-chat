@@ -9,7 +9,7 @@ import WFCVideoRenderController, { ScalingMode } from '@wfc/avenginekit/src/main
 
 @Component
 export default struct ConferenceParticipantView {
-    @Prop p: ParticipantProfile
+    @Prop @Watch('onParticipantUpdate') p: ParticipantProfile
     @Prop currentSwiperIndex: number = 0
     @State participantUserInfo: UserInfo | undefined = undefined
     xcomponentIdPrefix: string = ''
@@ -24,6 +24,13 @@ export default struct ConferenceParticipantView {
         }, err => {
             console.error('getUserInfoEx error', this.p.userId, err)
         })
+    }
+
+    onParticipantUpdate() {
+        if (!this.p.audience && !this.p.videoMuted) {
+            this.xcomponentController?.setVideoTrack(avenginekit.getCurrentSession()!.getParticipantVideoTrack(this.p.userId, this.p.screenSharing))
+            this.xcomponentController?.setScalingMode(ScalingMode.AspectFit)
+        }
     }
 
     xcomponentId() {
@@ -42,7 +49,7 @@ export default struct ConferenceParticipantView {
 
             // 会 crash，临时注释掉
             // if (!this.p.audience && this.p.status === CallState.STATUS_CONNECTED && !this.p.videoMuted && (this.swiperIndex === this.currentSwiperIndex || (this.swiperIndex === 0 && this.currentSwiperIndex === -1))) {
-            if (!this.p.audience && this.p.status === CallState.STATUS_CONNECTED && !this.p.videoMuted) {
+            if (!this.p.audience && !this.p.videoMuted) {
                 XComponent({
                     id: this.xcomponentId(),
                     type: XComponentType.SURFACE,
@@ -56,12 +63,15 @@ export default struct ConferenceParticipantView {
                     })
                     .onLoad((event: object) => {
                         console.log('xxxx XComponent debug', 'onLoad',  this._xcomponentId)
-                        this.xcomponentController?.setVideoTrack(avenginekit.getCurrentSession()!.getParticipantVideoTrack(this.p.userId, this.p.screenSharing))
+                        const session = avenginekit.getCurrentSession();
+                        if(session){
+                            this.xcomponentController?.setVideoTrack(session.getParticipantVideoTrack(this.p.userId, this.p.screenSharing))
                         this.xcomponentController?.setScalingMode(ScalingMode.AspectFit)
+                        }
                     })
                     .onDestroy(() => {
-                        this._xcomponentId = ''
                         console.log('xxxx XComponent debug', 'onDestroy', this._xcomponentId)
+                        this._xcomponentId = ''
                     })
             } else {
                 Stack() {

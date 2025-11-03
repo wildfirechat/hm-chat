@@ -29,6 +29,7 @@ import TextMessageContent from '@wfc/client/src/main/ets/wfc/messages/textMessag
 import EventType from '@wfc/client/src/main/ets/wfc/client/wfcEvent'
 import VideoType from '@wfc/avenginekit/src/main/ets/wfc/av/engine/videoType'
 import ConferenceMessageInputDialog from './ConferenceMessageInputDialog'
+import BasicDataSource from '../../../common/BasicDataSource'
 
 @Component
 export default struct ConferencePage {
@@ -57,6 +58,7 @@ export default struct ConferencePage {
     private voipPiPNodeController: VoipPiPNodeController = new VoipPiPNodeController('');
     private conferenceMessageInputDialogController?: CustomDialogController
     private latest5ConferenceChatroomMessages: Message[] = []
+    private swiperParticipantGridItemDataSource: SwiperParticipantGridItemDataSource = new SwiperParticipantGridItemDataSource()
     static COUNT_PER_PAGE = 4;
 
     aboutToAppear(): void {
@@ -87,12 +89,12 @@ export default struct ConferencePage {
     }
 
     getParticipantProfilesAndUpdateVideoRenderControllerMap() {
-         let newProfiles = this.callSession!.getParticipantProfiles()
+        let newProfiles = this.callSession!.getParticipantProfiles()
         if (!this.callSession!.audioOnly) {
             let map = new Map<string, WFCVideoRenderController>()
-            let profiles = [this.selfProfile!, ... newProfiles]
+            let profiles = [this.selfProfile!, ...newProfiles]
             profiles.forEach(p => {
-                let pid = this._participantId(p.userId, p.screenSharing);
+                let pid = this._participantIdForVideoRenderController(p.userId, p.screenSharing);
                 let controller = this.participantVideoRenderControllerMap.get(pid)
                 if (!controller) {
                     controller = new WFCVideoRenderController(pid)
@@ -101,7 +103,8 @@ export default struct ConferencePage {
             })
             this.participantVideoRenderControllerMap = map;
         }
-        this.participantProfiles = newProfiles
+        this.participantProfiles = newProfiles.sort((p1, p2) => p1.joinTime - p2.joinTime)
+        this.swiperParticipantGridItemDataSource.setupParticipantProfiles(this.selfProfile!, this.participantProfiles)
     }
 
     swapVideo(xcomponentId: string) {
@@ -168,6 +171,7 @@ export default struct ConferencePage {
                 this.previewProfile = undefined;
             }
         }
+        this.swiperParticipantGridItemDataSource.setupFocusProfile(this.focusProfile, this.previewProfile)
     }
 
     updateFocusAndPreviewView() {
@@ -319,7 +323,7 @@ export default struct ConferencePage {
 
         // 可能会调用多次，切换摄像头等情况下，会多次回调
         sessionCallback.didCreateLocalVideoTrack = (videoTrack: VideoTrack, screenSharing: boolean) => {
-            let controller = this.participantVideoRenderControllerMap.get(this._participantId(wfc.getUserId(), screenSharing));
+            let controller = this.participantVideoRenderControllerMap.get(this._participantIdForVideoRenderController(wfc.getUserId(), screenSharing));
             controller?.setVideoTrack(videoTrack)
 
             if (this.currentSwiperIndex === -1 || this.currentSwiperIndex === 0) {
@@ -327,7 +331,7 @@ export default struct ConferencePage {
             }
         }
         sessionCallback.didReceiveRemoteVideoTrack = (userId: string, videoTrack: VideoTrack, screenSharing: boolean) => {
-            let controller = this.participantVideoRenderControllerMap.get(this._participantId(userId, screenSharing));
+            let controller = this.participantVideoRenderControllerMap.get(this._participantIdForVideoRenderController(userId, screenSharing));
             controller?.setVideoTrack(videoTrack)
 
             if (this.currentSwiperIndex === -1 || this.currentSwiperIndex === 0) {
@@ -339,7 +343,7 @@ export default struct ConferencePage {
         this.callSession!.sessionCallback = sessionCallback;
     }
 
-    _participantId(userId: string, screenSharing: boolean) {
+    _participantIdForVideoRenderController(userId: string, screenSharing: boolean) {
         return screenSharing ? 'screen_sharing_' + userId : userId
     }
 
@@ -487,7 +491,7 @@ export default struct ConferencePage {
                                         showToast('正在进行屏幕共享，请先结束共享')
                                         return
                                     }
-                                    if(!this.conferenceInfo?.allowSwitchMode){
+                                    if (!this.conferenceInfo?.allowSwitchMode) {
                                         showToast('主持人不允许主动开启麦克风')
                                         return
                                     }
@@ -527,7 +531,7 @@ export default struct ConferencePage {
                                 .colorFilter(WHITE_FILTER)
                                 .hitTestBehavior(HitTestMode.Block)
                                 .onClick(() => {
-                                    if(!this.conferenceInfo?.allowSwitchMode){
+                                    if (!this.conferenceInfo?.allowSwitchMode) {
                                         showToast('主持人不允许主动开启摄像头')
                                         return
                                     }
@@ -646,7 +650,7 @@ export default struct ConferencePage {
     }
 
     onReceiveMessage = (messages: Message[]) => {
-        if(!this.callSession){
+        if (!this.callSession) {
             return
         }
         for (const msg of messages) {
@@ -725,98 +729,93 @@ export default struct ConferencePage {
     build() {
         NavDestination() {
             Swiper() {
-                Stack() {
-                    if (this.focusProfile) {
-                        ConferenceParticipantView({
-                            p: this.focusProfile,
-                            xcomponentIdPrefix: 'focus-xcp',
-                            swiperIndex: 0,
-                            currentSwiperIndex: this.currentSwiperIndex,
-                            xcomponentController: this.focusXComponentController,
-                        })
-                            .onClick(() => {
-                                if (this.callSession?.status !== CallState.STATUS_CONNECTED) {
-                                    return
-                                }
-                                this.showActionAndDurationView = !this.showActionAndDurationView
+                LazyForEach(this.swiperParticipantGridItemDataSource, (ps: ParticipantProfile[], participantSwiperItemIndex: number) => {
+                    if (participantSwiperItemIndex === 0) {
+                        Stack() {
+                            // focus
+                            if (ps[0]) {
+                                ConferenceParticipantView({
+                                    p: ps[0],
+                                    xcomponentIdPrefix: 'focus-xcp',
+                                    swiperIndex: 0,
+                                    currentSwiperIndex: this.currentSwiperIndex,
+                                    xcomponentController: this.focusXComponentController,
+                                })
+                                    .onClick(() => {
+                                        if (this.callSession?.status !== CallState.STATUS_CONNECTED) {
+                                            return
+                                        }
+                                        this.showActionAndDurationView = !this.showActionAndDurationView
 
-                                this.lastTriggerToShowActionAndDurationViewTimestamp = Date.now()
-                            })
-                    }
+                                        this.lastTriggerToShowActionAndDurationViewTimestamp = Date.now()
+                                    })
+                            }
 
-                    // preview
-                    if (this.previewProfile) {
-                        ConferenceParticipantView({
-                            p: this.previewProfile,
-                            xcomponentIdPrefix: 'preview-xcp',
-                            swiperIndex: 0,
-                            currentSwiperIndex: this.currentSwiperIndex,
-                            xcomponentController: this.previewXComponentController,
-                        })
-                            .padding(5)
-                            .margin({ top: this.statusBarHeight + 50 })
-                            .width(120)
-                            .height(160)
-                            .borderRadius(4)
-                            .onClick(() => {
-                                if (this.callSession?.status === CallState.STATUS_CONNECTED) {
-                                    // this.swapVideo(`${p.userId}-${this.callSession.callId}`)
-                                }
-                            })
-                    }
+                            // preview
+                            if (ps[1]) {
+                                ConferenceParticipantView({
+                                    p: ps[1],
+                                    xcomponentIdPrefix: 'preview-xcp',
+                                    swiperIndex: 0,
+                                    currentSwiperIndex: this.currentSwiperIndex,
+                                    xcomponentController: this.previewXComponentController,
+                                })
+                                    .padding(5)
+                                    .margin({ top: this.statusBarHeight + 50 })
+                                    .width(120)
+                                    .height(160)
+                                    .borderRadius(4)
+                                    .onClick(() => {
+                                        if (this.callSession?.status === CallState.STATUS_CONNECTED) {
+                                            // this.swapVideo(`${p.userId}-${this.callSession.callId}`)
+                                        }
+                                    })
+                            }
 
-                    if (this.showActionAndDurationView) {
-                        this.actionAndDurationView()
-                    }
-                    // this.chatroomView()
-                }
-                .width('100%')
-                .height('100%')
-                .alignContent(Alignment.TopStart)
+                            if (this.showActionAndDurationView) {
+                                this.actionAndDurationView()
+                            }
+                            // this.chatroomView()
+                        }
+                        .width('100%')
+                        .height('100%')
+                        .alignContent(Alignment.TopStart)
 
-                if (this.participantProfiles && this.participantProfiles.length >= 1) {
-                    ForEach(new Array(Math.ceil(this.participantIdsIncludeSelf().length / ConferencePage.COUNT_PER_PAGE)).fill(0), (item: number, participantFlexIndex) => {
+                    } else {
                         Flex({
                             direction: FlexDirection.Row,
                             justifyContent: FlexAlign.Start,
                             alignContent: FlexAlign.Start,
                             wrap: FlexWrap.Wrap,
                         }) {
-                            if (participantFlexIndex == 0) {
+                            ForEach(ps, (p: ParticipantProfile, flexIndex) => {
                                 ConferenceParticipantView({
-                                    p: this.selfProfile,
-                                    swiperIndex: participantFlexIndex + 1,
+                                    p: p,
+                                    swiperIndex: participantSwiperItemIndex,
                                     currentSwiperIndex: this.currentSwiperIndex,
-                                    xcomponentController: this.participantVideoRenderControllerMap.get(this.selfProfile!.userId)
+                                    xcomponentController: this.participantVideoRenderControllerMap.get(this._participantIdForVideoRenderController(p.userId, p.screenSharing))
                                 })
                                     .width('50%')
                                     .height('50%')
-                            }
-
-                            ForEach(this.participantProfiles, (item: ParticipantProfile , flexIndex) => {
-                                if (participantFlexIndex * ConferencePage.COUNT_PER_PAGE + flexIndex > this.participantProfiles!.length) {
-                                    // 占位
-                                    Column()
-                                        .width('50%')
-                                        .height('50%')
-                                        .backgroundColor(Color.Gray)
-                                } else {
-                                    ConferenceParticipantView({
-                                        p: this.participantProfiles![participantFlexIndex * 3 + flexIndex],
-                                        swiperIndex: participantFlexIndex + 1,
-                                        currentSwiperIndex: this.currentSwiperIndex,
-                                        xcomponentController: this.participantVideoRenderControllerMap.get(this._participantId(this.participantProfiles![participantFlexIndex * 3 + flexIndex].userId,this.participantProfiles![participantFlexIndex * 3 + flexIndex].screenSharing ))
-                                    })
-                                        .width('50%')
-                                        .height('50%')
-                                }
-                            }, (item: ParticipantProfile, flexIndex) => item.joinTime +  flexIndex + '')
+                            }, (p: ParticipantProfile, flexIndex) => {
+                                return p.userId + '-' + p.screenSharing + '-' + p.audience + '-' + p.videoMuted + '-' + p.audioMuted
+                            })
                         }
                         .backgroundColor(Color.Orange)
                         .width('100%')
                         .height('100%')
-                    }, (item: number, swiperIndex) => swiperIndex + '')
-                }
+                    }
+                }, (ps: ParticipantProfile[], index: number) => {
+                    let id = index + ''
+                    for (const p of ps) {
+                        if (p) {
+                            id += (p.userId + '-' + p.screenSharing + '-' + p.audience + '-' + p.videoMuted + '-' + p.audioMuted) + '|'
+                        } else {
+                            id += 'u' + '|'
+                        }
+                    }
+                    return id
+                })
             }
             .indicator(true)
             .vertical(false)
@@ -891,5 +890,48 @@ export default struct ConferencePage {
                 'messages': [message]
             } as Record<string, Object>
         )
+    }
+}
+
+class SwiperParticipantGridItemDataSource extends BasicDataSource<(ParticipantProfile | undefined)[]> {
+    selfProfile?: ParticipantProfile
+    focusProfile?: ParticipantProfile
+    previewProfile?: ParticipantProfile
+    participantProfiles: ParticipantProfile[] = []
+
+    setupParticipantProfiles(selfProfile: ParticipantProfile, participantProfiles: ParticipantProfile[]) {
+        this.selfProfile = selfProfile;
+        this.participantProfiles = participantProfiles;
+        this.notifyDataReload();
+    }
+
+    setupFocusProfile(focusProfile: ParticipantProfile | undefined, previewProfile?: ParticipantProfile | undefined) {
+        this.focusProfile = focusProfile;
+        this.previewProfile = previewProfile;
+        this.notifyDataChange(0);
+    }
+
+    public totalCount(): number {
+        // return 1;
+        if (this.participantProfiles.length === 0) {
+            return 1;
+        } else {
+            return 1 + Math.ceil((this.participantProfiles.length + 1) / ConferencePage.COUNT_PER_PAGE)
+        }
+    }
+
+    public getData(index: number): (ParticipantProfile | undefined)[] {
+        // 0 主页，focusProfile and previewProfile
+        // 1 自己，及（ ConferencePage.COUNT_PER_PAGE - 1）个其他参与者
+        // 2... 其他参与者
+        if (index === 0) {
+            return [this.focusProfile, this.previewProfile]
+        } else if (index === 1) {
+            return [this.selfProfile!, ...this.participantProfiles.slice(0, ConferencePage.COUNT_PER_PAGE - 1)]
+        } else {
+            index = index - 1;
+            const start = ConferencePage.COUNT_PER_PAGE * index - 1;
+            return this.participantProfiles.slice(start, start + ConferencePage.COUNT_PER_PAGE);
+        }
     }
 }

@@ -3,6 +3,7 @@ import { Category, Emoji } from './emojis'
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
 import StickerMessageContent from '@wfc/client/src/main/ets/wfc/messages/stickerMessageContent'
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
+import { deviceInfo } from '@kit.BasicServicesKit'
 
 @Preview
 @Component
@@ -10,7 +11,8 @@ export default struct EmojiInputPanelView {
     private emojis: Emoji[] = []
     private emojiAndStickers: Emoji[] = []
     private emojiCategories: Category[] = []
-    private conversation?: Conversation
+    conversation?: Conversation
+    textInputController?: TextInputController
     @State currentCategoryIndex: number = 0
     @Link text: string
     @Link caretPosition: number
@@ -174,13 +176,21 @@ export default struct EmojiInputPanelView {
                     })
                     .alignSelf(ItemAlign.End)
                     .onClick(() => {
-                        // TODO 不能处理 unicode 字符
-                        // FIXME
-                        // if (this.caretPosition > 0) {
-                        //     let char = this.text.charAt(this.caretPosition - 1)
-                        //     this.text = this.text.substring(0, this.caretPosition - 1) + this.text.substring(this.caretPosition);
-                        //     this.caretPosition = this.caretPosition - char.length;
-                        // }
+                        if (deviceInfo.sdkApiVersion >= 15) {
+                            this.textInputController?.deleteText(
+                                {
+                                    start: this.caretPosition - 1,
+                                    end: this.caretPosition
+                                }
+                            )
+                        } else {
+                            if (this.caretPosition > 0) {
+                                const lastChar = this.text.length >= 2 ? this.text.codePointAt(this.text.length - 2) : this.text.charCodeAt(this.text.length - 1)
+                                let lastCharLen = lastChar! > 65536 ? 2 : 1;
+                                this.text = this.text.substring(0, this.caretPosition - lastCharLen) + this.text.substring(this.caretPosition);
+                                this.caretPosition = this.caretPosition - lastCharLen;
+                            }
+                        }
                     })
                 }
             }

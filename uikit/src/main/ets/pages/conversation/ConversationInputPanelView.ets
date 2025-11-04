@@ -1004,6 +1004,7 @@ export default struct ConversationInputPanelView {
                         selectionStart: this.selectionStart,
                         selectionEnd: this.selectionEnd,
                         conversation: this.conversation,
+                        textInputController: this.textInputController
                     })
                         .focusable(true)
                         .width('100%')

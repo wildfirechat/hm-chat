@@ -81,6 +81,12 @@ export default class Config {
     // AI机器人ID
     static AI_ROBOT = "FireRobot";
 
+    // 用户协议地址
+    static USER_AGREEMENT_URL = "https://example.com/user_agreement.html";
+
+    //  隐私协议地址
+    static PRIVACY_AGREEMENT_URL = "https://example.com/user_privacy.html";
+
     static getWFCPlatform() {
         return Config.CURRENT_PLATFORM;
     }

@@ -6,6 +6,7 @@ import Config from '@wfc/client/src/main/ets/config';
 import wfc from '@wfc/client'
 import { uikitNavigationDestinations } from '@wfc/uikit/src/main/ets/pages/uikitNavigationConfig';
 import uikit from '@wfc/uikit';
+import { showToast } from '@wfc/uikit/src/main/ets/common/utils/Toast';
 
 @Preview
 @Component
@@ -81,6 +82,10 @@ export default struct AboutPage {
                         title: getContext().resourceManager.getStringSync($r('app.string.user_agreement').id),
                         showDivider: true
                     }).onClick(() => {
+                        if (!Config.USER_AGREEMENT_URL || Config.USER_AGREEMENT_URL.indexOf('https://example.com') >= 0) {
+                            showToast('请配置用户协议链接地址')
+                            return
+                        }
                         this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.WebViewPage, {
                             'url': 'https://www.wildfirechat.net/wildfirechat_user_agreement.html',
                             'title': '野火IM用户协议'
@@ -89,6 +94,10 @@ export default struct AboutPage {
                     OptionItemView({
                         title: getContext().resourceManager.getStringSync($r('app.string.privacy_policy').id),
                     }).onClick(() => {
+                        if (!Config.PRIVACY_AGREEMENT_URL || Config.PRIVACY_AGREEMENT_URL.indexOf('https://example.com') >= 0) {
+                            showToast('请配置隐私政策链接地址')
+                            return
+                        }
                         this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.WebViewPage, {
                             'url': 'https://www.wildfirechat.net/wildfirechat_user_privacy.html',
                             'title': '野火IM个人信息保护政策'

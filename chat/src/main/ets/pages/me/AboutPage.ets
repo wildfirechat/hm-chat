@@ -87,7 +87,7 @@ export default struct AboutPage {
                             return
                         }
                         this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.WebViewPage, {
-                            'url': 'https://www.wildfirechat.net/wildfirechat_user_agreement.html',
+                            'url': Config.USER_AGREEMENT_URL,
                             'title': '野火IM用户协议'
                         } as Record<string, Object>)
                     })
@@ -99,7 +99,7 @@ export default struct AboutPage {
                             return
                         }
                         this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.WebViewPage, {
-                            'url': 'https://www.wildfirechat.net/wildfirechat_user_privacy.html',
+                            'url': Config.PRIVACY_AGREEMENT_URL,
                             'title': '野火IM个人信息保护政策'
                         } as Record<string, Object>)
                     })

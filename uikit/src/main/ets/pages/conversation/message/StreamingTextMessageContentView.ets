@@ -30,6 +30,11 @@ export default struct StreamingTextMessageContentView {
                 .enableDataDetector(true)
             if (!this.isGenerated()) {
                 LoadingProgress().width(20).height(20)
+            } else {
+                Text('本内容由 AI 生成')
+                    .fontSize(12)
+                    .fontColor(Color.Gray)
+                    .margin({top: 5})
             }
         }
         .alignItems(HorizontalAlign.Start)

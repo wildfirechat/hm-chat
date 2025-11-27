@@ -133,7 +133,7 @@ export default struct ConversationPage {
         wfc.eventEmitter!.off(EventType.MessageStatusUpdate, this.onMessageStatusUpdate)
         wfc.eventEmitter!.off(EventType.ReceiveMessage, this.onReceiveMessage)
         wfc.eventEmitter!.off(EventType.DeleteMessage, this.onDeleteMessage)
-        wfc.eventEmitter!.on(EventType.MessageDeleted, this.onRemoteDeleteMessage)
+        wfc.eventEmitter!.off(EventType.MessageDeleted, this.onRemoteDeleteMessage)
         wfc.eventEmitter!.off(EventType.RecallMessage, this.onRecallMessage)
         wfc.eventEmitter!.off(EventType.MessageRead, this.onReadMessage)
         if (this.conversation!.type === ConversationType.Group) {

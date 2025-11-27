@@ -51,11 +51,11 @@ export default struct ConversationListTab {
 
     aboutToDisappear() {
         wfc.eventEmitter!.off(EventType.ReceiveMessage, this.onReceiveMessage)
-        wfc.eventEmitter!.on(EventType.SendMessage, this.onSendMessage)
-        wfc.eventEmitter!.on(EventType.RecallMessage, this.onRecallMessage)
+        wfc.eventEmitter!.off(EventType.SendMessage, this.onSendMessage)
+        wfc.eventEmitter!.off(EventType.RecallMessage, this.onRecallMessage)
         wfc.eventEmitter!.off(EventType.ConnectionStatusChanged, this.onConnectionStatusChange)
         wfc.eventEmitter!.off(EventType.ConversationInfoUpdate, this.onConversationInfoUpdate)
-        wfc.eventEmitter!.on(EventType.SettingUpdate, this.onSettingUpdate)
+        wfc.eventEmitter!.off(EventType.SettingUpdate, this.onSettingUpdate)
 
         wfc.eventEmitter!.off(EventType.UserInfosUpdate, this.onUserInfosUpdate)
         wfc.eventEmitter!.off(EventType.GroupInfosUpdate, this.onGroupInfosUpdate)

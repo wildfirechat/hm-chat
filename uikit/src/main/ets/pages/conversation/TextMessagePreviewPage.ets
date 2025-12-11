@@ -2,7 +2,6 @@ import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
 import { LengthUnit } from '@kit.ArkUI'
 
-@Entry
 @Component
 export default struct TextMessagePreviewPage {
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;

@@ -1,0 +1,937 @@
+import CallSession from '@wfc/avenginekit/src/main/ets/wfc/av/engine/callSession'
+import CallSessionCallback from '@wfc/avenginekit/src/main/ets/wfc/av/engine/callSessionCallback'
+import CallState from '@wfc/avenginekit/src/main/ets/wfc/av/engine/callState'
+import avengineKitImpl from '@wfc/avenginekit'
+import avengineKit from '@wfc/avenginekit/src/main/ets/wfc/av/engine/avenginekit'
+import wfc from '@wfc/client'
+import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
+import AVCastPicker from '@ohos.multimedia.avCastPicker'
+import ParticipantProfile from '@wfc/avenginekit/src/main/ets/wfc/av/engine/participantProfile'
+import PickGroupMemberModal from '../../group/PickGroupMemberModal'
+import { timestampFormat } from '../../../util/helper'
+import { window, PiPWindow } from '@kit.ArkUI'
+import ConferenceInfo from '@wfc/avenginekit/src/main/ets/wfc/av/model/conferenceInfo'
+import { showToast } from '../../../common/utils/Toast'
+import { WHITE_FILTER } from '../../../api/Util'
+import ConferenceParticipantView from './ConferenceParticipantView'
+import ConferenceMoreActionView from './ConferenceMoreActionView'
+import { VideoTrack } from '@ohos/webrtc/src/main/libohos_webrtc/webrtc'
+import WFCVideoRenderController, { ScalingMode } from '@wfc/avenginekit/src/main/ets/wfc/av/xcomponent/WFCVideoRenderController'
+import VoipPiPNodeController from '../VoipPiPNodeController'
+import uikit from '../../../uikit'
+import { BusinessError } from '@kit.BasicServicesKit'
+import { uikitNavigationDestinations } from '../../uikitNavigationConfig'
+import ConferenceInviteMessageContent from '@wfc/client/src/main/ets/wfc/av/messages/conferenceInviteMessageContent'
+import Message from '@wfc/client/src/main/ets/wfc/messages/message'
+import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
+import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType'
+import TextMessageContent from '@wfc/client/src/main/ets/wfc/messages/textMessageContent'
+import EventType from '@wfc/client/src/main/ets/wfc/client/wfcEvent'
+import VideoType from '@wfc/avenginekit/src/main/ets/wfc/av/engine/videoType'
+import ConferenceMessageInputDialog from './ConferenceMessageInputDialog'
+import BasicDataSource from '../../../common/BasicDataSource'
+
+@Component
+export default struct ConferencePage {
+    @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
+    @State targetUserInfos?: UserInfo[] = []
+    @State participantProfiles?: ParticipantProfile[] = []
+    @State invitor?: UserInfo = undefined
+    @State selfUserInfo?: UserInfo = undefined
+    @State callSession?: CallSession = undefined
+    @State showPickGroupMemberModal: boolean = false
+    @State durationStr: string = ''
+    @State showActionAndDurationView: boolean = true
+    @State focusProfile?: ParticipantProfile = undefined
+    @State previewProfile?: ParticipantProfile = undefined
+    @State showConferenceMoreActionSheet: boolean = false
+    @State selfProfile?: ParticipantProfile = undefined
+    @State currentSwiperIndex: number = -1;
+    private statusBarHeight = 0
+    private lastTriggerToShowActionAndDurationViewTimestamp: number = 0
+    private updateActionAndDurationViewInterval = 0
+    private conferenceInfo?: ConferenceInfo
+    private participantVideoRenderControllerMap = new Map<string, WFCVideoRenderController>()
+    private focusXComponentController: WFCVideoRenderController = new WFCVideoRenderController('focus-xcp')
+    private previewXComponentController: WFCVideoRenderController = new WFCVideoRenderController('preview-xcp')
+    pipController?: PiPWindow.PiPController;
+    private voipPiPNodeController: VoipPiPNodeController = new VoipPiPNodeController('');
+    private conferenceMessageInputDialogController?: CustomDialogController
+    private latest5ConferenceChatroomMessages: Message[] = []
+    private swiperParticipantGridItemDataSource: SwiperParticipantGridItemDataSource = new SwiperParticipantGridItemDataSource()
+    static COUNT_PER_PAGE = 4;
+
+    aboutToAppear(): void {
+        let callSession = avengineKitImpl.getCurrentSession();
+
+        if (!callSession || callSession.status === CallState.STATUS_IDLE) {
+            this.mainNavPathStack.pop()
+            return
+        }
+
+        let params = this.mainNavPathStack.getParamByIndex(this.mainNavPathStack.size() - 1) as Record<string, Object>;
+        this.conferenceInfo = params['conferenceInfo'] as ConferenceInfo
+
+        this.statusBarHeight = px2vp(AppStorage.get<number>('SafeAreaTopHeight')!)
+
+        this.selfUserInfo = wfc.getUserInfo(wfc.getUserId())
+        this.targetUserInfos = wfc.getUserInfos(callSession?.getParticipantIds()!)
+
+        this.callSession = callSession
+
+        this.selfProfile = callSession.getSelfProfile()
+        this.getParticipantProfilesAndUpdateVideoRenderControllerMap()
+
+        this.updateFocusAndPreviewProfile()
+
+        this.setupSessionCallback()
+        wfc.eventEmitter?.on(EventType.ReceiveMessage, this.onReceiveMessage)
+    }
+
+    getParticipantProfilesAndUpdateVideoRenderControllerMap() {
+        let newProfiles = this.callSession!.getParticipantProfiles()
+        if (!this.callSession!.audioOnly) {
+            let map = new Map<string, WFCVideoRenderController>()
+            let profiles = [this.selfProfile!, ...newProfiles]
+            profiles.forEach(p => {
+                let pid = this._participantIdForVideoRenderController(p.userId, p.screenSharing);
+                let controller = this.participantVideoRenderControllerMap.get(pid)
+                if (!controller) {
+                    controller = new WFCVideoRenderController(pid)
+                }
+                map.set(pid, controller);
+            })
+            this.participantVideoRenderControllerMap = map;
+        }
+        this.participantProfiles = newProfiles.sort((p1, p2) => p1.joinTime - p2.joinTime)
+        this.swiperParticipantGridItemDataSource.setupParticipantProfiles(this.selfProfile!, this.participantProfiles)
+    }
+
+    swapVideo(xcomponentId: string) {
+        // TODO
+        // let nextFocusUserId = ''
+        // let preFocusUserId = ''
+        // this.userXComponentMap.forEach((value, key) => {
+        //     if (value === xcomponentId) {
+        //         nextFocusUserId = key!;
+        //     }
+        //     if (value === this.focusXComponentId) {
+        //         preFocusUserId = key!;
+        //     }
+        // })
+        //
+        // this.userXComponentMap.set(nextFocusUserId, this.focusXComponentId)
+        // this.userXComponentMap.set(preFocusUserId, xcomponentId)
+        //
+        // this.setupInitialXComponentViews()
+    }
+
+    setupFocusAndPreviewVideoTrack() {
+        // console.log('setupFocusAndPreviewXComponentId focus', this.focusProfile!.videoTrack?.id)
+        if (this.focusProfile) {
+            this.focusXComponentController.setVideoTrack(this.callSession?.getParticipantVideoTrack(this.focusProfile.userId, this.focusProfile.screenSharing))
+            this.focusXComponentController.setScalingMode(ScalingMode.AspectFit)
+            if (this.previewProfile) {
+                this.previewXComponentController.setVideoTrack(this.callSession?.getParticipantVideoTrack(this.previewProfile.userId, this.previewProfile.screenSharing))
+                this.previewXComponentController.setScalingMode(ScalingMode.AspectFit)
+            }
+        }
+    }
+
+    updateFocusAndPreviewProfile() {
+        if (!this.participantProfiles || this.participantProfiles?.length === 0) {
+            this.focusProfile = this.selfProfile
+            this.previewProfile = undefined
+        } else {
+            // TODO
+            // 用户主动设置的焦点视频流
+            let foundFocusProfile = false
+            let preFocusProfile = this.focusProfile
+            for (let i = 0; i < this.participantProfiles.length; i++) {
+                if (!this.participantProfiles[i].audience && !this.participantProfiles[i].videoMuted) {
+                    this.focusProfile = this.participantProfiles[i]
+                    this.previewProfile = this.selfProfile
+                    foundFocusProfile = true
+                    break
+                }
+            }
+
+            if (foundFocusProfile) {
+                if (this.focusProfile) {
+                    console.log('av-c', 'found focusProfile', this.focusProfile.userId)
+                    this.callSession?.setParticipantVideoType(this.focusProfile.userId, this.focusProfile.screenSharing, VideoType.BIG_STREAM)
+                }
+                if (preFocusProfile && preFocusProfile.userId !== this.focusProfile?.userId) {
+                    this.callSession?.setParticipantVideoType(preFocusProfile.userId, preFocusProfile.screenSharing, VideoType.SMALL_STREAM)
+                }
+            }
+
+            if (!foundFocusProfile) {
+                this.focusProfile = this.selfProfile
+                this.previewProfile = undefined;
+            }
+        }
+        this.swiperParticipantGridItemDataSource.setupFocusProfile(this.focusProfile, this.previewProfile)
+    }
+
+    updateFocusAndPreviewView() {
+        this.updateFocusAndPreviewProfile()
+        if (this.currentSwiperIndex === -1 || this.currentSwiperIndex === 0) {
+            this.setupFocusAndPreviewVideoTrack()
+        }
+    }
+
+    aboutToDisappear(): void {
+        let win = AppStorage.get<window.Window>('window')
+        win?.setWindowLayoutFullScreen(false)
+        let sysBarProps: window.SystemBarProperties = {
+            // statusBarColor: '#00000000',
+            // navigationBarColor: '#00000000',
+            // 以下两个属性从API Version 8开始支持
+            navigationBarContentColor: '#000000',
+            statusBarContentColor: '#000000',
+        };
+        win?.setWindowSystemBarProperties(sysBarProps)
+        wfc.eventEmitter?.off(EventType.ReceiveMessage, this.onReceiveMessage)
+    }
+
+    onPageShow(): void {
+        let win = AppStorage.get<window.Window>('window')
+        win?.setWindowLayoutFullScreen(true)
+
+        let sysBarProps: window.SystemBarProperties = {
+            // statusBarColor: '#00000000',
+            // navigationBarColor: '#00000000',
+            // 以下两个属性从API Version 8开始支持
+            statusBarContentColor: '#ffffff',
+            navigationBarContentColor: '#ffffff'
+        };
+        win?.setWindowSystemBarProperties(sysBarProps)
+
+        if (!this.pipController) {
+            this.createPipController()
+                .then(() => {
+                    console.log('xxxxxxx create pip success')
+                })
+                .catch((reason: BusinessError) => {
+                    console.log('xxxxxxxx create pip controller error', reason.message);
+                })
+        }
+    }
+
+    onPageHide(): void {
+        // TODO
+    }
+
+    onPageHidden() {
+
+    }
+
+    updateActionAndDurationView = () => {
+        // TODO is page shown?
+        let millis = new Date().getTime() - this.callSession!.connectedTime
+        this.durationStr = timestampFormat(millis)
+        if (this.lastTriggerToShowActionAndDurationViewTimestamp > 0 && !this.showConferenceMoreActionSheet && Date.now() - this.lastTriggerToShowActionAndDurationViewTimestamp > 5000) {
+            this.showActionAndDurationView = false
+        }
+        let sysBarProps: window.SystemBarProperties = {
+            // statusBarColor: '#00000000',
+            // navigationBarColor: '#00000000',
+            // 以下两个属性从API Version 8开始支持
+            statusBarContentColor: this.showActionAndDurationView ? '#ffffff' : '#00ffffff',
+            navigationBarContentColor: this.showActionAndDurationView ? '#ffffff' : '#00ffffff'
+        };
+        let win = AppStorage.get<window.Window>('window')
+        win?.setWindowSystemBarProperties(sysBarProps)
+    }
+
+    setupSessionCallback() {
+        let sessionCallback: CallSessionCallback = new CallSessionCallback()
+
+        let that = this.callSession!;
+        sessionCallback.didChangeState = (status: number) => {
+            // 强制刷新
+            let tmp = this.callSession
+            tmp!.status = status;
+            this.callSession = undefined;
+            this.callSession = tmp;
+
+            if (status === CallState.STATUS_CONNECTED) {
+                this.lastTriggerToShowActionAndDurationViewTimestamp = Date.now()
+                this.updateActionAndDurationViewInterval = setInterval(this.updateActionAndDurationView, 1000)
+                wfc.joinChatroom(this.callSession!.callId, () => {
+                    console.log('join conference chatroom success')
+                }, err => {
+                    console.error('join conference chatroom fail', err)
+                })
+            }
+            this.selfProfile = this.callSession?.getSelfProfile()!;
+
+            this.updateFocusAndPreviewView()
+        }
+        sessionCallback.didCallEndWithReason = reason => {
+            if (this.updateActionAndDurationViewInterval) {
+                clearInterval(this.updateActionAndDurationViewInterval)
+            }
+            this.destroyPipController()
+
+            let index = this.mainNavPathStack.getIndexByName(uikitNavigationDestinations.ConferencePage)
+            if (index.length) {
+                this.mainNavPathStack.pop()
+            }
+        }
+        sessionCallback.didParticipantJoined = (userId: string, isScreenSharing?: boolean) => {
+
+            this.targetUserInfos = wfc.getUserInfos(this.callSession!.getParticipantIds()!)
+            this.getParticipantProfilesAndUpdateVideoRenderControllerMap()
+
+            // 主页只显示两个
+            if (this.participantProfiles?.length === 1) {
+                this.previewProfile = this.focusProfile;
+                this.focusProfile = this.participantProfiles[0]
+            }
+            this.updateFocusAndPreviewView()
+        }
+        sessionCallback.didParticipantLeft = (userId: string, callEndReason: number, screenSharing = false) => {
+            this.targetUserInfos = wfc.getUserInfos(this.callSession?.getParticipantIds()!)
+            this.getParticipantProfilesAndUpdateVideoRenderControllerMap()
+
+            this.updateFocusAndPreviewView();
+
+        }
+        sessionCallback.didChangeType = (userId: string, audience: boolean, screenSharing?: boolean) => {
+            this.getParticipantProfilesAndUpdateVideoRenderControllerMap()
+            this.selfProfile = this.callSession?.getSelfProfile()!;
+            this.updateFocusAndPreviewView()
+        }
+
+        sessionCallback.didParticipantConnected = (userId: string, isScreenSharing?: boolean) => {
+            this.targetUserInfos = wfc.getUserInfos(this.callSession?.getParticipantIds()!)
+            this.getParticipantProfilesAndUpdateVideoRenderControllerMap()
+            console.log('didParticipantConnected', userId, isScreenSharing)
+        }
+        sessionCallback.didChangeMode = state => {
+
+        }
+        sessionCallback.didMuteStateChanged = participants => {
+            if (participants.indexOf(wfc.getUserId()) >= 0) {
+                this.selfProfile = this.callSession?.getSelfProfile()!
+            }
+            this.getParticipantProfilesAndUpdateVideoRenderControllerMap()
+            this.updateFocusAndPreviewProfile()
+        }
+
+        // 可能会调用多次，切换摄像头等情况下，会多次回调
+        sessionCallback.didCreateLocalVideoTrack = (videoTrack: VideoTrack, screenSharing: boolean) => {
+            let controller = this.participantVideoRenderControllerMap.get(this._participantIdForVideoRenderController(wfc.getUserId(), screenSharing));
+            controller?.setVideoTrack(videoTrack)
+
+            if (this.currentSwiperIndex === -1 || this.currentSwiperIndex === 0) {
+                this.setupFocusAndPreviewVideoTrack()
+            }
+        }
+        sessionCallback.didReceiveRemoteVideoTrack = (userId: string, videoTrack: VideoTrack, screenSharing: boolean) => {
+            let controller = this.participantVideoRenderControllerMap.get(this._participantIdForVideoRenderController(userId, screenSharing));
+            controller?.setVideoTrack(videoTrack)
+
+            if (this.currentSwiperIndex === -1 || this.currentSwiperIndex === 0) {
+                this.setupFocusAndPreviewVideoTrack()
+            }
+        }
+
+        // end
+        this.callSession!.sessionCallback = sessionCallback;
+    }
+
+    _participantIdForVideoRenderController(userId: string, screenSharing: boolean) {
+        return screenSharing ? 'screen_sharing_' + userId : userId
+    }
+
+    tip() {
+        let desc = ''
+        if (this.callSession?.status === CallState.STATUS_OUTGOING) {
+            desc = '等待对方接听'
+        } else if (this.callSession?.status === CallState.STATUS_INCOMING) {
+            desc = `${this.invitor?.displayName} 邀请你通话`
+        } else if (this.callSession?.status === CallState.STATUS_CONNECTING) {
+            desc = '接听中...'
+        } else {
+            desc = '通话中'
+        }
+        return desc;
+    }
+
+    participantKey(user: UserInfo): string {
+        let profile = this.participantProfiles?.find(p => p.userId === user.uid);
+        //return user.uid + '-' + user.updateDt + '-' + profile?.status + '-' + profile?.audioMuted
+        return user.uid + '-' + user.updateDt
+    }
+
+    participantPortrait(p: ParticipantProfile): string | undefined {
+        let u = this.targetUserInfos?.find(u => u.uid === p.userId);
+        return u?.portrait;
+    }
+
+    participantIdsIncludeSelf() {
+        return [...this.callSession?.getParticipantIds()!, wfc.getUserId()]
+    }
+
+    @Builder
+    pickGroupMemberModal() {
+        PickGroupMemberModal({
+            groupId: this.callSession?.conversation?.target,
+            title: '选择群成员',
+            showPickGroupMemberModal: $showPickGroupMemberModal,
+            initialCheckedUserIds: this.participantIdsIncludeSelf(),
+            uncheckableUserIds: this.participantIdsIncludeSelf(),
+            onPickResult: (users: UserInfo[]) => {
+                this.callSession?.inviteNewParticipants(users.map(user => user.uid), '', false)
+            }
+        })
+            .height('100%')
+            .width('100%')
+            .margin({ top: px2vp(AppStorage.get<number>('SafeAreaTopHeight')) })
+            .backgroundColor(Color.White)
+    }
+
+    @Builder
+    conferenceMoreActionSheet() {
+        ConferenceMoreActionView({
+            conferencePage: this,
+        })
+            .width('100%')
+            .height('100%')
+            .padding({
+                top: 5
+            })
+    }
+
+    @Builder
+    actionAndDurationView() {
+        // actions
+        Column() {
+            // top actions
+            Row() {
+                AVCastPicker({ normalColor: Color.White, activeColor: Color.White })
+                    .width(50)
+                    .height(50)
+                    .border({ width: 1, radius: 4, color: Color.Transparent })
+
+                Image($r('app.media.av_conference_switch_camera'))
+                    .draggable(false)
+                    .width(50)
+                    .height(50)
+                    .colorFilter(WHITE_FILTER)
+                    .objectFit(ImageFit.Contain)
+                    .padding({ left: 10, right: 10 })
+                    .onClick(async () => {
+                        if (this.callSession?.status === CallState.STATUS_CONNECTED) {
+                            this.callSession?.switchCamera()
+                        }
+                    })
+
+                Column() {
+                    Text('会议标题')
+                        .fontColor(Color.White)
+                        .textAlign(TextAlign.Center)
+                        .alignSelf(ItemAlign.Center)
+                    Text(this.durationStr)
+                        .fontColor(Color.White)
+                        .textAlign(TextAlign.Center)
+                        .alignSelf(ItemAlign.Center)
+                }
+                .layoutWeight(1)
+
+                Image($r('app.media.av_conference_hangup'))
+                    .draggable(false)
+                    .clickEffect({ level: ClickEffectLevel.MIDDLE })
+                    .width(50)
+                    .height(50)
+                    .objectFit(ImageFit.Contain)
+                    .padding({ left: 10, right: 10 })
+                    .onClick(() => {
+                        this.callSession?.hangup()
+                    })
+                // Image($r('app.media.ic_tab_add'))
+                //     .fillColor(Color.Red)
+                //     .draggable(false)
+                //     .width(50)
+                //     .height(50)
+                //     .padding(10)
+                //     .onClick(() => {
+                //         this.showPickGroupMemberModal = true;
+                //     })
+                //     .bindContentCover(this.showPickGroupMemberModal, this.pickGroupMemberModal(), {
+                //         modalTransition: ModalTransition.DEFAULT,
+                //         onAppear: () => {
+                //         },
+                //
+                //         onDisappear: () => {
+                //             this.showPickGroupMemberModal = false
+                //         }
+                //     })
+            }
+            .justifyContent(FlexAlign.SpaceBetween)
+            .padding({ left: 10, right: 10 })
+            .width('100%')
+            .margin({ top: this.statusBarHeight })
+
+            // bottom actions
+            if (this.callSession!.status === CallState.STATUS_CONNECTED) {
+                Column() {
+                    Row() {
+                        Column() {
+                            Image(this.callSession?.audioMuted ? $r('app.media.av_conference_audio_mute') : $r('app.media.av_conference_audio'))
+                                .draggable(false)
+                                .width(30)
+                                .height(30)
+                                .colorFilter(WHITE_FILTER)
+                                .onClick(() => {
+                                    if (this.callSession?.isScreenSharing() && avengineKit.SCREEN_SHARING_REPLACE_MODE) {
+                                        showToast('正在进行屏幕共享，请先结束共享')
+                                        return
+                                    }
+                                    if (!this.conferenceInfo?.allowSwitchMode) {
+                                        showToast('主持人不允许主动开启麦克风')
+                                        return
+                                    }
+                                    this.lastTriggerToShowActionAndDurationViewTimestamp = Date.now()
+                                    let toMute = !this.callSession?.audioMuted
+                                    if (this.callSession?.status === CallState.STATUS_CONNECTED) {
+                                        if (toMute) {
+                                            if (!this.callSession.audience && this.callSession.videoMuted) {
+                                                this.callSession.switchAudience(true)
+                                            }
+                                            this.callSession?.muteAudio(true)
+                                        } else {
+                                            let participantFull = false
+                                            if (this.callSession.audience && participantFull) {
+                                                showToast('超过最大互动者人数')
+                                                return;
+                                            } else {
+                                                this.callSession.muteAudio(false)
+                                                if (this.callSession.audience) {
+                                                    this.callSession.switchAudience(false)
+                                                }
+                                            }
+                                        }
+                                    }
+                                })
+                            Text('麦克风')
+                                .margin({ top: 10 })
+                                .fontSize(13)
+                                .fontColor(Color.White)
+                        }
+
+                        Column() {
+                            Image(this.callSession?.videoMuted ? $r('app.media.av_conference_video_mute') : $r('app.media.av_conference_video'))
+                                .draggable(false)
+                                .width(30)
+                                .height(30)
+                                .colorFilter(WHITE_FILTER)
+                                .hitTestBehavior(HitTestMode.Block)
+                                .onClick(() => {
+                                    if (!this.conferenceInfo?.allowSwitchMode) {
+                                        showToast('主持人不允许主动开启摄像头')
+                                        return
+                                    }
+                                    this.lastTriggerToShowActionAndDurationViewTimestamp = Date.now()
+                                    let toMute = !this.callSession?.videoMuted
+                                    if (this.callSession?.status === CallState.STATUS_CONNECTED) {
+                                        if (toMute) {
+                                            if (!this.callSession.audience && this.callSession.audioMuted) {
+                                                this.callSession.switchAudience(true)
+                                            }
+                                            this.callSession?.muteVideo(true)
+                                        } else {
+                                            // TODO
+                                            let participantFull = false
+                                            if (this.callSession.audience && participantFull) {
+                                                showToast('超过最大互动者人数')
+                                                return;
+                                            } else {
+                                                this.callSession.muteVideo(false)
+                                                if (this.callSession.audience) {
+                                                    this.callSession.switchAudience(false)
+                                                }
+                                            }
+                                        }
+                                    }
+                                })
+                            Text('视频')
+                                .margin({ top: 10 })
+                                .fontSize(13)
+                                .fontColor(Color.White)
+                        }
+
+                        Column() {
+                            Image($r('app.media.av_conference_screen_sharing'))
+                                .draggable(false)
+                                .width(30)
+                                .height(30)
+                                .colorFilter(WHITE_FILTER)
+                                .onClick(() => {
+                                    if (this.callSession?.audience) {
+                                        showToast('请先切换为互动者')
+                                        return
+                                    }
+                                    if (this.callSession?.isScreenSharing()) {
+                                        this.callSession?.stopScreenShare()
+                                    } else {
+                                        this.callSession?.startScreenShare()
+                                        this.minimize()
+                                    }
+                                })
+                            Text('共享屏幕')
+                                .margin({ top: 10 })
+                                .fontSize(13)
+                                .fontColor(Color.White)
+                        }
+
+                        Column() {
+                            Image($r('app.media.av_conference_members'))
+                                .draggable(false)
+                                .width(30)
+                                .height(30)
+                                .colorFilter(WHITE_FILTER)
+                                .onClick(() => {
+                                    let params = {} as Record<string, Object>
+                                    params['callId'] = this.callSession!.callId
+                                    params['conferenceInfo'] = this.conferenceInfo!
+                                    this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ConferenceParticipantListPage, params)
+                                })
+                            Text('管理')
+                                .margin({ top: 10 })
+                                .fontSize(13)
+                                .fontColor(Color.White)
+                        }
+
+                        Column() {
+                            Image($r('app.media.av_conference_more'))
+                                .draggable(false)
+                                .width(30)
+                                .height(30)
+                                .colorFilter(WHITE_FILTER)
+                            Text('更多')
+                                .margin({ top: 10 })
+                                .fontSize(13)
+                                .fontColor(Color.White)
+                        }
+                        .enabled(true)
+                        .onClick(() => {
+                            this.showConferenceMoreActionSheet = true
+                        })
+                        .bindSheet(this.showConferenceMoreActionSheet, this.conferenceMoreActionSheet(), {
+                            height: '50%',
+                            dragBar: false,
+                            showClose: false,
+                            onDisappear: () => {
+                                this.showConferenceMoreActionSheet = false
+                            }
+                        })
+                    }
+                    .padding({ top: 20 })
+                    .width('100%')
+                    .justifyContent(FlexAlign.SpaceAround)
+
+                }
+                .width('100%')
+                .margin({ bottom: 30 })
+                .flexGrow(1)
+                .justifyContent(FlexAlign.End)
+            }
+        }
+        .justifyContent(FlexAlign.Start)
+        .width('100%')
+        .height('100%')
+        .hitTestBehavior(HitTestMode.Transparent)
+        .transition(TransitionEffect.OPACITY
+            .animation({ duration: 400, curve: Curve.Friction, delay: 0 }))
+    }
+
+    onReceiveMessage = (messages: Message[]) => {
+        if (!this.callSession) {
+            return
+        }
+        for (const msg of messages) {
+            if (msg.conversation.type === ConversationType.ChatRoom && msg.conversation.target === this.callSession.callId) {
+                this.latest5ConferenceChatroomMessages.push(msg)
+            }
+        }
+        let len = this.latest5ConferenceChatroomMessages.length
+        if (len > 5) {
+            this.latest5ConferenceChatroomMessages = this.latest5ConferenceChatroomMessages.slice(len - 5, len)
+        }
+    }
+
+    @Builder
+    chatroomView() {
+        Column() {
+            List() {
+                ForEach(this.latest5ConferenceChatroomMessages, (msg: Message, index: number) => {
+                    ListItem() {
+                        Row() {
+                            Text(wfc.getUserInfo(msg.from).displayName)
+                                .width(40)
+                            Text(msg.messageContent.digest(msg))
+                        }
+                    }
+                }, (msg: Message, index: number) => {
+                    return msg.messageId + ''
+                })
+            }
+            .width('100%')
+
+            Text('说点什么')
+                .fontColor(Color.Gray)
+                .onClick(() => {
+                    this.conferenceMessageInputDialogController = new CustomDialogController({
+                        builder: ConferenceMessageInputDialog({
+                            controller: this.conferenceMessageInputDialogController,
+                            onConfirm: (text: string) => {
+                                let textMsgContent = new TextMessageContent(text)
+                                let conversation = new Conversation(ConversationType.ChatRoom, this.callSession!.callId, 0)
+                                wfc.sendConversationMessage(conversation, textMsgContent, [], msgId => {
+
+                                }, undefined, undefined, (msgUid, timestamp) => {
+                                    let msg = wfc.getMessageByUid(msgUid);
+                                    this.latest5ConferenceChatroomMessages.push(msg)
+                                    let len = this.latest5ConferenceChatroomMessages.length
+                                    if (len > 5) {
+                                        this.latest5ConferenceChatroomMessages = this.latest5ConferenceChatroomMessages.slice(len - 5, len)
+                                    }
+                                })
+                            }
+                        }),
+                        cancel: () => {
+                            this.conferenceMessageInputDialogController = undefined
+                        },
+                        autoCancel: true,
+                        alignment: DialogAlignment.Center,
+                        gridCount: 6,
+                        customStyle: false
+                    })
+                    this.conferenceMessageInputDialogController.open()
+                })
+        }
+        .alignItems(HorizontalAlign.Start)
+        .width('40%')
+        .height('100%')
+        .padding({
+            left: 10,
+            top: 10,
+            right: 10,
+            bottom: 100
+        })
+        .justifyContent(FlexAlign.End)
+    }
+
+    build() {
+        NavDestination() {
+            Swiper() {
+                LazyForEach(this.swiperParticipantGridItemDataSource, (ps: ParticipantProfile[], participantSwiperItemIndex: number) => {
+                    if (participantSwiperItemIndex === 0) {
+                        Stack() {
+                            // focus
+                            if (ps[0]) {
+                                ConferenceParticipantView({
+                                    p: ps[0],
+                                    xcomponentIdPrefix: 'focus-xcp',
+                                    swiperIndex: 0,
+                                    currentSwiperIndex: this.currentSwiperIndex,
+                                    xcomponentController: this.focusXComponentController,
+                                })
+                                    .onClick(() => {
+                                        if (this.callSession?.status !== CallState.STATUS_CONNECTED) {
+                                            return
+                                        }
+                                        this.showActionAndDurationView = !this.showActionAndDurationView
+
+                                        this.lastTriggerToShowActionAndDurationViewTimestamp = Date.now()
+                                    })
+                            }
+
+                            // preview
+                            if (ps[1]) {
+                                ConferenceParticipantView({
+                                    p: ps[1],
+                                    xcomponentIdPrefix: 'preview-xcp',
+                                    swiperIndex: 0,
+                                    currentSwiperIndex: this.currentSwiperIndex,
+                                    xcomponentController: this.previewXComponentController,
+                                })
+                                    .padding(5)
+                                    .margin({ top: this.statusBarHeight + 50 })
+                                    .width(120)
+                                    .height(160)
+                                    .borderRadius(4)
+                                    .onClick(() => {
+                                        if (this.callSession?.status === CallState.STATUS_CONNECTED) {
+                                            // this.swapVideo(`${p.userId}-${this.callSession.callId}`)
+                                        }
+                                    })
+                            }
+
+                            if (this.showActionAndDurationView) {
+                                this.actionAndDurationView()
+                            }
+                            // this.chatroomView()
+                        }
+                        .width('100%')
+                        .height('100%')
+                        .alignContent(Alignment.TopStart)
+
+                    } else {
+                        Flex({
+                            direction: FlexDirection.Row,
+                            justifyContent: FlexAlign.Start,
+                            alignContent: FlexAlign.Start,
+                            wrap: FlexWrap.Wrap,
+                        }) {
+                            ForEach(ps, (p: ParticipantProfile, flexIndex) => {
+                                ConferenceParticipantView({
+                                    p: p,
+                                    swiperIndex: participantSwiperItemIndex,
+                                    currentSwiperIndex: this.currentSwiperIndex,
+                                    xcomponentController: this.participantVideoRenderControllerMap.get(this._participantIdForVideoRenderController(p.userId, p.screenSharing))
+                                })
+                                    .width('50%')
+                                    .height('50%')
+                            }, (p: ParticipantProfile, flexIndex) => {
+                                return p.userId + '-' + p.screenSharing + '-' + p.audience + '-' + p.videoMuted + '-' + p.audioMuted
+                            })
+                        }
+                        .backgroundColor(Color.Orange)
+                        .width('100%')
+                        .height('100%')
+                    }
+                }, (ps: ParticipantProfile[], index: number) => {
+                    let id = index + ''
+                    for (const p of ps) {
+                        if (p) {
+                            id += (p.userId + '-' + p.screenSharing + '-' + p.audience + '-' + p.videoMuted + '-' + p.audioMuted) + '|'
+                        } else {
+                            id += 'u' + '|'
+                        }
+                    }
+                    return id
+                })
+            }
+            .indicator(true)
+            .vertical(false)
+            .onChange(index => {
+                console.log('swiper onChange', this.currentSwiperIndex, index)
+                this.currentSwiperIndex = index
+            })
+        }
+        .title('VOIP Conference')
+        .hideTitleBar(true)
+        .onShown(() => {
+            this.onPageShow()
+        })
+        .onHidden(() => {
+            this.onPageHide()
+        })
+        .onBackPressed(() => true)
+        .backgroundColor('#000000')
+
+        // .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM])
+    }
+
+    minimize() {
+        this.showConferenceMoreActionSheet = false
+        this.pipController?.startPiP()
+            .catch((reason: BusinessError) => {
+                console.error('startPiP error', reason.code, reason.name, reason.message)
+            })
+        this.mainNavPathStack.pop()
+    }
+
+    async createPipController() {
+        this.pipController = await PiPWindow.create({
+            context: this.getUIContext().getHostContext(),
+            componentController: this.focusXComponentController,
+            customUIController: this.voipPiPNodeController,
+            navigationId: uikit.bundleName,
+            templateType: PiPWindow.PiPTemplateType.VIDEO_CALL,
+            contentWidth: 200,
+            contentHeight: 300,
+        });
+        this.pipController.on('stateChange', (state: PiPWindow.PiPState, reason: string) => {
+            // this.onStateChange(state, reason);
+        });
+        this.pipController.on('controlPanelActionEvent', (event: PiPWindow.PiPActionEventType, status?: number) => {
+            // this.onActionEvent(event, status);
+        });
+        this.pipController.setAutoStartEnabled(true)
+        console.log('createPipController')
+    }
+
+    destroyPipController() {
+        if (!this.pipController) {
+            return;
+        }
+        this.pipController.setAutoStartEnabled(false)
+        this.pipController.off('stateChange');
+        this.pipController.off('controlPanelActionEvent');
+        this.pipController.stopPiP()
+        this.pipController = undefined;
+    }
+
+    inviteNewParticipant() {
+        this.showConferenceMoreActionSheet = false
+
+        let info = this.conferenceInfo!
+        let inviteMessageContent = new ConferenceInviteMessageContent(info.conferenceId, info.owner, info.conferenceTitle, '', info.startTime, false, false, info.advance, info.pin, info.password)
+        let dummyConversation = new Conversation(0, '', 0)
+        let message = new Message(dummyConversation, inviteMessageContent)
+        this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ForwardMessagePage,
+            {
+                'messages': [message]
+            } as Record<string, Object>
+        )
+    }
+}
+
+class SwiperParticipantGridItemDataSource extends BasicDataSource<(ParticipantProfile | undefined)[]> {
+    selfProfile?: ParticipantProfile
+    focusProfile?: ParticipantProfile
+    previewProfile?: ParticipantProfile
+    participantProfiles: ParticipantProfile[] = []
+
+    setupParticipantProfiles(selfProfile: ParticipantProfile, participantProfiles: ParticipantProfile[]) {
+        this.selfProfile = selfProfile;
+        this.participantProfiles = participantProfiles;
+        this.notifyDataReload();
+    }
+
+    setupFocusProfile(focusProfile: ParticipantProfile | undefined, previewProfile?: ParticipantProfile | undefined) {
+        this.focusProfile = focusProfile;
+        this.previewProfile = previewProfile;
+        this.notifyDataChange(0);
+    }
+
+    public totalCount(): number {
+        // return 1;
+        if (this.participantProfiles.length === 0) {
+            return 1;
+        } else {
+            return 1 + Math.ceil((this.participantProfiles.length + 1) / ConferencePage.COUNT_PER_PAGE)
+        }
+    }
+
+    public getData(index: number): (ParticipantProfile | undefined)[] {
+        // 0 主页，focusProfile and previewProfile
+        // 1 自己，及（ ConferencePage.COUNT_PER_PAGE - 1）个其他参与者
+        // 2... 其他参与者
+        if (index === 0) {
+            return [this.focusProfile, this.previewProfile]
+        } else if (index === 1) {
+            return [this.selfProfile!, ...this.participantProfiles.slice(0, ConferencePage.COUNT_PER_PAGE - 1)]
+        } else {
+            index = index - 1;
+            const start = ConferencePage.COUNT_PER_PAGE * index - 1;
+            return this.participantProfiles.slice(start, start + ConferencePage.COUNT_PER_PAGE);
+        }
+    }
+}

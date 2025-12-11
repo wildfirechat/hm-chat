@@ -33,7 +33,7 @@ export default class Config {
     // !!! 我们提供的服务仅供用户测试和体验，为了保证测试可用，我们会不定期的更改密码. !!!
     // 上线时，请一定要切换为你们自己部署的服务
     // 格式: [uri, 用户名, 密码]，可以添加多个
-    static ICE_SERVERS = [['turn:turn.wildfirechat.net:3478', 'wfchat', 'wfchat123']];
+    static ICE_SERVERS = [['turn:turn.wildfirechat.net:3478', 'wfchat', 'wfchatpwd']];
     static LANGUAGE = 'zh_CN';
 
     static SDK_PLATFORM_WINDOWS = 3;
@@ -77,6 +77,15 @@ export default class Config {
 
     // 发送日志命令，当发送此文本消息时，会把协议栈日志发送到当前会话中，为空时关闭此功能。
     static SEND_LOG_COMMAND = '*#marslog#';
+
+    // AI机器人ID
+    static AI_ROBOT = "FireRobot";
+
+    // 用户协议地址
+    static USER_AGREEMENT_URL = "https://example.com/user_agreement.html";
+
+    //  隐私协议地址
+    static PRIVACY_AGREEMENT_URL = "https://example.com/user_privacy.html";
 
     static getWFCPlatform() {
         return Config.CURRENT_PLATFORM;

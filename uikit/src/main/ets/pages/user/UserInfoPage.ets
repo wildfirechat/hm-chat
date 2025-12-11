@@ -4,7 +4,7 @@ import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation';
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType';
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo';
 import EventType from '@wfc/client/src/main/ets/wfc/client/wfcEvent';
-import { navigationDestinations } from '../navigationConfig';
+import { uikitNavigationDestinations } from '../uikitNavigationConfig';
 import ActionSheetDialog from '../../view/ActionSheetDialog';
 import { selectImage } from '../../helper/mediaHelper';
 import { imageThumbnail } from '../../helper/imageVideoHelper';
@@ -15,7 +15,6 @@ import OptionItemView from '../../view/OptionItemView';
 import avenginekit from '@wfc/avenginekit';
 import { checkAndRequestPermission } from '../../helper/permissionHelper';
 
-@Entry
 @Component
 export default struct UserInfoPage {
     @State userInfo?: UserInfo = undefined
@@ -132,7 +131,7 @@ export default struct UserInfoPage {
                     showDivider: false
                 })
                     .onClick(() => {
-                        this.mainNavPathStack.pushPathByName(navigationDestinations.UpdateUserNickNameOrAliasPage, {
+                        this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.UpdateUserNickNameOrAliasPage, {
                             'userInfo': this.userInfo,
                         } as Record<string, Object>)
                     })
@@ -151,7 +150,7 @@ export default struct UserInfoPage {
                             }
                         })
                         .onClick(() => {
-                            this.mainNavPathStack.pushPathByName(navigationDestinations.ConversationPage, {
+                            this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ConversationPage, {
                                 'conversation': new Conversation(ConversationType.Single, this.userInfo!.uid, 0)
                             } as Record<string, Object>)
                         })
@@ -254,7 +253,7 @@ export default struct UserInfoPage {
                 value: '',
                 icon: 'resources/base/media/ic_public_more.svg',
                 action: () => {
-                    this.mainNavPathStack.pushPathByName(navigationDestinations.UpdateUserInfoPage, {
+                    this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.UpdateUserInfoPage, {
                         'userInfo': this.userInfo
                     } as Record<string, Object>)
 

@@ -1,12 +1,11 @@
 import OptionItemView from '../../view/OptionItemView'
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
-import { navigationDestinations } from '../navigationConfig'
+import { uikitNavigationDestinations } from '../uikitNavigationConfig'
 import ActionSheetDialog from '../../view/ActionSheetDialog'
 import ModifyGroupInfoType from '@wfc/client/src/main/ets/wfc/model/modifyGroupInfoType'
 import { showToast } from '../../common/utils/Toast'
 
-@Entry
 @Component
 export default struct GroupManagePage {
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
@@ -48,7 +47,7 @@ export default struct GroupManagePage {
                         showDivider: true,
                     })
                         .onClick(() => {
-                            this.mainNavPathStack.pushPathByName(navigationDestinations.GroupManagerListPage, {
+                            this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.GroupManagerListPage, {
                                 'groupInfo': this.groupInfo
                             } as Record<string, Object>)
                         })
@@ -57,7 +56,7 @@ export default struct GroupManagePage {
                         showDivider: true,
                     })
                         .onClick(() => {
-                            this.mainNavPathStack.pushPathByName(navigationDestinations.GroupMemberMuteOrAllowListPage, {
+                            this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.GroupMemberMuteOrAllowListPage, {
                                 'groupInfo': this.groupInfo
                             } as Record<string, Object>)
                         })
@@ -66,7 +65,7 @@ export default struct GroupManagePage {
                         showDivider: false,
                     })
                         .onClick(() => {
-                            this.mainNavPathStack.pushPathByName(navigationDestinations.GroupMemberPermissionPage, {
+                            this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.GroupMemberPermissionPage, {
                                 'groupInfo': this.groupInfo
                             } as Record<string, Object>)
                         })

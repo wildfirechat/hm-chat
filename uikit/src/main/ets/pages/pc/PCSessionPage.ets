@@ -5,9 +5,8 @@ import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType'
 import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
 import PCOnlineInfo from '@wfc/client/src/main/ets/wfc/model/pcOnlineInfo'
-import { navigationDestinations } from '../navigationConfig'
+import { uikitNavigationDestinations } from '../uikitNavigationConfig'
 
-@Entry
 @Component
 export default struct PCSessionPage {
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
@@ -60,7 +59,7 @@ export default struct PCSessionPage {
                     }
                     .width(120)
                     .onClick(() => {
-                        this.mainNavPathStack.replacePathByName(navigationDestinations.ConversationPage, {
+                        this.mainNavPathStack.replacePathByName(uikitNavigationDestinations.ConversationPage, {
                             'conversation': new Conversation(ConversationType.Single, Config.FILE_HELPER_ID, 0)
                         } as Record<string, Object>)
                     })

@@ -7,7 +7,6 @@ import ModifyGroupInfoType from '@wfc/client/src/main/ets/wfc/model/modifyGroupI
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo';
 import PickGroupMemberModal from './PickGroupMemberModal';
 
-@Entry
 @Component
 export default struct GroupMemberMuteOrAllowListPage {
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;

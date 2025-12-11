@@ -1,6 +1,5 @@
 import PickMultiContactModal from './PickMultiContactModal'
 
-@Entry
 @Component
 export default struct PickMultiContactPage {
     @State @Watch('onShowPickContactComponent') showPickContactComponent: boolean = true

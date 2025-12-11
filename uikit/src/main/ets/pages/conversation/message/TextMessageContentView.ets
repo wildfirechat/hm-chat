@@ -2,7 +2,7 @@ import wfc from '@wfc/client';
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import TextMessageContent from '@wfc/client/src/main/ets/wfc/messages/textMessageContent'
 import { showToast } from '../../../common/utils/Toast';
-import { navigationDestinations } from '../../navigationConfig';
+import { uikitNavigationDestinations } from '../../uikitNavigationConfig';
 
 @Component
 export default struct TextMessageContentView {
@@ -20,7 +20,7 @@ export default struct TextMessageContentView {
         let messageUid = quoteInfo!.messageUid
         let msg = wfc.getMessageByUid(messageUid)
         if (msg) {
-            this.mainNavPathStack.pushPathByName(navigationDestinations.TextMessagePreviewPage, {
+            this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.TextMessagePreviewPage, {
                 'message': msg
             } as Record<string, object>)
         } else {
@@ -41,7 +41,7 @@ export default struct TextMessageContentView {
                         types: [TextDataDetectorType.URL, TextDataDetectorType.PHONE_NUMBER, TextDataDetectorType.EMAIL]
                     })
                     .onClick(() => {
-                        this.mainNavPathStack.pushPathByName(navigationDestinations.TextMessagePreviewPage, {
+                        this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.TextMessagePreviewPage, {
                             'message': this.message
                         } as Record<string, object>)
                     })
@@ -72,7 +72,7 @@ export default struct TextMessageContentView {
                     types: [TextDataDetectorType.URL, TextDataDetectorType.PHONE_NUMBER, TextDataDetectorType.EMAIL]
                 })
                 .onClick(() => {
-                    this.mainNavPathStack.pushPathByName(navigationDestinations.TextMessagePreviewPage, {
+                    this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.TextMessagePreviewPage, {
                         'message': this.message
                     } as Record<string, object>)
                 })

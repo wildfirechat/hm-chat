@@ -11,7 +11,7 @@ import { showToast } from '../common/utils/Toast'
 import BasicDataSource from '../common/BasicDataSource'
 import data_preferences from '@ohos.data.preferences'
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
-import { navigationDestinations } from './navigationConfig'
+import { uikitNavigationDestinations } from './uikitNavigationConfig'
 import PCOnlineInfo from '@wfc/client/src/main/ets/wfc/model/pcOnlineInfo'
 import { it } from '@ohos/hypium'
 
@@ -51,11 +51,11 @@ export default struct ConversationListTab {
 
     aboutToDisappear() {
         wfc.eventEmitter!.off(EventType.ReceiveMessage, this.onReceiveMessage)
-        wfc.eventEmitter!.on(EventType.SendMessage, this.onSendMessage)
-        wfc.eventEmitter!.on(EventType.RecallMessage, this.onRecallMessage)
+        wfc.eventEmitter!.off(EventType.SendMessage, this.onSendMessage)
+        wfc.eventEmitter!.off(EventType.RecallMessage, this.onRecallMessage)
         wfc.eventEmitter!.off(EventType.ConnectionStatusChanged, this.onConnectionStatusChange)
         wfc.eventEmitter!.off(EventType.ConversationInfoUpdate, this.onConversationInfoUpdate)
-        wfc.eventEmitter!.on(EventType.SettingUpdate, this.onSettingUpdate)
+        wfc.eventEmitter!.off(EventType.SettingUpdate, this.onSettingUpdate)
 
         wfc.eventEmitter!.off(EventType.UserInfosUpdate, this.onUserInfosUpdate)
         wfc.eventEmitter!.off(EventType.GroupInfosUpdate, this.onGroupInfosUpdate)
@@ -250,7 +250,7 @@ export default struct ConversationListTab {
                         }
                         .width('100%')
                         .onClick(() => {
-                            this.mainNavPathStack.pushPathByName(navigationDestinations.PCSessionPage, {
+                            this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.PCSessionPage, {
                                 'pcOnlineInfo': info
                             } as Record<string, object>)
                         })
@@ -265,7 +265,7 @@ export default struct ConversationListTab {
                         ConversationInfoItemView({ conversationInfo: info })
                             .onClick(() => {
                                 wfc.clearConversationUnreadStatus(info.conversation!)
-                                this.mainNavPathStack.pushPathByName(navigationDestinations.ConversationPage, {
+                                this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ConversationPage, {
                                     'conversation': info.conversation
                                 } as Record<string, Object>)
                             })

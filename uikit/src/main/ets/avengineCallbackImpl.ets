@@ -8,15 +8,15 @@ import AVSessionManager from '@ohos.multimedia.avsession';
 import { startContinuousTask, stopContinuousTask } from './helper/continuousTaskHelper';
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType';
 import AVEngineCallback from '@wfc/avenginekit/src/main/ets/wfc/av/engine/avengineCallback';
-// 一定要引入，否则不能弹出对应页面
-import './pages/voip/SingleAudioCallPage'
-import './pages/voip/SingleVideoCallPage'
-import './pages/voip/MultiAudioCallPage'
-import './pages/voip/MultiVideoCallPage'
 
-import { navigationDestinations } from './pages/navigationConfig';
+import { uikitNavigationDestinations } from './pages/uikitNavigationConfig';
 import { common } from '@kit.AbilityKit';
 
+// 一定要引入，否则不能弹出对应页面
+import ('./pages/voip/SingleAudioCallPage')
+import ('./pages/voip/SingleVideoCallPage')
+import ('./pages/voip/MultiAudioCallPage')
+import ('./pages/voip/MultiVideoCallPage')
 export default class AVEngineCallbackImpl extends AVEngineCallback {
     private context: common.UIAbilityContext
     private avSession?: AVSessionManager.AVSession
@@ -33,19 +33,19 @@ export default class AVEngineCallbackImpl extends AVEngineCallback {
      * @param {CallSession} session 会话信息
      */
     async onReceiveCall(session: CallSession) {
-        this.createAVSessionAndStartContinuousTask(session.audioOnly)
+        this.createAVSessionAndStartContinuousTask(session)
         let name = ''
         if (session.conversation?.type === ConversationType.Single) {
             if (session.audioOnly) {
-                name = navigationDestinations.SingleAudioCallPage
+                name = uikitNavigationDestinations.SingleAudioCallPage
             } else {
-                name = navigationDestinations.SingleVideoCallPage
+                name = uikitNavigationDestinations.SingleVideoCallPage
             }
         } else if (session.conversation?.type === ConversationType.Group) {
             if (session.audioOnly) {
-                name = navigationDestinations.MultiAudioCallPage
+                name = uikitNavigationDestinations.MultiAudioCallPage
             } else {
-                name = navigationDestinations.MultiVideoCallPage
+                name = uikitNavigationDestinations.MultiVideoCallPage
             }
         } else {
             // TODO 会议
@@ -58,24 +58,33 @@ export default class AVEngineCallbackImpl extends AVEngineCallback {
      * @param session 会话信息
      */
     onStartCall = (session: CallSession) => {
-        this.createAVSessionAndStartContinuousTask(session.audioOnly)
+        this.createAVSessionAndStartContinuousTask(session)
         let name = ''
         if (session.conversation?.type === ConversationType.Single) {
             if (session.audioOnly) {
-                name = navigationDestinations.SingleAudioCallPage
+                name = uikitNavigationDestinations.SingleAudioCallPage
             } else {
-                name = navigationDestinations.SingleVideoCallPage
+                name = uikitNavigationDestinations.SingleVideoCallPage
             }
         } else if (session.conversation?.type === ConversationType.Group) {
             if (session.audioOnly) {
-                name = navigationDestinations.MultiAudioCallPage
+                name = uikitNavigationDestinations.MultiAudioCallPage
             } else {
-                name = navigationDestinations.MultiVideoCallPage
+                name = uikitNavigationDestinations.MultiVideoCallPage
             }
         } else {
             // TODO 会议
         }
         this.mainNavPathStack?.pushPathByName(name, {} as Record<string, object>)
+    }
+
+    /**
+     *  加入会议
+     * @param session 会话信息
+     */
+    onJoinConference(session: CallSession) {
+        this.createAVSessionAndStartContinuousTask(session)
+        // 不加载页面，仅仅开始 avSession
     }
 
     shouldStartRing(isIncoming: boolean) {
@@ -86,7 +95,7 @@ export default class AVEngineCallbackImpl extends AVEngineCallback {
         // TODO
     }
 
-    didCallEnded(reason: CallEndReason, duration: number) {
+    didCallEnded(session: CallSession) {
         this.avSession?.deactivate()
         this.avSession?.destroy()
         this.avSession = undefined
@@ -96,14 +105,14 @@ export default class AVEngineCallbackImpl extends AVEngineCallback {
         mainWindow?.setWindowKeepScreenOn(false)
     }
 
-    private async createAVSessionAndStartContinuousTask(audioOnly: boolean) {
-        let type: AVSessionManager.AVSessionType = audioOnly ? 'voice_call' : 'video_call';
+    private async createAVSessionAndStartContinuousTask(callSession: CallSession) {
+        let type: AVSessionManager.AVSessionType = callSession.audioOnly ? 'voice_call' : 'video_call';
         this.avSession = await AVSessionManager.createAVSession(this.context, 'voip', type);
         console.log('AVSession成功：' + JSON.stringify(this.avSession))
         // 激活接口要在元数据、控制命令注册完成之后再执行
         await this.avSession.activate();
         try {
-            startContinuousTask(this.context)
+            startContinuousTask(this.context, 'voip')
         } catch (e) {
             console.log('startBackgroundRunning', e)
         }

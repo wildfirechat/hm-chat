@@ -1,7 +1,7 @@
 import MessageContentType from "./messageContentType";
 import wfc from "../client/wfc";
 import MediaMessageContent from "./mediaMessageContent";
-import { stringValue } from "../util/longUtil";
+import { stringValue, _patchToJavaLong, _reverseToJsLongString } from "../util/longUtil";
 import Message from "./message";
 import Conversation from "../model/conversation";
 import Long from "../util/long";
@@ -115,8 +115,7 @@ export default class CompositeMessageContent extends MediaMessageContent {
                 'ms': arr,
             }
             let str = JSON.stringify(obj);
-            str = str.replace(/"uid":"([0-9]+)"/, "\"uid\":$1");
-            // str = str.replace(/"serverTime":"([0-9]+)"/, "\"serverTime\":$1");
+            str = _patchToJavaLong(str, 'uid')
 
             this.localPath = getContext(this).getApplicationContext()
                 .cacheDir + '/' + new Date().getTime() + 'cpm-' + new Date().getTime() + '.data';
@@ -141,8 +140,7 @@ export default class CompositeMessageContent extends MediaMessageContent {
         }
 
         let str = JSON.stringify(obj);
-        str = str.replace(/"uid":"([0-9]+)"/, "\"uid\":$1");
-        // str = str.replace(/"serverTime":"([0-9]+)"/, "\"serverTime\":$1");
+        str = _patchToJavaLong(str, 'uid')
 
         payload.binaryContent = wfc.utf8_to_b64(str)
         return payload;
@@ -165,10 +163,7 @@ export default class CompositeMessageContent extends MediaMessageContent {
             return;
         }
         this.messages = [];
-        // FIXME node 环境，decodeURIComponent 方法，有时候会在最后添加上@字符，目前尚未找到原因，先规避
-        // str = str.substring(0, str.lastIndexOf('}') + 1);
-        str = str.replace(/"uid":([0-9]+)/g, "\"uid\":\"$1\"");
-        // str = str.replace(/"serverTime":([0-9]+)/g, "\"serverTime\":\"$1\"");
+        str = _reverseToJsLongString(str, 'uid')
         let obj = JSON.parse(str) as Record<string, Object>;
         (obj.ms as Array<Record<string, Object>>).forEach(o => {
             let conv = new Conversation(o.type as number, o.target as string, o.line as number);

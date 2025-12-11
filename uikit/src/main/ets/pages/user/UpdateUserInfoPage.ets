@@ -3,7 +3,6 @@ import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
 import { showToast } from '../../common/utils/Toast'
 import ToggleItemView from '../../view/ToggleItemView'
 
-@Entry
 @Component
 export default struct UpdateUserInfoPage {
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;

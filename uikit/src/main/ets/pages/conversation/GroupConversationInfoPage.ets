@@ -14,7 +14,7 @@ import PickGroupMemberModal from '../group/PickGroupMemberModal';
 import appServer from '../../api/appServer';
 import GroupAnnouncement from '../../api/model/groupAnnouncement';
 import AppServerError from '../../api/appServerError';
-import { navigationDestinations } from '../navigationConfig';
+import { uikitNavigationDestinations } from '../uikitNavigationConfig';
 import EventType from '@wfc/client/src/main/ets/wfc/client/wfcEvent';
 import { imageThumbnail, imageThumbnailFile } from '../../helper/imageVideoHelper';
 import { selectImage } from '../../helper/mediaHelper';
@@ -163,7 +163,7 @@ export default struct GroupConversationInfoPage {
                                 if (this.groupInfo.privateChat === 1 && [GroupMemberType.Owner, GroupMemberType.Manager].indexOf(this.groupMember!.type) === -1) {
                                     showToast('禁止私聊')
                                 } else {
-                                    this.mainNavPathStack.pushPathByName(navigationDestinations.UserInfoPage, {
+                                    this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.UserInfoPage, {
                                         'userInfo': wfc.getUserInfo(groupMember.memberId)
                                     } as Record<string, Object>)
                                 }
@@ -251,7 +251,7 @@ export default struct GroupConversationInfoPage {
                             .width('100%')
                             .height(60)
                             .onClick(() => {
-                                this.mainNavPathStack.pushPathByName(navigationDestinations.GroupMemberListPage, { 'groupInfo': this.groupInfo } as Record<string, object>)
+                                this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.GroupMemberListPage, { 'groupInfo': this.groupInfo } as Record<string, object>)
                             })
                         }
                     }
@@ -272,7 +272,7 @@ export default struct GroupConversationInfoPage {
                             desc: this.groupInfo.name
                         })
                             .onClick(() => {
-                                this.mainNavPathStack.pushPathByName(navigationDestinations.UpdateGroupNamePage, {
+                                this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.UpdateGroupNamePage, {
                                     'groupInfo': this.groupInfo
                                 } as Record<string, Object>)
                             })
@@ -312,7 +312,7 @@ export default struct GroupConversationInfoPage {
                             imgUrl: 'http://static.wildfirechat.cn/wx_wfc_qrcode.jpg'
                         })
                             .onClick(() => {
-                                this.mainNavPathStack.pushPathByName(navigationDestinations.GroupQRCodePage, {
+                                this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.GroupQRCodePage, {
                                     'groupInfo': this.groupInfo
                                 } as Record<string, Object>)
                             })
@@ -322,7 +322,7 @@ export default struct GroupConversationInfoPage {
                         })
                             .onClick(() => {
                                 if ([GroupMemberType.Owner, GroupMemberType.Manager].indexOf(this.groupMember!.type) >= 0) {
-                                    this.mainNavPathStack.pushPathByName(navigationDestinations.UpdateGroupAnnouncementPage, {
+                                    this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.UpdateGroupAnnouncementPage, {
                                         'groupInfo': this.groupInfo
                                     } as Record<string, Object>)
                                 } else {
@@ -334,7 +334,7 @@ export default struct GroupConversationInfoPage {
                             desc: this.groupInfo.remark
                         })
                             .onClick(() => {
-                                this.mainNavPathStack.pushPathByName(navigationDestinations.UpdateGroupRemarkPage, {
+                                this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.UpdateGroupRemarkPage, {
                                     'groupInfo': this.groupInfo
                                 } as Record<string, Object>)
                             })
@@ -344,7 +344,7 @@ export default struct GroupConversationInfoPage {
                                 showDivider: false
                             })
                                 .onClick(() => {
-                                    this.mainNavPathStack.pushPathByName(navigationDestinations.GroupManagePage, {
+                                    this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.GroupManagePage, {
                                         'groupInfo': this.groupInfo
                                     } as Record<string, Object>)
                                 })
@@ -360,8 +360,8 @@ export default struct GroupConversationInfoPage {
                                         fontColor: Color.Red,
                                         action: () => {
                                             let conversation = new Conversation(ConversationType.Single, 'cgc8c8VV', 0)
-                                            this.mainNavPathStack.popToName(navigationDestinations.ConversationPage)
-                                            this.mainNavPathStack.replacePathByName(navigationDestinations.ConversationPage, {
+                                            this.mainNavPathStack.popToName(uikitNavigationDestinations.ConversationPage)
+                                            this.mainNavPathStack.replacePathByName(uikitNavigationDestinations.ConversationPage, {
                                                 'conversation': conversation
                                             } as Record<string, Object>)
                                         },
@@ -382,13 +382,13 @@ export default struct GroupConversationInfoPage {
                     Column() {
                         OptionItemView({ title: '查找聊天记录' })
                             .onClick(() => {
-                                this.mainNavPathStack.pushPathByName(navigationDestinations.SearchConversationMessagePage, {
+                                this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.SearchConversationMessagePage, {
                                     'conversation': this.conversationInfo?.conversation
                                 } as Record<string, Object>)
                             })
                         OptionItemView({ title: '文件记录', showDivider: false })
                             .onClick(() => {
-                                this.mainNavPathStack.pushPathByName(navigationDestinations.FileRecordPage, {
+                                this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.FileRecordPage, {
                                     'conversation': this.conversationInfo?.conversation,
                                 } as Record<string, Object>)
                             })
@@ -464,7 +464,7 @@ export default struct GroupConversationInfoPage {
                     Column() {
                         OptionItemView({ title: '我在本群的昵称', desc: this.userInfo?.groupAlias })
                             .onClick(() => {
-                                this.mainNavPathStack.pushPathByName(navigationDestinations.UpdateMyGroupAliasPage, {
+                                this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.UpdateMyGroupAliasPage, {
                                     'groupInfo': this.groupInfo
                                 } as Record<string, Object>)
                             })

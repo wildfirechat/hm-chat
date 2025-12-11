@@ -1,14 +1,15 @@
 {
-    "name": "@wfc/uikit",
-    "version": "1.0.0",
-    "description": "野火IM UIKit，包含一些通过 UI",
-    "main": "Index.ets",
-    "author": "",
-    "license": "Apache-2.0",
-    "dependencies": {
-        "@wfc/client": "file:../client",
-        "@wfc/avenginekit": "file:./libs/avenginekit.har"
-    },
-    "devDependencies": {
-    }
+  "name": "@wfc/uikit",
+  "version": "1.0.0",
+  "description": "野火IM UIKit，包含一些通用 UI",
+  "main": "Index.ets",
+  "author": "",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@wfc/client": "file:../client",
+    "@wfc/avenginekit": "file:./libs/avenginekit.har",
+    "@ohos/webrtc": "^1.0.0-rc3"
+  },
+  "devDependencies": {},
+  "dynamicDependencies": {}
 }

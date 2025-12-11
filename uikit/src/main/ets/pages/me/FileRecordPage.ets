@@ -10,9 +10,8 @@ import FileRecord from '@wfc/client/src/main/ets/wfc/model/fileRecord'
 import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
 import Long from '@wfc/client/src/main/ets/wfc/util/long'
 import { eq, stringValue } from '@wfc/client/src/main/ets/wfc/util/longUtil'
-import { navigationDestinations } from '../navigationConfig'
+import { uikitNavigationDestinations } from '../uikitNavigationConfig'
 
-@Entry
 @Component
 export default struct FileRecordPage {
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;

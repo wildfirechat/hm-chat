@@ -25,8 +25,6 @@ import GroupSearchResult from '../model/groupSearchResult';
 import GroupInfo from '../model/groupInfo';
 import ConversationInfo from '../model/conversationInfo';
 import Conversation from '../model/conversation';
-import AddGroupMemberNotification from '../messages/notification/addGroupMemberNotification';
-import KickoffGroupMemberNotification from '../messages/notification/kickoffGroupMemberNotification';
 import Message from '../messages/message';
 import ChatRoomInfo from '../model/chatRoomInfo';
 import MessageContent from '../messages/messageContent';
@@ -41,8 +39,8 @@ import FileRecord from '../model/fileRecord';
 import UserOnlineState from '../model/userOnlineState';
 import UserSettingScope from './userSettingScope';
 import PCOnlineInfo from '../model/pcOnlineInfo';
-import fs from '@ohos.file.fs';
 import UserSettingEntry from '../model/userSettingEntry';
+import { fileIo } from '@kit.CoreFileKit';
 
 const textEncoder = new util.TextEncoder('utf-8')
 
@@ -136,6 +134,13 @@ export class WfcManager {
     }
 
     /*
+     * 添加设置时间偏移接口，可以让时间不正确的设备能够正常运行
+     */
+    setTimeOffset(offset: number) {
+        impl.setTimeOffset(offset);
+    }
+
+    /*
      * 开启日志，需要在connect之前调用。如果有设置包名或者其他connect之前调用的操作，需要放到这些操作之后。
      */
     startLog() {
@@ -223,13 +228,18 @@ export class WfcManager {
     }
 
     /**
-     * 获取日志文件的路径列表。只有startLo之后才会生成日志。
+     * 获取日志文件的路径列表。只有startLog之后才会生成日志。
      * @returns 日志文件的路径列表
      */
     getLogFilesPath(): string[] {
         let logPath = this.getAppPath();
         let filesPath: string[] = [];
-        //Todo 遍历logPath目录，找出来所有protocol开头，xlog结尾的所有文件
+        let files = fileIo.listFileSync(logPath)
+        for (const file of files) {
+            if (file.startsWith('protocol') && file.endsWith('.xlog')) {
+                filesPath.push(logPath + '/' + file)
+            }
+        }
         return filesPath;
     }
 
@@ -1937,7 +1947,7 @@ export class WfcManager {
      * @param failCB
      * @returns {Promise<void>}
      */
-    async sendMessageEx(message: Message, toUsers = [], preparedCB: CallbackWithValue_1<number>, progressCB: CallbackWithValue_2_OrNull<number, number>, uploadedCB: CallbackWithValue_1_OrNull<string>, successCB: CallbackWithValue_2<Long, number>, failCB: FailCallbackOrNull) {
+    async sendMessageEx(message: Message, toUsers: string[], preparedCB: CallbackWithValue_1<number>, progressCB: CallbackWithValue_2_OrNull<number, number>, uploadedCB: CallbackWithValue_1_OrNull<string>, successCB: CallbackWithValue_2<Long, number>, failCB: FailCallbackOrNull) {
         impl.sendMessageEx(message, toUsers, preparedCB, progressCB, uploadedCB, successCB, failCB);
     }
 
@@ -2130,6 +2140,28 @@ export class WfcManager {
      */
     getMessageCount(conversation: Conversation): number {
         return impl.getMessageCount(conversation);
+    }
+
+    /**
+     * 获取指定会话类型内的消息总数。
+     * @param types
+     * @param lines
+     * @returns
+     */
+    getConversationMessageCount(types: numberArray, lines: numberArray): number {
+        return impl.getConversationMessageCount(types, lines);
+    }
+
+    /**
+     * 按照天获取会话内消息的数量。
+     * @param conversation
+     * @param contentTypes
+     * @param startTime
+     * @param endTime
+     * @returns
+     */
+    getMessageCountByDay(conversation: Conversation, contentTypes: numberArray, startTime: number, endTime: number): Map<string, number> {
+        return impl.getMessageCountByDay(conversation, contentTypes, startTime, endTime);
     }
 
     /**
@@ -2380,9 +2412,8 @@ export class WfcManager {
     }
 
 
-    getEncodedClientId() {
-        // fixme
-        //return impl.getEncodedClientId();
+    getEncodedClientId(): string {
+        return impl.getEncodedClientId();
     }
 
     /**
@@ -2391,10 +2422,7 @@ export class WfcManager {
      * @returns {string} 编码结果，base64格式
      */
     encodeData(data: string): string {
-        // TODO
-        // fixme
-        // return impl.encodeData(data);
-        return ''
+        return impl.encodeData(data);
     }
 
     /**
@@ -2403,9 +2431,7 @@ export class WfcManager {
      * @returns {null | string} 解码之后的数据
      */
     decodeData(encodedData: string): string {
-        // fixme
-        // return impl.decodeData(encodedData);
-        return ''
+        return impl.decodeData(encodedData);
     }
 
     /**

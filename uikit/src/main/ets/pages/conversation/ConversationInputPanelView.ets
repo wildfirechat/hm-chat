@@ -37,7 +37,7 @@ import EventType from '@wfc/client/src/main/ets/wfc/client/wfcEvent'
 import ChannelInfo from '@wfc/client/src/main/ets/wfc/model/channelInfo'
 import ChannelMenu from '@wfc/client/src/main/ets/wfc/model/channelMenu'
 import ChannelMenuEventMessageContent from '@wfc/client/src/main/ets/wfc/messages/channelMenuEventMessageContent'
-import { navigationDestinations } from '../navigationConfig'
+import { uikitNavigationDestinations } from '../uikitNavigationConfig'
 import QuoteInfo from '@wfc/client/src/main/ets/wfc/model/quoteInfo'
 import PickContactModal from '../picker/PickContactModal'
 import ForwardMessageDialog from './forward/ForwardMessageDialog'
@@ -154,7 +154,7 @@ export default struct ConversationInputPanelView {
                                             avenginekit.startCall(this.conversation, [this.conversation.target], false)
                                         } else if (this.conversation.type === ConversationType.Group) {
                                             this.showExtContentCoverModal = true
-                                            this.extContentCoverBuilderParam = this.pickGroupMemberModal
+                                            this.extContentCoverBuilderParam = this.pickGroupMemberToStartCallModal
                                             this.voipAudioOnly = false
                                         } else {
 
@@ -174,7 +174,7 @@ export default struct ConversationInputPanelView {
                                             avenginekit.startCall(this.conversation, [this.conversation.target], true)
                                         } else if (this.conversation.type === ConversationType.Group) {
                                             this.showExtContentCoverModal = true
-                                            this.extContentCoverBuilderParam = this.pickGroupMemberModal
+                                            this.extContentCoverBuilderParam = this.pickGroupMemberToStartCallModal
                                             this.voipAudioOnly = true
                                         }
                                     } else {
@@ -344,7 +344,7 @@ export default struct ConversationInputPanelView {
                             {
                                 title: '逐条转发',
                                 action: () => {
-                                    this.mainNavPathStack.pushPathByName(navigationDestinations.ForwardMessagePage, {
+                                    this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ForwardMessagePage, {
                                         'messages': this.checkedMessages,
                                         'forwardType': 'oneByOne',
                                     } as Record<string, Object>)
@@ -356,7 +356,7 @@ export default struct ConversationInputPanelView {
                             {
                                 title: '合并转发',
                                 action: () => {
-                                    this.mainNavPathStack.pushPathByName(navigationDestinations.ForwardMessagePage, {
+                                    this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ForwardMessagePage, {
                                         'messages': this.checkedMessages,
                                         'forwardType': 'compose',
                                     } as Record<string, Object>)
@@ -417,6 +417,26 @@ export default struct ConversationInputPanelView {
     onMentionGroupMember = (userInfo: UserInfo) => {
         this.showMentionSheet = false;
         let mentionText = '@' + wfc.getGroupMemberDisplayNameEx(userInfo, true)
+        this.text = this.text + mentionText + ' ';
+        this.mentions.push({
+            target: userInfo.uid,
+            text: mentionText
+        })
+    }
+
+    onMentionAll = () => {
+        this.showMentionSheet = false;
+        let mentionText = '@' + '所有人'
+        this.text = this.text + mentionText + ' ';
+        this.mentions.push({
+            target: '@all',
+            text: mentionText
+        })
+    }
+
+    onMentionRobot= (userInfo: UserInfo) => {
+        this.showMentionSheet = false;
+        let mentionText = '@' + userInfo.displayName
         this.text = this.text + mentionText + ' ';
         this.mentions.push({
             target: userInfo.uid,
@@ -575,7 +595,7 @@ export default struct ConversationInputPanelView {
         switch (menu.type) {
             case 'view':
                 if (menu.url) {
-                    this.mainNavPathStack.pushPathByName(navigationDestinations.WebViewPage, {
+                    this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.WebViewPage, {
                         'url': menu.url,
                         'title': menu.name
                     } as Record<string, Object>)
@@ -613,7 +633,7 @@ export default struct ConversationInputPanelView {
     @BuilderParam extContentCoverBuilderParam: () => void = this.dummyContentCoverBuilder
 
     @Builder
-    pickGroupMemberModal() {
+    pickGroupMemberToStartCallModal() {
         PickGroupMemberModal({
             groupId: this.conversation.target,
             title: '选择群成员',
@@ -758,9 +778,7 @@ export default struct ConversationInputPanelView {
                                 TextArea({ text: this.text, controller: this.textInputController })
                                     .id('textInput')
                                     .onChange(value => {
-                                        // TODO 优化，mentionview 弹出逻辑
-                                        // FIXME
-                                        if (this.text + "@" === value && this.conversation.type === ConversationType.Group) {
+                                        if (this.text + "@" === value) {
                                             this.showMentionSheet = true;
                                         } else {
                                             this.text = value
@@ -895,6 +913,7 @@ export default struct ConversationInputPanelView {
                                                     if (textMessageContent.mentionedTargets.indexOf(mention.target) === -1) {
                                                         textMessageContent.mentionedTargets.push(mention.target)
                                                     }
+                                                    textMessageContent.mentionedType = 1;
                                                 }
                                             }
                                         }
@@ -985,6 +1004,7 @@ export default struct ConversationInputPanelView {
                         selectionStart: this.selectionStart,
                         selectionEnd: this.selectionEnd,
                         conversation: this.conversation,
+                        textInputController: this.textInputController
                     })
                         .focusable(true)
                         .width('100%')
@@ -1002,7 +1022,7 @@ export default struct ConversationInputPanelView {
             })
             .backgroundColor('#EEEEEE')
 
-            .bindSheet(this.showMentionSheet, MentionGroupMemberView(this.groupId, this.onMentionGroupMember), {
+            .bindSheet(this.showMentionSheet, MentionGroupMemberView(this.groupId, this.onMentionGroupMember, this.onMentionRobot, this.onMentionAll), {
                 height: '70%',
                 dragBar: false,
                 showClose: false,

@@ -3,14 +3,18 @@ import CallSessionCallback from '@wfc/avenginekit/src/main/ets/wfc/av/engine/cal
 import CallState from '@wfc/avenginekit/src/main/ets/wfc/av/engine/callState'
 import avengineKit from '@wfc/avenginekit'
 import wfc from '@wfc/client'
+import { ScalingMode, VideoRenderController } from '@ohos/webrtc'
+import { VideoTrack } from '@ohos/webrtc/src/main/libohos_webrtc/webrtc';
+import Config from '@wfc/client/src/main/ets/config'
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
-import { PiPWindow, router, window } from '@kit.ArkUI'
+import { PiPWindow, router, UIContext, window } from '@kit.ArkUI'
 import { BusinessError } from '@kit.BasicServicesKit'
 import AVCastPicker from '@ohos.multimedia.avCastPicker'
 import { timestampFormat } from '../../util/helper'
-import uikit from '../../uikit'
-import { HashMap } from '@kit.ArkTS'
-import { navigationDestinations } from '../navigationConfig'
+import pipHelper from './pipHelper'
+import { uikitNavigationDestinations } from '../uikitNavigationConfig'
+import WFCVideoRenderController from '@wfc/avenginekit/src/main/ets/wfc/av/xcomponent/WFCVideoRenderController'
+import VoipPiPNodeController from './VoipPiPNodeController'
 
 @Component
 export default struct SingleVideoCallPage {
@@ -24,11 +28,12 @@ export default struct SingleVideoCallPage {
     private lastTriggerToShowActionAndDurationViewTimestamp: number = 0
     private updateActionAndDurationViewInterval = 0
     private statusBarHeight = 0
-    private userXComponentMap: HashMap<string, string> = new HashMap<string, string>()
-    private focusXComponentId: string = ''
+    private focusUserId: string = ''
     private pipController?: PiPWindow.PiPController;
-    private mXComponentController: XComponentController = new XComponentController()
+    private focusXComponentController: WFCVideoRenderController = new WFCVideoRenderController('focus-xcp')
+    private previewXComponentController: WFCVideoRenderController = new WFCVideoRenderController('preview-xcp')
     private isPageShow = false
+    private voipPiPNodeController: VoipPiPNodeController = new VoipPiPNodeController('');
 
     aboutToAppear(): void {
         let callSession = avengineKit.getCurrentSession();
@@ -45,42 +50,37 @@ export default struct SingleVideoCallPage {
         // this.state = callSession.status;
         this.callSession = callSession;
 
-        this.focusXComponentId = this.targetUserInfo.uid + this.callSession.callId
-        this.userXComponentMap.set(this.selfUserInfo.uid, this.selfUserInfo.uid + this.callSession.callId)
-        this.userXComponentMap.set(this.targetUserInfo.uid, this.focusXComponentId)
-
-        this.setupXComponentViews()
+        this.focusUserId = this.targetUserInfo.uid
 
         this.setupSessionCallback()
         console.log('SingleVideoCallPage aboutToAppear')
+        let localTrack = this.callSession.getParticipantVideoTrack(this.selfUserInfo.uid)
+        if (localTrack) {
+            this.previewXComponentController.setVideoTrack(localTrack)
+        }
+
+        let remoteTrack = this.callSession.getParticipantVideoTrack(this.targetUserInfo.uid)
+        if(remoteTrack){
+            this.focusXComponentController.setScalingMode(ScalingMode.AspectFit)
+            this.focusXComponentController.setVideoTrack(remoteTrack)
+        }
     }
 
     aboutToDisappear(): void {
         console.log('SingleVideoCallPage aboutToDisappear')
     }
 
-    swapVideo(xcomponentId: string) {
-        let nextFocusUserId = ''
-        let preFocusUserId = ''
-        this.userXComponentMap.forEach((value, key) => {
-            if (value === xcomponentId) {
-                nextFocusUserId = key!;
-            }
-            if (value === this.focusXComponentId) {
-                preFocusUserId = key!;
-            }
-        })
+    swapVideo() {
+        if (!this.selfUserInfo || !this.targetUserInfo || !this.callSession) {
+            return
+        }
+        let previewUserId = this.focusUserId
+        let focusUserId = this.focusUserId === this.selfUserInfo.uid ? this.targetUserInfo.uid : this.selfUserInfo.uid
 
-        this.userXComponentMap.set(nextFocusUserId, this.focusXComponentId)
-        this.userXComponentMap.set(preFocusUserId, xcomponentId)
+        this.focusXComponentController.setVideoTrack(this.callSession.getParticipantVideoTrack(focusUserId))
+        this.previewXComponentController.setVideoTrack(this.callSession.getParticipantVideoTrack(previewUserId))
 
-        this.setupXComponentViews()
-    }
-
-    setupXComponentViews() {
-        this.userXComponentMap.forEach((xcomponentId, userId) => {
-            this.callSession?.setUserXComponentId(userId, xcomponentId)
-        })
+        this.focusUserId = focusUserId
     }
 
     onPageShow(): void {
@@ -161,10 +161,20 @@ export default struct SingleVideoCallPage {
             }
             this.destroyPipController()
 
-            let index = this.mainNavPathStack.getIndexByName(navigationDestinations.SingleVideoCallPage)
+            let index = this.mainNavPathStack.getIndexByName(uikitNavigationDestinations.SingleVideoCallPage)
             if (index.length) {
                 this.mainNavPathStack.pop()
             }
+        }
+        sessionCallback.didCreateLocalVideoTrack = (track: VideoTrack, screenSharing: boolean) => {
+
+            let controller = this.focusUserId === this.selfUserInfo?.uid ? this.focusXComponentController : this.previewXComponentController
+            controller.setVideoTrack(track)
+            controller.setScalingMode(ScalingMode.AspectFill)
+        }
+        sessionCallback.didReceiveRemoteVideoTrack = (userId: string, track: VideoTrack, screenSharing: boolean) => {
+            this.focusXComponentController.setVideoTrack(track)
+            this.focusXComponentController.setScalingMode(ScalingMode.AspectFit)
         }
         this.callSession!.sessionCallback = sessionCallback;
     }
@@ -184,41 +194,20 @@ export default struct SingleVideoCallPage {
     }
 
     async createPipController() {
-        this.pipController = await PiPWindow.create({
-            context: getContext(this),
-            componentController: this.mXComponentController,
-            // https://developer.huawei.com/consumer/cn/doc/harmonyos-guides-V5/pipwindow-xcomponent-V5
-            // 2、UIAbility使用Router管理页面时（画中画场景不推荐该导航方式），无需设置navigationId。注意：该场景下启动画中画后，不要进行页面切换，否则还原场景可能出现异常
-            navigationId: uikit.bundleName,
-            templateType: PiPWindow.PiPTemplateType.VIDEO_MEETING,
-            contentWidth: 200,
-            contentHeight: 300,
-        });
-        this.pipController.on('stateChange', (state: PiPWindow.PiPState, reason: string) => {
-            this.onStateChange(state, reason);
-        });
-        this.pipController.on('controlPanelActionEvent', (event: PiPWindow.PiPActionEventType, status?: number) => {
-            this.onActionEvent(event, status);
-        });
-        this.pipController.setAutoStartEnabled(true)
-        console.log('createPipController')
+        this.pipController = await pipHelper.createPipController(this.getUIContext(), this.focusXComponentController, this.voipPiPNodeController, this.mainNavPathStack, uikitNavigationDestinations.SingleVideoCallPage)
     }
 
     destroyPipController() {
         if (!this.pipController) {
             return;
         }
-        this.pipController.setAutoStartEnabled(false)
-        this.pipController.off('stateChange');
-        this.pipController.off('controlPanelActionEvent');
-        this.pipController.stopPiP()
+        pipHelper.destroyPipController()
         this.pipController = undefined;
     }
 
     onStateChange(state: PiPWindow.PiPState, reason: string) {
         console.log('onStateChange', state, reason)
-        if(state === PiPWindow.PiPState.ABOUT_TO_START){
-            this.mainNavPathStack.pop()
+        if (state === PiPWindow.PiPState.ABOUT_TO_START) {
         }
         // switch (state) {
         //     case PiPWindow.PiPState.ABOUT_TO_START:
@@ -272,27 +261,6 @@ export default struct SingleVideoCallPage {
         // Logger.info(`[${TAG}] onActionEvent: ${this.buttonAction} status:${status}}`);
     }
 
-    previewXComponentWidth(): SizeT<string> {
-        let previewSize = this.callSession!.previewProfile?.size
-        if (!previewSize) {
-            return {
-                width: '100%',
-                height: '100%'
-            }
-        }
-        if (previewSize.width > previewSize.height) {
-            return {
-                width: `${previewSize.width / previewSize.height * 100}%`,
-                height: '100%'
-            }
-        } else {
-            return {
-                width: '100%',
-                height: `${previewSize.height / previewSize.width * 100}%`
-            }
-        }
-    }
-
     @Builder
     actionAndDurationView() {
         Column() {
@@ -308,6 +276,7 @@ export default struct SingleVideoCallPage {
                                 .catch((reason: BusinessError) => {
                                     console.log('startPiP errr', reason.message)
                                 })
+                            this.mainNavPathStack.pop()
                             console.log('stop pip')
                         })
 
@@ -452,9 +421,11 @@ export default struct SingleVideoCallPage {
                     XComponent({
                         id: this.targetUserInfo?.uid + this.callSession!.callId,
                         type: XComponentType.SURFACE,
-                        controller: this.mXComponentController,
-                        libraryname: 'wfrtc'
+                        controller: this.focusXComponentController,
                     })
+                    // .onLoad(() => {
+                    //     this.focusXComponentController.setVideoTrack(this.localVideoTrack!)
+                    // })
                         .enableAnalyzer(false)
                         .width('100%')
                         .height('100%')
@@ -471,23 +442,24 @@ export default struct SingleVideoCallPage {
 
                 Stack() {
                     Column() {
+
                         Column() {
                             XComponent({
                                 id: this.selfUserInfo!.uid + this.callSession?.callId,
                                 type: XComponentType.SURFACE,
-                                libraryname: 'wfrtc',
+                                controller: this.previewXComponentController,
                             })
                                 .borderRadius(4)
                                 .enableAnalyzer(false)
-                                .width(this.callSession?.status === CallState.STATUS_CONNECTED ? '120' : this.previewXComponentWidth().width)
-                                .height(this.callSession?.status === CallState.STATUS_CONNECTED ? '160' : this.previewXComponentWidth().height)
+                                .width(this.callSession?.status === CallState.STATUS_CONNECTED ? '120' : '100%')
+                                .height(this.callSession?.status === CallState.STATUS_CONNECTED ? '160' : '100%')
                                 .margin({
                                     left: this.callSession?.status === CallState.STATUS_CONNECTED ? 10 : 0,
                                     top: this.callSession?.status === CallState.STATUS_CONNECTED ? this.statusBarHeight + 50 : 0
                                 })
                         }
                         .onClick(() => {
-                            this.swapVideo(this.selfUserInfo!.uid + this.callSession?.callId)
+                            this.swapVideo()
                         })
                     }
                     .width('100%')
@@ -499,7 +471,7 @@ export default struct SingleVideoCallPage {
                         || this.callSession!.status === CallState.STATUS_INCOMING
                         || this.callSession!.status === CallState.STATUS_CONNECTING) {
                         Row() {
-                            Image(this.targetUserInfo?.portrait)
+                            Image(this.targetUserInfo?.portrait || Config.DEFAULT_PORTRAIT_URL)
                                 .draggable(false)
                                 .width(80)
                                 .height(80)
@@ -545,7 +517,7 @@ export default struct SingleVideoCallPage {
         .onBackPressed(() => {
             return true
         })
-        .title('Voip Test')
+        .title('VOIP Single')
         .hideTitleBar(true)
         .backgroundColor('#000000')
 

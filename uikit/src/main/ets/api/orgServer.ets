@@ -198,9 +198,10 @@ class OrgServer {
                     let result = data.result as Record<string, Object>
                     if (result.code === 0) {
                         // 30ba6ab2d4d249d4ab9114a02a9850fc
-                        let authToken: string = data.header['authtoken']
+                        let header = data.header as Record<string, Object>
+                        let authToken: string = header['authtoken'] as string
                         if (!authToken) {
-                            authToken = data.header['authToken']
+                            authToken = header['authToken'] as  string
                         }
                         if (authToken) {
                             this.authToken = authToken

@@ -17,7 +17,7 @@ export const getFiletypeIcon = (extension: string) => {
         extension = extension.substring(extension.lastIndexOf('.') + 1)
     }
 
-    extension = (extension || '').toLowerCase().replace(/^\./, '');
+    extension = (extension || '').toLowerCase().replace(new RegExp('^\./'), '');
 
     switch (true) {
         case ['mp3', 'flac', 'aac', 'm4a', 'wma'].includes(extension):

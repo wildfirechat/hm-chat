@@ -5,11 +5,11 @@ import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
 @Preview
 @Component
 export default struct UserItemView {
-    private enable?: boolean = true
-    private paddingLeft: number = 10
-    private paddingRight: number = 10
-    private uiUserInfo: UIUserInfo = {} as UIUserInfo;
-    private onClickUser?: (userInfo: UserInfo) => void
+    enable?: boolean = true
+    paddingLeft: number = 10
+    paddingRight: number = 10
+    uiUserInfo: UIUserInfo = {} as UIUserInfo;
+    onClickUser?: (userInfo: UserInfo) => void
 
     aboutToAppear() {
     }

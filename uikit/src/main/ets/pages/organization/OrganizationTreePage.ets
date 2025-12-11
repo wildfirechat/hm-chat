@@ -3,9 +3,8 @@ import Organization from '../../api/model/organization';
 import OrganizationEx from '../../api/model/organizationEx';
 import orgServer from '../../api/orgServer';
 import { showToast } from '../../common/utils/Toast';
-import { navigationDestinations } from '../navigationConfig';
+import { uikitNavigationDestinations } from '../uikitNavigationConfig';
 
-@Entry
 @Component
 export default struct OrganizationTreePage {
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
@@ -141,7 +140,7 @@ export default struct OrganizationTreePage {
                                     }
                                 })
                                 .onClick(() => {
-                                    this.mainNavPathStack.pushPathByName(navigationDestinations.UserInfoPage, { 'userInfo': orgServer.employeeToUserInfo(employee) } as Record<string, Object>)
+                                    this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.UserInfoPage, { 'userInfo': orgServer.employeeToUserInfo(employee) } as Record<string, Object>)
                                 })
                             }
                         },

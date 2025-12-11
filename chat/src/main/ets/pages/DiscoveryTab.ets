@@ -1,8 +1,12 @@
 import { showToast } from '@wfc/uikit/src/main/ets/common/utils/Toast'
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType'
-import { navigationDestinations } from '@wfc/uikit/src/main/ets/pages/navigationConfig'
+import { uikitNavigationDestinations } from '@wfc/uikit/src/main/ets/pages/uikitNavigationConfig'
 import BuildProfile from 'BuildProfile'
+import uikit from '@wfc/uikit'
+
+// 如果需要支持朋友圈时，请取消注释
+import { momentNavigationDestinations } from '@wfc/momentkit'
 
 @Preview
 @Component
@@ -44,7 +48,9 @@ export default struct DiscoveryTab {
                                 .padding({ left: 20 })
                             }
                             .onClick(() => {
-                                showToast('TODO')
+                                showToast('当前版本不支持朋友圈功能')
+                                // 如果需要支持朋友圈时，请取消注释
+                                this.mainNavPathStack.pushPathByName(momentNavigationDestinations.FeedListPage, {} as Record<string, Object>)
                             })
                             .padding({ left: 10, right: 10 })
                             .width('100%')
@@ -70,7 +76,7 @@ export default struct DiscoveryTab {
                                 .padding({ left: 10 })
                         }
                         .onClick(() => {
-                            this.mainNavPathStack.pushPathByName(navigationDestinations.ChatroomListPage, {} as Record<string, Object>)
+                            this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ChatroomListPage, {} as Record<string, Object>)
                         })
                         .padding({ left: 10, right: 10 })
                         .width('100%')
@@ -96,9 +102,38 @@ export default struct DiscoveryTab {
                         }
                         .onClick(() => {
                             let conversation = new Conversation(ConversationType.Single, 'FireRobot', 0)
-                            this.mainNavPathStack.pushPathByName(navigationDestinations.ConversationPage, {
+                            this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ConversationPage, {
                                 'conversation': conversation
                             } as Record<string, Object>)
+                        })
+                        .padding({ left: 10, right: 10 })
+                        .width('100%')
+                        .height(56)
+                    }
+                    .stateStyles({
+                        pressed: {
+                            .backgroundColor('#E5E5E5')
+                        },
+                        normal: {
+                            .backgroundColor(Color.White)
+                        }
+                    })
+
+                    ListItem() {
+                        Row() {
+                            Image($r('app.media.ic_conference'))
+                                .width(20)
+                                .height(20)
+                                .objectFit(ImageFit.Contain)
+                            Text('会议')
+                                .padding({ left: 10 })
+                        }
+                        .onClick(() => {
+                            if (uikit.isSupportConference()) {
+                                this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ConferencePortalPage, {} as Record<string, Object>)
+                            } else {
+                                showToast('多人版音视频 SDK，不支持会议功能')
+                            }
                         })
                         .padding({ left: 10, right: 10 })
                         .width('100%')
@@ -122,7 +157,7 @@ export default struct DiscoveryTab {
                                 .padding({ left: 10 })
                         }
                         .onClick(() => {
-                            this.mainNavPathStack.pushPathByName(navigationDestinations.WebViewPage, {
+                            this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.WebViewPage, {
                                 'url': 'https://docs.wildfirechat.cn',
                                 'title': '野火IM 开发文档'
                             } as Record<string, Object>)

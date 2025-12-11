@@ -6,7 +6,6 @@ import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
 import PickGroupMemberModal from './PickGroupMemberModal'
 import ActionSheetDialog from '../../view/ActionSheetDialog'
 
-@Entry
 @Component
 export default struct GroupManagerListPage {
     private customDialogController?: CustomDialogController
@@ -48,7 +47,7 @@ export default struct GroupManagerListPage {
                     .padding(10)
                     .width('100%')
                 Row() {
-                    Image(this.groupOwnerUerInfo?.portrait)
+                    Image(this.groupOwnerUerInfo!.portrait)
                         .width(40)
                         .height(40)
                         .margin(10)

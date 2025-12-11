@@ -8,10 +8,9 @@ import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType'
 import { inputMethod } from '@kit.IMEKit'
 import ConversationSearchResult from '@wfc/client/src/main/ets/wfc/model/conversationSearchResult'
-import { navigationDestinations } from '../navigationConfig'
+import { uikitNavigationDestinations } from '../uikitNavigationConfig'
 
 
-@Entry
 @Component
 @Preview
 export default struct SearchPortalPage {
@@ -22,7 +21,7 @@ export default struct SearchPortalPage {
             tag: 'contact',
             onSearchResultItemClick: value => {
                 let userInfo = value as UserInfo
-                this.mainNavPathStack.pushPathByName(navigationDestinations.ConversationPage, {
+                this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ConversationPage, {
                     'conversation': new Conversation(ConversationType.Single, userInfo.uid, 0)
                 } as Record<string, Object>)
             }
@@ -31,7 +30,7 @@ export default struct SearchPortalPage {
             tag: 'group',
             onSearchResultItemClick: value => {
                 let groupInfo = value as GroupInfo
-                this.mainNavPathStack.pushPathByName(navigationDestinations.ConversationPage, {
+                this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ConversationPage, {
                     'conversation': new Conversation(ConversationType.Group, groupInfo.target, 0)
                 } as Record<string, Object>)
             }
@@ -41,12 +40,12 @@ export default struct SearchPortalPage {
             onSearchResultItemClick: value => {
                 let conversationSearchResult = value as ConversationSearchResult
                 if (conversationSearchResult.matchCount > 1) {
-                    this.mainNavPathStack.pushPathByName(navigationDestinations.SearchConversationMessagePage, {
+                    this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.SearchConversationMessagePage, {
                         'keyword': this.keyword,
                         'conversation': conversationSearchResult.conversation!
                     } as Record<string, Object>)
                 } else {
-                    this.mainNavPathStack.pushPathByName(navigationDestinations.ConversationPage, {
+                    this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ConversationPage, {
                         'conversation': conversationSearchResult.conversation!
                     } as Record<string, Object>)
                 }
@@ -56,7 +55,7 @@ export default struct SearchPortalPage {
             tag: 'channel',
             onSearchResultItemClick: value => {
                 let channelInfo = value as ChannelInfo
-                this.mainNavPathStack.pushPathByName(navigationDestinations.ConversationPage, {
+                this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ConversationPage, {
                     'conversation': new Conversation(ConversationType.Channel, channelInfo.channelId, 0)
                 } as Record<string, Object>)
             }

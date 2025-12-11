@@ -25,7 +25,7 @@ import BasicDataSource from '../../common/BasicDataSource'
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
 import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
 import ChannelInfo from '@wfc/client/src/main/ets/wfc/model/channelInfo'
-import { navigationDestinations } from '../navigationConfig'
+import { uikitNavigationDestinations } from '../uikitNavigationConfig'
 import TestCustomNotificationMessageContent from '@wfc/client/src/main/ets/wfc_custom_message/testCustomNotificationMessageContent'
 import TestCustomMessageContentView from './custom_message/testCustomMessageContentView'
 import TestCustomNotificationMessageContentView from './custom_message/TestCustomNotificationMessageContentView'
@@ -38,8 +38,12 @@ import MessageStatus from '@wfc/client/src/main/ets/wfc/messages/messageStatus'
 import RichNotificationMessageContent from '@wfc/client/src/main/ets/wfc/messages/notification/richNotificationMessageContent'
 import RichNotificationMessageContentView from './message/RichNotificationMessageContentView'
 import { window, KeyboardAvoidMode } from '@kit.ArkUI'
+import ArticlesMessageContent from '@wfc/client/src/main/ets/wfc/messages/articlesMessageContent'
+import ArticleMessageContentView from './message/ArticlesMessageContentView'
+import ContextableNotificationMessageContentView from './message/ContextableNotificationMessageContentView'
+import StreamingTextGeneratingMessageContent from '@wfc/client/src/main/ets/wfc/messages/streamingTextGeneratingMessageContent'
+import StreamingTextGeneratedMessageContent from '@wfc/client/src/main/ets/wfc/messages/streamingTextGeneratedMessageContent'
 
-@Entry
 @Component
 export default struct ConversationPage {
     @State toReeditText: string = ''
@@ -129,7 +133,7 @@ export default struct ConversationPage {
         wfc.eventEmitter!.off(EventType.MessageStatusUpdate, this.onMessageStatusUpdate)
         wfc.eventEmitter!.off(EventType.ReceiveMessage, this.onReceiveMessage)
         wfc.eventEmitter!.off(EventType.DeleteMessage, this.onDeleteMessage)
-        wfc.eventEmitter!.on(EventType.MessageDeleted, this.onRemoteDeleteMessage)
+        wfc.eventEmitter!.off(EventType.MessageDeleted, this.onRemoteDeleteMessage)
         wfc.eventEmitter!.off(EventType.RecallMessage, this.onRecallMessage)
         wfc.eventEmitter!.off(EventType.MessageRead, this.onReadMessage)
         if (this.conversation!.type === ConversationType.Group) {
@@ -299,7 +303,7 @@ export default struct ConversationPage {
             }
         }
         if (allow) {
-            this.mainNavPathStack.pushPathByName(navigationDestinations.UserInfoPage, {
+            this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.UserInfoPage, {
                 'userInfo': wfc.getUserInfo(userId)
             } as Record<string, Object>)
         } else {
@@ -335,7 +339,7 @@ export default struct ConversationPage {
     onSendMessage = (message: Message) => {
         let conversation = new Conversation(message.conversation.type, message.conversation.target, message.conversation.line)
         if (this.isDisplayMessage(message) && Conversation.equal(conversation, this.conversation!)) {
-            this.conversationMessageDataSource.appendMessage(message);
+            this.conversationMessageDataSource.appendOrUpdateMessage(message);
             this.scroller.scrollEdge(Edge.Bottom)
         }
     }
@@ -366,7 +370,7 @@ export default struct ConversationPage {
 
         messages.forEach(message => {
             if (this.isDisplayMessage(message) && Conversation.equal(message.conversation, this.conversation!)) {
-                this.conversationMessageDataSource.appendMessage(message);
+                this.conversationMessageDataSource.appendOrUpdateMessage(message);
                 this.scroller.scrollEdge(Edge.Bottom)
             }
         })
@@ -475,7 +479,7 @@ export default struct ConversationPage {
         // type 撤回消息时，会更新 type
         // receipt status： 已读、未读，不支持送达报告
 
-        let key: string = message.messageContent.type + '-' + message.messageId + '-' + message.status
+        let key: string = message.messageContent.type + '-' + message.messageId + '-' + message.status + '-' + message.timestamp
         if (this.enableReceipt && this.readEntries && this.readEntries.size > 0) {
             if (this.conversation!.type === ConversationType.Group) {
                 if (this.enableGroupReceipt) {
@@ -503,16 +507,16 @@ export default struct ConversationPage {
         let name: string = ''
         switch (this.conversation!.type) {
             case ConversationType.Single:
-                name = navigationDestinations.SingleConversationInfoPage
+                name = uikitNavigationDestinations.SingleConversationInfoPage
                 break
             case ConversationType.Group:
-                name = navigationDestinations.GroupConversationInfoPage
+                name = uikitNavigationDestinations.GroupConversationInfoPage
                 break
             case ConversationType.Channel:
-                name = navigationDestinations.ChannelConversationInfoPage
+                name = uikitNavigationDestinations.ChannelConversationInfoPage
                 break
             case ConversationType.ChatRoom:
-                name = navigationDestinations.ChatroomConversationInfoPage
+                name = uikitNavigationDestinations.ChatroomConversationInfoPage
                 break
             default:
                 break
@@ -569,6 +573,10 @@ export default struct ConversationPage {
                                                 .width('100%')
                                                 .justifyContent(FlexAlign.Center)
 
+                                                // contextable notificaiton like messages
+                                                // 支持长按菜单的类通知消息，居中显示，不显示发送者，长按支持显示菜单
+                                            } else if (msg.messageContent instanceof ArticlesMessageContent) {
+                                                ContextableNotificationMessageContentView({ message: msg, enableMultiCheck: this.enableMultiCheck })
                                                 // out
                                             } else if (msg.direction === 0) {
                                                 Column() {
@@ -894,9 +902,28 @@ class ConversationMessageDataSource extends BasicDataSource<Message> {
         this.notifyDataReload();
     }
 
-    appendMessage(message: Message) {
-        if (this.messages.findIndex(m => m.messageId === message.messageId) >= 0) {
-            return
+    appendOrUpdateMessage(message: Message) {
+        let index = this.messages.findIndex(m => {
+            if (m.messageId > 0) {
+                return m.messageId === message.messageId
+            } else if (m.messageContent.type === MessageContentType.Streaming_Text_Generating) {
+                let curStreamingTextMessageContent = m.messageContent as StreamingTextGeneratingMessageContent;
+                if (message.messageContent.type === MessageContentType.Streaming_Text_Generating) {
+                    let newStreamingTextMessageContent = message.messageContent as StreamingTextGeneratingMessageContent;
+                    return curStreamingTextMessageContent.streamId === newStreamingTextMessageContent.streamId;
+                } else if (message.messageContent.type === MessageContentType.Streaming_Text_Generated) {
+                    let newStreamingTextMessageContent = message.messageContent as StreamingTextGeneratedMessageContent;
+                    return curStreamingTextMessageContent.streamId === newStreamingTextMessageContent.streamId;
+                } else {
+                    return false;
+                }
+            }
+            return false;
+        });
+        if (index >= 0) {
+            this.messages[index] = message;
+            this.notifyDataChange(index)
+            return;
         }
         this.messages = this.messages.concat(message)
         this.notifyDataReload();

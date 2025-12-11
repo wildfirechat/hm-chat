@@ -4,11 +4,11 @@ import { BusinessError } from '@kit.BasicServicesKit';
 import { LengthUnit, router } from '@kit.ArkUI';
 import Config from '@wfc/client/src/main/ets/config';
 import wfc from '@wfc/client'
-import { navigationDestinations } from '@wfc/uikit/src/main/ets/pages/navigationConfig';
+import { uikitNavigationDestinations } from '@wfc/uikit/src/main/ets/pages/uikitNavigationConfig';
 import uikit from '@wfc/uikit';
+import { showToast } from '@wfc/uikit/src/main/ets/common/utils/Toast';
 
 @Preview
-@Entry
 @Component
 export default struct AboutPage {
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
@@ -73,7 +73,7 @@ export default struct AboutPage {
                         title: getContext().resourceManager.getStringSync($r('app.string.feature_introduction').id),
                         showDivider: true
                     }).onClick(() => {
-                        this.mainNavPathStack.pushPathByName(navigationDestinations.WebViewPage, {
+                        this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.WebViewPage, {
                             'url': 'https://docs.wildfirechat.cn/',
                             'title': '野火IM功能介绍'
                         } as Record<string, Object>)
@@ -82,16 +82,24 @@ export default struct AboutPage {
                         title: getContext().resourceManager.getStringSync($r('app.string.user_agreement').id),
                         showDivider: true
                     }).onClick(() => {
-                        this.mainNavPathStack.pushPathByName(navigationDestinations.WebViewPage, {
-                            'url': 'https://www.wildfirechat.net/wildfirechat_user_agreement.html',
+                        if (!Config.USER_AGREEMENT_URL || Config.USER_AGREEMENT_URL.indexOf('https://example.com') >= 0) {
+                            showToast('请配置用户协议链接地址')
+                            return
+                        }
+                        this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.WebViewPage, {
+                            'url': Config.USER_AGREEMENT_URL,
                             'title': '野火IM用户协议'
                         } as Record<string, Object>)
                     })
                     OptionItemView({
                         title: getContext().resourceManager.getStringSync($r('app.string.privacy_policy').id),
                     }).onClick(() => {
-                        this.mainNavPathStack.pushPathByName(navigationDestinations.WebViewPage, {
-                            'url': 'https://www.wildfirechat.net/wildfirechat_user_privacy.html',
+                        if (!Config.PRIVACY_AGREEMENT_URL || Config.PRIVACY_AGREEMENT_URL.indexOf('https://example.com') >= 0) {
+                            showToast('请配置隐私政策链接地址')
+                            return
+                        }
+                        this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.WebViewPage, {
+                            'url': Config.PRIVACY_AGREEMENT_URL,
                             'title': '野火IM个人信息保护政策'
                         } as Record<string, Object>)
                     })

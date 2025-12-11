@@ -13,6 +13,7 @@ import Message from '@wfc/client/src/main/ets/wfc/messages/message';
 import FavItem from '@wfc/client/src/main/ets/wfc/model/favItem';
 import { stringValue } from '@wfc/client/src/main/ets/wfc/util/longUtil';
 import { parseHostAndPort } from './Util';
+import ConferenceInfo from '@wfc/avenginekit/src/main/ets/wfc/av/model/conferenceInfo';
 
 class AppServer {
     baseUrl = Config.APP_SERVER;
@@ -154,6 +155,51 @@ class AppServer {
         return this._post('/fav/del/' + favItemId)
     }
 
+    getMyPrivateConferenceId(): Promise<string> {
+        return this._post('/conference/get_my_id') as Promise<string>
+    }
+
+    createConference(conferenceInfo: ConferenceInfo): Promise<string> {
+        return this._post('/conference/create', conferenceInfo) as Promise<string>
+    }
+
+    async queryConferenceInfo(conferenceId: string, password: string): Promise<ConferenceInfo> {
+        let result = await this._post('/conference/info', { 'conferenceId': conferenceId, 'password': password } as Record<string, Object>)
+        return result as ConferenceInfo
+    }
+
+    destroyConference(conferenceId: string) {
+        return this._post(`/conference/destroy/${conferenceId}`);
+    }
+
+    favConference(conferenceId: string) {
+        return this._post('/conference/fav/' + conferenceId);
+    }
+
+    unfavConference(conferenceId: string) {
+        return this._post('/conference/unfav/' + conferenceId);
+    }
+
+    isFavConference(conferenceId: string) {
+        return this._post('/conference/is_fav/' + conferenceId);
+    }
+
+    async getFavConferences() {
+        let result = await this._post('/conference/fav_conferences');
+        return result as ConferenceInfo[]
+    }
+
+    updateConference(conferenceInfo: ConferenceInfo) {
+        return this._post('/conference/put_info', conferenceInfo);
+    }
+
+    recordConference(conferenceId: string, record: boolean) {
+        return this._post('/conference/recording/' + conferenceId, { 'recording': record } as JSONObject);
+    }
+
+    setConferenceFocusUserId(conferenceId: string, userId: string) {
+        return this._post('/conference/focus/' + conferenceId, { 'userId': userId ? userId : '' } as JSONObject);
+    }
     _init() {
         let context = AppStorage.get<common.UIAbilityContext>('context');
         let preference = data_preferences.getPreferencesSync(context?.getApplicationContext(), {
@@ -222,9 +268,10 @@ class AppServer {
                         let result = data.result as Record<string, Object>
                         if (result.code === 0) {
                             // 30ba6ab2d4d249d4ab9114a02a9850fc
-                            let authToken: string = data.header['authtoken']
+                            let header = data.header as Record<string, Object>
+                            let authToken: string = header['authtoken'] as string
                             if (!authToken) {
-                                authToken = data.header['authToken']
+                                authToken = header['authToken'] as string
                             }
                             if (authToken) {
                                 this.authToken = authToken

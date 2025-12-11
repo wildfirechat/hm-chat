@@ -86,20 +86,6 @@
                 }
             },
             {
-                "name": "ohos.permission.WRITE_MEDIA",
-                "reason": "$string:reason_write_media",
-                "usedScene": {
-                    "when": "always"
-                }
-            },
-            {
-                "name": "ohos.permission.READ_MEDIA",
-                "reason": "$string:reason_write_media",
-                "usedScene": {
-                    "when": "always"
-                }
-            },
-            {
                 "name": "ohos.permission.CAMERA",
                 "reason": "$string:camera_auth_reason",
                 "usedScene": {
@@ -116,6 +102,13 @@
             {
                 "name": "ohos.permission.MEDIA_LOCATION",
                 "reason": "$string:reason_media_location",
+                "usedScene": {
+                    "when": "inuse"
+                }
+            },
+            {
+                "name": "ohos.permission.KEEP_BACKGROUND_RUNNING",
+                "reason": "$string:reason_voip",
                 "usedScene": {
                     "when": "inuse"
                 }

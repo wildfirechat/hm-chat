@@ -1,9 +1,8 @@
 import Conversation from "@wfc/client/src/main/ets/wfc/model/conversation";
 import ConversationType from "@wfc/client/src/main/ets/wfc/model/conversationType";
 import OptionItemView from "../../view/OptionItemView";
-import { navigationDestinations } from "../navigationConfig";
+import { uikitNavigationDestinations } from "../uikitNavigationConfig";
 
-@Entry
 @Component
 export default struct ChannelConversationInfoPage {
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
@@ -21,8 +20,8 @@ export default struct ChannelConversationInfoPage {
                             fontColor: Color.Red,
                             action: () => {
                                 let conversation = new Conversation(ConversationType.Single, 'cgc8c8VV', 0)
-                                this.mainNavPathStack.popToName(navigationDestinations.ConversationPage)
-                                this.mainNavPathStack.replacePathByName(navigationDestinations.ConversationPage, {
+                                this.mainNavPathStack.popToName(uikitNavigationDestinations.ConversationPage)
+                                this.mainNavPathStack.replacePathByName(uikitNavigationDestinations.ConversationPage, {
                                     'conversation': conversation
                                 } as Record<string, Object>)
                             },

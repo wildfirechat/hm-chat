@@ -79,6 +79,7 @@ class WfcImpl {
     defaultSilentWhenPCOnline = true;
     doubleNetworkStrategy = 0;
     _connectedToMainNetwork = false;
+    _startLog = false;
     eventEmitter?: common.EventHub;
     context?: common.ApplicationContext;
     uploadingMap: Map<number, request.UploadTask> = new Map();
@@ -388,12 +389,20 @@ class WfcImpl {
         protoProxy.useAES256();
     }
 
+    setTimeOffset(offset: number) {
+        protoProxy.setTimeOffset(offset);
+    }
+
     startLog() {
-        protoProxy.startLog();
+        if (this.userId) {
+            protoProxy.startLog();
+        }
+        this._startLog = true;
     }
 
     stopLog() {
         protoProxy.stopLog();
+        this._startLog = false;
     }
 
     setLiteMode(liteMode: boolean) {
@@ -428,6 +437,9 @@ class WfcImpl {
         // 超过一周没有活跃，就预加载数据
         if (new Date().getTime() / 1000 - lastActiveTime > 7 * 24 * 60 * 60) {
             self.needPreloadDefaultData = true;
+        }
+        if (this._startLog) {
+            protoProxy.startLog();
         }
         return lastActiveTime;
         // for testing your code
@@ -470,6 +482,18 @@ class WfcImpl {
 
     getClientId(): string {
         return protoProxy.getClientId();
+    }
+
+    getEncodedClientId(): string {
+        return protoProxy.encodedCid();
+    }
+
+    encodeData(data: string): string {
+        return protoProxy.encodeData(data);
+    }
+
+    decodeData(encodedData: string): string {
+        return protoProxy.decodeData(encodedData);
     }
 
     getProtoRevision(): string {
@@ -2397,6 +2421,9 @@ class WfcImpl {
                         }
                     }
                 });
+                data.on('progress', (uploaded:number, total:number) => {
+                   progressCB && progressCB(uploaded, total)
+                });
                 data.on('fail', (result: Array<request.TaskState>) => {
                     message && self.uploadingMap.delete(message.messageId)
                     if (result && result.length >= 1) {
@@ -2690,6 +2717,23 @@ class WfcImpl {
         return protoProxy.getMessageCount(JSON.stringify(conversation));
     }
 
+    getConversationMessageCount(types: number[], lines: number[]): number {
+        return protoProxy.getConversationMessageCount(types, lines);
+    }
+
+    getMessageCountByDay(conversation: Conversation, contentTypes: number[], startTime: number, endTime: number): Map<string, number> {
+        let readedStr: string = protoProxy.getMessageCountByDay(JSON.stringify(conversation), contentTypes, startTime, endTime);
+        let readedArr = JSON.parse(readedStr) as Record<string, Object>[];
+        let result: Map<string, number> = new Map();
+        if (readedArr) {
+            readedArr.forEach(e => {
+                let values = Object.values(e)
+                result.set(values[0] as string, values[1] as number)
+            })
+        }
+        return result;
+    }
+
     async uploadMedia(fileName: string, fileOrData: string, mediaType: number, successCB: CallbackWithValue_1<string>, failCB: FailCallback, progressCB: CallbackWithValue_2<number, number>) {
         if (this.isTcpShortLink() && !this.isSupportBigFilesUpload()) {
             console.error('TCP短连接不支持内置对象存储，请把对象存储切换到其他类型')
@@ -2930,11 +2974,17 @@ class WfcImpl {
         protoProxy.setSecretMessageBurnStateListener(self.onSecretMessageStartBurningListener, self.onSecretMessageBurnedListener);
     }
 
-    _getLatestLogFilePath() {
+    _getLatestLogFilePath(): string | null {
         let appPath = this.getAppPath();
         const fileNames = fs.listFileSync(appPath)
         const logFiles = fileNames.filter(fn => fn.endsWith(".xlog")).sort((a, b) => a > b ? 1 : -1)
-        return logFiles.length > 0 ? appPath + '/' + logFiles[logFiles.length - 1] : null;
+        let logFilePath = logFiles.length > 0 ? appPath + '/' + logFiles[logFiles.length - 1] : null;
+        if (logFilePath) {
+            let cacheLogFilePath = self.context!.cacheDir + '/' + logFilePath.substring(logFilePath.lastIndexOf('/') + 1);
+            fs.copyFileSync(logFilePath, cacheLogFilePath);
+            return cacheLogFilePath;
+        }
+        return null;
     }
 
     // 预加载数据
@@ -2992,7 +3042,7 @@ class WfcImpl {
         // 每 10 个群 2 秒
         estimatedTime += Math.round(groupIdIds.length / 10) * 2
 
-        return estimatedTime * 1000;
+        return (estimatedTime > 60 ? 60 : estimatedTime) * 1000;
     }
 
     _preloadGroupMemberUserInfos(memberIds: string[]) {

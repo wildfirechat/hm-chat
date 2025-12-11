@@ -3,9 +3,8 @@ import EventType from '@wfc/client/src/main/ets/wfc/client/wfcEvent'
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType'
 import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
-import { navigationDestinations } from '../navigationConfig'
+import { uikitNavigationDestinations } from '../uikitNavigationConfig'
 
-@Entry
 @Component
 export default struct FavGroupListPage {
     @State favGroupList: GroupInfo[] = []
@@ -53,7 +52,7 @@ export default struct FavGroupListPage {
                         .width('100%')
                         .padding({ left: 10, right: 10 })
                         .onClick(() => {
-                            this.mainNavPathStack.pushPathByName(navigationDestinations.ConversationPage, {
+                            this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ConversationPage, {
                                 'conversation': new Conversation(ConversationType.Group, groupInfo.target, 0)
                             } as Record<string, Object>)
                         })

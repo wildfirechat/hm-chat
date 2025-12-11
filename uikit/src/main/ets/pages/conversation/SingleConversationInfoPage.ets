@@ -7,11 +7,10 @@ import ConversationInfo from '@wfc/client/src/main/ets/wfc/model/conversationInf
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType';
 import GroupType from '@wfc/client/src/main/ets/wfc/model/groupType';
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo';
-import { navigationDestinations } from '../navigationConfig';
+import { uikitNavigationDestinations } from '../uikitNavigationConfig';
 import PickMultiContactModal from '../picker/PickMultiContactModal';
 
 @Preview
-@Entry
 @Component
 export default struct SingleConversationInfoPage {
     @State targetUserInfo: UserInfo = {} as UserInfo
@@ -31,6 +30,7 @@ export default struct SingleConversationInfoPage {
     pickMultiContactModal() {
         PickMultiContactModal({
             showPickContactModal: $showPickContactModal,
+            showFavGroup:false,
             initialCheckedUserIds: [this.conversationInfo!.conversation.target],
             uncheckableUserIds: [this.conversationInfo!.conversation.target]
 
@@ -78,8 +78,8 @@ export default struct SingleConversationInfoPage {
                                     groupName = groupName.substring(0, groupName.length - 1)
                                     wfc.createGroup('', GroupType.Normal, groupName, '', '', memberIds, '', [0], null, (groupId) => {
                                         let conversation = new Conversation(ConversationType.Group, groupId, 0);
-                                        this.mainNavPathStack.popToName(navigationDestinations.ConversationPage)
-                                        this.mainNavPathStack.replacePathByName(navigationDestinations.ConversationPage, {
+                                        this.mainNavPathStack.popToName(uikitNavigationDestinations.ConversationPage)
+                                        this.mainNavPathStack.replacePathByName(uikitNavigationDestinations.ConversationPage, {
                                             'conversation': conversation
                                         } as Record<string, Object>)
                                     }, err => {
@@ -138,13 +138,13 @@ export default struct SingleConversationInfoPage {
                         title: '查找聊天记录',
                     })
                         .onClick(() => {
-                            this.mainNavPathStack.pushPathByName(navigationDestinations.SearchConversationMessagePage, {
+                            this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.SearchConversationMessagePage, {
                                 'conversation': this.conversationInfo?.conversation
                             } as Record<string, Object>)
                         })
                     OptionItemView({ title: '文件记录' })
                         .onClick(() => {
-                            this.mainNavPathStack.pushPathByName(navigationDestinations.FileRecordPage, {
+                            this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.FileRecordPage, {
                                 'conversation': this.conversationInfo?.conversation,
                             } as Record<string, Object>)
                         })
@@ -198,8 +198,8 @@ export default struct SingleConversationInfoPage {
                                     fontColor: Color.Red,
                                     action: () => {
                                         let conversation = new Conversation(ConversationType.Single, 'uiuJuJcc', 0)
-                                        this.mainNavPathStack.popToName(navigationDestinations.ConversationPage)
-                                        this.mainNavPathStack.replacePathByName(navigationDestinations.ConversationPage, {
+                                        this.mainNavPathStack.popToName(uikitNavigationDestinations.ConversationPage)
+                                        this.mainNavPathStack.replacePathByName(uikitNavigationDestinations.ConversationPage, {
                                             'conversation': conversation
                                         } as Record<string, Object>)
                                     },

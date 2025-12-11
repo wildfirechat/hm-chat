@@ -19,12 +19,15 @@ import FileMessageContentView from './FileMessageContentView'
 import pasteboard from '@ohos.pasteboard'
 import CustomMessageContentType from '@wfc/client/src/main/ets/wfc_custom_message/customMessageContentType'
 import TestCustomMessageContentView from '../custom_message/testCustomMessageContentView'
-import { navigationDestinations } from '../../navigationConfig'
+import { uikitNavigationDestinations } from '../../uikitNavigationConfig'
 import ConferenceInviteMessageContentView from './ConferenceInviteMessageContentView'
 import CardMessageContentView from './CardMessageContentView'
 import appServer from '../../../api/appServer'
 import AppServerError from '../../../api/appServerError'
 import GroupMemberType from '@wfc/client/src/main/ets/wfc/model/groupMemberType'
+import ArticleMessageContentView from './ArticlesMessageContentView'
+import LinkMessageContentView from './LinkMessageContentView'
+import StreamingTextMessageContentView from './StreamingTextMessageContentView'
 
 @Component
 export default struct NormaMessageContentView {
@@ -64,6 +67,12 @@ export default struct NormaMessageContentView {
                 ConferenceInviteMessageContentView({ message: $message })
             } else if (this.message.messageContent.type === MessageContentType.UserCard) {
                 CardMessageContentView({ message: $message })
+            } else if (this.message.messageContent.type === MessageContentType.Link) {
+                LinkMessageContentView({ message: $message })
+            } else if (this.message.messageContent.type === MessageContentType.Streaming_Text_Generating) {
+                StreamingTextMessageContentView({ message: $message })
+            } else if (this.message.messageContent.type === MessageContentType.Streaming_Text_Generated) {
+                StreamingTextMessageContentView({ message: $message })
             }
             // 自定义消息配置 start
             else if (this.message!.messageContent.type === CustomMessageContentType.MESSAGE_CONTENT_TYPE_CUSTOM_MESSAGE_TEST) {
@@ -173,7 +182,7 @@ export default struct NormaMessageContentView {
                 title: '转发',
                 tag: 'forward',
                 action: () => {
-                    this.mainNavPathStack.pushPathByName(navigationDestinations.ForwardMessagePage,
+                    this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ForwardMessagePage,
                         {
                             'messages': [this.message]
                         } as Record<string, Object>
@@ -249,7 +258,7 @@ export default struct NormaMessageContentView {
         ]
 
         // do filter
-        return menus.filter(item =>!item.filter || item.filter())
+        return menus.filter(item => !item.filter || item.filter())
     }
 
     @Builder
@@ -288,14 +297,18 @@ export default struct NormaMessageContentView {
             let readReceipt: ReadReceipt = new ReadReceipt()
             readReceipt.conversationType = ConversationType.Group
 
-            let readCount = 0
+            // sender
+            let readCount = 1
             this.readEntries.forEach(readDt => {
                 if (readDt! >= message.timestamp) {
                     readCount++
                 }
             })
             readReceipt.readCount = readCount
-            let groupMembersJoinBeforeMessage = this.groupMembers.filter(member => member.createDt < message.timestamp)
+            // 未读列表，默认包含消息发送之后，加入的群成员
+            // 如果需要不包含的话，请过滤一下
+            //let groupMembersJoinBeforeMessage = this.groupMembers.filter(member => member.createDt < message.timestamp)
+            let groupMembersJoinBeforeMessage = this.groupMembers
             readReceipt.unreadCount = groupMembersJoinBeforeMessage.length - readCount
             this.readReceipt = readReceipt
         }

@@ -1,14 +1,10 @@
 import appServer from '../../api/appServer'
 import BasicDataSource from '../../common/BasicDataSource'
-import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
-import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import MessageContentType from '@wfc/client/src/main/ets/wfc/messages/messageContentType'
-import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
-import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType'
 import FavItem from '@wfc/client/src/main/ets/wfc/model/favItem'
 import { JSONObject } from '@wfc/client/src/main/ets/wfc/type/types'
 import { _reverseToJsLongString } from '@wfc/client/src/main/ets/wfc/util/longUtil'
-import { navigationDestinations } from '../navigationConfig'
+import { uikitNavigationDestinations } from '../uikitNavigationConfig'
 import { LengthUnit } from '@kit.ArkUI'
 import CompositeMessageContent from '@wfc/client/src/main/ets/wfc/messages/compositeMessageContent'
 import { getFiletypeIcon, humanSize, timeFormat } from '../../util/helper'
@@ -17,7 +13,6 @@ import Config from '@wfc/client/src/main/ets/config'
 import FileMessageContent from '@wfc/client/src/main/ets/wfc/messages/fileMessageContent'
 import { showToast } from '../../common/utils/Toast'
 
-@Entry
 @Component
 export default struct FavRecordPage {
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
@@ -77,13 +72,13 @@ export default struct FavRecordPage {
         let msg = FavItem.toMessage(favItem)
         let content = msg.messageContent
         if (content.type === MessageContentType.Text) {
-            this.mainNavPathStack.pushPathByName(navigationDestinations.TextMessagePreviewPage, {
+            this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.TextMessagePreviewPage, {
                 'message': msg
             } as Record<string, object>)
         } else if ([MessageContentType.Video, MessageContentType.Image].indexOf(content.type) >= 0) {
 
         } else if (content.type === MessageContentType.Composite_Message) {
-            this.mainNavPathStack.pushPathByName(navigationDestinations.CompositeMessagePreviewPage, {
+            this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.CompositeMessagePreviewPage, {
                 'message': msg
             } as Record<string, object>)
 

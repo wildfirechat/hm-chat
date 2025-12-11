@@ -1,8 +1,7 @@
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation';
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType';
-import { navigationDestinations } from '../navigationConfig';
+import { uikitNavigationDestinations } from '../uikitNavigationConfig';
 
-@Entry
 @Component
 export default struct ChatroomListPage {
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
@@ -43,7 +42,7 @@ export default struct ChatroomListPage {
                         .width('100%')
                         .padding({ left: 10, right: 10 })
                         .onClick(() => {
-                            this.mainNavPathStack.pushPathByName(navigationDestinations.ConversationPage, {
+                            this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ConversationPage, {
                                 'conversation': new Conversation(ConversationType.ChatRoom, chatroom.roomId, 0)
                             } as Record<string, Object>)
 

@@ -2,7 +2,6 @@ import { showToast } from '../../common/utils/Toast';
 import OptionItemView from '../../view/OptionItemView'
 import ToggleItemView from '../../view/ToggleItemView'
 
-@Entry
 @Preview
 @Component
 export default struct MessageAndNotificationPage {

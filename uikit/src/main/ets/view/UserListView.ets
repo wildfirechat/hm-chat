@@ -9,11 +9,11 @@ import { groupUserInfos } from '../helper/asyncTaskHelper'
 export default struct UserListView {
     @State filteredUserInfos: UserInfo[] = []
     @State searchInputViewMaxWidth: string = '100%'
-    private userInfos: UserInfo[] = []
-    private userInfoDataSource: UserInfoDataSource = new UserInfoDataSource()
-    private showCategory: boolean = false
-    private showSearchView: boolean = false
-    private onClickUser?: (userInfo: UserInfo) => void
+    userInfos: UserInfo[] = []
+    userInfoDataSource: UserInfoDataSource = new UserInfoDataSource()
+    showCategory: boolean = false
+    showSearchView: boolean = false
+    onClickUser?: (userInfo: UserInfo) => void
 
     aboutToAppear() {
         this.filteredUserInfos = this.userInfos

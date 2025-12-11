@@ -57,7 +57,7 @@ export default class ArticlesMessageContent extends MessageContent {
     }
 }
 
-class Article {
+export class Article {
     articleId = '';
     cover = '';
     title = '';

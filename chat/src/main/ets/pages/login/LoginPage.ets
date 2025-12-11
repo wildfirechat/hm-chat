@@ -267,9 +267,9 @@ struct LoginPage {
         let preference = await data_preferences.getPreferences(context.getApplicationContext(), 'wfcstore')
         const userId = res['userId'] as string
         const token = res['token'] as string
-        preference.put('userId', userId);
-        preference.put('token', token);
-        preference.flush()
+        preference.putSync('userId', userId);
+        preference.putSync('token', token);
+        await preference.flush()
 
         wfc.connect(userId, token);
         router.replaceUrl({

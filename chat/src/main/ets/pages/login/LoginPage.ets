@@ -184,6 +184,7 @@ struct LoginPage {
                             })
                             .catch((reason: Error) => {
                                 this.isLogin = false
+                                showToast(reason.message)
                                 console.error('login failed', reason)
                             })
 
@@ -196,6 +197,7 @@ struct LoginPage {
                             })
                             .catch((reason: Error) => {
                                 this.isLogin = false
+                                showToast(reason.message)
                                 console.error('login failed', reason)
                             })
 

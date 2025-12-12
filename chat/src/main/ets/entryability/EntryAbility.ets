@@ -15,6 +15,7 @@ import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation';
 import ConnectionStatus from '@wfc/client/src/main/ets/wfc/client/connectionStatus';
 import CustomMessageConfig from '@wfc/client/src/main/ets/wfc_custom_message/customMessageConfig';
 import uikit from '@wfc/uikit'
+import { LAST_LOGIN_MOBILE_KEY } from '../pages/login/LoginPage';
 
 
 export default class EntryAbility extends UIAbility {
@@ -169,6 +170,7 @@ export default class EntryAbility extends UIAbility {
                 this.isMaiPageLoaded = true;
             }
 
+            PersistentStorage.persistProp(LAST_LOGIN_MOBILE_KEY, '');
             hilog.info(0x0000, 'testTag', 'Succeeded in loading the content. Data: %{public}s', JSON.stringify(data) ?? '');
         });
     }

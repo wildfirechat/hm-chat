@@ -8,12 +8,17 @@ import { inputMethod } from '@kit.IMEKit';
 
 import('@wfc/uikit/src/main/ets/pages/misc/WebViewPageWithRouter') //引入共享包中的命名路由页面
 
+// 上一次登陆的手机号码
+export const LAST_LOGIN_MOBILE_KEY = "last_login_mobile_key";
 
 @Preview
 @Entry
 @Component
 struct LoginPage {
     @State message: string = '野火 IM'
+
+    // 上一次登陆的手机号
+    @StorageLink(LAST_LOGIN_MOBILE_KEY) lastLoginMobile: string = ''
 
     // 是否切换密码登陆
     @State isLoginByPassword: boolean = false
@@ -29,6 +34,11 @@ struct LoginPage {
     @State isAgreeUserAgreementAndPrivacyPolicy: boolean = false
 
     controller: TextInputController = new TextInputController()
+
+
+    aboutToAppear(): void {
+        this.phoneNumber = this.lastLoginMobile
+    }
 
     build() {
         Column() {
@@ -174,6 +184,7 @@ struct LoginPage {
                             })
                             .catch((reason: Error) => {
                                 this.isLogin = false
+                                showToast(reason.message)
                                 console.error('login failed', reason)
                             })
 
@@ -186,6 +197,7 @@ struct LoginPage {
                             })
                             .catch((reason: Error) => {
                                 this.isLogin = false
+                                showToast(reason.message)
                                 console.error('login failed', reason)
                             })
 
@@ -248,13 +260,16 @@ struct LoginPage {
 
     async onLoginSuccess(res: Record<string, Object>) {
         console.log('login success', res);
+        //  记录手机号
+        this.lastLoginMobile = this.phoneNumber
+
         let context = getContext(this) as common.UIAbilityContext;
         let preference = await data_preferences.getPreferences(context.getApplicationContext(), 'wfcstore')
         const userId = res['userId'] as string
         const token = res['token'] as string
-        preference.put('userId', userId);
-        preference.put('token', token);
-        preference.flush()
+        preference.putSync('userId', userId);
+        preference.putSync('token', token);
+        await preference.flush()
 
         wfc.connect(userId, token);
         router.replaceUrl({

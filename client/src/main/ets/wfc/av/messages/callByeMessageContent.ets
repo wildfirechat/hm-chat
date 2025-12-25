@@ -45,7 +45,6 @@ export default class CallByeMessageContent extends MessageContent {
         let obj = JSON.parse(str) as Data;
         this.reason = obj.r;
         this.inviteMsgUid = obj.u ? longValue(obj.u) : undefined;
-        this.callId = obj.c;
     }
 }
 

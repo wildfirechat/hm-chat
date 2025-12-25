@@ -14,7 +14,7 @@ export default class CallByeMessageContent extends MessageContent {
     reason = 0;
     inviteMsgUid: Long | undefined;
 
-    constructor(mentionedType = 0, mentionedTargets = []) {
+    constructor(mentionedType = 0, mentionedTargets:string[] = []) {
         super(MessageContentType.VOIP_CONTENT_TYPE_END, mentionedType, mentionedTargets);
     }
 
@@ -28,6 +28,7 @@ export default class CallByeMessageContent extends MessageContent {
         let obj = {
             r: this.reason,
             u: this.inviteMsgUid ? stringValue(this.inviteMsgUid) : undefined,
+            c: this.callId
         } as Data;
         let str = JSON.stringify(obj)
         str = _patchToJavaLong(str, 'u');
@@ -44,10 +45,12 @@ export default class CallByeMessageContent extends MessageContent {
         let obj = JSON.parse(str) as Data;
         this.reason = obj.r;
         this.inviteMsgUid = obj.u ? longValue(obj.u) : undefined;
+        this.callId = obj.c;
     }
 }
 
 class Data {
     r = 0;
-    u: string | undefined
+    u: string | undefined;
+    c: string
 }

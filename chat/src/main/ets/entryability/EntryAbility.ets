@@ -16,6 +16,8 @@ import ConnectionStatus from '@wfc/client/src/main/ets/wfc/client/connectionStat
 import CustomMessageConfig from '@wfc/client/src/main/ets/wfc_custom_message/customMessageConfig';
 import uikit from '@wfc/uikit'
 import { LAST_LOGIN_MOBILE_KEY } from '../pages/login/LoginPage';
+import { backgroundTaskManager } from '@kit.BackgroundTasksKit';
+import { deviceInfo } from '@kit.BasicServicesKit';
 
 
 export default class EntryAbility extends UIAbility {
@@ -27,6 +29,11 @@ export default class EntryAbility extends UIAbility {
     };
     private storage: LocalStorage = new LocalStorage(this.launchParams);
     private applicationContext?: common.ApplicationContext
+    private connectionStatus: number = -1;
+    // 申请短时任务ID
+    private suspendDelayId: number = 0;
+    // 本次申请短时任务的剩余时间
+    private suspendDelayTime: number = 0;
 
     async onCreate(want: Want, launchParam: AbilityConstant.LaunchParam) {
         hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onCreate');
@@ -38,6 +45,7 @@ export default class EntryAbility extends UIAbility {
         uikit.init(this.context)
 
         wfc.eventEmitter!.on(EventType.ConnectionStatusChanged, async (status: number) => {
+            this.connectionStatus = status;
             if (status === ConnectionStatus.ConnectionStatusConnected) {
                 try {
                     const pushToken: string = await pushService.getToken();
@@ -145,13 +153,51 @@ export default class EntryAbility extends UIAbility {
         hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onForeground');
         this.isInBackground = false;
         AppStorage.setOrCreate('isInBackground', false);
+        if (this.suspendDelayId) {
+            try {
+                backgroundTaskManager.cancelSuspendDelay(this.suspendDelayId);
+            } catch (error) {
+                console.error(`Operation cancelSuspendDelay failed. code is ${(error as BusinessError).code} message is ${(error as BusinessError).message}`);
+            }
+        }
     }
 
-    onBackground() {
+    async onBackground() {
         // Ability has back to background
         hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onBackground');
         this.isInBackground = true;
         AppStorage.setOrCreate('isInBackground', true);
+        // wfc.disconnect(false, false)
+        hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onBackground, to disconnected');
+        if ([ConnectionStatus.ConnectionStatusConnected, ConnectionStatus.ConnectionStatusReceiveing].indexOf(this.connectionStatus) === -1) {
+            return
+        }
+
+        try {
+            if (deviceInfo.sdkApiVersion >= 15) {
+                let transientTaskInfo = await backgroundTaskManager.getTransientTaskInfo()
+                if (transientTaskInfo.remainingQuota < 10 * 1000) {
+                    // TODO
+                    // force close tcp
+                    return;
+                }
+            }
+
+            let delayInfo = backgroundTaskManager.requestSuspendDelay('im', () => {
+                // 回调函数。应用申请的短时任务即将超时，通过此函数回调应用，执行一些清理和标注工作，并取消短时任务
+                console.info('suspend delay task will timeout');
+                try {
+                    backgroundTaskManager.cancelSuspendDelay(this.suspendDelayId);
+                } catch (error) {
+                    console.error(`Operation cancelSuspendDelay failed. code is ${(error as BusinessError).code} message is ${(error as BusinessError).message}`);
+                }
+            })
+            this.suspendDelayId = delayInfo.requestId;
+            this.suspendDelayTime = delayInfo.actualDelayTime;
+            console.log('requestSuspendDelay success', delayInfo.requestId, delayInfo.actualDelayTime)
+        } catch (error) {
+            console.error(`Operation requestSuspendDelay failed. code is ${(error as BusinessError).code} message is ${(error as BusinessError).message}`);
+        }
     }
 
     onBackPressed(): boolean {

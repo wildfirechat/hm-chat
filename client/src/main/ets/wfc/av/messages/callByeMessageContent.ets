@@ -51,5 +51,5 @@ export default class CallByeMessageContent extends MessageContent {
 class Data {
     r = 0;
     u: string | undefined;
-    c: string
+    c: string = ''
 }

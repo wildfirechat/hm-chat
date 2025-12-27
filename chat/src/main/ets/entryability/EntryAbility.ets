@@ -32,8 +32,7 @@ export default class EntryAbility extends UIAbility {
     private connectionStatus: number = -1;
     // 申请短时任务ID
     private suspendDelayId: number = 0;
-    // 本次申请短时任务的剩余时间
-    private suspendDelayTime: number = 0;
+    private cancelIMShortTaskTimerID: number = 0
 
     async onCreate(want: Want, launchParam: AbilityConstant.LaunchParam) {
         hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onCreate');
@@ -153,13 +152,7 @@ export default class EntryAbility extends UIAbility {
         hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onForeground');
         this.isInBackground = false;
         AppStorage.setOrCreate('isInBackground', false);
-        if (this.suspendDelayId) {
-            try {
-                backgroundTaskManager.cancelSuspendDelay(this.suspendDelayId);
-            } catch (error) {
-                console.error(`Operation cancelSuspendDelay failed. code is ${(error as BusinessError).code} message is ${(error as BusinessError).message}`);
-            }
-        }
+        this.cancelIMShortTask()
     }
 
     async onBackground() {
@@ -172,9 +165,17 @@ export default class EntryAbility extends UIAbility {
         if ([ConnectionStatus.ConnectionStatusConnected, ConnectionStatus.ConnectionStatusReceiveing].indexOf(this.connectionStatus) === -1) {
             return
         }
+        this.startIMShortTask();
 
+    }
+
+    onBackPressed(): boolean {
+        return true;
+    }
+
+    private async startIMShortTask() {
         try {
-            if (deviceInfo.sdkApiVersion >= 15) {
+            if (deviceInfo.sdkApiVersion >= 20) {
                 let transientTaskInfo = await backgroundTaskManager.getTransientTaskInfo()
                 if (transientTaskInfo.remainingQuota < 10 * 1000) {
                     // TODO
@@ -186,22 +187,33 @@ export default class EntryAbility extends UIAbility {
             let delayInfo = backgroundTaskManager.requestSuspendDelay('im', () => {
                 // 回调函数。应用申请的短时任务即将超时，通过此函数回调应用，执行一些清理和标注工作，并取消短时任务
                 console.info('suspend delay task will timeout');
-                try {
-                    backgroundTaskManager.cancelSuspendDelay(this.suspendDelayId);
-                } catch (error) {
-                    console.error(`Operation cancelSuspendDelay failed. code is ${(error as BusinessError).code} message is ${(error as BusinessError).message}`);
-                }
+                this.cancelIMShortTask()
             })
             this.suspendDelayId = delayInfo.requestId;
-            this.suspendDelayTime = delayInfo.actualDelayTime;
+            this.cancelIMShortTaskTimerID = setTimeout(() => {
+                this.cancelIMShortTask()
+                this.cancelIMShortTaskTimerID = 0;
+            }, 15 * 1000)
             console.log('requestSuspendDelay success', delayInfo.requestId, delayInfo.actualDelayTime)
         } catch (error) {
             console.error(`Operation requestSuspendDelay failed. code is ${(error as BusinessError).code} message is ${(error as BusinessError).message}`);
         }
     }
 
-    onBackPressed(): boolean {
-        return true;
+    private cancelIMShortTask() {
+        if (this.suspendDelayId > 0) {
+            try {
+                backgroundTaskManager.cancelSuspendDelay(this.suspendDelayId);
+                console.log('cancelSuspendDelay success', this.suspendDelayId)
+                this.suspendDelayId = 0
+            } catch (error) {
+                console.error(`Operation cancelSuspendDelay failed. code is ${(error as BusinessError).code} message is ${(error as BusinessError).message}`);
+            }
+        }
+        if (this.cancelIMShortTaskTimerID > 0) {
+            clearTimeout(this.cancelIMShortTaskTimerID)
+            this.cancelIMShortTaskTimerID = 0;
+        }
     }
 
     private loadContent(url: string) {

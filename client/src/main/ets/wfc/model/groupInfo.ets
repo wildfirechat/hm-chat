@@ -33,7 +33,7 @@ export default class GroupInfo {
     //0 正常；1 全局禁言
     mute = 0;
 
-    //在group type为Restricted时，0 开放加入权限（群成员可以拉人，用户也可以主动加入）；1 只能群成员拉人入群；2 只能群管理拉人入群
+    //在group type为Restricted时，0 开放加入权限（群成员可以拉人，用户也可以主动加入）；1 只能群成员拉人入群；2 只能群管理拉人入群; 3 加群需要验证
     joinType = 0;
 
     //是否运行群中普通成员私聊。0 允许，1不允许

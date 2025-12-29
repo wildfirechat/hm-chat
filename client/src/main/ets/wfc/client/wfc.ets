@@ -40,7 +40,8 @@ import UserOnlineState from '../model/userOnlineState';
 import UserSettingScope from './userSettingScope';
 import PCOnlineInfo from '../model/pcOnlineInfo';
 import UserSettingEntry from '../model/userSettingEntry';
-import { fileIo } from '@kit.CoreFileKit';
+import { JoinGroupRequest } from '../model/JoinGroupRequest';
+import fileIo from '@ohos.file.fs';
 
 const textEncoder = new util.TextEncoder('utf-8')
 
@@ -565,6 +566,88 @@ export class WfcManager {
      */
     async handleFriendRequest(userId: string, accept: boolean, extra: string, successCB: () => void, failCB: (err: number) => void) {
         impl.handleFriendRequest(userId, accept, extra, successCB, failCB);
+    }
+
+    /**
+     * 发送加群申请
+     * @param {string} groupId 群组ID
+     * @param {string[]} memberIds 被邀请的用户ID列表，如果是主动加入，该列表为空? 还是包含自己？ 参考handleFriendRequest，这里应该是被邀请人列表，如果是自己申请，就传[self.getUserId()]? 不对，看ProtoLogic.java的实现，memberIds如果是邀请别人就是被邀请的人。如果是自己申请，应该也是[自己]。
+     * @param {string} reason 申请理由
+     * @param {string} extra 扩展信息
+     * @param {function ()} successCB
+     * @param {function (number)} failCB
+     */
+    async sendJoinGroupRequest(groupId: string, memberIds: string[], reason: string, extra: string, successCB: SuccessCallback, failCB: FailCallback) {
+        impl.sendJoinGroupRequest(groupId, memberIds, reason, extra, successCB, failCB);
+    }
+
+    /**
+     * 处理加群申请
+     * @param {string} groupId 群组ID
+     * @param {string} memberId 申请人的ID
+     * @param {string} inviterId 邀请人的ID (如果存在)
+     * @param status  1是同意加群；2是拒绝加群。只有这2个值可选。
+     * @param {string} memberExtra
+     * @param {number[]} notifyLines
+     * @param {function ()} successCB
+     * @param {function (number)} failCB
+     */
+    async handleJoinGroupRequest(groupId: string, memberId: string, inviterId: string, status: number, memberExtra: string, notifyLines: number[], successCB: SuccessCallback, failCB: FailCallback) {
+        impl.handleJoinGroupRequest(groupId, memberId, inviterId, status, memberExtra, notifyLines, successCB, failCB);
+    }
+
+    /**
+     * 获取加群请求列表
+     *
+     * @param groupId 群组ID
+     * @param memberId 被邀请人用户ID，可以为空。
+     * @param status 0是未处理；1是同意的；2是拒绝的；-1是获取所有的。
+     * @return 加群请求列表
+     */
+    getJoinGroupRequests(groupId: string, memberId: string = '', status: number = -1): JoinGroupRequest[] {
+        return impl.getJoinGroupRequests(groupId, memberId, status);
+    }
+
+    /**
+     * 清除加群请求未读状态
+     * @param groupId 群组ID
+     * @param memberId 被邀请成员ID，可以为空
+     * @param inviter 邀请者ID，可以为空
+     */
+    clearJoinGroupRequest(groupId: string, memberId: string = '', inviterId: string = ''): boolean {
+        return impl.clearJoinGroupRequest(groupId, memberId, inviterId);
+    }
+
+    /**
+     * 获取所有加群请求未读状态
+     */
+    getAllJoinGroupRequestUnread(): number {
+        return impl.getAllJoinGroupRequestUnread();
+    }
+
+    /**
+     * 获取加群请求未读状态
+     * @param groupId 群组ID
+     */
+    getJoinGroupRequestUnread(groupId: string): number {
+        return impl.getJoinGroupRequestUnread(groupId);
+    }
+
+    /**
+     * 获取加群请求未读状态
+     * @param groupId 群组ID，不能为空.
+     */
+    clearJoinGroupRequestUnread(groupId: string) {
+        impl.clearJoinGroupRequestUnread(groupId);
+    }
+
+    /**
+     * 清除当前用户服务端的加群请求，不删除本地。如果要删除本地还需要多调用一次。
+     * @param successCB
+     * @param failCB
+     */
+    clearRemoteJoinGroupRequest(successCB: SuccessCallback, failCB: FailCallback) {
+        impl.clearRemoteJoinGroupRequest(successCB, failCB);
     }
 
     /**

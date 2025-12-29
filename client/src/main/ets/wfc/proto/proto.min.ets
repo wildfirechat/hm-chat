@@ -51,7 +51,7 @@ import Friend from '../model/friend';
 import MessageContent from '../messages/messageContent';
 import ModifyMyInfoEntry from '../model/modifyMyInfoEntry';
 import request from '@ohos.request';
-import { FailCallback, SuccessCallback, CallbackWithValue_1, CallbackWithValue_2 } from '../type/types';
+import { FailCallback, SuccessCallback, CallbackWithValue_1, CallbackWithValue_2, JSONArray, JSONObject } from '../type/types';
 import { uri } from '@kit.ArkTS';
 import { fileUri } from '@kit.CoreFileKit';
 import fs from '@ohos.file.fs';
@@ -59,6 +59,7 @@ import buffer from '@ohos.buffer';
 import { atob } from '../util/base64.min';
 import { deviceInfo } from '@kit.BasicServicesKit';
 import UserSettingEntry from '../model/userSettingEntry';
+import { JoinGroupRequest } from '../model/JoinGroupRequest';
 
 /**
  * java long 类型在 javascript 类型的映射说明:
@@ -339,6 +340,13 @@ class WfcImpl {
         self.eventEmitter!.emit(EventType.FriendRequestUpdate, ids);
     }
 
+    onJoinGroupRequestUpdate() {
+        if (!self.isLogined) {
+            return;
+        }
+        console.log('join group request update');
+        self.eventEmitter!.emit(EventType.GroupJoinRequestUpdate);
+    }
     onSecretChatStateChangedListener(targetId: string) {
         console.log('onSecretChatStateChangedListener', targetId);
         self.eventEmitter!.emit(EventType.SecretChatStateChange, targetId);
@@ -808,6 +816,67 @@ class WfcImpl {
         }, extra);
     }
 
+    sendJoinGroupRequest(groupId: string, memberIds: string[], reason: string, extra: string, successCB: SuccessCallback, failCB: FailCallback) {
+        protoProxy.sendJoinGroupRequest(groupId, memberIds, reason, extra, () => {
+            if (successCB) {
+                successCB();
+            }
+        }, (errorCode: number) => {
+            if (failCB) {
+                failCB(errorCode);
+            }
+        });
+    }
+
+    handleJoinGroupRequest(groupId: string, memberId: string, inviterId: string, status: number, memberExtra: string, notifyLines: number[], successCB: SuccessCallback, failCB: FailCallback) {
+        protoProxy.handleJoinGroupRequest(groupId, memberId, inviterId, status, memberExtra, notifyLines, () => {
+            if (successCB) {
+                successCB();
+            }
+        }, (errorCode: number) => {
+            if (failCB) {
+                failCB(errorCode);
+            }
+        });
+    }
+
+    getJoinGroupRequests(groupId: string, memberId: string, status: number): JoinGroupRequest[] {
+        let requestsStr:string = protoProxy.getJoinGroupRequests(groupId, memberId, status);
+        let objs = JSON.parse(requestsStr) as JSONArray;
+        let requests: JoinGroupRequest[] = [];
+        objs.forEach(o => {
+            requests.push(JoinGroupRequest.fromObj(o as JSONObject));
+        });
+        return requests;
+    }
+
+    clearJoinGroupRequest(groupId: string, memberId: string, inviterId: string): boolean {
+        return protoProxy.clearJoinGroupRequest(groupId, memberId, inviterId) === 1;
+    }
+
+    getAllJoinGroupRequestUnread(): number {
+        return protoProxy.getAllJoinGroupRequestUnread();
+    }
+
+    getJoinGroupRequestUnread(groupId: string): number {
+        return protoProxy.getJoinGroupRequestUnread(groupId);
+    }
+
+    clearJoinGroupRequestUnread(groupId: string) {
+        protoProxy.clearJoinGroupRequestUnread(groupId);
+    }
+
+    clearRemoteJoinGroupRequest(successCB: SuccessCallback, failCB: FailCallback) {
+        protoProxy.clearRemoteJoinGroupRequest(() => {
+            if (successCB) {
+                successCB();
+            }
+        }, (errorCode: number) => {
+            if (failCB) {
+                failCB(errorCode);
+            }
+        });
+    }
     isBlackListed(userId: string): boolean {
         return protoProxy.isBlackListed(userId) === 1;
     }
@@ -3013,6 +3082,7 @@ class WfcImpl {
         protoProxy.setSecretChatStateListener(self.onSecretChatStateChangedListener);
         protoProxy.setSecretMessageBurnStateListener(self.onSecretMessageStartBurningListener, self.onSecretMessageBurnedListener)
         protoProxy.setSecretMessageBurnStateListener(self.onSecretMessageStartBurningListener, self.onSecretMessageBurnedListener);
+        protoProxy.setJoinGroupRequestUpdateListener(self.onJoinGroupRequestUpdate);
     }
 
     _getLatestLogFilePath(): string | null {

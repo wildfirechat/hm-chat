@@ -42,6 +42,8 @@ export default class EventType {
     static SettingUpdate = 'settingUpdate';
     // function (groupId, GroupMember[]) {}
     static GroupMembersUpdate = 'groupMembersUpdate';
+    // function () {}
+    static GroupJoinRequestUpdate = 'groupJoinRequestUpdate';
 
     // function (event) {}
     static ConferenceEvent = 'conferenceEvent';

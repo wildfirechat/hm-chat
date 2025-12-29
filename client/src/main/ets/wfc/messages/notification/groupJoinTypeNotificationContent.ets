@@ -36,6 +36,9 @@ export default class GroupJoinTypeNotificationContent extends GroupNotificationC
             case 2:
                 notifyStr += " 关闭了加入群组功能";
                 break;
+            case 3:
+                notifyStr += " 开启了加群验证功能";
+                break;
             default:
                 break;
         }

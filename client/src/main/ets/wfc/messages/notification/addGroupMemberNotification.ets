@@ -11,6 +11,7 @@ import GroupNotificationContent from './groupNotification';
 export default class AddGroupMemberNotification extends GroupNotificationContent {
     invitor = '';
     invitees = [] as string[];
+    approver = ''
 
     constructor(invitor: string = '', invitees: string[] = []) {
         super(MessageContentType.AddGroupMember_Notification);
@@ -28,7 +29,13 @@ export default class AddGroupMemberNotification extends GroupNotificationContent
             }
         }
 
-        if (this.fromSelf) {
+        if (this.approver) {
+            if (this.approver === wfc.getUserId()) {
+                notifyStr = '您批准了'
+            } else {
+                notifyStr = wfc.getGroupMemberDisplayName(this.groupId, this.approver) + '批准了 '
+            }
+        } else if (this.fromSelf) {
             notifyStr = '您邀请:';
         } else {
             notifyStr = wfc.getGroupMemberDisplayName(this.groupId, this.invitor) + '邀请:';
@@ -48,6 +55,7 @@ export default class AddGroupMemberNotification extends GroupNotificationContent
         let obj = {
             g: this.groupId,
             o: this.invitor,
+            n: this.approver,
             ms: this.invitees,
         } as Data;
         payload.binaryContent = wfc.utf8_to_b64(JSON.stringify(obj));
@@ -61,11 +69,13 @@ export default class AddGroupMemberNotification extends GroupNotificationContent
         this.groupId = obj.g;
         this.invitor = obj.o;
         this.invitees = obj.ms;
+        this.approver = obj.n;
     }
 }
 
 class Data {
     g = '';
     o = '';
+    n = '';
     ms = [] as string[]
 }

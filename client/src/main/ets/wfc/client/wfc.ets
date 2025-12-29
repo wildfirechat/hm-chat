@@ -2178,6 +2178,19 @@ export class WfcManager {
         impl.uploadMedia(fileName, fileOrData, mediaType, successCB, failCB, progressCB);
     }
 
+    /**
+     * 上传媒体文件
+     * @param {string} filePath
+     * @param {number} mediaType 媒体类型，可选值参考{@link MessageContentMediaType}
+     * @param {function (string)} successCB 回调通知上传成功之后的url
+     * @param {function (number)} failCB
+     * @param {function (number, number)} progressCB
+     * @returns {Promise<void>}
+     */
+    async uploadMediaFile(filePath: string, mediaType: number, successCB: CallbackWithValue_1<string>, failCB: FailCallback, progressCB: CallbackWithValue_2<number, number>) {
+        impl.uploadMediaFile(filePath, mediaType, successCB, failCB, progressCB);
+    }
+
     getVersion() {
         // fixme
         //return impl.getVersion();

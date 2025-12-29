@@ -55,6 +55,7 @@ import { FailCallback, SuccessCallback, CallbackWithValue_1, CallbackWithValue_2
 import { uri } from '@kit.ArkTS';
 import { fileUri } from '@kit.CoreFileKit';
 import fs from '@ohos.file.fs';
+import buffer from '@ohos.buffer';
 import { atob } from '../util/base64.min';
 import { deviceInfo } from '@kit.BasicServicesKit';
 import UserSettingEntry from '../model/userSettingEntry';
@@ -2421,8 +2422,8 @@ class WfcImpl {
                         }
                     }
                 });
-                data.on('progress', (uploaded:number, total:number) => {
-                   progressCB && progressCB(uploaded, total)
+                data.on('progress', (uploaded: number, total: number) => {
+                    progressCB && progressCB(uploaded, total)
                 });
                 data.on('fail', (result: Array<request.TaskState>) => {
                     message && self.uploadingMap.delete(message.messageId)
@@ -2759,6 +2760,46 @@ class WfcImpl {
                         progressCB(current, total);
                     }
                 });
+        }
+    }
+
+    async uploadMediaFile(filePath: string, mediaType: number, successCB: CallbackWithValue_1<string>, failCB: FailCallback, progressCB: CallbackWithValue_2<number, number>) {
+        if (this.isTcpShortLink() && !this.isSupportBigFilesUpload()) {
+            console.error('TCP短连接不支持内置对象存储，请把对象存储切换到其他类型')
+            failCB && failCB(-1);
+            return;
+        }
+        if (this.isTcpShortLink() || this.isSupportBigFilesUpload()) {
+            this._uploadFile(null, null, filePath, null, mediaType, progressCB, successCB, failCB);
+        } else {
+            try {
+                let fileName = filePath.lastIndexOf('/') >= 0 ? filePath.substring(filePath.lastIndexOf('/') + 1) : new Date().getTime() + '';
+                let stat = await fs.stat(filePath)
+                let f = await fs.open(filePath, fs.AccessModeType.READ)
+                let buf = new ArrayBuffer(stat.size)
+                await fs.read(f.fd, buf)
+                let fileData:string = buffer.from(buf).toString('base64')
+
+                protoProxy.uploadMedia(fileName, fileData, mediaType,
+                    (remoteUrl: string) => {
+                        if (successCB) {
+                            successCB(remoteUrl);
+                        }
+                    },
+                    (errorCode: number) => {
+                        if (failCB) {
+                            failCB(errorCode);
+                        }
+                    },
+                    (current: number, total: number) => {
+                        if (progressCB) {
+                            progressCB(current, total);
+                        }
+                    });
+            } catch (e) {
+                console.error('uploadMediaFile error', e)
+                failCB && failCB(-1)
+            }
         }
     }
 

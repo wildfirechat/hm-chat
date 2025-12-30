@@ -33,6 +33,12 @@ export interface PortraitAndName {
     name: string
 }
 
+export interface PortraitNameAndUnreadJoinGroupRequestCount {
+    portrait: string,
+    name: string,
+    unreadJoinGroupRequestCount?: number
+}
+
 export interface VideoDurationAndThumbnail {
     duration: number,
     thumbnail: string,

@@ -47,6 +47,7 @@ export default struct ConversationListTab {
         wfc.eventEmitter!.on(EventType.ChannelInfosUpdate, this.onChannelInfosUpdate)
         wfc.eventEmitter!.on(EventType.MessageStatusUpdate, this.onMessageStatusUpdate)
         wfc.eventEmitter!.on(EventType.FriendListUpdate, this.onFriendListUpdate)
+        wfc.eventEmitter!.on(EventType.GroupJoinRequestUpdate, this.onGroupJoinRequestUpdate)
     }
 
     aboutToDisappear() {
@@ -62,6 +63,7 @@ export default struct ConversationListTab {
         wfc.eventEmitter!.off(EventType.ChannelInfosUpdate, this.onChannelInfosUpdate)
         wfc.eventEmitter!.off(EventType.MessageStatusUpdate, this.onMessageStatusUpdate)
         wfc.eventEmitter!.off(EventType.FriendListUpdate, this.onFriendListUpdate)
+        wfc.eventEmitter!.off(EventType.GroupJoinRequestUpdate, this.onGroupJoinRequestUpdate)
     }
 
     onPageShow() {
@@ -166,6 +168,9 @@ export default struct ConversationListTab {
     onFriendListUpdate = () => {
         this.loadConversationList();
     }
+    onGroupJoinRequestUpdate = () => {
+        this.loadConversationList();
+    }
 
     conversationKey(conversationInfo: ConversationInfo): string {
         let conversation = conversationInfo.conversation!;
@@ -192,6 +197,8 @@ export default struct ConversationListTab {
         } else if (conversation.type === ConversationType.Group) {
             let groupInfo = wfc.getGroupInfo(conversation.target);
             key += '-' + groupInfo.updateDt + '-' + groupInfo.remark
+            let unreadJoinGroupRequestCount = wfc.getJoinGroupRequestUnread(conversation.target)
+            key += '-' + unreadJoinGroupRequestCount
         } else if (conversation.type === ConversationType.Channel) {
             let channelInfo = wfc.getChannelInfo(conversation.target);
             key += '-' + channelInfo.updateDt

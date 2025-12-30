@@ -6,7 +6,7 @@ import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
 import ConversationInfo from '@wfc/client/src/main/ets/wfc/model/conversationInfo'
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType'
 import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
-import { PortraitAndName } from './Types'
+import { PortraitAndName, PortraitNameAndUnreadJoinGroupRequestCount } from './Types'
 
 export default class Utils {
     static rect_left: number
@@ -37,14 +37,23 @@ export default class Utils {
         }
     }
 
-    static computeConversationItemPortraitAndName(conversation: Conversation): Promise<PortraitAndName> {
+
+    static async computeConversationItemPortraitAndName(conversation: Conversation): Promise<PortraitAndName> {
+        let tmp = await Utils.computeConversationItemPortraitNameAndUnReadJoinGroupRequestCount(conversation)
+        return {
+            portrait: tmp.portrait,
+            name: tmp.name
+        }
+    }
+
+    static computeConversationItemPortraitNameAndUnReadJoinGroupRequestCount(conversation: Conversation, includeUnreadJoinGroupRequestCount = false): Promise<PortraitNameAndUnreadJoinGroupRequestCount> {
         return new Promise((resolve, reject) => {
 
             if (conversation.type === ConversationType.Single) {
                 let userInfo = wfc.getUserInfo(conversation.target)
                 resolve({
                     portrait: userInfo.portrait,
-                    name: userInfo.friendAlias ? userInfo.friendAlias : userInfo.displayName
+                    name: userInfo.friendAlias ? userInfo.friendAlias : userInfo.displayName,
                 })
                 // fixme
                 // wfc.getUserInfoEx(conversation.target, false, (info: UserInfo) => {
@@ -54,7 +63,8 @@ export default class Utils {
                 let groupInfo: GroupInfo = wfc.getGroupInfo(conversation.target)
                 resolve({
                     portrait: groupInfo.portrait!,
-                    name: groupInfo.remark ? groupInfo.remark : groupInfo.name
+                    name: groupInfo.remark ? groupInfo.remark : groupInfo.name,
+                    unreadJoinGroupRequestCount: includeUnreadJoinGroupRequestCount ? wfc.getJoinGroupRequestUnread(conversation.target) : 0
                 })
             } else if (conversation.type === ConversationType.Channel) {
                 let channelInfo: ChannelInfo = wfc.getChannelInfo(conversation.target, false)

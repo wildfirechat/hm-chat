@@ -23,6 +23,8 @@ import ModifyGroupInfoType from '@wfc/client/src/main/ets/wfc/model/modifyGroupI
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation';
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType';
 
+import JoinGroupRequestDialog from '../group/JoinGroupRequestDialog';
+
 @Preview
 @Component
 export default struct GroupConversationInfoPage {
@@ -42,6 +44,34 @@ export default struct GroupConversationInfoPage {
     private enableRemoveMember: boolean = false
     private maxShowGroupMemberCount = 20
     private toShowGroupMemberCount = this.maxShowGroupMemberCount
+
+    private joinGroupRequestDialogController?: CustomDialogController = new CustomDialogController({
+        builder: JoinGroupRequestDialog({
+            confirm: (text: string) => {
+                this.joinGroupRequestDialogController?.close()
+                this.sendJoinGroupRequest(text)
+            },
+            cancel: () => {
+                this.pendingMemberIds = []
+            }
+        }),
+        autoCancel: true,
+        alignment: DialogAlignment.Center,
+        customStyle: false
+    })
+    private pendingMemberIds: string[] = []
+
+    sendJoinGroupRequest(reason: string) {
+        if (this.pendingMemberIds.length > 0) {
+            wfc.sendJoinGroupRequest(this.groupInfo.target, this.pendingMemberIds, reason, '', () => {
+                showToast('已发送加群申请')
+                this.pendingMemberIds = []
+            }, err => {
+                showToast('发送加群申请失败：' + err)
+                this.pendingMemberIds = []
+            })
+        }
+    }
 
     aboutToAppear() {
         let params = this.mainNavPathStack.getParamByIndex(this.mainNavPathStack.size() - 1) as Record<string, Object>;
@@ -196,7 +226,12 @@ export default struct GroupConversationInfoPage {
                                                     this.groupMembers = wfc.getGroupMembers(this.conversationInfo!.conversation.target, false)
                                                     showToast('添加新群成员成功')
                                                 }, (err: number) => {
-                                                    showToast('添加新成员失败：' + err)
+                                                    if (err === 13) {
+                                                        this.pendingMemberIds = uids
+                                                        this.joinGroupRequestDialogController?.open()
+                                                    } else {
+                                                        showToast('添加新成员失败：' + err)
+                                                    }
                                                 })
                                             }
                                         }

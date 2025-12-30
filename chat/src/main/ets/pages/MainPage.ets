@@ -113,7 +113,7 @@ struct MainPage {
                 groupName += '、'
             })
             groupName = groupName.substring(0, groupName.length - 1)
-            wfc.createGroup('', GroupType.Normal, groupName, '', '', memberIds, '', [0], null, (groupId) => {
+            wfc.createGroup('', GroupType.Restricted, groupName, '', '', memberIds, '', [0], null, (groupId) => {
                 this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ConversationPage, {
                     'conversation': new Conversation(ConversationType.Group, groupId, 0)
                 } as Record<string, Object>)

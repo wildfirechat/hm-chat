@@ -10,6 +10,7 @@ export default struct ConversationInfoItemView {
     @State conversationInfo?: ConversationInfo = undefined
     @State conversationItemPortrait: string = ''
     @State conversationItemName: string = ''
+    @State unreadJoinGroupRequestCount: number = 0
     /**
      * 仅显示头像和名称
      */
@@ -17,10 +18,11 @@ export default struct ConversationInfoItemView {
 
     aboutToAppear() {
         if (this.conversationInfo!.conversation) {
-            Utils.computeConversationItemPortraitAndName(this.conversationInfo!.conversation)
+            Utils.computeConversationItemPortraitNameAndUnReadJoinGroupRequestCount(this.conversationInfo!.conversation, true)
                 .then(value => {
                     this.conversationItemPortrait = value.portrait
                     this.conversationItemName = value.name
+                    this.unreadJoinGroupRequestCount = value.unreadJoinGroupRequestCount ?? 0
                 })
         }
     }
@@ -31,6 +33,9 @@ export default struct ConversationInfoItemView {
 
     conversationInfoSpanText(): string {
         let spanText = ''
+        if (this.unreadJoinGroupRequestCount > 0) {
+            spanText = `[${this.unreadJoinGroupRequestCount}条加群申请]`
+        }
         let unreadCount = this.conversationInfo?.unreadCount
         if (unreadCount) {
             if (unreadCount.unreadMention + unreadCount.unreadMentionAll > 0) {
@@ -38,7 +43,7 @@ export default struct ConversationInfoItemView {
             }
         }
         if (this.conversationInfo?.draft) {
-            spanText = '[草稿] '
+            spanText += '[草稿] '
         }
         if (this.conversationInfo?.lastMessage && this.conversationInfo.lastMessage.status === MessageStatus.Sending) {
             spanText = '[发送中]'

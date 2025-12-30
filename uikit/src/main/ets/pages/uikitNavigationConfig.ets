@@ -40,6 +40,7 @@ import MultiAudioCallPage from './voip/MultiAudioCallPage'
 import MultiVideoCallPage from './voip/MultiVideoCallPage'
 import GroupMemberPermissionPage from './group/GroupMemberPermissionPage'
 import GroupMemberListPage from './group/GroupMemberListPage'
+import GroupJoinRequestListPage from './group/GroupJoinRequestListPage'
 import ChatroomConversationInfoPage from './conversation/ChatroomConversationInfoPage'
 import FileRecordPage from './me/FileRecordPage'
 import ConferenceInfoPage from './voip/conference/ConferenceInfoPage'
@@ -104,6 +105,7 @@ export class uikitNavigationDestinations {
     static StartConferencePage = UIKIT_NAV_DESTINATION_PREFIX + 'startConferencePage'
     static OrderConferencePage = UIKIT_NAV_DESTINATION_PREFIX + 'orderConferencePage'
     static ConferenceParticipantListPage = UIKIT_NAV_DESTINATION_PREFIX + 'conferenceParticipantListPage'
+    static GroupJoinRequestListPage = UIKIT_NAV_DESTINATION_PREFIX + 'groupJoinRequestListPage'
 }
 
 @Builder
@@ -208,6 +210,8 @@ export function UIKitPageMap(name: string) {
         OrderConferencePage()
     } else if (name === uikitNavigationDestinations.ConferenceParticipantListPage) {
         ConferenceParticipantListPage()
+    } else if (name === uikitNavigationDestinations.GroupJoinRequestListPage) {
+        GroupJoinRequestListPage()
     } else {
         NavDestination() {
             Column() {

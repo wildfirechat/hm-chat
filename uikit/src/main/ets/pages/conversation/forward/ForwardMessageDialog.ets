@@ -1,6 +1,8 @@
 import { PortraitAndName } from '../../../common/Types'
 import Utils from '../../../common/Utils'
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
+import { LengthUnit } from '@kit.ArkUI'
+import { flexButtonSpace } from '../../../common/Styles'
 
 @Preview
 @CustomDialog
@@ -79,7 +81,7 @@ export default struct ForwardMessageDialog {
                 .onChange((value: string) => {
                     this.textValue = value
                 })
-            Flex({ justifyContent: FlexAlign.End }) {
+            Flex({ justifyContent: FlexAlign.End, space: flexButtonSpace }) {
                 Button('取消')
                     .onClick(() => {
                         this.controller.close()

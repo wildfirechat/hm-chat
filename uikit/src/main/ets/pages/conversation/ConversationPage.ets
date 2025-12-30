@@ -43,6 +43,7 @@ import ArticleMessageContentView from './message/ArticlesMessageContentView'
 import ContextableNotificationMessageContentView from './message/ContextableNotificationMessageContentView'
 import StreamingTextGeneratingMessageContent from '@wfc/client/src/main/ets/wfc/messages/streamingTextGeneratingMessageContent'
 import StreamingTextGeneratedMessageContent from '@wfc/client/src/main/ets/wfc/messages/streamingTextGeneratedMessageContent'
+import GroupType from '@wfc/client/src/main/ets/wfc/model/groupType'
 
 @Component
 export default struct ConversationPage {
@@ -77,6 +78,7 @@ export default struct ConversationPage {
     @State focusMessageBackgroundColor: Color = Color.Green
     @State showGroupMemberNickName: boolean = false
     @State longPressToMentionUser: string = ''
+    @State unreadJoinGroupRequestCount: number = 0
 
     aboutToAppear() {
         this.audioPlayerManager.init(getContext(this))
@@ -99,6 +101,7 @@ export default struct ConversationPage {
         wfc.eventEmitter!.on(EventType.GroupInfosUpdate, this.onGroupInfosUpdate)
         wfc.eventEmitter!.on(EventType.ChannelInfosUpdate, this.onChannelInfosUpdate)
         wfc.eventEmitter!.on(EventType.ConversationInfoUpdate, this.onConversationInfoUpdate)
+        wfc.eventEmitter!.on(EventType.GroupJoinRequestUpdate, this.onGroupJoinRequestUpdate)
 
         // 监听 observer.on('navDestinationUpdate')，处理重入问题
     }
@@ -146,6 +149,7 @@ export default struct ConversationPage {
         wfc.eventEmitter!.off(EventType.GroupInfosUpdate, this.onGroupInfosUpdate)
         wfc.eventEmitter!.off(EventType.ChannelInfosUpdate, this.onChannelInfosUpdate)
         wfc.eventEmitter!.off(EventType.ConversationInfoUpdate, this.onConversationInfoUpdate)
+        wfc.eventEmitter!.off(EventType.GroupJoinRequestUpdate, this.onGroupJoinRequestUpdate)
 
         this.unwatchOnlineState(this.conversation!)
     }
@@ -254,6 +258,30 @@ export default struct ConversationPage {
         if (this.conversation.type === ConversationType.Group) {
             wfc.eventEmitter!.on(EventType.GroupMembersUpdate, this.onGroupMembersUpdate)
             this.showGroupMemberNickName = !wfc.isHiddenGroupMemberName(this.conversation.target)
+            this.updateUnreadJoinGroupRequestCount()
+        }
+    }
+
+    onGroupJoinRequestUpdate = () => {
+        this.updateUnreadJoinGroupRequestCount()
+    }
+
+    async updateUnreadJoinGroupRequestCount() {
+        if (this.conversation?.type !== ConversationType.Group) {
+            return
+        }
+        let groupInfo = wfc.getGroupInfo(this.conversation.target, false)
+        if (groupInfo.type !== GroupType.Restricted || groupInfo.joinType !== 3) {
+            return;
+        }
+
+        let groupMember = wfc.getGroupMember(this.conversation.target, wfc.getUserId())
+        if (groupInfo && groupMember && (groupMember.type === GroupMemberType.Owner || groupMember.type === GroupMemberType.Manager)) {
+            let unread = wfc.getJoinGroupRequestUnread(this.conversation.target)
+            console.log('updateUnreadJoinRequestCount', unread)
+            this.unreadJoinGroupRequestCount = unread
+        } else {
+            this.unreadJoinGroupRequestCount = 0
         }
     }
 
@@ -541,7 +569,6 @@ export default struct ConversationPage {
                                     .padding(5)
                                     .fontSize(13)
                             }
-
                             Blank()
                                 .width('100%')
                                 .layoutWeight(1)
@@ -821,10 +848,32 @@ export default struct ConversationPage {
                             .height('100%')
                             .backgroundColor('#A0E5E5E5')
                     }
+                    Column() {
+                        if (this.unreadJoinGroupRequestCount > 0) {
+                            Row() {
+                                Text(this.unreadJoinGroupRequestCount + '条加群申请')
+                                    .padding(5)
+                                    .fontSize(13)
+                                    .fontColor(Color.Red)
+                                    .backgroundColor(Color.White)
+                                    .width('100%')
+                                    .height(40)
+                                    .textAlign(TextAlign.Center)
+                                    .onClick(() => {
+                                        wfc.clearJoinGroupRequestUnread(this.conversation!.target)
+                                        this.unreadJoinGroupRequestCount = 0
+                                        this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.GroupJoinRequestListPage, {
+                                            'groupId': this.conversation?.target
+                                        } as Record<string, Object>)
+                                    })
+                            }
+                            .alignItems(VerticalAlign.Center)
+                        }
+                    }
                 }
                 .height('100%')
                 .width('100%')
-                .alignContent(Alignment.Center)
+                .alignContent(Alignment.Top)
             }
             .scrollBar(BarState.Off)
             .edgeEffect(EdgeEffect.Spring)

@@ -88,7 +88,7 @@ export default struct ConversationInputPanelView {
     @Link enableMultiCheck: boolean
     @Link checkedMessages: Message[]
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
-    private messageListScroller?: Scroller
+    messageListScroller?: Scroller
     private textInputBottomWhenBlur: number = 0
     private textInputController: TextInputController = new TextInputController()
     private recordTouchDownY: number = 0

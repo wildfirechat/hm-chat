@@ -5,6 +5,7 @@ import { uikitNavigationDestinations } from '../uikitNavigationConfig'
 import ActionSheetDialog from '../../view/ActionSheetDialog'
 import ModifyGroupInfoType from '@wfc/client/src/main/ets/wfc/model/modifyGroupInfoType'
 import { showToast } from '../../common/utils/Toast'
+import GroupType from '@wfc/client/src/main/ets/wfc/model/groupType'
 
 @Component
 export default struct GroupManagePage {
@@ -23,8 +24,14 @@ export default struct GroupManagePage {
             case 0:
                 str = '不限制加入'
                 break;
-            case 0:
+            case 1:
                 str = '群成员可以拉人'
+                break;
+            case 2:
+                str = '只能群管理拉人'
+                break;
+            case 3:
+                str = '需要群管理审批'
                 break;
             default:
                 str = '只能群管理拉人'
@@ -77,58 +84,66 @@ export default struct GroupManagePage {
                         .backgroundColor('#EDEDED')
                         .padding({ left: 10, top: 15, bottom: 5 })
                         .width('100%')
-                    OptionItemView({
-                        title: '加群方式',
-                        desc: this.joinType(),
-                        showDivider: true,
-                        showRightArrow: false
-                    })
-                        .onClick(() => {
-                            let func = (joinType: number) => {
-                                customDialogController.close()
-                                wfc.modifyGroupInfo(this.groupInfo!.target, ModifyGroupInfoType.Modify_Group_JoinType, joinType + '', [], null, () => {
-                                    this.groupInfo!.joinType = joinType
-                                }, err => {
-                                    showToast('修改加群方式失败')
-                                })
-                            }
-                            let customDialogController = new CustomDialogController({
-                                builder: ActionSheetDialog({
-                                    cancel: {
-                                        title: '取消',
-                                        action: () => {
-                                            customDialogController.close()
-                                        }
-                                    },
-                                    sheets: [
-                                        {
-                                            title: '不限制加入',
-                                            action: () => {
-                                                func(0)
-                                            }
-                                        },
-                                        {
-                                            title: '群成员可以拉人',
-                                            action: () => {
-                                                func(1)
-                                            }
-                                        },
-                                        {
-                                            title: '只能管理员拉人',
-                                            action: () => {
-                                                func(2)
-                                            }
-                                        },
-                                    ]
-                                }),
-                                autoCancel: true,
-                                alignment: DialogAlignment.Center,
-                                // gridCount: 4,
-                                customStyle: false
-                            })
-
-                            customDialogController.open()
+                    if (this.groupInfo?.type === GroupType.Restricted) {
+                        OptionItemView({
+                            title: '加群方式',
+                            desc: this.joinType(),
+                            showDivider: true,
+                            showRightArrow: false
                         })
+                            .onClick(() => {
+                                let func = (joinType: number) => {
+                                    customDialogController.close()
+                                    wfc.modifyGroupInfo(this.groupInfo!.target, ModifyGroupInfoType.Modify_Group_JoinType, joinType + '', [], null, () => {
+                                        this.groupInfo!.joinType = joinType
+                                    }, err => {
+                                        showToast('修改加群方式失败')
+                                    })
+                                }
+                                let customDialogController = new CustomDialogController({
+                                    builder: ActionSheetDialog({
+                                        cancel: {
+                                            title: '取消',
+                                            action: () => {
+                                                customDialogController.close()
+                                            }
+                                        },
+                                        sheets: [
+                                            {
+                                                title: '不限制加入',
+                                                action: () => {
+                                                    func(0)
+                                                }
+                                            },
+                                            {
+                                                title: '群成员可以拉人',
+                                                action: () => {
+                                                    func(1)
+                                                }
+                                            },
+                                            {
+                                                title: '只能管理员拉人',
+                                                action: () => {
+                                                    func(2)
+                                                }
+                                            },
+                                            {
+                                                title: '需要群管理审批',
+                                                action: () => {
+                                                    func(3)
+                                                }
+                                            },
+                                        ]
+                                    }),
+                                    autoCancel: true,
+                                    alignment: DialogAlignment.Center,
+                                    // gridCount: 4,
+                                    customStyle: false
+                                })
+
+                                customDialogController.open()
+                            })
+                    }
                     OptionItemView({
                         title: '查找方式',
                         desc: this.groupInfo?.searchable === 0 ? '允许查找' : '不允许查找',
@@ -220,8 +235,26 @@ export default struct GroupManagePage {
                             })
 
                             customDialogController.open()
-
                         })
+
+                    if (this.groupInfo?.type === GroupType.Restricted && this.groupInfo?.joinType === 3) {
+                        Column() {
+                            Text('加群申请')
+                                .textAlign(TextAlign.Start)
+                                .backgroundColor('#EDEDED')
+                                .padding({ left: 10, top: 15, bottom: 5 })
+                                .width('100%')
+                            OptionItemView({
+                                title: '加群申请',
+                                showDivider: false,
+                            })
+                                .onClick(() => {
+                                    this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.GroupJoinRequestListPage, {
+                                        'groupId': this.groupInfo?.target
+                                    } as Record<string, Object>)
+                                })
+                        }
+                    }
                 }
             }
             .backgroundColor(Color.White)

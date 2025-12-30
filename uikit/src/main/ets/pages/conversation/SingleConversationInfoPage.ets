@@ -30,7 +30,7 @@ export default struct SingleConversationInfoPage {
     pickMultiContactModal() {
         PickMultiContactModal({
             showPickContactModal: $showPickContactModal,
-            showFavGroup:false,
+            showFavGroup: false,
             initialCheckedUserIds: [this.conversationInfo!.conversation.target],
             uncheckableUserIds: [this.conversationInfo!.conversation.target]
 
@@ -76,7 +76,7 @@ export default struct SingleConversationInfoPage {
                                         groupName += '、'
                                     })
                                     groupName = groupName.substring(0, groupName.length - 1)
-                                    wfc.createGroup('', GroupType.Normal, groupName, '', '', memberIds, '', [0], null, (groupId) => {
+                                    wfc.createGroup('', GroupType.Restricted, groupName, '', '', memberIds, '', [0], null, (groupId) => {
                                         let conversation = new Conversation(ConversationType.Group, groupId, 0);
                                         this.mainNavPathStack.popToName(uikitNavigationDestinations.ConversationPage)
                                         this.mainNavPathStack.replacePathByName(uikitNavigationDestinations.ConversationPage, {

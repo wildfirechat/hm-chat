@@ -23,31 +23,41 @@ class AppServer {
     constructor() {
     }
 
-    requestAuthCode(mobile: string) {
-        return this._post('/send_code', { 'mobile': mobile } as Record<string, string>)
+    requestAuthCode(mobile: string, slideVerifyToken?: string) {
+        let params = { 'mobile': mobile } as Record<string, Object>
+        if (slideVerifyToken) {
+            params['slideVerifyToken'] = slideVerifyToken
+        }
+        return this._post('/send_code', params)
     }
 
     requestDestroyAuthCode() {
         return this._post('/send_destroy_code')
     }
 
-    loginWithAuthCode(phone: string, authCode: string) {
+    loginWithAuthCode(phone: string, authCode: string, slideVerifyToken?: string) {
         let obj = {
             'mobile': phone,
             'code': authCode,
             'platform': Config.getWFCPlatform(),
             'clientId': wfc.getClientId(),
         } as Record<string, Object>
+        if (slideVerifyToken) {
+            obj['slideVerifyToken'] = slideVerifyToken
+        }
         return this._post('/login', obj)
     }
 
-    loinWithPassword(phone: string, password: string) {
+    loinWithPassword(phone: string, password: string, slideVerifyToken?: string) {
         let obj = {
             'mobile': phone,
             'password': password,
             'platform': Config.getWFCPlatform(),
             'clientId': wfc.getClientId(),
         } as Record<string, Object>
+        if (slideVerifyToken) {
+            obj['slideVerifyToken'] = slideVerifyToken
+        }
         return this._post('/login_pwd', obj)
     }
 
@@ -107,11 +117,27 @@ class AppServer {
         }
     }
 
-    changePassword(oldPassword: string, newPassword: string) {
-        return this._post('/change_pwd', {
+    changePassword(oldPassword: string, newPassword: string, slideVerifyToken?: string) {
+        let params = {
             'oldPassword': oldPassword,
             'newPassword': newPassword
-        } as JSONObject)
+        } as JSONObject
+        if (slideVerifyToken) {
+            params['slideVerifyToken'] = slideVerifyToken
+        }
+        return this._post('/change_pwd', params)
+    }
+
+    // 滑动验证相关 API
+    getSlideVerify() {
+        return this._post('/slide_verify/generate', {} as JSONObject, false)
+    }
+
+    verifySlide(token: string, x: number) {
+        return this._post('/slide_verify/verify', {
+            'token': token,
+            'x': x
+        } as JSONObject, true) // rawResponseData = true，获取完整响应
     }
 
     requestResetPasswordAuthCode(phone: string) {

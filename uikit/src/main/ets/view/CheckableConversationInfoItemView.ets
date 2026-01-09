@@ -2,19 +2,23 @@ import Utils from '../common/Utils';
 import { timeFormat } from '../util/helper';
 import ConversationInfo from '@wfc/client/src/main/ets/wfc/model/conversationInfo';
 import MessageStatus from '@wfc/client/src/main/ets/wfc/messages/messageStatus';
+import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation';
 
 @Component
 @Preview
-export default struct ConversationInfoItemView {
+export default struct CheckableConversationInfoItemView {
     conversationInfo?: ConversationInfo = undefined
     @State conversationItemPortrait: string = ''
     @State conversationItemName: string = ''
     @State unreadJoinGroupRequestCount: number = 0
+    @State _checked: boolean = false
+    @Link checkedConversations: Conversation[]
 
     /**
      * 仅显示头像和名称
      */
     basicMode: boolean = false
+    enableCheck: boolean = false
 
     aboutToAppear() {
         if (this.conversationInfo!.conversation) {
@@ -25,6 +29,10 @@ export default struct ConversationInfoItemView {
                     this.unreadJoinGroupRequestCount = value.unreadJoinGroupRequestCount ?? 0
                 })
         }
+    }
+
+    isChecked() {
+        return this.checkedConversations.findIndex(conv => Conversation.equal(conv, this.conversationInfo!.conversation)) >= 0
     }
 
     conversationUnreadCount() {
@@ -55,6 +63,13 @@ export default struct ConversationInfoItemView {
         Column() {
             Row() {
                 Row() {
+                    if (this.enableCheck) {
+                        Checkbox()
+                            .select(this.isChecked())
+                            .enabled(true)
+                            .hitTestBehavior(HitTestMode.None)
+                            .margin({right: 8})
+                    }
                     if (this.basicMode) {
                         Image(this.conversationItemPortrait)
                             .alt($r('app.media.avatar_def'))
@@ -96,8 +111,8 @@ export default struct ConversationInfoItemView {
                         }
                     }
                 }
-                .width(64)
                 .height(64)
+                .padding({left: 10, right: 10})
                 .justifyContent(FlexAlign.Center)
                 .alignItems(VerticalAlign.Center)
 

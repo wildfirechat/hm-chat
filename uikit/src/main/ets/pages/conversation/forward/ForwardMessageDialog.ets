@@ -61,8 +61,14 @@ export default struct ForwardMessageDialog {
                     .fontSize(13)
                     .fontColor('#989898')
                     .margin({ top: 15 })
-                    .padding({ top: 5, bottom: 5 })
+                    .padding({
+                        left: 20,
+                        right: 20,
+                        top: 10,
+                        bottom: 10
+                    })
                     .maxLines(3)
+                    .borderRadius(4)
                     .width('100%')
                     .textOverflow({ overflow: TextOverflow.Ellipsis })
                     .backgroundColor('#E5E5E5')

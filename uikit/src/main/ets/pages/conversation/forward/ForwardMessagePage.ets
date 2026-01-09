@@ -21,6 +21,9 @@ import MessageContent from '@wfc/client/src/main/ets/wfc/messages/messageContent
 import CallStartMessageContent from '@wfc/client/src/main/ets/wfc/av/messages/callStartMessageContent'
 import SoundMessageContent from '@wfc/client/src/main/ets/wfc/messages/soundMessageContent'
 import { window } from '@kit.ArkUI'
+import CheckableConversationInfoItemView from '../../../view/CheckableConversationInfoItemView'
+import { thirdPaymentService } from '@kit.PaymentKit'
+import ConversationPortraitView from '../../../view/ConversationPortraitView'
 
 @Component
 @Preview
@@ -32,6 +35,10 @@ export default struct ForwardMessagePage {
     private forwardType: 'oneByOne' | 'compose' = 'oneByOne'
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
     @State showPickContactModal: boolean = false
+    @State enableMultiCheck: boolean = false;
+    @State checkedConversations: Conversation[] = []
+    @State searchInputViewMaxWidth: string = '100%'
+    private checkedUserListScroller: Scroller = new Scroller()
 
     aboutToAppear() {
         this.recentConversationInfos = wfc.getConversationInfoList([0, 1, 2, 3], [0, 1]);
@@ -53,13 +60,27 @@ export default struct ForwardMessagePage {
         win?.setWindowLayoutFullScreen(false)
     }
 
+    private toggleConversation(conv: Conversation) {
+        let index = this.checkedConversations.findIndex(c => Conversation.equal(c, conv))
+        if (index >= 0) {
+            this.checkedConversations.splice(index, 1)
+        } else {
+            this.checkedConversations.push(conv)
+        }
+    }
+
     private searchModules: SearchModule[] = [
         {
             tag: 'contact',
             onSearchResultItemClick: value => {
                 let userInfo = value as UserInfo
                 let conversation = new Conversation(ConversationType.Single, userInfo.uid, 0)
-                this.forwardMessage([conversation])
+                if (this.enableMultiCheck) {
+                    this.toggleConversation(conversation)
+                } else {
+                    this.forwardMessage([conversation])
+                }
+                this.keyword = ''
             }
         },
         {
@@ -67,7 +88,12 @@ export default struct ForwardMessagePage {
             onSearchResultItemClick: value => {
                 let groupInfo = value as GroupInfo
                 let conversation = new Conversation(ConversationType.Group, groupInfo.target, 0)
-                this.forwardMessage([conversation])
+                if (this.enableMultiCheck) {
+                    this.toggleConversation(conversation)
+                } else {
+                    this.forwardMessage([conversation])
+                }
+                this.keyword = ''
             }
         },
     ]
@@ -215,31 +241,153 @@ export default struct ForwardMessagePage {
             .backgroundColor(Color.White)
     }
 
+    updateSearchInputViewWidthAndScroll() {
+        let checkedConvWidth = 100 / 8 * this.checkedConversations.length
+        if (checkedConvWidth > 75) {
+            this.searchInputViewMaxWidth = '25%'
+        } else {
+            this.searchInputViewMaxWidth = (100 - checkedConvWidth) + '%'
+        }
+        this.checkedUserListScroller.scrollEdge(Edge.End)
+    }
+
     build() {
         NavDestination() {
-            Column() {
-                Row() {
-                    TextInput({ placeholder: '搜索...' })
-                        .type(InputType.Normal)
-                        .layoutWeight(1)
-                        .borderRadius(4)
-                        .onChange((value: string) => {
-                            this.keyword = value
-                        })
-                }
-                .padding(10)
-                .width('100%')
+            Stack() {
 
-                Stack() {
-                    Column() {
-                        List() {
+                Column() {
+                    Row() {
+                        List({ scroller: this.checkedUserListScroller }) {
+                            ForEach(this.checkedConversations, (conv: Conversation) => {
+                                ListItem() {
+                                    ConversationPortraitView({
+                                        conversation: conv
+                                    })
+                                        .width(40)
+                                        .height(40)
+                                        .padding(2)
+                                        .borderRadius(4)
+                                        .onClick(() => {
+                                            this.toggleConversation(conv)
+                                            this.updateSearchInputViewWidthAndScroll()
+                                        })
+                                }
+                            }, (conv: Conversation) => conv.type + '-' + conv.target + '-' + conv.line)
+
+                            // ForEach(this.checkedOrganizations, (org: Organization) => {
+                            //     ListItem() {
+                            //         Image(org.portraitUrl)
+                            //             .alt($r('app.media.ic_deparment'))
+                            //             .width(40)
+                            //             .height(40)
+                            //             .borderRadius(4)
+                            //             .margin({ left: 10 })
+                            //             .onClick(() => {
+                            //                 this.checkedOrganizations = this.checkedOrganizations.filter(o => o.id !== org.id)
+                            //             })
+                            //     }
+                            // }, (org: Organization) => 'org-' + org.id)
+                            //
+                            // ForEach(this.checkedEmployees, (employee: Employee) => {
+                            //     ListItem() {
+                            //         Image(employee.portraitUrl)
+                            //             .alt($r('app.media.avatar_def'))
+                            //             .width(40)
+                            //             .height(40)
+                            //             .borderRadius(4)
+                            //             .margin({ left: 10 })
+                            //             .onClick(() => {
+                            //                 this.checkedEmployees = this.checkedEmployees.filter(e => e.employeeId !== employee.employeeId)
+                            //             })
+                            //     }
+                            // }, (e: Employee) => e.employeeId)
+
                             ListItem() {
-                                Text('创建新聊天')
-                                    .fontColor('#989898')
-                                    .fontSize(13)
-                                    .width('100%')
-                                    .height(40)
-                                    .padding({ left: 10, right: 10 })
+                                Row() {
+                                    TextInput({ placeholder: '搜索', text: this.keyword })
+                                        .onChange((value: string) => {
+                                            this.keyword = value
+                                        })
+                                        .borderRadius(4)
+                                }
+                                .constraintSize({ minWidth: '25%', maxWidth: this.searchInputViewMaxWidth })
+                            }
+                        }
+                        .scrollBar(BarState.Off)
+                        .listDirection(Axis.Horizontal)
+                        .width('100%')
+                        .height(60)
+                        .alignListItem(ListItemAlign.Center)
+                    }
+                    .padding({ left: 10, right: 10 })
+                    .width('100%')
+
+                    Stack() {
+                        Column() {
+                            List() {
+                                if (!this.enableMultiCheck) {
+                                    ListItem() {
+                                        Text('创建新聊天')
+                                            .fontColor('#989898')
+                                            .fontSize(13)
+                                            .width('100%')
+                                            .height(40)
+                                            .padding({ left: 10, right: 10 })
+                                            .stateStyles({
+                                                pressed: {
+                                                    .backgroundColor('#E5E5E5')
+                                                },
+                                                normal: {
+                                                    .backgroundColor(Color.White)
+                                                }
+                                            })
+                                            .enabled(true)
+                                            .onClick(() => {
+                                                this.showPickContactModal = true
+                                            })
+                                    }
+                                    .bindContentCover($$this.showPickContactModal, this.pickMultiContactModal(), {
+                                        modalTransition: ModalTransition.DEFAULT,
+                                        onAppear: () => {
+                                        },
+                                    })
+                                }
+
+                                ListItem() {
+                                    Text('最近聊天')
+                                        .fontColor('#989898')
+                                        .fontSize(13)
+                                        .width('100%')
+                                        .height(40)
+                                        .backgroundColor('#E5E5E5')
+                                        .padding({ left: 10, right: 10 })
+                                }
+
+                                ForEach(this.recentConversationInfos, (info: ConversationInfo, index: number) => {
+                                    ListItem() {
+                                        if (this.enableMultiCheck) {
+                                            CheckableConversationInfoItemView({
+                                                checkedConversations: $checkedConversations,
+                                                conversationInfo: info,
+                                                basicMode: true,
+                                                enableCheck: true
+                                            })
+                                                .width('100%')
+                                                .onClick(() => {
+                                                    this.toggleConversation(info.conversation)
+                                                    this.updateSearchInputViewWidthAndScroll();
+                                                })
+
+                                        } else {
+                                            ConversationInfoItemView({
+                                                conversationInfo: info,
+                                                basicMode: true
+                                            })
+                                                .onClick(() => {
+                                                    this.forwardMessage([info.conversation])
+                                                })
+                                        }
+                                    }
                                     .stateStyles({
                                         pressed: {
                                             .backgroundColor('#E5E5E5')
@@ -248,67 +396,75 @@ export default struct ForwardMessagePage {
                                             .backgroundColor(Color.White)
                                         }
                                     })
-                                    .enabled(true)
-                                    .onClick(() => {
-                                        this.showPickContactModal = true
-                                    })
+                                    .width("100%")
+                                }, (info: ConversationInfo) => info.conversation.type + info.conversation.target + '-' + info.conversation.line)
                             }
-                            .bindContentCover($$this.showPickContactModal, this.pickMultiContactModal(), {
-                                modalTransition: ModalTransition.DEFAULT,
-                                onAppear: () => {
-                                },
+                        }
+                        .height('100%')
+                        .width('100%')
+
+                        if (this.keyword) {
+                            SearchResultView({
+                                keyword: this.keyword,
+                                searchModules: this.searchModules
                             })
-
-                            ListItem() {
-                                Text('最近聊天')
-                                    .fontColor('#989898')
-                                    .fontSize(13)
-                                    .width('100%')
-                                    .height(40)
-                                    .backgroundColor('#E5E5E5')
-                                    .padding({ left: 10, right: 10 })
-                            }
-
-                            ForEach(this.recentConversationInfos, (info: ConversationInfo, index: number) => {
-                                ListItem() {
-                                    ConversationInfoItemView({
-                                        conversationInfo: info,
-                                        basicMode: true
-                                    })
-                                        .onClick(() => {
-                                            this.forwardMessage([info.conversation])
-                                        })
-                                }
-                                .stateStyles({
-                                    pressed: {
-                                        .backgroundColor('#E5E5E5')
-                                    },
-                                    normal: {
-                                        .backgroundColor(Color.White)
-                                    }
-                                })
-                            }, (info: ConversationInfo) => info.conversation.type + info.conversation.target + '-' + info.conversation.line)
+                                .height('100%')
+                                .backgroundColor(Color.White)
                         }
                     }
-                    .height('100%')
-
-                    if (this.keyword) {
-                        SearchResultView({
-                            keyword: this.keyword,
-                            searchModules: this.searchModules
-                        })
-                            .height('100%')
-                            .backgroundColor(Color.White)
-                    }
+                    .width('100%')
+                    .layoutWeight(1)
                 }
+                .padding({ bottom: 40 })
                 .width('100%')
-                .layoutWeight(1)
+
+                if (this.enableMultiCheck) {
+                    Row() {
+                        Text(`已选 ${this.checkedConversations.length} 人`)
+                        Button('发送')
+                            .type(ButtonType.Normal)
+                            .height(30)
+                            .width(60)
+                            .borderRadius(4)
+                            .enabled(this.checkedConversations.length > 0)
+                            .onClick(e => {
+                                this.forwardMessage(this.checkedConversations)
+                            })
+                    }
+                    .padding(10)
+                    .height(40)
+                    .width('100%')
+                    .justifyContent(FlexAlign.SpaceBetween)
+                    .alignItems(VerticalAlign.Center)
+                }
             }
-            .height('100%')
+            .alignContent(Alignment.Bottom)
             .width('100%')
+            .height('100%')
         }
-        .title('选择一个聊天')
+        .title(this.enableMultiCheck ? '选择多个聊天' : '选择一个聊天')
+        .menus(this.NavigationMenus())
         .height('100%')
         .width('100%')
+    }
+
+    @Builder
+    NavigationMenus() {
+        Row() {
+            Text(this.enableMultiCheck ? '取消多选' : '多选')
+                .height(30)
+                .fontSize(15)
+                .fontColor(Color.Black)
+                .padding({ right: 16 })
+                .onClick(() => {
+                    this.enableMultiCheck = !this.enableMultiCheck
+                    if (!this.enableMultiCheck) {
+                        this.checkedConversations = []
+                        this.searchInputViewMaxWidth = '100%'
+                    }
+                })
+        }
+        .height('100%')
+        .alignItems(VerticalAlign.Center)
     }
 }

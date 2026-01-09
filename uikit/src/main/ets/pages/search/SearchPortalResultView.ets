@@ -26,7 +26,7 @@ export default struct SearchResultView {
     @State conversationSearchResults: ConversationSearchResultWrapper[] = []
     @State expandConversationSearchResults: boolean = false
     @Prop @Watch('onSearchKeywordUpdate') keyword: string
-    private searchModules: SearchModule[] = []
+    searchModules: SearchModule[] = []
 
     aboutToAppear() {
         if (this.keyword) {

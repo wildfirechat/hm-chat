@@ -1,13 +1,5 @@
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
-import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
-import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType'
-import CheckableUserListView from '../../view/CheckableUserListView'
 import { loadContactUserInfos } from '../../helper/asyncTaskHelper'
-import Organization from '../../api/model/organization'
-import Employee from '../../api/model/employee'
-import orgServer from '../../api/orgServer'
-import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
-import { uikitNavigationDestinations } from '../uikitNavigationConfig'
 import UserListView from '../../view/UserListView'
 
 @Component

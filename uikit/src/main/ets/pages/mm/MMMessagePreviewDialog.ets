@@ -20,6 +20,7 @@ export default struct MMMessagePreviewDialog {
     @State index: number = 0
     @State bgColor: string = '#000000'
     @State marginTop: number = 0
+    @State currentScale: number = 1.0
     private isLoadingOldMessage: boolean = false
     private isLoadingNewMessage: boolean = false
     private panOption: PanGestureOptions = new PanGestureOptions({ direction: PanDirection.Down });
@@ -69,21 +70,25 @@ export default struct MMMessagePreviewDialog {
 
     onActionUpdate(event: GestureEvent) {
         if (event.offsetY > 0) {
-            let alpha = Math.ceil((1 - (vp2px(event.offsetY) / this.displayHeight)) * 255)
-            this.bgColor = `#${alpha.toString(16)}000000`
+            let ratio = vp2px(event.offsetY) / this.displayHeight
+            let alpha = Math.ceil((1 - ratio) * 255)
+            this.bgColor = `#${alpha.toString(16).padStart(2, '0')}000000`
             this.marginTop = event.offsetY;
+            this.currentScale = 1 - ratio * 1.2
         }
     }
 
     onActionEnd() {
         animateTo({ curve: curves.responsiveSpringMotion() }, () => {
-            if (vp2px(this.marginTop) > this.displayHeight * 0.5) {
+            if (vp2px(this.marginTop) > this.displayHeight * 0.15) { // Threshold 0.15
                 this.bgColor = '#00000000'
                 this.marginTop = this.displayHeight
+                this.currentScale = 0.2
                 this.controller.close()
             } else {
                 this.bgColor = '#000000'
                 this.marginTop = 0
+                this.currentScale = 1.0
             }
         })
     }
@@ -100,6 +105,7 @@ export default struct MMMessagePreviewDialog {
                             .width('100%')
                             .height('100%')// .backgroundColor('#EDEDED')
                                 // .backgroundColor(this.bgColor)
+                            .scale({ x: this.currentScale, y: this.currentScale, centerX: '50%', centerY: '50%' })
                             .draggable(true)
                             .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM])
                             .gesture(// 绑定PanGesture事件，监听拖拽动作
@@ -129,6 +135,7 @@ export default struct MMMessagePreviewDialog {
                             .width('100%')
                             .height('100%')
                             .margin({ top: this.marginTop })
+                            .scale({ x: this.currentScale, y: this.currentScale, centerX: '50%', centerY: '50%' })
                             .draggable(false)
                             .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM])
                             .gesture(// 绑定PanGesture事件，监听拖拽动作
@@ -233,6 +240,7 @@ export default struct MMMessagePreviewDialog {
                 .justifyContent(FlexAlign.Center)
                 .alignItems(HorizontalAlign.Center)
                 .margin({ top: this.marginTop })
+                .scale({ x: this.currentScale, y: this.currentScale, centerX: '50%', centerY: '50%' })
             }
 
             Column() {

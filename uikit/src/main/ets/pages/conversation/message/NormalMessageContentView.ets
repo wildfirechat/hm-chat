@@ -28,6 +28,8 @@ import GroupMemberType from '@wfc/client/src/main/ets/wfc/model/groupMemberType'
 import ArticleMessageContentView from './ArticlesMessageContentView'
 import LinkMessageContentView from './LinkMessageContentView'
 import StreamingTextMessageContentView from './StreamingTextMessageContentView'
+import { ScalingMode } from '@ohos/webrtc'
+import { trustedAppService } from '@kit.DeviceSecurityKit'
 
 @Component
 export default struct NormaMessageContentView {
@@ -104,8 +106,10 @@ export default struct NormaMessageContentView {
                 }
             }
         }
-        // .alignItems(HorizontalAlign.End)
-        .bindContextMenu(this.MessageContextMenuBuilder, ResponseType.LongPress)
+        .bindContextMenu(this.MessageContextMenuBuilder, ResponseType.LongPress, {
+            backgroundColor: '#4c4c4c',
+            backgroundBlurStyle: BlurStyle.NONE,
+        })
     }
 
     recallContextMenuFilter: () => boolean = () => {
@@ -144,6 +148,7 @@ export default struct NormaMessageContentView {
             {
                 title: '删除',
                 tag: 'delete',
+                icon: $r('app.media.ic_msg_delete'),
                 action: () => {
                     let deleteMessageDialogController = new CustomDialogController({
                         builder: ActionSheetDialog({
@@ -181,6 +186,7 @@ export default struct NormaMessageContentView {
             {
                 title: '转发',
                 tag: 'forward',
+                icon: $r('app.media.ic_msg_forward'),
                 action: () => {
                     this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ForwardMessagePage,
                         {
@@ -197,6 +203,7 @@ export default struct NormaMessageContentView {
             {
                 title: '多选',
                 tag: 'multiCheck',
+                icon: $r('app.media.ic_msg_select'),
                 action: () => {
                     this.enableMultiCheck = true
                 },
@@ -208,6 +215,7 @@ export default struct NormaMessageContentView {
             {
                 title: '引用',
                 tag: 'quote',
+                icon: $r('app.media.ic_msg_quote'),
                 action: () => {
                     this.quotedMessage = this.message;
                 },
@@ -220,6 +228,7 @@ export default struct NormaMessageContentView {
             {
                 title: '收藏',
                 tag: 'fav',
+                icon: $r('app.media.ic_msg_collect'),
                 action: () => {
                     appServer.favMessage(this.message)
                         .catch((e: AppServerError) => {
@@ -235,6 +244,7 @@ export default struct NormaMessageContentView {
             {
                 title: '撤回',
                 tag: 'recall',
+                icon: $r('app.media.ic_msg_rollback'),
                 action: () => {
                     wfc.recallMessage(this.message!.messageUid, () => {
                     }, err => {
@@ -246,6 +256,7 @@ export default struct NormaMessageContentView {
             {
                 title: '复制',
                 tag: 'copy',
+                icon: $r('app.media.ic_msg_copy'),
                 action: () => {
                     let pasteData: pasteboard.PasteData = pasteboard.createData(pasteboard.MIMETYPE_TEXT_PLAIN, this.message!.messageContent.digest())
                     let systemPasteboard: pasteboard.SystemPasteboard = pasteboard.getSystemPasteboard();
@@ -261,15 +272,47 @@ export default struct NormaMessageContentView {
         return menus.filter(item => !item.filter || item.filter())
     }
 
+
     @Builder
     MessageContextMenuBuilder() {
-        Menu() {
+        Grid() {
             ForEach(this.messageContextMenus(), (menuItem: MessageContextMenuItem) => {
-                MenuItem({ content: menuItem.title })
-                    .onClick(menuItem.action)
-
-            }, (menuItem: MessageContextMenuItem) => menuItem.title)
+                GridItem() {
+                    Column({ space: 8 }) {
+                        Image(menuItem.icon)
+                            .objectFit(ImageFit.Contain)
+                            .width(24)
+                            .height(24)
+                        Text(menuItem.title)
+                            .fontSize(13)
+                            .fontColor('#FFFFFF')
+                    }
+                    .justifyContent(FlexAlign.Center)
+                    .width(60)
+                    .height(70)
+                    .onClick(() => {
+                        menuItem.action()
+                    })
+                    .stateStyles({
+                        normal: {
+                            .backgroundColor(Color.Transparent)
+                        },
+                        pressed: {
+                            // .backgroundColor('#444444')
+                            .backgroundColor(Color.Red)
+                        }
+                    })
+                }
+            }, (menuItem: MessageContextMenuItem) => menuItem.tag)
         }
+        .columnsTemplate('repeat(auto-fit, 60)')
+        .width(Math.min(this.messageContextMenus().length, 5) * 60 + 20)
+        .padding({
+            left: 10,
+            right: 10,
+            top: 10,
+            bottom: 10
+        })
     }
 
     updateMessageReadReceipt(): void {
@@ -318,6 +361,7 @@ export default struct NormaMessageContentView {
 interface MessageContextMenuItem {
     title: string,
     tag: string,
+    icon: ResourceStr,
     action: () => void
     // 返回 false 时，将不会被包含在最终的长按菜单列表里面
     filter?: () => boolean

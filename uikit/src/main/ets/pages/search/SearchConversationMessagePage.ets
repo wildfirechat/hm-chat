@@ -57,18 +57,92 @@ export default struct SearchConversationMessagePage {
                 .padding(10)
                 .width('100%')
 
-                SearchConversationMessageResultView({
-                    keyword: this.keyword,
-                    conversation: this.conversation,
-                    searchModules: this.searchModules
-                })
-                    .onTouch(event => {
-                        inputMethod.getController().stopInputSession()
+                if (this.keyword && this.keyword.trim().length > 0) {
+                    SearchConversationMessageResultView({
+                        keyword: this.keyword,
+                        conversation: this.conversation,
+                        searchModules: this.searchModules
                     })
-                    .focusable(true)
-                    .focusOnTouch(true)
+                        .onTouch(event => {
+                            inputMethod.getController().stopInputSession()
+                        })
+                        .focusable(true)
+                        .focusOnTouch(true)
+                        .width('100%')
+                        .layoutWeight(1)
+                } else {
+                    Column() {
+                        Text('搜索指定内容')
+                            .fontSize(14)
+                            .fontColor('#B3B3B3')
+                            .margin({ top: 30, bottom: 20 })
+                        Row() {
+                            Column() {
+                                Text('日期')
+                                    .fontSize(16)
+                                    .fontColor('#5B6E8E')
+                                    .onClick(() => {
+                                        this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.SearchMessageByDatePage, {
+                                            'conversation': this.conversation
+                                        } as Record<string, Object>)
+                                    })
+                            }
+                            .width('33%')
+                            .alignItems(HorizontalAlign.Center)
+
+                            Column() {
+                                Text('图片与视频')
+                                    .fontSize(16)
+                                    .fontColor('#5B6E8E')
+                                    .onClick(() => {
+                                        this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.SearchMessagePictureVideoPage, {
+                                            'conversation': this.conversation
+                                        } as Record<string, Object>)
+                                    })
+                            }
+                            .width('33%')
+                            .alignItems(HorizontalAlign.Center)
+
+                            Column() {
+                                Text('文件')
+                                    .fontSize(16)
+                                    .fontColor('#5B6E8E')
+                                    .onClick(() => {
+                                        this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.SearchMessageFilePage, {
+                                            'conversation': this.conversation
+                                        } as Record<string, Object>)
+                                    })
+                            }
+                            .width('33%')
+                            .alignItems(HorizontalAlign.Center)
+                        }
+                        .width('100%')
+                        .justifyContent(FlexAlign.SpaceAround)
+
+                        Row() {
+                            Column() {
+                                Text('链接')
+                                    .fontSize(16)
+                                    .fontColor('#5B6E8E')
+                                    .onClick(() => {
+                                        this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.SearchMessageLinkPage, {
+                                            'conversation': this.conversation
+                                        } as Record<string, Object>)
+                                    })
+                            }
+                            .width('33%')
+                            .alignItems(HorizontalAlign.Center)
+                        }
+                        .width('100%')
+                        .justifyContent(FlexAlign.Start)
+                        .margin({ top: 30 })
+
+                    }
                     .width('100%')
-                    .layoutWeight(1)
+                    .height('100%')
+                    .alignItems(HorizontalAlign.Center)
+                }
+
             }
             .height('100%')
             .width('100%')

@@ -2239,8 +2239,8 @@ export class WfcManager {
      * 按照天获取会话内消息的数量。
      * @param conversation
      * @param contentTypes
-     * @param startTime
-     * @param endTime
+     * @param startTime 单位是秒
+     * @param endTime 单位是秒
      * @returns
      */
     getMessageCountByDay(conversation: Conversation, contentTypes: numberArray, startTime: number, endTime: number): Map<string, number> {

@@ -18,8 +18,8 @@ import { timeFormat } from '../../util/helper'
 export default struct SearchConversationMessageResultView {
     @State conversationMessageSearchResults: MessageResultWrapper[] = []
     @Prop @Watch('onSearchKeywordUpdate') keyword: string
-    private searchModules: SearchModule[] = []
-    private conversation?: Conversation
+    searchModules: SearchModule[] = []
+    conversation?: Conversation
 
     aboutToAppear() {
         if (this.keyword) {

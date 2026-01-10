@@ -26,6 +26,10 @@ import OrganizationTreePage from './organization/OrganizationTreePage'
 import PickOrganizationMemberPage from './organization/PickOrganizationMemberPage'
 import PickMultiContactPage from './picker/PickMultiContactPage'
 import SearchConversationMessagePage from './search/SearchConversationMessagePage'
+import SearchMessageByDatePage from './search/SearchMessageByDatePage'
+import SearchMessagePictureVideoPage from './search/SearchMessagePictureVideoPage'
+import SearchMessageFilePage from './search/SearchMessageFilePage'
+import SearchMessageLinkPage from './search/SearchMessageLinkPage'
 import SearchPortalPage from './search/SearchPortalPage'
 import SearchUserPage from './search/SearchUserPage'
 import UpdateUserInfoPage from './user/UpdateUserInfoPage'
@@ -68,6 +72,10 @@ export class uikitNavigationDestinations {
     static WebViewPage = UIKIT_NAV_DESTINATION_PREFIX + 'webViewPage'
     static PickMultiContactPage = UIKIT_NAV_DESTINATION_PREFIX + 'pickContactPage'
     static SearchConversationMessagePage = UIKIT_NAV_DESTINATION_PREFIX + 'searchConversationMessagePage'
+    static SearchMessageByDatePage = UIKIT_NAV_DESTINATION_PREFIX + 'searchMessageByDatePage'
+    static SearchMessagePictureVideoPage = UIKIT_NAV_DESTINATION_PREFIX + 'searchMessagePictureVideoPage'
+    static SearchMessageFilePage = UIKIT_NAV_DESTINATION_PREFIX + 'searchMessageFilePage'
+    static SearchMessageLinkPage = UIKIT_NAV_DESTINATION_PREFIX + 'searchMessageLinkPage'
     static UpdateUserInfoPage = UIKIT_NAV_DESTINATION_PREFIX + 'updateUserInfoPage'
     static UpdateGroupAnnouncementPage = UIKIT_NAV_DESTINATION_PREFIX + 'updateGroupAnnouncementPage'
     static UpdateGroupNamePage = UIKIT_NAV_DESTINATION_PREFIX + 'updateGroupNamePage'
@@ -142,6 +150,14 @@ export function UIKitPageMap(name: string) {
         PickMultiContactPage()
     } else if (name === uikitNavigationDestinations.SearchConversationMessagePage) {
         SearchConversationMessagePage()
+    } else if (name === uikitNavigationDestinations.SearchMessageByDatePage) {
+        SearchMessageByDatePage()
+    } else if (name === uikitNavigationDestinations.SearchMessagePictureVideoPage) {
+        SearchMessagePictureVideoPage()
+    } else if (name === uikitNavigationDestinations.SearchMessageFilePage) {
+        SearchMessageFilePage()
+    } else if (name === uikitNavigationDestinations.SearchMessageLinkPage) {
+        SearchMessageLinkPage()
     } else if (name === uikitNavigationDestinations.UpdateUserInfoPage) {
         UpdateUserInfoPage()
     } else if (name === uikitNavigationDestinations.UpdateGroupAnnouncementPage) {

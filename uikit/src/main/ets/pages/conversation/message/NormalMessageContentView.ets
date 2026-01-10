@@ -25,11 +25,9 @@ import CardMessageContentView from './CardMessageContentView'
 import appServer from '../../../api/appServer'
 import AppServerError from '../../../api/appServerError'
 import GroupMemberType from '@wfc/client/src/main/ets/wfc/model/groupMemberType'
-import ArticleMessageContentView from './ArticlesMessageContentView'
 import LinkMessageContentView from './LinkMessageContentView'
 import StreamingTextMessageContentView from './StreamingTextMessageContentView'
-import { ScalingMode } from '@ohos/webrtc'
-import { trustedAppService } from '@kit.DeviceSecurityKit'
+import { MessageContextMenuItem } from './MessageContextMenuItem'
 
 @Component
 export default struct NormaMessageContentView {
@@ -43,14 +41,28 @@ export default struct NormaMessageContentView {
     enableReceipt: boolean = false
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
 
+    private currentMessageContextMenuItems: MessageContextMenuItem[] = []
+    private menuColumnCount: number = 5
+    private menuWidth: number = 320
+
     aboutToAppear(): void {
         this.updateMessageReadReceipt()
+        this.updateCurrentMessageContextMenu()
+    }
+
+    updateCurrentMessageContextMenu(): void {
+        this.currentMessageContextMenuItems = this.messageContextMenus()
+        this.menuColumnCount = Math.min(this.currentMessageContextMenuItems.length, 5)
+        this.menuWidth = this.menuColumnCount * 60 + 20
     }
 
     build() {
         Column() {
             if (this.message!.messageContent.type === MessageContentType.Text) {
-                TextMessageContentView({ message: $message })
+                TextMessageContentView({
+                    message: $message,
+                    menuItems: this.currentMessageContextMenuItems
+                })
             } else if (this.message!.messageContent.type === MessageContentType.Sticker) {
                 StickerMessageContentView({ message: $message })
             } else if (this.message!.messageContent.type === MessageContentType.Image) {
@@ -272,11 +284,10 @@ export default struct NormaMessageContentView {
         return menus.filter(item => !item.filter || item.filter())
     }
 
-
     @Builder
     MessageContextMenuBuilder() {
         Grid() {
-            ForEach(this.messageContextMenus(), (menuItem: MessageContextMenuItem) => {
+            ForEach(this.currentMessageContextMenuItems, (menuItem: MessageContextMenuItem) => {
                 GridItem() {
                     Column({ space: 8 }) {
                         Image(menuItem.icon)
@@ -298,15 +309,16 @@ export default struct NormaMessageContentView {
                             .backgroundColor(Color.Transparent)
                         },
                         pressed: {
-                            // .backgroundColor('#444444')
-                            .backgroundColor(Color.Red)
+                            .backgroundColor('#444444')
                         }
                     })
                 }
             }, (menuItem: MessageContextMenuItem) => menuItem.tag)
         }
-        .columnsTemplate('repeat(auto-fit, 60)')
-        .width(Math.min(this.messageContextMenus().length, 5) * 60 + 20)
+        .columnsTemplate('1fr '.repeat(this.menuColumnCount).trim())
+        .width(this.menuWidth)
+        .backgroundColor('#4c4c4c')
+        .borderRadius(8)
         .padding({
             left: 10,
             right: 10,
@@ -356,13 +368,4 @@ export default struct NormaMessageContentView {
             this.readReceipt = readReceipt
         }
     }
-}
-
-interface MessageContextMenuItem {
-    title: string,
-    tag: string,
-    icon: ResourceStr,
-    action: () => void
-    // 返回 false 时，将不会被包含在最终的长按菜单列表里面
-    filter?: () => boolean
 }

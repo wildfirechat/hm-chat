@@ -682,9 +682,9 @@ export default struct ConversationInputPanelView {
                 }
             }),
             autoCancel: true,
-            alignment: DialogAlignment.Center,
+            alignment: DialogAlignment.Bottom,
             gridCount: 4,
-            customStyle: false
+            customStyle: true
         })
 
         this.forwardDialogController.open()

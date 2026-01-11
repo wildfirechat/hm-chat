@@ -12,6 +12,7 @@ export default struct ForwardMessageDialog {
     forwardMessageDesc: string = ''
     forwardMessageImageUri: string = ''
     @State targetConversationPortraitAndNames: PortraitAndName[] = []
+    @State isInputFocused: boolean = false
     controller: CustomDialogController
     // 若尝试在CustomDialog中传入多个其他的Controller，以实现在CustomDialog中打开另一个或另一些CustomDialog，那么此处需要将指向自己的controller放在最后
     cancel: () => void = () => {
@@ -37,24 +38,34 @@ export default struct ForwardMessageDialog {
             Text('发送给：')
                 .fontSize(18)
                 .margin({ top: 10, bottom: 10 })
-            Flex({
-                wrap: FlexWrap.Wrap,
-                direction: FlexDirection.Row,
-                justifyContent: FlexAlign.Start,
-                alignItems: ItemAlign.Center,
-            }) {
+                .width('100%')
+                .textAlign(TextAlign.Start)
+
+            List() {
                 ForEach(this.targetConversationPortraitAndNames, (pn: PortraitAndName) => {
-                    Image(pn.portrait)
-                        .width(40)
-                        .height(40)
-                        .borderRadius(4)
-                        .margin({ top: 10, right: 10 })
-                    if (this.targetConversations.length === 1) {
-                        Text(pn.name)
+                    ListItem() {
+                        Row() {
+                            Image(pn.portrait)
+                                .width(40)
+                                .height(40)
+                                .borderRadius(4)
+                                .margin({ right: 10 })
+                            Text(pn.name)
+                                .fontSize(16)
+                                .maxLines(1)
+                                .textOverflow({ overflow: TextOverflow.Ellipsis })
+                                .layoutWeight(1)
+                        }
+                        .width('100%')
+                        .padding({ top: 5, bottom: 5 })
+                        .alignItems(VerticalAlign.Center)
                     }
                 }, (pn: PortraitAndName, index: number) => index + '')
             }
+            .scrollBar(BarState.Off)
+            .constraintSize({ maxHeight: 150 })
             .width('100%')
+            .alignListItem(ListItemAlign.Start)
 
             if (this.forwardMessageDesc) {
                 Text(this.forwardMessageDesc)
@@ -75,36 +86,76 @@ export default struct ForwardMessageDialog {
             } else {
                 Image(this.forwardMessageImageUri)
                     .width('100%')
-                    .constraintSize({ maxHeight: 200 })
+                    .constraintSize({ maxHeight: 100 })
                     .objectFit(ImageFit.Contain)
+                    .margin({ top: 15 })
             }
 
-            TextInput({ placeholder: '给朋友留言' })
-                .height(40)
-                .width('100%')
-                .margin({ top: 20 })
-                .borderRadius(4)
-                .onChange((value: string) => {
-                    this.textValue = value
-                })
-            Flex({ justifyContent: FlexAlign.End, space: flexButtonSpace }) {
-                Button('取消')
-                    .onClick(() => {
-                        this.controller.close()
-                        this.cancel()
-                    }).backgroundColor(0xffffff).fontColor(Color.Black)
-                Button('发送')
-                    .onClick(() => {
-                        this.controller.close()
-                        this.confirm(this.textValue)
-                    }).backgroundColor(0xffffff).fontColor(Color.Red)
+            Row() {
+                TextInput({ placeholder: '给朋友留言' })
+                    .height(40)
+                    .layoutWeight(1)
+                    .borderRadius(4)
+                    .backgroundColor('#F5F5F5')
+                    .onChange((value: string) => {
+                        this.textValue = value
+                    })
+                    .onFocus(() => {
+                        this.isInputFocused = true
+                    })
+                    .onBlur(() => {
+                        this.isInputFocused = false
+                    })
+
+                if (this.isInputFocused) {
+                    Button('发送')
+                        .type(ButtonType.Normal)
+                        .height(30)
+                        .width(60)
+                        .borderRadius(4)
+                        .onClick(() => {
+                            this.controller.close()
+                            this.confirm(this.textValue)
+                        })
+                        .fontColor(Color.White)
+                        .margin({ left: 10 })
+                }
             }
-            .margin({ top: 10 })
+            .width('100%')
+            .margin({ top: 20 })
+
+
+            if (!this.isInputFocused) {
+                Flex({ justifyContent: FlexAlign.End, space: flexButtonSpace }) {
+                    Button('取消')
+                        .onClick(() => {
+                            this.controller.close()
+                            this.cancel()
+                        })
+                        .backgroundColor(Color.White)
+                        .fontColor(Color.Black)
+                        .fontSize(16)
+                        .padding({ left: 20, right: 20 })
+
+                    Button('发送')
+                        .type(ButtonType.Normal)
+                        .height(30)
+                        .width(60)
+                        .borderRadius(4)
+                        .onClick(() => {
+                            this.controller.close()
+                            this.confirm(this.textValue)
+                        })
+                        .fontColor(Color.White)
+                }
+                .margin({ top: 20 })
+            }
         }
+        .width('100%')
+        .backgroundColor(Color.White)
+        .borderRadius({ topLeft: 16, topRight: 16 })
         .padding(20)
         .justifyContent(FlexAlign.Start)
         .alignItems(HorizontalAlign.Start)
-
-        // dialog默认的borderRadius为24vp，如果需要使用border属性，请和borderRadius属性一起使用。
     }
 }

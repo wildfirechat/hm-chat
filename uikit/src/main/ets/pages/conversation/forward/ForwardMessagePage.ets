@@ -185,9 +185,9 @@ export default struct ForwardMessagePage {
                 }
             }),
             autoCancel: true,
-            alignment: DialogAlignment.Center,
+            alignment: DialogAlignment.Bottom,
             gridCount: 4,
-            customStyle: false
+            customStyle: true
         })
 
         this.forwardDialogController.open()
@@ -254,7 +254,6 @@ export default struct ForwardMessagePage {
     build() {
         NavDestination() {
             Stack() {
-
                 Column() {
                     Row() {
                         List({ scroller: this.checkedUserListScroller }) {

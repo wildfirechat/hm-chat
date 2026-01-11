@@ -15,6 +15,8 @@ export default struct CompositeMessageContentContainerView {
     // 组合消息本身
     @Prop parentCompositeMessage: Message
 
+    @State selectedText:string = ''
+
     aboutToAppear(): void {
     }
 
@@ -23,6 +25,7 @@ export default struct CompositeMessageContentContainerView {
             if (this.message!.messageContent.type === MessageContentType.Text) {
                 TextMessageContentView({
                     message: $message,
+                    selectedText: $selectedText,
                     textPadding: 0,
                 })
             } else if (this.message!.messageContent.type === MessageContentType.Sticker) {
@@ -33,7 +36,7 @@ export default struct CompositeMessageContentContainerView {
                 VideoMessageContentView({ message: $message })
             } else if (this.message!.messageContent.type === MessageContentType.Voice) {
                 //AudioMessageContent({ message: $message, audioPlayManager: this.audioPlayManager })
-                TextMessageContentView({ message: $message })
+                TextMessageContentView({ message: $message, selectedText: $selectedText })
             } else if (this.message!.messageContent.type === MessageContentType.VOIP_CONTENT_TYPE_START) {
                 CallStartMessageContentView({ message: $message })
             } else if (this.message!.messageContent.type === MessageContentType.Composite_Message) {

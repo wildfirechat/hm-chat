@@ -38,8 +38,11 @@ export default struct NormaMessageContentView {
     @State readReceipt: ReadReceipt | null = null
     @Prop @Watch('updateMessageReadReceipt') readEntries: Map<string, number> = new Map();
     @Prop groupMembers: GroupMember[] = []
-    enableReceipt: boolean = false
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
+
+    @State textMessageSelectedText:string = ''
+
+    enableReceipt: boolean = false
 
     private currentMessageContextMenuItems: MessageContextMenuItem[] = []
     private menuColumnCount: number = 5
@@ -61,6 +64,7 @@ export default struct NormaMessageContentView {
             if (this.message!.messageContent.type === MessageContentType.Text) {
                 TextMessageContentView({
                     message: $message,
+                    selectedText: $textMessageSelectedText,
                     menuItems: this.currentMessageContextMenuItems
                 })
             } else if (this.message!.messageContent.type === MessageContentType.Sticker) {
@@ -155,6 +159,10 @@ export default struct NormaMessageContentView {
             return enableRecall
         }
     }
+
+    // TODO
+    // FIXME
+    // filter 方法，需要根据 textMessageSelectedText 做一些判断
     messageContextMenus = () => {
         let menus: MessageContextMenuItem[] = [
             {
@@ -270,7 +278,8 @@ export default struct NormaMessageContentView {
                 tag: 'copy',
                 icon: $r('app.media.ic_msg_copy'),
                 action: () => {
-                    let pasteData: pasteboard.PasteData = pasteboard.createData(pasteboard.MIMETYPE_TEXT_PLAIN, this.message!.messageContent.digest())
+                    let text = this.textMessageSelectedText.length > 0 ? this.textMessageSelectedText : this.message!.messageContent.digest()
+                    let pasteData: pasteboard.PasteData = pasteboard.createData(pasteboard.MIMETYPE_TEXT_PLAIN, text)
                     let systemPasteboard: pasteboard.SystemPasteboard = pasteboard.getSystemPasteboard();
                     systemPasteboard.setData(pasteData)
                 },

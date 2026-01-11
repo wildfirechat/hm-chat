@@ -13,6 +13,7 @@ export default struct TextMessageContentView {
     @Prop menuItems: MessageContextMenuItem[] = []
     @State selectionStart: number = -1
     @State selectionEnd: number = -1
+    @Link selectedText:string
     // 延迟取消选择的定时器 ID
     private clearSelectionTimerId: number = -1
 
@@ -53,6 +54,13 @@ export default struct TextMessageContentView {
                     .copyOption(this.menuItems.length > 0 ? CopyOptions.InApp : CopyOptions.None)
                     .textSelectable(this.menuItems.length > 0 ? TextSelectableMode.SELECTABLE_UNFOCUSABLE : TextSelectableMode.UNSELECTABLE)
                     .selection(this.selectionStart, this.selectionEnd)
+                    .onTextSelectionChange((start, end) => {
+                        if (this.clearSelectionTimerId !== -1) {
+                            clearTimeout(this.clearSelectionTimerId)
+                            this.clearSelectionTimerId = -1
+                        }
+                        this.selectedText = this.getTextContent().substring(start, end)
+                    })
                     .bindSelectionMenu(TextSpanType.TEXT, this.SelectionMenuBuilder, TextResponseType.LONG_PRESS, {
                         onAppear: () => {
                             // 菜单出现时全选文本
@@ -115,6 +123,7 @@ export default struct TextMessageContentView {
                         clearTimeout(this.clearSelectionTimerId)
                         this.clearSelectionTimerId = -1
                     }
+                    this.selectedText = this.getTextContent().substring(start, end)
                 })
                 .bindSelectionMenu(TextSpanType.TEXT, this.SelectionMenuBuilder, TextResponseType.LONG_PRESS, {
                     onAppear: () => {

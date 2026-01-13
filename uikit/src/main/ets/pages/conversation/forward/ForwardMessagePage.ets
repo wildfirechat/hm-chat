@@ -1,5 +1,4 @@
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
-import router from '@ohos.router'
 import SearchResultView from '../../search/SearchPortalResultView'
 import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
 import { showToast } from '../../../common/utils/Toast'
@@ -22,7 +21,6 @@ import CallStartMessageContent from '@wfc/client/src/main/ets/wfc/av/messages/ca
 import SoundMessageContent from '@wfc/client/src/main/ets/wfc/messages/soundMessageContent'
 import { window } from '@kit.ArkUI'
 import CheckableConversationInfoItemView from '../../../view/CheckableConversationInfoItemView'
-import { thirdPaymentService } from '@kit.PaymentKit'
 import ConversationPortraitView from '../../../view/ConversationPortraitView'
 
 @Component

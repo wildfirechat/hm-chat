@@ -87,6 +87,7 @@ export default struct ConferenceParticipantListPage {
 
     showParticipants(callSession: CallSession) {
         let participantIds = callSession.getParticipantIds()
+        participantIds = participantIds.filter(uid => !uid.startsWith('screen_sharing_'))
         this.participantUserInfos = wfc.getUserInfos([wfc.getUserId(), ...participantIds])
     }
 

@@ -98,4 +98,10 @@ export default class MessageContentType {
 
     static MESSAGE_CONTENT_TYPE_FEED = 501;
     static MESSAGE_CONTENT_TYPE_COMMENT = 502;
+
+    // 备份恢复相关消息类型
+    static Restore_Request = 610;
+    static Restore_Response = 611;
+    static Backup_Response = 612;
+    static Backup_Request = 613;
 }

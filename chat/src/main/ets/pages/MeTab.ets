@@ -125,9 +125,16 @@ export default struct MeTab {
                 Divider()
                     .margin({ left: 40 })
                     .color('#F7F7F7')
-                OptionItemView({ icon: $r('app.media.ic_setting'), title: '设置', showDivider: false })
+                OptionItemView({ icon: $r('app.media.ic_setting'), title: '设置' })
                     .onClick(() => {
                         this.mainNavPathStack.pushPathByName(appNavigationDestinations.SettingPage, {} as Record<string, Object>)
+                    })
+                Divider()
+                    .margin({ left: 40 })
+                    .color('#F7F7F7')
+                OptionItemView({ icon: $r('app.media.ic_settings_file'), title: '备份与恢复', showDivider: false })
+                    .onClick(() => {
+                        this.mainNavPathStack.pushPathByName(appNavigationDestinations.BackupAndRestorePage, {} as Record<string, Object>)
                     })
             }
             .margin({ top: 10, bottom: 10 })

@@ -72,6 +72,10 @@ import { DEFAULT } from '@ohos/hypium';
 import PCLoginRequestMessageContent from '../messages/pcLoginRequestMessageContent';
 import StreamingTextGeneratingMessageContent from '../messages/streamingTextGeneratingMessageContent';
 import StreamingTextGeneratedMessageContent from '../messages/streamingTextGeneratedMessageContent';
+import BackupRequestNotificationContent from '../messages/backup/backupRequestNotificationContent';
+import BackupResponseNotificationContent from '../messages/backup/backupResponseNotificationContent';
+import RestoreRequestNotificationContent from '../messages/backup/restoreRequestNotificationContent';
+import RestoreResponseNotificationContent from '../messages/backup/restoreResponseNotificationContent';
 
 export default class MessageConfig {
     static getMessageContentFlag(type: number) {
@@ -299,6 +303,18 @@ export default class MessageConfig {
                 break
             case MessageContentType.Streaming_Text_Generated:
                 content = new StreamingTextGeneratedMessageContent()
+                break
+            case MessageContentType.Restore_Request:
+                content = new RestoreRequestNotificationContent()
+                break
+            case MessageContentType.Restore_Response:
+                content = new RestoreResponseNotificationContent()
+                break
+            case MessageContentType.Backup_Response:
+                content = new BackupResponseNotificationContent()
+                break
+            case MessageContentType.Backup_Request:
+                content = new BackupRequestNotificationContent()
                 break
             default:
                 content = new UnknownMessageContent()
@@ -607,6 +623,26 @@ export default class MessageConfig {
             name: 'pcLoginRequestMessageContent',
             flag: PersistFlag.No_Persist,
             type: MessageContentType.PC_Login_Request,
+        },
+        {
+            name: 'restoreRequestNotificationContent',
+            flag: PersistFlag.Transparent,
+            type: MessageContentType.Restore_Request,
+        },
+        {
+            name: 'restoreResponseNotificationContent',
+            flag: PersistFlag.Transparent,
+            type: MessageContentType.Restore_Response,
+        },
+        {
+            name: 'backupResponseNotificationContent',
+            flag: PersistFlag.Transparent,
+            type: MessageContentType.Backup_Response,
+        },
+        {
+            name: 'backupRequestNotificationContent',
+            flag: PersistFlag.Transparent,
+            type: MessageContentType.Backup_Request,
         }
 
     ];

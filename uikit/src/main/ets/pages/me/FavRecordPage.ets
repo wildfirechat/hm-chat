@@ -26,18 +26,27 @@ import ArticlesMessageContent from '@wfc/client/src/main/ets/wfc/messages/articl
 import ConferenceInviteMessageContent from '@wfc/client/src/main/ets/wfc/av/messages/conferenceInviteMessageContent'
 import LocationMessageContent from '@wfc/client/src/main/ets/wfc/messages/locationMessageContent'
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
+import SoundMessageContent from '@wfc/client/src/main/ets/wfc/messages/soundMessageContent'
+import AudioPlayManager from '../conversation/audio/AudioPlayManager'
 
 @Component
 export default struct FavRecordPage {
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
     @State noFavItems: boolean = false
     @State favItemLoaded: boolean = false
+    @State playingVoiceId: string = ''
     private favListDataSource: FavListDataSource = new FavListDataSource()
     private isLoading: boolean = false
     private mmPreviewDialogController?: CustomDialogController
+    private audioPlayManager: AudioPlayManager = new AudioPlayManager()
 
     aboutToAppear() {
+        this.audioPlayManager.init(getContext(this))
         this.loadFavList(0)
+    }
+
+    aboutToDisappear() {
+        this.audioPlayManager.release()
     }
 
     loadFavList(startId: number) {
@@ -58,7 +67,11 @@ export default struct FavRecordPage {
     }
 
     compositeMessageText(favItem: FavItem) {
-        let content = FavItem.toMessage(favItem).messageContent as CompositeMessageContent
+        let msg = FavItem.toMessage(favItem)
+        let content = msg.messageContent as CompositeMessageContent
+        if (!content || !content.messages) {
+            return ''
+        }
         let text = ''
         for (let i = 0; i < content.messages.length && i < 2; i++) {
             let msg = content.messages[i]
@@ -71,6 +84,9 @@ export default struct FavRecordPage {
     videoThumbnail(favItem: FavItem) {
         let msg = FavItem.toMessage(favItem)
         let content = msg.messageContent as VideoMessageContent
+        if (!content) {
+            return Config.DEFAULT_THUMBNAIL_URL
+        }
         if (content.thumbnail) {
             return 'data:image/jpeg;base64,' + content.thumbnail
         }
@@ -80,12 +96,28 @@ export default struct FavRecordPage {
     fileSize(favItem: FavItem) {
         let msg = FavItem.toMessage(favItem)
         let content = msg.messageContent as FileMessageContent
+        if (!content) {
+            return 0
+        }
         return content.size
+    }
+
+    voiceDuration(favItem: FavItem) {
+        let msg = FavItem.toMessage(favItem)
+        let content = msg.messageContent as SoundMessageContent
+        if (!content) {
+            return 0
+        }
+        return content.duration
     }
 
     previewMessage(favItem: FavItem) {
         let msg = FavItem.toMessage(favItem)
         let content = msg.messageContent
+        if (!content) {
+            showToast('消息内容不存在')
+            return
+        }
         if (content.type === MessageContentType.Text) {
             // 文本消息
             this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.TextMessagePreviewPage, {
@@ -129,8 +161,25 @@ export default struct FavRecordPage {
                     showToast('文件预览失败')
                 })
         } else if (content.type === MessageContentType.Voice) {
-            // 语音消息：暂不支持播放
-            showToast('语音消息请在原会话中播放')
+            // 语音消息：播放语音
+            let voiceContent = content as SoundMessageContent
+            let voiceId = msg.messageUid ? msg.messageUid.toString() : ('fav_' + favItem.id)
+
+            if (this.playingVoiceId === voiceId && this.audioPlayManager.state() === 'playing') {
+                // 正在播放，暂停
+                this.audioPlayManager.pause()
+                this.playingVoiceId = ''
+            } else {
+                // 开始播放
+                this.playingVoiceId = voiceId
+                let url: string = voiceContent.remotePath
+                if (msg.direction === 1) {
+                    url = Config.AMR_TO_MP3_SERVER_ADDRESS + voiceContent.remotePath
+                }
+                this.audioPlayManager.play(url, true, (err?: Error) => {
+                    this.playingVoiceId = ''
+                })
+            }
         } else if (content.type === MessageContentType.Link) {
             // 链接消息：打开网页
             let linkContent = content as LinkMessageContent
@@ -231,8 +280,14 @@ export default struct FavRecordPage {
                                             .width(30)
                                             .height(30)
                                             .margin({ right: 10 })
-                                        Text('语音 ' + favItem.title)
+                                        Text(this.voiceDuration(favItem) + '"')
                                             .fontSize(16)
+                                        if (favItem.messageUid && this.playingVoiceId === favItem.messageUid.toString()) {
+                                            Text('播放中...')
+                                                .fontSize(12)
+                                                .fontColor('#4CAF50')
+                                                .margin({ left: 10 })
+                                        }
                                         Image($r('app.media.ic_public_arrow_right'))
                                             .width(16)
                                             .height(16)

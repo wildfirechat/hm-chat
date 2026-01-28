@@ -250,8 +250,8 @@ export default struct FavRecordPage {
                                 if (favItem.type === MessageContentType.File) {
                                     Row() {
                                         Image(getFiletypeIcon(favItem.title))
-                                            .width(50)
-                                            .height(50)
+                                            .width(40)
+                                            .height(40)
                                             .margin({ right: 10 })
                                         Column() {
                                             Text(favItem.title)
@@ -259,26 +259,31 @@ export default struct FavRecordPage {
                                                 .fontSize(16)
                                                 .maxLines(1)
                                             Text(humanSize(this.fileSize(favItem)))
-                                                .fontSize(14)
-                                                .maxLines(1)
+                                                .fontSize(12)
+                                                .fontColor('#999999')
+                                                .margin({ top: 4 })
                                         }
-                                        .padding({ right: 10 })
-                                        .justifyContent(FlexAlign.SpaceBetween)
+                                        .layoutWeight(1)
+                                        .justifyContent(FlexAlign.Center)
                                         .alignItems(HorizontalAlign.Start)
                                     }
                                 } else if (favItem.type === MessageContentType.Video) {
                                     Image(this.videoThumbnail(favItem))
-                                        .width(200)
-                                        .height(200)
+                                        .width(160)
+                                        .height(160)
+                                        .objectFit(ImageFit.Cover)
+                                        .borderRadius(4)
                                 } else if (favItem.type === MessageContentType.Image) {
                                     Image(favItem.url)
-                                        .width(200)
-                                        .height(200)
+                                        .width(160)
+                                        .height(160)
+                                        .objectFit(ImageFit.Cover)
+                                        .borderRadius(4)
                                 } else if (favItem.type === MessageContentType.Voice) {
                                     Row() {
                                         Image($r('app.media.ic_file_type_audio'))
-                                            .width(30)
-                                            .height(30)
+                                            .width(24)
+                                            .height(24)
                                             .margin({ right: 10 })
                                         Text(this.voiceDuration(favItem) + '"')
                                             .fontSize(16)
@@ -288,31 +293,35 @@ export default struct FavRecordPage {
                                                 .fontColor('#4CAF50')
                                                 .margin({ left: 10 })
                                         }
-                                        Image($r('app.media.ic_public_arrow_right'))
-                                            .width(16)
-                                            .height(16)
-                                            .margin({ left: 'auto' })
                                     }
-                                    .width('100%')
-                                    .padding(10)
                                 } else if (favItem.type === MessageContentType.Composite_Message) {
-                                    Text(favItem.title)
-                                        .fontSize(15)
-                                    Text(this.compositeMessageText(favItem))
-                                        .lineSpacing({ value: 4, unit: LengthUnit.VP })
-                                        .fontSize(15)
-                                        .fontColor('#252525')
-                                        .maxLines(5)
-                                        .textOverflow({ overflow: TextOverflow.Ellipsis })
-                                } else if (favItem.type === MessageContentType.Link) {
+                                    Column() {
+                                        Text(favItem.title)
+                                            .fontSize(16)
+                                            .maxLines(1)
+                                            .textOverflow({ overflow: TextOverflow.Ellipsis })
+                                            .fontWeight(FontWeight.Medium)
+                                        Text(this.compositeMessageText(favItem))
+                                            .lineSpacing({ value: 4, unit: LengthUnit.VP })
+                                            .fontSize(14)
+                                            .fontColor('#999999')
+                                            .maxLines(3)
+                                            .textOverflow({ overflow: TextOverflow.Ellipsis })
+                                            .margin({ top: 6 })
+                                    }
+                                    .alignItems(HorizontalAlign.Start)
+                                } else if (favItem.type === MessageContentType.Link || favItem.type === MessageContentType.Articles) {
                                     Row() {
                                         Column() {
                                             Text(favItem.title)
-                                                .constraintSize({ maxWidth: 150 })
-                                                .maxLines(1)
+                                                .maxLines(2)
                                                 .fontSize(16)
+                                                .textOverflow({ overflow: TextOverflow.Ellipsis })
                                         }
-                                        .padding(10)
+                                        .layoutWeight(1)
+                                        .alignItems(HorizontalAlign.Start)
+                                        .margin({ right: 10 })
+
                                         if (favItem.url) {
                                             Image(favItem.url)
                                                 .width(60)
@@ -321,8 +330,7 @@ export default struct FavRecordPage {
                                                 .borderRadius(4)
                                         }
                                     }
-                                    .backgroundColor(Color.White)
-                                    .borderRadius(4)
+                                    .width('100%')
                                 } else if (favItem.type === MessageContentType.UserCard) {
                                     Row() {
                                         Image($r('app.media.ic_user_card'))
@@ -338,32 +346,7 @@ export default struct FavRecordPage {
                                                 .margin({ top: 4 })
                                         }
                                         .alignItems(HorizontalAlign.Start)
-                                        Image($r('app.media.ic_public_arrow_right'))
-                                            .width(16)
-                                            .height(16)
-                                            .margin({ left: 'auto' })
                                     }
-                                    .width('100%')
-                                    .padding(10)
-                                } else if (favItem.type === MessageContentType.Articles) {
-                                    Column() {
-                                        if (favItem.url) {
-                                            Image(favItem.url)
-                                                .width('100%')
-                                                .height(120)
-                                                .objectFit(ImageFit.Cover)
-                                                .borderRadius(4)
-                                        }
-                                        Text(favItem.title)
-                                            .fontSize(16)
-                                            .margin({ top: 8 })
-                                            .maxLines(2)
-                                            .textOverflow({ overflow: TextOverflow.Ellipsis })
-                                    }
-                                    .width('100%')
-                                    .padding(10)
-                                    .backgroundColor('#F5F5F5')
-                                    .borderRadius(4)
                                 } else if (favItem.type === MessageContentType.CONFERENCE_CONTENT_TYPE_INVITE) {
                                     Row() {
                                         Image($r('app.media.ic_func_video'))
@@ -380,45 +363,27 @@ export default struct FavRecordPage {
                                                 .margin({ top: 4 })
                                         }
                                         .alignItems(HorizontalAlign.Start)
-                                        Image($r('app.media.ic_public_arrow_right'))
-                                            .width(16)
-                                            .height(16)
-                                            .margin({ left: 'auto' })
                                     }
-                                    .width('100%')
-                                    .padding(10)
                                 } else if (favItem.type === MessageContentType.Location) {
                                     Row() {
                                         Image($r('app.media.ic_func_location'))
-                                            .width(30)
-                                            .height(30)
+                                            .width(32)
+                                            .height(32)
                                             .margin({ right: 10 })
                                         Text('位置: ' + favItem.title)
                                             .fontSize(16)
-                                        Image($r('app.media.ic_public_arrow_right'))
-                                            .width(16)
-                                            .height(16)
-                                            .margin({ left: 'auto' })
+                                            .layoutWeight(1)
+                                            .maxLines(2)
+                                            .textOverflow({ overflow: TextOverflow.Ellipsis })
                                     }
-                                    .width('100%')
-                                    .padding(10)
                                 } else if (favItem.type === MessageContentType.Sticker) {
-                                    Row() {
-                                        Text('[表情] ' + favItem.title)
-                                            .fontSize(16)
-                                        Image($r('app.media.ic_public_arrow_right'))
-                                            .width(16)
-                                            .height(16)
-                                            .margin({ left: 'auto' })
-                                    }
-                                    .width('100%')
-                                    .padding(10)
+                                    Text('[表情] ' + favItem.title)
+                                        .fontSize(16)
                                 } else {
                                     Text(favItem.title)
                                         .lineSpacing({ value: 4, unit: LengthUnit.VP })
-                                        .fontSize(15)
-                                        .fontColor('#252525')
-                                        .maxLines(6)
+                                        .fontSize(16)
+                                        .maxLines(5)
                                         .textOverflow({ overflow: TextOverflow.Ellipsis })
                                 }
                                 Row() {
@@ -433,7 +398,7 @@ export default struct FavRecordPage {
                                 }
                                 .margin({ top: 10 })
                             }
-                            .padding(10)
+                            .padding(15)
                             .alignItems(HorizontalAlign.Start)
                             .onClick(() => {
                                 this.previewMessage(favItem)

@@ -1,6 +1,19 @@
 {
     "app": {
         "signingConfigs": [
+            {
+                "name": "default",
+                "type": "HarmonyOS",
+                "material": {
+                    "certpath": "/Users/jiangecho/.ohos/config/default_hm-chat_xqdh1u3OLsxetaLqcNGvPoqc9pkc3zq3lwuG8tgZvt4=.cer",
+                    "keyAlias": "debugKey",
+                    "keyPassword": "0000001BAABAD8F51BB4E7768A52B103B97EE45430EA0BA6858A84CF28B731349530B1C006D52397CF53AD",
+                    "profile": "/Users/jiangecho/.ohos/config/default_hm-chat_xqdh1u3OLsxetaLqcNGvPoqc9pkc3zq3lwuG8tgZvt4=.p7b",
+                    "signAlg": "SHA256withECDSA",
+                    "storeFile": "/Users/jiangecho/.ohos/config/default_hm-chat_xqdh1u3OLsxetaLqcNGvPoqc9pkc3zq3lwuG8tgZvt4=.p12",
+                    "storePassword": "0000001B46C1139A13E7926A8CEEC12D6E2833139E0E1C2FC6C3774649A4444B5980A03E2BAB623A81B23D"
+                }
+            }
         ],
         "products": [
             {

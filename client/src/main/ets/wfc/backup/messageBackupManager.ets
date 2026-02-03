@@ -9,6 +9,7 @@
 
 import fs from '@ohos.file.fs';
 import { util } from '@kit.ArkTS';
+import taskpool from '@ohos.taskpool';
 import type { WfcManager } from '../client/wfc';
 import ConversationInfo from '../model/conversationInfo';
 import Conversation from '../model/conversation';
@@ -43,6 +44,65 @@ import {
 const textEncoder = new util.TextEncoder();
 const textDecoder = util.TextDecoder.create('utf-8');
 
+
+/**
+ * TaskPool 任务：读取文本文件
+ */
+@Concurrent
+function readTextFileTask(filePath: string): string | null {
+  try {
+    const file = fs.openSync(filePath, fs.OpenMode.READ_ONLY);
+    const stat = fs.statSync(filePath);
+    const buffer = new ArrayBuffer(stat.size);
+    fs.readSync(file.fd, buffer);
+    fs.closeSync(file);
+    const result = new util.TextDecoder('utf-8').decodeWithStream(new Uint8Array(buffer), { stream: false });
+    return result;
+  } catch (error) {
+    console.error('[MessageBackupManager] TaskPool readTextFile failed:', JSON.stringify(error));
+    return null;
+  }
+}
+
+/**
+ * TaskPool 任务：写入文本文件
+ */
+@Concurrent
+function writeTextFileTask(filePath: string, content: string): boolean {
+  try {
+    const uint8Array = new util.TextEncoder().encodeInto(content);
+    const file = fs.openSync(filePath, fs.OpenMode.CREATE | fs.OpenMode.WRITE_ONLY);
+    const arrayBuffer = uint8Array.buffer;
+    fs.writeSync(file.fd, arrayBuffer);
+    fs.closeSync(file);
+    return true;
+  } catch (error) {
+    console.error('[MessageBackupManager] TaskPool writeTextFile failed:', JSON.stringify(error));
+    return false;
+  }
+}
+
+/**
+ * TaskPool 任务：复制文件
+ */
+@Concurrent
+function copyFileTask(srcPath: string, destPath: string): boolean {
+  try {
+    const srcFile = fs.openSync(srcPath, fs.OpenMode.READ_ONLY);
+    const destFile = fs.openSync(destPath, fs.OpenMode.CREATE | fs.OpenMode.WRITE_ONLY);
+    const stat = fs.statSync(srcPath);
+    const buffer = new ArrayBuffer(stat.size);
+    fs.readSync(srcFile.fd, buffer);
+    fs.writeSync(destFile.fd, new Uint8Array(buffer));
+    fs.closeSync(srcFile);
+    fs.closeSync(destFile);
+    return true;
+  } catch (error) {
+    console.error('[MessageBackupManager] TaskPool copyFile failed:', JSON.stringify(error));
+    return false;
+  }
+}
+
 /**
  * WfcManager类型定义
  */
@@ -59,6 +119,17 @@ const BACKUP_ENCRYPTION_ALGORITHM = 'AES-256-CBC';
 const BACKUP_KEY_DERIVATION = 'PBKDF2-SHA256';
 const DEFAULT_MESSAGE_BATCH_SIZE = 100;  // 每次获取100条消息
 const THUMBNAIL_COMPRESSION_QUALITY = 0.45;
+
+/**
+ * 批量恢复消息的结果接口
+ */
+interface BatchRestoreResult {
+  success: boolean;
+  hasMedia?: boolean;
+  message?: Message;
+  direction?: number;
+  status?: number;
+}
 
 /**
  * 消息备份管理器类
@@ -360,8 +431,6 @@ export class MessageBackupManager {
 
       // 2. 检查是否需要密码
       const isEncrypted = metadata.encryption.enabled;
-      console.log(`[MessageBackupManager] Backup isEncrypted: ${isEncrypted}`);
-      console.log(`[MessageBackupManager] Password provided: ${password ? 'Yes (length=' + password.length + ')' : 'No'}`);
 
       if (isEncrypted && (!password || password.length === 0)) {
         console.error('[MessageBackupManager] Backup is encrypted but no password provided');
@@ -377,7 +446,6 @@ export class MessageBackupManager {
       if (isEncrypted && password && metadata.conversations.length > 0) {
         const firstConv = metadata.conversations[0];
         const messagesPath = `${backupDir}/conversations/${firstConv.directory}/messages.json`;
-        console.log(`[MessageBackupManager] Verifying password with: ${messagesPath}`);
         const encryptedData = await this.readEncryptedMessagesFile(messagesPath);
 
         if (encryptedData) {
@@ -388,11 +456,8 @@ export class MessageBackupManager {
             iterations: encryptedData['iterations'] as number
           };
 
-          console.log(`[MessageBackupManager] Encrypted data found, salt: ${encrypted.salt ? encrypted.salt.substring(0, 8) + '...' : 'empty'}, iterations: ${encrypted.iterations}`);
-
           // 验证密码
           const isValid = await BackupCrypto.verifyPassword(encrypted, password);
-          console.log(`[MessageBackupManager] Password verification result: ${isValid}`);
           if (!isValid) {
             console.error('[MessageBackupManager] Password verification failed');
             return {
@@ -444,8 +509,8 @@ export class MessageBackupManager {
             );
           }
         } else {
-          // 未加密，直接读取
-          messagesData = await this.readMessagesFile(messagesPath);
+          // 未加密，直接读取（使用异步方法）
+          messagesData = await this.readMessagesFileAsync(messagesPath);
         }
 
         if (!messagesData) {
@@ -463,6 +528,9 @@ export class MessageBackupManager {
 
         totalMessages += restoreResult.messageCount;
         totalMedia += restoreResult.mediaCount;
+        
+        // 让出主线程，避免长时间占用（增加延迟时间）
+        await new Promise<void>(resolve => setTimeout(resolve, 10));
       }
 
       if (this.isCancelled) {
@@ -742,7 +810,8 @@ export class MessageBackupManager {
       };
 
       const messagesJsonPath = `${convDir}/messages.json`;
-      this.writeTextFile(messagesJsonPath, JSON.stringify(messagesData, null, 2));
+      // 使用TaskPool写入文件以避免阻塞主线程
+      await this.writeTextFileAsync(messagesJsonPath, JSON.stringify(messagesData, null, 2));
 
       return {
         messageCount: convMessageCount,
@@ -819,73 +888,75 @@ export class MessageBackupManager {
       let restoredCount = 0;
       let restoredMediaCount = 0;
 
-      for (const msgDict of convData.messages) {
+      // 批量处理消息，避免阻塞主线程
+      // 减小批量大小以降低单批次处理时间，避免 AppFreeze
+      const BATCH_SIZE = 10; // 每批处理10条消息
+      const totalMessages = convData.messages.length;
+      
+      for (let i = 0; i < totalMessages; i += BATCH_SIZE) {
         if (this.isCancelled) break;
 
-        try {
-          // 解码消息
-          const result = await this.decodeMessage(msgDict, conversation, mediaDir);
-          if (result) {
-            // 插入到数据库
-            let insertedMsg: Message | null = null;
-            if (result.messageUid && result.messageUid !== Long.ZERO) {
-              insertedMsg = this.wfc.insertMessageEx(
-                result.messageUid,
-                result.conversation,
-                result.from,
-                result.messageContent,
-                result.status,
-                result.timestamp,
-                result.localExtra || ''
-              );
+        const batchEnd = Math.min(i + BATCH_SIZE, totalMessages);
+        const batchMessages = convData.messages.slice(i, batchEnd);
+        
+        // 顺序处理批次中的消息，避免并发过多文件 I/O 导致 AppFreeze
+        const batchResults: BatchRestoreResult[] = [];
+        for (const msgDict of batchMessages) {
+          if (this.isCancelled) break;
+          
+          try {
+            // 解码消息
+            const result = await this.decodeMessage(msgDict, conversation, mediaDir);
+            if (result) {
+              // 插入到数据库
+              let insertedMsg: Message | null = null;
+              if (result.messageUid && result.messageUid !== Long.ZERO) {
+                insertedMsg = this.wfc!.insertMessageEx(
+                  result.messageUid,
+                  result.conversation,
+                  result.from,
+                  result.messageContent,
+                  result.status,
+                  result.timestamp,
+                  result.localExtra || ''
+                );
+              }
+
+              if (insertedMsg) {
+                batchResults.push({
+                  success: true,
+                  hasMedia: !!msgDict.payload.localMediaInfo,
+                  message: insertedMsg,
+                  direction: result.direction,
+                  status: result.status
+                } as BatchRestoreResult);
+              } else {
+                batchResults.push({ success: false } as BatchRestoreResult);
+              }
+            } else {
+              batchResults.push({ success: false } as BatchRestoreResult);
             }
+          } catch (error) {
+            console.error('[MessageBackupManager] Failed to restore message:', JSON.stringify(error));
+            batchResults.push({ success: false } as BatchRestoreResult);
+          }
+          
+          // 每处理一条消息后让出线程，确保UI响应
+          await new Promise<void>(resolve => setTimeout(resolve, 0));
+        }
 
-            if (insertedMsg) {
-              restoredCount++;
-
-              // 统计媒体文件
-              if (msgDict.payload.localMediaInfo) {
-                restoredMediaCount++;
-              }
-
-              // 对于发送出去的消息（direction=0），需要同步到服务器
-              // 如果消息状态不是Sent（已发送成功），则重新发送
-              if (result.direction === 0 && result.status !== 1) {  // 1 = MessageStatus.Sent
-                try {
-                  console.log('[MessageBackupManager] Syncing message to server:', result.messageUid.toString());
-                  await new Promise<void>((resolve, reject) => {
-                    this.wfc!.sendMessage(
-                      insertedMsg!,
-                      (messageId: number) => {
-                        console.log('[MessageBackupManager] Message prepared:', messageId);
-                      },
-                      (progress: number, total: number) => {
-                        // 进度回调（可选）
-                      },
-                      (uploaded: string) => {
-                        // 上传完成回调（可选）
-                      },
-                      (messageUid: Long, timestamp: number) => {
-                        console.log('[MessageBackupManager] Message synced successfully:', messageUid.toString());
-                        resolve();
-                      },
-                      (errorCode: number) => {
-                        console.error('[MessageBackupManager] Failed to sync message:', errorCode);
-                        // 即使发送失败也继续处理其他消息
-                        resolve();
-                      }
-                    );
-                  });
-                } catch (error) {
-                  console.error('[MessageBackupManager] Error syncing message:', JSON.stringify(error));
-                  // 继续处理其他消息
-                }
-              }
+        // 统计成功恢复的消息
+        for (const result of batchResults) {
+          if (result.success) {
+            restoredCount++;
+            if (result.hasMedia) {
+              restoredMediaCount++;
             }
           }
-        } catch (error) {
-          console.error('[MessageBackupManager] Failed to restore message:', JSON.stringify(error));
         }
+
+        // 让出主线程，避免长时间占用（增加延迟时间）
+        await new Promise<void>(resolve => setTimeout(resolve, 10));
       }
 
       return {
@@ -903,7 +974,7 @@ export class MessageBackupManager {
   }
 
   /**
-   * 编码消息
+   * 编码消息（优化版本，使用TaskPool处理文件操作）
    */
   private async encodeMessage(message: Message, mediaDir: string): Promise<MessageBackupData> {
     // 编码基本信息
@@ -935,8 +1006,8 @@ export class MessageBackupManager {
               const fileName = `media_${fileId}.${extension}`;
               const targetPath = `${mediaDir}/${fileName}`;
 
-              // 复制文件
-              const copied = this.copyFile(localPath, targetPath);
+              // 使用TaskPool复制文件
+              const copied = await this.copyFileAsync(localPath, targetPath);
               if (copied) {
                 const fileSize = this.getFileSize(localPath);
 
@@ -1053,8 +1124,8 @@ export class MessageBackupManager {
               const newFileName = `${fileId}.${extension}`;
               const newFilePath = `${appPath}/sendbox/${newFileName}`;
 
-              // 复制文件
-              this.copyFile(backupFilePath, newFilePath);
+              // 使用TaskPool复制文件，避免阻塞主线程
+              await this.copyFileAsync(backupFilePath, newFilePath);
 
               // 设置localMediaPath
               payloadDict.localMediaPath = newFilePath;
@@ -1108,19 +1179,17 @@ export class MessageBackupManager {
   private async encryptMessagesFile(messagesJsonPath: string, password: string): Promise<boolean> {
     try {
       console.log(`[MessageBackupManager] encryptMessagesFile START: ${messagesJsonPath}`);
-      console.log(`[MessageBackupManager] Password length: ${password ? password.length : 0}`);
 
-      // 1. 读取原始JSON
-      const jsonString = this.readTextFile(messagesJsonPath);
+      // 1. 在TaskPool中读取原始JSON
+      const jsonString = await taskpool.execute(readTextFileTask, messagesJsonPath) as string | null;
       if (!jsonString) {
         console.error(`[MessageBackupManager] Failed to read original JSON from ${messagesJsonPath}`);
         return false;
       }
 
       console.log(`[MessageBackupManager] Original JSON length: ${jsonString.length}`);
-      console.log(`[MessageBackupManager] Original JSON prefix: ${jsonString.substring(0, 100)}`);
 
-      // 2. 加密
+      // 2. 加密（在主线程执行，因为涉及 BackupCrypto）
       const data = textEncoder.encodeInto(jsonString);
       console.log(`[MessageBackupManager] Data encoded, length: ${data.length}`);
 
@@ -1130,37 +1199,18 @@ export class MessageBackupManager {
         return false;
       }
 
-      console.log(`[MessageBackupManager] Encryption successful:`);
-      console.log(`[MessageBackupManager] - Salt: ${encrypted.salt ? encrypted.salt.substring(0, 8) + '...' : 'MISSING'}`);
-      console.log(`[MessageBackupManager] - IV: ${encrypted.iv ? encrypted.iv.substring(0, 8) + '...' : 'MISSING'}`);
-      console.log(`[MessageBackupManager] - Data length: ${encrypted.data ? encrypted.data.length : 0}`);
-      console.log(`[MessageBackupManager] - Iterations: ${encrypted.iterations}`);
+      console.log(`[MessageBackupManager] Encryption successful`);
 
-      // 3. 保存加密后的数据
+      // 3. 在TaskPool中写入加密数据
       const encryptedJsonString = JSON.stringify(encrypted);
-      console.log(`[MessageBackupManager] Encrypted JSON string length: ${encryptedJsonString.length}`);
-      console.log(`[MessageBackupManager] Encrypted JSON prefix: ${encryptedJsonString.substring(0, 100)}`);
-
-      this.writeTextFile(messagesJsonPath, encryptedJsonString);
-      console.log(`[MessageBackupManager] Encrypted data written to ${messagesJsonPath}`);
-
-      // Verify the write
-      const verifyContent = this.readTextFile(messagesJsonPath);
-      console.log(`[MessageBackupManager] Verify read after write, length: ${verifyContent ? verifyContent.length : 0}`);
-      console.log(`[MessageBackupManager] Verify prefix: ${verifyContent ? verifyContent.substring(0, 50) : 'EMPTY'}`);
-
-      // Try to parse it as EncryptedData
-      try {
-        const parsed: Record<string, Object> = JSON.parse(verifyContent || '') as Record<string, Object>;
-        const hasSalt = parsed['salt'] !== undefined;
-        const hasIv = parsed['iv'] !== undefined;
-        const hasData = parsed['data'] !== undefined;
-        const hasIterations = parsed['iterations'] !== undefined;
-        console.log(`[MessageBackupManager] Parse verification - salt: ${hasSalt}, iv: ${hasIv}, data: ${hasData}, iterations: ${hasIterations}`);
-      } catch (e) {
-        console.error(`[MessageBackupManager] Failed to parse written encrypted data: ${JSON.stringify(e)}`);
+      const writeSuccess = await taskpool.execute(writeTextFileTask, messagesJsonPath, encryptedJsonString) as boolean;
+      
+      if (!writeSuccess) {
+        console.error(`[MessageBackupManager] Failed to write encrypted data to ${messagesJsonPath}`);
+        return false;
       }
 
+      console.log(`[MessageBackupManager] Encrypted data written to ${messagesJsonPath}`);
       return true;
     } catch (error) {
       console.error('[MessageBackupManager] Failed to encrypt messages.json:', JSON.stringify(error));
@@ -1212,12 +1262,12 @@ export class MessageBackupManager {
         conversations: conversations
       };
 
-      // 保存到文件
+      // 保存到文件，使用TaskPool优化
       const metadataPath = `${directoryPath}/metadata.json`;
       console.log(`[MessageBackupManager] Creating metadata.json at: ${metadataPath}`);
       const jsonString = JSON.stringify(metadata, null, 2);
       console.log(`[MessageBackupManager] Metadata JSON length: ${jsonString.length}`);
-      this.writeTextFile(metadataPath, jsonString);
+      await this.writeTextFileAsync(metadataPath, jsonString);
       console.log(`[MessageBackupManager] metadata.json created successfully`);
     } catch (error) {
       console.error('[MessageBackupManager] Failed to create metadata.json:', JSON.stringify(error));
@@ -1230,7 +1280,8 @@ export class MessageBackupManager {
   private async readMetadataFile(metadataPath: string): Promise<BackupMetadata | null> {
     try {
       console.log(`[MessageBackupManager] Reading text file: ${metadataPath}`);
-      const jsonString = this.readTextFile(metadataPath);
+      // 使用TaskPool读取文件
+      const jsonString = await this.readTextFileAsync(metadataPath);
       if (!jsonString) {
         console.log(`[MessageBackupManager] Failed to read text file, got null`);
         console.log(`[MessageBackupManager] This may be due to a failed backup creation. Please delete and recreate the backup.`);
@@ -1251,11 +1302,11 @@ export class MessageBackupManager {
   }
 
   /**
-   * 读取messages.json
+   * 读取messages.json（异步版本，使用TaskPool）
    */
-  private async readMessagesFile(messagesPath: string): Promise<ConversationBackupData | null> {
+  private async readMessagesFileAsync(messagesPath: string): Promise<ConversationBackupData | null> {
     try {
-      const jsonString = this.readTextFile(messagesPath);
+      const jsonString = await this.readTextFileAsync(messagesPath);
       if (!jsonString) {
         return null;
       }
@@ -1266,20 +1317,21 @@ export class MessageBackupManager {
     }
   }
 
+
   /**
    * 读取加密的messages.json
    */
   private async readEncryptedMessagesFile(messagesPath: string): Promise<Record<string, Object> | null> {
     try {
       console.log(`[MessageBackupManager] readEncryptedMessagesFile - Reading: ${messagesPath}`);
-      const jsonString = this.readTextFile(messagesPath);
+      // 使用TaskPool读取文件
+      const jsonString = await this.readTextFileAsync(messagesPath);
       if (!jsonString) {
         console.error(`[MessageBackupManager] readEncryptedMessagesFile - Failed to read file`);
         return null;
       }
 
       console.log(`[MessageBackupManager] readEncryptedMessagesFile - File content length: ${jsonString.length}`);
-      console.log(`[MessageBackupManager] readEncryptedMessagesFile - Content prefix: ${jsonString.substring(0, 100)}`);
 
       // Check if content looks like encrypted data (should start with {"salt":)
       const isEncryptedFormat = jsonString.trim().startsWith('{"salt"');
@@ -1295,97 +1347,44 @@ export class MessageBackupManager {
     }
   }
 
+
   /**
    * 读取文本文件
    */
-  private readTextFile(filePath: string): string | null {
+  private async readTextFileAsync(filePath: string): Promise<string | null> {
     try {
-      console.log(`[MessageBackupManager] readTextFile - Checking if file exists: ${filePath}`);
-
-      // 先检查文件是否存在
-      try {
-        const stat = fs.statSync(filePath);
-        console.log(`[MessageBackupManager] readTextFile - File exists, size: ${stat.size}, isFile: ${stat.isFile()}`);
-      } catch (statError) {
-        console.error(`[MessageBackupManager] readTextFile - File does not exist or cannot access: ${JSON.stringify(statError)}`);
-        return null;
-      }
-
-      console.log(`[MessageBackupManager] readTextFile - Opening file: ${filePath}`);
-      const file = fs.openSync(filePath, fs.OpenMode.READ_ONLY);
-      console.log(`[MessageBackupManager] readTextFile - File opened successfully, fd: ${file.fd}`);
-
-      const stat = fs.statSync(filePath);
-      console.log(`[MessageBackupManager] readTextFile - Creating buffer of size: ${stat.size}`);
-      const buffer = new ArrayBuffer(stat.size);
-
-      console.log(`[MessageBackupManager] readTextFile - Reading file content`);
-      fs.readSync(file.fd, buffer);
-      console.log(`[MessageBackupManager] readTextFile - Read ${buffer.byteLength} bytes`);
-
-      fs.closeSync(file);
-      console.log(`[MessageBackupManager] readTextFile - File closed`);
-
-      const result = textDecoder.decodeWithStream(new Uint8Array(buffer), { stream: false });
-      console.log(`[MessageBackupManager] readTextFile - Decoded successfully, length: ${result.length}`);
-      return result;
+      return await taskpool.execute(readTextFileTask, filePath) as string | null;
     } catch (error) {
-      console.error('[MessageBackupManager] readTextFile - Failed to read file:', JSON.stringify(error));
+      console.error('[MessageBackupManager] readTextFileAsync failed:', JSON.stringify(error));
       return null;
     }
   }
 
+
   /**
    * 写入文本文件
    */
-  private writeTextFile(filePath: string, content: string): void {
+  private async writeTextFileAsync(filePath: string, content: string): Promise<boolean> {
     try {
-      console.log(`[MessageBackupManager] writeTextFile - Encoding content, length: ${content.length}`);
-
-      // 使用encode返回Uint8Array
-      const uint8Array = textEncoder.encodeInto(content);
-      console.log(`[MessageBackupManager] writeTextFile - Encoded to ${uint8Array.byteLength} bytes`);
-
-      console.log(`[MessageBackupManager] writeTextFile - Opening file for writing: ${filePath}`);
-      const file = fs.openSync(filePath, fs.OpenMode.CREATE | fs.OpenMode.WRITE_ONLY);
-      console.log(`[MessageBackupManager] writeTextFile - File opened, fd: ${file.fd}`);
-
-      // 将Uint8Array转换为ArrayBuffer进行写入
-      const arrayBuffer = uint8Array.buffer;
-      console.log(`[MessageBackupManager] writeTextFile - Writing data, arrayBuffer length: ${arrayBuffer.byteLength}`);
-
-      const writeResult = fs.writeSync(file.fd, arrayBuffer);
-      console.log(`[MessageBackupManager] writeTextFile - Write result: ${writeResult} bytes`);
-
-      fs.closeSync(file);
-      console.log(`[MessageBackupManager] writeTextFile - File closed successfully`);
+      return await taskpool.execute(writeTextFileTask, filePath, content) as boolean;
     } catch (error) {
-      console.error('[MessageBackupManager] writeTextFile - Failed to write file:', JSON.stringify(error));
+      console.error('[MessageBackupManager] writeTextFileAsync failed:', JSON.stringify(error));
+      return false;
     }
   }
 
   /**
    * 复制文件
    */
-  private copyFile(srcPath: string, destPath: string): boolean {
+  private async copyFileAsync(srcPath: string, destPath: string): Promise<boolean> {
     try {
-      const srcFile = fs.openSync(srcPath, fs.OpenMode.READ_ONLY);
-      const destFile = fs.openSync(destPath, fs.OpenMode.CREATE | fs.OpenMode.WRITE_ONLY);
-
-      const stat = fs.statSync(srcPath);
-      const buffer = new ArrayBuffer(stat.size);
-      fs.readSync(srcFile.fd, buffer);
-      fs.writeSync(destFile.fd, new Uint8Array(buffer));
-
-      fs.closeSync(srcFile);
-      fs.closeSync(destFile);
-
-      return true;
+      return await taskpool.execute(copyFileTask, srcPath, destPath) as boolean;
     } catch (error) {
-      console.error('[MessageBackupManager] Failed to copy file:', JSON.stringify(error));
+      console.error('[MessageBackupManager] copyFileAsync failed:', JSON.stringify(error));
       return false;
     }
   }
+
 
   /**
    * 获取文件大小

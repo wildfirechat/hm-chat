@@ -12,7 +12,7 @@ export default struct CheckableConversationInfoItemView {
     @State conversationItemName: string = ''
     @State unreadJoinGroupRequestCount: number = 0
     @State _checked: boolean = false
-    @Link checkedConversations: Conversation[]
+    @Link checkedConversationInfos: ConversationInfo[]
 
     /**
      * 仅显示头像和名称
@@ -32,7 +32,7 @@ export default struct CheckableConversationInfoItemView {
     }
 
     isChecked() {
-        return this.checkedConversations.findIndex(conv => Conversation.equal(conv, this.conversationInfo!.conversation)) >= 0
+        return this.checkedConversationInfos.findIndex(info => Conversation.equal(info.conversation, this.conversationInfo!.conversation)) >= 0
     }
 
     conversationUnreadCount() {

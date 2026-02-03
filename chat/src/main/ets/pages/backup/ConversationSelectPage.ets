@@ -21,7 +21,7 @@ export default struct ConversationSelectPage {
   @Consume('mainNavPathStack') mainNavPathStack: NavPathStack
   private conversationInfoDataSource: ConversationInfoDataSource = new ConversationInfoDataSource()
   private conversationInfos: ConversationInfo[] = []
-  @State checkedConversations: Conversation[] = []
+  @State checkedConversationInfos: ConversationInfo[] = []
   @State selectAll: boolean = false
   private target: string = 'local' // 'local' or 'pc'
   private includeMedia: boolean = false
@@ -34,38 +34,32 @@ export default struct ConversationSelectPage {
 
     this.conversationInfos = conversationList
     this.conversationInfoDataSource.setConversationInfos(conversationList)
-    this.checkedConversations = []
+    this.checkedConversationInfos = []
     this.selectAll = false
   }
 
   toggleSelectAll(): void {
     this.selectAll = !this.selectAll
     if (this.selectAll) {
-      this.checkedConversations = this.conversationInfos.map(info => info.conversation)
+      this.checkedConversationInfos = this.conversationInfos;
     } else {
-      this.checkedConversations = []
+      this.checkedConversationInfos = []
     }
   }
 
-  toggleSelection(conversation: Conversation): void {
-    let index = this.checkedConversations.findIndex(c => Conversation.equal(c, conversation))
+  toggleSelection(info: ConversationInfo): void {
+    let index = this.checkedConversationInfos.findIndex(c => Conversation.equal(c.conversation, info.conversation))
     if (index >= 0) {
-      this.checkedConversations.splice(index, 1)
+      this.checkedConversationInfos.splice(index, 1)
     } else {
-      this.checkedConversations.push(conversation)
+      this.checkedConversationInfos.push(info)
     }
 
-    this.selectAll = this.checkedConversations.length === this.conversationInfos.length
-  }
-
-  getSelectedConversations(): ConversationInfo[] {
-    return this.conversationInfos.filter(info =>
-      this.checkedConversations.findIndex(c => Conversation.equal(c, info.conversation)) >= 0
-    )
+    this.selectAll = this.checkedConversationInfos.length === this.conversationInfos.length
   }
 
   getSelectedCount(): number {
-    return this.checkedConversations.length
+    return this.checkedConversationInfos.length
   }
 
   onNext() {
@@ -75,11 +69,9 @@ export default struct ConversationSelectPage {
       return
     }
 
-    const selected = this.getSelectedConversations()
-
     // 跳转到备份选项页面
     this.mainNavPathStack.pushPathByName(appNavigationDestinations.BackupOptionsPage, {
-      'selectedConversations': selected,
+      'selectedConversations': this.checkedConversationInfos,
       'target': this.target,
       'includeMedia': this.includeMedia
     } as Record<string, Object>)
@@ -107,13 +99,13 @@ export default struct ConversationSelectPage {
           LazyForEach(this.conversationInfoDataSource, (info: ConversationInfo, index: number) => {
             ListItem() {
               CheckableConversationInfoItemView({
-                checkedConversations: $checkedConversations,
+                checkedConversationInfos: $checkedConversationInfos,
                 conversationInfo: info,
                 basicMode: true,
                 enableCheck: true
               })
                 .onClick(() => {
-                  this.toggleSelection(info.conversation)
+                  this.toggleSelection(info)
                 })
             }
           }, (info: ConversationInfo) => info.conversation.type + info.conversation.target + '-' + info.conversation.line)

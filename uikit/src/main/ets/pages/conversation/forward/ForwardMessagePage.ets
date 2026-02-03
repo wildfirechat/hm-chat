@@ -35,7 +35,7 @@ export default struct ForwardMessagePage {
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
     @State showPickContactModal: boolean = false
     @State enableMultiCheck: boolean = false;
-    @State checkedConversations: Conversation[] = []
+    @State checkedConversationInfos: ConversationInfo[] = []
     @State searchInputViewMaxWidth: string = '100%'
     private checkedUserListScroller: Scroller = new Scroller()
 
@@ -61,11 +61,11 @@ export default struct ForwardMessagePage {
     }
 
     private toggleConversation(conv: Conversation) {
-        let index = this.checkedConversations.findIndex(c => Conversation.equal(c, conv))
+        let index = this.checkedConversationInfos.findIndex(info => Conversation.equal(info.conversation, conv))
         if (index >= 0) {
-            this.checkedConversations.splice(index, 1)
+            this.checkedConversationInfos.splice(index, 1)
         } else {
-            this.checkedConversations.push(conv)
+            this.checkedConversationInfos.push(new ConversationInfo(conv));
         }
     }
 
@@ -247,7 +247,7 @@ export default struct ForwardMessagePage {
     }
 
     updateSearchInputViewWidthAndScroll() {
-        let checkedConvWidth = 100 / 8 * this.checkedConversations.length
+        let checkedConvWidth = 100 / 8 * this.checkedConversationInfos.length
         if (checkedConvWidth > 75) {
             this.searchInputViewMaxWidth = '25%'
         } else {
@@ -262,21 +262,21 @@ export default struct ForwardMessagePage {
                 Column() {
                     Row() {
                         List({ scroller: this.checkedUserListScroller }) {
-                            ForEach(this.checkedConversations, (conv: Conversation) => {
+                            ForEach(this.checkedConversationInfos, (info: ConversationInfo) => {
                                 ListItem() {
                                     ConversationPortraitView({
-                                        conversation: conv
+                                        conversation: info.conversation
                                     })
                                         .width(40)
                                         .height(40)
                                         .padding(2)
                                         .borderRadius(4)
                                         .onClick(() => {
-                                            this.toggleConversation(conv)
+                                            this.toggleConversation(info.conversation)
                                             this.updateSearchInputViewWidthAndScroll()
                                         })
                                 }
-                            }, (conv: Conversation) => conv.type + '-' + conv.target + '-' + conv.line)
+                            }, (info: ConversationInfo) => info.conversation.type + '-' + info.conversation.target + '-' + info.conversation.line)
 
                             // ForEach(this.checkedOrganizations, (org: Organization) => {
                             //     ListItem() {
@@ -371,7 +371,7 @@ export default struct ForwardMessagePage {
                                     ListItem() {
                                         if (this.enableMultiCheck) {
                                             CheckableConversationInfoItemView({
-                                                checkedConversations: $checkedConversations,
+                                                checkedConversationInfos: $checkedConversationInfos,
                                                 conversationInfo: info,
                                                 basicMode: true,
                                                 enableCheck: true
@@ -424,15 +424,15 @@ export default struct ForwardMessagePage {
 
                 if (this.enableMultiCheck) {
                     Row() {
-                        Text(`已选 ${this.checkedConversations.length} 人`)
+                        Text(`已选 ${this.checkedConversationInfos.length} 人`)
                         Button('发送')
                             .type(ButtonType.Normal)
                             .height(30)
                             .width(60)
                             .borderRadius(4)
-                            .enabled(this.checkedConversations.length > 0)
+                            .enabled(this.checkedConversationInfos.length > 0)
                             .onClick(e => {
-                                this.forwardMessage(this.checkedConversations)
+                                this.forwardMessage(this.checkedConversationInfos.map(info => info.conversation))
                             })
                     }
                     .padding(10)
@@ -463,7 +463,7 @@ export default struct ForwardMessagePage {
                 .onClick(() => {
                     this.enableMultiCheck = !this.enableMultiCheck
                     if (!this.enableMultiCheck) {
-                        this.checkedConversations = []
+                        this.checkedConversationInfos = []
                         this.searchInputViewMaxWidth = '100%'
                     }
                 })

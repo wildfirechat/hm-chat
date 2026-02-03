@@ -2402,6 +2402,7 @@ class WfcImpl {
             let uploadRequestOptions: request.UploadConfig | undefined = undefined
             if (serverType === 0) {
                 // 内置存储，不支持大文件上传
+                console.error('内置文件存储，不支持大文件上传')
             } else if (serverType === 1) {
                 // qiniu
                 // TODO

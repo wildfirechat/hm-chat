@@ -71,7 +71,7 @@ export default struct RestoreProgressPage {
         false, // 不覆盖现有消息
         (progress: number, current: string) => {
           // 进度回调
-          this.progress = Math.floor(progress * 100)
+          this.progress = progress
           this.currentStep = current
           console.log(`Restore progress: ${this.progress}%, ${current}`)
         }

@@ -22,12 +22,13 @@ import SoundMessageContent from '@wfc/client/src/main/ets/wfc/messages/soundMess
 import { window } from '@kit.ArkUI'
 import CheckableConversationInfoItemView from '../../../view/CheckableConversationInfoItemView'
 import ConversationPortraitView from '../../../view/ConversationPortraitView'
+import ConversationInfoDataSource from '../../../pages/datasource/ConversationInfoDataSource'
 
 @Component
 @Preview
 export default struct ForwardMessagePage {
     @State keyword: string = ''
-    @State recentConversationInfos: ConversationInfo[] = [];
+    private conversationInfoDataSource: ConversationInfoDataSource = new ConversationInfoDataSource()
     private messages: Message[] = []
     private forwardDialogController?: CustomDialogController
     private forwardType: 'oneByOne' | 'compose' = 'oneByOne'
@@ -39,7 +40,8 @@ export default struct ForwardMessagePage {
     private checkedUserListScroller: Scroller = new Scroller()
 
     aboutToAppear() {
-        this.recentConversationInfos = wfc.getConversationInfoList([0, 1, 2, 3], [0, 1]);
+        let conversationInfos = wfc.getConversationInfoList([0, 1, 2, 3], [0, 1]);
+        this.conversationInfoDataSource.setConversationInfos(conversationInfos)
         let params = this.mainNavPathStack.getParamByIndex(this.mainNavPathStack.size() - 1) as Record<string, Object>;
         if (params) {
             let msgs: Message[] = params['messages'] as Message[]
@@ -65,6 +67,11 @@ export default struct ForwardMessagePage {
         } else {
             this.checkedConversations.push(conv)
         }
+    }
+
+    private loadRecentConversations() {
+        let conversationInfos = wfc.getConversationInfoList([0, 1, 2, 3], [0, 1]);
+        this.conversationInfoDataSource.setConversationInfos(conversationInfos)
     }
 
     private searchModules: SearchModule[] = [
@@ -360,7 +367,7 @@ export default struct ForwardMessagePage {
                                         .padding({ left: 10, right: 10 })
                                 }
 
-                                ForEach(this.recentConversationInfos, (info: ConversationInfo, index: number) => {
+                                LazyForEach(this.conversationInfoDataSource, (info: ConversationInfo, index: number) => {
                                     ListItem() {
                                         if (this.enableMultiCheck) {
                                             CheckableConversationInfoItemView({
@@ -394,7 +401,7 @@ export default struct ForwardMessagePage {
                                         }
                                     })
                                     .width("100%")
-                                }, (info: ConversationInfo) => info.conversation.type + info.conversation.target + '-' + info.conversation.line)
+                                }, (info: ConversationInfo) => info.conversation.type + '-' + info.conversation.target + '-' + info.conversation.line)
                             }
                         }
                         .height('100%')

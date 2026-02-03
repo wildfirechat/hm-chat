@@ -98,7 +98,6 @@ export default struct PCBackupProgressPage {
 
   async aboutToAppear() {
     this.backupManager.setWfcManager(wfc)
-    await this.startBackupRequest()
   }
 
   async startBackupRequest() {
@@ -621,6 +620,7 @@ export default struct PCBackupProgressPage {
           this.passwordHint = params['passwordHint'] as string
         }
       }
+      this.startBackupRequest()
     })
   }
 }

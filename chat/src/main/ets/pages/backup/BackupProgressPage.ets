@@ -85,7 +85,7 @@ export default struct BackupProgressPage {
         this.passwordHint || undefined,
         (progress: number, current: string) => {
           // 进度回调
-          this.progress = Math.floor(progress * 100)
+          this.progress = progress
           this.currentStep = current
           console.log(`Backup progress: ${this.progress}%, ${current}`)
         }

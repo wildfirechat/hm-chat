@@ -12,24 +12,16 @@ import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationTyp
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
 import { appNavigationDestinations } from '../mainNavigationConfig'
 import { showToast } from '@wfc/uikit/src/main/ets/common/utils/Toast'
-
-// 会话项包装类，包含选中状态
-@Observed
-class ConversationItem {
-  conversationInfo: ConversationInfo
-  portrait: string = ''
-  isSelected: boolean = false
-
-  constructor(convInfo: ConversationInfo) {
-    this.conversationInfo = convInfo
-  }
-}
+import ConversationInfoDataSource from '@wfc/uikit/src/main/ets/pages/datasource/ConversationInfoDataSource'
+import CheckableConversationInfoItemView from '@wfc/uikit/src/main/ets/view/CheckableConversationInfoItemView'
 
 @Preview
 @Component
 export default struct ConversationSelectPage {
   @Consume('mainNavPathStack') mainNavPathStack: NavPathStack
-  @State conversationItems: ConversationItem[] = []
+  private conversationInfoDataSource: ConversationInfoDataSource = new ConversationInfoDataSource()
+  private conversationInfos: ConversationInfo[] = []
+  @State checkedConversations: Conversation[] = []
   @State selectAll: boolean = false
   private target: string = 'local' // 'local' or 'pc'
   private includeMedia: boolean = false
@@ -40,54 +32,40 @@ export default struct ConversationSelectPage {
     const conversationList = wfc.getConversationInfoList(types, [0])
     console.log(`Loaded ${conversationList.length} conversations`)
 
-    // 创建会话项数组并加载头像
-    this.conversationItems = conversationList.map(convInfo => {
-      const item = new ConversationItem(convInfo)
-      item.portrait = convInfo.portrait()
-      return item
-    })
+    this.conversationInfos = conversationList
+    this.conversationInfoDataSource.setConversationInfos(conversationList)
+    this.checkedConversations = []
+    this.selectAll = false
   }
 
   toggleSelectAll(): void {
     this.selectAll = !this.selectAll
-
-    // 直接更新每个会话项的选中状态
-    const newItems = this.conversationItems.map(item => {
-      const newItem = new ConversationItem(item.conversationInfo)
-      newItem.portrait = item.portrait
-      newItem.isSelected = this.selectAll
-      return newItem
-    })
-
-    this.conversationItems = newItems
+    if (this.selectAll) {
+      this.checkedConversations = this.conversationInfos.map(info => info.conversation)
+    } else {
+      this.checkedConversations = []
+    }
   }
 
-  toggleSelection(item: ConversationItem): void {
-    // 创建新的会话项数组，只修改被点击的项
-    const newItems = this.conversationItems.map(i => {
-      if (i === item) {
-        const newItem = new ConversationItem(i.conversationInfo)
-        newItem.portrait = i.portrait
-        newItem.isSelected = !i.isSelected
-        return newItem
-      }
-      return i
-    })
+  toggleSelection(conversation: Conversation): void {
+    let index = this.checkedConversations.findIndex(c => Conversation.equal(c, conversation))
+    if (index >= 0) {
+      this.checkedConversations.splice(index, 1)
+    } else {
+      this.checkedConversations.push(conversation)
+    }
 
-    this.conversationItems = newItems
-
-    // 更新全选状态
-    this.selectAll = newItems.every(i => i.isSelected)
+    this.selectAll = this.checkedConversations.length === this.conversationInfos.length
   }
 
   getSelectedConversations(): ConversationInfo[] {
-    return this.conversationItems
-      .filter(item => item.isSelected)
-      .map(item => item.conversationInfo)
+    return this.conversationInfos.filter(info =>
+      this.checkedConversations.findIndex(c => Conversation.equal(c, info.conversation)) >= 0
+    )
   }
 
   getSelectedCount(): number {
-    return this.conversationItems.filter(item => item.isSelected).length
+    return this.checkedConversations.length
   }
 
   onNext() {
@@ -126,16 +104,19 @@ export default struct ConversationSelectPage {
 
         // 会话列表
         List({ space: 0 }) {
-          ForEach(this.conversationItems, (item: ConversationItem, index: number) => {
+          LazyForEach(this.conversationInfoDataSource, (info: ConversationInfo, index: number) => {
             ListItem() {
-              ConversationItemView({
-                item: item,
-                onCheckChange: () => {
-                  this.toggleSelection(item)
-                }
+              CheckableConversationInfoItemView({
+                checkedConversations: $checkedConversations,
+                conversationInfo: info,
+                basicMode: true,
+                enableCheck: true
               })
+                .onClick(() => {
+                  this.toggleSelection(info.conversation)
+                })
             }
-          }, (item: ConversationItem, index: number) => `${index}`)
+          }, (info: ConversationInfo) => info.conversation.type + info.conversation.target + '-' + info.conversation.line)
         }
         .width('100%')
         .layoutWeight(1)
@@ -183,103 +164,6 @@ export default struct ConversationSelectPage {
           this.includeMedia = params['includeMedia'] as boolean
         }
       }
-    })
-  }
-
-  @Builder
-  ConversationItemForBackup(item: ConversationItem, onCheckChange: () => void) {
-    Row() {
-      // 复选框
-      Checkbox()
-        .select(item.isSelected)
-        .enabled(true)
-        .margin({ right: 12 })
-
-      // 会话头像
-      Image(item.portrait)
-        .width(48)
-        .height(48)
-        .borderRadius(4)
-        .alt($r('app.media.avatar_def'))
-        .margin({ right: 12 })
-
-      // 会话信息
-      Column() {
-        Text(item.conversationInfo.title())
-          .fontSize(16)
-          .fontColor('#1d1d1d')
-          .maxLines(1)
-          .layoutWeight(1)
-          .textOverflow({ overflow: TextOverflow.Ellipsis })
-
-        Text(`${this.getMessageCount(item.conversationInfo)}条消息`)
-          .fontSize(14)
-          .fontColor('#999999')
-          .margin({ top: 4 })
-      }
-      .layoutWeight(1)
-      .alignItems(HorizontalAlign.Start)
-    }
-    .width('100%')
-    .height(64)
-    .padding({ left: 16, right: 16, top: 8, bottom: 8 })
-    .backgroundColor(Color.White)
-    .onClick(() => {
-      onCheckChange()
-    })
-  }
-
-  getMessageCount(conversationInfo: ConversationInfo): number {
-    // 从数据库获取会话的消息总数
-    return wfc.getMessageCount(conversationInfo.conversation)
-  }
-}
-
-// 子组件，使用 @ObjectLink 接收 ConversationItem
-@Component
-struct ConversationItemView {
-  @ObjectLink item: ConversationItem
-  onCheckChange: () => void = () => {}
-
-  build() {
-    Row() {
-      // 复选框
-      Checkbox()
-        .select(this.item.isSelected)
-        .enabled(true)
-        .margin({ right: 12 })
-
-      // 会话头像
-      Image(this.item.portrait)
-        .width(48)
-        .height(48)
-        .borderRadius(4)
-        .alt($r('app.media.avatar_def'))
-        .margin({ right: 12 })
-
-      // 会话信息
-      Column() {
-        Text(this.item.conversationInfo.title())
-          .fontSize(16)
-          .fontColor('#1d1d1d')
-          .maxLines(1)
-          .layoutWeight(1)
-          .textOverflow({ overflow: TextOverflow.Ellipsis })
-
-        Text(`${wfc.getMessageCount(this.item.conversationInfo.conversation)}条消息`)
-          .fontSize(14)
-          .fontColor('#999999')
-          .margin({ top: 4 })
-      }
-      .layoutWeight(1)
-      .alignItems(HorizontalAlign.Start)
-    }
-    .width('100%')
-    .height(64)
-    .padding({ left: 16, right: 16, top: 8, bottom: 8 })
-    .backgroundColor(Color.White)
-    .onClick(() => {
-      this.onCheckChange()
     })
   }
 }

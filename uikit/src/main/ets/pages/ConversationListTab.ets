@@ -12,6 +12,7 @@ import data_preferences from '@ohos.data.preferences'
 import { uikitNavigationDestinations } from './uikitNavigationConfig'
 import PCOnlineInfo from '@wfc/client/src/main/ets/wfc/model/pcOnlineInfo'
 import ConversationInfoDataSource from './datasource/ConversationInfoDataSource'
+import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
 
 @Component
 @Preview
@@ -23,6 +24,7 @@ export default struct ConversationListTab {
     @Link conversationListTabUnreadCount: number
     private conversationInfoDataSource: ConversationInfoDataSource = new ConversationInfoDataSource()
     private context?: Context
+    private  _loadConversationInfoListDebouncer: number = 0
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
 
     aboutToAppear() {
@@ -67,13 +69,7 @@ export default struct ConversationListTab {
     onPageShow() {
     }
 
-    // TODO
-    // FIXME
-    // 不是所有情况，都需要完整的重新加载会话列表
-    loadConversationList() {
-        if (this.connectionStatus === ConnectionStatus.ConnectionStatusConnecting) {
-            return;
-        }
+    _loadConversationList = async () => {
         let conversationInfos = wfc.getConversationInfoList([0, 1, 2, 3], [0, 1]);
         this.conversationInfoDataSource.setConversationInfos(conversationInfos)
         let totalUnreadCount = 0
@@ -85,6 +81,21 @@ export default struct ConversationListTab {
         })
 
         this.conversationListTabUnreadCount = totalUnreadCount
+    }
+
+    // TODO
+    // FIXME
+    // 不是所有情况，都需要完整的重新加载会话列表
+    loadConversationList() {
+        if (this.connectionStatus === ConnectionStatus.ConnectionStatusConnecting) {
+            return;
+        }
+        if (this._loadConversationInfoListDebouncer > 0) {
+            clearTimeout(this._loadConversationInfoListDebouncer)
+        }
+        this._loadConversationInfoListDebouncer = setTimeout(() => {
+            this._loadConversationList();
+        }, 200);
     }
 
     loadPCOnlineInfos() {
@@ -153,9 +164,8 @@ export default struct ConversationListTab {
     onUserInfosUpdate = () => {
         this.loadConversationList();
     }
-    onGroupInfosUpdate = () => {
+    onGroupInfosUpdate = (groupInfos: GroupInfo[]) => {
         this.loadConversationList();
-
     }
     onChannelInfosUpdate = () => {
         this.loadConversationList();

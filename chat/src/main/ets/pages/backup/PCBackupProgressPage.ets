@@ -8,11 +8,8 @@
 
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import { appNavigationDestinations } from '../mainNavigationConfig'
-import type { BackupResult } from '@wfc/client/src/main/ets/wfc/backup'
 import { MessageBackupManager } from '@wfc/client/src/main/ets/wfc/backup/messageBackupManager'
-import { BackupError } from '@wfc/client/src/main/ets/wfc/backup/backupTypes'
 import ConversationInfo from '@wfc/client/src/main/ets/wfc/model/conversationInfo'
-import { showToast } from '@wfc/uikit/src/main/ets/common/utils/Toast'
 import fs from '@ohos.file.fs'
 import http from '@ohos.net.http'
 import EventType from '@wfc/client/src/main/ets/wfc/client/wfcEvent'
@@ -37,7 +34,8 @@ interface ConversationData {
 
 // 备份请求接口
 interface BackupRequestContent {
-  conversations: ConversationData[]
+  conversationCount: number
+  messageCount: number
   includeMedia: boolean
   timestamp: number
 }
@@ -115,49 +113,32 @@ export default struct PCBackupProgressPage {
     const userId = wfc.getUserId()
 
     // 构建会话列表数据
-    const conversationsData: ConversationData[] = []
+    let totalMessageCount = 0;
     for (const convInfo of this.conversations) {
       const conv = convInfo.conversation
       const messageCount = wfc.getMessageCount(conv)
-
-      const convData: ConversationInfoData = {
-        type: conv.type,
-        target: conv.target,
-        line: conv.line
-      }
-
-      const data: ConversationData = {
-        conversation: convData,
-        messageCount: messageCount
-      }
-      conversationsData.push(data)
-    }
-
-    // 创建备份请求通知
-    const requestContent: BackupRequestContent = {
-      conversations: conversationsData,
-      includeMedia: this.includeMedia,
-      timestamp: Date.now()
+      totalMessageCount += messageCount
     }
 
     try {
       // 发送备份请求消息（类型613）
-      await this.sendBackupRequest(userId, requestContent)
+      await this.sendBackupRequest(userId, this.conversations.length, totalMessageCount, this.includeMedia)
     } catch (error) {
       console.error('Failed to send backup request:', JSON.stringify(error))
       this.showError('发送备份请求失败')
     }
   }
 
-  async sendBackupRequest(userId: string, content: BackupRequestContent): Promise<void> {
+  async sendBackupRequest(userId: string, conversationCount: number, messageCount: number, includeMedia:boolean): Promise<void> {
     // 创建会话对象（发送给自己，PC端会收到）
     const conversation = new Conversation(0, userId, 0)
 
     // 创建备份请求消息内容
     const messageContent = new BackupRequestNotificationContent()
-    messageContent.conversationsJson = JSON.stringify(content.conversations)
-    messageContent.includeMedia = content.includeMedia
-    messageContent.timestamp = content.timestamp
+    messageContent.conversationCount = conversationCount
+    messageContent.messageCount = messageCount
+    messageContent.includeMedia = includeMedia
+    messageContent.timestamp = Date.now();
 
     // 发送消息
     try {

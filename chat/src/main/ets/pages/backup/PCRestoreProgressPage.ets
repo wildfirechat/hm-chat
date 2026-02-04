@@ -260,7 +260,7 @@ export default struct PCRestoreProgressPage {
         false,  // 不覆盖现有消息
         (progress: number, current: string) => {
           // 恢复占50-100%
-          const displayProgress = 50 + Math.floor(progress * 50)
+          const displayProgress = 50 + Math.floor(progress /2)
           this.progress = displayProgress
           this.detail = current
         }

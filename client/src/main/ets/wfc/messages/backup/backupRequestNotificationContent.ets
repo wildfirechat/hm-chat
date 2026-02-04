@@ -17,11 +17,9 @@ import MessageContentType from '../messageContentType';
  * 备份请求通知消息内容
  */
 export default class BackupRequestNotificationContent extends NotificationMessageContent {
-  /**
-   * 会话列表（JSON字符串）
-   * 格式: [{conversation: {type, target, line}, messageCount: int}, ...]
-   */
-  conversationsJson: string = '';
+
+  conversationCount:number = 0;
+  messageCount: number = 0;
 
   /**
    * 是否包含媒体文件
@@ -45,9 +43,8 @@ export default class BackupRequestNotificationContent extends NotificationMessag
 
     const dataDict: JSONObject = {};
 
-    if (this.conversationsJson) {
-      dataDict['c'] = this.conversationsJson;
-    }
+    dataDict['cc'] = this.conversationCount;
+    dataDict['mc'] = this.messageCount;
     dataDict['m'] = this.includeMedia;
     dataDict['t'] = this.timestamp;
 
@@ -69,7 +66,8 @@ export default class BackupRequestNotificationContent extends NotificationMessag
       const jsonStr = wfc.b64_to_utf8(payload.binaryContent);
       const obj = JSON.parse(jsonStr) as JSONObject;
 
-      this.conversationsJson = (obj['c'] as string) || '';
+      this.conversationCount = (obj['cc'] as number) || 0;
+      this.messageCount = (obj['mc'] as number) || 0;
       this.includeMedia = (obj['m'] as boolean) || false;
       this.timestamp = (obj['t'] as number) || 0;
     } catch (error) {

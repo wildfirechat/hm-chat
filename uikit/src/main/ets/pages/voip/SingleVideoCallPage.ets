@@ -3,7 +3,7 @@ import CallSessionCallback from '@wfc/avenginekit/src/main/ets/wfc/av/engine/cal
 import CallState from '@wfc/avenginekit/src/main/ets/wfc/av/engine/callState'
 import avengineKit from '@wfc/avenginekit'
 import wfc from '@wfc/client'
-import { ScalingMode, VideoRenderController } from '@ohos/webrtc'
+import { Logging, LoggingSeverity, ScalingMode } from '@ohos/webrtc'
 import { VideoTrack } from '@ohos/webrtc/src/main/libohos_webrtc/webrtc';
 import Config from '@wfc/client/src/main/ets/config'
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
@@ -64,6 +64,9 @@ export default struct SingleVideoCallPage {
             this.focusXComponentController.setScalingMode(ScalingMode.AspectFit)
             this.focusXComponentController.setVideoTrack(remoteTrack)
         }
+
+        // 打开 webrtc 库日志
+        // Logging.enableLogToDebugOutput(LoggingSeverity.VERBOSE)
     }
 
     aboutToDisappear(): void {

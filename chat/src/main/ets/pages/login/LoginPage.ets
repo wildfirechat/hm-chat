@@ -38,7 +38,7 @@ struct LoginPage {
     @State showSlideVerify: boolean = false
     @State cachedSlideVerifyToken: string = ''
     @State hasSlideVerifiedForCode: boolean = false // 标记是否已通过发送验证码的滑动验证
-    @State pendingAction: string = '' // 'send_code', 'password_login'
+    @State pendingAction: string = '' // 'send_code', 'password_login', 'code_login'
 
     controller: TextInputController = new TextInputController()
 
@@ -186,23 +186,14 @@ struct LoginPage {
                             this.pendingAction = 'password_login'
                             this.showSlideVerify = true
                         } else {
-                            // 验证码登录：如果已通过发送验证码时的验证，则直接登录
-                            // 注意：登录时不传递 slideVerifyToken，因为 token 在发送验证码时已被后端删除
+                            // 验证码登录：检查是否已通过滑动验证
                             if (this.hasSlideVerifiedForCode) {
-                                appServer.loginWithAuthCode(this.phoneNumber, this.authCode)
-                                    .then(async res => {
-                                        this.isLogin = false
-                                        this.onLoginSuccess(res as Record<string, Object>)
-                                    })
-                                    .catch((reason: Error) => {
-                                        this.isLogin = false
-                                        showToast(reason.message)
-                                        console.error('login failed', reason)
-                                    })
+                                // 已通过验证，直接登录
+                                this.doCodeLogin()
                             } else {
                                 // 未验证过，需要先滑动验证
-                                showToast('请先获取验证码')
-                                this.isLogin = false
+                                this.pendingAction = 'code_login'
+                                this.showSlideVerify = true
                             }
                         }
                     })
@@ -289,6 +280,19 @@ struct LoginPage {
         .height('100%')
     }
 
+    doCodeLogin() {
+        appServer.loginWithAuthCode(this.phoneNumber, this.authCode)
+            .then(async res => {
+                this.isLogin = false
+                this.onLoginSuccess(res as Record<string, Object>)
+            })
+            .catch((reason: Error) => {
+                this.isLogin = false
+                showToast(reason.message)
+                console.error('login failed', reason)
+            })
+    }
+
     async onLoginSuccess(res: Record<string, Object>) {
         console.log('login success', res);
         //  记录手机号
@@ -346,6 +350,10 @@ struct LoginPage {
                             showToast(reason.message)
                             console.error('login failed', reason)
                         })
+                } else if (this.page.pendingAction === 'code_login') {
+                    // 验证码登录 - 滑动验证通过后执行登录
+                    this.page.hasSlideVerifiedForCode = true
+                    this.page.doCodeLogin()
                 }
 
                 this.page.showSlideVerify = false

@@ -2437,6 +2437,26 @@ export class WfcManager {
     }
 
     /**
+     * 获取PC客户端是否被锁定
+     * @param pcClientId PC客户端ID
+     * @returns 是否被锁定
+     */
+    isLockPCClient(pcClientId: string): boolean {
+        return impl.isLockPCClient(pcClientId);
+    }
+
+    /**
+     * 锁定或解锁PC客户端
+     * @param pcClientId PC客户端ID
+     * @param isLock true 锁定，false 解锁
+     * @param successCB
+     * @param failCB
+     */
+    lockPCClient(pcClientId: string, isLock: boolean, successCB: SuccessCallback, failCB: FailCallback) {
+        impl.lockPCClient(pcClientId, isLock, successCB, failCB)
+    }
+
+    /**
      * 获取会话中的文件记录
      * @param {Conversation|undefined|null} conversation 会话，为 undefined|null 时，则获取当前用户所有收到和发出的文件记录
      * @param {String} fromUser 来源用户

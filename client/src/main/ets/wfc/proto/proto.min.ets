@@ -1721,6 +1721,15 @@ class WfcImpl {
         this.setUserSetting(UserSettingScope.MuteWhenPCOnline, "", strValue, successCB, failCB);
     }
 
+    isLockPCClient(pcClientId: string): boolean {
+        let value = this.getUserSetting(UserSettingScope.LockPC, pcClientId);
+        return value === "1";
+    }
+
+    lockPCClient(pcClientId: string, isLock: boolean, successCB: SuccessCallback, failCB: FailCallback) {
+        this.setUserSetting(UserSettingScope.LockPC, pcClientId, isLock ? "1" : "0", successCB, failCB);
+    }
+
     clearMessageUnreadStatus(messageId: number) {
         protoProxy.clearMessageUnreadStatus(messageId);
     }

@@ -1,6 +1,7 @@
 import { showToast } from '../../common/utils/Toast'
 import Config from '@wfc/client/src/main/ets/config'
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
+import EventType from '@wfc/client/src/main/ets/wfc/client/wfcEvent'
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType'
 import PCOnlineInfo from '@wfc/client/src/main/ets/wfc/model/pcOnlineInfo'
@@ -19,6 +20,27 @@ export default struct PCSessionPage {
         this.pcOnineInfo = params['pcOnlineInfo'] as PCOnlineInfo
         if (this.pcOnineInfo) {
             this.isLockPC = wfc.isLockPCClient(this.pcOnineInfo.clientId)
+        }
+    }
+
+    onSettingUpdate = () => {
+        this.checkPCOnlineStatus()
+    }
+
+    checkPCOnlineStatus() {
+        if (!this.pcOnineInfo) {
+            return
+        }
+        let infos = wfc.getPCOnlineInfos()
+        let pcStillOnline = false
+        for (let info of infos) {
+            if (info.clientId === this.pcOnineInfo.clientId) {
+                pcStillOnline = true
+                break
+            }
+        }
+        if (!pcStillOnline) {
+            this.mainNavPathStack.pop()
         }
     }
 
@@ -141,5 +163,14 @@ export default struct PCSessionPage {
         .title('已登录的设备')
         .height('100%')
         .width('100%')
+        .onReady(() => {
+            // 页面显示时：添加监听并检查PC状态
+            wfc.eventEmitter?.on(EventType.SettingUpdate, this.onSettingUpdate)
+            this.checkPCOnlineStatus()
+        })
+        .onHidden(() => {
+            // 页面隐藏时：移除监听
+            wfc.eventEmitter?.off(EventType.SettingUpdate, this.onSettingUpdate)
+        })
     }
 }

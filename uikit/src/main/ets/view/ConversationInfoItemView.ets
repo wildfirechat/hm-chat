@@ -59,45 +59,48 @@ export default struct ConversationInfoItemView {
                         Image(this.conversationItemPortrait)
                             .alt($r('app.media.avatar_def'))
                             .draggable(false)
-                            .height(44)
-                            .width(44)
-                            .padding(2)
-                            .borderRadius(4)
+                            .height(48)
+                            .width(48)
+                            .borderRadius(6)
                     } else if (this.conversationInfo!.isSilent && this.conversationUnreadCount() > 0) {
                         Badge({
                             // count: this.conversationInfo!.unreadCount ? (this.conversationInfo!.unreadCount.unreadMention + this.conversationInfo!.unreadCount.unread + this.conversationInfo!.unreadCount.unreadMentionAll) : 0,
                             // maxCount: 99,
                             value: '',
                             position: BadgePosition.RightTop,
-                            style: { badgeSize: 8, badgeColor: '#FA2A2D' }
+                            style: { badgeSize: 10, badgeColor: '#FA2A2D' }
                         }) {
                             Image(this.conversationItemPortrait)
                                 .alt($r('app.media.avatar_def'))
                                 .draggable(false)
-                                .height(44)
-                                .width(44)
+                                .height(52)
+                                .width(52)
                                 .padding(2)
-                                .borderRadius(4)
+                                .borderRadius(6)
                         }
                     } else {
                         Badge({
                             count: this.conversationUnreadCount(),
                             maxCount: 99,
                             position: BadgePosition.RightTop,
-                            style: { badgeSize: 14, badgeColor: '#FA2A2D' }
+                            style: { badgeSize: 16, badgeColor: '#FA2A2D' }
                         }) {
                             Image(this.conversationItemPortrait)
                                 .alt($r('app.media.avatar_def'))
                                 .draggable(false)
-                                .height(44)
-                                .width(44)
+                                .height(52)
+                                .width(52)
                                 .padding(2)
-                                .borderRadius(4)
+                                .borderRadius(6)
                         }
                     }
                 }
                 .width(64)
                 .height(64)
+                .margin({
+                    left: 8,
+                    right: 8,
+                })
                 .justifyContent(FlexAlign.Center)
                 .alignItems(VerticalAlign.Center)
 

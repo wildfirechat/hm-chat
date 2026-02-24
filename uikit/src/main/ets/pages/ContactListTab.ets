@@ -234,7 +234,7 @@ export default struct ContactListTab {
                                             style: { badgeSize: 14, badgeColor: '#FA2A2D' }
                                         }) {
                                             Text(header.title)
-                                                .padding({ left: 10 })
+                                                .padding({ left: 16 })
                                         }
                                         .padding({ left: 20 })
                                     } else {
@@ -245,7 +245,7 @@ export default struct ContactListTab {
                                             style: { badgeSize: 14, badgeColor: '#FA2A2D' }
                                         }) {
                                             Text(header.title)
-                                                .padding({ left: 10 })
+                                                .padding({ left: 16 })
                                         }
                                         .padding({ left: 20 })
                                     }
@@ -253,7 +253,7 @@ export default struct ContactListTab {
                                 .onClick(() => {
                                     header.action()
                                 })
-                                .padding({ left: 10, right: 10 })
+                                .padding({ left: 16, right: 10 })
                                 .width('100%')
                                 .height(60)
                             }
@@ -281,7 +281,7 @@ export default struct ContactListTab {
                                             .fontColor('#828282')
                                     }
                                     .height(30)
-                                    .padding({ left: 10 })
+                                    .padding({ left: 16 })
                                     .alignItems(VerticalAlign.Center)
                                     .backgroundColor('#EDEDED')
                                 }
@@ -295,11 +295,11 @@ export default struct ContactListTab {
                                     Column() {
                                         Text(groupedUserInfo.userInfo.friendAlias ? groupedUserInfo.userInfo.friendAlias : groupedUserInfo.userInfo.displayName)
                                             .maxLines(1)
-                                            .padding({ left: 10 })
+                                            .padding({ left: 16 })
                                         if (groupedUserInfo.onlineState) {
                                             Text(groupedUserInfo.onlineState.desc())
                                                 .maxLines(1)
-                                                .padding({ left: 10, top: 4 })
+                                                .padding({ left: 16, top: 4 })
                                                 .fontSize(11)
                                         }
                                     }
@@ -307,7 +307,7 @@ export default struct ContactListTab {
                                 }
                                 .height(60)
                                 .width('100%')
-                                .padding({ left: 10, right: 10 })
+                                .padding({ left: 16, right: 10 })
                                 .onClick(() => {
                                     this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.UserInfoPage, {
                                         'userInfo': groupedUserInfo.userInfo
@@ -329,7 +329,7 @@ export default struct ContactListTab {
                 }
                 .divider({
                     strokeWidth: 1,
-                    startMargin: 60,
+                    startMargin: 72,
                 })
                 .scrollBar(BarState.Off)
                 .width('100%')

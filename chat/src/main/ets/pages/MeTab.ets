@@ -70,7 +70,7 @@ export default struct MeTab {
                 .layoutWeight(1)
                 .height(60)
                 .padding({ top: 5, bottom: 5 })
-                .margin({ left: 10 })
+                .margin({ left: 16 })
 
                 Image($r('app.media.ic_public_arrow_right'))
                     .width(22)
@@ -79,7 +79,12 @@ export default struct MeTab {
             }
             .width('100%')
             .height(100)
-            .padding(10)
+            .padding({
+                left:26,
+                right: 20,
+                top: 10,
+                bottom: 10
+            })
             .alignItems(VerticalAlign.Center)
             .backgroundColor(Color.White)
             .onClick(() => {

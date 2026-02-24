@@ -8,8 +8,8 @@ export default struct OptionItemView {
     @Prop subTitle: string = ''
     @Prop imgUrl: string = ''
     showRightArrow: boolean = true
-    paddingLeft: number = 10
-    paddingRight: number = 10
+    paddingLeft: number = 16
+    paddingRight: number = 16
     showDivider: boolean = true
 
     build() {
@@ -19,7 +19,7 @@ export default struct OptionItemView {
                     Image(this.icon)
                         .width(20)
                         .height(20)
-                        .margin({ right: 10 })
+                        .margin({ right: this.paddingLeft})
                 }
                 Column() {
                     Text(this.title)

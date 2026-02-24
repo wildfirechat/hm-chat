@@ -19,7 +19,7 @@ export default struct OptionItemView {
                     Image(this.icon)
                         .width(20)
                         .height(20)
-                        .margin({ right: this.paddingLeft})
+                        .margin({ right: this.paddingLeft })
                 }
                 Column() {
                     Text(this.title)
@@ -78,7 +78,7 @@ export default struct OptionItemView {
                 Divider()
                     .strokeWidth(0.6)
                     .color('#EDEDED')
-                    .padding({ left: this.icon ? 30 + this.paddingLeft : this.paddingLeft })
+                    .padding({ left: this.icon ? 20 + 2 * this.paddingLeft : this.paddingLeft })
             }
         }
         .width('100%')

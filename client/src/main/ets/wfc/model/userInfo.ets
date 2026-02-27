@@ -31,6 +31,7 @@ export default class UserInfo {
     mobile = '';
     email = '';
     address = '';
+    company = '';
     social = '';
     extra = '';
     type = 0; //0 normal; 1 robot; 2 thing;

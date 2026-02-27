@@ -1,4 +1,3 @@
-// 引入包名
 import http from '@ohos.net.http';
 import data_preferences from '@ohos.data.preferences';
 import wfc from '@wfc/client'
@@ -226,6 +225,7 @@ class AppServer {
     setConferenceFocusUserId(conferenceId: string, userId: string) {
         return this._post('/conference/focus/' + conferenceId, { 'userId': userId ? userId : '' } as JSONObject);
     }
+
     _init() {
         let context = AppStorage.get<common.UIAbilityContext>('context');
         let preference = data_preferences.getPreferencesSync(context?.getApplicationContext(), {
@@ -243,20 +243,7 @@ class AppServer {
         }
         return new Promise((resolve, reject) => {
             let httpRequest = http.createHttp();
-            // 用于订阅HTTP响应头，此接口会比request请求先返回。可以根据业务需要订阅此消息
-            // 从API 8开始，使用on('headersReceive', Callback)替代on('headerReceive', AsyncCallback)。 8+
-            // httpRequest.on('headersReceive', (header) => {
-            //     console.info('header: ' + JSON.stringify(header));
-            // if (header.toString() === 'authToken') {
-            //     this.authToken = header.toString();
-            //         let context = GlobalContext.getContext().getObject<common.ApplicationContext>('applicationContext');
-            //         let preference = data_preferences.getPreferencesSync(context, {
-            //             name: 'wfcstore'
-            //         })
-            //         let _url = url.URL.parseURL(this.baseUrl)
-            //         preference.put(`authToken-${_url.host}-${_url.port}`, this.authToken)
-            // }
-            // });
+
             console.log('request', path, data)
             httpRequest.request(// 填写HTTP请求的URL地址，可以带参数也可以不带参数。URL地址需要开发者自定义。请求的参数可以在extraData中指定
                 this.baseUrl + path,
@@ -277,15 +264,6 @@ class AppServer {
                     usingProtocol: http.HttpProtocol.HTTP1_1, // 可选，协议类型默认值由系统自动指定
                 }, (err, data) => {
                 if (!err && data.responseCode == 200) {
-                    // data.result为HTTP响应内容，可根据业务需要进行解析
-                    console.info('Result:' + JSON.stringify(data.result));
-                    console.info('code:' + JSON.stringify(data.responseCode));
-                    // data.header为HTTP响应头，可根据业务需要进行解析
-                    console.info('header:' + JSON.stringify(data.header));
-                    console.info('cookies:' + JSON.stringify(data.cookies)); // 8+
-                    // 取消订阅HTTP响应头事件
-                    // httpRequest.off('headersReceive');
-                    // 当该请求使用完毕时，调用destroy方法主动销毁
                     httpRequest.destroy();
                     console.log('response', data)
                     if (rawResponseData) {
@@ -314,13 +292,8 @@ class AppServer {
                         }
                     }
                 } else {
-                    console.info('error:' + JSON.stringify(err));
-                    // 取消订阅HTTP响应头事件
-                    httpRequest.off('headersReceive');
-                    // 当该请求使用完毕时，调用destroy方法主动销毁。
                     httpRequest.destroy();
-                    console.error('err', err)
-                    reject(new AppServerError(-1, err.message))
+                    reject(new AppServerError(-1, err?.message || '请求失败'))
                 }
             }
             )

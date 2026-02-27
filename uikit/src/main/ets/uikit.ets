@@ -3,6 +3,8 @@ import avenginekit from '@wfc/avenginekit/src/main/ets/wfc/av/engine/avenginekit
 // import VideoProfile from '@wfc/avenginekit/src/main/ets/wfc/av/engine/videoProfile';
 import AVEngineCallbackImpl from './avengineCallbackImpl';
 import { common } from '@kit.AbilityKit';
+import wfc from '@wfc/client/src/main/ets/wfc/client/wfc';
+import CollectionMessageContent from '@wfc/client/src/main/ets/wfc/messages/CollectionMessageContent';
 
 export class UIKit {
     bundleName = ''

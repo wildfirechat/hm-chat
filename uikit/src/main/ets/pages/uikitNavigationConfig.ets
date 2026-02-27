@@ -53,10 +53,14 @@ import ConferencePage from './voip/conference/ConferencePage'
 import StartConferencePage from './voip/conference/StartConferencePage'
 import OrderConferencePage from './voip/conference/OrderConferencePage'
 import ConferenceParticipantListPage from './voip/conference/ConferenceParticipantListPage'
+import CreateCollectionPage from './collection/CreateCollectionPage'
+import CollectionDetailPage from './collection/CollectionDetailPage'
 
 export const UIKIT_NAV_DESTINATION_PREFIX = 'uikit-';
 
 export class uikitNavigationDestinations {
+    static CreateCollectionPage = UIKIT_NAV_DESTINATION_PREFIX + 'createCollectionPage'
+    static CollectionDetailPage = UIKIT_NAV_DESTINATION_PREFIX + 'collectionDetailPage'
     static SearchPortalPage = UIKIT_NAV_DESTINATION_PREFIX + 'searchPortalPage'
     static ConversationPage = UIKIT_NAV_DESTINATION_PREFIX + 'conversationPage'
     static SingleConversationInfoPage = UIKIT_NAV_DESTINATION_PREFIX + 'singleConversationInfoPage'
@@ -228,6 +232,10 @@ export function UIKitPageMap(name: string) {
         ConferenceParticipantListPage()
     } else if (name === uikitNavigationDestinations.GroupJoinRequestListPage) {
         GroupJoinRequestListPage()
+    } else if (name === uikitNavigationDestinations.CreateCollectionPage) {
+        CreateCollectionPage()
+    } else if (name === uikitNavigationDestinations.CollectionDetailPage) {
+        CollectionDetailPage()
     } else {
         NavDestination() {
             Column() {

@@ -26,6 +26,9 @@ export default class Config {
     // 组织结构项目：https://github.com/wildfirechat/organization-platform 或 https://gitee.com/wfchat/organization-platform
     static ORGANIZATION_SERVER = 'https://org.wildfirechat.cn';
 
+    // 接龙服务地址，如果需要接龙功能，请部署接龙服务，然后这里填上接龙服务地址；如果不需要接龙功能，请置为 null
+    static COLLECTION_SERVER_ADDRESS = "https://jielong.wildfirechat.net";
+
     // 野火二维码 scheme，不要修改，如果需要修改的话，所有端都需要一起修改
     static QR_CODE_PREFIX_PC_SESSION = "wildfirechat://pcsession/";
 

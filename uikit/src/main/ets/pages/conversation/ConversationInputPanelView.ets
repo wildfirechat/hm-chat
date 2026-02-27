@@ -267,6 +267,19 @@ export default struct ConversationInputPanelView {
                 this.showExtContentCoverModal = true
                 this.extContentCoverBuilderParam = this.pickSingleContactModal
             }
+        },
+        {
+            title: '接龙',
+            icon: $r('app.media.ic_func_collection'),
+            action: () => {
+                if (this.conversation.type !== ConversationType.Group) {
+                    showToast('仅群组支持接龙');
+                    return;
+                }
+                this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.CreateCollectionPage, {
+                    'conversation': this.conversation
+                } as Record<string, Object>)
+            }
         }
     ]
     private multiCheckAction: MultiCheckAction[] = [

@@ -68,7 +68,6 @@ import EnterChannelChatMessageContent from "../messages/enterChannelChatMessageC
 import LeaveChannelChatMessageContent from "../messages/leaveChannelChatMessageContent";
 import ModifyGroupSettingNotification from "../messages/notification/modifyGroupSettingNotification";
 import MessageContent from '../messages/messageContent';
-import { DEFAULT } from '@ohos/hypium';
 import PCLoginRequestMessageContent from '../messages/pcLoginRequestMessageContent';
 import StreamingTextGeneratingMessageContent from '../messages/streamingTextGeneratingMessageContent';
 import StreamingTextGeneratedMessageContent from '../messages/streamingTextGeneratedMessageContent';
@@ -76,6 +75,7 @@ import BackupRequestNotificationContent from '../messages/backup/backupRequestNo
 import BackupResponseNotificationContent from '../messages/backup/backupResponseNotificationContent';
 import RestoreRequestNotificationContent from '../messages/backup/restoreRequestNotificationContent';
 import RestoreResponseNotificationContent from '../messages/backup/restoreResponseNotificationContent';
+import CollectionMessageContent from '../messages/CollectionMessageContent';
 
 export default class MessageConfig {
     static getMessageContentFlag(type: number) {
@@ -315,6 +315,9 @@ export default class MessageConfig {
                 break
             case MessageContentType.Backup_Request:
                 content = new BackupRequestNotificationContent()
+                break
+            case MessageContentType.Collection:
+                content = new CollectionMessageContent()
                 break
             default:
                 content = new UnknownMessageContent()
@@ -643,6 +646,11 @@ export default class MessageConfig {
             name: 'backupRequestNotificationContent',
             flag: PersistFlag.Transparent,
             type: MessageContentType.Backup_Request,
+        },
+        {
+            name: 'collectionMessageContent',
+            flag: PersistFlag.Persist_And_Count,
+            type: MessageContentType.Collection,
         }
 
     ];

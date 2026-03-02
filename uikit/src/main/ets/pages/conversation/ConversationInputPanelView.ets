@@ -280,6 +280,19 @@ export default struct ConversationInputPanelView {
                     'conversation': this.conversation
                 } as Record<string, Object>)
             }
+        },
+        {
+            title: '投票',
+            icon: $rawfile('ic_ext_poll.svg'),
+            action: () => {
+                if (this.conversation.type !== ConversationType.Group) {
+                    showToast('仅群组支持投票');
+                    return;
+                }
+                this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.PollHomePage, {
+                    'groupId': this.conversation.target
+                } as Record<string, Object>)
+            }
         }
     ]
     private multiCheckAction: MultiCheckAction[] = [

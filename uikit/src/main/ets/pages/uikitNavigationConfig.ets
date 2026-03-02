@@ -55,12 +55,20 @@ import OrderConferencePage from './voip/conference/OrderConferencePage'
 import ConferenceParticipantListPage from './voip/conference/ConferenceParticipantListPage'
 import CreateCollectionPage from './collection/CreateCollectionPage'
 import CollectionDetailPage from './collection/CollectionDetailPage'
+import CreatePollPage from './poll/CreatePollPage'
+import PollDetailPage from './poll/PollDetailPage'
+import PollHomePage from './poll/PollHomePage'
+import PollListPage from './poll/PollListPage'
 
 export const UIKIT_NAV_DESTINATION_PREFIX = 'uikit-';
 
 export class uikitNavigationDestinations {
     static CreateCollectionPage = UIKIT_NAV_DESTINATION_PREFIX + 'createCollectionPage'
     static CollectionDetailPage = UIKIT_NAV_DESTINATION_PREFIX + 'collectionDetailPage'
+    static CreatePollPage = UIKIT_NAV_DESTINATION_PREFIX + 'createPollPage'
+    static PollDetailPage = UIKIT_NAV_DESTINATION_PREFIX + 'pollDetailPage'
+    static PollHomePage = UIKIT_NAV_DESTINATION_PREFIX + 'pollHomePage'
+    static PollListPage = UIKIT_NAV_DESTINATION_PREFIX + 'pollListPage'
     static SearchPortalPage = UIKIT_NAV_DESTINATION_PREFIX + 'searchPortalPage'
     static ConversationPage = UIKIT_NAV_DESTINATION_PREFIX + 'conversationPage'
     static SingleConversationInfoPage = UIKIT_NAV_DESTINATION_PREFIX + 'singleConversationInfoPage'
@@ -236,6 +244,14 @@ export function UIKitPageMap(name: string) {
         CreateCollectionPage()
     } else if (name === uikitNavigationDestinations.CollectionDetailPage) {
         CollectionDetailPage()
+    } else if (name === uikitNavigationDestinations.CreatePollPage) {
+        CreatePollPage()
+    } else if (name === uikitNavigationDestinations.PollDetailPage) {
+        PollDetailPage()
+    } else if (name === uikitNavigationDestinations.PollHomePage) {
+        PollHomePage()
+    } else if (name === uikitNavigationDestinations.PollListPage) {
+        PollListPage()
     } else {
         NavDestination() {
             Column() {

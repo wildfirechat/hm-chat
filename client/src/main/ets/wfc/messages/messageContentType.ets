@@ -30,6 +30,10 @@ export default class MessageContentType {
     // 接龙消息
     static Collection = 17;
 
+    // 投票消息
+    static Poll = 18;
+    static Poll_Result = 19;
+
     static Mark_Unread_Sync = 31;
 
     static StartSecretChat_Notification = 40;

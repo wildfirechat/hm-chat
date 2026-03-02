@@ -76,6 +76,8 @@ import BackupResponseNotificationContent from '../messages/backup/backupResponse
 import RestoreRequestNotificationContent from '../messages/backup/restoreRequestNotificationContent';
 import RestoreResponseNotificationContent from '../messages/backup/restoreResponseNotificationContent';
 import CollectionMessageContent from '../messages/CollectionMessageContent';
+import PollMessageContent from '../messages/pollMessageContent';
+import PollResultMessageContent from '../messages/pollResultMessageContent';
 
 export default class MessageConfig {
     static getMessageContentFlag(type: number) {
@@ -318,6 +320,12 @@ export default class MessageConfig {
                 break
             case MessageContentType.Collection:
                 content = new CollectionMessageContent()
+                break
+            case MessageContentType.Poll:
+                content = new PollMessageContent()
+                break
+            case MessageContentType.Poll_Result:
+                content = new PollResultMessageContent()
                 break
             default:
                 content = new UnknownMessageContent()
@@ -651,6 +659,16 @@ export default class MessageConfig {
             name: 'collectionMessageContent',
             flag: PersistFlag.Persist_And_Count,
             type: MessageContentType.Collection,
+        },
+        {
+            name: 'pollMessageContent',
+            flag: PersistFlag.Persist_And_Count,
+            type: MessageContentType.Poll,
+        },
+        {
+            name: 'pollResultMessageContent',
+            flag: PersistFlag.Persist_And_Count,
+            type: MessageContentType.Poll_Result,
         }
 
     ];

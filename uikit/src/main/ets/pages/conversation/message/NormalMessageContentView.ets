@@ -30,6 +30,10 @@ import StreamingTextMessageContentView from './StreamingTextMessageContentView'
 import { MessageContextMenuItem } from './MessageContextMenuItem'
 import CollectionMessageContentView from './CollectionMessageContentView'
 import CollectionMessageContent from '@wfc/client/src/main/ets/wfc/messages/CollectionMessageContent'
+import PollMessageContentView from './PollMessageContentView'
+import PollResultMessageContentView from './PollResultMessageContentView'
+import PollMessageContent from '@wfc/client/src/main/ets/wfc/messages/pollMessageContent'
+import PollResultMessageContent from '@wfc/client/src/main/ets/wfc/messages/pollResultMessageContent'
 
 @Component
 export default struct NormaMessageContentView {
@@ -95,6 +99,10 @@ export default struct NormaMessageContentView {
                 StreamingTextMessageContentView({ message: $message })
             } else if (this.message.messageContent.type === MessageContentType.Collection) {
                 CollectionMessageContentView({ message: $message })
+            } else if (this.message.messageContent.type === MessageContentType.Poll) {
+                PollMessageContentView({ message: $message })
+            } else if (this.message.messageContent.type === MessageContentType.Poll_Result) {
+                PollResultMessageContentView({ message: $message })
             }
             // 自定义消息配置 start
             else if (this.message!.messageContent.type === CustomMessageContentType.MESSAGE_CONTENT_TYPE_CUSTOM_MESSAGE_TEST) {

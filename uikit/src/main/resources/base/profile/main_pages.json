@@ -23,6 +23,10 @@
         "pages/voip/SingleAudioCallPage",
         "pages/voip/SingleVideoCallPage",
         "pages/voip/MultiAudioCallPage",
-        "pages/voip/MultiVideoCallPage"
+        "pages/voip/MultiVideoCallPage",
+        "pages/poll/PollHomePage",
+        "pages/poll/PollListPage",
+        "pages/poll/CreatePollPage",
+        "pages/poll/PollDetailPage"
     ]
 }

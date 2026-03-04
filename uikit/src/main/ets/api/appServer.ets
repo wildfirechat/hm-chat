@@ -13,6 +13,7 @@ import FavItem from '@wfc/client/src/main/ets/wfc/model/favItem';
 import { stringValue } from '@wfc/client/src/main/ets/wfc/util/longUtil';
 import { parseHostAndPort } from './Util';
 import ConferenceInfo from '@wfc/avenginekit/src/main/ets/wfc/av/model/conferenceInfo';
+import QRLoginSession from './model/qrLoginSession';
 
 class AppServer {
     baseUrl = Config.APP_SERVER;
@@ -80,6 +81,42 @@ class AppServer {
         } as Record<string, Object>)
     }
 
+    /**
+     * 二维码登录，创建二维码登录 session
+     * @param userId
+     * @returns
+     */
+    createQRLoginSession(userId: string, deviceName: string = 'wearable') {
+        let result = this._post('/pc_session', {
+            'flag': 1,
+            'device_name': deviceName,
+            'userId': userId,
+            'clientId': wfc.getClientId(),
+            'platform': Config.getWFCPlatform()
+        } as Record<string, Object>)
+        return result as object as QRLoginSession
+    }
+
+    /**
+     * 二维码登录
+     * UI 层的具体实现，可以参考 vue-pc-chat
+     * @param token
+     * @returns
+     */
+    async loginWithQRSession(token: string) {
+        let data = await this._post(`session_login/${token}`, '', true) as http.HttpResponse
+        const restResult = data.result as Record<string, Object>
+        let code = restResult['code'] as number
+        if (code === 0) {
+            this._interceptResponseAuthToken(data)
+            return restResult
+        } else if ([9, 18].indexOf(code) >= 0) {
+            return restResult
+        } else {
+            throw new AppServerError(code, restResult['message'] as string)
+        }
+    }
+
     async scanPCLogin(token: string): Promise<PCSession> {
         let result = await this._post(`/scan_pc/${token}`)
         let pcSession = result as PCSession
@@ -136,7 +173,7 @@ class AppServer {
         return this._post('/slide_verify/verify', {
             'token': token,
             'x': x
-        } as JSONObject, true) // rawResponseData = true，获取完整响应
+        } as JSONObject)
     }
 
     requestResetPasswordAuthCode(phone: string) {
@@ -267,25 +304,11 @@ class AppServer {
                     httpRequest.destroy();
                     console.log('response', data)
                     if (rawResponseData) {
-                        resolve(data.result)
+                        resolve(data)
                     } else {
                         let result = data.result as Record<string, Object>
                         if (result.code === 0) {
-                            // 30ba6ab2d4d249d4ab9114a02a9850fc
-                            let header = data.header as Record<string, Object>
-                            let authToken: string = header['authtoken'] as string
-                            if (!authToken) {
-                                authToken = header['authToken'] as string
-                            }
-                            if (authToken) {
-                                this.authToken = authToken
-                                let context = AppStorage.get<common.ApplicationContext>('context');
-                                let preference = data_preferences.getPreferencesSync(context?.getApplicationContext(), {
-                                    name: 'wfcstore'
-                                })
-                                let hostPort = parseHostAndPort(this.baseUrl)
-                                preference.putSync(`authToken:${hostPort.host}-${hostPort.port}`, this.authToken)
-                            }
+                            this._interceptResponseAuthToken(data)
                             resolve(result.result)
                         } else {
                             reject(new AppServerError(result.code as number, result.message as string))
@@ -298,6 +321,23 @@ class AppServer {
             }
             )
         })
+    }
+
+    _interceptResponseAuthToken(data: http.HttpResponse) {
+        let header = data.header as Record<string, Object>
+        let authToken: string = header['authtoken'] as string
+        if (!authToken) {
+            authToken = header['authToken'] as string
+        }
+        if (authToken) {
+            this.authToken = authToken
+            let context = AppStorage.get<common.ApplicationContext>('context');
+            let preference = data_preferences.getPreferencesSync(context?.getApplicationContext(), {
+                name: 'wfcstore'
+            })
+            let hostPort = parseHostAndPort(this.baseUrl)
+            preference.putSync(`authToken:${hostPort.host}-${hostPort.port}`, this.authToken)
+        }
     }
 }
 

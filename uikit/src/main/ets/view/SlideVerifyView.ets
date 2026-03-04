@@ -26,7 +26,6 @@ export struct SlideVerifyView {
   @State scaleY: number = 1
   @State imageOffsetX: number = 0
 
-  private controller: SlideVerifyController = new SlideVerifyController()
   delegate?: SlideVerifyViewDelegate
 
   aboutToAppear() {
@@ -239,47 +238,12 @@ export struct SlideVerifyView {
 
   private async verifySlidePosition(x: number) {
     try {
-      console.info('[SlideVerify] ========== 验证开始 ==========')
-      console.info('[SlideVerify] 滑块按钮在轨道上的位置:', x, 'px')
-      console.info('[SlideVerify] 背景图偏移 imageOffsetX:', this.imageOffsetX.toFixed(2), 'px')
-      console.info('[SlideVerify] 缩放比例 scaleX:', this.scaleX.toFixed(3))
-
       // 转换为原图坐标
       const originalX = Math.round(x / this.scaleX)
-      console.info('[SlideVerify] 转换到原图(300x150)的X坐标:', originalX)
-      console.info('[SlideVerify] 原图有效X坐标范围: 50 ~ 200')
-      console.info('[SlideVerify] ==================================')
-
-      // 模仿 iOS，检查 code === 0 判断成功
-      const responseStr: string = await appServer.verifySlide(this.token, originalX) as string
-      const response = JSON.parse(responseStr) as Record<string, Object>
-
-      console.info('[SlideVerify] API 响应:', JSON.stringify(response))
-      console.info('[SlideVerify] response.code:', response['code'])
-      console.info('[SlideVerify] response.code === 0:', response['code'] === 0)
-
-      if (response['code'] === 0) {
-        console.info('[SlideVerify] 验证成功！')
-        this.isVerified = true
-
-        // 延迟关闭
-        setTimeout(() => {
-          if (this.delegate) {
-            this.delegate.slideVerifyViewDidVerifySuccess(this.token)
-          }
-        }, 500)
-      } else {
-        console.info('[SlideVerify] 验证失败！code =', response['code'])
-        // 验证失败
-        this.reset()
-        if (this.delegate) {
-          this.delegate.slideVerifyViewDidVerifyFailed()
-        }
-
-        // 1秒后自动刷新
-        setTimeout(() => {
-          this.refreshVerify()
-        }, 1000)
+      await appServer.verifySlide(this.token, originalX) as string
+      this.isVerified = true
+      if (this.delegate) {
+        this.delegate.slideVerifyViewDidVerifySuccess(this.token)
       }
     } catch (error) {
       console.error('[SlideVerify] 验证失败:', error)

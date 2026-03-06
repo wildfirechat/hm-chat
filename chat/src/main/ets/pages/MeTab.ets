@@ -93,11 +93,13 @@ export default struct MeTab {
                 } as Record<string, Object>)
             })
 
-            OptionItemView({ icon: $r('app.media.ic_account'), title: '账号与安全' })
-                .margin({ top: 10 })
-                .onClick(() => {
-                    this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.AccountPage, {} as Record<string, Object>)
-                })
+            if(BuildProfile.DEBUG){
+                OptionItemView({ icon: $r('app.media.ic_account'), title: '账号与安全' })
+                    .margin({ top: 10 })
+                    .onClick(() => {
+                        this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.AccountPage, {} as Record<string, Object>)
+                    })
+            }
 
             OptionItemView({ icon: $r('app.media.ic_notification'), title: '消息与通知' })
                 .margin({ top: 10 })

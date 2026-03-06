@@ -6,6 +6,7 @@ import wfc from '@wfc/client/src/main/ets/wfc/client/wfc';
 import { showToast } from '@wfc/uikit/src/main/ets/common/utils/Toast';
 import { inputMethod } from '@kit.IMEKit';
 import { SlideVerifyView, SlideVerifyViewDelegate } from '@wfc/uikit/src/main/ets/view/SlideVerifyView';
+import Config from '@wfc/client/src/main/ets/config';
 
 import('@wfc/uikit/src/main/ets/pages/misc/WebViewPageWithRouter') //引入共享包中的命名路由页面
 
@@ -222,7 +223,7 @@ struct LoginPage {
                             router.pushNamedRoute({
                                 name: 'webViewPageWithRouter',
                                 params: {
-                                    url: 'https://www.wildfirechat.net/wildfirechat_user_agreement.html',
+                                    url: Config.USER_AGREEMENT_URL,
                                     title: '野火IM用户协议'
                                 }
                             }, router.RouterMode.Standard)
@@ -236,7 +237,7 @@ struct LoginPage {
                             router.pushNamedRoute({
                                 name: 'webViewPageWithRouter',
                                 params: {
-                                    url: 'https://www.wildfirechat.net/wildfirechat_user_privacy.html',
+                                    url: Config.PRIVACY_AGREEMENT_URL,
                                     title: '野火IM个人信息保护政策'
                                 }
                             }, router.RouterMode.Standard)

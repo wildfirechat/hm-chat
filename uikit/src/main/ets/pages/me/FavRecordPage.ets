@@ -28,6 +28,7 @@ import LocationMessageContent from '@wfc/client/src/main/ets/wfc/messages/locati
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import SoundMessageContent from '@wfc/client/src/main/ets/wfc/messages/soundMessageContent'
 import AudioPlayManager from '../conversation/audio/AudioPlayManager'
+import http from '@ohos.net.http'
 
 @Component
 export default struct FavRecordPage {
@@ -51,8 +52,9 @@ export default struct FavRecordPage {
 
     loadFavList(startId: number) {
         appServer.getFavList(startId, 20)
-            .then(respData => {
-                let respStr = respData as string
+            .then(respData=> {
+                let rd= respData as http.HttpResponse
+                let respStr = rd.result as string
                 let data = _reverseToJsLongString(respStr, 'messageUid')
                 let obj = JSON.parse(data) as JSONObject
                 let favItems = ((obj['result'] as JSONObject)['items']) as FavItem[]

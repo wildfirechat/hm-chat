@@ -273,7 +273,7 @@ class AppServer {
         this.authToken = preference.getSync(`authToken:${hostPort.host}-${hostPort.port}`, '') as string
     }
 
-    _post(path: string, data?: string | Object, rawResponseData = false): Promise<string | object> {
+    _post(path: string, data?: string | Object, rawResponseData = false): Promise<string | object | http.HttpResponse> {
         if (!this.isInitialized) {
             this._init()
             this.isInitialized = true

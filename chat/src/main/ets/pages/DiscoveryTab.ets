@@ -66,30 +66,32 @@ export default struct DiscoveryTab {
                         })
                     }
 
-                    ListItem() {
-                        Row() {
-                            Image($r('app.media.ic_chatroom'))
-                                .width(20)
-                                .height(20)
-                                .objectFit(ImageFit.Contain)
-                            Text('聊天室')
-                                .padding({ left: 10 })
+                    if (BuildProfile.DEBUG) {
+                        ListItem() {
+                            Row() {
+                                Image($r('app.media.ic_chatroom'))
+                                    .width(20)
+                                    .height(20)
+                                    .objectFit(ImageFit.Contain)
+                                Text('聊天室')
+                                    .padding({ left: 10 })
+                            }
+                            .onClick(() => {
+                                this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ChatroomListPage, {} as Record<string, Object>)
+                            })
+                            .padding({ left: 10, right: 10 })
+                            .width('100%')
+                            .height(56)
                         }
-                        .onClick(() => {
-                            this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ChatroomListPage, {} as Record<string, Object>)
+                        .stateStyles({
+                            pressed: {
+                                .backgroundColor('#E5E5E5')
+                            },
+                            normal: {
+                                .backgroundColor(Color.White)
+                            }
                         })
-                        .padding({ left: 10, right: 10 })
-                        .width('100%')
-                        .height(56)
                     }
-                    .stateStyles({
-                        pressed: {
-                            .backgroundColor('#E5E5E5')
-                        },
-                        normal: {
-                            .backgroundColor(Color.White)
-                        }
-                    })
 
                     ListItem() {
                         Row() {

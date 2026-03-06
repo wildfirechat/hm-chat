@@ -19,12 +19,14 @@ export default struct SettingPage {
     build() {
         NavDestination() {
             Column() {
-                OptionItemView({
-                    title: '隐私设置'
-                })
-                    .onClick(() => {
-                        showToast('TODO')
+                if (BuildProfile.DEBUG) {
+                    OptionItemView({
+                        title: '隐私设置'
                     })
+                        .onClick(() => {
+                            showToast('TODO')
+                        })
+                }
 
                 Column() {
                     OptionItemView({

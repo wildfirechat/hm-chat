@@ -82,7 +82,7 @@ struct MainPage {
             let callSession = avengineKit.getCurrentSession();
             if (!callSession) {
                 return
-        }
+            }
             pipHelper.stopCurrentPiP()
             // let params: Record<string, Object> = {}
             // if (callSession.conference) {
@@ -300,32 +300,7 @@ struct MainPage {
                         // 解析码值结果跳转应用服务页
 
                         let qrcode = result.originalValue;
-                        let prefix = qrcode.substring(0, qrcode.lastIndexOf('/') + 1)
-                        let value = qrcode.substring(qrcode.lastIndexOf('/') + 1)
-                        try {
-                            let _url = url.URL.parseURL(qrcode)
-                        } catch (e) {
-                        }
-
-                        switch (prefix) {
-                            case WfcScheme.QR_CODE_PREFIX_PC_SESSION:
-                                this.showPCLoginPage(value)
-                                break
-                            case WfcScheme.QR_CODE_PREFIX_USER:
-                                this.showUser(value)
-                                break
-                            case WfcScheme.QR_CODE_PREFIX_GROUP:
-                                this.showGroup(value)
-                                break
-                                break
-                            // case WfcScheme.QR_CODE_PREFIX_CHANNEL:
-                            //     break
-                            // case WfcScheme.QR_CODE_PREFIX_CONFERENCE:
-                            //     break
-                            default:
-                                showToast('qrcode: ' + qrcode);
-                                break
-                        }
+                        WfcScheme.handleQRCodeResult(this.mainNavPathStack, qrcode);
 
                     }).catch((error: BusinessError) => {
                         // TODO

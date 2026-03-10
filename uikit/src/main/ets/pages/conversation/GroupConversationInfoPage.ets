@@ -24,6 +24,7 @@ import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation';
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType';
 
 import JoinGroupRequestDialog from '../group/JoinGroupRequestDialog';
+import ErrorCode from '@wfc/client/src/main/ets/wfc/client/errorCode';
 
 @Preview
 @Component
@@ -226,7 +227,7 @@ export default struct GroupConversationInfoPage {
                                                     this.groupMembers = wfc.getGroupMembers(this.conversationInfo!.conversation.target, false)
                                                     showToast('添加新群成员成功')
                                                 }, (err: number) => {
-                                                    if (err === 13) {
+                                                    if (err === ErrorCode.JOIN_GROUP_FAILED_NEED_VERIFY) {
                                                         this.pendingMemberIds = uids
                                                         this.joinGroupRequestDialogController?.open()
                                                     } else {

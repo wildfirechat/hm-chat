@@ -14,6 +14,11 @@ export default class ErrorCode {
     static kEcServerNotInGroup = 9;
     static kEcServerInvalidMessage = 10;
     static kEcServerGroupAlreadyExist = 11;
+    //Group error
+
+    static ERROR_CODE_ALREADY_IN_GROUP = 12; // member already in group
+    static JOIN_GROUP_FAILED_NEED_VERIFY = 13;
+
     static kEcServerPasswordIncorrect = 15;
     static kEcServerFriendAlreadyRequested = 16;
     static kEcServerFriendRequestOverFrequency = 17;

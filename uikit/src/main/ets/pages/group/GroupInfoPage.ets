@@ -1,20 +1,24 @@
 import { showToast } from '../../common/utils/Toast';
 import LoadingView from '../../view/LoadingView';
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc';
+import ErrorCode from '@wfc/client/src/main/ets/wfc/client/errorCode';
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation';
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType';
 import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo';
 import { uikitNavigationDestinations } from '../uikitNavigationConfig';
+import JoinGroupRequestDialog from './JoinGroupRequestDialog';
 
 @Component
 export default struct GroupInfoPage {
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
     @State groupInfo: GroupInfo | undefined = undefined
     private groupId?: string
+    private from ?: string
 
     aboutToAppear() {
         let params = this.mainNavPathStack.getParamByIndex(this.mainNavPathStack.size() - 1) as Record<string, Object>;
         this.groupId = params['groupId'] as string
+        this.from = params['from'] as string
         if (!this.groupId) {
             this.mainNavPathStack.pop()
             return
@@ -59,7 +63,11 @@ export default struct GroupInfoPage {
             wfc.addGroupMembers(this.groupId!, [wfc.getUserId()], '', [0], null, () => {
                 this.showGroupConversationPage()
             }, err => {
-                showToast('加入群聊失败 ' + err)
+                if (err === ErrorCode.JOIN_GROUP_FAILED_NEED_VERIFY) {
+                    this.joinGroupRequestDialogController?.open();
+                } else {
+                    showToast('加入群聊失败 ' + err)
+                }
             })
         }
     }
@@ -94,5 +102,28 @@ export default struct GroupInfoPage {
         .title('群信息')
         .height('100%')
         .width('100%')
+    }
+
+    private joinGroupRequestDialogController?: CustomDialogController = new CustomDialogController({
+        builder: JoinGroupRequestDialog({
+            confirm: (text: string) => {
+                this.joinGroupRequestDialogController?.close()
+                this.sendJoinGroupRequest(text)
+            },
+            cancel: () => {
+            }
+        }),
+        autoCancel: true,
+        alignment: DialogAlignment.Center,
+        customStyle: false
+    })
+
+    sendJoinGroupRequest(reason: string) {
+        wfc.sendJoinGroupRequest(this.groupInfo!.target, [wfc.getUserId()], reason, '', () => {
+            showToast('已发送加群申请')
+            this.mainNavPathStack.pop()
+        }, err => {
+            showToast('发送加群申请失败：' + err)
+        })
     }
 }

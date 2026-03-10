@@ -59,10 +59,12 @@ import CreatePollPage from './poll/CreatePollPage'
 import PollDetailPage from './poll/PollDetailPage'
 import PollHomePage from './poll/PollHomePage'
 import PollListPage from './poll/PollListPage'
+import MMPreviewPage from './mm/MMPreviewPage'
 
 export const UIKIT_NAV_DESTINATION_PREFIX = 'uikit-';
 
 export class uikitNavigationDestinations {
+    static MMPreviewPage = UIKIT_NAV_DESTINATION_PREFIX + 'mmPreviewPage'
     static CreateCollectionPage = UIKIT_NAV_DESTINATION_PREFIX + 'createCollectionPage'
     static CollectionDetailPage = UIKIT_NAV_DESTINATION_PREFIX + 'collectionDetailPage'
     static CreatePollPage = UIKIT_NAV_DESTINATION_PREFIX + 'createPollPage'
@@ -252,6 +254,8 @@ export function UIKitPageMap(name: string) {
         PollHomePage()
     } else if (name === uikitNavigationDestinations.PollListPage) {
         PollListPage()
+    } else if (name === uikitNavigationDestinations.MMPreviewPage) {
+        MMPreviewPage()
     } else {
         NavDestination() {
             Column() {

@@ -1,9 +1,13 @@
-import { momentClient, Feed, Comment } from '@wfc/moment_client';
+import { momentClient, Feed, Comment, Profile, FeedEntry } from '@wfc/moment_client';
 import { FeedViewModel, FeedListState, FeedInteractionEvents, CommentInputState } from '../model/FeedViewModel';
 import { MomentConstants, TimeFormatter } from '../utils/MomentConstants';
 import { FeedItemComponent } from '../components/FeedItemComponent';
+import { FeedHeaderComponent } from '../components/FeedHeaderComponent';
+import { FeedImagePreviewDialog } from '../components/FeedImagePreviewDialog';
 import wfc from '@wfc/client';
 import { momentNavigationDestinations } from '../../../../Index';
+import { uikitNavigationDestinations } from '@wfc/uikit/src/main/ets/pages/uikitNavigationConfig';
+import { promptAction } from '@kit.ArkUI';
 
 @Component
 export struct FeedListPage {
@@ -24,6 +28,24 @@ export struct FeedListPage {
         placeholder: '写评论...'
     };
     @State commentText: string = '';
+    @State unreadCount: number = 0;
+    @State userProfile: Profile | undefined = undefined;
+
+    @State titleBarOpacity: number = 0;
+    private listScroller: Scroller = new Scroller();
+
+    @State previewImages: FeedEntry[] = [];
+    @State previewIndex: number = 0;
+    previewDialogController: CustomDialogController = new CustomDialogController({
+        builder: FeedImagePreviewDialog({
+            images: this.$previewImages,
+            index: this.$previewIndex,
+        }),
+        customStyle: true,
+        autoCancel: true,
+        alignment: DialogAlignment.Center
+    });
+
     // 当前用户ID
     private currentUserId: string = '';
 
@@ -33,6 +55,23 @@ export struct FeedListPage {
         // 获取当前用户ID
         this.currentUserId = wfc.getUserId()
         this.loadInitialFeeds();
+        this.loadUserProfile();
+        this.loadUnreadCount();
+    }
+
+    private loadUserProfile() {
+        momentClient.getUserProfile(this.currentUserId, (profile: Profile) => {
+            this.userProfile = profile;
+        }, (err) => {
+            console.error('Load user profile failed:', err);
+        });
+    }
+
+    private loadUnreadCount() {
+        // 鸿蒙 momentClient 似乎没直接暴露 getUnreadCount，
+        // 参考 MomentClientImpl.ets 的 getFeedMessages(fromIndex, isNew)
+        const newMsgs = momentClient.getFeedMessages(BigInt(0), true);
+        this.unreadCount = newMsgs?.length || 0;
     }
 
     /**
@@ -234,32 +273,44 @@ export struct FeedListPage {
         },
 
         onDelete: (feed: FeedViewModel) => {
-            // TODO: 显示确认删除对话框
-            if (feed.feed.feedId) {
-                momentClient.deleteFeed(
-                    feed.feed.feedId,
-                    () => {
-                        // 从列表中移除
-                        const index = this.feedListState.feeds.findIndex(f => f.feed.feedId === feed.feed.feedId);
-                        if (index !== -1) {
-                            this.feedListState.feeds.splice(index, 1);
-                        }
-                    },
-                    (errorCode: number) => {
-                        console.error('Delete feed failed:', errorCode);
+            promptAction.showDialog({
+                title: '提示',
+                message: '确定删除这条朋友圈吗？',
+                buttons: [
+                    { text: '取消', color: '#000000' },
+                    { text: '删除', color: '#FF0000' }
+                ]
+            }).then(data => {
+                if (data.index === 1) {
+                    if (feed.feed.feedId) {
+                        momentClient.deleteFeed(
+                            feed.feed.feedId,
+                            () => {
+                                // 从列表中移除
+                                const index = this.feedListState.feeds.findIndex(f => f.feed.feedId === feed.feed.feedId);
+                                if (index !== -1) {
+                                    this.feedListState.feeds.splice(index, 1);
+                                }
+                            },
+                            (errorCode: number) => {
+                                console.error('Delete feed failed:', errorCode);
+                            }
+                        );
                     }
-                );
-            }
+                }
+            })
         },
 
         onUserClick: (userId: string) => {
-            // TODO: 跳转到用户详情页
-            console.log('User clicked:', userId);
+            this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.UserInfoPage, {
+                'userId': userId
+            } as Record<string, Object>)
         },
 
-        onImageClick: (images, index: number) => {
-            // TODO: 打开图片预览
-            console.log('Image clicked:', index);
+        onImageClick: (images: FeedEntry[], index: number) => {
+            this.previewImages = images;
+            this.previewIndex = index;
+            this.previewDialogController.open();
         },
 
         onMoreComments: (feed: FeedViewModel) => {
@@ -282,33 +333,84 @@ export struct FeedListPage {
 
     build() {
         NavDestination() {
-            Column() {
-                // 主内容区域
-                if (this.feedListState.isLoading && this.feedListState.feeds.length === 0) {
-                    // 初始加载状态
-                    this.buildLoadingView()
-                } else if (this.feedListState.error && this.feedListState.feeds.length === 0) {
-                    // 错误状态
-                    this.buildErrorView()
-                } else {
-                    // 朋友圈列表
-                    this.buildFeedList()
+            Stack({ alignContent: Alignment.Top }) {
+                Column() {
+                    // 主内容区域
+                    if (this.feedListState.isLoading && this.feedListState.feeds.length === 0) {
+                        // 初始加载状态
+                        this.buildLoadingView()
+                    } else if (this.feedListState.error && this.feedListState.feeds.length === 0) {
+                        // 错误状态
+                        this.buildErrorView()
+                    } else {
+                        // 朋友圈列表
+                        this.buildFeedList()
+                    }
                 }
+                .width('100%')
+                .height('100%')
+                .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM])
 
                 // 评论输入框
                 if (this.commentInputState.isVisible) {
                     this.buildCommentInput()
                 }
 
-                // 发布按钮
-                this.buildFloatingActionButton()
+                // 自定义标题栏
+                this.buildCustomTitleBar()
             }
             .width('100%')
             .height('100%')
-            .backgroundColor(MomentConstants.BACKGROUND_COLOR)
+            .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM])
         }
-        .title('朋友圈')
-        .backgroundColor(MomentConstants.BACKGROUND_COLOR)
+        .hideTitleBar(true)
+        .ignoreLayoutSafeArea([LayoutSafeAreaType.SYSTEM], [LayoutSafeAreaEdge.TOP, LayoutSafeAreaEdge.BOTTOM])
+    }
+
+    @Builder
+    private buildCustomTitleBar() {
+        Row() {
+            SymbolGlyph($r('sys.symbol.chevron_backward'))
+                .fontSize(28)
+                .fontColor([this.titleBarOpacity > 0.5 ? Color.Black : Color.White])
+                .onClick(() => {
+                    this.mainNavPathStack.pop();
+                })
+
+            Blank()
+            
+            if (this.titleBarOpacity > 0) {
+                Text('朋友圈')
+                    .fontSize(18)
+                    .fontWeight(FontWeight.Bold)
+                    .fontColor(Color.Black)
+                    .opacity(this.titleBarOpacity)
+            }
+
+            Blank()
+
+            SymbolGlyph($r('sys.symbol.camera'))
+                .fontSize(28)
+                .fontColor([this.titleBarOpacity > 0.5 ? Color.Black : Color.White])
+                .onClick(() => {
+                    promptAction.showActionMenu({
+                        title: '',
+                        buttons: [
+                            { text: '拍摄', color: '#000000' },
+                            { text: '从相册选择', color: '#000000' }
+                        ]
+                    }).then(data => {
+                        if (data.index === 0 || data.index === 1) {
+                            this.mainNavPathStack.pushPathByName(momentNavigationDestinations.PostFeedPage, {} as Record<string, Object>)
+                        }
+                    })
+                })
+        }
+        .width('100%')
+        .height(48 + px2vp(AppStorage.get<number>('SafeAreaTopHeight') || 0))
+        .padding({ left: 16, right: 16, top: px2vp(AppStorage.get<number>('SafeAreaTopHeight') || 0) })
+        .backgroundColor(`rgba(237, 237, 237, ${this.titleBarOpacity})`)
+        .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP])
     }
 
     @Builder
@@ -358,7 +460,17 @@ export struct FeedListPage {
     @Builder
     private buildFeedList() {
         Refresh({ refreshing: $$this.feedListState.isRefreshing, offset: 64, friction: 100 }) {
-            List({ space: 0 }) {
+            List({ space: 0, scroller: this.listScroller }) {
+                ListItem() {
+                    FeedHeaderComponent({ profile: this.userProfile, userId: this.currentUserId })
+                }
+
+                if (this.unreadCount > 0) {
+                    ListItem() {
+                        this.buildUnreadCountHint()
+                    }
+                }
+
                 ForEach(this.feedListState.feeds, (feedItem: FeedViewModel, index: number) => {
                     ListItem() {
                         FeedItemComponent({
@@ -371,7 +483,6 @@ export struct FeedListPage {
                         })
                     }
                     .backgroundColor(MomentConstants.CARD_BACKGROUND_COLOR)
-                    .margin({ bottom: 8 })
                 }, (feedItem: FeedViewModel, index: number) => `${feedItem.feed.feedId}_${index}`)
 
                 // 加载更多指示器
@@ -395,12 +506,59 @@ export struct FeedListPage {
             .listDirection(Axis.Vertical)
             .scrollBar(BarState.Off)
             .edgeEffect(EdgeEffect.None)
+            .onDidScroll(() => {
+                const offset = this.listScroller.currentOffset().yOffset;
+                // Fade starts after scrolling 100vp, fully solid after 200vp
+                let opacity = (offset - 100) / 100;
+                if (opacity < 0) opacity = 0;
+                if (opacity > 1) opacity = 1;
+                this.titleBarOpacity = opacity;
+
+                AppStorage.setOrCreate('closeFeedMenuTime', Date.now());
+            })
+            .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM])
         }
         .onRefreshing(() => {
             this.onRefresh();
         })
-        .backgroundColor(MomentConstants.BACKGROUND_COLOR)
         .layoutWeight(1)
+        .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM])
+    }
+
+    @Builder
+    private buildUnreadCountHint() {
+        Row() {
+            Image(wfc.getUserInfo(this.currentUserId).portrait || $r('app.media.icon'))
+                .width(30)
+                .height(30)
+                .borderRadius(4)
+                .margin({ right: 10 })
+
+            Text(`${this.unreadCount}条新消息`)
+                .fontSize(14)
+                .fontColor(Color.White)
+                .fontWeight(FontWeight.Medium)
+
+            Image($r('app.media.icon')) // TODO: 使用右箭头图标
+                .width(12)
+                .height(12)
+                .fillColor(Color.White)
+                .margin({ left: 10 })
+        }
+        .width(180)
+        .height(40)
+        .backgroundColor('#4C4C4C')
+        .borderRadius(4)
+        .padding({ left: 8, right: 8 })
+        .alignSelf(ItemAlign.Center)
+        .justifyContent(FlexAlign.Center)
+        .margin({ top: 10, bottom: 10 })
+        .onClick(() => {
+            // 跳转到消息列表
+            // this.mainNavPathStack.pushPathByName(momentNavigationDestinations.FeedMessagePage, {} as Record<string, Object>)
+            this.unreadCount = 0;
+            momentClient.clearUnreadStatus();
+        })
     }
 
     @Builder
@@ -472,35 +630,4 @@ export struct FeedListPage {
         .zIndex(999)
     }
 
-    @Builder
-    private buildFloatingActionButton() {
-        Button() {
-            Image($r('app.media.icon')) // TODO: 使用编辑图标
-                .width(24)
-                .height(24)
-                .fillColor('#FFFFFF')
-        }
-        .width(56)
-        .height(56)
-        .borderRadius(28)
-        .backgroundColor(MomentConstants.PRIMARY_COLOR)
-        .shadow({
-            radius: 8,
-            color: 'rgba(0,0,0,0.2)',
-            offsetX: 0,
-            offsetY: 2
-        })
-        .position({
-            x: '100%',
-            y: '100%'
-        })
-        .translate({
-            x: -72, // 56 + 16 margin
-            y: -72
-        })
-        .zIndex(100)
-        .onClick(() => {
-            this.mainNavPathStack.pushPathByName(momentNavigationDestinations.PostFeedPage, {} as Record<string, Object>)
-        })
-    }
 }

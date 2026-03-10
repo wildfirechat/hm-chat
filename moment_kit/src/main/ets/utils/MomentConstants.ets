@@ -3,9 +3,14 @@
  */
 
 export class MomentConstants {
-    static calculateImageGridHeight(imageCount: number): Length {
-        // throw new Error('Method not implemented.');
-        return 120;
+    static calculateImageGridHeight(imageCount: number): number {
+        if (imageCount === 0) return 0;
+        if (imageCount === 1) return MomentConstants.IMAGE_SINGLE_HEIGHT;
+        
+        const columns = imageCount === 4 ? 2 : 3;
+        const rows = Math.ceil(imageCount / columns);
+        const itemSize = (MomentConstants.IMAGE_GRID_WIDTH - (columns - 1) * MomentConstants.IMAGE_GRID_GAP) / columns;
+        return rows * itemSize + (rows - 1) * MomentConstants.IMAGE_GRID_GAP;
     }
     // 颜色常量
     static readonly PRIMARY_COLOR: string = '#07C160'; // 微信绿
@@ -14,26 +19,29 @@ export class MomentConstants {
     static readonly TEXT_PRIMARY_COLOR: string = '#191919'; // 主要文字色
     static readonly TEXT_SECONDARY_COLOR: string = '#888888'; // 次要文字色
     static readonly LINK_COLOR: string = '#576B95'; // 链接色（微信蓝）
-    static readonly LIKE_COLOR: string = '#F56565'; // 点赞色
+    static readonly LIKE_COLOR: string = '#576B95'; // 点赞色（微信蓝，文字显示点赞通常也是蓝色）
     static readonly DIVIDER_COLOR: string = '#E5E5E5'; // 分割线色
-    static readonly INTERACTIONS_BACKGROUND_COLOR: string = '#F5F5F5'; // 互动区背景色
+    static readonly INTERACTIONS_BACKGROUND_COLOR: string = '#F7F7F7'; // 互动区背景色
     static readonly ERROR_COLOR: string = '#F56565'; // 错误提示色
     static readonly COMMENT_BACKGROUND_COLOR = '#F0F0F0';
 
     // 尺寸定义
-    static readonly AVATAR_SIZE = 40;
+    static readonly AVATAR_SIZE = 44;
+    static readonly AVATAR_SIZE_LARGE = 64;
     static readonly AVATAR_SIZE_SMALL = 20;
     static readonly IMAGE_SIZE = 80;
-    static readonly IMAGE_SIZE_LARGE = 120;
-    static readonly CARD_PADDING = 16;
-    static readonly ITEM_SPACING = 8;
+    static readonly IMAGE_SIZE_LARGE = 180;
+    static readonly CARD_PADDING = 18;
+    static readonly ITEM_SPACING = 10;
     static readonly BORDER_RADIUS = 4;
-    static readonly IMAGE_GRID_GAP = 4;
-    static readonly IMAGE_GRID_WIDTH = 120;
-    static readonly BORDER_RADIUS_SMALL = 4;
+    static readonly IMAGE_GRID_GAP = 6;
+    static readonly IMAGE_GRID_WIDTH = 240;
+    static readonly BORDER_RADIUS_SMALL = 2;
 
-    static readonly IMAGE_SINGLE_WIDTH = 120;
-    static readonly IMAGE_SINGLE_HEIGHT = 120;
+    static readonly IMAGE_SINGLE_WIDTH = 180;
+    static readonly IMAGE_SINGLE_HEIGHT = 180;
+
+    static readonly COVER_HEIGHT = 300;
 
     // 字体大小
     static readonly FONT_SIZE_LARGE = 16;

@@ -1,6 +1,7 @@
-import { momentClient } from '@wfc/moment_client';
+import { momentClient, FeedEntry, FeedContentType } from '@wfc/moment_client';
 import { MomentConstants } from '../utils/MomentConstants';
 import { picker } from '@kit.CoreFileKit';
+import { showToast } from '@wfc/uikit/src/main/ets/common/utils/Toast';
 
 interface PostFeedState {
     text: string;
@@ -22,8 +23,69 @@ export struct PostFeedPage {
 
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
 
-    aboutToAppear() {
-        // 页面初始化
+    /**
+     * 发布朋友圈
+     */
+    private async publishFeed() {
+        if (this.postState.isPosting) {
+            return;
+        }
+
+        if (!this.postState.text.trim() && this.postState.selectedImages.length === 0) {
+            showToast('请输入内容');
+            return;
+        }
+
+        this.postState.isPosting = true;
+        
+        try {
+            const uploadedMedias: FeedEntry[] = [];
+            
+            // 逐个上传图片
+            for (const imagePath of this.postState.selectedImages) {
+                const url = await this.uploadImage(imagePath);
+                if (url) {
+                    uploadedMedias.push(new FeedEntry(url, '', 0, 0));
+                }
+            }
+
+            const feedType = uploadedMedias.length > 0 ? FeedContentType.Content_Image_Type : FeedContentType.Content_Text_Type;
+            const text = this.postState.text.trim();
+
+            momentClient.postFeed(
+                feedType,
+                text,
+                uploadedMedias,
+                [], // toUsers
+                [], // excludeUsers
+                [], // mentionedUsers
+                '', // extra
+                (feedId: bigint, timestamp: number) => {
+                    console.log('Feed posted successfully:', feedId);
+                    this.postState.isPosting = false;
+                    this.goBack();
+                },
+                (errorCode: number) => {
+                    console.error('Post feed failed:', errorCode);
+                    this.postState.isPosting = false;
+                    showToast(`发布失败: ${errorCode}`);
+                }
+            );
+        } catch (e) {
+            console.error('Publish error:', e);
+            this.postState.isPosting = false;
+            showToast('发布失败');
+        }
+    }
+
+    private uploadImage(path: string): Promise<string> {
+        return new Promise((resolve, reject) => {
+            momentClient.uploadMedia('', path, (url: string) => {
+                resolve(url);
+            }, (err: number) => {
+                reject(err);
+            });
+        });
     }
 
     /**
@@ -58,58 +120,6 @@ export struct PostFeedPage {
     }
 
     /**
-     * 发布朋友圈
-     */
-    private publishFeed() {
-        if (this.postState.isPosting) {
-            return;
-        }
-
-        if (!this.postState.text.trim() && this.postState.selectedImages.length === 0) {
-            this.postState.error = '请输入文字或选择图片';
-            return;
-        }
-
-        this.postState.isPosting = true;
-        this.postState.error = undefined;
-
-        // 构建朋友圈内容
-        const feedType = this.postState.selectedImages.length > 0 ? 1 : 0; // 1: 图片，0: 文字
-        const text = this.postState.text.trim();
-        // TODO
-        // const medias = this.postState.selectedImages.map((imagePath, index) => ({
-        //   url: imagePath,
-        //   thumbUrl: imagePath, // TODO: 生成缩略图
-        //   type: 'image',
-        //   width: 0,
-        //   height: 0
-        // }));
-
-        momentClient.postFeed(
-            feedType,
-            text,
-            //medias,
-            [],
-            [],
-            [],
-            [],
-            '',
-            (feedId: bigint, timestamp: number) => {
-                console.log('Feed posted successfully:', feedId);
-                this.postState.isPosting = false;
-
-                // 发布成功，返回上一页
-                this.goBack();
-            },
-            (errorCode: number) => {
-                console.error('Post feed failed:', errorCode);
-                this.postState.isPosting = false;
-                this.postState.error = `发布失败: ${errorCode}`;
-            }
-        );
-    }
-
-    /**
      * 返回上一页
      */
     private goBack() {
@@ -139,31 +149,36 @@ export struct PostFeedPage {
                 if (this.postState.error) {
                     this.buildErrorTip()
                 }
-
-                // 发布按钮
-                this.buildPublishButton()
             }
             .width('100%')
             .height('100%')
             .padding(MomentConstants.CARD_PADDING)
             .backgroundColor(MomentConstants.BACKGROUND_COLOR)
         }
-        .title('发表朋友圈')
+        .title('发表')
+        .menus(this.buildPostMenu)
         .backgroundColor(MomentConstants.BACKGROUND_COLOR)
-        .toolbarConfiguration([
-            {
-                value: '取消',
-                action: () => {
-                    this.goBack();
-                }
-            },
-            {
-                value: '发布',
-                action: () => {
-                    this.publishFeed();
-                }
-            }
-        ])
+    }
+
+    @Builder
+    private buildPostMenu() {
+        Column() {
+            Button(this.postState.isPosting ? '...' : '发表')
+                .backgroundColor(this.canPublish() ? '#07C160' : '#E2E2E2')
+                .fontColor(this.canPublish() ? Color.White : '#A6A6A6')
+                .fontSize(16)
+                .height(32)
+                .padding({ left: 16, right: 16 })
+                .borderRadius(4)
+                .onClick(() => {
+                    if (this.canPublish()) {
+                        this.publishFeed();
+                    }
+                })
+        }
+        .height('100%')
+        .justifyContent(FlexAlign.Center)
+        .margin({ right: 16 })
     }
 
     @Builder
@@ -231,7 +246,7 @@ export struct PostFeedPage {
 
             // 删除按钮
             Button() {
-                Image($r('app.media.icon')) // TODO: 使用关闭图标
+                Image($r('app.media.ic_delete'))
                     .width(16)
                     .height(16)
                     .fillColor('#FFFFFF')
@@ -251,7 +266,7 @@ export struct PostFeedPage {
     @Builder
     private buildAddImageButton() {
         Column() {
-            Image($r('app.media.icon')) // TODO: 使用添加图标
+            Image($r('app.media.ic_add'))
                 .width(24)
                 .height(24)
                 .fillColor(MomentConstants.TEXT_SECONDARY_COLOR)
@@ -297,28 +312,4 @@ export struct PostFeedPage {
         .margin({ bottom: 16 })
     }
 
-    @Builder
-    private buildPublishButton() {
-        Button(this.postState.isPosting ? '发布中...' : '发布')
-            .width('100%')
-            .height(44)
-            .fontSize(MomentConstants.FONT_SIZE_MEDIUM)
-            .fontColor('#FFFFFF')
-            .backgroundColor(this.canPublish() ? MomentConstants.PRIMARY_COLOR : '#CCCCCC')
-            .borderRadius(MomentConstants.BORDER_RADIUS)
-            .enabled(this.canPublish())
-            .margin({ bottom: 20 })
-            .onClick(() => {
-                this.publishFeed();
-            })
-
-        if (this.postState.isPosting) {
-            LoadingProgress()
-                .width(20)
-                .height(20)
-                .color(MomentConstants.PRIMARY_COLOR)
-                .position({ x: '50%', y: '50%' })
-                .translate({ x: '-50%', y: '-50%' })
-        }
-    }
 }

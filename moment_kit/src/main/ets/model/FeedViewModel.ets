@@ -16,9 +16,11 @@ export class FeedViewModel {
     isCommenting: boolean = false; // 是否正在评论
     isExpanded: boolean = false; // 文本是否展开（长文本折叠）
     showAllComments: boolean = false; // 是否显示所有评论
+    updateTime: number = Date.now(); // 用于强制UI刷新
 
     constructor(feed: Feed) {
         this.feed = feed;
+        this.updateTime = Date.now();
     }
 
     /**

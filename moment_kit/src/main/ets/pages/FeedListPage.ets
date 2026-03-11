@@ -7,7 +7,7 @@ import { FeedImagePreviewDialog } from '../components/FeedImagePreviewDialog';
 import wfc from '@wfc/client';
 import { momentNavigationDestinations } from '../../../../Index';
 import { uikitNavigationDestinations } from '@wfc/uikit/src/main/ets/pages/uikitNavigationConfig';
-import { promptAction } from '@kit.ArkUI';
+import { promptAction, window, KeyboardAvoidMode } from '@kit.ArkUI';
 
 @Component
 export struct FeedListPage {
@@ -30,6 +30,7 @@ export struct FeedListPage {
     @State commentText: string = '';
     @State unreadCount: number = 0;
     @State userProfile: Profile | undefined = undefined;
+    @State isKeyboardShowing: boolean = false;
 
     @State titleBarOpacity: number = 0;
     private listScroller: Scroller = new Scroller();
@@ -57,6 +58,12 @@ export struct FeedListPage {
         this.loadInitialFeeds();
         this.loadUserProfile();
         this.loadUnreadCount();
+
+        try {
+            this.getUIContext().setKeyboardAvoidMode(KeyboardAvoidMode.RESIZE);
+        } catch (e) {
+            console.error('setKeyboardAvoidMode failed:', e);
+        }
     }
 
     private loadUserProfile() {
@@ -166,7 +173,7 @@ export struct FeedListPage {
             if (isLiked) {
                 // 取消点赞 - 需要找到对应的点赞评论并删除
                 const likeComment = feed.getLikesList().find(like => like.sender === this.currentUserId);
-                if (likeComment && likeComment.commentId && feed.feed.feedId) {
+                if (likeComment && likeComment.commentId !== undefined && feed.feed.feedId !== undefined) {
                     momentClient.deleteComment(
                         likeComment.commentId,
                         feed.feed.feedId,
@@ -179,12 +186,22 @@ export struct FeedListPage {
                                 }
                             }
                             feed.isLiking = false;
+
+                            // 刷新UI
+                            const feedIndex = this.feedListState.feeds.findIndex(f => f.feed.feedId === feed.feed.feedId);
+                            if (feedIndex !== -1) {
+                                const newFeeds = [...this.feedListState.feeds];
+                                newFeeds[feedIndex] = new FeedViewModel(feed.feed);
+                                this.feedListState.feeds = newFeeds;
+                            }
                         },
                         (errorCode: number) => {
                             feed.isLiking = false;
                             console.error('Unlike failed:', errorCode);
                         }
                     );
+                } else {
+                    feed.isLiking = false;
                 }
             } else {
                 // 点赞
@@ -198,7 +215,7 @@ export struct FeedListPage {
                         (commentId: bigint, timestamp: number) => {
                             // 添加到本地点赞列表
                             const newLike = {
-                                'commendId': commentId,
+                                'commentId': commentId,
                                 'feedId': feed.feed.feedId,
                                 'sender': this.currentUserId,
                                 'type': 1,
@@ -215,6 +232,14 @@ export struct FeedListPage {
                             comment.fromJsonObject(newLike);
                             feed.feed.comments.push(comment);
                             feed.isLiking = false;
+
+                            // 刷新UI
+                            const feedIndex = this.feedListState.feeds.findIndex(f => f.feed.feedId === feed.feed.feedId);
+                            if (feedIndex !== -1) {
+                                const newFeeds = [...this.feedListState.feeds];
+                                newFeeds[feedIndex] = new FeedViewModel(feed.feed);
+                                this.feedListState.feeds = newFeeds;
+                            }
                         },
                         (errorCode: number) => {
                             feed.isLiking = false;
@@ -260,6 +285,14 @@ export struct FeedListPage {
                         feed.feed.comments.push(comment);
                         feed.isCommenting = false;
 
+                        // 刷新UI
+                        const index = this.feedListState.feeds.findIndex(f => f.feed.feedId === feed.feed.feedId);
+                        if (index !== -1) {
+                            const newFeeds = [...this.feedListState.feeds];
+                            newFeeds[index] = new FeedViewModel(feed.feed);
+                            this.feedListState.feeds = newFeeds;
+                        }
+
                         // 隐藏评论输入框
                         this.commentInputState.isVisible = false;
                         this.commentText = '';
@@ -289,7 +322,10 @@ export struct FeedListPage {
                                 // 从列表中移除
                                 const index = this.feedListState.feeds.findIndex(f => f.feed.feedId === feed.feed.feedId);
                                 if (index !== -1) {
-                                    this.feedListState.feeds.splice(index, 1);
+                                    // 必须创建新数组触发状态更新
+                                    const newFeeds = [...this.feedListState.feeds];
+                                    newFeeds.splice(index, 1);
+                                    this.feedListState.feeds = newFeeds;
                                 }
                             },
                             (errorCode: number) => {
@@ -321,7 +357,7 @@ export struct FeedListPage {
     /**
      * 显示评论输入框
      */
-    private showCommentInput(feed: FeedViewModel, replyTo?: string, replyToName?: string) {
+    private showCommentInput(feed: FeedViewModel, listIndex: number, replyTo?: string, replyToName?: string) {
         this.commentInputState = {
             isVisible: true,
             feedId: feed.feed.feedId,
@@ -329,42 +365,67 @@ export struct FeedListPage {
             replyToName,
             placeholder: replyTo ? `回复 ${replyToName || replyTo}:` : '写评论...'
         };
+
+        // 等待软键盘弹出及布局重新计算后，将对应的朋友圈滚动到可视区域底部
+        setTimeout(() => {
+            const targetIndex = listIndex + (this.unreadCount > 0 ? 2 : 1);
+            this.listScroller.scrollToIndex(targetIndex, true, ScrollAlign.END);
+        }, 300);
     }
 
     build() {
         NavDestination() {
             Stack({ alignContent: Alignment.Top }) {
-                Column() {
-                    // 主内容区域
-                    if (this.feedListState.isLoading && this.feedListState.feeds.length === 0) {
-                        // 初始加载状态
-                        this.buildLoadingView()
-                    } else if (this.feedListState.error && this.feedListState.feeds.length === 0) {
-                        // 错误状态
-                        this.buildErrorView()
-                    } else {
-                        // 朋友圈列表
-                        this.buildFeedList()
+                Stack({ alignContent: Alignment.Top }) {
+                    Column() {
+                        // 主内容区域
+                        if (this.feedListState.isLoading && this.feedListState.feeds.length === 0) {
+                            // 初始加载状态
+                            this.buildLoadingView()
+                        } else if (this.feedListState.error && this.feedListState.feeds.length === 0) {
+                            // 错误状态
+                            this.buildErrorView()
+                        } else {
+                            // 朋友圈列表
+                            this.buildFeedList()
+                        }
+                    }
+                    .width('100%')
+                    .height('100%')
+                    .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP])
+
+                    // 评论输入框
+                    if (this.commentInputState.isVisible) {
+                        this.buildCommentInput()
                     }
                 }
                 .width('100%')
                 .height('100%')
-                .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM])
+                .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP])
 
-                // 评论输入框
-                if (this.commentInputState.isVisible) {
-                    this.buildCommentInput()
-                }
 
-                // 自定义标题栏
+                // 自定义标题栏 (移出内部Stack，并使用绝对定位避免被键盘推上去)
                 this.buildCustomTitleBar()
             }
             .width('100%')
             .height('100%')
-            .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM])
         }
         .hideTitleBar(true)
-        .ignoreLayoutSafeArea([LayoutSafeAreaType.SYSTEM], [LayoutSafeAreaEdge.TOP, LayoutSafeAreaEdge.BOTTOM])
+        .ignoreLayoutSafeArea([LayoutSafeAreaType.SYSTEM], [LayoutSafeAreaEdge.TOP])
+        .onShown(() => {
+            try {
+                this.getUIContext().setKeyboardAvoidMode(KeyboardAvoidMode.RESIZE);
+            } catch (e) {
+                console.error('setKeyboardAvoidMode failed:', e);
+            }
+        })
+        .onHidden(() => {
+            try {
+                this.getUIContext().setKeyboardAvoidMode(KeyboardAvoidMode.OFFSET);
+            } catch (e) {
+                console.error('setKeyboardAvoidMode failed:', e);
+            }
+        })
     }
 
     @Builder
@@ -410,7 +471,8 @@ export struct FeedListPage {
         .height(48 + px2vp(AppStorage.get<number>('SafeAreaTopHeight') || 0))
         .padding({ left: 16, right: 16, top: px2vp(AppStorage.get<number>('SafeAreaTopHeight') || 0) })
         .backgroundColor(`rgba(237, 237, 237, ${this.titleBarOpacity})`)
-        .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP])
+        .position({ x: 0, y: 0 })
+        .zIndex(100)
     }
 
     @Builder
@@ -478,12 +540,12 @@ export struct FeedListPage {
                             currentUserId: this.currentUserId,
                             events: this.interactionEvents,
                             onCommentClick: (replyTo?: string, replyToName?: string) => {
-                                this.showCommentInput(feedItem, replyTo, replyToName);
+                                this.showCommentInput(feedItem, index, replyTo, replyToName);
                             }
                         })
                     }
                     .backgroundColor(MomentConstants.CARD_BACKGROUND_COLOR)
-                }, (feedItem: FeedViewModel, index: number) => `${feedItem.feed.feedId}_${index}`)
+                }, (feedItem: FeedViewModel, index: number) => `${feedItem.feed.feedId}_${index}_${feedItem.updateTime}`)
 
                 // 加载更多指示器
                 if (this.feedListState.hasMore) {
@@ -516,13 +578,13 @@ export struct FeedListPage {
 
                 AppStorage.setOrCreate('closeFeedMenuTime', Date.now());
             })
-            .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM])
+            .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP])
         }
         .onRefreshing(() => {
             this.onRefresh();
         })
         .layoutWeight(1)
-        .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM])
+        .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP])
     }
 
     @Builder
@@ -598,11 +660,18 @@ export struct FeedListPage {
             // 输入框区域
             Row() {
                 TextInput({ placeholder: this.commentInputState.placeholder, text: this.commentText })
+                    .id('comment_input')
+                    .defaultFocus(true)
                     .layoutWeight(1)
                     .height(40)
                     .backgroundColor('#FFFFFF')
                     .borderRadius(20)
                     .padding({ left: 16, right: 16 })
+                    .onAppear(() => {
+                        setTimeout(() => {
+                            focusControl.requestFocus('comment_input');
+                        }, 100);
+                    })
                     .onChange((value: string) => {
                         this.commentText = value;
                     })
@@ -626,7 +695,6 @@ export struct FeedListPage {
         }
         .width('100%')
         .height('100%')
-        .position({ x: 0, y: 0 })
         .zIndex(999)
     }
 

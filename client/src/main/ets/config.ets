@@ -32,6 +32,11 @@ export default class Config {
     // 投票服务地址，如果需要投票功能，请部署投票服务，然后这里填上投票服务地址；如果不需要投票功能，请置为 null
     static POLL_SERVER_ADDRESS = 'https://poll.wildfirechat.net';
 
+    // 归档服务器地址，用于加载历史归档消息
+    // 归档服务项目：https://github.com/wildfirechat/archive-server
+    // 如果没有部署归档服务，或者不需要加载历史归档消息的话，可置为 null 或空字符串
+    static ARCHIVE_SERVER_ADDRESS = ''; // 例如: 'http://localhost:8088'
+
     // 野火二维码 scheme，不要修改，如果需要修改的话，所有端都需要一起修改
     static QR_CODE_PREFIX_PC_SESSION = "wildfirechat://pcsession/";
 

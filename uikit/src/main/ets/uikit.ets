@@ -6,6 +6,11 @@ import { common } from '@kit.AbilityKit';
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc';
 import CollectionMessageContent from '@wfc/client/src/main/ets/wfc/messages/CollectionMessageContent';
 
+import archiveServer from './api/archiveServer';
+
+export { archiveServer };
+
+
 export class UIKit {
     bundleName = ''
     entryAbilityName = ''

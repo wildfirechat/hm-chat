@@ -39,6 +39,8 @@ import ContextableNotificationMessageContentView from './message/ContextableNoti
 import StreamingTextGeneratingMessageContent from '@wfc/client/src/main/ets/wfc/messages/streamingTextGeneratingMessageContent'
 import StreamingTextGeneratedMessageContent from '@wfc/client/src/main/ets/wfc/messages/streamingTextGeneratedMessageContent'
 import GroupType from '@wfc/client/src/main/ets/wfc/model/groupType'
+import archiveServer from '../../api/archiveServer'
+import ArchiveMessageResult from '../../api/model/archiveMessageResult'
 
 @Component
 export default struct ConversationPage {
@@ -74,6 +76,7 @@ export default struct ConversationPage {
     @State showGroupMemberNickName: boolean = false
     @State longPressToMentionUser: string = ''
     @State unreadJoinGroupRequestCount: number = 0
+    @State private archiveNextStartMid: number = 0  // 归档消息分页起始ID
 
     aboutToAppear() {
         this.audioPlayerManager.init(getContext(this))
@@ -169,6 +172,10 @@ export default struct ConversationPage {
         }
 
         this.conversation = conversation;
+        
+        // 重置归档消息分页状态
+        this.archiveNextStartMid = 0;
+        this.hasNoMoreHistoryMessage = false;
 
         this.conversationInfo = wfc.getConversationInfo(this.conversation)
         this.readEntries = wfc.getConversationRead(this.conversation)
@@ -280,7 +287,7 @@ export default struct ConversationPage {
         }
     }
 
-    loadHistoryMessage() {
+    async loadHistoryMessage() {
         let oldestMessageId = 0;
         let oldestMessageUid = Long.ZERO
         if (this.conversationMessageDataSource.totalCount() > 0) {
@@ -288,22 +295,23 @@ export default struct ConversationPage {
             oldestMessageId = oldestMsg.messageId
             oldestMessageUid = oldestMsg.messageUid
         }
-        wfc.getMessagesV2(this.conversation!, oldestMessageId, true, 20, '', (messages) => {
+        wfc.getMessagesV2(this.conversation!, oldestMessageId, true, 20, '', async (messages) => {
             if (messages.length === 0) {
-                wfc.loadRemoteConversationMessages(this.conversation!, [], oldestMessageUid, 20, msgs => {
+                wfc.loadRemoteConversationMessages(this.conversation!, [], oldestMessageUid, 20, async msgs => {
                     if (msgs.length === 0) {
-                        this.hasNoMoreHistoryMessage = true
+                        // 远程IM服务没有更多消息，尝试从归档服务获取
+                        await this.loadArchivedHistoryMessages()
                     } else {
                         let filteredMsgs = msgs.filter(m => {
                             return m.messageId != 0 && this.conversationMessageDataSource.getMessages().findIndex(dm => eq(dm.messageUid, m.messageUid)) === -1
                         })
                         this.conversationMessageDataSource.insertMessages(0, filteredMsgs)
                         this.scroller.scrollToIndex(msgs.length - 1, false)
+                        this.refreshStatus = false;
                     }
-                    this.refreshStatus = false;
-                }, err => {
-                    this.hasNoMoreHistoryMessage = true
-                    this.refreshStatus = false;
+                }, async err => {
+                    // 远程IM服务出错，尝试从归档服务获取
+                    await this.loadArchivedHistoryMessages()
                 })
             } else {
                 this.conversationMessageDataSource.insertMessages(0, messages)
@@ -314,6 +322,73 @@ export default struct ConversationPage {
             console.error('getMessageV2 error', err)
             this.refreshStatus = false;
         })
+    }
+
+    /**
+     * 加载归档历史消息
+     * 当本地和远程IM都没有更多消息时，尝试从归档服务加载
+     */
+    async loadArchivedHistoryMessages() {
+        // 检查归档服务是否可用
+        if (!archiveServer.getBaseUrl() || archiveServer.getBaseUrl().length === 0) {
+            this.hasNoMoreHistoryMessage = true
+            this.refreshStatus = false;
+            return
+        }
+
+        // 获取当前最早消息的消息ID作为起始ID
+        let startMid = this.archiveNextStartMid
+        if (startMid === 0 && this.conversationMessageDataSource.totalCount() > 0) {
+            // 首次加载归档消息，使用当前最早消息的 messageUid
+            let oldestMsg = this.conversationMessageDataSource.getData(0)
+            if (oldestMsg && oldestMsg.messageUid) {
+                try {
+                    // messageUid 是 Long 类型，转换为 number
+                    startMid = parseInt(oldestMsg.messageUid.toString())
+                } catch (e) {
+                    console.error('Failed to convert messageUid to number', e)
+                }
+            }
+        }
+
+        try {
+            const result: ArchiveMessageResult = await archiveServer.getArchivedMessages(
+                this.conversation!.type,
+                this.conversation!.target,
+                this.conversation!.line,
+                startMid,
+                true,  // before: 获取更早的消息
+                10     // limit: 每次加载10条
+            )
+
+            if (result.messages && result.messages.length > 0) {
+                // 过滤掉已存在的消息
+                let filteredMsgs = result.messages.filter((m: Message) => {
+                    return m.messageId != 0 && this.conversationMessageDataSource.getMessages().findIndex((dm: Message) => eq(dm.messageUid, m.messageUid)) === -1
+                })
+                
+                if (filteredMsgs.length > 0) {
+                    this.conversationMessageDataSource.insertMessages(0, filteredMsgs)
+                    this.scroller.scrollToIndex(filteredMsgs.length - 1, false)
+                }
+                
+                // 更新分页状态
+                this.archiveNextStartMid = result.nextStartMid
+                
+                // 如果没有更多归档消息
+                if (!result.hasMore) {
+                    this.hasNoMoreHistoryMessage = true
+                }
+            } else {
+                // 没有归档消息
+                this.hasNoMoreHistoryMessage = true
+            }
+        } catch (error) {
+            console.error('Failed to load archived messages:', error)
+            this.hasNoMoreHistoryMessage = true
+        } finally {
+            this.refreshStatus = false;
+        }
     }
 
     showUserInfo(userId: string) {
@@ -455,6 +530,9 @@ export default struct ConversationPage {
         // 清空会话消息
         if (!conversationInfo.lastMessage && conversationInfo.conversation.type !== ConversationType.ChatRoom) {
             this.conversationMessageDataSource.setMessages([])
+            // 重置归档消息分页状态
+            this.archiveNextStartMid = 0;
+            this.hasNoMoreHistoryMessage = false;
         }
     }
     onChannelInfosUpdate = (channelInfos: ChannelInfo[]) => {

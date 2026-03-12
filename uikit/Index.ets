@@ -1,3 +1,4 @@
-import uikit from './src/main/ets/uikit'
+import uikit, { archiveServer } from './src/main/ets/uikit'
 
+export { archiveServer };
 export default uikit

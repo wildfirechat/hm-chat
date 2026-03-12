@@ -17,6 +17,7 @@ import ArchivedMessage from './model/archivedMessage';
 import ArchiveMessagePayload from './model/archiveMessagePayload';
 import ArchiveMessageResult from './model/archiveMessageResult';
 import NotificationMessageContent from '@wfc/client/src/main/ets/wfc/messages/notification/notificationMessageContent';
+import MessagePayload from '@wfc/client/src/main/ets/wfc/messages/messagePayload';
 
 /**
  * 归档服务
@@ -25,9 +26,8 @@ import NotificationMessageContent from '@wfc/client/src/main/ets/wfc/messages/no
 class ArchiveServer {
     /// 归档服务基础 URL，例如：http://localhost:8088
     baseUrl: string = Config.ARCHIVE_SERVER_ADDRESS || '';
-
     /// 消息ID计数器（用于生成负数消息ID）
-    private messageIdCounter: number = 0;
+    messageIdCounter: number = 0;
 
     /**
      * 设置归档服务基础 URL
@@ -111,7 +111,7 @@ class ArchiveServer {
      * 将归档服务返回的数据解析为 ArchiveMessageResult
      * 其中 messages 字段会被转换为 Message 对象
      */
-    private parseResultFromResponse(response: Record<string, Object>): ArchiveMessageResult {
+    parseResultFromResponse(response: Record<string, Object>): ArchiveMessageResult {
         const result = ArchiveMessageResult.fromObject(response);
         const messageDicts = response['messages'] as Array<Record<string, Object>>;
         if (messageDicts && Array.isArray(messageDicts)) {
@@ -133,14 +133,14 @@ class ArchiveServer {
     /**
      * 将归档消息转换为 Message
      */
-    private convertArchivedMessageToMessage(archivedMsg: ArchivedMessage): Message | null {
+    convertArchivedMessageToMessage(archivedMsg: ArchivedMessage): Message | null {
         if (!archivedMsg) {
             return null;
         }
 
         const conversation = new Conversation(archivedMsg.convType, archivedMsg.convTarget, archivedMsg.convLine);
 
-        let sdkPayload: import('@wfc/client/src/main/ets/wfc/messages/messagePayload').default;
+        let sdkPayload: MessagePayload;
         if (archivedMsg.payload) {
             sdkPayload = archivedMsg.payload.toSDKPayload(archivedMsg.contentType);
         } else {
@@ -197,7 +197,7 @@ class ArchiveServer {
      * 带认证的 POST 请求
      * 先获取 authCode，然后发送请求
      */
-    private async postWithAuth(
+    async postWithAuth(
         path: string,
         data?: Record<string, Object>
     ): Promise<Record<string, Object>> {
@@ -216,7 +216,7 @@ class ArchiveServer {
     /**
      * 发送 POST 请求
      */
-    private async post(
+    async post(
         path: string,
         data?: Record<string, Object>,
         authCode?: string

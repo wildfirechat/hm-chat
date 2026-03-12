@@ -6,8 +6,9 @@
     "author": "",
     "license": "",
     "dependencies": {
-//        "@wfc/moment_client": "file:../moment_client",
+//        "@wfc/moment_client": "file:../../hm-moment/moment_client",
         "@wfc/moment_client": "file:./libs/moment_client.har",
+        "@wfc/uikit": "file:../uikit",
         "@wfc/client": "file:../client"
     }
 }

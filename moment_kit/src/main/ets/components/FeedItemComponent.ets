@@ -456,21 +456,6 @@ export struct FeedItemComponent {
                 // 点击评论可以回复
                 this.onCommentClick(comment.sender, this.getUserDisplayInfo(comment.sender).displayName);
             })
-
-            // 删除按钮（自己的评论或自己的朋友圈）
-            if (comment.sender === this.currentUserId || this.feedViewModel.feed.sender === this.currentUserId) {
-                Image($r('app.media.icon')) // TODO: 使用删除图标
-                    .width(12)
-                    .height(12)
-                    .fillColor(MomentConstants.TEXT_SECONDARY_COLOR)
-                    .margin({ left: 8 })
-                    .onClick(() => {
-                        // TODO: 删除评论
-                        if (comment.commentId && this.feedViewModel.feed.feedId) {
-                            // 调用删除评论API
-                        }
-                    })
-            }
         }
         .width('100%')
         .alignItems(VerticalAlign.Top)

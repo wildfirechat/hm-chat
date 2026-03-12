@@ -50,6 +50,10 @@
         {
             "name": "moment_kit",
             "srcPath": "./moment_kit"
-        }
+        },
+//        {
+//            "name": "moment_client",
+//            "srcPath": "../hm-moment/moment_client"
+//        }
     ]
 }

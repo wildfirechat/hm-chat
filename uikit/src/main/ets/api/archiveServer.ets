@@ -113,16 +113,14 @@ class ArchiveServer {
      */
     parseResultFromResponse(response: Record<string, Object>): ArchiveMessageResult {
         const result = ArchiveMessageResult.fromObject(response);
-        const messageDicts = response['messages'] as Array<Record<string, Object>>;
-        if (messageDicts && Array.isArray(messageDicts)) {
+        // 将 archivedMessages 转换为 Message 对象（逆序插入，使时间从旧到新排列）
+        if (result.archivedMessages && result.archivedMessages.length > 0) {
             const messages: Message[] = [];
-            for (const messageDict of messageDicts) {
-                const archivedMsg = ArchivedMessage.fromObject(messageDict);
-                if (archivedMsg) {
-                    const message = this.convertArchivedMessageToMessage(archivedMsg);
-                    if (message) {
-                        messages.push(message);
-                    }
+            // 从后往前遍历，实现逆序插入
+            for (let i = result.archivedMessages.length - 1; i >= 0; i--) {
+                const message = this.convertArchivedMessageToMessage(result.archivedMessages[i]);
+                if (message) {
+                    messages.push(message);
                 }
             }
             result.messages = messages;
@@ -257,7 +255,7 @@ class ArchiveServer {
                         console.log('ArchiveServer response:', data.result);
                         const result = data.result as Record<string, Object>;
                         if (result.code === 0) {
-                            resolve(result.result as Record<string, Object> || {});
+                            resolve(result.data as Record<string, Object> || {});
                         } else {
                             reject(new Error(`Server error: ${result.code}, ${result.message}`));
                         }

@@ -35,7 +35,7 @@ export default class Config {
     // 归档服务器地址，用于加载历史归档消息
     // 归档服务项目：https://github.com/wildfirechat/archive-server
     // 如果没有部署归档服务，或者不需要加载历史归档消息的话，可置为 null 或空字符串
-    static ARCHIVE_SERVER_ADDRESS = ''; // 例如: 'http://localhost:8088'
+    static ARCHIVE_SERVER_ADDRESS = ''; //'http://192.168.1.81:8088'
 
     // 野火二维码 scheme，不要修改，如果需要修改的话，所有端都需要一起修改
     static QR_CODE_PREFIX_PC_SESSION = "wildfirechat://pcsession/";

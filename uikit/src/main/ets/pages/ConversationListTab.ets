@@ -239,7 +239,7 @@ export default struct ConversationListTab {
     build() {
         Column() {
             Divider()
-                .color('#ECECEC')
+                .color($r('app.color.wf_divider'))
             List() {
                 // headers
                 if (this.connectionStatusHeader) {
@@ -247,7 +247,8 @@ export default struct ConversationListTab {
                         Text(this.connectionStatusHeader)
                             .height(40)
                             .width('100%')
-                            .backgroundColor('#F7F7F7')
+                            .backgroundColor($r('app.color.wf_secondary_background'))
+                            .fontColor($r('app.color.wf_secondary_text'))
                             .textAlign(TextAlign.Center)
 
                     }
@@ -259,7 +260,8 @@ export default struct ConversationListTab {
                             Text(`${info.desc() + (this.isMuteWhenPCOnline ? '，手机通知已关闭' : '')}`)
                                 .height(40)
                                 .width('100%')
-                                .backgroundColor('#F7F7F7')
+                                .backgroundColor($r('app.color.wf_secondary_background'))
+                                .fontColor($r('app.color.wf_secondary_text'))
                                 .textAlign(TextAlign.Center)
 
                         }
@@ -288,18 +290,24 @@ export default struct ConversationListTab {
                     }
                     .stateStyles({
                         pressed: {
-                            .backgroundColor('#E5E5E5')
+                            .backgroundColor($r('app.color.wf_item_pressed'))
                         },
                         normal: {
-                            .backgroundColor(Color.White)
+                            .backgroundColor(Color.Transparent)
                         }
                     })
                 }, (info: ConversationInfo) => this.conversationKey(info))
             }
+            .divider({
+                strokeWidth: 0.4,
+                color: $r('app.color.wf_divider'),
+                startMargin: 80,
+            })
             .width('100%')
             .cachedCount(5)
+            .backgroundColor($r('app.color.wf_background'))
         }
-        .backgroundColor('#EEEEEE')
+        .backgroundColor($r('app.color.wf_primary_background_color'))
         .width('100%')
         .height('100%')
     }

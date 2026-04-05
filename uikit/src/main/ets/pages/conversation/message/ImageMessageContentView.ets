@@ -47,6 +47,7 @@ export default struct ImageMessageContentView {
     build() {
         Image(this.imageUrl())
             .alt(this.thumbnail())
+            .backgroundColor($r('app.color.wf_image_placeholder_bg'))
             .draggable(false)
             .objectFit(ImageFit.Fill)
             .width(px2vp(this.scaledSize?.width))

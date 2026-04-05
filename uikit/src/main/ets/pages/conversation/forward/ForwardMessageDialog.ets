@@ -40,6 +40,7 @@ export default struct ForwardMessageDialog {
                 .margin({ top: 10, bottom: 10 })
                 .width('100%')
                 .textAlign(TextAlign.Start)
+                .fontColor($r('app.color.wf_primary_text'))
 
             List() {
                 ForEach(this.targetConversationPortraitAndNames, (pn: PortraitAndName) => {
@@ -55,6 +56,7 @@ export default struct ForwardMessageDialog {
                                 .maxLines(1)
                                 .textOverflow({ overflow: TextOverflow.Ellipsis })
                                 .layoutWeight(1)
+                                .fontColor($r('app.color.wf_primary_text'))
                         }
                         .width('100%')
                         .padding({ top: 5, bottom: 5 })
@@ -70,7 +72,7 @@ export default struct ForwardMessageDialog {
             if (this.forwardMessageDesc) {
                 Text(this.forwardMessageDesc)
                     .fontSize(13)
-                    .fontColor('#989898')
+                    .fontColor($r('app.color.wf_tertiary_text'))
                     .margin({ top: 15 })
                     .padding({
                         left: 20,
@@ -82,7 +84,7 @@ export default struct ForwardMessageDialog {
                     .borderRadius(4)
                     .width('100%')
                     .textOverflow({ overflow: TextOverflow.Ellipsis })
-                    .backgroundColor('#E5E5E5')
+                    .backgroundColor($r('app.color.wf_primary_background_color'))
             } else {
                 Image(this.forwardMessageImageUri)
                     .width('100%')
@@ -96,7 +98,9 @@ export default struct ForwardMessageDialog {
                     .height(40)
                     .layoutWeight(1)
                     .borderRadius(4)
-                    .backgroundColor('#F5F5F5')
+                    .backgroundColor($r('app.color.wf_primary_background_color'))
+                    .fontColor($r('app.color.wf_primary_text'))
+                    .placeholderColor($r('app.color.wf_tertiary_text'))
                     .onChange((value: string) => {
                         this.textValue = value
                     })
@@ -118,6 +122,7 @@ export default struct ForwardMessageDialog {
                             this.confirm(this.textValue)
                         })
                         .fontColor(Color.White)
+                        .backgroundColor($r('app.color.wf_primary'))
                         .margin({ left: 10 })
                 }
             }
@@ -132,8 +137,8 @@ export default struct ForwardMessageDialog {
                             this.controller.close()
                             this.cancel()
                         })
-                        .backgroundColor(Color.White)
-                        .fontColor(Color.Black)
+                        .backgroundColor(Color.Transparent)
+                        .fontColor($r('app.color.wf_primary_text'))
                         .fontSize(16)
                         .padding({ left: 20, right: 20 })
 
@@ -147,12 +152,13 @@ export default struct ForwardMessageDialog {
                             this.confirm(this.textValue)
                         })
                         .fontColor(Color.White)
+                        .backgroundColor($r('app.color.wf_primary'))
                 }
                 .margin({ top: 20 })
             }
         }
         .width('100%')
-        .backgroundColor(Color.White)
+        .backgroundColor($r('app.color.wf_background'))
         .borderRadius({ topLeft: 16, topRight: 16 })
         .padding(20)
         .justifyContent(FlexAlign.Start)

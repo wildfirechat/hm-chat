@@ -58,7 +58,7 @@ export struct FeedItemComponent {
                     .width(MomentConstants.AVATAR_SIZE)
                     .height(MomentConstants.AVATAR_SIZE)
                     .borderRadius(4)
-                    .backgroundColor('#F0F0F0')
+                    .backgroundColor(MomentConstants.COMMENT_BACKGROUND_COLOR)
                     .margin({ right: 10 })
                     .onClick(() => {
                         this.events.onUserClick(this.feedViewModel.feed.sender);
@@ -178,7 +178,7 @@ export struct FeedItemComponent {
                 .height(MomentConstants.IMAGE_SINGLE_HEIGHT)
                 .borderRadius(MomentConstants.BORDER_RADIUS)
                 .objectFit(ImageFit.Cover)
-                .backgroundColor('#F0F0F0')
+                .backgroundColor(MomentConstants.COMMENT_BACKGROUND_COLOR)
                 .onClick(() => {
                     this.events.onImageClick(this.images(), 0);
                 })
@@ -192,7 +192,7 @@ export struct FeedItemComponent {
                             .height('100%')
                             .borderRadius(MomentConstants.BORDER_RADIUS_SMALL)
                             .objectFit(ImageFit.Cover)
-                            .backgroundColor('#F0F0F0')
+                            .backgroundColor(MomentConstants.COMMENT_BACKGROUND_COLOR)
                             .onClick(() => {
                                 this.events.onImageClick(this.images(), index);
                             })
@@ -264,13 +264,13 @@ export struct FeedItemComponent {
 
                 Button() {
                     Row({ space: 2 }) {
-                        Circle({ width: 4, height: 4 }).fill('#576B95')
-                        Circle({ width: 4, height: 4 }).fill('#576B95')
+                        Circle({ width: 4, height: 4 }).fill(MomentConstants.LINK_COLOR)
+                        Circle({ width: 4, height: 4 }).fill(MomentConstants.LINK_COLOR)
                     }
                     .padding({ left: 8, right: 8 })
                 }
                 .height(24)
-                .backgroundColor('#F7F7F7')
+                .backgroundColor(MomentConstants.INTERACTIONS_BACKGROUND_COLOR)
                 .borderRadius(4)
                 .onTouch((event: TouchEvent) => {
                     if (event.type === TouchType.Down) {
@@ -311,7 +311,7 @@ export struct FeedItemComponent {
             })
 
             // 分割线
-            Divider().vertical(true).color('#333333').height(16).strokeWidth(1)
+            Divider().vertical(true).color($r('app.color.divider')).height(16).strokeWidth(1)
 
             // 评论
             Row() {
@@ -333,7 +333,7 @@ export struct FeedItemComponent {
         }
         .width(160)
         .height(38)
-        .backgroundColor('#4C4C4C')
+        .backgroundColor($r('app.color.unread_hint_background'))
         .borderRadius(6)
         .position({ right: 38, top: -7 }) // 24 height button vs 38 height menu, difference is 14, so top is -7. width 160 vs 24+padding, right is 38
         .transition({ type: TransitionType.All, opacity: 0, translate: { x: 20 } })
@@ -353,7 +353,7 @@ export struct FeedItemComponent {
             }
 
             if (this.feedViewModel.hasLikes() && this.feedViewModel.hasComments()) {
-                Divider().color('#E5E5E5').strokeWidth(0.5).margin({ top: 4, bottom: 4 })
+                Divider().color(MomentConstants.DIVIDER_COLOR).strokeWidth(0.5).margin({ top: 4, bottom: 4 })
             }
 
             // 评论列表

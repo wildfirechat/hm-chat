@@ -775,7 +775,7 @@ export default struct ConversationInputPanelView {
                                             .backgroundColor('#E5E5E5')
                                         },
                                         normal: {
-                                            .backgroundColor('#F7F7F7')
+                                            .backgroundColor($r('app.color.wf_primary_background_color'))
                                         }
                                     })
                                     .onClick(() => {
@@ -830,13 +830,15 @@ export default struct ConversationInputPanelView {
                                     .wordBreak(WordBreak.BREAK_ALL)
                                     .constraintSize({ maxHeight: 80 })
                                     .borderRadius(4)
-                                    .backgroundColor('#FDFDFD')
+                                    .backgroundColor($r('app.color.wf_background'))
+                                    .fontColor($r('app.color.wf_primary_text'))
 
                                 if (this.quotedMessage) {
                                     Row() {
                                         Text(this.quotedMessage.messageContent.digest(this.quotedMessage))
                                             .maxLines(2)
                                             .layoutWeight(1)
+                                            .fontColor($r('app.color.wf_tertiary_text'))
                                         Image($r('app.media.ic_delete'))
                                             .width(15)
                                             .height(15)
@@ -844,7 +846,7 @@ export default struct ConversationInputPanelView {
                                             .margin({ left: 10 })
                                             .draggable(false)
                                             .borderRadius(10)
-                                            .backgroundColor('#B3B3B3')
+                                            .backgroundColor($r('app.color.c_gray'))
                                             .onClick(() => {
                                                 this.quotedMessage = null
                                             })
@@ -852,7 +854,7 @@ export default struct ConversationInputPanelView {
                                     .margin({ top: 10 })
                                     .padding(8)
                                     .borderRadius(4)
-                                    .backgroundColor('#EAEAEA')
+                                    .backgroundColor($r('app.color.wf_primary_background_color'))
                                 }
                             }
                             .margin({ left: 10, right: 10 })
@@ -862,14 +864,14 @@ export default struct ConversationInputPanelView {
                                 .layoutWeight(1)
                                 .margin({ left: 10, right: 10 })
                                 .borderRadius(4)
-                                .fontColor('#7E7E7E')// .backgroundColor('#F3F3F3')
+                                .fontColor($r('app.color.wf_secondary_text'))// .backgroundColor('#F3F3F3')
                                 .type(ButtonType.Normal)
                                 .stateStyles({
                                     pressed: {
-                                        .backgroundColor('#E5E5E5')
+                                        .backgroundColor($r('app.color.wf_item_pressed'))
                                     },
                                     normal: {
-                                        .backgroundColor(Color.White)
+                                        .backgroundColor($r('app.color.wf_background'))
                                     }
                                 })
                                 .onTouch(async event => {
@@ -985,6 +987,7 @@ export default struct ConversationInputPanelView {
                                     Text(ext.title)
                                         .margin({ top: 8 })
                                         .fontSize(12)
+                                        .fontColor($r('app.color.wf_secondary_text'))
                                 }
                                 .borderRadius(4)
                                 .margin(10)
@@ -992,10 +995,10 @@ export default struct ConversationInputPanelView {
                                 .onClick(ext.action)
                                 .stateStyles({
                                     pressed: {
-                                        .backgroundColor('#E5E5E5')
+                                        .backgroundColor($r('app.color.wf_item_pressed'))
                                     },
                                     normal: {
-                                        .backgroundColor(Color.White)
+                                        .backgroundColor($r('app.color.wf_background'))
                                     }
                                 })
                             }
@@ -1009,6 +1012,7 @@ export default struct ConversationInputPanelView {
                     .padding(0)
                     .width('100%')
                     .height(this.keyboardHeight)
+                    .backgroundColor($r('app.color.wf_primary_background_color'))
                     .onAppear(() => {
                         this.setKeyboardAvoidMode(KeyboardAvoidMode.OFFSET)
                     })
@@ -1046,7 +1050,7 @@ export default struct ConversationInputPanelView {
             .onAppear(() => {
                 this.enable = true
             })
-            .backgroundColor('#EEEEEE')
+            .backgroundColor($r('app.color.wf_primary_background_color'))
 
             .bindSheet(this.showMentionSheet, MentionGroupMemberView(this.groupId, this.onMentionGroupMember, this.onMentionRobot, this.onMentionAll), {
                 height: '70%',

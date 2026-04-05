@@ -230,7 +230,7 @@ struct MainPage {
                 count: this.tabUnreadCount(targetIndex),
                 maxCount: 99,
                 position: BadgePosition.RightTop,
-                style: { badgeSize: 14, badgeColor: '#FA2A2D' }
+                style: { badgeSize: 14, badgeColor: $r('app.color.wf_badge_color') }
             }) {
                 Image(this.currentIndex === targetIndex ? selectedImg : normalImg)
                     .size({ width: 20 })
@@ -238,7 +238,7 @@ struct MainPage {
             }
 
             Text(title)
-                .fontColor(this.currentIndex === targetIndex ? '#3066EC' : '#6B6B6B')
+                .fontColor(this.currentIndex === targetIndex ? $r('app.color.wf_tab_text_selected') : $r('app.color.wf_tab_text_normal'))
                 .fontSize(14)
                 .padding({ top: 5, bottom: 5 })
         }
@@ -316,6 +316,7 @@ struct MainPage {
             Text(this.title)
                 .padding({ left: 10 })
                 .fontSize(25)
+                .fontColor($r('app.color.wf_primary_text'))
                 .width('200')
         }
         .height('100%')
@@ -329,6 +330,7 @@ struct MainPage {
                 .width(30)
                 .height(30)
                 .padding(6)
+                .fillColor($r('app.color.wf_icon_color'))
                 .onClick(() => {
                     this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.SearchPortalPage, {
                         'keyword': '1'
@@ -340,6 +342,7 @@ struct MainPage {
                 .height(30)
                 .padding(6)
                 .margin({ left: 12 })
+                .fillColor($r('app.color.wf_icon_color'))
                 .bindMenu(this.SubMoreMenus())
                 .bindContentCover($$this.showPickContactModal, this.pickMultiContactModal(), {
                     modalTransition: ModalTransition.DEFAULT,
@@ -393,7 +396,7 @@ struct MainPage {
                     .tabBar(this.TabBuilder(this.tabTitles[4], 4, $r('app.media.me_press'), $r('app.media.me_normal')))
                 }
             }
-            .backgroundColor('#F0F1F3')
+            .backgroundColor($r('app.color.wf_background'))
             .onChange(index => {
                 this.currentIndex = index
                 this.title = this.tabTitles[index]
@@ -401,7 +404,7 @@ struct MainPage {
         }
         .title(this.TitleBuilder())
         .titleMode(NavigationTitleMode.Mini)
-        .backgroundColor('#EEEEEE')
+        .backgroundColor($r('app.color.wf_primary_background_color'))
         .hideBackButton(true)
         .menus(this.NavigationMenus())
         .mode(NavigationMode.Stack)

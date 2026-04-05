@@ -76,18 +76,23 @@ export default struct SearchPortalPage {
                         .layoutWeight(1)
                         .borderRadius(4)
                         .enableKeyboardOnFocus(true)
+                        .backgroundColor($r('app.color.wf_background'))
+                        .fontColor($r('app.color.wf_primary_text'))
+                        .placeholderColor($r('app.color.wf_tertiary_text'))
                         .onChange((value: string) => {
                             this.keyword = value
                         })
                     Text('取消')
                         .padding(5)
                         .margin({ left: 10 })
+                        .fontColor($r('app.color.wf_link'))
                         .onClick(() => {
                             this.mainNavPathStack.pop()
                         })
                 }
                 .padding(10)
                 .width('100%')
+                .backgroundColor($r('app.color.wf_primary_background_color'))
 
                 SearchResultView({
                     keyword: this.keyword,
@@ -103,23 +108,13 @@ export default struct SearchPortalPage {
             }
             .height('100%')
             .width('100%')
+            .backgroundColor($r('app.color.wf_background'))
         }
         .height('100%')
         .width('100%')
         .onReady((ctx: NavDestinationContext) => {
 
         })
-
-        // .onReady((ctx: NavDestinationContext) => {
-        //     // 在NavDestination中能够拿到传来的NavPathInfo和当前所处的NavPathStack
-        //     try {
-        //         this.name = ctx?.pathInfo?.name;
-        //         this.paramNum = (ctx?.pathInfo?.param as PageParam)?.num;
-        //         this.stack = ctx.pathStack;
-        //     } catch (e) {
-        //         console.log(`testTag onReady catch exception: ${JSON.stringify(e)}`)
-        //     }
-        // })
         .mode(NavDestinationMode.STANDARD)
         .hideTitleBar(true)
     }

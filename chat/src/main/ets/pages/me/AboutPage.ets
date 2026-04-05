@@ -56,9 +56,10 @@ export default struct AboutPage {
 
                 Text($r('app.string.app_name'))
                     .margin({ top: 8 })
+                    .fontColor($r('app.color.wf_primary_text'))
 
                 Text($r('app.string.version_tag_s', this.version))
-                    .fontColor($r('app.color.c_gray'))
+                    .fontColor($r('app.color.wf_tertiary_text'))
                     .fontSize(12)
                     .margin({ top: 4 })
 
@@ -67,6 +68,7 @@ export default struct AboutPage {
                     .lineSpacing({ value: 4, unit: LengthUnit.VP })
                     .padding(16)
                     .width('100%')
+                    .fontColor($r('app.color.wf_tertiary_text'))
 
                 Column() {
                     OptionItemView({
@@ -104,7 +106,7 @@ export default struct AboutPage {
                         } as Record<string, Object>)
                     })
                 }
-                .backgroundColor(Color.White)
+                .backgroundColor($r('app.color.wf_background'))
             }
             .width('100%')
             .height('100%')
@@ -112,6 +114,6 @@ export default struct AboutPage {
         .title(getContext().resourceManager.getStringSync($r('app.string.app_about').id))
         .height('100%')
         .width('100%')
-        .backgroundColor('#EDEDED')
+        .backgroundColor($r('app.color.wf_primary_background_color'))
     }
 }

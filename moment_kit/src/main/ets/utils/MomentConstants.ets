@@ -13,17 +13,17 @@ export class MomentConstants {
         return rows * itemSize + (rows - 1) * MomentConstants.IMAGE_GRID_GAP;
     }
     // 颜色常量
-    static readonly PRIMARY_COLOR: string = '#07C160'; // 微信绿
-    static readonly BACKGROUND_COLOR: string = '#F7F7F7'; // 背景色
-    static readonly CARD_BACKGROUND_COLOR: string = '#FFFFFF'; // 卡片背景色
-    static readonly TEXT_PRIMARY_COLOR: string = '#191919'; // 主要文字色
-    static readonly TEXT_SECONDARY_COLOR: string = '#888888'; // 次要文字色
-    static readonly LINK_COLOR: string = '#576B95'; // 链接色（微信蓝）
-    static readonly LIKE_COLOR: string = '#576B95'; // 点赞色（微信蓝，文字显示点赞通常也是蓝色）
-    static readonly DIVIDER_COLOR: string = '#E5E5E5'; // 分割线色
-    static readonly INTERACTIONS_BACKGROUND_COLOR: string = '#F7F7F7'; // 互动区背景色
-    static readonly ERROR_COLOR: string = '#F56565'; // 错误提示色
-    static readonly COMMENT_BACKGROUND_COLOR = '#F0F0F0';
+    static readonly PRIMARY_COLOR: Resource = $r('app.color.primary'); // 微信绿
+    static readonly BACKGROUND_COLOR: Resource = $r('app.color.background'); // 背景色
+    static readonly CARD_BACKGROUND_COLOR: Resource = $r('app.color.card_background'); // 卡片背景色
+    static readonly TEXT_PRIMARY_COLOR: Resource = $r('app.color.text_primary'); // 主要文字色
+    static readonly TEXT_SECONDARY_COLOR: Resource = $r('app.color.text_secondary'); // 次要文字色
+    static readonly LINK_COLOR: Resource = $r('app.color.link'); // 链接色（微信蓝）
+    static readonly LIKE_COLOR: Resource = $r('app.color.like'); // 点赞色（微信蓝，文字显示点赞通常也是蓝色）
+    static readonly DIVIDER_COLOR: Resource = $r('app.color.divider'); // 分割线色
+    static readonly INTERACTIONS_BACKGROUND_COLOR: Resource = $r('app.color.interactions_background'); // 互动区背景色
+    static readonly ERROR_COLOR: Resource = $r('app.color.error'); // 错误提示色
+    static readonly COMMENT_BACKGROUND_COLOR: Resource = $r('app.color.comment_background');
 
     // 尺寸定义
     static readonly AVATAR_SIZE = 44;

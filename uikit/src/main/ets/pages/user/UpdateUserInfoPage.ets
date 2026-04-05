@@ -102,6 +102,6 @@ export default struct UpdateUserInfoPage {
         .title('资料设置')
         .height('100%')
         .width('100%')
-        .backgroundColor('#EDEDED')
+        .backgroundColor($r('app.color.wf_primary_background_color'))
     }
 }

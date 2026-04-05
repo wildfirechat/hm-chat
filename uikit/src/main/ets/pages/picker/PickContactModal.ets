@@ -38,7 +38,7 @@ export default struct PickContactModal {
             .height('100%')
             .padding({ top: 5 })
         }
-        .backgroundColor('#EEEEEE')
+        .backgroundColor($r('app.color.wf_background'))
         .title('选取联系人')
         .titleMode(NavigationTitleMode.Mini)
         .hideBackButton(false)

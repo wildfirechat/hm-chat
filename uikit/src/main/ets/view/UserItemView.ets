@@ -26,7 +26,7 @@ export default struct UserItemView {
                 .height(30)
                 .padding({ left: 10 })
                 .alignItems(VerticalAlign.Center)
-                .backgroundColor('#EDEDED')
+                .backgroundColor($r('app.color.wf_secondary_background'))
             }
             Row() {
                 Image(this.uiUserInfo.userInfo.portrait)
@@ -50,10 +50,10 @@ export default struct UserItemView {
             })
             .stateStyles({
                 pressed: {
-                    .backgroundColor('#E5E5E5')
+                    .backgroundColor($r('app.color.wf_item_pressed'))
                 },
                 normal: {
-                    .backgroundColor(Color.White)
+                    .backgroundColor($r('app.color.wf_background'))
                 }
             })
         }

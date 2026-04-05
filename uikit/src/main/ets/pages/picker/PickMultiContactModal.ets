@@ -102,7 +102,7 @@ export default struct PickMultiContactModal {
             .width('100%')
             .height('100%')
         }
-        .backgroundColor('#EEEEEE')
+        .backgroundColor($r('app.color.wf_primary_background_color'))
         .title('选取联系人')
         .titleMode(NavigationTitleMode.Mini)
         .hideBackButton(false)

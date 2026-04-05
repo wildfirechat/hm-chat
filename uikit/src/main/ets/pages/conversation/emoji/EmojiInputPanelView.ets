@@ -56,10 +56,10 @@ export default struct EmojiInputPanelView {
                     .borderRadius(4)
                     .stateStyles({
                         pressed: {
-                            .backgroundColor('#E5E5E5')
+                            .backgroundColor($r('app.color.wf_item_pressed'))
                         },
                         normal: {
-                            .backgroundColor(this.currentCategoryIndex === index ? '#E5E5E5' : Color.Transparent)
+                            .backgroundColor(this.currentCategoryIndex === index ? $r('app.color.wf_item_pressed') : Color.Transparent)
                         }
                     })
                     .onClick(() => {
@@ -90,7 +90,7 @@ export default struct EmojiInputPanelView {
                                     .align(Alignment.Center)
                                     .stateStyles({
                                         pressed: {
-                                            .backgroundColor('#E5E5E5')
+                                            .backgroundColor($r('app.color.wf_item_pressed'))
                                         },
                                         normal: {
                                             .backgroundColor(Color.Transparent)
@@ -125,7 +125,7 @@ export default struct EmojiInputPanelView {
                                     .borderRadius(4)
                                     .stateStyles({
                                         pressed: {
-                                            .backgroundColor('#E5E5E5')
+                                            .backgroundColor($r('app.color.wf_item_pressed'))
                                         },
                                         normal: {
                                             .backgroundColor(Color.Transparent)
@@ -168,10 +168,10 @@ export default struct EmojiInputPanelView {
                     .borderRadius(4)
                     .stateStyles({
                         pressed: {
-                            .backgroundColor('#E5E5E5')
+                            .backgroundColor($r('app.color.wf_item_pressed'))
                         },
                         normal: {
-                            .backgroundColor(Color.White)
+                            .backgroundColor($r('app.color.wf_background'))
                         }
                     })
                     .alignSelf(ItemAlign.End)

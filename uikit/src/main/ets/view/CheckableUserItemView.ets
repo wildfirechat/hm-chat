@@ -30,12 +30,12 @@ export default struct CheckableUserItemView {
                     Text(this.uiUserInfo.category)
                         .width('100%')
                         .fontSize(13)
-                        .fontColor('#828282')
+                        .fontColor($r('app.color.wf_secondary_text'))
                 }
                 .height(30)
                 .padding({ left: 10 })
                 .alignItems(VerticalAlign.Center)
-                .backgroundColor('#EDEDED')
+                .backgroundColor($r('app.color.wf_primary_background_color'))
             }
             Row() {
                 Checkbox()
@@ -65,6 +65,7 @@ export default struct CheckableUserItemView {
                     .maxLines(1)
                     .fontSize(15)
                     .layoutWeight(1)
+                    .fontColor($r('app.color.wf_primary_text'))
             }
             .width('100%')
             .height(60)
@@ -78,10 +79,10 @@ export default struct CheckableUserItemView {
             })
             .stateStyles({
                 pressed: {
-                    .backgroundColor('#E5E5E5')
+                    .backgroundColor($r('app.color.wf_item_pressed'))
                 },
                 normal: {
-                    .backgroundColor(Color.White)
+                    .backgroundColor($r('app.color.wf_background'))
                 }
             })
         }

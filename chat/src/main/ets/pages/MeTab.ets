@@ -57,13 +57,14 @@ export default struct MeTab {
                 Column() {
                     Text(this.userInfo!.displayName)
                         .fontSize(20)
+                        .fontColor($r('app.color.wf_primary_text'))
                         .maxLines(1)
                     Text(`野火号:${this.userInfo!.name}`)
                         .maxLines(1)
                         .fontSize(14)
                         .wordBreak(WordBreak.BREAK_ALL)
                         .textOverflow({ overflow: TextOverflow.Ellipsis })
-                        .fontColor(Color.Gray)
+                        .fontColor($r('app.color.wf_tertiary_text'))
                 }
                 .alignItems(HorizontalAlign.Start)
                 .justifyContent(FlexAlign.SpaceBetween)
@@ -75,7 +76,7 @@ export default struct MeTab {
                 Image($r('app.media.ic_public_arrow_right'))
                     .width(22)
                     .height(22)
-                    .fillColor('#B6B6B6')
+                    .fillColor($r('app.color.c_gray'))
             }
             .width('100%')
             .height(100)
@@ -86,7 +87,7 @@ export default struct MeTab {
                 bottom: 10
             })
             .alignItems(VerticalAlign.Center)
-            .backgroundColor(Color.White)
+            .backgroundColor($r('app.color.wf_background'))
             .onClick(() => {
                 this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.UserInfoPage, {
                     'userInfo': this.userInfo,
@@ -112,16 +113,13 @@ export default struct MeTab {
                     .onClick(() => {
                         this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.FileRecordPortalPage, {} as Record<string, Object>)
                     })
-                Divider()
-                    .margin({ left: 40 })
-                    .color('#F7F7F7')
                 OptionItemView({ icon: $r('app.media.ic_star'), title: '收藏', showDivider: false })
                     .onClick(() => {
                         this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.FavRecordPage, {} as Record<string, Object>)
                     })
             }
             .margin({ top: 10 })
-            .backgroundColor(Color.White)
+            .backgroundColor($r('app.color.wf_background'))
 
             Column() {
                 OptionItemView({ icon: $r('app.media.ic_theme'), title: '主题' })
@@ -129,23 +127,17 @@ export default struct MeTab {
                         showToast('TODO')
                     })
                     .visibility(Visibility.None)
-                Divider()
-                    .margin({ left: 40 })
-                    .color('#F7F7F7')
                 OptionItemView({ icon: $r('app.media.ic_setting'), title: '设置' })
                     .onClick(() => {
                         this.mainNavPathStack.pushPathByName(appNavigationDestinations.SettingPage, {} as Record<string, Object>)
                     })
-                Divider()
-                    .margin({ left: 40 })
-                    .color('#F7F7F7')
                 OptionItemView({ icon: $r('app.media.ic_settings_file'), title: '备份与恢复', showDivider: false })
                     .onClick(() => {
                         this.mainNavPathStack.pushPathByName(appNavigationDestinations.BackupAndRestorePage, {} as Record<string, Object>)
                     })
             }
             .margin({ top: 10, bottom: 10 })
-            .backgroundColor(Color.White)
+            .backgroundColor($r('app.color.wf_background'))
 
             if (BuildProfile.DEBUG) {
                 OptionItemView({ title: 'API测试页' })
@@ -162,6 +154,6 @@ export default struct MeTab {
         }
         .width('100%')
         .height('100%')
-        .backgroundColor('#EDEDED')
+        .backgroundColor($r('app.color.wf_primary_background_color'))
     }
 }

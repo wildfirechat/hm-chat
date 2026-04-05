@@ -46,7 +46,7 @@ export default struct GroupManagePage {
                 Column() {
                     Text('成员管理')
                         .textAlign(TextAlign.Start)
-                        .backgroundColor('#EDEDED')
+                        .backgroundColor($r('app.color.wf_secondary_background'))
                         .padding({ left: 10, top: 5, bottom: 5 })
                         .width('100%')
                     OptionItemView({
@@ -81,7 +81,7 @@ export default struct GroupManagePage {
                 Column() {
                     Text('群基本设置')
                         .textAlign(TextAlign.Start)
-                        .backgroundColor('#EDEDED')
+                        .backgroundColor($r('app.color.wf_secondary_background'))
                         .padding({ left: 10, top: 15, bottom: 5 })
                         .width('100%')
                     if (this.groupInfo?.type === GroupType.Restricted) {
@@ -257,11 +257,11 @@ export default struct GroupManagePage {
                     }
                 }
             }
-            .backgroundColor(Color.White)
+            .backgroundColor($r('app.color.wf_background'))
         }
         .title('群管理')
         .height('100%')
         .width('100%')
-        .backgroundColor('#EDEDED')
+        .backgroundColor($r('app.color.wf_primary_background_color'))
     }
 }

@@ -105,10 +105,10 @@ export default struct SearchConversationMessageResultView {
             .width('100%')
             .stateStyles({
                 pressed: {
-                    .backgroundColor('#E5E5E5')
+                    .backgroundColor($r('app.color.wf_item_pressed'))
                 },
                 normal: {
-                    .backgroundColor(Color.White)
+                    .backgroundColor($r('app.color.wf_background'))
                 }
             })
             .onClick(() => {
@@ -126,7 +126,7 @@ export default struct SearchConversationMessageResultView {
             .height(32)
             .fontColor('#828282')
             .fontSize(13)
-            .backgroundColor('#EDEDED')
+            .backgroundColor($r('app.color.wf_secondary_background'))
     }
 
     @Builder

@@ -231,9 +231,10 @@ export default struct ContactListTab {
                                         Badge({
                                             position: BadgePosition.Right,
                                             value: header.badgeValue,
-                                            style: { badgeSize: 14, badgeColor: '#FA2A2D' }
+                                            style: { badgeSize: 14, badgeColor: $r('app.color.wf_badge_color') }
                                         }) {
                                             Text(header.title)
+                                                .fontColor($r('app.color.wf_primary_text'))
                                                 .padding({ left: 16 })
                                         }
                                         .padding({ left: 20 })
@@ -242,9 +243,10 @@ export default struct ContactListTab {
                                             position: BadgePosition.Right,
                                             maxCount: 99,
                                             count: header.badgeCount,
-                                            style: { badgeSize: 14, badgeColor: '#FA2A2D' }
+                                            style: { badgeSize: 14, badgeColor: $r('app.color.wf_badge_color') }
                                         }) {
                                             Text(header.title)
+                                                .fontColor($r('app.color.wf_primary_text'))
                                                 .padding({ left: 16 })
                                         }
                                         .padding({ left: 20 })
@@ -259,10 +261,10 @@ export default struct ContactListTab {
                             }
                             .stateStyles({
                                 pressed: {
-                                    .backgroundColor('#E5E5E5')
+                                    .backgroundColor($r('app.color.wf_item_pressed'))
                                 },
                                 normal: {
-                                    .backgroundColor(Color.White)
+                                    .backgroundColor(Color.Transparent)
                                 }
                             })
                         },
@@ -278,12 +280,12 @@ export default struct ContactListTab {
                                         Text(groupedUserInfo.category)
                                             .width('100%')
                                             .fontSize(13)
-                                            .fontColor('#828282')
+                                            .fontColor($r('app.color.wf_secondary_text'))
                                     }
                                     .height(30)
                                     .padding({ left: 16 })
                                     .alignItems(VerticalAlign.Center)
-                                    .backgroundColor('#EDEDED')
+                                    .backgroundColor($r('app.color.wf_secondary_background'))
                                 }
                                 Row() {
                                     Image(groupedUserInfo.userInfo.portrait)
@@ -294,10 +296,12 @@ export default struct ContactListTab {
                                         .borderRadius(4)
                                     Column() {
                                         Text(groupedUserInfo.userInfo.friendAlias ? groupedUserInfo.userInfo.friendAlias : groupedUserInfo.userInfo.displayName)
+                                            .fontColor($r('app.color.wf_primary_text'))
                                             .maxLines(1)
                                             .padding({ left: 16 })
                                         if (groupedUserInfo.onlineState) {
                                             Text(groupedUserInfo.onlineState.desc())
+                                                .fontColor($r('app.color.wf_tertiary_text'))
                                                 .maxLines(1)
                                                 .padding({ left: 16, top: 4 })
                                                 .fontSize(11)
@@ -319,16 +323,18 @@ export default struct ContactListTab {
                         }
                         .stateStyles({
                             pressed: {
-                                .backgroundColor('#E5E5E5')
+                                .backgroundColor($r('app.color.wf_item_pressed'))
                             },
                             normal: {
-                                .backgroundColor(Color.White)
+                                .backgroundColor(Color.Transparent)
                             }
                         })
                     }, (info: UIUserInfo) => info.category + '-' + info.userInfo.uid + '-' + info.userInfo.updateDt + '-' + info.userInfo.friendAlias)
                 }
                 .divider({
-                    strokeWidth: 1,
+                    strokeWidth: 0.4,
+                    color: $r('app.color.wf_divider'),
+                    // TODO groupedUserInfo 里面添加一个 isLast，然后就能实现动态 startMargin 了
                     startMargin: 72,
                 })
                 .scrollBar(BarState.Off)
@@ -338,14 +344,14 @@ export default struct ContactListTab {
             .height('100%')
             .width('100%')
             .justifyContent(FlexAlign.Start)
-            .backgroundColor(Color.White)
+            .backgroundColor($r('app.color.wf_background'))
             .padding({ top: 5 })
 
             AlphabetIndexer({ arrayValue: this.contactCategories, selected: 0 })
-                .selectedColor(0xFFFFFF)// 选中项文本颜色
-                .popupColor(Color.Black)// 弹出框文本颜色
-                .selectedBackgroundColor(0xCCCCCC)// 选中项背景颜色
-                .popupBackground(0xD2B48C)// 弹出框背景颜色
+                .selectedColor(Color.White)// 选中项文本颜色
+                .popupColor($r('app.color.wf_primary_text'))// 弹出框文本颜色
+                .selectedBackgroundColor($r('app.color.wf_alphabet_indexer_selected_bg'))// 选中项背景颜色
+                .popupBackground($r('app.color.wf_alphabet_indexer_popup_bg'))// 弹出框背景颜色
                 .usingPopup(true)// 是否显示弹出框
                 .selectedFont({ size: 16, weight: FontWeight.Bolder })// 选中项字体样式
                 .popupFont({ size: 30, weight: FontWeight.Bolder })// 弹出框内容的字体样式

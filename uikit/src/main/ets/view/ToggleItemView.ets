@@ -15,10 +15,11 @@ export default struct ToggleItemView {
         Column() {
             Row() {
                 Column() {
-                Text(this.title)
+                    Text(this.title)
+                        .fontColor($r('app.color.wf_primary_text'))
                     if (this.desc) {
                         Text(this.desc)
-                            .fontColor(Color.Gray)
+                            .fontColor($r('app.color.wf_tertiary_text'))
                             .fontSize(13)
                             .padding({ top: 5 })
                     }
@@ -36,10 +37,11 @@ export default struct ToggleItemView {
             if (this.showDivider) {
                 Divider()
                     .strokeWidth(0.6)
-                    .color('#EDEDED')
+                    .color($r('app.color.wf_divider'))
                     .padding({ left: this.paddingLeft })
             }
         }
         .width('100%')
+        .backgroundColor($r('app.color.wf_background'))
     }
 }

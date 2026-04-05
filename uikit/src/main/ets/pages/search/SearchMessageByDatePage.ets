@@ -74,7 +74,7 @@ export default struct SearchMessageByDatePage {
             }
             .width('100%')
             .height('100%')
-            .backgroundColor(Color.White)
+            .backgroundColor($r('app.color.wf_background'))
         }
         .title('按日期查找')
     }
@@ -128,7 +128,7 @@ struct MonthView {
                 .padding(10)
                 .width('100%')
                 .textAlign(TextAlign.Start)
-                .backgroundColor('#F5F5F5')
+                .backgroundColor($r('app.color.wf_secondary_background'))
 
             Grid() {
                 // Header (Sun, Mon, ...)

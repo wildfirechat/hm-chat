@@ -81,6 +81,5 @@ export default struct MessageAndNotificationPage {
         .title('消息与通知')
         .height('100%')
         .width('100%')
-        .backgroundColor('#EDEDED')
     }
 }

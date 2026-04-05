@@ -146,7 +146,7 @@ export default struct SearchMessagePictureVideoPage {
             }
             .width('100%')
             .height('100%')
-            .backgroundColor(Color.White)
+            .backgroundColor($r('app.color.wf_background'))
         }
         .title('图片与视频')
     }
@@ -156,12 +156,11 @@ export default struct SearchMessagePictureVideoPage {
         Column() {
             Text(`${group.year}年${group.month}月`)
                 .fontSize(14)
-                .fontColor(Color.Black)
                 .fontWeight(FontWeight.Bold)
                 .padding({ left: 10, top: 10, bottom: 10 })
         }
         .width('100%')
-        .backgroundColor(Color.White)
+        .backgroundColor($r('app.color.wf_secondary_background'))
     }
 
     @Builder

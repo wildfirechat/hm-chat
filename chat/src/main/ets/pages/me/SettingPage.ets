@@ -70,7 +70,7 @@ export default struct SettingPage {
                         })
                 }
                 .margin({ top: 10 })
-                .backgroundColor(Color.White)
+                .backgroundColor($r('app.color.wf_background'))
 
                 OptionItemView({ title: '注销' })
                     .onClick(event => {
@@ -111,6 +111,6 @@ export default struct SettingPage {
         .title('设置')
         .height('100%')
         .width('100%')
-        .backgroundColor('#EDEDED')
+        .backgroundColor($r('app.color.wf_primary_background_color'))
     }
 }

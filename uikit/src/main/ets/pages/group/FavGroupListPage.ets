@@ -66,6 +66,7 @@ export default struct FavGroupListPage {
                 startMargin: 60
             })
         }
+        .background($r('app.color.wf_primary_background_color'))
         .title('群列表')
         .height('100%')
         .width('100%')

@@ -48,9 +48,9 @@ export default struct ChannelListPage {
                 Text('我订阅的频道')
                     .width('100%')
                     .fontSize(13)
-                    .fontColor('#989898')
+                    .fontColor($r('app.color.wf_tertiary_text'))
                     .padding(10)
-                    .backgroundColor('#E5E5E5')
+                    .backgroundColor($r('app.color.wf_primary_background_color'))
 
                 List() {
                     ForEach(this.channelList, (channelInfo: ChannelInfo) => {
@@ -64,22 +64,34 @@ export default struct ChannelListPage {
                                 Text(channelInfo.name)
                                     .maxLines(1)
                                     .padding({ left: 10 })
+                                    .fontColor($r('app.color.wf_primary_text'))
                             }
                             .height(60)
                             .width('100%')
                             .padding({ left: 10, right: 10 })
+                            .backgroundColor($r('app.color.wf_background'))
                             .onClick(() => {
                                 this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ConversationPage, {
                                     'conversation': new Conversation(ConversationType.Channel, channelInfo.channelId, 0)
                                 } as Record<string, Object>)
                             })
                         }
+                        .stateStyles({
+                            pressed: {
+                                .backgroundColor($r('app.color.wf_item_pressed'))
+                            },
+                            normal: {
+                                .backgroundColor($r('app.color.wf_background'))
+                            }
+                        })
                     }, (channelInfo: ChannelInfo) => channelInfo.channelId + '-' + channelInfo.updateDt)
                 }
                 .width('100%')
                 .height('100%')
+                .backgroundColor($r('app.color.wf_primary_background_color'))
                 .divider({
                     strokeWidth: 1,
+                    color: $r('app.color.wf_divider'),
                     startMargin: 60
                 })
             }
@@ -88,6 +100,7 @@ export default struct ChannelListPage {
             .hideBackButton(false)
             .height('100%')
             .width('100%')
+            .backgroundColor($r('app.color.wf_primary_background_color'))
             .navBarPosition(NavBarPosition.Start)
             .menus([
                 {

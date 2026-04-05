@@ -108,12 +108,14 @@ export default struct UserInfoPage {
                             .maxLines(1)
                             .textOverflow({ overflow: TextOverflow.Ellipsis })
                             .fontSize(20)
+                            .fontColor($r('app.color.wf_primary_text'))
                         Text(`野火ID： ${this.userInfo!.name}`)
                             .width('100%')
                             .maxLines(1)
                             .wordBreak(WordBreak.BREAK_ALL)
                             .textOverflow({ overflow: TextOverflow.Ellipsis })
                             .fontSize(14)
+                            .fontColor($r('app.color.wf_tertiary_text'))
                     }
                     .padding({ left: 10 })
                     .layoutWeight(1)
@@ -122,7 +124,7 @@ export default struct UserInfoPage {
                 .padding(10)
                 .width('100%')
                 .justifyContent(FlexAlign.Start)
-                .backgroundColor(Color.White)
+                .backgroundColor($r('app.color.wf_background'))
 
                 Divider()
                 OptionItemView({
@@ -141,12 +143,13 @@ export default struct UserInfoPage {
                         .width('100%')
                         .padding(15)
                         .textAlign(TextAlign.Center)
+                        .fontColor($r('app.color.wf_primary_text'))
                         .stateStyles({
                             pressed: {
-                                .backgroundColor('#E5E5E5')
+                                .backgroundColor($r('app.color.wf_item_pressed'))
                             },
                             normal: {
-                                .backgroundColor(Color.White)
+                                .backgroundColor($r('app.color.wf_background'))
                             }
                         })
                         .onClick(() => {
@@ -162,12 +165,13 @@ export default struct UserInfoPage {
                         .width('100%')
                         .padding(15)
                         .textAlign(TextAlign.Center)
+                        .fontColor($r('app.color.wf_primary_text'))
                         .stateStyles({
                             pressed: {
-                                .backgroundColor('#E5E5E5')
+                                .backgroundColor($r('app.color.wf_item_pressed'))
                             },
                             normal: {
-                                .backgroundColor(Color.White)
+                                .backgroundColor($r('app.color.wf_background'))
                             }
                         })
                         .onClick(() => {
@@ -218,7 +222,7 @@ export default struct UserInfoPage {
                             voipDialogController.open()
                         })
                 }
-                .backgroundColor(Color.White)
+                .backgroundColor($r('app.color.wf_background'))
                 .margin({ top: 20 })
 
                 if (!this.isMyFriend && this.userInfo!.uid !== wfc.getUserId()) {
@@ -227,7 +231,8 @@ export default struct UserInfoPage {
                         .padding(15)
                         .margin({ top: 20 })
                         .textAlign(TextAlign.Center)
-                        .backgroundColor(Color.White)
+                        .fontColor($r('app.color.wf_primary_text'))
+                        .backgroundColor($r('app.color.wf_background'))
                         .onClick(() => {
                             let selfUserInfo = wfc.getUserInfo(wfc.getUserId())
                             wfc.sendFriendRequest(this.userInfo!.uid, '我是 ' + selfUserInfo.displayName, '', () => {
@@ -241,9 +246,9 @@ export default struct UserInfoPage {
             }
             .width('100%')
             .height('100%')
-            .backgroundColor('#EDEDED')
+            .backgroundColor($r('app.color.wf_primary_background_color'))
         }
-        .backgroundColor('#EEEEEE')
+        .backgroundColor($r('app.color.wf_primary_background_color'))
         .hideTitleBar(false)
         .title('用户信息')
         .height('100%')

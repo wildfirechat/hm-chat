@@ -82,7 +82,7 @@ export default struct SearchMessageLinkPage {
             }
             .width('100%')
             .height('100%')
-            .backgroundColor(Color.White)
+            .backgroundColor($r('app.color.wf_background'))
         }
         .title('链接')
     }

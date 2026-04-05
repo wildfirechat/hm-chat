@@ -2,11 +2,11 @@
   "color": [
     {
       "name": "start_window_background",
-      "value": "#FFFFFF"
+      "value": "#111111"
     },
     {
       "name": "c_gray",
-      "value": "#8B8B8B"
+      "value": "#6B6B6B"
     },
     {
       "name": "primary",
@@ -14,63 +14,63 @@
     },
     {
       "name": "background",
-      "value": "#F7F7F7"
+      "value": "#111111"
     },
     {
       "name": "card_background",
-      "value": "#FFFFFF"
+      "value": "#1C1C1E"
     },
     {
       "name": "text_primary",
-      "value": "#191919"
+      "value": "#E0E0E0"
     },
     {
       "name": "text_secondary",
-      "value": "#888888"
+      "value": "#8E8E93"
     },
     {
       "name": "link",
-      "value": "#576B95"
+      "value": "#58A6FF"
     },
     {
       "name": "like",
-      "value": "#576B95"
+      "value": "#58A6FF"
     },
     {
       "name": "divider",
-      "value": "#E5E5E5"
+      "value": "#38383A"
     },
     {
       "name": "interactions_background",
-      "value": "#F7F7F7"
+      "value": "#2C2C2E"
     },
     {
       "name": "error",
-      "value": "#F56565"
+      "value": "#FF453A"
     },
     {
       "name": "comment_background",
-      "value": "#F0F0F0"
+      "value": "#2C2C2E"
     },
     {
       "name": "button_disabled",
-      "value": "#E2E2E2"
+      "value": "#333333"
     },
     {
       "name": "text_disabled",
-      "value": "#A6A6A6"
+      "value": "#666666"
     },
     {
       "name": "error_background",
-      "value": "#FFF3F3"
+      "value": "#3D1B1B"
     },
     {
       "name": "unread_hint_background",
-      "value": "#4C4C4C"
+      "value": "#2C2C2E"
     },
     {
       "name": "title_bar_background",
-      "value": "#EDEDED"
+      "value": "#111111"
     }
   ]
 }

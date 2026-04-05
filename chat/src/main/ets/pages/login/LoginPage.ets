@@ -52,21 +52,22 @@ struct LoginPage {
         Stack() {
             // 原有的登录界面
             Column() {
-                Text(this.isLoginByPassword ? '密码登陆' : '验证码登录')
+                Text(this.isLoginByPassword ? '密码登录' : '验证码登录')
                     .fontSize(26)
-                    .fontColor('#0C0C0C')
+                    .fontColor($r('app.color.wf_primary_text'))
 
                 Row() {
                     Text('手机号')
                         .width(50)
+                        .fontColor($r('app.color.wf_primary_text'))
                     TextInput({
                         text: this.phoneNumber,
                         placeholder: '请输入手机号(仅支持中国大陆手机号)',
                         controller: this.controller
                     })
-                        .placeholderColor(Color.Grey)
+                        .placeholderColor($r('app.color.wf_tertiary_text'))
                         .placeholderFont({ size: 14, weight: 400 })
-                        .caretColor(Color.Blue)
+                        .caretColor($r('app.color.wf_primary'))
                         .layoutWeight(1)
                         .height(40)
                         .margin({ left: 20 })
@@ -74,11 +75,8 @@ struct LoginPage {
                         .borderRadius(4)
                         .type(InputType.Number)
                         .enabled(!this.isLogin)
-                        .fontColor(Color.Black)
-                        .borderStyle(BorderStyle.Dashed)
-                        .inputFilter('[a-zA-Z0-9]', (e) => {
-                            console.log(JSON.stringify(e))
-                        })
+                        .fontColor($r('app.color.wf_primary_text'))
+                        .backgroundColor($r('app.color.wf_background'))
                         .onChange((value: string) => {
                             this.phoneNumber = value
                         })
@@ -89,18 +87,20 @@ struct LoginPage {
                 Row() {
                     Text(this.isLoginByPassword ? '密码' : '验证码')
                         .width(50)
+                        .fontColor($r('app.color.wf_primary_text'))
                     if (this.isLoginByPassword) {
                         TextInput({ text: this.password, placeholder: '请输入密码', controller: this.controller })
-                            .placeholderColor(Color.Grey)
+                            .placeholderColor($r('app.color.wf_tertiary_text'))
                             .placeholderFont({ size: 14, weight: 400 })
-                            .caretColor(Color.Blue)
+                            .caretColor($r('app.color.wf_primary'))
                             .layoutWeight(1)
                             .height(40)
                             .margin({ left: 20, bottom: 20, top: 20 })
                             .fontSize(14)
                             .borderRadius(4)
                             .type(InputType.Password)
-                            .fontColor(Color.Black)
+                            .fontColor($r('app.color.wf_primary_text'))
+                            .backgroundColor($r('app.color.wf_background'))
                             .enabled(!this.isLogin)
                             .showPasswordIcon(true)
                             .onChange((value: string) => {
@@ -108,20 +108,18 @@ struct LoginPage {
                             })
                     } else {
                         TextInput({ text: this.authCode, placeholder: '请输入验证码', controller: this.controller })
-                            .placeholderColor(Color.Grey)
+                            .placeholderColor($r('app.color.wf_tertiary_text'))
                             .placeholderFont({ size: 14, weight: 400 })
-                            .caretColor(Color.Blue)
+                            .caretColor($r('app.color.wf_primary'))
                             .layoutWeight(1)
                             .height(40)
                             .margin(20)
                             .fontSize(14)
                             .borderRadius(4)
                             .type(InputType.Number)
-                            .fontColor(Color.Black)
+                            .fontColor($r('app.color.wf_primary_text'))
+                            .backgroundColor($r('app.color.wf_background'))
                             .enabled(!this.isLogin)
-                            .inputFilter('[a-zA-Z0-9]', (e) => {
-                                console.log(JSON.stringify(e))
-                            })
                             .onChange((value: string) => {
                                 this.authCode = value
                             })
@@ -149,7 +147,7 @@ struct LoginPage {
                         .layoutWeight(1)
                     Text(this.isLoginByPassword ? '注册/验证码登录' : '使用密码登录')
                         .fontSize(13)
-                        .fontColor(Color.Grey)
+                        .fontColor($r('app.color.wf_secondary_text'))
                         .textAlign(TextAlign.End)
                         .onClick(() => {
                             this.isLoginByPassword = !this.isLoginByPassword
@@ -160,21 +158,18 @@ struct LoginPage {
                     Button({ type: ButtonType.Normal, stateEffect: true }) {
                         Row() {
                             if (this.isLogin) {
-                                LoadingProgress().width(20).height(20).margin({ left: 12 }).color(0xFFFFFF)
+                                LoadingProgress().width(20).height(20).margin({ left: 12 }).color(Color.White)
                             }
-                            Text(this.isLogin ? '登录中...' : '登录').fontColor(0xffffff).margin({ left: 5 })
+                            Text(this.isLogin ? '登录中...' : '登录').fontColor(Color.White).margin({ left: 5 })
                         }.alignItems(VerticalAlign.Center)
                     }
-                    .borderRadius(8)
-                    .backgroundColor(0x317aff)
-                    .width(90)
+                    .borderRadius(4)
+                    .backgroundColor($r('app.color.wf_primary'))
+                    .width('100%')
                     .height(40)
                     .focusable(true)
                     .focusOnTouch(true)
                     .enabled(!this.isLogin && ((this.isLoginByPassword && this.phoneNumber.length === 11 && this.password.length > 0) || (!this.isLoginByPassword && this.phoneNumber.length === 11 && this.authCode.length > 0)))
-                    .type(ButtonType.Normal)
-                    .width('100%')
-                    .borderRadius(4)
                     .onClick(() => {
                         inputMethod.getController().stopInputSession()
                         if(!this.isAgreeUserAgreementAndPrivacyPolicy){
@@ -216,8 +211,9 @@ struct LoginPage {
                         })
                     Text('登录即代表同意')
                         .fontSize(12)
+                        .fontColor($r('app.color.wf_secondary_text'))
                     Text('《野火IM用户协议》')
-                        .fontColor(Color.Blue)
+                        .fontColor($r('app.color.wf_link'))
                         .fontSize(12)
                         .onClick(() => {
                             router.pushNamedRoute({
@@ -230,8 +226,9 @@ struct LoginPage {
                         })
                     Text('和')
                         .fontSize(12)
+                        .fontColor($r('app.color.wf_secondary_text'))
                     Text('《野火IM隐私政策》')
-                        .fontColor(Color.Blue)
+                        .fontColor($r('app.color.wf_link'))
                         .fontSize(12)
                         .onClick(() => {
                             router.pushNamedRoute({
@@ -279,6 +276,7 @@ struct LoginPage {
         }
         .width('100%')
         .height('100%')
+        .backgroundColor($r('app.color.wf_background'))
     }
 
     doCodeLogin() {

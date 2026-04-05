@@ -38,7 +38,7 @@ export default struct SingleConversationInfoPage {
             .height('100%')
             .width('100%')
             .margin({ top: px2vp(AppStorage.get<number>('SafeAreaTopHeight')) })
-            .backgroundColor(Color.White)
+            .backgroundColor($r('app.color.wf_background'))
     }
 
     build() {
@@ -48,10 +48,12 @@ export default struct SingleConversationInfoPage {
                     Image(this.targetUserInfo.portrait)
                         .width(48)
                         .height(48)
+                        .borderRadius(4)
                     Image($r('app.media.ic_add_team_member'))
                         .width(48)
                         .height(48)
                         .margin({ left: 20 })
+                        .fillColor($r('app.color.wf_icon_color'))
                         .bindContentCover(this.showPickContactModal, this.pickMultiContactModal(), {
                             modalTransition: ModalTransition.DEFAULT,
                             onAppear: () => {
@@ -95,11 +97,12 @@ export default struct SingleConversationInfoPage {
                 .padding(20)
                 .width('100%')
                 .justifyContent(FlexAlign.Start)
-                .backgroundColor(Color.White)
+                .backgroundColor($r('app.color.wf_background'))
 
                 Column() {
                     Row() {
                         Text('消息免打扰')
+                            .fontColor($r('app.color.wf_primary_text'))
                         Toggle({ type: ToggleType.Switch, isOn: this.conversationInfo!.isSilent })
                             .onChange(isOn => {
                                 wfc.setConversationSlient(this.conversationInfo!.conversation, isOn, () => {
@@ -115,6 +118,7 @@ export default struct SingleConversationInfoPage {
 
                     Row() {
                         Text('置顶聊天')
+                            .fontColor($r('app.color.wf_primary_text'))
                         Toggle({ type: ToggleType.Switch, isOn: this.conversationInfo!.top > 0 })
                             .onChange((value: boolean) => {
                                 wfc.setConversationTop(this.conversationInfo!.conversation, value ? 1 : 0, () => {
@@ -131,7 +135,7 @@ export default struct SingleConversationInfoPage {
                 .padding({ left: 10, right: 10 })
                 .margin({ top: 10 })
                 .width('100%')
-                .backgroundColor(Color.White)
+                .backgroundColor($r('app.color.wf_background'))
 
                 Column() {
                     OptionItemView({
@@ -151,7 +155,6 @@ export default struct SingleConversationInfoPage {
                 }
                 .margin({ top: 10 })
                 .width('100%')
-                .backgroundColor(Color.White)
 
                 Column() {
                     OptionItemView({ title: '清空聊天记录' })
@@ -215,12 +218,13 @@ export default struct SingleConversationInfoPage {
                 }
                 .margin({ top: 10 })
                 .width('100%')
-                .backgroundColor(Color.White)
+                .backgroundColor($r('app.color.wf_background'))
             }
             .width('100%')
             .height('100%')
+            .backgroundColor($r('app.color.wf_primary_background_color'))
         }
-        .backgroundColor('#EEEEEE')
+        .backgroundColor($r('app.color.wf_primary_background_color'))
         .title('会话详情')
         // .hideBackButton(false)
         .height('100%')

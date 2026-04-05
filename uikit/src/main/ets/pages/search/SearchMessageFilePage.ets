@@ -93,7 +93,7 @@ export default struct SearchMessageFilePage {
                                 }
                                 .width('100%')
                                 .padding(10)
-                                .backgroundColor(Color.White)
+                                .backgroundColor($r('app.color.wf_background'))
                                 .onClick(() => {
                                     // Jump to message
                                     // But FileRecord only has messageUid.
@@ -129,7 +129,7 @@ export default struct SearchMessageFilePage {
             }
             .width('100%')
             .height('100%')
-            .backgroundColor(Color.White)
+            .backgroundColor($r('app.color.wf_background'))
         }
         .title('文件')
     }

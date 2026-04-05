@@ -29,7 +29,7 @@ export default struct UpdateGroupRemarkPage {
                 Divider()
                     .margin({ top: 30 })
                     .strokeWidth(0.4)
-                    .color('#EDEDED')
+                    .color($r('app.color.wf_divider'))
 
                 Row() {
                     Image(this.groupInfo.portrait)
@@ -53,7 +53,7 @@ export default struct UpdateGroupRemarkPage {
 
                 Divider()
                     .strokeWidth(0.4)
-                    .color('#EDEDED')
+                    .color($r('app.color.wf_divider'))
 
                 Text(`群聊名称：${this.groupInfo.name}`)
                     .fontColor('#838383')

@@ -27,15 +27,17 @@ export default struct FileMessageContentView {
                     .constraintSize({ maxWidth: 160 })
                     .fontSize(18)
                     .maxLines(1)
+                    .fontColor($r('app.color.wf_primary_text'))
                 Text(humanSize(this.fileMessageContent().size))
                     .fontSize(14)
                     .maxLines(1)
+                    .fontColor($r('app.color.wf_tertiary_text'))
             }
             .padding({ right: 10 })
             .justifyContent(FlexAlign.SpaceBetween)
             .alignItems(HorizontalAlign.Start)
         }
-        .backgroundColor(Color.White)
+        .backgroundColor(this.message.direction === 0 ? $r('app.color.wf_sent_bubble_bg') : $r('app.color.wf_received_bubble_bg'))
         .borderRadius(4)
         .justifyContent(FlexAlign.Start)
         .onClick(() => {

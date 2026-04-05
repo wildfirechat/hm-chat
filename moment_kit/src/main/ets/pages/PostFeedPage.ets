@@ -164,8 +164,8 @@ export struct PostFeedPage {
     private buildPostMenu() {
         Column() {
             Button(this.postState.isPosting ? '...' : '发表')
-                .backgroundColor(this.canPublish() ? '#07C160' : '#E2E2E2')
-                .fontColor(this.canPublish() ? Color.White : '#A6A6A6')
+                .backgroundColor(this.canPublish() ? MomentConstants.PRIMARY_COLOR : $r('app.color.button_disabled'))
+                .fontColor(this.canPublish() ? Color.White : $r('app.color.text_disabled'))
                 .fontSize(16)
                 .height(32)
                 .padding({ left: 16, right: 16 })
@@ -192,8 +192,10 @@ export struct PostFeedPage {
                 .height(120)
                 .fontSize(MomentConstants.FONT_SIZE_CONTENT)
                 .backgroundColor(MomentConstants.CARD_BACKGROUND_COLOR)
+                .fontColor(MomentConstants.TEXT_PRIMARY_COLOR)
                 .borderRadius(MomentConstants.BORDER_RADIUS)
                 .padding(12)
+                .placeholderColor(MomentConstants.TEXT_SECONDARY_COLOR)
                 .onChange((value: string) => {
                     this.postState.text = value;
                     this.postState.error = undefined;
@@ -242,14 +244,14 @@ export struct PostFeedPage {
                 .height(100)
                 .borderRadius(MomentConstants.BORDER_RADIUS)
                 .objectFit(ImageFit.Cover)
-                .backgroundColor('#F0F0F0')
+                .backgroundColor(MomentConstants.COMMENT_BACKGROUND_COLOR)
 
             // 删除按钮
             Button() {
                 Image($r('app.media.ic_delete'))
                     .width(16)
                     .height(16)
-                    .fillColor('#FFFFFF')
+                    .fillColor(Color.White)
             }
             .width(24)
             .height(24)
@@ -307,7 +309,7 @@ export struct PostFeedPage {
         }
         .width('100%')
         .padding(12)
-        .backgroundColor('#FFF3F3')
+        .backgroundColor($r('app.color.error_background'))
         .borderRadius(MomentConstants.BORDER_RADIUS)
         .margin({ bottom: 16 })
     }

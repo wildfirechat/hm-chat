@@ -106,6 +106,6 @@ export default struct FileRecordPortalPage {
         .title('文件记录')
         .height('100%')
         .width('100%')
-        .backgroundColor('#EDEDED')
+        .backgroundColor($r('app.color.wf_background'))
     }
 }

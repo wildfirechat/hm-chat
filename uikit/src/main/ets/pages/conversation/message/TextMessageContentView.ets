@@ -45,7 +45,8 @@ export default struct TextMessageContentView {
                 Text(this.getTextContent())
                     .padding(this.textPadding)
                     .constraintSize({ minHeight: 40 })
-                    .backgroundColor(Color.White)
+                    .backgroundColor(this.message.direction === 0 ? $r('app.color.wf_sent_bubble_bg') : $r('app.color.wf_received_bubble_bg'))
+                    .fontColor($r('app.color.wf_primary_text'))
                     .borderRadius(4)
                     .enableDataDetector(true)
                     .dataDetectorConfig({
@@ -97,7 +98,8 @@ export default struct TextMessageContentView {
                     .constraintSize({ minHeight: 40 })
                     .maxLines(2)
                     .textOverflow({ overflow: TextOverflow.Ellipsis })
-                    .backgroundColor('#E7E7E7')
+                    .backgroundColor($r('app.color.wf_primary_background_color'))
+                    .fontColor($r('app.color.wf_tertiary_text'))
                     .borderRadius(4)
                     .onClick(() => {
                         this.showQuoteMessage()
@@ -109,7 +111,8 @@ export default struct TextMessageContentView {
             Text(this.getTextContent())
                 .padding(this.textPadding)
                 .constraintSize({ minHeight: 40 })
-                .backgroundColor(Color.White)
+                .backgroundColor(this.message.direction === 0 ? $r('app.color.wf_sent_bubble_bg') : $r('app.color.wf_received_bubble_bg'))
+                .fontColor($r('app.color.wf_primary_text'))
                 .borderRadius(4)
                 .enableDataDetector(true)
                 .dataDetectorConfig({
@@ -166,7 +169,7 @@ export default struct TextMessageContentView {
                                 .height(24)
                             Text(menuItem.title)
                                 .fontSize(13)
-                                .fontColor('#FFFFFF')
+                                .fontColor(Color.White)
                         }
                         .justifyContent(FlexAlign.Center)
                         .width(60)
@@ -183,7 +186,7 @@ export default struct TextMessageContentView {
                                 .backgroundColor(Color.Transparent)
                             },
                             pressed: {
-                                .backgroundColor('#444444')
+                                .backgroundColor($r('app.color.c_gray'))
                             }
                         })
                     }
@@ -194,7 +197,7 @@ export default struct TextMessageContentView {
             .width(Math.min(this.menuItems.length, 5) * 60 + 20)
             .height(this.getMenuHeight())
         }
-        .backgroundColor('#4c4c4c')
+        .backgroundColor($r('app.color.unread_hint_background'))
         .borderRadius(8)
         .padding({
             left: 10,

@@ -81,7 +81,7 @@ export default struct FileRecordPage {
         NavDestination() {
             Column() {
                 Text('文件记录')
-                    .backgroundColor('#e5e5e5')
+                    .backgroundColor($r('app.color.wf_secondary_background'))
                     .fontColor('#989898')
                     .fontSize(13)
                     .padding({ left: 10 })
@@ -147,7 +147,7 @@ export default struct FileRecordPage {
         .title('文件记录')
         .height('100%')
         .width('100%')
-        .backgroundColor('#EDEDED')
+        .backgroundColor($r('app.color.wf_background'))
     }
 }
 

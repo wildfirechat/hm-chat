@@ -36,10 +36,10 @@ export default struct CompositeMessagePreviewPage {
             Text('TODO 时间区间')
                 .width('100%')
                 .fontSize(13)
-                .fontColor('#989898')
+                .fontColor($r('app.color.wf_tertiary_text'))
                 .padding(10)
                 .visibility(Visibility.None)
-                .backgroundColor('#E5E5E5')
+                .backgroundColor($r('app.color.wf_primary_background_color'))
             List() {
                 LazyForEach(this.compositeMessageDataSource,
                     (msg: Message, index: number) => {
@@ -58,9 +58,10 @@ export default struct CompositeMessagePreviewPage {
                                             Text(wfc.getUserDisplayName(msg.from))
                                                 .fontSize(12)
                                                 .padding({ bottom: 2 })
+                                                .fontColor($r('app.color.wf_tertiary_text'))
                                             Text(timeFormat(msg.timestamp))
                                                 .fontSize(12)
-                                                .fontColor('#b4b4b4')
+                                                .fontColor($r('app.color.wf_tertiary_text'))
                                                 .padding(10)
                                         }
                                         .width('100%')
@@ -88,12 +89,14 @@ export default struct CompositeMessagePreviewPage {
             .width('100%')
             .height('100%')
             .padding({ right: 10 })
-            .divider({ strokeWidth: 1, startMargin: 60 })
+            .divider({ strokeWidth: 1, startMargin: 60, color: $r('app.color.wf_divider') })
+            .backgroundColor($r('app.color.wf_background'))
 
         }
         .title(this.title)
         .height('100%')
         .width('100%')
+        .backgroundColor($r('app.color.wf_primary_background_color'))
     }
 
     showPortrait(index: number) {

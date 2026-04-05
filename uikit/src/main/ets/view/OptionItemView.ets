@@ -24,13 +24,14 @@ export default struct OptionItemView {
                 Column() {
                     Text(this.title)
                         .fontSize(16)
+                        .fontColor($r('app.color.wf_primary_text'))
                         .maxLines(1)
                         .textOverflow({ overflow: TextOverflow.Ellipsis })
                     if (this.subTitle) {
                         Text(this.subTitle)
                             .padding({ top: 2 })
                             .fontSize(13)
-                            .fontColor('#747474')
+                            .fontColor($r('app.color.wf_tertiary_text'))
                             .maxLines(1)
                             .textOverflow({ overflow: TextOverflow.Ellipsis })
                     }
@@ -42,7 +43,7 @@ export default struct OptionItemView {
                     Text(this.desc)
                         .padding({ left: 10, right: 10 })
                         .fontSize(13)
-                        .fontColor('#747474')
+                        .fontColor($r('app.color.wf_tertiary_text'))
                         .maxLines(1)
                         .constraintSize({ maxWidth: 200 })
                         .textOverflow({ overflow: TextOverflow.Ellipsis })
@@ -58,7 +59,7 @@ export default struct OptionItemView {
                     Image($r('app.media.ic_public_arrow_right'))
                         .width(22)
                         .height(22)
-                        .fillColor('#B6B6B6')
+                        .fillColor($r('app.color.c_gray'))
                 }
             }
             .width('100%')
@@ -67,17 +68,17 @@ export default struct OptionItemView {
             .justifyContent(FlexAlign.SpaceBetween)
             .stateStyles({
                 pressed: {
-                    .backgroundColor('#E5E5E5')
+                    .backgroundColor($r('app.color.wf_item_pressed'))
                 },
                 normal: {
-                    .backgroundColor(Color.White)
+                    .backgroundColor($r('app.color.wf_background'))
                 }
             })
 
             if (this.showDivider) {
                 Divider()
-                    .strokeWidth(0.6)
-                    .color('#EDEDED')
+                    .strokeWidth(0.4)
+                    .color($r('app.color.wf_divider'))
                     .padding({ left: this.icon ? 20 + 2 * this.paddingLeft : this.paddingLeft })
             }
         }

@@ -40,10 +40,11 @@ export default struct DiscoveryTab {
                                     position: BadgePosition.Right,
                                     maxCount: 99,
                                     count: this.unreadMomentCount,
-                                    style: { badgeSize: 14, badgeColor: '#FA2A2D' }
+                                    style: { badgeSize: 14, badgeColor: $r('app.color.wf_badge_color') }
                                 }) {
                                     Text('朋友圈')
                                         .padding({ left: 10 })
+                                        .fontColor($r('app.color.wf_primary_text'))
                                 }
                                 .padding({ left: 20 })
                             }
@@ -58,10 +59,10 @@ export default struct DiscoveryTab {
                         }
                         .stateStyles({
                             pressed: {
-                                .backgroundColor('#E5E5E5')
+                                .backgroundColor($r('app.color.wf_item_pressed'))
                             },
                             normal: {
-                                .backgroundColor(Color.White)
+                                .backgroundColor($r('app.color.wf_background'))
                             }
                         })
                     }
@@ -75,6 +76,7 @@ export default struct DiscoveryTab {
                                     .objectFit(ImageFit.Contain)
                                 Text('聊天室')
                                     .padding({ left: 10 })
+                                    .fontColor($r('app.color.wf_primary_text'))
                             }
                             .onClick(() => {
                                 this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ChatroomListPage, {} as Record<string, Object>)
@@ -85,10 +87,10 @@ export default struct DiscoveryTab {
                         }
                         .stateStyles({
                             pressed: {
-                                .backgroundColor('#E5E5E5')
+                                .backgroundColor($r('app.color.wf_item_pressed'))
                             },
                             normal: {
-                                .backgroundColor(Color.White)
+                                .backgroundColor($r('app.color.wf_background'))
                             }
                         })
                     }
@@ -101,6 +103,7 @@ export default struct DiscoveryTab {
                                 .objectFit(ImageFit.Contain)
                             Text('机器人')
                                 .padding({ left: 10 })
+                                .fontColor($r('app.color.wf_primary_text'))
                         }
                         .onClick(() => {
                             let conversation = new Conversation(ConversationType.Single, 'FireRobot', 0)
@@ -114,10 +117,10 @@ export default struct DiscoveryTab {
                     }
                     .stateStyles({
                         pressed: {
-                            .backgroundColor('#E5E5E5')
+                            .backgroundColor($r('app.color.wf_item_pressed'))
                         },
                         normal: {
-                            .backgroundColor(Color.White)
+                            .backgroundColor($r('app.color.wf_background'))
                         }
                     })
 
@@ -129,6 +132,7 @@ export default struct DiscoveryTab {
                                 .objectFit(ImageFit.Contain)
                             Text('会议')
                                 .padding({ left: 10 })
+                                .fontColor($r('app.color.wf_primary_text'))
                         }
                         .onClick(() => {
                             if (uikit.isSupportConference()) {
@@ -143,10 +147,10 @@ export default struct DiscoveryTab {
                     }
                     .stateStyles({
                         pressed: {
-                            .backgroundColor('#E5E5E5')
+                            .backgroundColor($r('app.color.wf_item_pressed'))
                         },
                         normal: {
-                            .backgroundColor(Color.White)
+                            .backgroundColor($r('app.color.wf_background'))
                         }
                     })
 
@@ -157,6 +161,7 @@ export default struct DiscoveryTab {
                                 .height(20)
                             Text('开发手册')
                                 .padding({ left: 10 })
+                                .fontColor($r('app.color.wf_primary_text'))
                         }
                         .onClick(() => {
                             this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.WebViewPage, {
@@ -170,16 +175,16 @@ export default struct DiscoveryTab {
                     }
                     .stateStyles({
                         pressed: {
-                            .backgroundColor('#E5E5E5')
+                            .backgroundColor($r('app.color.wf_item_pressed'))
                         },
                         normal: {
-                            .backgroundColor(Color.White)
+                            .backgroundColor($r('app.color.wf_background'))
                         }
                     })
                 }
                 .divider({
-                    strokeWidth: 0.6,
-                    color: '#EDEDED',
+                    strokeWidth: 0.4,
+                    color: $r('app.color.wf_divider'),
                     startMargin: 40
                 })
             }
@@ -189,6 +194,6 @@ export default struct DiscoveryTab {
         .height('100%')
         .width('100%')
         .justifyContent(FlexAlign.Start)
-        .backgroundColor('#EDEDED')
+        .backgroundColor($r('app.color.wf_primary_background_color'))
     }
 }

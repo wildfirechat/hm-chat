@@ -50,7 +50,7 @@ export default struct PickConversationModal {
                                     .fontSize(13)
                                     .width('100%')
                                     .height(40)
-                                    .backgroundColor('#E5E5E5')
+                                    .backgroundColor($r('app.color.wf_secondary_background'))
                                     .padding({ left: 10, right: 10 })
                             }
 
@@ -66,10 +66,10 @@ export default struct PickConversationModal {
                                 }
                                 .stateStyles({
                                     pressed: {
-                                        .backgroundColor('#E5E5E5')
+                                        .backgroundColor($r('app.color.wf_item_pressed'))
                                     },
                                     normal: {
-                                        .backgroundColor(Color.White)
+                                        .backgroundColor($r('app.color.wf_background'))
                                     }
                                 })
                             }, (info: ConversationInfo) => info.conversation.type + info.conversation.target + '-' + info.conversation.line)
@@ -92,6 +92,7 @@ export default struct PickConversationModal {
             .height('100%')
             .width('100%')
         }
+        .backgroundColor($r('app.color.wf_background'))
         .title('选择一个聊天')
         .titleMode(NavigationTitleMode.Mini)
         .hideBackButton(false)

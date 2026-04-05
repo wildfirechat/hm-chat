@@ -35,10 +35,18 @@ export struct SlideVerifyView {
   build() {
     Column() {
       // 标题
-      Text('安全验证')
-        .fontSize(18)
-        .fontWeight(FontWeight.Bold)
-        .margin({ bottom: 15 })
+      Row(){
+        Text('安全验证')
+          .fontSize(18)
+          .fontWeight(FontWeight.Bold)
+
+        if (false && this.isLoading) {
+          LoadingProgress()
+            .width(40)
+            .color(0x317aff)
+        }
+      }
+      .height(40)
 
       // 图片容器
       Stack() {
@@ -59,7 +67,7 @@ export struct SlideVerifyView {
       }
       .width('100%')
       .height(150)
-      .backgroundColor('#f5f5f5')
+      .backgroundColor($r('app.color.wf_primary_background_color'))
       .borderRadius(4)
       .margin({ bottom: 15 })
 
@@ -112,7 +120,7 @@ export struct SlideVerifyView {
       }
       .width('100%')
       .height(40)
-      .backgroundColor('#f0f0f0')
+      .backgroundColor($r('app.color.wf_secondary_background'))
       .borderRadius(20)
       .margin({ bottom: 10 })
 
@@ -133,16 +141,10 @@ export struct SlideVerifyView {
       .shadow({ radius: 8, color: '#80000000', offsetX: 0, offsetY: 2 })
       .position({ x: 290, y: 10 })
 
-      if (this.isLoading) {
-        LoadingProgress()
-          .width(40)
-          .height(40)
-          .color(0x317aff)
-      }
     }
     .width(320)
     .padding(20)
-    .backgroundColor(Color.White)
+    .backgroundColor($r('app.color.wf_primary_background_color'))
     .borderRadius(12)
     .shadow({ radius: 20, color: '#80000000', offsetX: 0, offsetY: 4 })
   }

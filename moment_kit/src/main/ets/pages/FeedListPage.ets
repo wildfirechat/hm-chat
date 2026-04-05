@@ -609,7 +609,7 @@ export struct FeedListPage {
         }
         .width(180)
         .height(40)
-        .backgroundColor('#4C4C4C')
+        .backgroundColor($r('app.color.unread_hint_background'))
         .borderRadius(4)
         .padding({ left: 8, right: 8 })
         .alignSelf(ItemAlign.Center)
@@ -664,7 +664,9 @@ export struct FeedListPage {
                     .defaultFocus(true)
                     .layoutWeight(1)
                     .height(40)
-                    .backgroundColor('#FFFFFF')
+                    .backgroundColor(MomentConstants.CARD_BACKGROUND_COLOR)
+                    .fontColor(MomentConstants.TEXT_PRIMARY_COLOR)
+                    .placeholderColor(MomentConstants.TEXT_SECONDARY_COLOR)
                     .borderRadius(20)
                     .padding({ left: 16, right: 16 })
                     .onAppear(() => {
@@ -678,7 +680,7 @@ export struct FeedListPage {
 
                 Button('发送')
                     .height(40)
-                    .backgroundColor(this.commentText.trim() ? MomentConstants.PRIMARY_COLOR : '#CCCCCC')
+                    .backgroundColor(this.commentText.trim() ? MomentConstants.PRIMARY_COLOR : $r('app.color.button_disabled'))
                     .borderRadius(20)
                     .margin({ left: 8 })
                     .enabled(!!this.commentText.trim())
@@ -691,7 +693,7 @@ export struct FeedListPage {
             }
             .width('100%')
             .padding(16)
-            .backgroundColor('#FFFFFF')
+            .backgroundColor(MomentConstants.CARD_BACKGROUND_COLOR)
         }
         .width('100%')
         .height('100%')

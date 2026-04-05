@@ -123,6 +123,7 @@ export default struct SearchResultView {
                         .borderRadius(4)
                     Text(userInfo.displayName)
                         .padding({ left: 10 })
+                        .fontColor($r('app.color.wf_primary_text'))
                         .maxLines(1)
                         .textOverflow({ overflow: TextOverflow.Ellipsis })
                 }
@@ -132,10 +133,10 @@ export default struct SearchResultView {
             }
             .stateStyles({
                 pressed: {
-                    .backgroundColor('#E5E5E5')
+                    .backgroundColor($r('app.color.wf_item_pressed'))
                 },
                 normal: {
-                    .backgroundColor(Color.White)
+                    .backgroundColor($r('app.color.wf_background'))
                 }
             })
             .onClick(() => {
@@ -166,6 +167,7 @@ export default struct SearchResultView {
                         .borderRadius(4)
                     Text(userInfo.displayName)
                         .padding({ left: 10 })
+                        .fontColor($r('app.color.wf_primary_text'))
                         .maxLines(1)
                         .textOverflow({ overflow: TextOverflow.Ellipsis })
                 }
@@ -175,10 +177,10 @@ export default struct SearchResultView {
             }
             .stateStyles({
                 pressed: {
-                    .backgroundColor('#E5E5E5')
+                    .backgroundColor($r('app.color.wf_item_pressed'))
                 },
                 normal: {
-                    .backgroundColor(Color.White)
+                    .backgroundColor($r('app.color.wf_background'))
                 }
             })
             .onClick(() => {
@@ -209,13 +211,14 @@ export default struct SearchResultView {
                         .borderRadius(4)
                     Column() {
                         Text(groupSearchResult.groupInfo.name)
+                            .fontColor($r('app.color.wf_primary_text'))
                             .maxLines(1)
                             .textOverflow({ overflow: TextOverflow.Ellipsis })
 
                         Text(groupSearchResult.matchType === 1 ? '群成员名包含：' + this.keyword : '群名称包含：' + this.keyword)
                             .fontSize(12)
                             .margin({ top: 5 })
-                            .fontColor('#B3B3B3')
+                            .fontColor($r('app.color.wf_tertiary_text'))
                             .maxLines(1)
                             .textOverflow({ overflow: TextOverflow.Ellipsis })
                     }
@@ -229,10 +232,10 @@ export default struct SearchResultView {
             }
             .stateStyles({
                 pressed: {
-                    .backgroundColor('#E5E5E5')
+                    .backgroundColor($r('app.color.wf_item_pressed'))
                 },
                 normal: {
-                    .backgroundColor(Color.White)
+                    .backgroundColor($r('app.color.wf_background'))
                 }
             })
             .onClick(() => {
@@ -263,6 +266,7 @@ export default struct SearchResultView {
                         .borderRadius(4)
                     Text(channelInfo.name)
                         .padding({ left: 10 })
+                        .fontColor($r('app.color.wf_primary_text'))
                         .maxLines(1)
                         .textOverflow({ overflow: TextOverflow.Ellipsis })
                 }
@@ -272,10 +276,10 @@ export default struct SearchResultView {
             }
             .stateStyles({
                 pressed: {
-                    .backgroundColor('#E5E5E5')
+                    .backgroundColor($r('app.color.wf_item_pressed'))
                 },
                 normal: {
-                    .backgroundColor(Color.White)
+                    .backgroundColor($r('app.color.wf_background'))
                 }
             })
             .onClick(() => {
@@ -311,13 +315,14 @@ export default struct SearchResultView {
                         .borderRadius(4)
                     Column() {
                         Text(resultWrapper.title)
+                            .fontColor($r('app.color.wf_primary_text'))
                             .maxLines(1)
                             .textOverflow({ overflow: TextOverflow.Ellipsis })
 
                         Text(resultWrapper.desc)
                             .fontSize(12)
                             .margin({ top: 5 })
-                            .fontColor('#B3B3B3')
+                            .fontColor($r('app.color.wf_tertiary_text'))
                             .maxLines(1)
                             .textOverflow({ overflow: TextOverflow.Ellipsis })
                     }
@@ -331,10 +336,10 @@ export default struct SearchResultView {
             }
             .stateStyles({
                 pressed: {
-                    .backgroundColor('#E5E5E5')
+                    .backgroundColor($r('app.color.wf_item_pressed'))
                 },
                 normal: {
-                    .backgroundColor(Color.White)
+                    .backgroundColor($r('app.color.wf_background'))
                 }
             })
             .onClick(() => {
@@ -356,9 +361,9 @@ export default struct SearchResultView {
             .padding({ left: 10 })
             .width('100%')
             .height(32)
-            .fontColor('#828282')
+            .fontColor($r('app.color.wf_secondary_text'))
             .fontSize(13)
-            .backgroundColor('#EDEDED')
+            .backgroundColor($r('app.color.wf_primary_background_color'))
     }
 
     @Builder
@@ -367,7 +372,7 @@ export default struct SearchResultView {
             .padding({ left: 10 })
             .width('100%')
             .height(32)
-            .fontColor('#5B6E8E')
+            .fontColor($r('app.color.wf_primary'))
             .fontSize(13)
             .onClick(action)
     }
@@ -382,14 +387,17 @@ export default struct SearchResultView {
                 this.conversationSearchResultBuilder()
                 this.channelSearchResultBuilder()
             }
+            .backgroundColor($r('app.color.wf_background'))
         } else {
             Column() {
                 Text(this.keyword ? '搜索结果为空' : '输入关键词开始搜索')
+                    .fontColor($r('app.color.wf_tertiary_text'))
             }
             .width('100%')
             .height('100%')
             .justifyContent(FlexAlign.Center)
             .alignItems(HorizontalAlign.Center)
+            .backgroundColor($r('app.color.wf_background'))
         }
     }
 }

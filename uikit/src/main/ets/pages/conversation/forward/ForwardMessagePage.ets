@@ -243,7 +243,7 @@ export default struct ForwardMessagePage {
             .height('100%')
             .width('100%')
             .margin({ top: px2vp(AppStorage.get<number>('SafeAreaTopHeight')) })
-            .backgroundColor(Color.White)
+            .backgroundColor($r('app.color.wf_background'))
     }
 
     updateSearchInputViewWidthAndScroll() {
@@ -313,6 +313,9 @@ export default struct ForwardMessagePage {
                                             this.keyword = value
                                         })
                                         .borderRadius(4)
+                                        .backgroundColor($r('app.color.wf_background'))
+                                        .fontColor($r('app.color.wf_primary_text'))
+                                        .placeholderColor($r('app.color.wf_tertiary_text'))
                                 }
                                 .constraintSize({ minWidth: '25%', maxWidth: this.searchInputViewMaxWidth })
                             }
@@ -332,17 +335,17 @@ export default struct ForwardMessagePage {
                                 if (!this.enableMultiCheck) {
                                     ListItem() {
                                         Text('创建新聊天')
-                                            .fontColor('#989898')
+                                            .fontColor($r('app.color.wf_secondary_text'))
                                             .fontSize(13)
                                             .width('100%')
                                             .height(40)
                                             .padding({ left: 10, right: 10 })
                                             .stateStyles({
                                                 pressed: {
-                                                    .backgroundColor('#E5E5E5')
+                                                    .backgroundColor($r('app.color.wf_item_pressed'))
                                                 },
                                                 normal: {
-                                                    .backgroundColor(Color.White)
+                                                    .backgroundColor($r('app.color.wf_background'))
                                                 }
                                             })
                                             .enabled(true)
@@ -359,11 +362,11 @@ export default struct ForwardMessagePage {
 
                                 ListItem() {
                                     Text('最近聊天')
-                                        .fontColor('#989898')
+                                        .fontColor($r('app.color.wf_tertiary_text'))
                                         .fontSize(13)
                                         .width('100%')
                                         .height(40)
-                                        .backgroundColor('#E5E5E5')
+                                        .backgroundColor($r('app.color.wf_primary_background_color'))
                                         .padding({ left: 10, right: 10 })
                                 }
 
@@ -394,15 +397,16 @@ export default struct ForwardMessagePage {
                                     }
                                     .stateStyles({
                                         pressed: {
-                                            .backgroundColor('#E5E5E5')
+                                            .backgroundColor($r('app.color.wf_item_pressed'))
                                         },
                                         normal: {
-                                            .backgroundColor(Color.White)
+                                            .backgroundColor($r('app.color.wf_background'))
                                         }
                                     })
                                     .width("100%")
                                 }, (info: ConversationInfo) => info.conversation.type + '-' + info.conversation.target + '-' + info.conversation.line)
                             }
+                            .backgroundColor($r('app.color.wf_background'))
                         }
                         .height('100%')
                         .width('100%')
@@ -413,7 +417,7 @@ export default struct ForwardMessagePage {
                                 searchModules: this.searchModules
                             })
                                 .height('100%')
-                                .backgroundColor(Color.White)
+                                .backgroundColor($r('app.color.wf_background'))
                         }
                     }
                     .width('100%')
@@ -425,6 +429,7 @@ export default struct ForwardMessagePage {
                 if (this.enableMultiCheck) {
                     Row() {
                         Text(`已选 ${this.checkedConversationInfos.length} 人`)
+                            .fontColor($r('app.color.wf_primary_text'))
                         Button('发送')
                             .type(ButtonType.Normal)
                             .height(30)
@@ -440,6 +445,7 @@ export default struct ForwardMessagePage {
                     .width('100%')
                     .justifyContent(FlexAlign.SpaceBetween)
                     .alignItems(VerticalAlign.Center)
+                    .backgroundColor($r('app.color.wf_background'))
                 }
             }
             .alignContent(Alignment.Bottom)
@@ -458,7 +464,7 @@ export default struct ForwardMessagePage {
             Text(this.enableMultiCheck ? '取消多选' : '多选')
                 .height(30)
                 .fontSize(15)
-                .fontColor(Color.Black)
+                .fontColor($r('app.color.wf_primary_text'))
                 .padding({ right: 16 })
                 .onClick(() => {
                     this.enableMultiCheck = !this.enableMultiCheck

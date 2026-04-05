@@ -2,39 +2,39 @@
   "color": [
     {
       "name": "start_window_background",
-      "value": "#FFFFFF"
+      "value": "#111111"
     },
     {
       "name": "c_gray",
-      "value": "#8B8B8B"
+      "value": "#6B6B6B"
     },
     {
       "name": "wf_primary_background_color",
-      "value": "#EEEEEE"
+      "value": "#1A1A1A"
     },
     {
       "name": "wf_background",
-      "value": "#FFFFFF"
+      "value": "#111111"
     },
     {
       "name": "wf_secondary_background",
-      "value": "#F7F7F7"
+      "value": "#1E1E1E"
     },
     {
       "name": "wf_primary_text",
-      "value": "#000000"
+      "value": "#E0E0E0"
     },
     {
       "name": "wf_secondary_text",
-      "value": "#666666"
+      "value": "#A0A0A0"
     },
     {
       "name": "wf_tertiary_text",
-      "value": "#999999"
+      "value": "#707070"
     },
     {
       "name": "wf_divider",
-      "value": "#E5E5E5"
+      "value": "#333333"
     },
     {
       "name": "wf_primary",
@@ -42,27 +42,27 @@
     },
     {
       "name": "wf_badge_color",
-      "value": "#FA2A2D"
+      "value": "#FF453A"
     },
     {
       "name": "wf_item_pressed",
-      "value": "#E5E5E5"
+      "value": "#2C2C2E"
     },
     {
       "name": "wf_conversation_top_background",
-      "value": "#EEEEEE"
+      "value": "#1C1C1E"
     },
     {
       "name": "wf_alphabet_indexer_selected_bg",
-      "value": "#CCCCCC"
+      "value": "#3A3A3C"
     },
     {
       "name": "wf_alphabet_indexer_popup_bg",
-      "value": "#D2B48C"
+      "value": "#48484A"
     },
     {
       "name": "wf_link",
-      "value": "#576B95"
+      "value": "#7D90A9"
     },
     {
       "name": "wf_sent_bubble_bg",
@@ -70,11 +70,11 @@
     },
     {
       "name": "wf_received_bubble_bg",
-      "value": "#FFFFFF"
+      "value": "#2C2C2C"
     },
     {
       "name": "wf_image_placeholder_bg",
-      "value": "#F0F0F0"
+      "value": "#1A1A1A"
     }
   ]
 }

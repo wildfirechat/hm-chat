@@ -121,13 +121,13 @@ export default struct NormaMessageContentView {
                     if (this.message!.conversation.type === ConversationType.Group) {
                         Text(`已读 ${this.readReceipt.readCount}/${this.readReceipt.readCount + this.readReceipt.unreadCount}`)
                             .fontSize(12)
-                            .fontColor('#b4b4b4')
+                            .fontColor($r('app.color.wf_tertiary_text'))
                             .margin({ top: 4 })
                             .alignSelf(ItemAlign.End)
                     } else if (this.message!.conversation.type === ConversationType.Single) {
                         Text(this.readReceipt.readCount > 0 ? '已读' : '未读')
                             .fontSize(12)
-                            .fontColor('#b4b4b4')
+                            .fontColor($r('app.color.wf_tertiary_text'))
                             .margin({ top: 4 })
                             .alignSelf(ItemAlign.End)
                     }
@@ -135,7 +135,7 @@ export default struct NormaMessageContentView {
             }
         }
         .bindContextMenu(this.MessageContextMenuBuilder, ResponseType.LongPress, {
-            backgroundColor: '#4c4c4c',
+            backgroundColor: $r('app.color.unread_hint_background'),
             backgroundBlurStyle: BlurStyle.NONE,
         })
     }
@@ -317,7 +317,7 @@ export default struct NormaMessageContentView {
                             .height(24)
                         Text(menuItem.title)
                             .fontSize(13)
-                            .fontColor('#FFFFFF')
+                            .fontColor(Color.White)
                     }
                     .justifyContent(FlexAlign.Center)
                     .width(60)
@@ -330,7 +330,7 @@ export default struct NormaMessageContentView {
                             .backgroundColor(Color.Transparent)
                         },
                         pressed: {
-                            .backgroundColor('#444444')
+                            .backgroundColor($r('app.color.c_gray'))
                         }
                     })
                 }
@@ -338,7 +338,7 @@ export default struct NormaMessageContentView {
         }
         .columnsTemplate('1fr '.repeat(this.menuColumnCount).trim())
         .width(this.menuWidth)
-        .backgroundColor('#4c4c4c')
+        .backgroundColor($r('app.color.unread_hint_background'))
         .borderRadius(8)
         .padding({
             left: 10,

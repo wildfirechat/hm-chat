@@ -641,6 +641,7 @@ export default struct ConversationPage {
                                 Text('没有更多消息')
                                     .padding(5)
                                     .fontSize(13)
+                                    .fontColor($r('app.color.wf_tertiary_text'))
                             }
                             Blank()
                                 .width('100%')
@@ -683,7 +684,7 @@ export default struct ConversationPage {
                                                     if (this.showMessageTimeInfo(index)) {
                                                         Text(timeFormat(msg.timestamp))
                                                             .fontSize(12)
-                                                            .fontColor('#b4b4b4')
+                                                            .fontColor($r('app.color.wf_tertiary_text'))
                                                             .padding(10)
                                                     }
                                                     Row() {
@@ -789,7 +790,7 @@ export default struct ConversationPage {
                                                     if (this.showMessageTimeInfo(index)) {
                                                         Text(timeFormat(msg.timestamp))
                                                             .fontSize(12)
-                                                            .fontColor('#b4b4b4')
+                                                            .fontColor($r('app.color.wf_tertiary_text'))
                                                             .padding(10)
                                                     }
                                                     Row() {
@@ -833,6 +834,7 @@ export default struct ConversationPage {
                                                             if (this.showGroupMemberNickName) {
                                                                 Text(wfc.getGroupMemberDisplayName(this.conversation!.target, msg.from))
                                                                     .fontSize(12)
+                                                                    .fontColor($r('app.color.wf_tertiary_text'))
                                                                     .padding({ bottom: 2 })
                                                             }
                                                             NormalMessageContentView({
@@ -919,7 +921,8 @@ export default struct ConversationPage {
                         })
                             .width('100%')
                             .height('100%')
-                            .backgroundColor('#A0E5E5E5')
+                            .backgroundColor($r('app.color.unread_hint_background'))
+                            .opacity(0.8)
                     }
                     Column() {
                         if (this.unreadJoinGroupRequestCount > 0) {
@@ -928,7 +931,7 @@ export default struct ConversationPage {
                                     .padding(5)
                                     .fontSize(13)
                                     .fontColor(Color.Red)
-                                    .backgroundColor(Color.White)
+                                    .backgroundColor($r('app.color.wf_background'))
                                     .width('100%')
                                     .height(40)
                                     .textAlign(TextAlign.Center)
@@ -952,7 +955,7 @@ export default struct ConversationPage {
             .edgeEffect(EdgeEffect.Spring)
             .width('100%')
             .layoutWeight(1)
-            .backgroundColor('#F3F3F3')
+            .backgroundColor($r('app.color.wf_secondary_background'))
             .onTouch((event?: TouchEvent) => {
                 this.collapseConversationInputPanelViewTimestamp = new Date().getTime()
             })
@@ -1003,7 +1006,7 @@ export default struct ConversationPage {
         ])
         .height('100%')
         .width('100%')
-        .backgroundColor('#EEEEEE')
+        .backgroundColor($r('app.color.wf_primary_background_color'))
     }
 }
 

@@ -57,7 +57,7 @@ export default struct UpdateUserNickNameOrAliasPage {
                 Divider()
                     .margin({ top: 30 })
                     .strokeWidth(0.4)
-                    .color('#EDEDED')
+                    .color($r('app.color.wf_divider'))
 
                 Row() {
                     TextInput({
@@ -75,7 +75,7 @@ export default struct UpdateUserNickNameOrAliasPage {
 
                 Divider()
                     .strokeWidth(0.4)
-                    .color('#EDEDED')
+                    .color($r('app.color.wf_divider'))
 
                 Button('完成', {
                     type: ButtonType.Normal,

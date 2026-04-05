@@ -274,10 +274,10 @@ export default struct CheckableUserListView {
                                 .padding({ left: 10, right: 10 })
                                 .stateStyles({
                                     pressed: {
-                                        .backgroundColor('#E5E5E5')
+                                        .backgroundColor($r('app.color.wf_item_pressed'))
                                     },
                                     normal: {
-                                        .backgroundColor(Color.White)
+                                        .backgroundColor($r('app.color.wf_background'))
                                     }
                                 })
                                 .onClick(() => {

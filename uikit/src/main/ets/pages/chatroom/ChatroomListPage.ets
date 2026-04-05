@@ -34,13 +34,16 @@ export default struct ChatroomListPage {
                                 .width(20)
                                 .height(20)
                                 .borderRadius(4)
+                                .fillColor($r('app.color.wf_icon_color'))
                             Text(chatroom.title)
                                 .maxLines(1)
                                 .padding({ left: 10 })
+                                .fontColor($r('app.color.wf_primary_text'))
                         }
                         .height(60)
                         .width('100%')
                         .padding({ left: 10, right: 10 })
+                        .backgroundColor($r('app.color.wf_background'))
                         .onClick(() => {
                             this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ConversationPage, {
                                 'conversation': new Conversation(ConversationType.ChatRoom, chatroom.roomId, 0)
@@ -48,18 +51,29 @@ export default struct ChatroomListPage {
 
                         })
                     }
+                    .stateStyles({
+                        pressed: {
+                            .backgroundColor($r('app.color.wf_item_pressed'))
+                        },
+                        normal: {
+                            .backgroundColor($r('app.color.wf_background'))
+                        }
+                    })
                 }, (chatroom: ChatroomItem) => chatroom.roomId)
             }
             .width('100%')
             .height('100%')
+            .backgroundColor($r('app.color.wf_primary_background_color'))
             .divider({
                 strokeWidth: 1,
+                color: $r('app.color.wf_divider'),
                 startMargin: 60
             })
         }
         .title('聊天室列表')
         .height('100%')
         .width('100%')
+        .backgroundColor($r('app.color.wf_primary_background_color'))
     }
 }
 

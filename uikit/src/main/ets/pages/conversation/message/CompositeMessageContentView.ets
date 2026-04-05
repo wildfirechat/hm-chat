@@ -17,24 +17,27 @@ export default struct CompositeMessageContentView {
             Column() {
                 Text(this.compositeMessageContent?.title)
                     .fontSize(16)
+                    .fontColor($r('app.color.wf_primary_text'))
                 Text(this.compositeMessageContent?.compositeDigest())
                     .fontSize(14)
                     .margin({ top: 5, bottom: 5 })
+                    .fontColor($r('app.color.wf_tertiary_text'))
             }
             .borderWidth({ bottom: '1px' })
-            .borderColor('#EDEDED')
+            .borderColor($r('app.color.wf_divider'))
             .alignItems(HorizontalAlign.Start)
             .constraintSize({minWidth: 200})
 
             Text('聊天记录')
                 .fontSize(12)
                 .margin({ top: 5 })
+                .fontColor($r('app.color.wf_tertiary_text'))
         }
         .margin({ top: 4 })
         .alignItems(HorizontalAlign.Start)
         .padding(10)
         .borderRadius(4)
-        .backgroundColor(Color.White)
+        .backgroundColor(this.message.direction === 0 ? $r('app.color.wf_sent_bubble_bg') : $r('app.color.wf_received_bubble_bg'))
         .onClick(() => {
             this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.CompositeMessagePreviewPage, {
                 'message': this.message

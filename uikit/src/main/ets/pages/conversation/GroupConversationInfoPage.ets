@@ -140,7 +140,7 @@ export default struct GroupConversationInfoPage {
             .height('100%')
             .width('100%')
             .margin({ top: px2vp(AppStorage.get<number>('SafeAreaTopHeight')) })
-            .backgroundColor(Color.White)
+            .backgroundColor($r('app.color.wf_background'))
     }
 
     private unremovableGroupMemberIds() {
@@ -166,7 +166,7 @@ export default struct GroupConversationInfoPage {
             .height('100%')
             .width('100%')
             .margin({ top: px2vp(AppStorage.get<number>('SafeAreaTopHeight')) })
-            .backgroundColor(Color.White)
+            .backgroundColor($r('app.color.wf_background'))
     }
 
     build() {
@@ -186,7 +186,7 @@ export default struct GroupConversationInfoPage {
                                     .borderRadius(4)
                                 Text(groupMember.getName())
                                     .maxLines(1)
-                                    .fontColor('#7E7E7E')
+                                    .fontColor($r('app.color.wf_tertiary_text'))
                                     .fontSize(12)
                                     .margin({ top: 5 })
                             }
@@ -281,6 +281,7 @@ export default struct GroupConversationInfoPage {
                         if (this.groupInfo.memberCount > this.groupMembers.length) {
                             Row() {
                                 Text('查看全部成员')
+                                    .fontColor($r('app.color.wf_secondary_text'))
                             }
                             .justifyContent(FlexAlign.Center)
                             .alignItems(VerticalAlign.Center)
@@ -293,7 +294,7 @@ export default struct GroupConversationInfoPage {
                     }
                     .padding(10)
                     .width('100%')
-                    .backgroundColor(Color.White)
+                    .backgroundColor($r('app.color.wf_background'))
 
                     Column() {
                         // TODO
@@ -413,7 +414,7 @@ export default struct GroupConversationInfoPage {
                     }
                     .margin({ top: 10 })
                     .width('100%')
-                    .backgroundColor(Color.White)
+                    .backgroundColor($r('app.color.wf_background'))
 
                     Column() {
                         OptionItemView({ title: '查找聊天记录' })
@@ -431,7 +432,7 @@ export default struct GroupConversationInfoPage {
                     }
                     .margin({ top: 10 })
                     .width('100%')
-                    .backgroundColor(Color.White)
+                    .backgroundColor($r('app.color.wf_background'))
 
                     Column() {
                         Row() {
@@ -452,7 +453,7 @@ export default struct GroupConversationInfoPage {
 
                         Divider()
                             .strokeWidth(0.6)
-                            .color('#EDEDED')
+                            .color($r('app.color.wf_divider'))
                             .padding({ left: 10 })
 
                         Row() {
@@ -473,7 +474,7 @@ export default struct GroupConversationInfoPage {
 
                         Divider()
                             .strokeWidth(0.6)
-                            .color('#EDEDED')
+                            .color($r('app.color.wf_divider'))
                             .padding({ left: 10 })
 
                         Row() {
@@ -495,7 +496,7 @@ export default struct GroupConversationInfoPage {
                     }
                     .margin({ top: 10 })
                     .width('100%')
-                    .backgroundColor(Color.White)
+                    .backgroundColor($r('app.color.wf_background'))
 
                     Column() {
                         OptionItemView({ title: '我在本群的昵称', desc: this.userInfo?.groupAlias })
@@ -524,7 +525,7 @@ export default struct GroupConversationInfoPage {
                     }
                     .margin({ top: 10 })
                     .width('100%')
-                    .backgroundColor(Color.White)
+                    .backgroundColor($r('app.color.wf_background'))
 
                     Column() {
                         Row() {
@@ -537,10 +538,10 @@ export default struct GroupConversationInfoPage {
                         .alignItems(VerticalAlign.Center)
                         .stateStyles({
                             pressed: {
-                                .backgroundColor('#E5E5E5')
+                                .backgroundColor($r('app.color.wf_item_pressed'))
                             },
                             normal: {
-                                .backgroundColor(Color.White)
+                                .backgroundColor($r('app.color.wf_background'))
                             }
                         })
                         .onClick(event => {
@@ -579,7 +580,7 @@ export default struct GroupConversationInfoPage {
 
                         Divider()
                             .strokeWidth(0.6)
-                            .color('#EDEDED')
+                            .color($r('app.color.wf_divider'))
 
                         Row() {
                             Text(this.groupInfo.owner === wfc.getUserId() ? '解散群组' : '删除并退出')
@@ -592,10 +593,10 @@ export default struct GroupConversationInfoPage {
                         .alignItems(VerticalAlign.Center)
                         .stateStyles({
                             pressed: {
-                                .backgroundColor('#E5E5E5')
+                                .backgroundColor($r('app.color.wf_item_pressed'))
                             },
                             normal: {
-                                .backgroundColor(Color.White)
+                                .backgroundColor($r('app.color.wf_background'))
                             }
                         })
                         .onClick(() => {
@@ -622,14 +623,14 @@ export default struct GroupConversationInfoPage {
                     }
                     .margin({ top: 10, bottom: 20 })
                     .width('100%')
-                    .backgroundColor(Color.White)
+                    .backgroundColor($r('app.color.wf_background'))
                 }
             }
             .scrollBar(BarState.Off)
             .width('100%')
             .height('100%')
         }
-        .backgroundColor('#EEEEEE')
+        .backgroundColor($r('app.color.wf_primary_background_color'))
         .title('会话详情')
         .height('100%')
         .width('100%')

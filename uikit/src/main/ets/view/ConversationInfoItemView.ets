@@ -68,7 +68,7 @@ export default struct ConversationInfoItemView {
                             // maxCount: 99,
                             value: '',
                             position: BadgePosition.RightTop,
-                            style: { badgeSize: 10, badgeColor: '#FA2A2D' }
+                            style: { badgeSize: 10, badgeColor: $r('app.color.wf_badge_color') }
                         }) {
                             Image(this.conversationItemPortrait)
                                 .alt($r('app.media.avatar_def'))
@@ -83,7 +83,7 @@ export default struct ConversationInfoItemView {
                             count: this.conversationUnreadCount(),
                             maxCount: 99,
                             position: BadgePosition.RightTop,
-                            style: { badgeSize: 16, badgeColor: '#FA2A2D' }
+                            style: { badgeSize: 16, badgeColor: $r('app.color.wf_badge_color') }
                         }) {
                             Image(this.conversationItemPortrait)
                                 .alt($r('app.media.avatar_def'))
@@ -107,7 +107,7 @@ export default struct ConversationInfoItemView {
                 Column() {
                     Row() {
                         Text(this.conversationItemName)
-                            .fontColor('#1d1d1d')
+                            .fontColor($r('app.color.wf_primary_text'))
                             .fontSize(16)
                             .maxLines(1)
                             .layoutWeight(1)
@@ -115,7 +115,7 @@ export default struct ConversationInfoItemView {
                         if (!this.basicMode) {
                             Text(timeFormat(this.conversationInfo!.timestamp))
                                 .fontSize(12)
-                                .fontColor('#b3b3b3')
+                                .fontColor($r('app.color.wf_tertiary_text'))
                         }
                     }
 
@@ -131,7 +131,7 @@ export default struct ConversationInfoItemView {
                                 .textOverflow({ overflow: TextOverflow.Ellipsis })
                                 .wordBreak(WordBreak.BREAK_ALL)
                                 .fontSize(13)
-                                .fontColor('#b3b3b3')
+                                .fontColor($r('app.color.wf_tertiary_text'))
                                 .margin({ right: 10 })
                                 .maxLines(1)
                                 .layoutWeight(1)
@@ -158,9 +158,9 @@ export default struct ConversationInfoItemView {
 
             Divider()
                 .margin({ left: 60 })
-                .color(!this.basicMode && this.conversationInfo!.top ? '#E5E5E5' : '#F7F7F7')
+                .color(!this.basicMode && this.conversationInfo!.top ? $r('app.color.wf_divider') : Color.Transparent)
         }
         .width('100%')
-        .backgroundColor(!this.basicMode && this.conversationInfo!.top ? '#EEEEEE' : '')
+        .backgroundColor(!this.basicMode && this.conversationInfo!.top ? $r('app.color.wf_conversation_top_background') : Color.Transparent)
     }
 }

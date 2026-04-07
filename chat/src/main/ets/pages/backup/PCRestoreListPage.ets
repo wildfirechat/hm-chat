@@ -270,7 +270,7 @@ export default struct PCRestoreListPage {
 
             Text(this.isWaitingResponse ? '正在等待电脑端确认...' : '正在获取备份列表...')
               .fontSize(14)
-              .fontColor('#666666')
+              .fontColor($r('app.color.wf_secondary_text'))
               .margin({ top: 20 })
           }
           .width('100%')
@@ -290,7 +290,7 @@ export default struct PCRestoreListPage {
           Column() {
             Text('电脑端没有可用的备份')
               .fontSize(16)
-              .fontColor('#999999')
+              .fontColor($r('app.color.wf_secondary_text'))
               .margin({ top: 100 })
           }
           .width('100%')
@@ -305,16 +305,17 @@ export default struct PCRestoreListPage {
                     Text(this.formatBackupTime(backup.time))
                       .fontSize(16)
                       .fontWeight(FontWeight.Medium)
+                      .fontColor($r('app.color.wf_primary_text'))
 
                     Text(`${backup.deviceName} • ${backup.conversationCount}个会话 • ${backup.messageCount}条消息`)
                       .fontSize(14)
-                      .fontColor('#666666')
+                      .fontColor($r('app.color.wf_secondary_text'))
                       .margin({ top: 4 })
 
                     if (backup.mediaFileCount > 0) {
                       Text(`${backup.mediaFileCount}个媒体文件 • ${backup.fileCount}个文件`)
                         .fontSize(12)
-                        .fontColor('#999999')
+                        .fontColor($r('app.color.wf_tertiary_text'))
                         .margin({ top: 2 })
                     }
                   }
@@ -323,7 +324,7 @@ export default struct PCRestoreListPage {
                 }
                 .width('100%')
                 .padding(16)
-                .backgroundColor(Color.White)
+                .backgroundColor($r('app.color.wf_background'))
                 .onClick(() => {
                   this.selectBackup(backup)
                 })
@@ -332,10 +333,10 @@ export default struct PCRestoreListPage {
           }
           .width('100%')
           .layoutWeight(1)
-          .backgroundColor(Color.White)
+          .backgroundColor($r('app.color.wf_background'))
           .divider({
             strokeWidth: 1,
-            color: '#F7F7F7',
+            color: $r('app.color.wf_divider'),
             startMargin: 16,
             endMargin: 16
           })
@@ -343,7 +344,7 @@ export default struct PCRestoreListPage {
       }
       .width('100%')
       .height('100%')
-      .backgroundColor('#EDEDED')
+      .backgroundColor($r('app.color.wf_secondary_background'))
     }
     .title('电脑端备份')
     .height('100%')

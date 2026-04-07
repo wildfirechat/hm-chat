@@ -70,13 +70,13 @@ export default struct RestoreSourcePage {
         // 提示信息
         Text(this.isPCOnline ? '提示：从电脑端恢复需要电脑端在线' : '提示：电脑端未在线，无法从电脑端恢复')
           .fontSize(14)
-          .fontColor('#999999')
+          .fontColor($r('app.color.wf_secondary_text'))
           .margin({ top: 20 })
           .padding({ left: 16, right: 16 })
       }
       .width('100%')
       .height('100%')
-      .backgroundColor('#EDEDED')
+      .backgroundColor($r('app.color.wf_secondary_background'))
     }
     .title('选择恢复来源')
     .height('100%')

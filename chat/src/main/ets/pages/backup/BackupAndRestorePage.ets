@@ -40,7 +40,7 @@ export default struct BackupAndRestorePage {
       }
       .width('100%')
       .height('100%')
-      .backgroundColor('#EDEDED')
+      .backgroundColor($r('app.color.wf_secondary_background'))
     }
     .title('备份与恢复')
     .height('100%')

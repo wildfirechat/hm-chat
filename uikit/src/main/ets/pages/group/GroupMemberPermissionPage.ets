@@ -26,6 +26,7 @@ export default struct GroupMemberPermissionPage {
             Column() {
                 Row() {
                     Text('允许普通成员发起临时会话')
+                        .fontColor($r('app.color.wf_primary_text'))
                     Toggle({ type: ToggleType.Switch, isOn: this.groupInfo!.privateChat === 0 })
                         .onChange(isOn => {
                             wfc.modifyGroupInfo(this.groupInfo!.target, ModifyGroupInfoType.Modify_Group_PrivateChat, isOn ? '0' : '1', [], null, () => {
@@ -39,13 +40,13 @@ export default struct GroupMemberPermissionPage {
                 .justifyContent(FlexAlign.SpaceBetween)
                 .width('100%')
                 .height(56)
-                .backgroundColor(Color.White)
+                .backgroundColor($r('app.color.wf_background'))
                 .padding({ left: 10, right: 10 })
             }
         }
         .title('群成员权限')
         .height('100%')
         .width('100%')
-        .backgroundColor('#EDEDED')
+        .backgroundColor($r('app.color.wf_secondary_background'))
     }
 }

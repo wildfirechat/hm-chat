@@ -16,13 +16,13 @@ export default struct GroupQRCodePage {
             Text('TODO ')
                 .width('100%')
                 .fontSize(13)
-                .fontColor('#989898')
+                .fontColor($r('app.color.wf_secondary_text'))
                 .padding(10)
-                .backgroundColor('#E5E5E5')
-
+                .backgroundColor($r('app.color.wf_secondary_background'))
         }
         .title('群二维码')
         .height('100%')
         .width('100%')
+        .backgroundColor($r('app.color.wf_background'))
     }
 }

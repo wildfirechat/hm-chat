@@ -16,12 +16,14 @@ export default struct JoinGroupRequestDialog {
                 .fontSize(16)
                 .margin({ top: 10, bottom: 10 })
                 .width('100%')
+                .fontColor($r('app.color.wf_primary_text'))
 
             TextInput({ placeholder: '请输入理由' })
                 .height(40)
                 .width('100%')
                 .margin({ top: 10 })
                 .borderRadius(4)
+                .fontColor($r('app.color.wf_primary_text'))
                 .onChange((value: string) => {
                     this.textValue = value
                 })
@@ -30,16 +32,18 @@ export default struct JoinGroupRequestDialog {
                     .onClick(() => {
                         this.controller.close()
                         this.cancel()
-                    }).backgroundColor(0xffffff).fontColor(Color.Black)
+                    })
                 Button('确定')
                     .onClick(() => {
                         this.controller.close()
                         this.confirm(this.textValue)
-                    }).backgroundColor(0xffffff).fontColor(Color.Red)
+                    })
+                    .fontColor(Color.Red)
             }
             .margin({ top: 10 })
         }
         .padding(20)
+        .backgroundColor($r('app.color.wf_background'))
         .justifyContent(FlexAlign.Start)
         .alignItems(HorizontalAlign.Start)
     }

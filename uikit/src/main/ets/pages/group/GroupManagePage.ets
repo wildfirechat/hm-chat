@@ -241,7 +241,7 @@ export default struct GroupManagePage {
                         Column() {
                             Text('加群申请')
                                 .textAlign(TextAlign.Start)
-                                .backgroundColor('#EDEDED')
+                                .backgroundColor($r('app.color.wf_secondary_background'))
                                 .padding({ left: 10, top: 15, bottom: 5 })
                                 .width('100%')
                             OptionItemView({

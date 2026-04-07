@@ -93,7 +93,7 @@ export default struct CardMessageContentView {
         })
         .width(200)
         .alignItems(HorizontalAlign.Start)
-        .backgroundColor(Color.White)
+        .backgroundColor($r('app.color.wf_background'))
         .borderRadius(4)
     }
 }

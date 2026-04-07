@@ -135,7 +135,7 @@ export default struct NormaMessageContentView {
             }
         }
         .bindContextMenu(this.MessageContextMenuBuilder, ResponseType.LongPress, {
-            backgroundColor: $r('app.color.unread_hint_background'),
+            backgroundColor: $r('app.color.wf_message_context_memu_background'),
             backgroundBlurStyle: BlurStyle.NONE,
         })
     }
@@ -326,11 +326,11 @@ export default struct NormaMessageContentView {
                         menuItem.action()
                     })
                     .stateStyles({
-                        normal: {
-                            .backgroundColor(Color.Transparent)
-                        },
                         pressed: {
-                            .backgroundColor($r('app.color.c_gray'))
+                            .backgroundColor($r('app.color.wf_item_pressed'))
+                        },
+                        normal: {
+                            .backgroundColor($r('app.color.wf_message_context_memu_background'))
                         }
                     })
                 }
@@ -338,7 +338,7 @@ export default struct NormaMessageContentView {
         }
         .columnsTemplate('1fr '.repeat(this.menuColumnCount).trim())
         .width(this.menuWidth)
-        .backgroundColor($r('app.color.unread_hint_background'))
+        .backgroundColor($r('app.color.wf_message_context_memu_background'))
         .borderRadius(8)
         .padding({
             left: 10,

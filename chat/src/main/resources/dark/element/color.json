@@ -39,10 +39,6 @@
     {
       "name": "wf_badge_color",
       "value": "#FF453A"
-    },
-    {
-      "name": "wf_icon_color",
-      "value": "#E0E0E0"
     }
   ]
 }

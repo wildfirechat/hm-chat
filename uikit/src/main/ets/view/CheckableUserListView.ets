@@ -128,7 +128,7 @@ export default struct CheckableUserListView {
             .height('100%')
             .width('100%')
             .margin({ top: px2vp(AppStorage.get<number>('SafeAreaTopHeight')) })
-            .backgroundColor(Color.White)
+            .backgroundColor($r('app.color.wf_background'))
     }
 
     @Builder
@@ -140,7 +140,7 @@ export default struct CheckableUserListView {
             .height('100%')
             .width('100%')
             .margin({ top: px2vp(AppStorage.get<number>('SafeAreaTopHeight')) })
-            .backgroundColor(Color.White)
+            .backgroundColor($r('app.color.wf_background'))
     }
 
     build() {
@@ -222,16 +222,17 @@ export default struct CheckableUserListView {
                                         Text(org.name)
                                             .maxLines(1)
                                             .padding({ left: 10 })
+                                            .fontColor($r('app.color.wf_primary_text'))
                                     }
                                     .height(60)
                                     .width('100%')
                                     .padding({ left: 10, right: 10 })
                                     .stateStyles({
                                         pressed: {
-                                            .backgroundColor('#E5E5E5')
+                                            .backgroundColor($r('app.color.wf_item_pressed'))
                                         },
                                         normal: {
-                                            .backgroundColor(Color.White)
+                                            .backgroundColor($r('app.color.wf_background'))
                                         }
                                     })
                                     .onClick(() => {
@@ -268,6 +269,7 @@ export default struct CheckableUserListView {
                                     Text('群聊(保存到通讯录的群组)')
                                         .maxLines(1)
                                         .padding({ left: 10 })
+                                        .fontColor($r('app.color.wf_primary_text'))
                                 }
                                 .height(60)
                                 .width('100%')
@@ -318,6 +320,7 @@ export default struct CheckableUserListView {
                 })
             } else {
                 Text('加载中..')
+                    .fontColor($r('app.color.wf_tertiary_text'))
             }
         }
         .width('100%')

@@ -57,18 +57,19 @@ export default struct BackupOptionsPage {
         Column() {
           Text(`已选择 ${this.selectedConversations.length} 个会话`)
             .fontSize(14)
-            .fontColor('#666666')
+            .fontColor($r('app.color.wf_secondary_text'))
             .width('100%')
             .padding(16)
         }
         .width('100%')
-        .backgroundColor(Color.White)
+        .backgroundColor($r('app.color.wf_background'))
 
         // 是否包含媒体文件
         Row() {
           Text('包含媒体文件')
             .fontSize(16)
             .layoutWeight(1)
+            .fontColor($r('app.color.wf_primary_text'))
           Toggle({ type: ToggleType.Switch, isOn: this.includeMedia })
             .onChange((isOn: boolean) => {
               this.includeMedia = isOn
@@ -76,7 +77,7 @@ export default struct BackupOptionsPage {
         }
         .width('100%')
         .padding(16)
-        .backgroundColor(Color.White)
+        .backgroundColor($r('app.color.wf_background'))
         .margin({ top: 10 })
 
         // 开始备份按钮
@@ -91,7 +92,7 @@ export default struct BackupOptionsPage {
       .width('100%')
       .height('100%')
       .padding(16)
-      .backgroundColor('#EDEDED')
+      .backgroundColor($r('app.color.wf_secondary_background'))
     }
     .title('备份选项')
     .height('100%')

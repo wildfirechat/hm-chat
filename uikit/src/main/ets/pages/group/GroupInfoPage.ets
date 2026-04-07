@@ -86,6 +86,7 @@ export default struct GroupInfoPage {
                         .margin({ top: 10 })
                         .textOverflow({ overflow: TextOverflow.Ellipsis })
                         .maxLines(1)
+                        .fontColor($r('app.color.wf_primary_text'))
                     Button(this.actionButtonText())
                         .margin({ top: 20 })
                         .borderRadius(8)
@@ -95,6 +96,9 @@ export default struct GroupInfoPage {
                         })
                 }
                 .alignItems(HorizontalAlign.Center)
+                .width('100%')
+                .height('100%')
+                .backgroundColor($r('app.color.wf_background'))
             } else {
                 LoadingView()
             }
@@ -102,6 +106,7 @@ export default struct GroupInfoPage {
         .title('群信息')
         .height('100%')
         .width('100%')
+        .backgroundColor($r('app.color.wf_background'))
     }
 
     private joinGroupRequestDialogController?: CustomDialogController = new CustomDialogController({

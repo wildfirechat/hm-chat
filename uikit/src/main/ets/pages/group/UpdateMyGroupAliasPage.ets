@@ -24,10 +24,12 @@ export default struct UpdateMyGroupAliasPage {
                 Text('我在群里的昵称')
                     .fontSize(20)
                     .margin({ top: 40 })
+                    .fontColor($r('app.color.wf_primary_text'))
 
                 Text('昵称修改后，只会在此群内显示，群内成员都可以看见。')
                     .textAlign(TextAlign.Center)
                     .margin({ top: 20 })
+                    .fontColor($r('app.color.wf_secondary_text'))
 
 
                 Divider()
@@ -38,7 +40,7 @@ export default struct UpdateMyGroupAliasPage {
                 Row() {
                     Image(this.groupInfo.portrait)
                         .draggable(false)
-                        .backgroundColor(Color.Gray)
+                        .backgroundColor($r('app.color.wf_secondary_background'))
                         .borderRadius(4)
                         .width(40)
                         .height(40)
@@ -49,6 +51,7 @@ export default struct UpdateMyGroupAliasPage {
                     })
                         .borderRadius(2)
                         .backgroundColor(Color.Transparent)
+                        .fontColor($r('app.color.wf_primary_text'))
                         .maxLines(1)
                         .layoutWeight(1)
                 }

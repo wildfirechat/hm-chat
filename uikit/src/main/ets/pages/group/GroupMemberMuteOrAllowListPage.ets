@@ -51,7 +51,7 @@ export default struct GroupMemberMuteOrAllowListPage {
             .height('100%')
             .width('100%')
             .margin({ top: px2vp(AppStorage.get<number>('SafeAreaTopHeight')) })
-            .backgroundColor(Color.White)
+            .backgroundColor($r('app.color.wf_background'))
     }
 
     build() {
@@ -80,15 +80,16 @@ export default struct GroupMemberMuteOrAllowListPage {
                         .height(40)
                         .margin(10)
                     Text(this.groupInfo?.mute === 0 ? '禁言成员' : '发言白名单')
+                        .fontColor($r('app.color.wf_primary_text'))
                 }
                 .alignItems(VerticalAlign.Center)
                 .width('100%')
                 .stateStyles({
                     pressed: {
-                        .backgroundColor('#E5E5E5')
+                        .backgroundColor($r('app.color.wf_item_pressed'))
                     },
                     normal: {
-                        .backgroundColor(Color.White)
+                        .backgroundColor($r('app.color.wf_background'))
                     }
                 })
                 .onClick(() => {
@@ -146,15 +147,16 @@ export default struct GroupMemberMuteOrAllowListPage {
                                     .borderRadius(4)
                                 Text(info.displayName)
                                     .maxLines(1)
+                                    .fontColor($r('app.color.wf_primary_text'))
                             }
                             .width('100%')
                             .justifyContent(FlexAlign.Start)
                             .stateStyles({
                                 pressed: {
-                                    .backgroundColor('#E5E5E5')
+                                    .backgroundColor($r('app.color.wf_item_pressed'))
                                 },
                                 normal: {
-                                    .backgroundColor(Color.White)
+                                    .backgroundColor($r('app.color.wf_background'))
                                 }
                             })
                             .onClick(() => {

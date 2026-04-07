@@ -22,9 +22,11 @@ export default struct UpdateGroupRemarkPage {
                 Text('备注')
                     .fontSize(20)
                     .margin({ top: 40 })
+                    .fontColor($r('app.color.wf_primary_text'))
 
                 Text('群聊的备注，仅自己可见')
                     .margin({ top: 20 })
+                    .fontColor($r('app.color.wf_secondary_text'))
 
                 Divider()
                     .margin({ top: 30 })
@@ -34,7 +36,7 @@ export default struct UpdateGroupRemarkPage {
                 Row() {
                     Image(this.groupInfo.portrait)
                         .draggable(false)
-                        .backgroundColor(Color.Gray)
+                        .backgroundColor($r('app.color.wf_secondary_background'))
                         .borderRadius(4)
                         .width(40)
                         .height(40)
@@ -45,6 +47,7 @@ export default struct UpdateGroupRemarkPage {
                     })
                         .borderRadius(2)
                         .backgroundColor(Color.Transparent)
+                        .fontColor($r('app.color.wf_primary_text'))
                         .maxLines(1)
                         .layoutWeight(1)
                 }
@@ -56,7 +59,7 @@ export default struct UpdateGroupRemarkPage {
                     .color($r('app.color.wf_divider'))
 
                 Text(`群聊名称：${this.groupInfo.name}`)
-                    .fontColor('#838383')
+                    .fontColor($r('app.color.wf_tertiary_text'))
                     .fontSize(13)
                     .maxLines(1)
                     .ellipsisMode(EllipsisMode.START)

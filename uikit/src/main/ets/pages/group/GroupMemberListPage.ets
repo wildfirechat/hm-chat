@@ -41,7 +41,7 @@ export default struct GroupMemberListPage {
                                     .borderRadius(4)
                                 Text(groupMember.getName())
                                     .maxLines(1)
-                                    .fontColor('#7E7E7E')
+                                    .fontColor($r('app.color.wf_tertiary_text'))
                                     .fontSize(12)
                                     .margin({ top: 5 })
                             }
@@ -63,13 +63,13 @@ export default struct GroupMemberListPage {
                     }
                     .padding(10)
                     .width('100%')
-                    .backgroundColor(Color.White)
+                    .backgroundColor($r('app.color.wf_background'))
                 }
             }
             .scrollBar(BarState.Off)
             .width('100%')
             .height('100%')
-            .backgroundColor('#EDEDED')
+            .backgroundColor($r('app.color.wf_secondary_background'))
         }
         .title('群成员列表')
         .height('100%')

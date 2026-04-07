@@ -41,6 +41,7 @@ export default struct GroupJoinRequestListPage {
                     if (this.computedRequests.length === 0) {
                         Column() {
                             Text('没有加群申请')
+                                .fontColor($r('app.color.wf_tertiary_text'))
                         }
                         .justifyContent(FlexAlign.Center)
                         .alignItems(HorizontalAlign.Center)
@@ -67,6 +68,7 @@ export default struct GroupJoinRequestListPage {
                 }
                 .height('100%')
                 .width('100%')
+                .backgroundColor($r('app.color.wf_secondary_background'))
             }
             .title('加群申请')
             .titleMode(NavigationTitleMode.Mini)
@@ -78,6 +80,7 @@ export default struct GroupJoinRequestListPage {
         .width('100%')
         .height('100%')
         .hideTitleBar(true)
+        .backgroundColor($r('app.color.wf_secondary_background'))
     }
 }
 
@@ -96,9 +99,11 @@ struct NewGroupJoinRequestsCard {
             Column() {
                 Text(this.req.userInfo!!.displayName)
                     .fontSize(14)
+                    .fontColor($r('app.color.wf_primary_text'))
                 Text(this.req.request!!.reason)
                     .padding({ top: 2 })
                     .fontSize(12)
+                    .fontColor($r('app.color.wf_tertiary_text'))
             }
             .alignItems(HorizontalAlign.Start)
             .padding({ left: 10 })
@@ -122,14 +127,17 @@ struct NewGroupJoinRequestsCard {
             } else if (this.status === 1) {
                 Text('已接受')
                     .fontSize(12)
+                    .fontColor($r('app.color.wf_tertiary_text'))
             } else if (this.status === 2) {
                 Text('已拒绝')
                     .fontSize(12)
+                    .fontColor($r('app.color.wf_tertiary_text'))
             }
         }
         .width('100%')
         .justifyContent(FlexAlign.Start)
         .padding(10)
+        .backgroundColor($r('app.color.wf_background'))
     }
 }
 

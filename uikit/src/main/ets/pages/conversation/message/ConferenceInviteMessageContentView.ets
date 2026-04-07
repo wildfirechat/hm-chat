@@ -60,7 +60,7 @@ export default struct ConferenceInviteMessageContentView {
         })
         .width(200)
         .alignItems(HorizontalAlign.Start)
-        .backgroundColor(Color.White)
+        .backgroundColor(this.message.direction === 0 ? $r('app.color.wf_sent_bubble_bg') : $r('app.color.wf_received_bubble_bg'))
         .borderRadius(4)
     }
 }

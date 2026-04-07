@@ -75,6 +75,14 @@
     {
       "name": "wf_image_placeholder_bg",
       "value": "#F0F0F0"
+    },
+    {
+      "name": "wf_message_context_memu_background",
+      "value": "#4c4c4c"
+    },
+    {
+      "name": "wf_icon_color",
+      "value": "#000000"
     }
   ]
 }

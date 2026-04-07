@@ -75,7 +75,7 @@ export default struct PollResultMessageContentView {
         }
         .width(240)
         .padding(12)
-        .backgroundColor(Color.White)
+        .backgroundColor(this.message.direction === 0 ? $r('app.color.wf_sent_bubble_bg') : $r('app.color.wf_received_bubble_bg'))
         .borderRadius(8)
         .alignItems(HorizontalAlign.Start)
         .onClick(() => this.handleClick())

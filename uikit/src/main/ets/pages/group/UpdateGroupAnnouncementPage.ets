@@ -31,15 +31,17 @@ export default struct UpdateGroupAnnouncementPage {
                 Text('修改群公告')
                     .fontSize(20)
                     .margin({ top: 40 })
+                    .fontColor($r('app.color.wf_primary_text'))
 
                 Text('修改群公告后，将在群里通知其他成员。')
                     .margin({ top: 20 })
+                    .fontColor($r('app.color.wf_secondary_text'))
 
 
                 Divider()
                     .margin({ top: 30 })
                     .strokeWidth(0.4)
-                    .color('#EDEDED')
+                    .color($r('app.color.wf_divider'))
 
                 Row() {
                     TextInput({
@@ -48,6 +50,7 @@ export default struct UpdateGroupAnnouncementPage {
                     })
                         .borderRadius(2)
                         .backgroundColor(Color.Transparent)
+                        .fontColor($r('app.color.wf_primary_text'))
                         .maxLines(1)
                         .layoutWeight(1)
                 }
@@ -56,7 +59,7 @@ export default struct UpdateGroupAnnouncementPage {
 
                 Divider()
                     .strokeWidth(0.4)
-                    .color('#EDEDED')
+                    .color($r('app.color.wf_divider'))
 
                 Button('完成', {
                     type: ButtonType.Normal,

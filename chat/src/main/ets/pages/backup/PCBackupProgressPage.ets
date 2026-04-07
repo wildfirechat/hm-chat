@@ -535,12 +535,13 @@ export default struct PCBackupProgressPage {
           Text(this.currentStep)
             .fontSize(18)
             .fontWeight(FontWeight.Bold)
+            .fontColor($r('app.color.wf_primary_text'))
             .margin({ top: 60 })
 
           // 详情
           Text(this.detail)
             .fontSize(14)
-            .fontColor('#666666')
+            .fontColor($r('app.color.wf_secondary_text'))
             .margin({ top: 20 })
 
           // 上传进度
@@ -579,7 +580,7 @@ export default struct PCBackupProgressPage {
       }
       .width('100%')
       .height('100%')
-      .backgroundColor('#EDEDED')
+      .backgroundColor($r('app.color.wf_secondary_background'))
     }
     .title('备份到电脑')
     .height('100%')

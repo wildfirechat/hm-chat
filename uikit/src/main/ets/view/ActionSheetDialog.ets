@@ -43,10 +43,10 @@ export default struct ActionSheetDialog {
                     .borderRadius(10)
                     .stateStyles({
                         pressed: {
-                            .backgroundColor('#E5E5E5')
+                            .backgroundColor($r('app.color.wf_item_pressed'))
                         },
                         normal: {
-                            .backgroundColor(Color.White)
+                            .backgroundColor($r('app.color.wf_secondary_background'))
                         }
                     })
                     .onClick(() => {
@@ -80,10 +80,10 @@ export default struct ActionSheetDialog {
                     .borderRadius(10)
                     .stateStyles({
                         pressed: {
-                            .backgroundColor('#E5E5E5')
+                            .backgroundColor($r('app.color.wf_item_pressed'))
                         },
                         normal: {
-                            .backgroundColor(Color.White)
+                            .backgroundColor($r('app.color.wf_secondary_background'))
                         }
                     })
                     .onClick(() => {
@@ -98,7 +98,7 @@ export default struct ActionSheetDialog {
         }
         // .padding({ top: 10, bottom: 10 })
         .width('100%')
-        .backgroundColor(Color.White)
+        .backgroundColor($r('app.color.wf_secondary_background'))
 
         // .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.BOTTOM])
 

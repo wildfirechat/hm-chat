@@ -28,9 +28,9 @@ export default struct FavGroupListPage {
             Text('保存到通讯录的群组')
                 .width('100%')
                 .fontSize(13)
-                .fontColor('#989898')
+                .fontColor($r('app.color.wf_secondary_text'))
                 .padding(10)
-                .backgroundColor('#E5E5E5')
+                .backgroundColor($r('app.color.wf_secondary_background'))
 
             List() {
                 ForEach(this.favGroupList, (groupInfo: GroupInfo) => {
@@ -44,6 +44,7 @@ export default struct FavGroupListPage {
                             Text(groupInfo.name)
                                 .layoutWeight(1)
                                 .maxLines(1)
+                                .fontColor($r('app.color.wf_primary_text'))
                                 .textOverflow({ overflow: TextOverflow.Ellipsis })
                                 .ellipsisMode(EllipsisMode.END)
                                 .padding({ left: 10, right: 10 })
@@ -51,6 +52,14 @@ export default struct FavGroupListPage {
                         .height(60)
                         .width('100%')
                         .padding({ left: 10, right: 10 })
+                        .stateStyles({
+                            pressed: {
+                                .backgroundColor($r('app.color.wf_item_pressed'))
+                            },
+                            normal: {
+                                .backgroundColor($r('app.color.wf_background'))
+                            }
+                        })
                         .onClick(() => {
                             this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ConversationPage, {
                                 'conversation': new Conversation(ConversationType.Group, groupInfo.target, 0)
@@ -60,13 +69,14 @@ export default struct FavGroupListPage {
                 }, (groupInfo: GroupInfo) => groupInfo.target + groupInfo.updateDt)
             }
             .width('100%')
-            .height('100%')
+            .layoutWeight(1)
+            .backgroundColor($r('app.color.wf_background'))
             .divider({
                 strokeWidth: 1,
                 startMargin: 60
             })
         }
-        .background($r('app.color.wf_primary_background_color'))
+        .backgroundColor($r('app.color.wf_primary_background_color'))
         .title('群列表')
         .height('100%')
         .width('100%')

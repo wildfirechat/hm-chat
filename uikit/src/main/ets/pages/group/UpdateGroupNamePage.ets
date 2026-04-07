@@ -23,20 +23,22 @@ export default struct UpdateGroupNamePage {
                 Text('修改群聊名称')
                     .fontSize(20)
                     .margin({ top: 40 })
+                    .fontColor($r('app.color.wf_primary_text'))
 
                 Text('修改群聊名称后，将在群里通知其他成员。')
                     .margin({ top: 20 })
+                    .fontColor($r('app.color.wf_secondary_text'))
 
 
                 Divider()
                     .margin({ top: 30 })
                     .strokeWidth(0.4)
-                    .color('#EDEDED')
+                    .color($r('app.color.wf_divider'))
 
                 Row() {
                     Image(this.groupInfo.portrait)
                         .draggable(false)
-                        .backgroundColor(Color.Gray)
+                        .backgroundColor($r('app.color.wf_secondary_background'))
                         .borderRadius(4)
                         .width(40)
                         .height(40)
@@ -47,6 +49,7 @@ export default struct UpdateGroupNamePage {
                     })
                         .borderRadius(2)
                         .backgroundColor(Color.Transparent)
+                        .fontColor($r('app.color.wf_primary_text'))
                         .maxLines(1)
                         .layoutWeight(1)
                 }
@@ -55,7 +58,7 @@ export default struct UpdateGroupNamePage {
 
                 Divider()
                     .strokeWidth(0.4)
-                    .color('#EDEDED')
+                    .color($r('app.color.wf_divider'))
 
                 Button('完成', {
                     type: ButtonType.Normal,

@@ -80,13 +80,13 @@ export default struct BackupTargetPage {
         // 提示信息
         Text(this.isPCOnline ? '提示：备份到电脑端需要电脑端在线' : '提示：电脑端未在线，无法备份到电脑端')
           .fontSize(14)
-          .fontColor('#999999')
+          .fontColor($r('app.color.wf_secondary_text'))
           .margin({ top: 20 })
           .padding({ left: 16, right: 16 })
       }
       .width('100%')
       .height('100%')
-      .backgroundColor('#EDEDED')
+      .backgroundColor($r('app.color.wf_secondary_background'))
     }
     .title('选择备份位置')
     .height('100%')

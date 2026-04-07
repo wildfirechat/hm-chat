@@ -35,7 +35,7 @@ export default struct RichNotificationMessageContentView {
         }
         .padding(10)
         .margin({ top: 10, bottom: 10 })
-        .backgroundColor(Color.White)
+        .backgroundColor(this.message.direction === 0 ? $r('app.color.wf_sent_bubble_bg') : $r('app.color.wf_received_bubble_bg'))
         .alignItems(HorizontalAlign.Start)
         .constraintSize({ maxWidth: 300 })
         .borderRadius(4)

@@ -24,19 +24,22 @@ export default struct StreamingTextMessageContentView {
         Column() {
             Text(this.streamingMessageContent())
                 .constraintSize({ minHeight: 40 })
-                .backgroundColor(Color.White)
                 .padding(10)
-                .borderRadius(4)
                 .enableDataDetector(true)
+                .dataDetectorConfig({
+                    types: [TextDataDetectorType.URL, TextDataDetectorType.PHONE_NUMBER, TextDataDetectorType.EMAIL]
+                })
             if (!this.isGenerated()) {
                 LoadingProgress().width(20).height(20)
             } else {
                 Text('本内容由 AI 生成')
                     .fontSize(12)
                     .fontColor(Color.Gray)
-                    .margin({top: 5})
+                    .padding({left: 10, top: 5, bottom: 5})
             }
         }
+        .borderRadius(4)
+        .backgroundColor(this.message.direction === 0 ? $r('app.color.wf_sent_bubble_bg') : $r('app.color.wf_received_bubble_bg'))
         .alignItems(HorizontalAlign.Start)
     }
 }

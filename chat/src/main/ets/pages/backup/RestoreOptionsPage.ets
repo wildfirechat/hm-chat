@@ -84,62 +84,66 @@ export default struct RestoreOptionsPage {
             Row() {
               Text('备份时间')
                 .fontSize(16)
-                .fontColor('#666666')
+                .fontColor($r('app.color.wf_secondary_text'))
                 .width(100)
               Text(this.formatDate(this.backupInfo.backupTime))
                 .fontSize(16)
                 .fontWeight(FontWeight.Medium)
+                .fontColor($r('app.color.wf_primary_text'))
                 .layoutWeight(1)
             }
             .width('100%')
             .padding(16)
 
             Divider()
-              .color('#F7F7F7')
+              .color($r('app.color.wf_divider'))
 
             // 备份设备
             Row() {
               Text('备份设备')
                 .fontSize(16)
-                .fontColor('#666666')
+                .fontColor($r('app.color.wf_secondary_text'))
                 .width(100)
               Text(this.backupInfo.deviceName)
                 .fontSize(16)
                 .fontWeight(FontWeight.Medium)
+                .fontColor($r('app.color.wf_primary_text'))
                 .layoutWeight(1)
             }
             .width('100%')
             .padding(16)
 
             Divider()
-              .color('#F7F7F7')
+              .color($r('app.color.wf_divider'))
 
             // 会话数量
             Row() {
               Text('会话数量')
                 .fontSize(16)
-                .fontColor('#666666')
+                .fontColor($r('app.color.wf_secondary_text'))
                 .width(100)
               Text(`${this.backupInfo.totalConversations}`)
                 .fontSize(16)
                 .fontWeight(FontWeight.Medium)
+                .fontColor($r('app.color.wf_primary_text'))
                 .layoutWeight(1)
             }
             .width('100%')
             .padding(16)
 
             Divider()
-              .color('#F7F7F7')
+              .color($r('app.color.wf_divider'))
 
             // 消息数量
             Row() {
               Text('消息数量')
                 .fontSize(16)
-                .fontColor('#666666')
+                .fontColor($r('app.color.wf_secondary_text'))
                 .width(100)
               Text(`${this.backupInfo.totalMessages}`)
                 .fontSize(16)
                 .fontWeight(FontWeight.Medium)
+                .fontColor($r('app.color.wf_primary_text'))
                 .layoutWeight(1)
             }
             .width('100%')
@@ -147,17 +151,18 @@ export default struct RestoreOptionsPage {
 
             if (this.backupInfo.mediaFileCount > 0) {
               Divider()
-                .color('#F7F7F7')
+                .color($r('app.color.wf_divider'))
 
               // 媒体文件
               Row() {
                 Text('媒体文件')
                   .fontSize(16)
-                  .fontColor('#666666')
+                  .fontColor($r('app.color.wf_secondary_text'))
                   .width(100)
                 Text(`${this.backupInfo.mediaFileCount} (${this.formatFileSize(this.backupInfo.mediaTotalSize)})`)
                   .fontSize(16)
                   .fontWeight(FontWeight.Medium)
+                  .fontColor($r('app.color.wf_primary_text'))
                   .layoutWeight(1)
               }
               .width('100%')
@@ -166,31 +171,31 @@ export default struct RestoreOptionsPage {
 
             // 调试信息 - 显示备份路径
             Divider()
-              .color('#F7F7F7')
+              .color($r('app.color.wf_divider'))
 
             Row() {
               Text('备份路径')
                 .fontSize(14)
-                .fontColor('#999999')
+                .fontColor($r('app.color.wf_tertiary_text'))
                 .width(100)
               Text(this.backupInfo.backupPath)
                 .fontSize(12)
-                .fontColor('#999999')
+                .fontColor($r('app.color.wf_tertiary_text'))
                 .maxLines(2)
                 .textOverflow({ overflow: TextOverflow.Ellipsis })
                 .layoutWeight(1)
             }
             .width('100%')
             .padding(16)
-          }
-          .width('100%')
-          .backgroundColor(Color.White)
-          .borderRadius(8)
-
-          // 开始恢复按钮
-          Button('开始恢复')
+            }
             .width('100%')
-            .fontSize(16)
+            .backgroundColor($r('app.color.wf_background'))
+            .borderRadius(8)
+            ...
+            .width('100%')
+            .height('100%')
+            .padding(16)
+            .backgroundColor($r('app.color.wf_secondary_background'))
             .margin({ top: 30 })
             .onClick(() => {
               this.startRestore()

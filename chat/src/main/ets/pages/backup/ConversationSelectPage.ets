@@ -85,6 +85,7 @@ export default struct ConversationSelectPage {
           Text('全选')
             .fontSize(16)
             .layoutWeight(1)
+            .fontColor($r('app.color.wf_primary_text'))
           Toggle({ type: ToggleType.Switch, isOn: this.selectAll })
             .onChange(() => {
               this.toggleSelectAll()
@@ -92,7 +93,7 @@ export default struct ConversationSelectPage {
         }
         .width('100%')
         .padding(16)
-        .backgroundColor(Color.White)
+        .backgroundColor($r('app.color.wf_background'))
 
         // 会话列表
         List({ space: 0 }) {
@@ -112,10 +113,10 @@ export default struct ConversationSelectPage {
         }
         .width('100%')
         .layoutWeight(1)
-        .backgroundColor(Color.White)
+        .backgroundColor($r('app.color.wf_background'))
         .divider({
           strokeWidth: 1,
-          color: '#F7F7F7',
+          color: $r('app.color.wf_divider'),
           startMargin: 72,
           endMargin: 0
         })
@@ -124,7 +125,7 @@ export default struct ConversationSelectPage {
         Row() {
           Text(`已选择 ${this.getSelectedCount()} 个会话`)
             .fontSize(14)
-            .fontColor('#666666')
+            .fontColor($r('app.color.wf_secondary_text'))
             .layoutWeight(1)
 
           Button('下一步')
@@ -137,7 +138,7 @@ export default struct ConversationSelectPage {
         }
         .width('100%')
         .padding(16)
-        .backgroundColor(Color.White)
+        .backgroundColor($r('app.color.wf_background'))
       }
       .width('100%')
       .height('100%')

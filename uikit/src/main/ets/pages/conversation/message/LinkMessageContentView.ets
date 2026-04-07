@@ -32,7 +32,7 @@ export default struct LinkMessageContentView {
                 .objectFit(ImageFit.CENTER)
                 .borderRadius(4)
         }
-        .backgroundColor(Color.White)
+        .backgroundColor(this.message.direction === 0 ? $r('app.color.wf_sent_bubble_bg') : $r('app.color.wf_received_bubble_bg'))
         .borderRadius(4)
         .onClick(() => {
             this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.WebViewPage, {

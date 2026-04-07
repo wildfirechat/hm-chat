@@ -76,7 +76,7 @@ export default struct AudioMessageContentView {
                     .margin({ left: 10 })
             }
             .width(`${this.soundMessageContent().duration / 60 * 100}%`)
-            .backgroundColor(Color.White)
+            .backgroundColor(this.message.direction === 0 ? $r('app.color.wf_sent_bubble_bg') : $r('app.color.wf_received_bubble_bg'))
             .alignItems(VerticalAlign.Center)
             .height(40)
             .padding(5)

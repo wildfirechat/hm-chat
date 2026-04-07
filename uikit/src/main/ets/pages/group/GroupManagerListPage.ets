@@ -37,14 +37,16 @@ export default struct GroupManagerListPage {
             .height('100%')
             .width('100%')
             .margin({ top: px2vp(AppStorage.get<number>('SafeAreaTopHeight')) })
-            .backgroundColor(Color.White)
+            .backgroundColor($r('app.color.wf_background'))
     }
 
     build() {
         NavDestination() {
             Column() {
                 Text('群主')
-                    .padding(10)
+                    .textAlign(TextAlign.Start)
+                    .backgroundColor($r('app.color.wf_secondary_background'))
+                    .padding({ left: 10, top: 5, bottom: 5 })
                     .width('100%')
                 Row() {
                     Image(this.groupOwnerUerInfo!.portrait)
@@ -54,20 +56,23 @@ export default struct GroupManagerListPage {
                         .borderRadius(4)
                     Text(this.groupOwnerUerInfo?.displayName)
                         .maxLines(1)
+                        .fontColor($r('app.color.wf_primary_text'))
                 }
                 .width('100%')
                 .stateStyles({
                     pressed: {
-                        .backgroundColor('#E5E5E5')
+                        .backgroundColor($r('app.color.wf_item_pressed'))
                     },
                     normal: {
-                        .backgroundColor(Color.White)
+                        .backgroundColor($r('app.color.wf_background'))
                     }
                 })
 
                 if (this.groupManagerUserInfos.length > 0) {
                     Text('管理员')
-                        .padding(10)
+                        .textAlign(TextAlign.Start)
+                        .backgroundColor($r('app.color.wf_secondary_background'))
+                        .padding({ left: 10, top: 5, bottom: 5 })
                         .width('100%')
                     List() {
                         ForEach(this.groupManagerUserInfos, (info: UserInfo) => {
@@ -80,15 +85,16 @@ export default struct GroupManagerListPage {
                                         .borderRadius(4)
                                     Text(info.displayName)
                                         .maxLines(1)
+                                        .fontColor($r('app.color.wf_primary_text'))
                                 }
                                 .width('100%')
                                 .justifyContent(FlexAlign.Start)
                                 .stateStyles({
                                     pressed: {
-                                        .backgroundColor('#E5E5E5')
+                                        .backgroundColor($r('app.color.wf_item_pressed'))
                                     },
                                     normal: {
-                                        .backgroundColor(Color.White)
+                                        .backgroundColor($r('app.color.wf_background'))
                                     }
                                 })
                                 .onClick(() => {
@@ -121,7 +127,6 @@ export default struct GroupManagerListPage {
                         }, (info: UserInfo) => info.uid + info.updateDt)
                     }
                     .width('100%')
-                    .backgroundColor(Color.White)
                     .divider({
                         strokeWidth: 1,
                         startMargin: 60
@@ -137,6 +142,7 @@ export default struct GroupManagerListPage {
                             .borderRadius(4)
                         Text('添加管理员')
                             .maxLines(1)
+                            .fontColor($r('app.color.wf_primary_text'))
                     }
                     .margin({ top: 20 })
                     .bindContentCover(this.showPickGroupMemberModal, this.pickGroupMemberModal((userInfos: UserInfo[]) => {
@@ -167,10 +173,10 @@ export default struct GroupManagerListPage {
                     .width('100%')
                     .stateStyles({
                         pressed: {
-                            .backgroundColor('#E5E5E5')
+                            .backgroundColor($r('app.color.wf_item_pressed'))
                         },
                         normal: {
-                            .backgroundColor(Color.White)
+                            .backgroundColor($r('app.color.wf_background'))
                         }
                     })
                 }
@@ -179,6 +185,6 @@ export default struct GroupManagerListPage {
         .title('管理员列表')
         .height('100%')
         .width('100%')
-        .backgroundColor('#EDEDED')
+        .backgroundColor($r('app.color.wf_background'))
     }
 }

@@ -197,7 +197,7 @@ export default struct TextMessageContentView {
             .width(Math.min(this.menuItems.length, 5) * 60 + 20)
             .height(this.getMenuHeight())
         }
-        .backgroundColor($r('app.color.unread_hint_background'))
+        .backgroundColor($r('app.color.wf_message_context_memu_background'))
         .borderRadius(8)
         .padding({
             left: 10,

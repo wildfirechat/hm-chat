@@ -39,7 +39,7 @@ export default struct CallStartMessageContentView {
                 .padding({ left: 10 })
         }
         .padding({ left: 10, right: 10 })
-        .backgroundColor(Color.White)
+        .backgroundColor(this.message.direction === 0 ? $r('app.color.wf_sent_bubble_bg') : $r('app.color.wf_received_bubble_bg'))
         .align(Alignment.Center)
         .borderRadius(4)
         .onClick(async () => {
@@ -84,6 +84,6 @@ export default struct CallStartMessageContentView {
             .height('100%')
             .width('100%')
             .margin({ top: px2vp(AppStorage.get<number>('SafeAreaTopHeight')) })
-            .backgroundColor(Color.White)
+            .backgroundColor($r('app.color.wf_background'))
     }
 }

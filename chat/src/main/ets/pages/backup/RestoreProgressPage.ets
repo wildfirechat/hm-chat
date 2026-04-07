@@ -209,17 +209,19 @@ export default struct RestoreProgressPage {
           Text(`${this.progress}%`)
             .fontSize(32)
             .fontWeight(FontWeight.Bold)
+            .fontColor($r('app.color.wf_primary_text'))
             .margin({ top: 60 })
 
           // 状态
           Text(this.currentStep)
             .fontSize(18)
+            .fontColor($r('app.color.wf_primary_text'))
             .margin({ top: 20 })
 
           // 详情
           Text(this.detail)
             .fontSize(14)
-            .fontColor('#999999')
+            .fontColor($r('app.color.wf_secondary_text'))
             .margin({ top: 10 })
 
           // 进度条
@@ -257,7 +259,7 @@ export default struct RestoreProgressPage {
       }
       .width('100%')
       .height('100%')
-      .backgroundColor('#EDEDED')
+      .backgroundColor($r('app.color.wf_secondary_background'))
     }
     .title('恢复进度')
     .height('100%')

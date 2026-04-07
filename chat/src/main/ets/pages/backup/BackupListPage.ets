@@ -190,7 +190,7 @@ export default struct BackupListPage {
               .margin({ top: 100 })
             Text('加载中...')
               .fontSize(14)
-              .fontColor('#999999')
+              .fontColor($r('app.color.wf_secondary_text'))
               .margin({ top: 20 })
           }
           .width('100%')
@@ -200,7 +200,7 @@ export default struct BackupListPage {
           Column() {
             Text('暂无本地备份')
               .fontSize(16)
-              .fontColor('#999999')
+              .fontColor($r('app.color.wf_secondary_text'))
               .margin({ top: 100 })
           }
           .width('100%')
@@ -215,14 +215,15 @@ export default struct BackupListPage {
                     Text(`${this.formatDate(info.backupTime)}`)
                       .fontSize(16)
                       .fontWeight(FontWeight.Medium)
+                      .fontColor($r('app.color.wf_primary_text'))
                     Text(`${info.deviceName} · ${info.totalConversations}个会话 · ${info.totalMessages}条消息`)
                       .fontSize(14)
-                      .fontColor('#666666')
+                      .fontColor($r('app.color.wf_secondary_text'))
                       .margin({ top: 4 })
                     if (info.mediaFileCount > 0) {
                       Text(`${info.mediaFileCount}个媒体文件 · ${this.formatFileSize(info.mediaTotalSize)}`)
                         .fontSize(12)
-                        .fontColor('#999999')
+                        .fontColor($r('app.color.wf_tertiary_text'))
                         .margin({ top: 2 })
                     }
                   }
@@ -241,7 +242,7 @@ export default struct BackupListPage {
                 }
                 .width('100%')
                 .padding(16)
-                .backgroundColor(Color.White)
+                .backgroundColor($r('app.color.wf_background'))
                 .onClick(() => {
                   this.selectBackup(info)
                 })
@@ -250,10 +251,10 @@ export default struct BackupListPage {
           }
           .width('100%')
           .layoutWeight(1)
-          .backgroundColor(Color.White)
+          .backgroundColor($r('app.color.wf_background'))
           .divider({
             strokeWidth: 1,
-            color: '#F7F7F7',
+            color: $r('app.color.wf_divider'),
             startMargin: 16,
             endMargin: 16
           })
@@ -261,7 +262,7 @@ export default struct BackupListPage {
       }
       .width('100%')
       .height('100%')
-      .backgroundColor('#EDEDED')
+      .backgroundColor($r('app.color.wf_secondary_background'))
     }
     .title('本地备份')
     .height('100%')

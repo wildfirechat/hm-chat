@@ -25,7 +25,7 @@ export default struct MMMessagePreviewDialog {
     private isLoadingNewMessage: boolean = false
     private panOption: PanGestureOptions = new PanGestureOptions({ direction: PanDirection.Down });
     private displayHeight: number = 0
-    private controller: CustomDialogController
+    controller: CustomDialogController
     @State showVideoPlayIcon: boolean = false
     private isVideoPlaying = false
 

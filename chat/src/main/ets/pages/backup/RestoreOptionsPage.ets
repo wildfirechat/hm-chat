@@ -191,7 +191,6 @@ export default struct RestoreOptionsPage {
             .width('100%')
             .backgroundColor($r('app.color.wf_background'))
             .borderRadius(8)
-            ...
             .width('100%')
             .height('100%')
             .padding(16)

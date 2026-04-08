@@ -326,23 +326,19 @@ struct MainPage {
     @Builder
     NavigationMenus() {
         Row() {
-            Image($r('app.media.ic_search'))
-                .width(30)
-                .height(30)
-                .padding(6)
-                .fillColor($r('app.color.wf_icon_color'))
+            SymbolGlyph($r('sys.symbol.magnifyingglass'))
+                .fontSize(22)
+                .fontColor([$r('app.color.wf_icon_color')])
                 .onClick(() => {
                     this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.SearchPortalPage, {
                         'keyword': '1'
                     } as Record<string, Object>, true)
                 })
 
-            Image($r('app.media.ic_add'))
-                .width(30)
-                .height(30)
-                .padding(6)
+            SymbolGlyph($r('sys.symbol.plus_circle'))
+                .fontSize(22)
+                .fontColor([$r('app.color.wf_icon_color')])
                 .margin({ left: 12 })
-                .fillColor($r('app.color.wf_icon_color'))
                 .bindMenu(this.SubMoreMenus())
                 .bindContentCover($$this.showPickContactModal, this.pickMultiContactModal(), {
                     modalTransition: ModalTransition.DEFAULT,

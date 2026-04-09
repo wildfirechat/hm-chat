@@ -17,6 +17,8 @@ export default class PCOnlineInfo {
     static Web_Online = 1
     static WX_Online = 2
     static Pad_Online = 3
+    static Wearable_Online = 4
+    static TV_Online = 5
     type = PCOnlineInfo.PC_Online;
     platform = new Platform(0)
     isOnline = false;
@@ -38,6 +40,12 @@ export default class PCOnlineInfo {
                 break
             case PCOnlineInfo.Pad_Online:
                 str = 'Pad 在线'
+                break
+            case PCOnlineInfo.Wearable_Online:
+                str = '穿戴设备 在线'
+                break
+            case PCOnlineInfo.TV_Online:
+                str = 'TV 在线'
                 break
             default:
                 break

@@ -1,44 +1,12 @@
 {
   "color": [
     {
-      "name": "start_window_background",
-      "value": "#111111"
-    },
-    {
-      "name": "c_gray",
-      "value": "#6B6B6B"
-    },
-    {
-      "name": "wf_primary_background_color",
-      "value": "#1A1A1A"
-    },
-    {
-      "name": "wf_background",
-      "value": "#111111"
-    },
-    {
-      "name": "wf_primary_text",
-      "value": "#E0E0E0"
-    },
-    {
-      "name": "wf_secondary_text",
-      "value": "#A0A0A0"
-    },
-    {
-      "name": "wf_divider",
-      "value": "#333333"
-    },
-    {
       "name": "wf_tab_text_selected",
       "value": "#5086FF"
     },
     {
       "name": "wf_tab_text_normal",
       "value": "#808080"
-    },
-    {
-      "name": "wf_badge_color",
-      "value": "#FF453A"
     }
   ]
 }

@@ -1,14 +1,6 @@
 {
   "color": [
     {
-      "name": "start_window_background",
-      "value": "#111111"
-    },
-    {
-      "name": "c_gray",
-      "value": "#6B6B6B"
-    },
-    {
       "name": "primary",
       "value": "#07C160"
     },
@@ -63,10 +55,6 @@
     {
       "name": "error_background",
       "value": "#3D1B1B"
-    },
-    {
-      "name": "unread_hint_background",
-      "value": "#2C2C2E"
     },
     {
       "name": "title_bar_background",

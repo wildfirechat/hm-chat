@@ -83,6 +83,10 @@
     {
       "name": "wf_icon_color",
       "value": "#000000"
+    },
+    {
+      "name": "unread_hint_background",
+      "value": "#4C4C4C"
     }
   ]
 }

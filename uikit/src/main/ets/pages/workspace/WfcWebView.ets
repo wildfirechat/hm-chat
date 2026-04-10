@@ -14,6 +14,7 @@ export default struct WfcWebView {
     onTitleReceive?: (title?: string) => void
     dsBridge?: DSBridge
     @State progress: number = 0
+    @State darkMode: WebDarkMode = WebDarkMode.Auto;
     @State @Watch('onPickUser') pickedUser: SubscribedAbstractProperty<UserInfo[]> = LocalStorage.getShared()
         .link('pickUserResult');
 
@@ -47,6 +48,8 @@ export default struct WfcWebView {
                 .onProgressChange((data: OnProgressChangeEvent) => {
                     this.progress = data.newProgress
                 })
+                .darkMode(this.darkMode)
+                .forceDarkAccess(true)
                 .javaScriptAccess(true)
                 .javaScriptProxy({
                     object: this.dsBridge,

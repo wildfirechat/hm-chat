@@ -235,7 +235,7 @@ export default struct PollDetailPage {
             },
             secondaryButton: {
                 value: '删除',
-                fontColor: '#FF3B30',
+                fontColor: $r('app.color.wf_danger'),
                 action: () => { this.doDeletePoll(); }
             }
         });
@@ -263,10 +263,10 @@ export default struct PollDetailPage {
         return '';
     }
 
-    private getStatusColor(): string {
-        if (!this.poll) return '#999999';
-        if (this.poll.status === 1 || this.poll.isExpired()) return '#999999';
-        return '#FF9500';
+    private getStatusColor(): Resource {
+        if (!this.poll) return $r('app.color.wf_tertiary_text');
+        if (this.poll.status === 1 || this.poll.isExpired()) return $r('app.color.wf_tertiary_text');
+        return $r('app.color.wf_warning');
     }
 
     private getCreatorName(): string {
@@ -331,17 +331,17 @@ export default struct PollDetailPage {
         return this.poll?.myOptionIds?.includes(optionId) ?? false;
     }
 
-    private getOptionFontColor(optionId: number): string {
+    private getOptionFontColor(optionId: number): Resource {
         let isMyVote = this.isMyVoteOption(optionId);
         let isSelected = this.isOptionSelected(optionId);
         let hasVoted = !this.canVote();
 
         // 已投票选项：显示蓝色
-        if (isMyVote) return '#007AFF';
+        if (isMyVote) return $r('app.color.wf_primary');
         // 投票前选中：显示蓝色
-        if (isSelected && !hasVoted) return '#007AFF';
-        // 其他情况：黑色
-        return '#333333';
+        if (isSelected && !hasVoted) return $r('app.color.wf_primary');
+        // 其他情况：文本主色
+        return $r('app.color.wf_primary_text');
     }
 
     @Builder
@@ -355,10 +355,10 @@ export default struct PollDetailPage {
                         Circle()
                             .width(20)
                             .height(20)
-                            .fill('#007AFF')
+                            .fill($r('app.color.wf_primary'))
                         Text('✓')
                             .fontSize(12)
-                            .fontColor(Color.White)
+                            .fontColor($r('app.color.wf_background'))
                     }
                     .width(32)
                 } else {
@@ -367,7 +367,7 @@ export default struct PollDetailPage {
                         .width(20)
                         .height(20)
                         .fill(Color.Transparent)
-                        .stroke('#CCCCCC')
+                        .stroke($r('app.color.wf_divider'))
                         .strokeWidth(2)
                         .width(32)
                 }
@@ -385,7 +385,7 @@ export default struct PollDetailPage {
                     if (this.poll?.shouldShowResult()) {
                         Text(`${option.votePercent}% (${option.voteCount}票)`)
                             .fontSize(12)
-                            .fontColor('#666666')
+                            .fontColor($r('app.color.wf_secondary_text'))
                             .margin({ left: 8 })
                     }
                 }
@@ -398,14 +398,14 @@ export default struct PollDetailPage {
                         Row()
                             .width('100%')
                             .height(4)
-                            .backgroundColor('#E5E5E5')
+                            .backgroundColor($r('app.color.wf_divider'))
                             .borderRadius(2)
 
                         // 进度条
                         Row()
                             .width(`${option.votePercent}%`)
                             .height(4)
-                            .backgroundColor('#007AFF')
+                            .backgroundColor($r('app.color.wf_primary'))
                             .borderRadius(2)
                     }
                     .width('100%')
@@ -416,7 +416,7 @@ export default struct PollDetailPage {
         }
         .width('100%')
         .padding({ top: 12, bottom: 12, left: this.isManagerMode() ? 16 : 12, right: 12 })
-        .backgroundColor(this.isMyVoteOption(option.optionId) || (this.isOptionSelected(option.optionId) && this.canVote()) ? '#F0F8FF' : Color.White)
+        .backgroundColor(this.isMyVoteOption(option.optionId) || (this.isOptionSelected(option.optionId) && this.canVote()) ? $r('app.color.wf_secondary_background') : $r('app.color.wf_background'))
         .onClick(() => {
             this.toggleOption(option.optionId);
         })
@@ -429,10 +429,10 @@ export default struct PollDetailPage {
                     LoadingProgress()
                         .width(40)
                         .height(40)
-                        .color('#007AFF')
+                        .color($r('app.color.wf_primary'))
                     Text('加载中...')
                         .fontSize(14)
-                        .fontColor('#999999')
+                        .fontColor($r('app.color.wf_tertiary_text'))
                         .margin({ top: 8 })
                 }
                 .width('100%')
@@ -442,7 +442,7 @@ export default struct PollDetailPage {
                 Column() {
                     Text('加载失败')
                         .fontSize(16)
-                        .fontColor('#999999')
+                        .fontColor($r('app.color.wf_tertiary_text'))
                 }
                 .width('100%')
                 .height('100%')
@@ -462,14 +462,14 @@ export default struct PollDetailPage {
                                     
                                     Text(`发起者：${this.getCreatorName()}`)
                                         .fontSize(12)
-                                        .fontColor('#666666')
+                                        .fontColor($r('app.color.wf_secondary_text'))
                                     
                                     // 状态标签
                                     Text(this.getStatusText())
                                         .fontSize(11)
                                         .fontColor(this.getStatusColor())
                                         .padding({ left: 6, right: 6, top: 2, bottom: 2 })
-                                        .backgroundColor('#FFF5E6')
+                                        .backgroundColor($r('app.color.wf_secondary_background'))
                                         .borderRadius(4)
                                         .visibility(this.getStatusText() ? Visibility.Visible : Visibility.None)
                                 }
@@ -479,14 +479,14 @@ export default struct PollDetailPage {
                                 Text(this.poll.title)
                                     .fontSize(18)
                                     .fontWeight(FontWeight.Bold)
-                                    .fontColor('#333333')
+                                    .fontColor($r('app.color.wf_primary_text'))
                                     .width('100%')
 
                                 // 描述
                                 if (this.poll.desc) {
                                     Text(this.poll.desc)
                                         .fontSize(14)
-                                        .fontColor('#666666')
+                                        .fontColor($r('app.color.wf_secondary_text'))
                                         .width('100%')
                                 }
 
@@ -494,22 +494,22 @@ export default struct PollDetailPage {
                                 Row({ space: 8 }) {
                                     Text(this.poll.pollType === 1 ? '单选' : '多选')
                                         .fontSize(12)
-                                        .fontColor('#007AFF')
+                                        .fontColor($r('app.color.wf_primary'))
                                         .padding({ left: 8, right: 8, top: 4, bottom: 4 })
-                                        .backgroundColor('#F0F8FF')
+                                        .backgroundColor($r('app.color.wf_secondary_background'))
                                         .borderRadius(4)
                                 }
                                 .width('100%')
                             }
                             .width('100%')
                             .padding(16)
-                            .backgroundColor(Color.White)
+                            .backgroundColor($r('app.color.wf_background'))
                             .borderRadius(12)
 
                             // 选项列表标题
                             Text('选项')
                                 .fontSize(14)
-                                .fontColor('#666666')
+                                .fontColor($r('app.color.wf_secondary_text'))
                                 .fontWeight(FontWeight.Medium)
                                 .width('100%')
                                 .padding({ left: 4 })
@@ -522,21 +522,21 @@ export default struct PollDetailPage {
                                         if (index < this.poll!.options.length - 1) {
                                             Divider()
                                                 .strokeWidth(0.5)
-                                                .color('#E5E5E5')
+                                                .color($r('app.color.wf_divider'))
                                                 .margin({ left: 16, right: 16 })
                                         }
                                     }
                                 }, (option: PollOption) => option.optionId.toString())
                             }
                             .width('100%')
-                            .backgroundColor(Color.White)
+                            .backgroundColor($r('app.color.wf_background'))
                             .borderRadius(12)
                             .clip(true)
 
                             // 底部状态
                             Text(this.getFooterStatusText())
                                 .fontSize(12)
-                                .fontColor('#999999')
+                                .fontColor($r('app.color.wf_tertiary_text'))
                                 .width('100%')
                                 .textAlign(TextAlign.Center)
                                 .padding(16)
@@ -555,16 +555,16 @@ export default struct PollDetailPage {
                                 .width('100%')
                                 .height(44)
                                 .fontSize(16)
-                                .fontColor(Color.White)
-                                .backgroundColor(this.selectedOptions.size > 0 ? '#007AFF' : '#CCCCCC')
+                                .fontColor($r('app.color.wf_background'))
+                                .backgroundColor(this.selectedOptions.size > 0 ? $r('app.color.wf_primary') : $r('app.color.wf_divider'))
                                 .borderRadius(8)
                                 .enabled(this.selectedOptions.size > 0)
                                 .onClick(() => { this.submitVote(); })
                         }
                         .width('100%')
                         .padding(16)
-                        .backgroundColor(Color.White)
-                        .shadow({ radius: 4, color: '#00000010' })
+                        .backgroundColor($r('app.color.wf_background'))
+                        .shadow({ radius: 4, color: $r('app.color.wf_divider') })
                     } else if (this.isManagerMode()) {
                         Row({ space: 16 }) {
                             // 实名投票显示导出按钮
@@ -573,8 +573,8 @@ export default struct PollDetailPage {
                                     .layoutWeight(1)
                                     .height(44)
                                     .fontSize(14)
-                                    .fontColor(Color.White)
-                                    .backgroundColor('#007AFF')
+                                    .fontColor($r('app.color.wf_background'))
+                                    .backgroundColor($r('app.color.wf_primary'))
                                     .borderRadius(8)
                                     .onClick(() => { this.exportPollDetails(); })
                             }
@@ -585,8 +585,8 @@ export default struct PollDetailPage {
                                     .layoutWeight(this.poll.anonymous === 0 ? 1 : 2)
                                     .height(44)
                                     .fontSize(14)
-                                    .fontColor(Color.White)
-                                    .backgroundColor('#FF3B30')
+                                    .fontColor($r('app.color.wf_background'))
+                                    .backgroundColor($r('app.color.wf_danger'))
                                     .borderRadius(8)
                                     .onClick(() => { this.deletePoll(); })
                             } else {
@@ -594,16 +594,16 @@ export default struct PollDetailPage {
                                     .layoutWeight(this.poll.anonymous === 0 ? 1 : 2)
                                     .height(44)
                                     .fontSize(14)
-                                    .fontColor(Color.White)
-                                    .backgroundColor('#FF9500')
+                                    .fontColor($r('app.color.wf_background'))
+                                    .backgroundColor($r('app.color.wf_warning'))
                                     .borderRadius(8)
                                     .onClick(() => { this.closePoll(); })
                             }
                         }
                         .width('100%')
                         .padding(16)
-                        .backgroundColor(Color.White)
-                        .shadow({ radius: 4, color: '#00000010' })
+                        .backgroundColor($r('app.color.wf_background'))
+                        .shadow({ radius: 4, color: $r('app.color.wf_divider') })
                     }
                 }
                 .width('100%')
@@ -611,7 +611,7 @@ export default struct PollDetailPage {
             }
         }
         .title('投票详情')
-        .backgroundColor('#F2F2F7')
+        .backgroundColor($r('app.color.wf_primary_background_color'))
         .hideBackButton(false)
     }
 

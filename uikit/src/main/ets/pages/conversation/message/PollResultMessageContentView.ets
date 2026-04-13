@@ -37,7 +37,7 @@ export default struct PollResultMessageContentView {
             Text('📊 ' + this.pollResultContent().title)
                 .fontSize(16)
                 .fontWeight(FontWeight.Medium)
-                .fontColor('#333333')
+                .fontColor($r('app.color.wf_primary_text'))
                 .maxLines(2)
                 .textOverflow({ overflow: TextOverflow.Ellipsis })
                 .width('100%')
@@ -46,7 +46,7 @@ export default struct PollResultMessageContentView {
             if (this.winnerText) {
                 Text('🏆 获胜: ' + this.winnerText)
                     .fontSize(14)
-                    .fontColor('#FF9500')
+                    .fontColor($r('app.color.wf_warning'))
                     .maxLines(1)
                     .textOverflow({ overflow: TextOverflow.Ellipsis })
                     .width('100%')
@@ -56,7 +56,7 @@ export default struct PollResultMessageContentView {
             // 分隔线
             Divider()
                 .strokeWidth(0.5)
-                .color('#E5E5E5')
+                .color($r('app.color.wf_divider'))
                 .margin({ top: 12, bottom: 8 })
                 .width('100%')
 
@@ -64,11 +64,11 @@ export default struct PollResultMessageContentView {
             Row() {
                 Text(`${this.pollResultContent().voterCount}人参与投票`)
                     .fontSize(12)
-                    .fontColor('#999999')
+                    .fontColor($r('app.color.wf_tertiary_text'))
 
                 Text('查看详情')
                     .fontSize(12)
-                    .fontColor('#007AFF')
+                    .fontColor($r('app.color.wf_primary'))
             }
             .width('100%')
             .justifyContent(FlexAlign.SpaceBetween)

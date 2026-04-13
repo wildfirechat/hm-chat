@@ -31,7 +31,7 @@ export default struct FileRecordPortalPage {
             .height('100%')
             .width('100%')
             .margin({ top: px2vp(AppStorage.get<number>('SafeAreaTopHeight')) })
-            .backgroundColor(Color.White)
+            .backgroundColor($r('app.color.wf_background'))
     }
 
     @Builder
@@ -48,7 +48,7 @@ export default struct FileRecordPortalPage {
             .height('100%')
             .width('100%')
             .margin({ top: px2vp(AppStorage.get<number>('SafeAreaTopHeight')) })
-            .backgroundColor(Color.White)
+            .backgroundColor($r('app.color.wf_background'))
     }
 
     build() {
@@ -106,6 +106,6 @@ export default struct FileRecordPortalPage {
         .title('文件记录')
         .height('100%')
         .width('100%')
-        .backgroundColor($r('app.color.wf_background'))
+        .backgroundColor($r('app.color.wf_primary_background_color'))
     }
 }

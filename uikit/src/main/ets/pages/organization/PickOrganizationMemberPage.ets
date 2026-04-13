@@ -81,7 +81,7 @@ export default struct PickOrganizationMemberPage{
                     Row() {
                         ForEach(this.orgPath, (org: Organization, index: number) => {
                             Text(org.name)
-                                .fontColor(index === this.orgPath.length - 1 ? '#3B62E0' : '#485666')
+                                .fontColor(index === this.orgPath.length - 1 ? $r('app.color.wf_primary') : '#485666')
                                 .onClick(() => {
                                     if (index < this.orgPath.length - 1) {
                                         this.onClickOrg(this.orgPath[index])
@@ -128,7 +128,7 @@ export default struct PickOrganizationMemberPage{
                                     Blank()
                                     Text('下级')
                                         .enabled(!this.isOrganizationChecked(org))
-                                        .fontColor('#3B62E0')
+                                        .fontColor($r('app.color.wf_primary'))
                                         .visibility(this.isOrganizationChecked(org) ? Visibility.None : Visibility.Visible)
                                         .onClick((event: ClickEvent) => {
                                             this.onClickOrg(org)
@@ -139,10 +139,10 @@ export default struct PickOrganizationMemberPage{
                                 .padding({ left: 10, right: 10 })
                                 .stateStyles({
                                     pressed: {
-                                        .backgroundColor('#E5E5E5')
+                                        .backgroundColor($r('app.color.wf_divider'))
                                     },
                                     normal: {
-                                        .backgroundColor(Color.White)
+                                        .backgroundColor($r('app.color.wf_background'))
                                     }
                                 })
                                 .onClick(() => {
@@ -184,10 +184,10 @@ export default struct PickOrganizationMemberPage{
                                 .padding({ left: 10, right: 10 })
                                 .stateStyles({
                                     pressed: {
-                                        .backgroundColor('#E5E5E5')
+                                        .backgroundColor($r('app.color.wf_divider'))
                                     },
                                     normal: {
-                                        .backgroundColor(Color.White)
+                                        .backgroundColor($r('app.color.wf_background'))
                                     }
                                 })
                                 .onClick(() => {
@@ -206,7 +206,7 @@ export default struct PickOrganizationMemberPage{
                     .height('100%')
                 }
                 .layoutWeight(1)
-                .backgroundColor(Color.White)
+                .backgroundColor($r('app.color.wf_background'))
             }
         }
         .title(this.title)

@@ -20,20 +20,20 @@ export default struct CollectionMessageContentView {
                 Image($r('app.media.ic_func_collection'))
                     .width(18)
                     .height(18)
-                    .fillColor('#576b95')
+                    .fillColor($r('app.color.wf_link'))
                     .margin({ right: 6 })
 
                 Text(this.collectionMessageContent().title)
                     .fontSize(16)
                     .fontWeight(FontWeight.Bold)
-                    .fontColor('#333333')
+                    .fontColor($r('app.color.wf_primary_text'))
                     .maxLines(2)
                     .textOverflow({ overflow: TextOverflow.Ellipsis })
                     .layoutWeight(1)
 
                 Text(`${this.collectionMessageContent().entries ? this.collectionMessageContent().entries.length : 0}人参与`)
                     .fontSize(12)
-                    .fontColor('#999999')
+                    .fontColor($r('app.color.wf_tertiary_text'))
                     .margin({ left: 4 })
             }
             .width('100%')
@@ -43,7 +43,7 @@ export default struct CollectionMessageContentView {
             if (this.collectionMessageContent().desc) {
                 Text(this.collectionMessageContent().desc)
                     .fontSize(13)
-                    .fontColor('#666666')
+                    .fontColor($r('app.color.wf_tertiary_text'))
                     .maxLines(2)
                     .textOverflow({ overflow: TextOverflow.Ellipsis })
                     .margin({ top: 4 })
@@ -52,7 +52,7 @@ export default struct CollectionMessageContentView {
 
             // Divider
             Divider()
-                .color('#e0e0e0')
+                .color($r('app.color.wf_divider'))
                 .strokeWidth(0.5)
                 .margin({ top: 8, bottom: 8 })
 
@@ -62,7 +62,7 @@ export default struct CollectionMessageContentView {
                     ForEach(this.collectionMessageContent().entries.slice(0, 3), (entry: CollectionEntry, index: number) => {
                          Text(`${index + 1}. ${entry.content}`)
                             .fontSize(14)
-                            .fontColor('#666666')
+                            .fontColor($r('app.color.wf_tertiary_text'))
                             .maxLines(1)
                             .textOverflow({ overflow: TextOverflow.Ellipsis })
                             .margin({ top: 2 })
@@ -71,13 +71,13 @@ export default struct CollectionMessageContentView {
                     if (this.collectionMessageContent().entries.length > 3) {
                          Text('...')
                             .fontSize(12)
-                            .fontColor('#999999')
+                            .fontColor($r('app.color.wf_tertiary_text'))
                             .margin({ top: 4 })
                     }
                 } else {
                     Text('暂无参与，快来抢沙发吧~')
                         .fontSize(13)
-                        .fontColor('#999999')
+                        .fontColor($r('app.color.wf_tertiary_text'))
                 }
             }
             .width('100%')
@@ -85,7 +85,7 @@ export default struct CollectionMessageContentView {
 
             // Divider
             Divider()
-                .color('#e0e0e0')
+                .color($r('app.color.wf_divider'))
                 .strokeWidth(0.5)
                 .margin({ top: 8, bottom: 8 })
 
@@ -93,7 +93,7 @@ export default struct CollectionMessageContentView {
             Row() {
                 Text(this.collectionMessageContent().status === 0 ? '参与接龙' : '已结束')
                     .fontSize(14)
-                    .fontColor(this.collectionMessageContent().status === 0 ? '#576b95' : '#999999')
+                    .fontColor(this.collectionMessageContent().status === 0 ? $r('app.color.wf_link') : $r('app.color.wf_tertiary_text'))
             }
             .width('100%')
         }

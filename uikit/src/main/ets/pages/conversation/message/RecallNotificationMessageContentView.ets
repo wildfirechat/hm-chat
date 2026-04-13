@@ -50,7 +50,7 @@ export default struct RecallNotificationMessageContentView {
                 Text('编辑')
                     .margin({ left: 8 })
                     .fontSize(13)
-                    .fontColor('#3066EC')
+                    .fontColor($r('app.color.wf_primary'))
                     .onClick(() => {
                         this.onClickReedit?.()
                     })

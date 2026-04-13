@@ -23,22 +23,22 @@ export default struct DestroyAccountPage {
 
             Column() {
                 Text('亲，真的要狠心离开我们吗😭😭😭！')
-                    .fontColor('#0C0C0C')
+                    .fontColor($r('app.color.wf_primary_text'))
 
                 Row() {
                     Text('验证码')
                         .width(50)
                     TextInput({ text: this.authCode, placeholder: '请输入验证码', controller: this.controller })
-                        .placeholderColor(Color.Grey)
+                        .placeholderColor($r('app.color.wf_tertiary_text'))
                         .placeholderFont({ size: 14, weight: 400 })
-                        .caretColor(Color.Blue)
+                        .caretColor($r('app.color.wf_primary'))
                         .layoutWeight(1)
                         .height(40)
                         .margin(20)
                         .fontSize(14)
                         .borderRadius(4)
                         .type(InputType.Number)
-                        .fontColor(Color.Black)
+                        .fontColor($r('app.color.wf_primary_text'))
                         .enabled(!this.isDestroy)
                         .inputFilter('[a-zA-Z0-9]', (e) => {
                             console.log(JSON.stringify(e))
@@ -70,9 +70,9 @@ export default struct DestroyAccountPage {
                     Button({ type: ButtonType.Normal, stateEffect: true }) {
                         Row() {
                             if (this.isDestroy) {
-                                LoadingProgress().width(20).height(20).margin({ left: 12 }).color(0xFFFFFF)
+                                LoadingProgress().width(20).height(20).margin({ left: 12 }).color($r('app.color.wf_background'))
                             }
-                            Text(this.isDestroy ? '注销中...' : '注销').fontColor(Color.Red).margin({ left: 5 })
+                            Text(this.isDestroy ? '注销中...' : '注销').fontColor($r('app.color.wf_danger')).margin({ left: 5 })
                         }.alignItems(VerticalAlign.Center)
                     }
                     .borderRadius(8)

@@ -394,7 +394,7 @@ export default struct GroupConversationInfoPage {
                                     message: $r("app.string.complaint"),
                                     primaryButton: {
                                         value: "举报",
-                                        fontColor: Color.Red,
+                                        fontColor: $r('app.color.wf_danger'),
                                         action: () => {
                                             let conversation = new Conversation(ConversationType.Single, 'cgc8c8VV', 0)
                                             this.mainNavPathStack.popToName(uikitNavigationDestinations.ConversationPage)
@@ -530,7 +530,7 @@ export default struct GroupConversationInfoPage {
                     Column() {
                         Row() {
                             Text('清空聊天记录')
-                                .fontColor(Color.Red)
+                                .fontColor($r('app.color.wf_danger'))
                         }
                         .height(56)
                         .width('100%')
@@ -584,7 +584,7 @@ export default struct GroupConversationInfoPage {
 
                         Row() {
                             Text(this.groupInfo.owner === wfc.getUserId() ? '解散群组' : '删除并退出')
-                                .fontColor(Color.Red)
+                                .fontColor($r('app.color.wf_danger'))
                         }
                         .margin({ top: 2 })
                         .height(56)

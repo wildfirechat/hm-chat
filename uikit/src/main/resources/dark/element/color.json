@@ -83,6 +83,18 @@
     {
       "name": "unread_hint_background",
       "value": "#2C2C2E"
+    },
+    {
+      "name": "wf_danger",
+      "value": "#FF453A"
+    },
+    {
+      "name": "wf_success",
+      "value": "#32D74B"
+    },
+    {
+      "name": "wf_warning",
+      "value": "#FF9F0A"
     }
   ]
 }

@@ -75,7 +75,7 @@ export default struct ConferenceInfoPage {
                         showDivider: false
                     })
                 }
-                .backgroundColor(Color.White)
+                .backgroundColor($r('app.color.wf_background'))
 
                 Column() {
                     OptionItemView({
@@ -93,7 +93,7 @@ export default struct ConferenceInfoPage {
                         showRightArrow: false
                     })
                 }
-                .backgroundColor(Color.White)
+                .backgroundColor($r('app.color.wf_background'))
                 .margin({ top: 20 })
 
                 Column() {
@@ -118,7 +118,7 @@ export default struct ConferenceInfoPage {
                     })
                 }
                 .margin({ top: 20 })
-                .backgroundColor(Color.White)
+                .backgroundColor($r('app.color.wf_background'))
 
                 Column() {
                     Button(this.expired ? '会议已过期' : '加入会议')
@@ -152,7 +152,7 @@ export default struct ConferenceInfoPage {
             .alignItems(HorizontalAlign.Start)
             .width('100%')
         }
-        .backgroundColor('#EDEDED')
+        .backgroundColor($r('app.color.wf_primary_background_color'))
         .height('100%')
         .width('100%')
         .hideTitleBar(false)

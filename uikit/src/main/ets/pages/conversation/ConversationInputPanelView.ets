@@ -312,7 +312,7 @@ export default struct ConversationInputPanelView {
                     },
                     secondaryButton: {
                         value: '确定',
-                        fontColor: Color.Red,
+                        fontColor: $r('app.color.wf_danger'),
                         action: () => {
                             this.deleteMessageDialogController = new CustomDialogController({
                                 builder: ActionSheetDialog({
@@ -673,7 +673,7 @@ export default struct ConversationInputPanelView {
             .height('100%')
             .width('100%')
             .margin({ top: px2vp(AppStorage.get<number>('SafeAreaTopHeight')) })
-            .backgroundColor(Color.White)
+            .backgroundColor($r('app.color.wf_background'))
     }
 
     @Builder
@@ -688,7 +688,7 @@ export default struct ConversationInputPanelView {
             .height('100%')
             .width('100%')
             .margin({ top: px2vp(AppStorage.get<number>('SafeAreaTopHeight')) })
-            .backgroundColor(Color.White)
+            .backgroundColor($r('app.color.wf_background'))
     }
 
     sendUserCard(userInfo: UserInfo) {

@@ -17,7 +17,7 @@ export default struct ChatroomConversationInfoPage {
                         message: $r("app.string.complaint"),
                         primaryButton: {
                             value: "举报",
-                            fontColor: Color.Red,
+                            fontColor: $r('app.color.wf_danger'),
                             action: () => {
                                 let conversation = new Conversation(ConversationType.Single, 'cgc8c8VV', 0)
                                 this.mainNavPathStack.popToName(uikitNavigationDestinations.ConversationPage)

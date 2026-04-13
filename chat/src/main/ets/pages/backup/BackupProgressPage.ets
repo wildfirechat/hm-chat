@@ -29,7 +29,7 @@ export default struct BackupProgressPage {
   @State detail: string = ''
   @State isBackupComplete: boolean = false
   @State backupSuccess: boolean = false
-  @State progressColor: string = '#007AFF'  // 默认蓝色
+  @State progressColor: ResourceStr = '#007AFF'  // 默认蓝色
   private backupManager: MessageBackupManager = MessageBackupManager.getInstance()
   private cancelled: boolean = false
 
@@ -100,7 +100,7 @@ export default struct BackupProgressPage {
 
       if (result.success) {
         this.currentStep = '备份完成'
-        this.progressColor = '#4CD964'  // 绿色
+        this.progressColor = $r('app.color.wf_success')  // 绿色
         this.detail = `已备份 ${result.messageCount} 条消息`
         if (result.mediaCount > 0) {
           this.detail += `\n${result.mediaCount} 个媒体文件 (${this.formatFileSize(result.mediaSize)})`
@@ -109,7 +109,7 @@ export default struct BackupProgressPage {
         await this.showSuccessDialog(result)
       } else {
         this.currentStep = '备份失败'
-        this.progressColor = '#FF3B30'  // 红色
+        this.progressColor = $r('app.color.wf_danger')  // 红色
         this.detail = this.getErrorMessage(result.error)
         await this.showFailureDialog()
       }
@@ -118,7 +118,7 @@ export default struct BackupProgressPage {
       this.isBackupComplete = true
       this.backupSuccess = false
       this.currentStep = '备份失败'
-      this.progressColor = '#FF3B30'  // 红色
+      this.progressColor = $r('app.color.wf_danger')  // 红色
       this.detail = '备份过程中发生错误'
       await this.showFailureDialog()
     }

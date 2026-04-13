@@ -53,7 +53,7 @@ export default struct SearchMessageLinkPage {
                     Column() {
                         Text('暂无链接')
                             .fontSize(14)
-                            .fontColor(Color.Gray)
+                            .fontColor($r('app.color.wf_tertiary_text'))
                     }
                     .width('100%')
                     .layoutWeight(1)
@@ -95,16 +95,16 @@ export default struct SearchMessageLinkPage {
                     .fontSize(16)
                     .maxLines(2)
                     .textOverflow({ overflow: TextOverflow.Ellipsis })
-                    .fontColor(Color.Black)
+                    .fontColor($r('app.color.wf_primary_text'))
 
                 Row() {
                     Text(wfc.getUserDisplayName(msg.from))
                         .fontSize(12)
-                        .fontColor(Color.Gray)
+                        .fontColor($r('app.color.wf_tertiary_text'))
                         .margin({ right: 10 })
                     Text(timeFormat(msg.timestamp))
                         .fontSize(12)
-                        .fontColor(Color.Gray)
+                        .fontColor($r('app.color.wf_tertiary_text'))
                 }
                 .margin({ top: 5 })
             }
@@ -125,12 +125,12 @@ export default struct SearchMessageLinkPage {
                     .height(60)
                     .objectFit(ImageFit.Cover)
                     .borderRadius(4)
-                    .backgroundColor('#F0F0F0')
+                    .backgroundColor($r('app.color.wf_primary_background_color'))
             }
         }
         .width('100%')
         .padding(10)
-        .backgroundColor(Color.White)
+        .backgroundColor($r('app.color.wf_background'))
     }
 
     linkMessageContent(message: Message) {

@@ -82,7 +82,7 @@ export default struct FileRecordPage {
             Column() {
                 Text('文件记录')
                     .backgroundColor($r('app.color.wf_secondary_background'))
-                    .fontColor('#989898')
+                    .fontColor($r('app.color.wf_tertiary_text'))
                     .fontSize(13)
                     .padding({ left: 10 })
                     .width('100%')
@@ -92,6 +92,7 @@ export default struct FileRecordPage {
                         .width('100%')
                         .height('100%')
                         .textAlign(TextAlign.Center)
+                        .fontColor($r('app.color.wf_primary_text'))
                 } else {
                     List() {
                         LazyForEach(this.fileRecordDataSource, (fileRecord: FileRecord) => {
@@ -103,24 +104,31 @@ export default struct FileRecordPage {
                                         .margin(10)
                                     Column() {
                                         Text(fileRecord.name)
-                                            .fontSize(1)
+                                            .fontSize(16)
                                             .maxLines(1)
+                                            .fontColor($r('app.color.wf_primary_text'))
+                                            .textOverflow({ overflow: TextOverflow.Ellipsis })
                                         Row() {
-                                            Text(fileRecord.name)
-                                                .maxLines(1)
                                             Text(this.fileSenderDisplayName(fileRecord))
                                                 .maxLines(1)
-                                                .margin({ left: 10 })
+                                                .fontSize(12)
+                                                .fontColor($r('app.color.wf_tertiary_text'))
                                             Text(humanSize(fileRecord.size))
                                                 .maxLines(1)
+                                                .fontSize(12)
+                                                .fontColor($r('app.color.wf_tertiary_text'))
                                                 .margin({ left: 10 })
                                         }
+                                        .margin({ top: 4 })
                                         .justifyContent(FlexAlign.Start)
                                     }
+                                    .layoutWeight(1)
                                     .justifyContent(FlexAlign.Center)
                                     .alignItems(HorizontalAlign.Start)
                                 }
+                                .width('100%')
                                 .justifyContent(FlexAlign.Start)
+                                .backgroundColor($r('app.color.wf_background'))
                             }
                         }, (fileRecord: FileRecord) => stringValue(fileRecord.messageUid)
                         )
@@ -132,22 +140,22 @@ export default struct FileRecordPage {
                         }
                     })
                     .width('100%')
-                    // .height(0)
                     .layoutWeight(1)
                     .divider({
                         strokeWidth: 1,
+                        color: $r('app.color.wf_divider'),
                         startMargin: 70
                     })
                 }
             }
             .width('100%')
             .height('100%')
+            .backgroundColor($r('app.color.wf_primary_background_color'))
             .alignItems(HorizontalAlign.Start)
         }
         .title('文件记录')
         .height('100%')
         .width('100%')
-        .backgroundColor($r('app.color.wf_background'))
     }
 }
 

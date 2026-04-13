@@ -267,7 +267,7 @@ struct MainPage {
             .height('100%')
             .width('100%')
             .margin({ top: px2vp(AppStorage.get<number>('SafeAreaTopHeight')) })
-            .backgroundColor(Color.White)
+            .backgroundColor($r('app.color.wf_background'))
     }
 
     @Builder

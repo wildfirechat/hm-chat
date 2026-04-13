@@ -29,7 +29,7 @@ export default struct RestoreProgressPage {
   @State isRestoreComplete: boolean = false
   @State restoreSuccess: boolean = false
   @State shouldStartRestore: boolean = false
-  @State progressColor: string = '#4CD964'  // 默认绿色
+  @State progressColor: ResourceStr = $r('app.color.wf_success')  // 默认绿色
   private backupManager: MessageBackupManager = MessageBackupManager.getInstance()
   private cancelled: boolean = false
 
@@ -151,12 +151,12 @@ export default struct RestoreProgressPage {
       },
       secondaryButton: {
         value: '确定',
-        fontColor: Color.Red,
+        fontColor: $r('app.color.wf_danger'),
         action: () => {
           this.backupManager.cancel()
           this.cancelled = true
           this.currentStep = '正在取消...'
-          this.progressColor = '#FF9500'  // 橙色
+          this.progressColor = $r('app.color.wf_warning')  // 橙色
           // 等待取消完成
           setTimeout(() => {
             this.mainNavPathStack.pop()

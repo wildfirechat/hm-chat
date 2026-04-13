@@ -56,7 +56,7 @@ export default struct PCSessionPage {
                 // 状态文字
                 Text(`${this.pcOnineInfo?.platform?.getPlatFormName()} 已登录`)
                     .fontSize(16)
-                    .fontColor('#666666')
+                    .fontColor($r('app.color.wf_tertiary_text'))
                     .margin({ top: 16 })
 
                 // 功能列表
@@ -65,11 +65,11 @@ export default struct PCSessionPage {
                     Row() {
                         Text('手机静音')
                             .fontSize(16)
-                            .fontColor('#333333')
+                            .fontColor($r('app.color.wf_primary_text'))
                             .layoutWeight(1)
 
                         Toggle({ type: ToggleType.Switch, isOn: this.isMuteWhenPCOnLine })
-                            .selectedColor('#317aff')
+                            .selectedColor($r('app.color.wf_primary'))
                             .onChange((isOn: boolean) => {
                                 wfc.muteNotificationWhenPcOnline(isOn, () => {
                                     this.isMuteWhenPCOnLine = isOn
@@ -84,18 +84,18 @@ export default struct PCSessionPage {
 
                     Divider()
                         .strokeWidth(1)
-                        .color('#E0E0E0')
+                        .color($r('app.color.wf_divider'))
                         .margin({ left: 16 })
 
                     // 锁定
                     Row() {
                         Text('锁定电脑')
                             .fontSize(16)
-                            .fontColor('#333333')
+                            .fontColor($r('app.color.wf_primary_text'))
                             .layoutWeight(1)
 
                         Toggle({ type: ToggleType.Switch, isOn: this.isLockPC })
-                            .selectedColor('#317aff')
+                            .selectedColor($r('app.color.wf_primary'))
                             .onChange((isOn: boolean) => {
                                 wfc.lockPCClient(this.pcOnineInfo!.clientId, isOn, () => {
                                     this.isLockPC = isOn
@@ -110,19 +110,19 @@ export default struct PCSessionPage {
 
                     Divider()
                         .strokeWidth(1)
-                        .color('#E0E0E0')
+                        .color($r('app.color.wf_divider'))
                         .margin({ left: 16 })
 
                     // 文件助手
                     Row() {
                         Text('传文件')
                             .fontSize(16)
-                            .fontColor('#333333')
+                            .fontColor($r('app.color.wf_primary_text'))
                             .layoutWeight(1)
 
                         Text('>')
                             .fontSize(18)
-                            .fontColor('#999999')
+                            .fontColor($r('app.color.wf_tertiary_text'))
                     }
                     .width('100%')
                     .height(56)
@@ -134,7 +134,7 @@ export default struct PCSessionPage {
                     })
                 }
                 .width('100%')
-                .backgroundColor(Color.White)
+                .backgroundColor($r('app.color.wf_background'))
                 .margin({ top: 30 })
 
                 Blank()
@@ -158,7 +158,7 @@ export default struct PCSessionPage {
             }
             .width('100%')
             .height('100%')
-            .backgroundColor('#F5F5F5')
+            .backgroundColor($r('app.color.wf_primary_background_color'))
         }
         .title('已登录的设备')
         .height('100%')

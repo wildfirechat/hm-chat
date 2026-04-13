@@ -30,10 +30,12 @@ export default struct OrderConferencePage {
             Column() {
                 Column() {
                     Text('会议主题')
+                        .fontColor($r('app.color.wf_primary_text'))
                     TextInput({ text: this.title })
                         .borderRadius(0)
-                        .backgroundColor(Color.White)
-                        .border({ color: Color.Black })
+                        .backgroundColor(Color.Transparent)
+                        .fontColor($r('app.color.wf_primary_text'))
+                        .border({ color: $r('app.color.wf_divider') })
                         .borderWidth({
                             left: 0,
                             right: 0,
@@ -54,7 +56,7 @@ export default struct OrderConferencePage {
                     top: 10,
                     bottom: 10
                 })
-                .backgroundColor(Color.White)
+                .backgroundColor($r('app.color.wf_background'))
 
                 Column() {
                     OptionItemView({
@@ -96,7 +98,7 @@ export default struct OrderConferencePage {
                             })
                         })
                 }
-                .backgroundColor(Color.White)
+                .backgroundColor($r('app.color.wf_background'))
                 .margin({ top: 20 })
 
                 Column() {
@@ -120,7 +122,7 @@ export default struct OrderConferencePage {
                     })
                 }
                 .margin({ top: 20 })
-                .backgroundColor(Color.White)
+                .backgroundColor($r('app.color.wf_background'))
 
 
                 Column() {
@@ -152,7 +154,7 @@ export default struct OrderConferencePage {
                     })
                 }
                 .margin({ top: 20 })
-                .backgroundColor(Color.White)
+                .backgroundColor($r('app.color.wf_background'))
 
                 Column() {
                     ToggleItemView({
@@ -168,7 +170,7 @@ export default struct OrderConferencePage {
                 }
                 .alignItems(HorizontalAlign.Start)
                 .margin({ top: 20 })
-                .backgroundColor(Color.White)
+                .backgroundColor($r('app.color.wf_background'))
 
                 Column() {
                     Button('预定')
@@ -209,7 +211,7 @@ export default struct OrderConferencePage {
             .alignItems(HorizontalAlign.Start)
             .width('100%')
         }
-        .backgroundColor('#EDEDED')
+        .backgroundColor($r('app.color.wf_primary_background_color'))
         .height('100%')
         .width('100%')
         .hideTitleBar(false)

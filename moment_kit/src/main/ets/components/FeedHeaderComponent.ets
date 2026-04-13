@@ -17,7 +17,7 @@ export struct FeedHeaderComponent {
                 .width('100%')
                 .height('100%')
                 .objectFit(ImageFit.Cover)
-                .backgroundColor('#333333')
+                .backgroundColor($r('app.color.wf_tertiary_text'))
 
             Row() {
                 // 用户名
@@ -33,8 +33,8 @@ export struct FeedHeaderComponent {
                     .height(MomentConstants.AVATAR_SIZE_LARGE)
                     .borderRadius(8)
                     .borderWidth(2)
-                    .borderColor(Color.White)
-                    .backgroundColor(Color.White)
+                    .borderColor($r('app.color.wf_background'))
+                    .backgroundColor($r('app.color.wf_background'))
             }
             .margin({ right: 20, bottom: -20 })
         }

@@ -107,7 +107,7 @@ export default struct SearchMessagePictureVideoPage {
                     Column() {
                         Text('暂无图片与视频')
                             .fontSize(14)
-                            .fontColor(Color.Gray)
+                            .fontColor($r('app.color.wf_tertiary_text'))
                     }
                     .width('100%')
                     .layoutWeight(1)
@@ -186,7 +186,7 @@ export default struct SearchMessagePictureVideoPage {
         }
         .width('100%')
         .height('100%')
-        .backgroundColor('#F0F0F0')
+        .backgroundColor($r('app.color.wf_primary_background_color'))
     }
 
     imageUrl(message: Message) {

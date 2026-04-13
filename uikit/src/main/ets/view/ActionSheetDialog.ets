@@ -70,7 +70,7 @@ export default struct ActionSheetDialog {
                         Text(this.cancel.title)
                             .fontSize(15)
                             .textAlign(TextAlign.Center)
-                            .fontColor(Color.Red)
+                            .fontColor($r('app.color.wf_danger'))
                     }
                     .justifyContent(FlexAlign.Center)
                     .align(Alignment.Center)

@@ -51,7 +51,7 @@ export default struct SettingPage {
                                 message: $r("app.string.complaint"),
                                 primaryButton: {
                                     value: "举报",
-                                    fontColor: Color.Red,
+                                    fontColor: $r('app.color.wf_danger'),
                                     action: () => {
                                         let conversation = new Conversation(ConversationType.Single, 'cgc8c8VV', 0)
                                         this.mainNavPathStack.popToName(uikitNavigationDestinations.ConversationPage)
@@ -79,7 +79,7 @@ export default struct SettingPage {
                             message: "账号注销之后，所有数据将被删除，无法恢复，请慎重！",
                             primaryButton: {
                                 value: "注销",
-                                fontColor: Color.Red,
+                                fontColor: $r('app.color.wf_danger'),
                                 action: () => {
                                     this.mainNavPathStack.pushPathByName(appNavigationDestinations.DestroyAccountPage, {} as Record<string, Object>)
                                 },

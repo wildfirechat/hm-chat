@@ -31,21 +31,23 @@ export default struct ChangePasswordPage {
                 Column() {
                     Row() {
                         Text($r('app.string.original_password')).width(70)
+                            .fontColor($r('app.color.wf_primary_text'))
                         TextInput({
                             text: this.originalPassword,
                             placeholder: $r('app.string.enter_original_password'),
                             controller: this.controller
                         })
-                            .placeholderColor(Color.Grey)
+                            .placeholderColor($r('app.color.wf_tertiary_text'))
                             .placeholderFont({ size: 14, weight: 400 })
-                            .caretColor(Color.Blue)
+                            .caretColor($r('app.color.wf_primary'))
                             .layoutWeight(1)
                             .height(40)
                             .margin({ left: 20 })
                             .fontSize(14)
                             .borderRadius(4)
                             .type(InputType.Password)
-                            .fontColor(Color.Black)
+                            .fontColor($r('app.color.wf_primary_text'))
+                            .backgroundColor(Color.Transparent)
                             .borderStyle(BorderStyle.Dashed)
                             .onChange((value: string) => {
                                 this.originalPassword = value
@@ -54,21 +56,23 @@ export default struct ChangePasswordPage {
 
                     Row() {
                         Text($r('app.string.new_password')).width(70)
+                            .fontColor($r('app.color.wf_primary_text'))
                         TextInput({
                             text: this.password,
                             placeholder: $r('app.string.enter_new_password'),
                             controller: this.controller
                         })
-                            .placeholderColor(Color.Grey)
+                            .placeholderColor($r('app.color.wf_tertiary_text'))
                             .placeholderFont({ size: 14, weight: 400 })
-                            .caretColor(Color.Blue)
+                            .caretColor($r('app.color.wf_primary'))
                             .layoutWeight(1)
                             .height(40)
                             .margin({ left: 20 })
                             .fontSize(14)
                             .borderRadius(4)
                             .type(InputType.Password)
-                            .fontColor(Color.Black)
+                            .fontColor($r('app.color.wf_primary_text'))
+                            .backgroundColor(Color.Transparent)
                             .borderStyle(BorderStyle.Dashed)
                             .onChange((value: string) => {
                                 this.password = value
@@ -77,21 +81,23 @@ export default struct ChangePasswordPage {
 
                     Row() {
                         Text($r('app.string.confirm_password')).width(70)
+                            .fontColor($r('app.color.wf_primary_text'))
                         TextInput({
                             text: this.confirmPassword,
                             placeholder: $r('app.string.confirm_new_password'),
                             controller: this.controller
                         })
-                            .placeholderColor(Color.Grey)
+                            .placeholderColor($r('app.color.wf_tertiary_text'))
                             .placeholderFont({ size: 14, weight: 400 })
-                            .caretColor(Color.Blue)
+                            .caretColor($r('app.color.wf_primary'))
                             .layoutWeight(1)
                             .height(40)
                             .margin({ left: 20 })
                             .fontSize(14)
                             .borderRadius(4)
                             .type(InputType.Password)
-                            .fontColor(Color.Black)
+                            .fontColor($r('app.color.wf_primary_text'))
+                            .backgroundColor(Color.Transparent)
                             .borderStyle(BorderStyle.Dashed)
                             .onChange((value: string) => {
                                 this.confirmPassword = value
@@ -102,13 +108,13 @@ export default struct ChangePasswordPage {
                         Button({ type: ButtonType.Normal, stateEffect: true }) {
                             Row() {
                                 if (this.isProgress) {
-                                    LoadingProgress().width(20).height(20).margin({ left: 12 }).color(0xFFFFFF)
+                                    LoadingProgress().width(20).height(20).margin({ left: 12 }).color(Color.White)
                                 }
-                                Text($r('app.string.btn_reset_password')).fontColor(0xffffff).margin({ left: 5 })
+                                Text($r('app.string.btn_reset_password')).fontColor(Color.White).margin({ left: 5 })
                             }.alignItems(VerticalAlign.Center)
                         }
                         .borderRadius(8)
-                        .backgroundColor(0x317aff)
+                        .backgroundColor($r('app.color.wf_primary'))
                         .width(90)
                         .height(40)
                         .focusable(true)
@@ -167,7 +173,7 @@ export default struct ChangePasswordPage {
         .title('设置新密码')
         .height('100%')
         .width('100%')
-        .backgroundColor('#EDEDED')
+        .backgroundColor($r('app.color.wf_primary_background_color'))
     }
 
     changePassword(slideVerifyToken: string) {

@@ -217,18 +217,18 @@ export struct FeedItemComponent {
             Image($r('app.media.icon')) // TODO: 使用播放图标
                 .width(40)
                 .height(40)
-                .fillColor('#FFFFFF')
+                .fillColor($r('app.color.wf_background'))
 
             Text('视频')
                 .fontSize(MomentConstants.FONT_SIZE_MEDIUM)
-                .fontColor('#FFFFFF')
+                .fontColor($r('app.color.wf_background'))
                 .margin({ left: 8 })
         }
         .width(MomentConstants.IMAGE_SINGLE_WIDTH)
         .height(120)
         .justifyContent(FlexAlign.Center)
         .alignItems(VerticalAlign.Center)
-        .backgroundColor('#000000')
+        .backgroundColor($r('app.color.wf_primary_text'))
         .borderRadius(MomentConstants.BORDER_RADIUS)
         .margin({ bottom: 8 })
         .onClick(() => {
@@ -296,10 +296,10 @@ export struct FeedItemComponent {
             Row() {
                 Text(this.feedViewModel.isLiked(this.currentUserId) ? '❤' : '❤')
                     .fontSize(16)
-                    .fontColor(Color.White)
+                    .fontColor($r('app.color.wf_background'))
                 Text(this.feedViewModel.isLiked(this.currentUserId) ? '取消' : '赞')
                     .fontSize(14)
-                    .fontColor(Color.White)
+                    .fontColor($r('app.color.wf_background'))
                     .margin({ left: 4 })
             }
             .layoutWeight(1)
@@ -317,10 +317,10 @@ export struct FeedItemComponent {
             Row() {
                 Text('🗨')
                     .fontSize(16)
-                    .fontColor(Color.White)
+                    .fontColor($r('app.color.wf_background'))
                 Text('评论')
                     .fontSize(14)
-                    .fontColor(Color.White)
+                    .fontColor($r('app.color.wf_background'))
                     .margin({ left: 4 })
             }
             .layoutWeight(1)

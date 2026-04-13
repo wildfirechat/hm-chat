@@ -136,7 +136,7 @@ struct MonthView {
                     GridItem() {
                         Text(day)
                             .fontSize(14)
-                            .fontColor(Color.Gray)
+                            .fontColor($r('app.color.wf_tertiary_text'))
                     }
                     .height(30)
                 })
@@ -149,7 +149,7 @@ struct MonthView {
                                 Text(`${day}`)
                                     .fontSize(16)
                                     .fontWeight(this.hasMessage(day) ? FontWeight.Bold : FontWeight.Normal)
-                                    .fontColor(this.hasMessage(day) ? Color.Black : Color.Gray)
+                                    .fontColor(this.hasMessage(day) ? $r('app.color.wf_primary_text') : $r('app.color.wf_tertiary_text'))
 
                                 if (this.hasMessage(day)) {
                                     Circle({ width: 4, height: 4 })

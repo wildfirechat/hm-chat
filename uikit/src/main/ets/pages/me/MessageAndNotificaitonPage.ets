@@ -31,7 +31,7 @@ export default struct MessageAndNotificationPage {
                         }
                     })
                 }
-                .backgroundColor(Color.White)
+                .backgroundColor($r('app.color.wf_background'))
 
                 Column() {
                     ToggleItemView({
@@ -59,7 +59,7 @@ export default struct MessageAndNotificationPage {
                     })
                 }
                 .margin({ top: 10 })
-                .backgroundColor(Color.White)
+                .backgroundColor($r('app.color.wf_background'))
 
 
                 Column() {
@@ -73,10 +73,11 @@ export default struct MessageAndNotificationPage {
                     })
                 }
                 .margin({ top: 10 })
-                .backgroundColor(Color.White)
+                .backgroundColor($r('app.color.wf_background'))
             }
             .width('100%')
             .height('100%')
+            .backgroundColor($r('app.color.wf_primary_background_color'))
         }
         .title('消息与通知')
         .height('100%')

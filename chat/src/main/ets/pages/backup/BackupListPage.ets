@@ -163,7 +163,7 @@ export default struct BackupListPage {
       },
       secondaryButton: {
         value: '删除',
-        fontColor: Color.Red,
+        fontColor: $r('app.color.wf_danger'),
         action: async () => {
           try {
             await this.backupManager.deleteBackup(backupInfo.backupPath)
@@ -232,10 +232,10 @@ export default struct BackupListPage {
 
                   // 删除按钮
                   Image($r('app.media.ic_delete'))
-                    .width(24)
-                    .height(24)
-                    .fillColor('#FF3B30')
-                    .margin({ left: 10 })
+                    .width(16)
+                    .height(16)
+                    .fillColor($r('app.color.wf_danger'))
+                    .margin({ right: 4 })
                     .onClick(() => {
                       this.deleteBackup(info)
                     })

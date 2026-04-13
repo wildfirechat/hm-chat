@@ -135,7 +135,7 @@ export default struct CheckableConversationInfoItemView {
                         Row() {
                             if (this.conversationInfoSpanText()) {
                                 Text() {
-                                    Span(this.conversationInfoSpanText()).fontSize(13).fontColor(Color.Red)
+                                    Span(this.conversationInfoSpanText()).fontSize(13).fontColor($r('app.color.wf_danger'))
                                 }
                             }
 

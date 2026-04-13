@@ -61,7 +61,7 @@ export default struct RestoreOptionsPage {
       },
       secondaryButton: {
         value: '确定',
-        fontColor: Color.Red,
+        fontColor: $r('app.color.wf_danger'),
         action: () => {
           console.log(`[RestoreOptionsPage] User confirmed, navigating to RestoreProgressPage`)
           console.log(`[RestoreOptionsPage] Passing backupPath: ${this.backupInfo?.backupPath}`)
@@ -204,7 +204,7 @@ export default struct RestoreOptionsPage {
       .width('100%')
       .height('100%')
       .padding(16)
-      .backgroundColor('#EDEDED')
+      .backgroundColor($r('app.color.wf_primary_background_color'))
     }
     .title('恢复选项')
     .height('100%')

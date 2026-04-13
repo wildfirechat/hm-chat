@@ -48,6 +48,7 @@ export default struct PickUserPage {
             Scroll() {
                 Column() {
                     Text('Tes' + this.checkedUsers.length)
+                        .fontColor($r('app.color.wf_primary_text'))
 
                     CheckableUserListView({
                         checkedUsers: $checkedUsers,
@@ -68,7 +69,7 @@ export default struct PickUserPage {
             .height('100%')
             .padding({ top: 5 })
         }
-        .backgroundColor('#EEEEEE')
+        .backgroundColor($r('app.color.wf_primary_background_color'))
         .title('选取联系人')
         .titleMode(NavigationTitleMode.Mini)
         .hideBackButton(false)

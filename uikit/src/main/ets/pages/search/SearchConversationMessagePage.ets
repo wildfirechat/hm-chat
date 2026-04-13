@@ -74,7 +74,7 @@ export default struct SearchConversationMessagePage {
                     Column() {
                         Text('搜索指定内容')
                             .fontSize(14)
-                            .fontColor('#B3B3B3')
+                            .fontColor($r('app.color.wf_tertiary_text'))
                             .margin({ top: 30, bottom: 20 })
                         Row() {
                             Column() {

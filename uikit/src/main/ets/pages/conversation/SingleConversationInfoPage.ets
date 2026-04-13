@@ -198,7 +198,7 @@ export default struct SingleConversationInfoPage {
                                 message: $r("app.string.complaint"),
                                 primaryButton: {
                                     value: "举报",
-                                    fontColor: Color.Red,
+                                    fontColor: $r('app.color.wf_danger'),
                                     action: () => {
                                         let conversation = new Conversation(ConversationType.Single, 'uiuJuJcc', 0)
                                         this.mainNavPathStack.popToName(uikitNavigationDestinations.ConversationPage)

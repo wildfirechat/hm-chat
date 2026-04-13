@@ -39,11 +39,12 @@ export struct SlideVerifyView {
         Text('安全验证')
           .fontSize(18)
           .fontWeight(FontWeight.Bold)
+          .fontColor($r('app.color.wf_primary_text'))
 
         if (false && this.isLoading) {
           LoadingProgress()
             .width(40)
-            .color(0x317aff)
+            .color($r('app.color.wf_primary'))
         }
       }
       .height(40)
@@ -76,14 +77,14 @@ export struct SlideVerifyView {
         // 提示文字
         Text('向右滑动完成验证')
           .fontSize(14)
-          .fontColor('#999999')
+          .fontColor($r('app.color.wf_tertiary_text'))
           .opacity(this.hintOpacity)
 
         // 滑块按钮
         Circle()
           .width(40)
           .height(40)
-          .fill(this.isVerified ? '#4CAF50' : Color.White)
+          .fill(this.isVerified ? $r('app.color.wf_success') : $r('app.color.wf_background'))
           .position({ x: this.currentX, y: 0 })
           .shadow({ radius: this.isVerified ? 0 : 5, color: '#80000000', offsetX: 0, offsetY: 2 })
           .gesture(
@@ -136,7 +137,7 @@ export struct SlideVerifyView {
       .height(32)
       .justifyContent(FlexAlign.Center)
       .alignItems(VerticalAlign.Center)
-      .backgroundColor('rgba(255, 255, 255, 0.9)')
+      .backgroundColor($r('app.color.wf_background'))
       .borderRadius(4)
       .shadow({ radius: 8, color: '#80000000', offsetX: 0, offsetY: 2 })
       .position({ x: 290, y: 10 })
@@ -144,7 +145,7 @@ export struct SlideVerifyView {
     }
     .width(320)
     .padding(20)
-    .backgroundColor($r('app.color.wf_primary_background_color'))
+    .backgroundColor($r('app.color.wf_background'))
     .borderRadius(12)
     .shadow({ radius: 20, color: '#80000000', offsetX: 0, offsetY: 4 })
   }

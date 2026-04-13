@@ -310,8 +310,8 @@ export struct FeedListPage {
                 title: '提示',
                 message: '确定删除这条朋友圈吗？',
                 buttons: [
-                    { text: '取消', color: '#000000' },
-                    { text: '删除', color: '#FF0000' }
+                    { text: '取消', color: $r('app.color.wf_primary_text') },
+                    { text: '删除', color: $r('app.color.wf_danger') }
                 ]
             }).then(data => {
                 if (data.index === 1) {
@@ -430,47 +430,57 @@ export struct FeedListPage {
 
     @Builder
     private buildCustomTitleBar() {
-        Row() {
-            SymbolGlyph($r('sys.symbol.chevron_backward'))
-                .fontSize(28)
-                .fontColor([this.titleBarOpacity > 0.5 ? Color.Black : Color.White])
-                .onClick(() => {
-                    this.mainNavPathStack.pop();
-                })
+        Stack({ alignContent: Alignment.Top }) {
+            // 背景层
+            Row()
+                .width('100%')
+                .height(48 + px2vp(AppStorage.get<number>('SafeAreaTopHeight') || 0))
+                .backgroundColor($r('app.color.title_bar_background'))
+                .opacity(this.titleBarOpacity)
 
-            Blank()
-            
-            if (this.titleBarOpacity > 0) {
-                Text('朋友圈')
-                    .fontSize(18)
-                    .fontWeight(FontWeight.Bold)
-                    .fontColor(Color.Black)
-                    .opacity(this.titleBarOpacity)
-            }
-
-            Blank()
-
-            SymbolGlyph($r('sys.symbol.camera'))
-                .fontSize(28)
-                .fontColor([this.titleBarOpacity > 0.5 ? Color.Black : Color.White])
-                .onClick(() => {
-                    promptAction.showActionMenu({
-                        title: '',
-                        buttons: [
-                            { text: '拍摄', color: '#000000' },
-                            { text: '从相册选择', color: '#000000' }
-                        ]
-                    }).then(data => {
-                        if (data.index === 0 || data.index === 1) {
-                            this.mainNavPathStack.pushPathByName(momentNavigationDestinations.PostFeedPage, {} as Record<string, Object>)
-                        }
+            // 内容层
+            Row() {
+                SymbolGlyph($r('sys.symbol.chevron_backward'))
+                    .fontSize(28)
+                    .fontColor([this.titleBarOpacity > 0.5 ? $r('app.color.wf_primary_text') : Color.White])
+                    .onClick(() => {
+                        this.mainNavPathStack.pop();
                     })
-                })
+
+                Blank()
+            
+                if (this.titleBarOpacity > 0) {
+                    Text('朋友圈')
+                        .fontSize(18)
+                        .fontWeight(FontWeight.Bold)
+                        .fontColor($r('app.color.wf_primary_text'))
+                        .opacity(this.titleBarOpacity)
+                }
+
+                Blank()
+
+                SymbolGlyph($r('sys.symbol.camera'))
+                    .fontSize(28)
+                    .fontColor([this.titleBarOpacity > 0.5 ? $r('app.color.wf_primary_text') : Color.White])
+                    .onClick(() => {
+                        promptAction.showActionMenu({
+                            title: '',
+                            buttons: [
+                                { text: '拍摄', color: $r('app.color.wf_primary_text') },
+                                { text: '从相册选择', color: $r('app.color.wf_primary_text') }
+                            ]
+                        }).then(data => {
+                            if (data.index === 0 || data.index === 1) {
+                                this.mainNavPathStack.pushPathByName(momentNavigationDestinations.PostFeedPage, {} as Record<string, Object>)
+                            }
+                        })
+                    })
+            }
+            .width('100%')
+            .height(48 + px2vp(AppStorage.get<number>('SafeAreaTopHeight') || 0))
+            .padding({ left: 16, right: 16, top: px2vp(AppStorage.get<number>('SafeAreaTopHeight') || 0) })
         }
         .width('100%')
-        .height(48 + px2vp(AppStorage.get<number>('SafeAreaTopHeight') || 0))
-        .padding({ left: 16, right: 16, top: px2vp(AppStorage.get<number>('SafeAreaTopHeight') || 0) })
-        .backgroundColor(`rgba(237, 237, 237, ${this.titleBarOpacity})`)
         .position({ x: 0, y: 0 })
         .zIndex(100)
     }

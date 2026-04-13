@@ -34,7 +34,7 @@ export default struct StreamingTextMessageContentView {
             } else {
                 Text('本内容由 AI 生成')
                     .fontSize(12)
-                    .fontColor(Color.Gray)
+                    .fontColor($r('app.color.wf_tertiary_text'))
                     .padding({left: 10, top: 5, bottom: 5})
             }
         }

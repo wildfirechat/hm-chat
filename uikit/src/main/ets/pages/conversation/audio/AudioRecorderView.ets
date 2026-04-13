@@ -16,7 +16,7 @@ export default struct AudioRecorderView {
     ]
     @State volumeResource: Resource = this.volumeIcons[0];
     @State recordStateText: string = '手指上滑，取消'
-    @State recordStateTextBackgroundColor: string = '#716F66'
+    @State recordStateTextBackgroundColor: ResourceColor = $r('app.color.wf_tertiary_text')
 
     aboutToAppear(): void {
         // TODO
@@ -30,10 +30,10 @@ export default struct AudioRecorderView {
     onShowCancelRecordIndicator(propName: string) {
         if (this.showCancelRecordIndicator) {
             this.recordStateText = '松开手指，取消'
-            this.recordStateTextBackgroundColor = '#CC933432'
+            this.recordStateTextBackgroundColor = $r('app.color.wf_danger')
         } else {
             this.recordStateText = '手指上滑，取消'
-            this.recordStateTextBackgroundColor = '#716F66'
+            this.recordStateTextBackgroundColor = $r('app.color.wf_tertiary_text')
         }
     }
 
@@ -62,7 +62,7 @@ export default struct AudioRecorderView {
             .width(200)
             .height(200)
             .borderRadius(5)
-            .backgroundColor('#716F66')
+            .backgroundColor($r('app.color.wf_primary_background_color'))
         }
         .justifyContent(FlexAlign.Center)
         .alignItems(VerticalAlign.Center)

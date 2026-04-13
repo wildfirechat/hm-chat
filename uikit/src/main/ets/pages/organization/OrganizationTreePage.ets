@@ -65,7 +65,7 @@ export default struct OrganizationTreePage {
                     Row() {
                         ForEach(this.orgPath, (org: Organization, index: number) => {
                             Text(org.name)
-                                .fontColor(index === this.orgPath.length - 1 ? '#485666' : '#3B62E0')
+                                .fontColor(index === this.orgPath.length - 1 ? '#485666' : $r('app.color.wf_primary'))
                                 .onClick(() => {
                                     if (index < this.orgPath.length - 1) {
                                         this.onClickOrg(this.orgPath[index])
@@ -104,10 +104,10 @@ export default struct OrganizationTreePage {
                                 .padding({ left: 10, right: 10 })
                                 .stateStyles({
                                     pressed: {
-                                        .backgroundColor('#E5E5E5')
+                                        .backgroundColor($r('app.color.wf_divider'))
                                     },
                                     normal: {
-                                        .backgroundColor(Color.White)
+                                        .backgroundColor($r('app.color.wf_background'))
                                     }
                                 })
                                 .onClick(() => {
@@ -133,10 +133,10 @@ export default struct OrganizationTreePage {
                                 .padding({ left: 10, right: 10 })
                                 .stateStyles({
                                     pressed: {
-                                        .backgroundColor('#E5E5E5')
+                                        .backgroundColor($r('app.color.wf_divider'))
                                     },
                                     normal: {
-                                        .backgroundColor(Color.White)
+                                        .backgroundColor($r('app.color.wf_background'))
                                     }
                                 })
                                 .onClick(() => {
@@ -152,7 +152,7 @@ export default struct OrganizationTreePage {
                 .layoutWeight(1)
             }
         }
-        .backgroundColor('#EEEEEE')
+        .backgroundColor($r('app.color.wf_primary_background_color'))
         .title(this.title)
         .height('100%')
         .width('100%')

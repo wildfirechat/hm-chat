@@ -85,7 +85,7 @@ export default struct SearchConversationMessageResultView {
                         Text(resultWrapper.digest)
                             .fontSize(12)
                             .margin({ top: 5 })
-                            .fontColor('#B3B3B3')
+                            .fontColor($r('app.color.wf_tertiary_text'))
                             .maxLines(1)
                             .textOverflow({ overflow: TextOverflow.Ellipsis })
                     }
@@ -124,7 +124,7 @@ export default struct SearchConversationMessageResultView {
             .padding({ left: 10 })
             .width('100%')
             .height(32)
-            .fontColor('#828282')
+            .fontColor($r('app.color.wf_tertiary_text'))
             .fontSize(13)
             .backgroundColor($r('app.color.wf_secondary_background'))
     }

@@ -38,7 +38,7 @@ export default struct ConferenceParticipantListPage {
                 })
             }
         }
-        .backgroundColor('#EDEDED')
+        .backgroundColor($r('app.color.wf_primary_background_color'))
         .height('100%')
         .width('100%')
         .hideTitleBar(false)

@@ -240,189 +240,207 @@ export default struct FavRecordPage {
 
     build() {
         NavDestination() {
-            if (!this.favItemLoaded) {
-                Text('正在加载...')
-            } else if (this.noFavItems) {
-                Text('暂无收藏')
-            } else {
-                List() {
-                    LazyForEach(this.favListDataSource, (favItem: FavItem) => {
-                        ListItem() {
-                            Column() {
-                                if (favItem.type === MessageContentType.File) {
-                                    Row() {
-                                        Image(getFiletypeIcon(favItem.title))
-                                            .width(40)
-                                            .height(40)
-                                            .margin({ right: 10 })
-                                        Column() {
-                                            Text(favItem.title)
-                                                .textOverflow({ overflow: TextOverflow.Ellipsis })
-                                                .fontSize(16)
-                                                .maxLines(1)
-                                            Text(humanSize(this.fileSize(favItem)))
-                                                .fontSize(12)
-                                                .fontColor('#999999')
-                                                .margin({ top: 4 })
-                                        }
-                                        .layoutWeight(1)
-                                        .justifyContent(FlexAlign.Center)
-                                        .alignItems(HorizontalAlign.Start)
-                                    }
-                                } else if (favItem.type === MessageContentType.Video) {
-                                    Image(this.videoThumbnail(favItem))
-                                        .width(160)
-                                        .height(160)
-                                        .objectFit(ImageFit.Cover)
-                                        .borderRadius(4)
-                                } else if (favItem.type === MessageContentType.Image) {
-                                    Image(favItem.url)
-                                        .width(160)
-                                        .height(160)
-                                        .objectFit(ImageFit.Cover)
-                                        .borderRadius(4)
-                                } else if (favItem.type === MessageContentType.Voice) {
-                                    Row() {
-                                        Image($r('app.media.ic_file_type_audio'))
-                                            .width(24)
-                                            .height(24)
-                                            .margin({ right: 10 })
-                                        Text(this.voiceDuration(favItem) + '"')
-                                            .fontSize(16)
-                                        if (favItem.messageUid && this.playingVoiceId === favItem.messageUid.toString()) {
-                                            Text('播放中...')
-                                                .fontSize(12)
-                                                .fontColor('#4CAF50')
-                                                .margin({ left: 10 })
-                                        }
-                                    }
-                                } else if (favItem.type === MessageContentType.Composite_Message) {
-                                    Column() {
-                                        Text(favItem.title)
-                                            .fontSize(16)
-                                            .maxLines(1)
-                                            .textOverflow({ overflow: TextOverflow.Ellipsis })
-                                            .fontWeight(FontWeight.Medium)
-                                        Text(this.compositeMessageText(favItem))
-                                            .lineSpacing({ value: 4, unit: LengthUnit.VP })
-                                            .fontSize(14)
-                                            .fontColor('#999999')
-                                            .maxLines(3)
-                                            .textOverflow({ overflow: TextOverflow.Ellipsis })
-                                            .margin({ top: 6 })
-                                    }
-                                    .alignItems(HorizontalAlign.Start)
-                                } else if (favItem.type === MessageContentType.Link || favItem.type === MessageContentType.Articles) {
-                                    Row() {
-                                        Column() {
-                                            Text(favItem.title)
-                                                .maxLines(2)
-                                                .fontSize(16)
-                                                .textOverflow({ overflow: TextOverflow.Ellipsis })
-                                        }
-                                        .layoutWeight(1)
-                                        .alignItems(HorizontalAlign.Start)
-                                        .margin({ right: 10 })
-
-                                        if (favItem.url) {
-                                            Image(favItem.url)
-                                                .width(60)
-                                                .height(60)
-                                                .objectFit(ImageFit.Cover)
-                                                .borderRadius(4)
-                                        }
-                                    }
-                                    .width('100%')
-                                } else if (favItem.type === MessageContentType.UserCard) {
-                                    Row() {
-                                        Image($r('app.media.ic_user_card'))
-                                            .width(40)
-                                            .height(40)
-                                            .margin({ right: 10 })
-                                        Column() {
-                                            Text(favItem.title)
-                                                .fontSize(16)
-                                            Text('个人名片')
-                                                .fontSize(12)
-                                                .fontColor('#999999')
-                                                .margin({ top: 4 })
-                                        }
-                                        .alignItems(HorizontalAlign.Start)
-                                    }
-                                } else if (favItem.type === MessageContentType.CONFERENCE_CONTENT_TYPE_INVITE) {
-                                    Row() {
-                                        Image($r('app.media.ic_func_video'))
-                                            .width(40)
-                                            .height(40)
-                                            .margin({ right: 10 })
-                                        Column() {
-                                            Text(favItem.title)
-                                                .fontSize(16)
-                                                .maxLines(1)
-                                            Text('会议邀请')
-                                                .fontSize(12)
-                                                .fontColor('#999999')
-                                                .margin({ top: 4 })
-                                        }
-                                        .alignItems(HorizontalAlign.Start)
-                                    }
-                                } else if (favItem.type === MessageContentType.Location) {
-                                    Row() {
-                                        Image($r('app.media.ic_func_location'))
-                                            .width(32)
-                                            .height(32)
-                                            .margin({ right: 10 })
-                                        Text('位置: ' + favItem.title)
-                                            .fontSize(16)
+            Column() {
+                if (!this.favItemLoaded) {
+                    Text('正在加载...')
+                        .fontColor($r('app.color.wf_primary_text'))
+                } else if (this.noFavItems) {
+                    Text('暂无收藏')
+                        .fontColor($r('app.color.wf_primary_text'))
+                } else {
+                    List() {
+                        LazyForEach(this.favListDataSource, (favItem: FavItem) => {
+                            ListItem() {
+                                Column() {
+                                    if (favItem.type === MessageContentType.File) {
+                                        Row() {
+                                            Image(getFiletypeIcon(favItem.title))
+                                                .width(40)
+                                                .height(40)
+                                                .margin({ right: 10 })
+                                            Column() {
+                                                Text(favItem.title)
+                                                    .textOverflow({ overflow: TextOverflow.Ellipsis })
+                                                    .fontSize(16)
+                                                    .fontColor($r('app.color.wf_primary_text'))
+                                                    .maxLines(1)
+                                                Text(humanSize(this.fileSize(favItem)))
+                                                    .fontSize(12)
+                                                    .fontColor($r('app.color.wf_tertiary_text'))
+                                                    .margin({ top: 4 })
+                                            }
                                             .layoutWeight(1)
-                                            .maxLines(2)
+                                            .justifyContent(FlexAlign.Center)
+                                            .alignItems(HorizontalAlign.Start)
+                                        }
+                                    } else if (favItem.type === MessageContentType.Video) {
+                                        Image(this.videoThumbnail(favItem))
+                                            .width(160)
+                                            .height(160)
+                                            .objectFit(ImageFit.Cover)
+                                            .borderRadius(4)
+                                    } else if (favItem.type === MessageContentType.Image) {
+                                        Image(favItem.url)
+                                            .width(160)
+                                            .height(160)
+                                            .objectFit(ImageFit.Cover)
+                                            .borderRadius(4)
+                                    } else if (favItem.type === MessageContentType.Voice) {
+                                        Row() {
+                                            Image($r('app.media.ic_file_type_audio'))
+                                                .width(24)
+                                                .height(24)
+                                                .margin({ right: 10 })
+                                            Text(this.voiceDuration(favItem) + '"')
+                                                .fontSize(16)
+                                                .fontColor($r('app.color.wf_primary_text'))
+                                            if (favItem.messageUid && this.playingVoiceId === favItem.messageUid.toString()) {
+                                                Text('播放中...')
+                                                    .fontSize(12)
+                                                    .fontColor($r('app.color.wf_primary'))
+                                                    .margin({ left: 10 })
+                                            }
+                                        }
+                                    } else if (favItem.type === MessageContentType.Composite_Message) {
+                                        Column() {
+                                            Text(favItem.title)
+                                                .fontSize(16)
+                                                .maxLines(1)
+                                                .textOverflow({ overflow: TextOverflow.Ellipsis })
+                                                .fontWeight(FontWeight.Medium)
+                                                .fontColor($r('app.color.wf_primary_text'))
+                                            Text(this.compositeMessageText(favItem))
+                                                .lineSpacing({ value: 4, unit: LengthUnit.VP })
+                                                .fontSize(14)
+                                                .fontColor($r('app.color.wf_tertiary_text'))
+                                                .maxLines(3)
+                                                .textOverflow({ overflow: TextOverflow.Ellipsis })
+                                                .margin({ top: 6 })
+                                        }
+                                        .alignItems(HorizontalAlign.Start)
+                                    } else if (favItem.type === MessageContentType.Link || favItem.type === MessageContentType.Articles) {
+                                        Row() {
+                                            Column() {
+                                                Text(favItem.title)
+                                                    .maxLines(2)
+                                                    .fontSize(16)
+                                                    .fontColor($r('app.color.wf_primary_text'))
+                                                    .textOverflow({ overflow: TextOverflow.Ellipsis })
+                                            }
+                                            .layoutWeight(1)
+                                            .alignItems(HorizontalAlign.Start)
+                                            .margin({ right: 10 })
+
+                                            if (favItem.url) {
+                                                Image(favItem.url)
+                                                    .width(60)
+                                                    .height(60)
+                                                    .objectFit(ImageFit.Cover)
+                                                    .borderRadius(4)
+                                            }
+                                        }
+                                        .width('100%')
+                                    } else if (favItem.type === MessageContentType.UserCard) {
+                                        Row() {
+                                            Image($r('app.media.ic_user_card'))
+                                                .width(40)
+                                                .height(40)
+                                                .margin({ right: 10 })
+                                            Column() {
+                                                Text(favItem.title)
+                                                    .fontSize(16)
+                                                    .fontColor($r('app.color.wf_primary_text'))
+                                                Text('个人名片')
+                                                    .fontSize(12)
+                                                    .fontColor($r('app.color.wf_tertiary_text'))
+                                                    .margin({ top: 4 })
+                                            }
+                                            .alignItems(HorizontalAlign.Start)
+                                        }
+                                    } else if (favItem.type === MessageContentType.CONFERENCE_CONTENT_TYPE_INVITE) {
+                                        Row() {
+                                            Image($r('app.media.ic_func_video'))
+                                                .width(40)
+                                                .height(40)
+                                                .margin({ right: 10 })
+                                            Column() {
+                                                Text(favItem.title)
+                                                    .fontSize(16)
+                                                    .fontColor($r('app.color.wf_primary_text'))
+                                                    .maxLines(1)
+                                                Text('会议邀请')
+                                                    .fontSize(12)
+                                                    .fontColor($r('app.color.wf_tertiary_text'))
+                                                    .margin({ top: 4 })
+                                            }
+                                            .alignItems(HorizontalAlign.Start)
+                                        }
+                                    } else if (favItem.type === MessageContentType.Location) {
+                                        Row() {
+                                            Image($r('app.media.ic_func_location'))
+                                                .width(32)
+                                                .height(32)
+                                                .margin({ right: 10 })
+                                            Text('位置: ' + favItem.title)
+                                                .fontSize(16)
+                                                .fontColor($r('app.color.wf_primary_text'))
+                                                .layoutWeight(1)
+                                                .maxLines(2)
+                                                .textOverflow({ overflow: TextOverflow.Ellipsis })
+                                        }
+                                    } else if (favItem.type === MessageContentType.Sticker) {
+                                        Text('[表情] ' + favItem.title)
+                                            .fontSize(16)
+                                            .fontColor($r('app.color.wf_primary_text'))
+                                    } else {
+                                        Text(favItem.title)
+                                            .lineSpacing({ value: 4, unit: LengthUnit.VP })
+                                            .fontSize(16)
+                                            .fontColor($r('app.color.wf_primary_text'))
+                                            .maxLines(5)
                                             .textOverflow({ overflow: TextOverflow.Ellipsis })
                                     }
-                                } else if (favItem.type === MessageContentType.Sticker) {
-                                    Text('[表情] ' + favItem.title)
-                                        .fontSize(16)
-                                } else {
-                                    Text(favItem.title)
-                                        .lineSpacing({ value: 4, unit: LengthUnit.VP })
-                                        .fontSize(16)
-                                        .maxLines(5)
-                                        .textOverflow({ overflow: TextOverflow.Ellipsis })
-                                }
-                                Row() {
-                                    Text(favItem.origin)
-                                        .fontSize(12)
-                                        .fontColor('#b2b2b2')
+                                    Row() {
+                                        Text(favItem.origin)
+                                            .fontSize(12)
+                                            .fontColor($r('app.color.wf_tertiary_text'))
 
-                                    Text(timeFormat(favItem.timestamp))
-                                        .margin({ left: 10 })
-                                        .fontSize(12)
-                                        .fontColor('#b2b2b2')
+                                        Text(timeFormat(favItem.timestamp))
+                                            .margin({ left: 10 })
+                                            .fontSize(12)
+                                            .fontColor($r('app.color.wf_tertiary_text'))
+                                    }
+                                    .margin({ top: 10 })
                                 }
-                                .margin({ top: 10 })
+                                .padding(15)
+                                .alignItems(HorizontalAlign.Start)
+                                .onClick(() => {
+                                    this.previewMessage(favItem)
+                                })
                             }
-                            .padding(15)
-                            .alignItems(HorizontalAlign.Start)
-                            .onClick(() => {
-                                this.previewMessage(favItem)
-                            })
-                        }
-                        .key(favItem.id + '')
-                    }, (favItem: FavItem) => favItem.id + '')
-                }
-                .width('100%')
-                .height('100%')
-                .layoutWeight(1)
-                .divider({
-                    strokeWidth: 1,
-                    startMargin: 10,
-                    endMargin: 10
-                })
-                .onScrollIndex((start, end) => {
-                    if (end === this.favListDataSource.totalCount() - 1 && !this.isLoading) {
-                        this.loadFavList(this.favListDataSource.getData(this.favListDataSource.totalCount() - 1).id)
+                            .backgroundColor($r('app.color.wf_background'))
+                            .key(favItem.id + '')
+                        }, (favItem: FavItem) => favItem.id + '')
                     }
-                })
+                    .width('100%')
+                    .height('100%')
+                    .layoutWeight(1)
+                    .divider({
+                        strokeWidth: 1,
+                        color: $r('app.color.wf_divider'),
+                        startMargin: 10,
+                        endMargin: 10
+                    })
+                    .onScrollIndex((start, end) => {
+                        if (end === this.favListDataSource.totalCount() - 1 && !this.isLoading) {
+                            this.loadFavList(this.favListDataSource.getData(this.favListDataSource.totalCount() - 1).id)
+                        }
+                    })
+                }
             }
+            .width('100%')
+            .height('100%')
+            .backgroundColor($r('app.color.wf_primary_background_color'))
         }
         .title('我的收藏')
         .height('100%')

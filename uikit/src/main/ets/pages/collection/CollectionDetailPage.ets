@@ -124,7 +124,7 @@ export default struct CollectionDetailPage {
                                 if (this.collection.desc) {
                                     Text(this.collection.desc)
                                         .fontSize(14)
-                                        .fontColor('#333333')
+                                        .fontColor($r('app.color.wf_primary_text'))
                                         .margin({ bottom: 8 })
                                         .width('100%')
                                 }
@@ -146,7 +146,7 @@ export default struct CollectionDetailPage {
                                 }
                             }
                             .padding(16)
-                            .backgroundColor(Color.White)
+                            .backgroundColor($r('app.color.wf_background'))
                         }
 
                         // Entries
@@ -170,7 +170,7 @@ export default struct CollectionDetailPage {
                         }
                     }
                     .layoutWeight(1)
-                    .backgroundColor('#F5F5F5')
+                    .backgroundColor($r('app.color.wf_primary_background_color'))
                 }
             }
         }
@@ -199,7 +199,7 @@ export default struct CollectionDetailPage {
             bottom: 12
         })
         .width('100%')
-        .backgroundColor(Color.White)
+        .backgroundColor($r('app.color.wf_background'))
     }
 
     @Builder
@@ -215,8 +215,8 @@ export default struct CollectionDetailPage {
             })
                 .width('100%')
                 .layoutWeight(1)
-                .backgroundColor(Color.White)
-                .border({ width: 1, color: '#CCCCCC', radius: 4 })
+                .backgroundColor($r('app.color.wf_background'))
+                .border({ width: 1, color: $r('app.color.wf_divider'), radius: 4 })
                 .height(40)
                 .padding({ left: 8, right: 8 })
                 .onSubmit(() => {
@@ -283,7 +283,7 @@ export default struct CollectionDetailPage {
             buttons: [
                 {
                     text: '取消',
-                    color: '#000000'
+                    color: $r('app.color.wf_primary_text')
                 },
                 {
                     text: '删除',

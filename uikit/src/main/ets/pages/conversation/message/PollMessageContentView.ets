@@ -46,7 +46,7 @@ export default struct PollMessageContentView {
             Text('🗳️ ' + this.pollContent().title)
                 .fontSize(16)
                 .fontWeight(FontWeight.Medium)
-                .fontColor('#333333')
+                .fontColor($r('app.color.wf_primary_text'))
                 .maxLines(2)
                 .textOverflow({ overflow: TextOverflow.Ellipsis })
                 .width('100%')
@@ -55,7 +55,7 @@ export default struct PollMessageContentView {
             if (this.pollContent().desc) {
                 Text(this.pollContent().desc)
                     .fontSize(14)
-                    .fontColor('#666666')
+                    .fontColor($r('app.color.wf_tertiary_text'))
                     .maxLines(2)
                     .textOverflow({ overflow: TextOverflow.Ellipsis })
                     .width('100%')
@@ -65,7 +65,7 @@ export default struct PollMessageContentView {
             // 分隔线
             Divider()
                 .strokeWidth(0.5)
-                .color('#E5E5E5')
+                .color($r('app.color.wf_divider'))
                 .margin({ top: 12, bottom: 8 })
                 .width('100%')
 
@@ -73,11 +73,11 @@ export default struct PollMessageContentView {
             Row() {
                 Text(this.getStatusText() + ' · ' + this.getTypeText())
                     .fontSize(12)
-                    .fontColor('#999999')
+                    .fontColor($r('app.color.wf_tertiary_text'))
 
                 Text('点击参与')
                     .fontSize(12)
-                    .fontColor('#007AFF')
+                    .fontColor($r('app.color.wf_primary'))
             }
             .width('100%')
             .justifyContent(FlexAlign.SpaceBetween)

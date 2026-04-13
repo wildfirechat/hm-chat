@@ -120,7 +120,7 @@ export default struct PCRestoreProgressPage {
         },
         secondaryButton: {
           value: '开始恢复',
-          fontColor: Color.Red,
+          fontColor: $r('app.color.wf_danger'),
           action: () => {
             this.downloadAllFiles(metadata)
             resolve()
@@ -390,8 +390,8 @@ export default struct PCRestoreProgressPage {
           if (!this.isRestoreComplete) {
             Progress({ value: this.progress, total: 100, type: ProgressType.Linear })
               .width('80%')
-              .height(4)
-              .color('#4CD964')
+              .width(4)
+              .color($r('app.color.wf_success'))
               .margin({ top: 40 })
           }
         }

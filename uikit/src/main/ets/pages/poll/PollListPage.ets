@@ -110,7 +110,7 @@ export default struct PollListPage {
             },
             secondaryButton: {
                 value: '删除',
-                fontColor: '#FF3B30',
+                fontColor: $r('app.color.wf_danger'),
                 action: () => {
                     this.doDeletePoll(poll);
                 }
@@ -152,18 +152,18 @@ export default struct PollListPage {
         return '进行中';
     }
 
-    private getStatusColor(poll: Poll): string {
+    private getStatusColor(poll: Poll): Resource {
         if (poll.status === 1 || poll.isExpired()) {
-            return '#999999';
+            return $r('app.color.wf_tertiary_text');
         }
-        return '#FF9500';
+        return $r('app.color.wf_warning');
     }
 
-    private getStatusBgColor(poll: Poll): string {
+    private getStatusBgColor(poll: Poll): Resource {
         if (poll.status === 1 || poll.isExpired()) {
-            return '#F5F5F5';
+            return $r('app.color.wf_primary_background_color');
         }
-        return '#FFF5E6';
+        return $r('app.color.wf_secondary_background');
     }
 
     private isPollEnded(poll: Poll): boolean {
@@ -179,11 +179,11 @@ export default struct PollListPage {
                     Circle()
                         .width(40)
                         .height(40)
-                        .fill('#F0F8FF')
+                        .fill($r('app.color.wf_secondary_background'))
 
                     Text(poll.pollType === 1 ? '单' : '多')
                         .fontSize(14)
-                        .fontColor('#007AFF')
+                        .fontColor($r('app.color.wf_primary'))
                         .fontWeight(FontWeight.Bold)
                 }
 
@@ -192,7 +192,7 @@ export default struct PollListPage {
                     Row({ space: 8 }) {
                         Text(poll.title)
                             .fontSize(16)
-                            .fontColor('#333333')
+                            .fontColor($r('app.color.wf_primary_text'))
                             .fontWeight(FontWeight.Medium)
                             .layoutWeight(1)
                             .maxLines(1)
@@ -210,11 +210,11 @@ export default struct PollListPage {
                     Row({ space: 8 }) {
                         Text(`${poll.voterCount}人参与`)
                             .fontSize(13)
-                            .fontColor('#666666')
+                            .fontColor($r('app.color.wf_tertiary_text'))
 
                         Text(this.formatTime(poll.createdAt))
                             .fontSize(13)
-                            .fontColor('#999999')
+                            .fontColor($r('app.color.wf_tertiary_text'))
                     }
                     .width('100%')
                 }
@@ -223,7 +223,7 @@ export default struct PollListPage {
             }
             .width('100%')
             .padding(16)
-            .backgroundColor(Color.White)
+            .backgroundColor($r('app.color.wf_background'))
         }
         .onClick(() => {
             this.navigateToPollDetail(poll);
@@ -239,8 +239,8 @@ export default struct PollListPage {
             if (!this.isPollEnded(poll)) {
                 Button('结束')
                     .fontSize(14)
-                    .fontColor(Color.White)
-                    .backgroundColor('#FF9500')
+                    .fontColor($r('app.color.wf_background'))
+                    .backgroundColor($r('app.color.wf_warning'))
                     .width(60)
                     .height(40)
                     .onClick(() => {
@@ -250,8 +250,8 @@ export default struct PollListPage {
 
             Button('删除')
                 .fontSize(14)
-                .fontColor(Color.White)
-                .backgroundColor('#FF3B30')
+                .fontColor($r('app.color.wf_background'))
+                .backgroundColor($r('app.color.wf_danger'))
                 .width(60)
                 .height(40)
                 .onClick(() => {
@@ -268,7 +268,7 @@ export default struct PollListPage {
                     Column() {
                         Text('暂无投票')
                             .fontSize(16)
-                            .fontColor('#999999')
+                            .fontColor($r('app.color.wf_tertiary_text'))
                     }
                     .width('100%')
                     .height('100%')
@@ -281,8 +281,8 @@ export default struct PollListPage {
                     }
                     .width('100%')
                     .height('100%')
-                    .divider({ strokeWidth: 0.5, color: '#E5E5E5' })
-                    .backgroundColor('#F2F2F7')
+                    .divider({ strokeWidth: 0.5, color: $r('app.color.wf_divider') })
+                    .backgroundColor($r('app.color.wf_primary_background_color'))
                 }
             }
             .onRefreshing(() => {
@@ -290,7 +290,7 @@ export default struct PollListPage {
             })
         }
         .title('我的投票')
-        .backgroundColor('#F2F2F7')
+        .backgroundColor($r('app.color.wf_primary_background_color'))
         .hideBackButton(false)
     }
 }

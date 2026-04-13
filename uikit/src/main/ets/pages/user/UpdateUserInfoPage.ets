@@ -54,7 +54,7 @@ export default struct UpdateUserInfoPage {
                     })
                 }
                 .margin({ top: 10 })
-                .backgroundColor(Color.White)
+                .backgroundColor($r('app.color.wf_background'))
             }
 
             if (this.isFriend) {
@@ -63,14 +63,14 @@ export default struct UpdateUserInfoPage {
                     .width('100%')
                     .height(56)
                     .textAlign(TextAlign.Center)
-                    .backgroundColor(Color.White)
+                    .backgroundColor($r('app.color.wf_background'))
                     .fontColor(Color.Red)
                     .stateStyles({
                         pressed: {
-                            .backgroundColor('#E5E5E5')
+                            .backgroundColor($r('app.color.wf_item_pressed'))
                         },
                         normal: {
-                            .backgroundColor(Color.White)
+                            .backgroundColor($r('app.color.wf_background'))
                         }
                     })
                     .onClick(() => {

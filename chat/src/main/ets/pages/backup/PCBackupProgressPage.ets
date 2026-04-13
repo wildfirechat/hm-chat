@@ -548,8 +548,8 @@ export default struct PCBackupProgressPage {
           if (this.isUploading && this.totalFiles > 0) {
             Progress({ value: this.uploadedFiles, total: this.totalFiles, type: ProgressType.Linear })
               .width('80%')
-              .height(4)
-              .color('#007AFF')
+              .width(4)
+              .color($r('app.color.wf_primary'))
               .margin({ top: 40 })
           }
 

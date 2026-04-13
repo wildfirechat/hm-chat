@@ -31,113 +31,118 @@ export default struct ConferencePortalPage {
 
     build() {
         NavDestination() {
-            Row() {
-                Column() {
-                    Image($r('app.media.av_join_conference'))
-                        .height(60)
-                        .width(60)
-                        .borderRadius(4)
-                    Text('加入会议')
-                        .padding({ top: 5 })
-                }
-                .onClick(() => {
-                    this.joinConferenceDialogController = new CustomDialogController({
-                        builder: JoinConferenceDialog({
-                            controller: this.joinConferenceDialogController,
-                            onConfirm: (conferenceId: string, password: string) => {
-                                this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ConferenceInfoPage, {
-                                    'conferenceId': conferenceId,
-                                    'password': password
-                                } as Record<string, string>)
-                            }
-                        }),
-                        alignment: DialogAlignment.Center,
-                    })
-                    this.joinConferenceDialogController.open()
-                })
-
-                Column() {
-                    Image($r('app.media.av_start_conference'))
-                        .height(60)
-                        .width(60)
-                        .borderRadius(4)
-                    Text('发起会议')
-                        .padding({ top: 5 })
-                }
-                .onClick(async () => {
-                    // let conferenceInfo = new ConferenceInfo();
-                    // conferenceInfo.conferenceTitle = 'Test';
-                    // conferenceInfo.pin = '123456'
-                    // conferenceInfo.owner = wfc.getUserId()
-                    // conferenceInfo.startTime = Math.ceil(new Date().getTime() / 1000)
-                    // conferenceInfo.endTime = Math.ceil(new Date().getTime() / 1000 + 3600)
-                    // let conferenceId = await appServer.createConference(conferenceInfo)
-                    // avenginekitImpl.startConference(conferenceId, false, conferenceInfo.pin, wfc.getUserId(), conferenceInfo.conferenceTitle, 'desc', false, false)
-                    this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.StartConferencePage, {} as Record<string, Object>)
-
-                })
-
-                Column() {
-                    Image($r('app.media.av_book_conference'))
-                        .height(60)
-                        .width(60)
-                        .borderRadius(4)
-                    Text('预定会议')
-                        .padding({ top: 5 })
-                }
-                .onClick(() => {
-                    this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.OrderConferencePage, {} as Record<string, Object>)
-                })
-            }
-            .width('100%')
-            .padding({ top: 10, bottom: 10 })
-            .justifyContent(FlexAlign.SpaceAround)
-
-            Stack() {
-                List() {
-                    ForEach(this.favConferenceInfos, (info: ConferenceInfo, index: number) => {
-                        ListItem() {
-                            OptionItemView({
-                                title: info.conferenceTitle,
-                                subTitle: info.startTime * 1000 < new Date().getTime() ? '会议已开始，请尽快加入' : '会议尚未开始',
-                                showRightArrow: false
-                            })
-                        }
-                        .onClick(() => {
-                            this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ConferenceInfoPage, {
-                                'conferenceId': info.conferenceId,
-                                'password': info.password
-                            } as Record<string, string>)
-
-                        })
-
-                    }, (info: ConferenceInfo, index: number) => {
-                        return index + ''
-                    })
-                }
-                .width('100%')
-                .height('100%')
-
+            Column() {
                 Row() {
-                    Text('会议记录')
-                        .padding({ right: 10 })
-                        .fontColor('#3B62E0')
-                        .onClick(() => {
-                            showToast('TODO')
+                    Column() {
+                        Image($r('app.media.av_join_conference'))
+                            .height(60)
+                            .width(60)
+                            .borderRadius(4)
+                        Text('加入会议')
+                            .padding({ top: 5 })
+                            .fontColor($r('app.color.wf_primary_text'))
+                    }
+                    .onClick(() => {
+                        this.joinConferenceDialogController = new CustomDialogController({
+                            builder: JoinConferenceDialog({
+                                controller: this.joinConferenceDialogController,
+                                onConfirm: (conferenceId: string, password: string) => {
+                                    this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ConferenceInfoPage, {
+                                        'conferenceId': conferenceId,
+                                        'password': password
+                                    } as Record<string, string>)
+                                }
+                            }),
+                            alignment: DialogAlignment.Center,
                         })
+                        this.joinConferenceDialogController.open()
+                    })
+
+                    Column() {
+                        Image($r('app.media.av_start_conference'))
+                            .height(60)
+                            .width(60)
+                            .borderRadius(4)
+                        Text('发起会议')
+                            .padding({ top: 5 })
+                            .fontColor($r('app.color.wf_primary_text'))
+                    }
+                    .onClick(async () => {
+                        this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.StartConferencePage, {} as Record<string, Object>)
+                    })
+
+                    Column() {
+                        Image($r('app.media.av_book_conference'))
+                            .height(60)
+                            .width(60)
+                            .borderRadius(4)
+                        Text('预定会议')
+                            .padding({ top: 5 })
+                            .fontColor($r('app.color.wf_primary_text'))
+                    }
+                    .onClick(() => {
+                        this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.OrderConferencePage, {} as Record<string, Object>)
+                    })
                 }
-                .visibility(Visibility.Hidden)
                 .width('100%')
-                .justifyContent(FlexAlign.End)
+                .padding({ top: 20, bottom: 20 })
+                .backgroundColor($r('app.color.wf_background'))
+                .justifyContent(FlexAlign.SpaceAround)
 
+                Stack() {
+                    List() {
+                        ForEach(this.favConferenceInfos, (info: ConferenceInfo, index: number) => {
+                            ListItem() {
+                                OptionItemView({
+                                    title: info.conferenceTitle,
+                                    subTitle: info.startTime * 1000 < new Date().getTime() ? '会议已开始，请尽快加入' : '会议尚未开始',
+                                    showRightArrow: false
+                                })
+                            }
+                            .onClick(() => {
+                                this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ConferenceInfoPage, {
+                                    'conferenceId': info.conferenceId,
+                                    'password': info.password
+                                } as Record<string, string>)
+                            })
+                        }, (info: ConferenceInfo, index: number) => {
+                            return index + ''
+                        })
+                    }
+                    .divider({
+                        strokeWidth: 0.5,
+                        color: $r('app.color.wf_divider'),
+                        startMargin: 16,
+                        endMargin: 16
+                    })
+                    .backgroundColor($r('app.color.wf_background'))
+                    .width('100%')
+                    .height('100%')
+
+                    Row() {
+                        Text('会议记录')
+                            .padding({ right: 10 })
+                            .fontColor($r('app.color.wf_primary'))
+                            .onClick(() => {
+                                showToast('TODO')
+                            })
+                    }
+                    .visibility(Visibility.Hidden)
+                    .width('100%')
+                    .justifyContent(FlexAlign.End)
+                }
+                .width('100%')
+                .margin({ top: 10 })
+                .layoutWeight(1)
             }
+            .height('100%')
             .width('100%')
-
         }
         .onShown(() => {
             this.loadFavConferences()
         })
         .title('会议')
+        .backgroundColor($r('app.color.wf_primary_background_color'))
         .height('100%')
         .width('100%')
     }

@@ -8,15 +8,20 @@ export default struct ConferencePasswordDialog {
         Column() {
             Text('请输入会议密码')
                 .fontSize(17)
+                .fontColor($r('app.color.wf_primary_text'))
                 .padding(20)
 
             Column() {
                 Text('会议密码')
                     .fontSize(15)
+                    .fontColor($r('app.color.wf_primary_text'))
                 TextInput({ placeholder: '请输入会议密码', text: this.password })
                     .fontSize(14)
                     .borderRadius(4)
                     .type(InputType.Number)
+                    .fontColor($r('app.color.wf_primary_text'))
+                    .placeholderColor($r('app.color.wf_tertiary_text'))
+                    .backgroundColor(Color.Transparent)
                     .maxLines(1)
                     .maxLength(50)
                     .margin({ top: 5 })
@@ -29,7 +34,7 @@ export default struct ConferencePasswordDialog {
 
             Row() {
                 Button('取消')
-                    .fontColor(Color.Gray)
+                    .fontColor($r('app.color.wf_tertiary_text'))
                     .type(ButtonType.Normal)
                     .buttonStyle(ButtonStyleMode.TEXTUAL)
                     .onClick(() => {

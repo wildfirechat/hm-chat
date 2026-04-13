@@ -112,7 +112,7 @@ export default struct AudioMessageContentView {
                     .width(8)
                     .height(8)
                     .margin({ left: 8 })
-                    .backgroundColor(Color.Red)
+                    .backgroundColor($r('app.color.wf_danger'))
                     .borderRadius(8)
             }
         }

@@ -50,6 +50,7 @@ export default struct PCLoginPage {
             Column() {
                 Text(`允许 ${this.platform?.getPlatFormName()} 登录`)
                     .fontSize(20)
+                    .fontColor($r('app.color.wf_primary_text'))
                     .margin({ top: 80 })
 
                 Image($r('app.media.pc'))
@@ -59,9 +60,10 @@ export default struct PCLoginPage {
 
                 Column() {
                     Button('确定', { type: ButtonType.Normal, stateEffect: true })
-                        .backgroundColor(0x317aff)
+                        .backgroundColor($r('app.color.wf_primary'))
+                        .fontColor(Color.White)
                         .borderRadius(8)
-                        .height(40)
+                        .height(44)
                         .enabled(this.enableConfirmButton)
                         .focusable(true)
                         .focusOnTouch(true)
@@ -80,8 +82,9 @@ export default struct PCLoginPage {
                         })
                     Button('取消', { type: ButtonType.Normal, stateEffect: true })
                         .borderRadius(8)
-                        .backgroundColor('#D6D7D7')
-                        .height(40)
+                        .backgroundColor($r('app.color.wf_secondary_background'))
+                        .fontColor($r('app.color.wf_primary_text'))
+                        .height(44)
                         .margin({ top: 20 })
                         .focusable(true)
                         .focusOnTouch(true)
@@ -103,6 +106,7 @@ export default struct PCLoginPage {
             }
             .width('100%')
             .height('100%')
+            .backgroundColor($r('app.color.wf_background'))
             .justifyContent(FlexAlign.Center)
             .alignItems(HorizontalAlign.Center)
         }

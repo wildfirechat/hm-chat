@@ -35,21 +35,23 @@ export default struct ResetPasswordPage {
                 Column() {
                     Row() {
                         Text($r('app.string.verification_code')).width(70)
+                            .fontColor($r('app.color.wf_primary_text'))
                         TextInput({
                             text: this.verificationCode,
                             placeholder: $r('app.string.enter_verification_code'),
                             controller: this.controller
                         })
-                            .placeholderColor(Color.Grey)
+                            .placeholderColor($r('app.color.wf_tertiary_text'))
                             .placeholderFont({ size: 14, weight: 400 })
-                            .caretColor(Color.Blue)
+                            .caretColor($r('app.color.wf_primary'))
                             .layoutWeight(1)
                             .height(40)
                             .margin({ left: 20 })
                             .fontSize(14)
                             .borderRadius(4)
                             .type(InputType.Number)
-                            .fontColor(Color.Black)
+                            .fontColor($r('app.color.wf_primary_text'))
+                            .backgroundColor(Color.Transparent)
                             .borderStyle(BorderStyle.Dashed)
                             .onChange((value: string) => {
                                 this.verificationCode = value
@@ -67,21 +69,23 @@ export default struct ResetPasswordPage {
 
                     Row() {
                         Text($r('app.string.new_password')).width(70)
+                            .fontColor($r('app.color.wf_primary_text'))
                         TextInput({
                             text: this.password,
                             placeholder: $r('app.string.enter_new_password'),
                             controller: this.controller
                         })
-                            .placeholderColor(Color.Grey)
+                            .placeholderColor($r('app.color.wf_tertiary_text'))
                             .placeholderFont({ size: 14, weight: 400 })
-                            .caretColor(Color.Blue)
+                            .caretColor($r('app.color.wf_primary'))
                             .layoutWeight(1)
                             .height(40)
                             .margin({ left: 20 })
                             .fontSize(14)
                             .borderRadius(4)
                             .type(InputType.Password)
-                            .fontColor(Color.Black)
+                            .fontColor($r('app.color.wf_primary_text'))
+                            .backgroundColor(Color.Transparent)
                             .borderStyle(BorderStyle.Dashed)
                             .onChange((value: string) => {
                                 this.password = value
@@ -90,21 +94,23 @@ export default struct ResetPasswordPage {
 
                     Row() {
                         Text($r('app.string.confirm_password')).width(70)
+                            .fontColor($r('app.color.wf_primary_text'))
                         TextInput({
                             text: this.confirmPassword,
                             placeholder: $r('app.string.confirm_new_password'),
                             controller: this.controller
                         })
-                            .placeholderColor(Color.Grey)
+                            .placeholderColor($r('app.color.wf_tertiary_text'))
                             .placeholderFont({ size: 14, weight: 400 })
-                            .caretColor(Color.Blue)
+                            .caretColor($r('app.color.wf_primary'))
                             .layoutWeight(1)
                             .height(40)
                             .margin({ left: 20 })
                             .fontSize(14)
                             .borderRadius(4)
                             .type(InputType.Password)
-                            .fontColor(Color.Black)
+                            .fontColor($r('app.color.wf_primary_text'))
+                            .backgroundColor(Color.Transparent)
                             .borderStyle(BorderStyle.Dashed)
                             .onChange((value: string) => {
                                 this.confirmPassword = value
@@ -115,20 +121,19 @@ export default struct ResetPasswordPage {
                         Button({ type: ButtonType.Normal, stateEffect: true }) {
                             Row() {
                                 if (this.isProgress) {
-                                    LoadingProgress().width(20).height(20).margin({ left: 12 }).color(0xFFFFFF)
+                                    LoadingProgress().width(20).height(20).margin({ left: 12 }).color(Color.White)
                                 }
-                                Text($r('app.string.btn_reset_password')).fontColor(0xffffff).margin({ left: 5 })
+                                Text($r('app.string.btn_reset_password')).fontColor(Color.White).margin({ left: 5 })
                             }.alignItems(VerticalAlign.Center)
                         }
                         .borderRadius(8)
-                        .backgroundColor(0x317aff)
-                        .width(90)
-                        .height(40)
+                        .backgroundColor($r('app.color.wf_primary'))
                         .focusable(true)
                         .focusOnTouch(true)
                         .enabled(!this.isProgress && this.verificationCode.length > 0 && this.password.length > 0 && this.confirmPassword.length > 0)
                         .type(ButtonType.Normal)
                         .width('100%')
+                        .height(40)
                         .borderRadius(4)
                         .onClick(() => {
                             // 判断密码是否一致
@@ -179,7 +184,7 @@ export default struct ResetPasswordPage {
         .title('设置新密码')
         .height('100%')
         .width('100%')
-        .backgroundColor('#EDEDED')
+        .backgroundColor($r('app.color.wf_primary_background_color'))
     }
 
     resetPassword() {

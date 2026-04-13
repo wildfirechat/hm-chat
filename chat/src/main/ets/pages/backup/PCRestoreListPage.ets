@@ -280,7 +280,7 @@ export default struct PCRestoreListPage {
           Column() {
             Text(this.errorMessage)
               .fontSize(16)
-              .fontColor('#FF3B30')
+              .fontColor($r('app.color.wf_danger'))
               .margin({ top: 100 })
           }
           .width('100%')

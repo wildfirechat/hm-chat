@@ -11,6 +11,8 @@ import AVEngineCallback from '@wfc/avenginekit/src/main/ets/wfc/av/engine/avengi
 
 import { uikitNavigationDestinations } from './pages/uikitNavigationConfig';
 import { common } from '@kit.AbilityKit';
+import { checkAndRequestPermission } from './helper/permissionHelper';
+import { showToast } from './common/utils/Toast';
 
 // 一定要引入，否则不能弹出对应页面
 import ('./pages/voip/SingleAudioCallPage')
@@ -33,6 +35,13 @@ export default class AVEngineCallbackImpl extends AVEngineCallback {
      * @param {CallSession} session 会话信息
      */
     async onReceiveCall(session: CallSession) {
+        let cameraGranted =  await checkAndRequestPermission(this.context, 'ohos.permission.CAMERA')
+        let microphoneGranted = await checkAndRequestPermission(this.context, 'ohos.permission.MICROPHONE')
+        if (!cameraGranted || !microphoneGranted) {
+            showToast('请授予摄像头和麦克风权限')
+            return
+        }
+
         this.createAVSessionAndStartContinuousTask(session)
         let name = ''
         if (session.conversation?.type === ConversationType.Single) {

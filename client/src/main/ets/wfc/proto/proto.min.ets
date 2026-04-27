@@ -130,9 +130,6 @@ class WfcImpl {
     }
 
     onReceiveMessage(messages: string, hasMore: boolean) {
-        if (!self.isLogined) {
-            return;
-        }
         // receiving
         // if (self.connectionStatus === 2) {
         //     return;

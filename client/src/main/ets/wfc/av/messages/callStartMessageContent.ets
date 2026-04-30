@@ -28,6 +28,15 @@ export default class CallStartMessageContent extends MessageContent {
     pin = '';
     sdkType = 0;
 
+    /**
+     *   0 voip对voip电话；1 voip打PSTN电话；2 PSTN打voip电话。
+     */
+    pstnType = 0;
+
+    /**
+     * 当pstnType为1或者2时，PSTN电话号码.
+     */
+    pstnNumber = '';
     constructor(mentionedType = 0, mentionedTargets = []) {
         super(MessageContentType.VOIP_CONTENT_TYPE_START, mentionedType, mentionedTargets);
     }
@@ -53,7 +62,7 @@ export default class CallStartMessageContent extends MessageContent {
             ts: this.targetIds,
             t: this.targetIds[0],
             p: this.pin,
-            ty: this.sdkType
+            ty: this.sdkType,
         } as Data;
         payload.binaryContent = wfc.utf8_to_b64(JSON.stringify(obj));
 
@@ -83,6 +92,8 @@ export default class CallStartMessageContent extends MessageContent {
         }
         this.pin = obj.p;
         this.sdkType = obj.ty;
+        this.pstnType = obj.pstnty;
+        this.pstnNumber = obj.pstnn;
     }
 }
 
@@ -94,6 +105,9 @@ class Data {
     ts = [] as string[]
     t = ''
     p = ''
-    ty = 0;
+    ty = 0
+    pstnty = 0
+    pstnn = ''
+    ;
 }
 

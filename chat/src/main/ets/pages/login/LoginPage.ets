@@ -130,10 +130,19 @@ struct LoginPage {
                             .borderRadius(4)
                             .enabled(!this.isLogin && this.phoneNumber.length === 11)
                             .onClick(() => {
-                                // 发送验证码时需要滑动验证
                                 inputMethod.getController().stopInputSession()
-                                this.pendingAction = 'send_code'
-                                this.showSlideVerify = true
+                                if (Config.ENABLE_SLIDE_VERIFY) {
+                                    this.pendingAction = 'send_code'
+                                    this.showSlideVerify = true
+                                } else {
+                                    appServer.requestAuthCode(this.phoneNumber)
+                                        .then(res => {
+                                            showToast('发送验证码成功')
+                                        })
+                                        .catch((reason: Error) => {
+                                            showToast('发送验证码失败 ' + reason)
+                                        })
+                                }
                             })
                     }
 
@@ -172,24 +181,41 @@ struct LoginPage {
                     .enabled(!this.isLogin && ((this.isLoginByPassword && this.phoneNumber.length === 11 && this.password.length > 0) || (!this.isLoginByPassword && this.phoneNumber.length === 11 && this.authCode.length > 0)))
                     .onClick(() => {
                         inputMethod.getController().stopInputSession()
-                        if(!this.isAgreeUserAgreementAndPrivacyPolicy){
+                        if (!this.isAgreeUserAgreementAndPrivacyPolicy) {
                             showToast('请同意用户协议及隐私政策')
                             return
                         }
                         this.isLogin = true
-                        if (this.isLoginByPassword) {
-                            // 密码登录需要滑动验证
-                            this.pendingAction = 'password_login'
-                            this.showSlideVerify = true
-                        } else {
-                            // 验证码登录：检查是否已通过滑动验证
-                            if (this.hasSlideVerifiedForCode) {
-                                // 已通过验证，直接登录
-                                this.doCodeLogin()
-                            } else {
-                                // 未验证过，需要先滑动验证
-                                this.pendingAction = 'code_login'
+                        if (Config.ENABLE_SLIDE_VERIFY) {
+                            if (this.isLoginByPassword) {
+                                // 密码登录需要滑动验证
+                                this.pendingAction = 'password_login'
                                 this.showSlideVerify = true
+                            } else {
+                                // 验证码登录：检查是否已通过滑动验证
+                                if (this.hasSlideVerifiedForCode) {
+                                    // 已通过验证，直接登录
+                                    this.doCodeLogin()
+                                } else {
+                                    // 未验证过，需要先滑动验证
+                                    this.pendingAction = 'code_login'
+                                    this.showSlideVerify = true
+                                }
+                            }
+                        } else {
+                            if (this.isLoginByPassword) {
+                                appServer.loinWithPassword(this.phoneNumber, this.password)
+                                    .then(async res => {
+                                        this.isLogin = false
+                                        this.onLoginSuccess(res as Record<string, Object>)
+                                    })
+                                    .catch((reason: Error) => {
+                                        this.isLogin = false
+                                        showToast(reason.message)
+                                        console.error('login failed', reason)
+                                    })
+                            } else {
+                                this.doCodeLogin()
                             }
                         }
                     })

@@ -4,6 +4,7 @@ import wfc from '@wfc/client/src/main/ets/wfc/client/wfc';
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo';
 import { SlideVerifyView, SlideVerifyViewDelegate } from '@wfc/uikit/src/main/ets/view/SlideVerifyView';
 import { inputMethod } from '@kit.IMEKit';
+import Config from '@wfc/client/src/main/ets/config';
 
 @Component
 export default struct ResetPasswordPage {
@@ -142,9 +143,13 @@ export default struct ResetPasswordPage {
                                 return
                             }
 
-                            // 显示滑动验证
-                            inputMethod.getController().stopInputSession()
-                            this.showSlideVerify = true
+                            if (Config.ENABLE_SLIDE_VERIFY) {
+                                // 显示滑动验证
+                                inputMethod.getController().stopInputSession()
+                                this.showSlideVerify = true
+                            } else {
+                                this.resetPassword()
+                            }
                         })
 
                     }

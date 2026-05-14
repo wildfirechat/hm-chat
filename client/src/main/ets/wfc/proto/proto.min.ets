@@ -427,7 +427,7 @@ class WfcImpl {
         return protoProxy.isTcpShortLink() === 1;
     }
 
-    connect(userId: string, token: string): number {
+    connect(imhost: string, port: number, userId: string, token: string): number {
         if (!self.userId) {
             self.userId = userId;
             let status = this.getConnectionStatus();
@@ -438,7 +438,7 @@ class WfcImpl {
         }
         self.userId = userId;
 
-        let lastActiveTime: number = protoProxy.connect(userId, token);
+        let lastActiveTime: number = protoProxy.connect(imhost, port, userId, token);
         console.log('lastActiveTime', lastActiveTime);
         // 超过一周没有活跃，就预加载数据
         if (new Date().getTime() / 1000 - lastActiveTime > 7 * 24 * 60 * 60) {

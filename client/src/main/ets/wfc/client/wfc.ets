@@ -179,12 +179,14 @@ export class WfcManager {
 
     /**
      * 连接服务器
+     * @param {string} imhost IM服务Host
+     * @param {string} port IM服务端口
      * @param {string} userId 用户id
      * @param {string} token 用户token，生成token时，所使用的clientId，一定要通过{@link getClientId}获取
      * @return {number} 返回上一次活动时间。如果间隔时间较长，可以加个第一次登录的等待提示界面，在等待时同步所有的用户信息/群组信息/频道信息等。
      */
-    connect(userId: string, token: string): number {
-        return impl.connect(userId, token);
+    connect(imhost: string, port: number, userId: string, token: string): number {
+        return impl.connect(imhost, port, userId, token);
     }
 
     /**

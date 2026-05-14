@@ -331,7 +331,7 @@ struct LoginPage {
         preference.putSync('token', token);
         await preference.flush()
 
-        wfc.connect(userId, token);
+        wfc.connect(Config.IM_HOST, 80, userId, token);
         router.replaceUrl({
             url: "pages/MainPage",
             params: {}

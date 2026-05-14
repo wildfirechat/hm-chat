@@ -115,7 +115,7 @@ export default class EntryAbility extends UIAbility {
                     let token = await preferences.get('token', null);
                     if (userId && token) {
                         url = 'pages/MainPage'
-                        wfc.connect(userId as string, token as string);
+                        wfc.connect(Config.IM_HOST, 80, userId as string, token as string);
                     }
                 } catch (e) {
 

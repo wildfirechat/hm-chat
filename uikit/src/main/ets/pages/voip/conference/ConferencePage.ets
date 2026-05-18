@@ -9,7 +9,7 @@ import AVCastPicker from '@ohos.multimedia.avCastPicker'
 import ParticipantProfile from '@wfc/avenginekit/src/main/ets/wfc/av/engine/participantProfile'
 import PickGroupMemberModal from '../../group/PickGroupMemberModal'
 import { timestampFormat } from '../../../util/helper'
-import { window, PiPWindow } from '@kit.ArkUI'
+import { window, PiPWindow, KeyboardAvoidMode } from '@kit.ArkUI'
 import ConferenceInfo from '@wfc/avenginekit/src/main/ets/wfc/av/model/conferenceInfo'
 import { showToast } from '../../../common/utils/Toast'
 import { WHITE_FILTER } from '../../../api/Util'
@@ -28,7 +28,6 @@ import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationTyp
 import TextMessageContent from '@wfc/client/src/main/ets/wfc/messages/textMessageContent'
 import EventType from '@wfc/client/src/main/ets/wfc/client/wfcEvent'
 import VideoType from '@wfc/avenginekit/src/main/ets/wfc/av/engine/videoType'
-import ConferenceMessageInputDialog from './ConferenceMessageInputDialog'
 import BasicDataSource from '../../../common/BasicDataSource'
 
 @Component
@@ -56,8 +55,10 @@ export default struct ConferencePage {
     private previewXComponentController: WFCVideoRenderController = new WFCVideoRenderController('preview-xcp')
     pipController?: PiPWindow.PiPController;
     private voipPiPNodeController: VoipPiPNodeController = new VoipPiPNodeController('');
-    private conferenceMessageInputDialogController?: CustomDialogController
-    private latest5ConferenceChatroomMessages: Message[] = []
+    @State latest5ConferenceChatroomMessages: Message[] = []
+    @State showInputPanel: boolean = false
+    @State keyboardHeight: number = 0
+    @State inputText: string = ''
     private swiperParticipantGridItemDataSource: SwiperParticipantGridItemDataSource = new SwiperParticipantGridItemDataSource()
     static COUNT_PER_PAGE = 4;
 
@@ -86,6 +87,7 @@ export default struct ConferencePage {
 
         this.setupSessionCallback()
         wfc.eventEmitter?.on(EventType.ReceiveMessage, this.onReceiveMessage)
+        wfc.eventEmitter?.on(EventType.SendMessage, this.onSendMessage)
     }
 
     getParticipantProfilesAndUpdateVideoRenderControllerMap() {
@@ -193,11 +195,15 @@ export default struct ConferencePage {
         };
         win?.setWindowSystemBarProperties(sysBarProps)
         wfc.eventEmitter?.off(EventType.ReceiveMessage, this.onReceiveMessage)
+        wfc.eventEmitter?.off(EventType.SendMessage, this.onSendMessage)
     }
 
     onPageShow(): void {
         let win = AppStorage.get<window.Window>('window')
         win?.setWindowLayoutFullScreen(true)
+
+        // 禁止 ArkUI 内部自动上移防键盘，确保视频页面完全不动
+        this.getUIContext().setKeyboardAvoidMode(KeyboardAvoidMode.NONE)
 
         let sysBarProps: window.SystemBarProperties = {
             // statusBarColor: '#00000000',
@@ -217,10 +223,21 @@ export default struct ConferencePage {
                     console.log('xxxxxxxx create pip controller error', reason.message);
                 })
         }
+
+        // 监听键盘高度，手动将 sheet 内容顶到键盘上方（KeyboardAvoidMode.NONE 禁用了自动避让）
+        win?.off('keyboardHeightChange')
+        win?.on('keyboardHeightChange', (height: number) => {
+            this.keyboardHeight = px2vp(height)
+        })
+
     }
 
     onPageHide(): void {
-        // TODO
+        // 离开页面时恢复默认键盘避让模式，不影响其他页面
+        this.getUIContext().setKeyboardAvoidMode(KeyboardAvoidMode.RESIZE)
+        let win = AppStorage.get<window.Window>('window')
+        win?.off('keyboardHeightChange')
+        this.keyboardHeight = 0
     }
 
     onPageHidden() {
@@ -431,7 +448,7 @@ export default struct ConferencePage {
                     })
 
                 Column() {
-                    Text('会议标题')
+                    Text(this.callSession?.title)
                         .fontColor(Color.White)
                         .textAlign(TextAlign.Center)
                         .alignSelf(ItemAlign.Center)
@@ -649,7 +666,15 @@ export default struct ConferencePage {
             .animation({ duration: 400, curve: Curve.Friction, delay: 0 }))
     }
 
+    onSendMessage = (msg: Message) => {
+        this._appendConferenceChatroomMessage([msg])
+    }
+
     onReceiveMessage = (messages: Message[]) => {
+        this._appendConferenceChatroomMessage(messages)
+    }
+
+    _appendConferenceChatroomMessage(messages: Message[]){
         if (!this.callSession) {
             return
         }
@@ -665,65 +690,121 @@ export default struct ConferencePage {
     }
 
     @Builder
-    chatroomView() {
-        Column() {
-            List() {
-                ForEach(this.latest5ConferenceChatroomMessages, (msg: Message, index: number) => {
-                    ListItem() {
-                        Row() {
-                            Text(wfc.getUserInfo(msg.from).displayName)
-                                .width(40)
-                            Text(msg.messageContent.digest(msg))
-                        }
+    chatroomLatestMessageListView(){
+        List() {
+            ForEach(this.latest5ConferenceChatroomMessages, (msg: Message, index: number) => {
+                ListItem() {
+                    Row() {
+                        Text(wfc.getUserInfo(msg.from).displayName + ':  ')
+                            .fontColor(Color.White)
+                            .fontSize(12)
+                            .maxLines(1)
+                            .constraintSize({ maxWidth: 70 })
+                        Text(msg.messageContent.digest(msg))
+                            .fontColor(Color.White)
+                            .fontSize(12)
+                            .maxLines(2)
+                            .textOverflow({ overflow: TextOverflow.Ellipsis })
+                            .layoutWeight(1)
                     }
-                }, (msg: Message, index: number) => {
-                    return msg.messageId + ''
-                })
+                    .padding({ top: 4, bottom: 4, left: 8, right: 8 })
+                    // .backgroundColor('rgba(0,0,0,0.45)')
+                    .borderRadius(6)
+                    .margin({ bottom: 4 })
+                    .width('100%')
+                }
+            }, (msg: Message, index: number) => msg.messageId + '')
+        }
+        .scrollBar(BarState.Off)
+        .constraintSize({ maxHeight: 180 })
+        .width('100%')
+    }
+
+    // sheet 内容：消息列表 + 输入框，键盘弹出时 sheet 自动上移，不影响主页面
+    @Builder
+    inputSheetContent() {
+        Column() {
+            this.chatroomLatestMessageListView()
+            Row() {
+                TextInput({ placeholder: '说点什么...', text: this.inputText })
+                    .fontSize(14)
+                    .borderRadius(20)
+                    .backgroundColor('rgba(255,255,255,0.15)')
+                    .fontColor(Color.White)
+                    .placeholderColor('rgba(255,255,255,0.5)')
+                    .layoutWeight(1)
+                    .onChange(value => {
+                        this.inputText = value
+                    })
+                    .defaultFocus(true)
+                Button('发送')
+                    .enabled(!!this.inputText)
+                    .type(ButtonType.Normal)
+                    .buttonStyle(ButtonStyleMode.TEXTUAL)
+                    .fontColor(Color.White)
+                    .margin({ left: 8 })
+                    .onClick(() => {
+                        if (this.inputText) {
+                            let textMsgContent = new TextMessageContent(this.inputText)
+                            let conversation = new Conversation(ConversationType.ChatRoom, this.callSession!.callId, 0)
+                            wfc.sendConversationMessage(conversation, textMsgContent, [], msgId => {
+                            }, undefined, undefined, (msgUid, timestamp) => {
+                                let len = this.latest5ConferenceChatroomMessages.length
+                                if (len > 5) {
+                                    this.latest5ConferenceChatroomMessages = this.latest5ConferenceChatroomMessages.slice(len - 5, len)
+                                }
+                            })
+                            this.inputText = ''
+                        }
+                        // 如果希望点击发送按钮后，不隐藏输入框，将下面这行注释了
+                        this.showInputPanel = false
+                    })
             }
             .width('100%')
+            .padding({ top: 8, bottom: 8, left: 12, right: 12 })
+            .backgroundColor('rgba(255,255,255,0.1)')
+            .borderRadius(24)
+            .margin({ top: 8 })
+        }
+        .padding({ left: 16, right: 16, top: 12, bottom: this.keyboardHeight > 0 ? this.keyboardHeight + 20 : 20 })
+        .width('100%')
+    }
 
+    @Builder
+    chatroomView() {
+        Column() {
+            this.chatroomLatestMessageListView()
+
+            // 点击后通过 bindSheet 弹出输入面板；sheet 是系统级浮层，键盘弹出时只有 sheet 上移，视频画面完全不动
             Text('说点什么')
-                .fontColor(Color.Gray)
+                .fontColor(Color.White)
+                .fontSize(13)
+                .backgroundColor('rgba(0,0,0,0.45)')
+                .borderRadius(16)
+                .padding(8)
+                .margin({ top: 4 })
                 .onClick(() => {
-                    this.conferenceMessageInputDialogController = new CustomDialogController({
-                        builder: ConferenceMessageInputDialog({
-                            controller: this.conferenceMessageInputDialogController,
-                            onConfirm: (text: string) => {
-                                let textMsgContent = new TextMessageContent(text)
-                                let conversation = new Conversation(ConversationType.ChatRoom, this.callSession!.callId, 0)
-                                wfc.sendConversationMessage(conversation, textMsgContent, [], msgId => {
-
-                                }, undefined, undefined, (msgUid, timestamp) => {
-                                    let msg = wfc.getMessageByUid(msgUid);
-                                    this.latest5ConferenceChatroomMessages.push(msg)
-                                    let len = this.latest5ConferenceChatroomMessages.length
-                                    if (len > 5) {
-                                        this.latest5ConferenceChatroomMessages = this.latest5ConferenceChatroomMessages.slice(len - 5, len)
-                                    }
-                                })
-                            }
-                        }),
-                        cancel: () => {
-                            this.conferenceMessageInputDialogController = undefined
-                        },
-                        autoCancel: true,
-                        alignment: DialogAlignment.Center,
-                        gridCount: 6,
-                        customStyle: false
-                    })
-                    this.conferenceMessageInputDialogController.open()
+                    this.showInputPanel = true
+                })
+                .bindSheet(this.showInputPanel, this.inputSheetContent(), {
+                    height: SheetSize.FIT_CONTENT,
+                    dragBar: false,
+                    showClose: false,
+                    backgroundColor: '#E61E1E1E',
+                    maskColor: Color.Transparent,
+                    onDisappear: () => {
+                        this.showInputPanel = false
+                        this.inputText = ''
+                    }
                 })
         }
         .alignItems(HorizontalAlign.Start)
-        .width('40%')
+        .width('55%')
         .height('100%')
-        .padding({
-            left: 10,
-            top: 10,
-            right: 10,
-            bottom: 100
-        })
+        .padding({ left: 10, top: 10, right: 10, bottom: 100 })
         .justifyContent(FlexAlign.End)
+        .hitTestBehavior(HitTestMode.Transparent)
+        .visibility(this.showInputPanel ? Visibility.Hidden: Visibility.Visible)
     }
 
     build() {
@@ -775,7 +856,9 @@ export default struct ConferencePage {
                             if (this.showActionAndDurationView) {
                                 this.actionAndDurationView()
                             }
-                            // this.chatroomView()
+                            if(this.callSession?.status === CallState.STATUS_CONNECTED){
+                                this.chatroomView()
+                            }
                         }
                         .width('100%')
                         .height('100%')
@@ -834,8 +917,7 @@ export default struct ConferencePage {
         })
         .onBackPressed(() => true)
         .backgroundColor('#000000')
-
-        // .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM])
+        .expandSafeArea([SafeAreaType.KEYBOARD], [SafeAreaEdge.BOTTOM])
     }
 
     minimize() {

@@ -993,6 +993,7 @@ export default struct ConversationPage {
         })
         .mode(NavDestinationMode.STANDARD)
         .title(this.title)
+        .hideBackButton(true)
         .menus([
             {
                 value: '',

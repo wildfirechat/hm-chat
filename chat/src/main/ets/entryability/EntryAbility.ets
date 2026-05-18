@@ -5,7 +5,7 @@ import data_preferences from '@ohos.data.preferences';
 import wfc from '@wfc/client'
 import Config from '@wfc/client/src/main/ets/config'
 import { AbilityConstant, common, Context, Want } from '@kit.AbilityKit';
-import { pushCommon, pushService } from '@kit.PushKit';
+// PushKit 不适用于 PC 端，已移除
 
 import EventType from '@wfc/client/src/main/ets/wfc/client/wfcEvent';
 import Message from '@wfc/client/src/main/ets/wfc/messages/message';
@@ -42,19 +42,14 @@ export default class EntryAbility extends UIAbility {
         wfc.init(this.applicationContext, this.context.eventHub, this.applicationContext.filesDir, Config.getWFCPlatform());
         CustomMessageConfig.registerCustomMessages();
         uikit.init(this.context)
+        // PC 端标识，供子组件按需做 PC/手机差异化逻辑
+        AppStorage.setOrCreate('isPC', true);
 
         wfc.eventEmitter!.on(EventType.ConnectionStatusChanged, async (status: number) => {
             this.connectionStatus = status;
             if (status === ConnectionStatus.ConnectionStatusConnected) {
-                try {
-                    const pushToken: string = await pushService.getToken();
-                    // huawei harmony
-                    wfc.setDeviceToken(8, pushToken);
-                    hilog.info(0x0000, 'testTag', 'Get push token successfully: %{public}s', pushToken);
-                } catch (err) {
-                    let e: BusinessError = err as BusinessError;
-                    hilog.error(0x0000, 'testTag', 'Get push token catch error: %{public}d %{public}s', e.code, e.message);
-                }
+                // PC 端不注册手机推送 Token
+                hilog.info(0x0000, 'testTag', 'PC client connected, skip push token registration');
 
             } else if ([
                 ConnectionStatus.ConnectionStatusTokenIncorrect,
@@ -127,6 +122,14 @@ export default class EntryAbility extends UIAbility {
         // 获取应用主窗口
         let mainWin: window.Window = windowStage.getMainWindowSync();
         AppStorage.setOrCreate('window', mainWin)
+        // PC 端：设置最小窗口尺寸与默认窗口尺寸
+        // not exist
+        // mainWin.setWindowMinSize({ width: 1200, height: 760 }).catch((err: BusinessError) => {
+        //     hilog.error(0x0000, 'testTag', 'setWindowMinSize failed: %{public}s', JSON.stringify(err));
+        // });
+        // mainWin.resize(1440, 900).catch((err: BusinessError) => {
+        //     hilog.error(0x0000, 'testTag', 'resize window failed: %{public}s', JSON.stringify(err));
+        // });
         // 获取状态栏高度
         let statusArea = mainWin.getWindowAvoidArea(window.AvoidAreaType.TYPE_SYSTEM);
         AppStorage.setOrCreate('SafeAreaTopHeight', statusArea.topRect.height);

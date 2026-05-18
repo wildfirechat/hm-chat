@@ -45,6 +45,7 @@ import CardMessageContent from '@wfc/client/src/main/ets/wfc/messages/cardMessag
 import fileUri from '@ohos.file.fileuri'
 import { checkAndRequestPermission, checkPermissions } from '../../helper/permissionHelper'
 import { Permissions } from '@kit.AbilityKit'
+import { KeyCode } from '@kit.InputKit'
 
 const INPUT_ICON_WIDTH = 30
 
@@ -92,6 +93,10 @@ export default struct ConversationInputPanelView {
     private textInputBottomWhenBlur: number = 0
     private textInputController: TextInputController = new TextInputController()
     private recordTouchDownY: number = 0
+    /** PC 端：跟踪 Shift 键是否按下，用于区分 Enter（发送）和 Shift+Enter（换行） */
+    @State private isShiftDown: boolean = false
+    /** PC 端：Enter 发送后，屏蔽 TextArea onChange 插入的换行符 */
+    private _justSentByEnter: boolean = false
     private recorder?: AudioRecordManager
     private recordOutputAudioFile: string = ''
     private recordAudioStartMillis: number = 0
@@ -716,6 +721,35 @@ export default struct ConversationInputPanelView {
         this.forwardDialogController.open()
     }
 
+    /** 发送文本消息（供发送按钮 onClick 和 Enter 键复用） */
+    doSendTextMessage() {
+        if (this.text.trim().length === 0) return
+        let textMessageContent = new TextMessageContent(this.text.trim());
+        if (this.mentions.length > 0) {
+            for (const mention of this.mentions) {
+                if (this.text.indexOf(mention.text) >= 0) {
+                    if (mention.target === '@all') {
+                        textMessageContent.mentionedType = 2;
+                        break
+                    } else {
+                        if (textMessageContent.mentionedTargets.indexOf(mention.target) === -1) {
+                            textMessageContent.mentionedTargets.push(mention.target)
+                        }
+                        textMessageContent.mentionedType = 1;
+                    }
+                }
+            }
+            this.mentions = []
+        }
+        if (this.quotedMessage) {
+            textMessageContent.quoteInfo = QuoteInfo.initWithMessage(this.quotedMessage!)
+        }
+        wfc.sendConversationMessage(this.conversation, textMessageContent, [], null, null, null, null, null);
+        wfc.setConversationDraft(this.conversation, '')
+        this.text = '';
+        this.quotedMessage = null
+    }
+
     build() {
         if (this.enableMultiCheck) {
             Row() {
@@ -804,6 +838,14 @@ export default struct ConversationInputPanelView {
                                 TextArea({ text: this.text, controller: this.textInputController })
                                     .id('textInput')
                                     .onChange(value => {
+                                        if (this._justSentByEnter) {
+                                            this._justSentByEnter = false
+                                            // Enter 发送后 TextArea 会插入换行符，忽略这次更新
+                                            if (value === '\n' || value.trim().length === 0) {
+                                                this.text = ''
+                                                return
+                                            }
+                                        }
                                         if (this.text + "@" === value) {
                                             this.showMentionSheet = true;
                                         } else {
@@ -832,6 +874,23 @@ export default struct ConversationInputPanelView {
                                     .borderRadius(4)
                                     .backgroundColor($r('app.color.wf_background'))
                                     .fontColor($r('app.color.wf_primary_text'))
+                                    // PC 端：Enter 发送，Shift+Enter 换行
+                                    .onKeyEvent((event: KeyEvent) => {
+                                        if (event.keyCode === KeyCode.KEYCODE_SHIFT_LEFT ||
+                                            event.keyCode === KeyCode.KEYCODE_SHIFT_RIGHT) {
+                                            this.isShiftDown = event.type === KeyType.Down
+                                            return
+                                        }
+                                        if (event.type === KeyType.Down &&
+                                            event.keyCode === KeyCode.KEYCODE_ENTER &&
+                                            !this.isShiftDown) {
+                                            if (this.text.trim().length > 0) {
+                                                this._justSentByEnter = true
+                                                this.doSendTextMessage()
+                                            }
+                                            event.stopPropagation()
+                                        }
+                                    })
 
                                 if (this.quotedMessage) {
                                     Row() {
@@ -930,31 +989,7 @@ export default struct ConversationInputPanelView {
                                 .height(INPUT_ICON_WIDTH)
                                 .borderRadius(4)
                                 .onClick(() => {
-                                    let textMessageContent = new TextMessageContent(this.text.trim());
-                                    if (this.mentions.length > 0) {
-                                        for (const mention of this.mentions) {
-                                            if (this.text.indexOf(mention.text) >= 0) {
-                                                if (mention.target === '@all') {
-                                                    textMessageContent.mentionedType = 2;
-                                                    break
-                                                } else {
-                                                    if (textMessageContent.mentionedTargets.indexOf(mention.target) === -1) {
-                                                        textMessageContent.mentionedTargets.push(mention.target)
-                                                    }
-                                                    textMessageContent.mentionedType = 1;
-                                                }
-                                            }
-                                        }
-                                        this.mentions = []
-                                    }
-
-                                    if (this.quotedMessage) {
-                                        textMessageContent.quoteInfo = QuoteInfo.initWithMessage(this.quotedMessage!)
-                                    }
-                                    wfc.sendConversationMessage(this.conversation, textMessageContent, [], null, null, null, null, null);
-                                    wfc.setConversationDraft(this.conversation, '')
-                                    this.text = '';
-                                    this.quotedMessage = null
+                                    this.doSendTextMessage()
                                 })
                         } else {
                             Image($r('app.media.ic_chat_add'))

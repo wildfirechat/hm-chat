@@ -22,6 +22,8 @@ export default struct ConversationListTab {
     @State pcOnlineInfos: PCOnlineInfo[] = []
     @State isMuteWhenPCOnline: boolean = false
     @Link conversationListTabUnreadCount: number
+    /** PC 端：记录当前选中的会话，用于高亮显示 */
+    @State private pcSelectedConvKey: string = ''
     private conversationInfoDataSource: ConversationInfoDataSource = new ConversationInfoDataSource()
     private context?: Context
     private  _loadConversationInfoListDebouncer: number = 0
@@ -281,21 +283,20 @@ export default struct ConversationListTab {
                     ListItem() {
                         ConversationInfoItemView({ conversationInfo: info })
                             .onClick(() => {
+                                this.pcSelectedConvKey = `${info.conversation?.type}-${info.conversation?.target}`
                                 wfc.clearConversationUnreadStatus(info.conversation!)
-                                this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ConversationPage, {
+                                this.mainNavPathStack.replacePathByName(uikitNavigationDestinations.ConversationPage, {
                                     'conversation': info.conversation
-                                } as Record<string, Object>)
+                                } as Record<string, Object>, true)
                             })
                             .bindContextMenu(this.MenuBuilder(info), ResponseType.LongPress, { preview: MenuPreviewMode.IMAGE })
                     }
-                    .stateStyles({
-                        pressed: {
-                            .backgroundColor($r('app.color.wf_item_pressed'))
-                        },
-                        normal: {
-                            .backgroundColor(Color.Transparent)
-                        }
-                    })
+                    // 选中高亮 + PC 右键菜单
+                    .backgroundColor(this.pcSelectedConvKey === `${info.conversation?.type}-${info.conversation?.target}`
+                        ? $r('app.color.wf_item_pressed')
+                        : Color.Transparent)
+                    .hoverEffect(HoverEffect.Highlight)
+                    .bindContextMenu(this.MenuBuilder(info), ResponseType.RightClick)
                 }, (info: ConversationInfo) => this.conversationKey(info))
             }
             .divider({

@@ -45,8 +45,9 @@ export default struct CallStartMessageContentView {
         .onClick(async () => {
             let content = this.message.messageContent as CallStartMessageContent;
 
-            let cameraGranted = content.audioOnly ? true : await checkAndRequestPermission(this.getUIContext().getHostContext(), 'ohos.permission.CAMERA')
-            let microphoneGranted = await checkAndRequestPermission(this.getUIContext().getHostContext(), 'ohos.permission.MICROPHONE')
+            let context = this.getUIContext().getHostContext()!
+            let cameraGranted = content.audioOnly ? true : await checkAndRequestPermission(context, 'ohos.permission.CAMERA')
+            let microphoneGranted = await checkAndRequestPermission(context, 'ohos.permission.MICROPHONE')
             if (!cameraGranted || !microphoneGranted) {
                 showToast('请授予摄像头和麦克风权限')
                 return

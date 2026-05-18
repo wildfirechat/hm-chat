@@ -127,8 +127,9 @@ export default struct ConferenceInfoPage {
                         .borderRadius(4)
                         .width('50%')
                         .onClick(async () => {
-                            let cameraGranted = await checkAndRequestPermission(this.getUIContext().getHostContext(), 'ohos.permission.CAMERA')
-                            let microphoneGranted = await checkAndRequestPermission(this.getUIContext().getHostContext(), 'ohos.permission.MICROPHONE')
+                            let context = this.getUIContext().getHostContext()!
+                            let cameraGranted = await checkAndRequestPermission(context, 'ohos.permission.CAMERA')
+                            let microphoneGranted = await checkAndRequestPermission(context, 'ohos.permission.MICROPHONE')
                             if (!cameraGranted || !microphoneGranted) {
                                 showToast('请授予摄像头和麦克风权限')
                                 return;

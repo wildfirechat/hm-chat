@@ -34,6 +34,7 @@ import PollMessageContentView from './PollMessageContentView'
 import PollResultMessageContentView from './PollResultMessageContentView'
 import PollMessageContent from '@wfc/client/src/main/ets/wfc/messages/pollMessageContent'
 import PollResultMessageContent from '@wfc/client/src/main/ets/wfc/messages/pollResultMessageContent'
+import MeetingMinutesMessageContentView from './MeetingMinutesMessageContentView'
 
 @Component
 export default struct NormaMessageContentView {
@@ -103,6 +104,8 @@ export default struct NormaMessageContentView {
                 PollMessageContentView({ message: $message })
             } else if (this.message.messageContent.type === MessageContentType.Poll_Result) {
                 PollResultMessageContentView({ message: $message })
+            } else if (this.message.messageContent.type === MessageContentType.Meeting_Minutes) {
+                MeetingMinutesMessageContentView({ message: $message })
             }
             // 自定义消息配置 start
             else if (this.message!.messageContent.type === CustomMessageContentType.MESSAGE_CONTENT_TYPE_CUSTOM_MESSAGE_TEST) {

@@ -26,6 +26,8 @@ import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType'
 import TextMessageContent from '@wfc/client/src/main/ets/wfc/messages/textMessageContent'
+import TranscriptionMessageContent from '@wfc/client/src/main/ets/wfc/messages/transcriptionMessageContent'
+import MessageContentType from '@wfc/client/src/main/ets/wfc/messages/messageContentType'
 import EventType from '@wfc/client/src/main/ets/wfc/client/wfcEvent'
 import VideoType from '@wfc/avenginekit/src/main/ets/wfc/av/engine/videoType'
 import BasicDataSource from '../../../common/BasicDataSource'
@@ -56,6 +58,7 @@ export default struct ConferencePage {
     pipController?: PiPWindow.PiPController;
     private voipPiPNodeController: VoipPiPNodeController = new VoipPiPNodeController('');
     @State latest5ConferenceChatroomMessages: Message[] = []
+    @State latest5TranscriptionMessages: Message[] = []
     @State showInputPanel: boolean = false
     @State keyboardHeight: number = 0
     @State inputText: string = ''
@@ -680,13 +683,48 @@ export default struct ConferencePage {
         }
         for (const msg of messages) {
             if (msg.conversation.type === ConversationType.ChatRoom && msg.conversation.target === this.callSession.callId) {
-                this.latest5ConferenceChatroomMessages.push(msg)
+                if (msg.messageContent.type === MessageContentType.Transcription) {
+                    this.latest5TranscriptionMessages.push(msg)
+                } else {
+                    this.latest5ConferenceChatroomMessages.push(msg)
+                }
             }
         }
         let len = this.latest5ConferenceChatroomMessages.length
         if (len > 5) {
             this.latest5ConferenceChatroomMessages = this.latest5ConferenceChatroomMessages.slice(len - 5, len)
         }
+        let tlen = this.latest5TranscriptionMessages.length
+        if (tlen > 5) {
+            this.latest5TranscriptionMessages = this.latest5TranscriptionMessages.slice(tlen - 5, tlen)
+        }
+    }
+
+    @Builder
+    transcriptionView() {
+        Column() {
+            ForEach(this.latest5TranscriptionMessages, (msg: Message, index: number) => {
+                Row() {
+                    Text(wfc.getUserInfo((msg.messageContent as TranscriptionMessageContent).userId).displayName)
+                        .fontSize(12)
+                        .fontColor('#FFA500')
+                        .margin({ right: 4 })
+                    Text((msg.messageContent as TranscriptionMessageContent).content)
+                        .fontSize(12)
+                        .fontColor(Color.White)
+                        .layoutWeight(1)
+                }
+                .width('100%')
+                .padding({ top: 2, bottom: 2 })
+            }, (msg: Message, index: number) => {
+                return msg.messageUid + ''
+            })
+        }
+        .alignItems(HorizontalAlign.Start)
+        .width('80%')
+        .constraintSize({ maxHeight: 120 })
+        .padding(8)
+        .position({ x: '10%', y: 40 })
     }
 
     @Builder
@@ -859,6 +897,7 @@ export default struct ConferencePage {
                             if(this.callSession?.status === CallState.STATUS_CONNECTED){
                                 this.chatroomView()
                             }
+                            this.transcriptionView()
                         }
                         .width('100%')
                         .height('100%')

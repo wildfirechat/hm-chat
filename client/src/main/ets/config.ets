@@ -95,6 +95,12 @@ export default class Config {
     // AI机器人ID
     static AI_ROBOT = "FireRobot";
 
+    // AI会议纪要机器人ID，用于会议纪要消息跳转
+    static AI_MINUTES_ROBOT_ID = "robotminutes";
+
+    // 会议纪要详情页地址
+    static MINUTES_URL = "http://101.42.4.222:8883/index.html";
+
     // 用户协议地址
     static USER_AGREEMENT_URL = "https://example.com/user_agreement.html";
 

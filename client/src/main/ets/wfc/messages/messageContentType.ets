@@ -103,6 +103,9 @@ export default class MessageContentType {
     static VOIP_Multi_Call_Ongoing = 416;
     static VOIP_Join_Call_Request = 417;
 
+    static Meeting_Minutes = 25;
+    static Transcription = 26;
+
     static MESSAGE_CONTENT_TYPE_FEED = 501;
     static MESSAGE_CONTENT_TYPE_COMMENT = 502;
 

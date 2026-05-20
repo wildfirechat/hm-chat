@@ -78,6 +78,8 @@ import RestoreResponseNotificationContent from '../messages/backup/restoreRespon
 import CollectionMessageContent from '../messages/CollectionMessageContent';
 import PollMessageContent from '../messages/pollMessageContent';
 import PollResultMessageContent from '../messages/pollResultMessageContent';
+import MeetingMinutesMessageContent from '../messages/meetingMinutesMessageContent';
+import TranscriptionMessageContent from '../messages/transcriptionMessageContent';
 
 export default class MessageConfig {
     static getMessageContentFlag(type: number) {
@@ -326,6 +328,12 @@ export default class MessageConfig {
                 break
             case MessageContentType.Poll_Result:
                 content = new PollResultMessageContent()
+                break
+            case MessageContentType.Meeting_Minutes:
+                content = new MeetingMinutesMessageContent()
+                break
+            case MessageContentType.Transcription:
+                content = new TranscriptionMessageContent()
                 break
             default:
                 content = new UnknownMessageContent()
@@ -669,6 +677,16 @@ export default class MessageConfig {
             name: 'pollResultMessageContent',
             flag: PersistFlag.Persist_And_Count,
             type: MessageContentType.Poll_Result,
+        },
+        {
+            name: 'meetingMinutesMessageContent',
+            flag: PersistFlag.Persist_And_Count,
+            type: MessageContentType.Meeting_Minutes,
+        },
+        {
+            name: 'transcriptionMessageContent',
+            flag: PersistFlag.Transparent,
+            type: MessageContentType.Transcription,
         }
 
     ];

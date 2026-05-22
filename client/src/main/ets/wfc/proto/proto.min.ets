@@ -427,6 +427,18 @@ class WfcImpl {
         return protoProxy.isTcpShortLink() === 1;
     }
 
+    setUseKcp(kcpPort: number, useKcp: boolean) {
+        protoProxy.setUseKcp(kcpPort, useKcp);
+    }
+
+    isUseKcp(): boolean {
+        return protoProxy.isUseKcp();
+    }
+
+    useTls(skipVerifyCert: boolean, selfSignedCerts: string[]) {
+        protoProxy.useTls(skipVerifyCert, selfSignedCerts);
+    }
+
     connect(userId: string, token: string): number {
         if (!self.userId) {
             self.userId = userId;

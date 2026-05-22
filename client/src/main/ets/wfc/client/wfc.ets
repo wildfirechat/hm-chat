@@ -87,6 +87,9 @@ export class WfcManager {
         this.eventEmitter = eventHub;
         impl.init(context, eventHub, dbPath, platform);
         this.startLog();
+        //KCP需要专业版IM服务支持，并打开KCP端口。这个函数要在connect之前调用，否则会无效.
+        // this.setUseKcp(88, true);
+
         // if (Config.ENABLE_PTT) {
         //     pttClient.init();
         // }
@@ -175,6 +178,34 @@ export class WfcManager {
      */
     isTcpShortLink(): boolean {
         return impl.isTcpShortLink();
+    }
+
+    /**
+     * 设置使用KCP，需要专业版IM服务，且开启KCP端口。
+     *
+     * @param kcpPort kcp端口
+     * @param useKcp 是否使用kcp，要为true。
+     */
+    setUseKcp(kcpPort: number, useKcp: boolean) {
+        impl.setUseKcp(kcpPort, useKcp);
+    }
+
+    /**
+     * 是否使用KCP
+     * @returns 是否使用KCP
+     */
+    isUseKcp(): boolean {
+        return impl.isUseKcp();
+    }
+
+    /**
+     * 设置使用TLS，需要专业版IM服务，且开启TLS功能
+     *
+     * @param skipVerifyCert 是否跳过本地验证，一般自签名要跳过。
+     * @param selfSignedCerts 自签名证书，如果是公签，传空。
+     */
+    UseTls(skipVerifyCert: boolean, selfSignedCerts: string[]) {
+        impl.useTls(skipVerifyCert, selfSignedCerts);
     }
 
     /**

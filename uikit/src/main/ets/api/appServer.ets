@@ -263,6 +263,19 @@ class AppServer {
         return this._post('/conference/focus/' + conferenceId, { 'userId': userId ? userId : '' } as JSONObject);
     }
 
+    async checkVersion(currentVersion: string, buildNumber: number): Promise<Record<string, Object> | null> {
+        let url = this.baseUrl + '/version/check?platform=' + Config.getWFCPlatform() + '&currentVersion=' + currentVersion + '&buildNumber=' + buildNumber
+        try {
+            let result = await this._get(url)
+            if (result && result.code === 0) {
+                return result.result as Record<string, Object>
+            }
+        } catch (e) {
+            console.error('checkVersion error', e)
+        }
+        return null
+    }
+
     _init() {
         let context = AppStorage.get<common.UIAbilityContext>('context');
         let preference = data_preferences.getPreferencesSync(context?.getApplicationContext(), {
@@ -271,6 +284,35 @@ class AppServer {
         // 兼容 Android 端迁移过来的数据
         let hostPort = parseHostAndPort(this.baseUrl)
         this.authToken = preference.getSync(`authToken:${hostPort.host}-${hostPort.port}`, '') as string
+    }
+
+    _get(url: string): Promise<Record<string, Object>> {
+        if (!this.isInitialized) {
+            this._init()
+            this.isInitialized = true
+        }
+        return new Promise((resolve, reject) => {
+            let httpRequest = http.createHttp();
+            httpRequest.request(url, {
+                method: http.RequestMethod.GET,
+                header: {
+                    'Content-Type': 'application/json',
+                    'authToken': this.authToken
+                },
+                expectDataType: http.HttpDataType.OBJECT,
+                connectTimeout: 30000,
+                readTimeout: 30000,
+            }, (err, data) => {
+                if (!err && data.responseCode == 200) {
+                    httpRequest.destroy();
+                    let result = data.result as Record<string, Object>
+                    resolve(result)
+                } else {
+                    httpRequest.destroy();
+                    reject(new AppServerError(-1, err?.message || '请求失败'))
+                }
+            })
+        })
     }
 
     _post(path: string, data?: string | Object, rawResponseData = false): Promise<string | object | http.HttpResponse> {

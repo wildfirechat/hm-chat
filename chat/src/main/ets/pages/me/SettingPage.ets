@@ -7,13 +7,38 @@ import { appNavigationDestinations } from '../mainNavigationConfig';
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation';
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType';
 import BuildProfile from 'BuildProfile';
+import appServer from '@wfc/uikit/src/main/ets/api/appServer';
+import { bundleManager } from '@kit.AbilityKit';
 
 @Preview
 @Component
 export default struct SettingPage {
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
+    @State versionNeedUpdate: boolean = false;
 
     aboutToAppear() {
+        this.loadVersionInfo();
+        this.refreshVersionInfo();
+    }
+
+    loadVersionInfo() {
+        let versionInfo = AppStorage.get<Record<string, Object> | null>('versionInfo')
+        this.versionNeedUpdate = versionInfo ? (versionInfo['needUpdate'] as boolean) : false
+    }
+
+    async refreshVersionInfo() {
+        try {
+            let bundleInfo = await bundleManager.getBundleInfoForSelf(bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION)
+            let currentVersion = bundleInfo.versionName || ''
+            let buildNumber = bundleInfo.versionCode || 0
+            let versionInfo = await appServer.checkVersion(currentVersion, buildNumber)
+            AppStorage.setOrCreate<Record<string, Object> | null>('versionInfo', versionInfo)
+            if (versionInfo) {
+                this.versionNeedUpdate = versionInfo['needUpdate'] as boolean
+            }
+        } catch (e) {
+            console.error('SettingPage refreshVersionInfo error', e)
+        }
     }
 
     build() {
@@ -31,7 +56,8 @@ export default struct SettingPage {
                 Column() {
                     OptionItemView({
                         title: '关于',
-                        showDivider: true
+                        showDivider: true,
+                        showBadge: this.versionNeedUpdate
                     }).onClick(() => {
                         this.mainNavPathStack.pushPathByName(appNavigationDestinations.AboutPage, {} as Record<string, Object>)
                     })

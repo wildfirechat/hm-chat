@@ -7,6 +7,7 @@ import { showToast } from '@wfc/uikit/src/main/ets/common/utils/Toast';
 import { inputMethod } from '@kit.IMEKit';
 import { SlideVerifyView, SlideVerifyViewDelegate } from '@wfc/uikit/src/main/ets/view/SlideVerifyView';
 import Config from '@wfc/client/src/main/ets/config';
+import { bundleManager } from '@kit.AbilityKit';
 
 import('@wfc/uikit/src/main/ets/pages/misc/WebViewPageWithRouter') //引入共享包中的命名路由页面
 
@@ -46,6 +47,74 @@ struct LoginPage {
 
     aboutToAppear(): void {
         this.phoneNumber = this.lastLoginMobile
+        // 延迟3秒后检查版本更新（不需要登录）
+        setTimeout(() => {
+            this.checkVersionUpdate()
+        }, 3000)
+    }
+
+    async checkVersionUpdate() {
+        try {
+            let bundleInfo = await bundleManager.getBundleInfoForSelf(bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION)
+            let currentVersion = bundleInfo.versionName || ''
+            let buildNumber = bundleInfo.versionCode || 0
+            let versionInfo = await appServer.checkVersion(currentVersion, buildNumber)
+            AppStorage.setOrCreate<Record<string, Object> | null>('versionInfo', versionInfo)
+            if (!versionInfo) {
+                return
+            }
+            let needUpdate = versionInfo['needUpdate'] as boolean
+            if (!needUpdate) {
+                return
+            }
+            let forceUpdate = versionInfo['forceUpdate'] as boolean
+            let title = (versionInfo['title'] as string) || '发现新版本'
+            let message = (versionInfo['message'] as string) || ''
+            let url = (versionInfo['harmonyUrl'] as string) || ''
+
+            let hasShown = AppStorage.get<boolean>('versionDialogShown') || false
+            if (hasShown) {
+                return
+            }
+            AppStorage.setOrCreate('versionDialogShown', true)
+
+            if (forceUpdate) {
+                AlertDialog.show({
+                    title: title,
+                    message: message,
+                    autoCancel: false,
+                    primaryButton: {
+                        value: '立即更新',
+                        action: () => {
+                            if (url) {
+                                let context = getContext(this) as common.UIAbilityContext
+                                context.startAbility({ action: 'ohos.want.action.viewData', uri: url })
+                            }
+                        }
+                    }
+                })
+            } else {
+                AlertDialog.show({
+                    title: title,
+                    message: message,
+                    primaryButton: {
+                        value: '立即更新',
+                        action: () => {
+                            if (url) {
+                                let context = getContext(this) as common.UIAbilityContext
+                                context.startAbility({ action: 'ohos.want.action.viewData', uri: url })
+                            }
+                        }
+                    },
+                    secondaryButton: {
+                        value: '以后再说',
+                        action: () => {}
+                    }
+                })
+            }
+        } catch (e) {
+            console.error('LoginPage checkVersionUpdate error', e)
+        }
     }
 
     build() {

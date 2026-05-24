@@ -1,5 +1,6 @@
 import OptionItemView from '@wfc/uikit/src/main/ets/view/OptionItemView'
 import { bundleManager } from '@kit.AbilityKit';
+import { common } from '@kit.AbilityKit';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { LengthUnit, router } from '@kit.ArkUI';
 import Config from '@wfc/client/src/main/ets/config';
@@ -14,13 +15,18 @@ export default struct AboutPage {
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
     @State version: string = 'v1.0.0'
     @State appInfo: string = ''
+    @State needUpdate: boolean = false
+    @State forceUpdate: boolean = false
+    @State updateTitle: string = '发现新版本'
+    @State updateMessage: string = ''
+    @State updateUrl: string = ''
 
     aboutToAppear() {
         bundleManager.getBundleInfoForSelf(bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION)
             .then((bundleInfo) => {
-                let bundleName = bundleInfo.name; // 包名
-                this.version = bundleInfo.versionName; //应用版本名
-                let versionNo = bundleInfo.versionCode; //应用版本号
+                let bundleName = bundleInfo.name || ''; // 包名
+                this.version = bundleInfo.versionName || 'v1.0.0'; //应用版本名
+                let versionNo = bundleInfo.versionCode || 0; //应用版本号
                 let info = `${bundleName}\n`
                     + `${versionNo} ${this.version}\n`
                     + `${wfc.getProtoRevision()}\n`
@@ -38,13 +44,69 @@ export default struct AboutPage {
                 }
 
                 this.appInfo = info;
+                this.loadVersionInfo();
 
             })
             .catch((error: BusinessError) => {
                 console.error("get bundleInfo failed,error is " + error)
             })
+    }
 
+    loadVersionInfo() {
+        let versionInfo = AppStorage.get<Record<string, Object> | null>('versionInfo')
+        if (versionInfo && versionInfo['needUpdate'] as boolean) {
+            this.needUpdate = true
+            this.forceUpdate = versionInfo['forceUpdate'] as boolean
+            this.updateTitle = (versionInfo['title'] as string) || '发现新版本'
+            this.updateMessage = (versionInfo['message'] as string) || ''
+            this.updateUrl = (versionInfo['harmonyUrl'] as string) || ''
+        } else {
+            this.needUpdate = false
+            this.forceUpdate = false
+            this.updateTitle = '发现新版本'
+            this.updateMessage = ''
+            this.updateUrl = ''
+        }
+    }
 
+    showVersionUpdateDialog() {
+        if (!this.needUpdate) {
+            return
+        }
+        if (this.forceUpdate) {
+            AlertDialog.show({
+                title: this.updateTitle,
+                message: this.updateMessage,
+                autoCancel: false,
+                primaryButton: {
+                    value: '立即更新',
+                    action: () => {
+                        if (this.updateUrl) {
+                            let context = getContext(this) as common.UIAbilityContext
+                            context.startAbility({ action: 'ohos.want.action.viewData', uri: this.updateUrl })
+                        }
+                    }
+                }
+            })
+        } else {
+            AlertDialog.show({
+                title: this.updateTitle,
+                message: this.updateMessage,
+                primaryButton: {
+                    value: '立即更新',
+                    action: () => {
+                        if (this.updateUrl) {
+                            let context = getContext(this) as common.UIAbilityContext
+                            context.startAbility({ action: 'ohos.want.action.viewData', uri: this.updateUrl })
+                        }
+                    }
+                },
+                secondaryButton: {
+                    value: '以后再说',
+                    action: () => {}
+                }
+            })
+        }
     }
 
     build() {
@@ -71,6 +133,14 @@ export default struct AboutPage {
                     .fontColor($r('app.color.wf_tertiary_text'))
 
                 Column() {
+                    OptionItemView({
+                        title: '当前版本',
+                        desc: this.version,
+                        showDivider: true,
+                        showBadge: this.needUpdate
+                    }).onClick(() => {
+                        this.showVersionUpdateDialog()
+                    })
                     OptionItemView({
                         title: getContext().resourceManager.getStringSync($r('app.string.feature_introduction').id),
                         showDivider: true

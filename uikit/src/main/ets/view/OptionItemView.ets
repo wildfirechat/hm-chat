@@ -8,6 +8,7 @@ export default struct OptionItemView {
     @Prop subTitle: string = ''
     @Prop imgUrl: string = ''
     showRightArrow: boolean = true
+    showBadge: boolean = false
     paddingLeft: number = 16
     paddingRight: number = 16
     showDivider: boolean = true
@@ -22,11 +23,23 @@ export default struct OptionItemView {
                         .margin({ right: this.paddingLeft })
                 }
                 Column() {
-                    Text(this.title)
-                        .fontSize(16)
-                        .fontColor($r('app.color.wf_primary_text'))
-                        .maxLines(1)
-                        .textOverflow({ overflow: TextOverflow.Ellipsis })
+                    Row() {
+                        Text(this.title)
+                            .fontSize(16)
+                            .fontColor($r('app.color.wf_primary_text'))
+                            .maxLines(1)
+                            .textOverflow({ overflow: TextOverflow.Ellipsis })
+                        if (this.showBadge) {
+                            Text('')
+                                .width(8)
+                                .height(8)
+                                .backgroundColor('#FF0000')
+                                .borderRadius(4)
+                                .margin({ left: 6 })
+                        }
+                    }
+                    .justifyContent(FlexAlign.Start)
+                    .alignItems(VerticalAlign.Center)
                     if (this.subTitle) {
                         Text(this.subTitle)
                             .padding({ top: 2 })

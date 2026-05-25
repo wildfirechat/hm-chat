@@ -55,7 +55,9 @@ class OrgServer {
 
     async getOrganizationEx(orgId: number): Promise<OrganizationEx> {
         let result = await this._post('/api/organization/query_ex', { 'id': orgId } as Record<string, Object>);
-        return result as OrganizationEx
+        let orgEx = result as OrganizationEx;
+        this.fillDefaultPortraitList(orgEx.employees);
+        return orgEx;
     }
 
     async getOrganizations(orgIds: number[]): Promise<Organization[]> {
@@ -65,32 +67,43 @@ class OrgServer {
 
     async getOrganizationEmployees(orgIds: number[]): Promise<Employee[]> {
         let employeeIds = await this._post('/api/organization/batch_employees', { 'ids': orgIds } as Record<string, Object>);
-        return this.getEmployeeList(employeeIds as string[]);
+        let employees = await this.getEmployeeList(employeeIds as string[]);
+        this.fillDefaultPortraitList(employees)
+        return employees
     }
 
     async getOrgEmployees(orgId: number) {
         let employeeIds = await this._post('/api/organization/employees', { 'ids': [orgId] } as Record<string, Object>);
-        return this.getEmployeeList(employeeIds as string[]);
+        let employees = await this.getEmployeeList(employeeIds as string[]);
+        this.fillDefaultPortraitList(employees)
+        return employees
     }
 
     async getEmployeeList(employeeIds: string[]): Promise<Employee[]> {
         let result = await this._post('/api/employee/query_list', { 'employeeIds': employeeIds } as Record<string, Object>)
+        this.fillDefaultPortraitList(result as Employee[])
         return result as Employee[]
     }
 
     async getEmployee(employeeId: string): Promise<Employee> {
         let result = await this._post('/api/employee/query', { 'employeeId': employeeId } as Record<string, Object>);
+        this.fillDefaultPortrait(result as Employee)
         return result as Employee;
     }
 
     async getEmployeeEx(employeeId: string): Promise<EmployeeEx> {
         let result = await this._post('/api/employee/query_ex', { 'employeeId': employeeId } as Record<string, Object>);
-        return result as EmployeeEx;
+        let empEx = result as EmployeeEx;
+        this.fillDefaultPortrait(empEx.employee ?? null);
+        return empEx;
     }
 
     async searchEmployee(orgId: number, keyword: string): Promise<Employee[]> {
         let result = await this._post('/api/employee/search', { 'organizationId': orgId, 'keyword': keyword } as Record<string, Object>);
-        return result as Employee[]
+        let pageResponse = result as Record<string, Object>;
+        let contents = pageResponse['contents'] as Employee[];
+        this.fillDefaultPortraitList(contents);
+        return contents;
     }
 
     async getOrganizationPath(orgId: number): Promise<Organization[]> {
@@ -130,6 +143,18 @@ class OrgServer {
         userInfo.type = 1;
         userInfo.deleted = 0;
         return userInfo;
+    }
+
+    private fillDefaultPortrait(obj: Employee | null): void {
+        if (!obj) return;
+        if (!obj.portraitUrl || !obj.portraitUrl.startsWith('http')) {
+            obj.portraitUrl = `${Config.APP_SERVER}/avatar?name=${encodeURIComponent(obj.name)}`;
+        }
+    }
+
+    private fillDefaultPortraitList(list: Employee[] | null): void {
+        if (!list) return;
+        list.forEach(item => this.fillDefaultPortrait(item));
     }
 
     _init() {

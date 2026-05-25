@@ -24,7 +24,7 @@ export default class Config {
 
     // 组织结构服务地址，如果没有部署组织结构服务，或者不需要组织结构的话，可置为 null
     // 组织结构项目：https://github.com/wildfirechat/organization-platform 或 https://gitee.com/wfchat/organization-platform
-    static ORGANIZATION_SERVER = 'https://org.wildfirechat.cn';
+    static ORGANIZATION_SERVER = 'https://org.wildfirechat.net';
 
     // 接龙服务地址，如果需要接龙功能，请部署接龙服务，然后这里填上接龙服务地址；如果不需要接龙功能，请置为 null
     static COLLECTION_SERVER_ADDRESS = "https://jielong.wildfirechat.net";

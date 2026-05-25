@@ -118,7 +118,8 @@ export default struct PickOrganizationMemberPage{
                                             width: 0,
                                             height: 0
                                         })
-                                    Image($r('app.media.ic_deparment'))
+                                    Image(org.portraitUrl)
+                                        .alt($r('app.media.ic_deparment'))
                                         .width(40)
                                         .height(40)
                                         .borderRadius(4)

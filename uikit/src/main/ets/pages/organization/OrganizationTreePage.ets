@@ -91,7 +91,8 @@ export default struct OrganizationTreePage {
                         ForEach(this.subOrganizations, (org: Organization, index: number) => {
                             ListItem() {
                                 Row() {
-                                    Image($r('app.media.ic_deparment'))
+                                    Image(org.portraitUrl)
+                                        .alt($r('app.media.ic_deparment'))
                                         .width(40)
                                         .height(40)
                                         .borderRadius(4)
@@ -154,6 +155,17 @@ export default struct OrganizationTreePage {
         }
         .backgroundColor($r('app.color.wf_primary_background_color'))
         .title(this.title)
+        .menus([
+            {
+                value: '',
+                icon: 'resources/base/media/ic_search.png',
+                action: () => {
+                    this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.SearchOrganizationEmployeePage, {
+                        'orgId': this.curOrganization?.id
+                    } as Record<string, Object>)
+                }
+            }
+        ])
         .height('100%')
         .width('100%')
     }

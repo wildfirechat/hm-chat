@@ -23,6 +23,7 @@ import MessageAndNotificationPage from './me/MessageAndNotificaitonPage'
 import PCLoginPage from './pc/PCLoginPage'
 import WebViewPage from './misc/WebViewPage'
 import OrganizationTreePage from './organization/OrganizationTreePage'
+import SearchOrganizationEmployeePage from './organization/SearchOrganizationEmployeePage'
 import PickOrganizationMemberPage from './organization/PickOrganizationMemberPage'
 import PickMultiContactPage from './picker/PickMultiContactPage'
 import SearchConversationMessagePage from './search/SearchConversationMessagePage'
@@ -106,6 +107,7 @@ export class uikitNavigationDestinations {
     static NotificationPage = UIKIT_NAV_DESTINATION_PREFIX + 'messageAndNotificationPage'
     static CompositeMessagePreviewPage = UIKIT_NAV_DESTINATION_PREFIX + 'compositeMessagePreviewPage'
     static OrganizationTreePage = UIKIT_NAV_DESTINATION_PREFIX + 'organizationTreePage'
+    static SearchOrganizationEmployeePage = UIKIT_NAV_DESTINATION_PREFIX + 'searchOrganizationEmployeePage'
     static PickOrganizationMemberPage = UIKIT_NAV_DESTINATION_PREFIX + 'pickOrganizationMemberPage'
     static ForwardMessagePage = UIKIT_NAV_DESTINATION_PREFIX + 'forwardMessagePage'
     static GroupInfoPage = UIKIT_NAV_DESTINATION_PREFIX + 'groupInfoPage'
@@ -204,6 +206,8 @@ export function UIKitPageMap(name: string) {
         TextMessagePreviewPage()
     } else if (name === uikitNavigationDestinations.OrganizationTreePage) {
         OrganizationTreePage()
+    } else if (name === uikitNavigationDestinations.SearchOrganizationEmployeePage) {
+        SearchOrganizationEmployeePage()
     } else if (name === uikitNavigationDestinations.PickOrganizationMemberPage) {
         PickOrganizationMemberPage()
     } else if (name === uikitNavigationDestinations.ForwardMessagePage) {

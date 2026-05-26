@@ -2,8 +2,8 @@
   "app": {
     "bundleName": "cn.wildfirechat.messenger.open",
     "vendor": "wildfire",
-    "versionCode": 1000020,
-    "versionName": "1.2.0",
+    "versionCode": 1000021,
+    "versionName": "1.2.1",
     "icon": "$media:app_icon",
     "label": "$string:app_name"
   }

@@ -95,6 +95,13 @@ export default class Config {
     // AI机器人ID
     static AI_ROBOT = "FireRobot";
 
+    // 禁止发送的文件类型
+    static DISABLED_SEND_FILE_TYPES = ['exe', 'bat', 'apk'];
+    // 禁止接收/下载的文件类型
+    static DISABLED_RECEIVE_FILE_TYPES = ['exe', 'bat', 'apk'];
+    // 打开消息链接的策略，0=不限制, 1=提醒, 2=禁止
+    static OPEN_LINK_POLICY = 1;
+
     // AI会议纪要机器人ID，用于会议纪要消息跳转
     static AI_MINUTES_ROBOT_ID = "robotminutes";
 

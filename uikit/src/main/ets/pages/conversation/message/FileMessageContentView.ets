@@ -1,5 +1,6 @@
 import { showToast } from '../../../common/utils/Toast'
 import { getFiletypeIcon, humanSize } from '../../../util/helper'
+import Config from '@wfc/client/src/main/ets/config'
 import FileMessageContent from '@wfc/client/src/main/ets/wfc/messages/fileMessageContent'
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import { filePreview } from '@kit.PreviewKit';
@@ -41,6 +42,11 @@ export default struct FileMessageContentView {
         .borderRadius(4)
         .justifyContent(FlexAlign.Start)
         .onClick(() => {
+            let ext = this.fileMessageContent().name.substring(this.fileMessageContent().name.lastIndexOf('.') + 1).toLowerCase()
+            if (Config.DISABLED_RECEIVE_FILE_TYPES.includes(ext)) {
+                showToast('禁止打开此类型')
+                return
+            }
             let context = getContext(this)
             downloadMedia(context, this.message.messageUid, this.fileMessageContent().remotePath)
                 .then(async filePath => {

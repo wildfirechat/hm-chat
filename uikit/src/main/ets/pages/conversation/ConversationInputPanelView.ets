@@ -28,6 +28,7 @@ import ConversationInfo from '@wfc/client/src/main/ets/wfc/model/conversationInf
 import { imageSize, imageThumbnail, videoThumbnail } from '../../helper/imageVideoHelper'
 import { inputMethod } from '@kit.IMEKit'
 import PickGroupMemberModal from '../group/PickGroupMemberModal'
+import Config from '@wfc/client/src/main/ets/config'
 import FileMessageContent from '@wfc/client/src/main/ets/wfc/messages/fileMessageContent'
 import { isImage, isVideo } from '../../util/helper'
 import GroupMemberType from '@wfc/client/src/main/ets/wfc/model/groupMemberType'
@@ -232,6 +233,11 @@ export default struct ConversationInputPanelView {
                 try {
                     let selectedFileUri = await selectFile()
                     let name = fileNameFromFileUri(selectedFileUri)
+                    let ext = name.substring(name.lastIndexOf('.') + 1).toLowerCase()
+                    if (Config.DISABLED_SEND_FILE_TYPES.includes(ext)) {
+                        showToast('不能发送该类型文件')
+                        return
+                    }
                     let filePath = getContext(this)
                         .getApplicationContext()
                         .cacheDir + '/' + new Date().getTime() + '-' + name

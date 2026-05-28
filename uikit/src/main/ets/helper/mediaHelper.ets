@@ -11,6 +11,7 @@ import camera from '@ohos.multimedia.camera';
 import { BusinessError } from '@ohos.base';
 import { dataSharePredicates } from '@kit.ArkData';
 import { compressImage, packing } from './imageVideoHelper';
+import Config from '@wfc/client/src/main/ets/config'
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc';
 import { fileIo } from '@kit.CoreFileKit';
 import { showToast } from '../common/utils/Toast';
@@ -121,6 +122,13 @@ export async function takePhoto(context: common.UIAbilityContext): Promise<Media
 export function downloadMedia(context: Context, messageUid: Long, url: string, progressCB?: (receivedSize: number, totalSize: number) => void): Promise<string> {
     return new Promise<string>(async (resolve, reject) => {
         let suffix = url.substring(url.lastIndexOf('.'))
+        let fileName = url.substring(url.lastIndexOf('/') + 1)
+        let ext = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase()
+        if (Config.DISABLED_RECEIVE_FILE_TYPES.includes(ext)) {
+            showToast('不能接收该类型文件')
+            reject('file type not allowed')
+            return
+        }
         let filePath = context.cacheDir + '/' + messageUid.toString() + suffix
         if (await fileIo.access(filePath)) {
             resolve(filePath)

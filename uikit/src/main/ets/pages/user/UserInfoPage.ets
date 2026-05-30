@@ -14,6 +14,7 @@ import ModifyMyInfoType from '@wfc/client/src/main/ets/wfc/model/modifyMyInfoTyp
 import OptionItemView from '../../view/OptionItemView';
 import avenginekit from '@wfc/avenginekit';
 import { checkAndRequestPermission } from '../../helper/permissionHelper';
+import WfcScheme from '../../wfcScheme'
 
 @Component
 export default struct UserInfoPage {
@@ -137,6 +138,23 @@ export default struct UserInfoPage {
                             'userInfo': this.userInfo,
                         } as Record<string, Object>)
                     })
+                if (this.userInfo?.uid === wfc.getUserId()) {
+                    OptionItemView({
+                        title: '二维码',
+                        // icon: $r('app.media.qr_code'),
+                        showRightArrow: true,
+                        showDivider: false
+                    })
+                        .onClick(() => {
+                            this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.QRCodePage, {
+                                'title': '我的二维码',
+                                'portraitUrl': this.userInfo!.portrait,
+                                'name': this.userInfo!.displayName,
+                                'qrCodeValue': WfcScheme.QR_CODE_PREFIX_USER + this.userInfo!.uid,
+                                'hint': '扫描二维码，加我为好友'
+                            } as Record<string, Object>)
+                        })
+                }
 
                 Column() {
                     Text('发消息')

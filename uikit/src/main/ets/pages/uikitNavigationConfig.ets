@@ -12,7 +12,6 @@ import GroupInfoPage from './group/GroupInfoPage'
 import GroupManagePage from './group/GroupManagePage'
 import GroupManagerListPage from './group/GroupManagerListPage'
 import GroupMemberMuteOrAllowListPage from './group/GroupMemberMuteOrAllowListPage'
-import GroupQRCodePage from './group/GroupQRCodePage'
 import UpdateGroupAnnouncementPage from './group/UpdateGroupAnnouncementPage'
 import UpdateGroupNamePage from './group/UpdateGroupNamePage'
 import UpdateGroupRemarkNamePage from './group/UpdateGroupRemarkPage'
@@ -33,6 +32,7 @@ import SearchMessageFilePage from './search/SearchMessageFilePage'
 import SearchMessageLinkPage from './search/SearchMessageLinkPage'
 import SearchPortalPage from './search/SearchPortalPage'
 import SearchUserPage from './search/SearchUserPage'
+import QRCodePage from './qrcode/QRCodePage'
 import UpdateUserInfoPage from './user/UpdateUserInfoPage'
 import UserInfoPage from './user/UserInfoPage'
 import TextMessageContentView from './conversation/message/TextMessageContentView'
@@ -96,7 +96,7 @@ export class uikitNavigationDestinations {
     static UpdateGroupNamePage = UIKIT_NAV_DESTINATION_PREFIX + 'updateGroupNamePage'
     static UpdateGroupRemarkPage = UIKIT_NAV_DESTINATION_PREFIX + 'updateGroupRemarkPage'
     static UpdateMyGroupAliasPage = UIKIT_NAV_DESTINATION_PREFIX + 'updateMyGroupAliasPage'
-    static GroupQRCodePage = UIKIT_NAV_DESTINATION_PREFIX + 'groupQRCodePage'
+    static QRCodePage = UIKIT_NAV_DESTINATION_PREFIX + 'qrCodePage'
     static GroupManagePage = UIKIT_NAV_DESTINATION_PREFIX + 'groupManagePage'
     static GroupManagerListPage = UIKIT_NAV_DESTINATION_PREFIX + 'groupManagerListPage'
     static GroupMemberMuteOrAllowListPage = UIKIT_NAV_DESTINATION_PREFIX + 'groupMemberMuteOrAllowListPage'
@@ -184,8 +184,8 @@ export function UIKitPageMap(name: string) {
         UpdateGroupRemarkNamePage()
     } else if (name === uikitNavigationDestinations.UpdateMyGroupAliasPage) {
         UpdateMyGroupAliasNamePage()
-    } else if (name === uikitNavigationDestinations.GroupQRCodePage) {
-        GroupQRCodePage()
+    } else if (name === uikitNavigationDestinations.QRCodePage) {
+        QRCodePage()
     } else if (name === uikitNavigationDestinations.GroupManagePage) {
         GroupManagePage()
     } else if (name === uikitNavigationDestinations.GroupManagerListPage) {

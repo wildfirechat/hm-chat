@@ -25,6 +25,7 @@ import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationTyp
 
 import JoinGroupRequestDialog from '../group/JoinGroupRequestDialog';
 import ErrorCode from '@wfc/client/src/main/ets/wfc/client/errorCode';
+import WfcScheme from '../../wfcScheme'
 
 @Preview
 @Component
@@ -349,8 +350,12 @@ export default struct GroupConversationInfoPage {
                             imgUrl: 'http://static.wildfirechat.cn/wx_wfc_qrcode.jpg'
                         })
                             .onClick(() => {
-                                this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.GroupQRCodePage, {
-                                    'groupInfo': this.groupInfo
+                                this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.QRCodePage, {
+                                    'title': '群二维码',
+                                    'portraitUrl': this.groupInfo.portrait,
+                                    'name': this.groupInfo.name,
+                                    'qrCodeValue': WfcScheme.QR_CODE_PREFIX_GROUP + this.groupInfo.target,
+                                    'hint': '扫描二维码，加入群聊'
                                 } as Record<string, Object>)
                             })
                         OptionItemView({

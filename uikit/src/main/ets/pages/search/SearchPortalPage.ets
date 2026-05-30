@@ -9,62 +9,75 @@ import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationTyp
 import { inputMethod } from '@kit.IMEKit'
 import ConversationSearchResult from '@wfc/client/src/main/ets/wfc/model/conversationSearchResult'
 import { uikitNavigationDestinations } from '../uikitNavigationConfig'
+import Employee from '../../api/model/employee'
+import orgServer from '../../api/orgServer'
 
 
 @Component
 @Preview
 export default struct SearchPortalPage {
     @State keyword: string = ''
+    @State private orgId: number = 0
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
-    private searchModules: SearchModule[] = [
-        {
-            tag: 'contact',
-            onSearchResultItemClick: value => {
-                let userInfo = value as UserInfo
-                this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ConversationPage, {
-                    'conversation': new Conversation(ConversationType.Single, userInfo.uid, 0)
-                } as Record<string, Object>)
-            }
-        },
-        {
-            tag: 'group',
-            onSearchResultItemClick: value => {
-                let groupInfo = value as GroupInfo
-                this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ConversationPage, {
-                    'conversation': new Conversation(ConversationType.Group, groupInfo.target, 0)
-                } as Record<string, Object>)
-            }
-        },
-        {
-            tag: 'conversation',
-            onSearchResultItemClick: value => {
-                let conversationSearchResult = value as ConversationSearchResult
-                if (conversationSearchResult.matchCount > 1) {
-                    this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.SearchConversationMessagePage, {
-                        'keyword': this.keyword,
-                        'conversation': conversationSearchResult.conversation!
-                    } as Record<string, Object>)
-                } else {
-                    this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ConversationPage, {
-                        'conversation': conversationSearchResult.conversation!
-                    } as Record<string, Object>)
-                }
-            }
-        },
-        {
-            tag: 'channel',
-            onSearchResultItemClick: value => {
-                let channelInfo = value as ChannelInfo
-                this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ConversationPage, {
-                    'conversation': new Conversation(ConversationType.Channel, channelInfo.channelId, 0)
-                } as Record<string, Object>)
-            }
-        },
-    ]
+    private searchModules: SearchModule[] = []
 
     aboutToAppear() {
         let params = this.mainNavPathStack.getParamByIndex(this.mainNavPathStack.size() - 1) as Record<string, Object>;
-        // TODO
+        this.orgId = params['orgId'] as number ?? 0
+        this.searchModules = [
+            {
+                tag: 'contact',
+                onSearchResultItemClick: value => {
+                    let userInfo = value as UserInfo
+                    this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ConversationPage, {
+                        'conversation': new Conversation(ConversationType.Single, userInfo.uid, 0)
+                    } as Record<string, Object>)
+                }
+            },
+            {
+                tag: 'group',
+                onSearchResultItemClick: value => {
+                    let groupInfo = value as GroupInfo
+                    this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ConversationPage, {
+                        'conversation': new Conversation(ConversationType.Group, groupInfo.target, 0)
+                    } as Record<string, Object>)
+                }
+            },
+            {
+                tag: 'conversation',
+                onSearchResultItemClick: value => {
+                    let conversationSearchResult = value as ConversationSearchResult
+                    if (conversationSearchResult.matchCount > 1) {
+                        this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.SearchConversationMessagePage, {
+                            'keyword': this.keyword,
+                            'conversation': conversationSearchResult.conversation!
+                        } as Record<string, Object>)
+                    } else {
+                        this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ConversationPage, {
+                            'conversation': conversationSearchResult.conversation!
+                        } as Record<string, Object>)
+                    }
+                }
+            },
+            {
+                tag: 'channel',
+                onSearchResultItemClick: value => {
+                    let channelInfo = value as ChannelInfo
+                    this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ConversationPage, {
+                        'conversation': new Conversation(ConversationType.Channel, channelInfo.channelId, 0)
+                    } as Record<string, Object>)
+                }
+            },
+            {
+                tag: 'employee',
+                onSearchResultItemClick: value => {
+                    let employee = value as Employee
+                    this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.UserInfoPage, {
+                        'userInfo': orgServer.employeeToUserInfo(employee)
+                    } as Record<string, Object>)
+                }
+            },
+        ]
     }
 
     build() {
@@ -96,7 +109,8 @@ export default struct SearchPortalPage {
 
                 SearchResultView({
                     keyword: this.keyword,
-                    searchModules: this.searchModules
+                    searchModules: this.searchModules,
+                    employeeOrgId: this.orgId
                 })
                     .onTouch(event => {
                         inputMethod.getController().stopInputSession()

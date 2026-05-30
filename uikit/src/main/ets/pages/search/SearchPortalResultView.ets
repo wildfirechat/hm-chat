@@ -11,6 +11,8 @@ import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationTyp
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
 import Utils from '../../common/Utils'
 import { drawing } from '@kit.ArkGraphics2D'
+import Employee from '../../api/model/employee'
+import orgServer from '../../api/orgServer'
 
 @Component
 @Preview
@@ -25,8 +27,11 @@ export default struct SearchResultView {
     @State expandChannelSearchResult: boolean = false
     @State conversationSearchResults: ConversationSearchResultWrapper[] = []
     @State expandConversationSearchResults: boolean = false
+    @State employeeSearchResults: Employee[] = []
+    @State expandEmployeeSearchResult: boolean = false
     @Prop @Watch('onSearchKeywordUpdate') keyword: string
     searchModules: SearchModule[] = []
+    employeeOrgId: number = 0
 
     aboutToAppear() {
         if (this.keyword) {
@@ -39,6 +44,7 @@ export default struct SearchResultView {
         this.expandGroupSearchResult = false
         this.expandContactSearchResult = false
         this.expandChannelSearchResult = false
+        this.expandEmployeeSearchResult = false
 
         if (keyword.length === 0) {
             this.userSearchResults = []
@@ -46,6 +52,7 @@ export default struct SearchResultView {
             this.groupSearchResults = []
             this.channelSearchResults = []
             this.conversationSearchResults = []
+            this.employeeSearchResults = []
         } else {
             if (this.searchModules.length === 1) {
                 // 只有一个搜索模块时，全部展开
@@ -83,6 +90,19 @@ export default struct SearchResultView {
                         }, err => {
                             showToast('搜索用户失败' + err)
                         })
+                        break
+                    case 'employee':
+                        if(orgServer.isServiceAvailable){
+                            orgServer.searchEmployee(this.employeeOrgId, keyword)
+                                .then((employees: Employee[]) => {
+                                    if (this.keyword.trim() === keyword) {
+                                        this.employeeSearchResults = employees
+                                    }
+                                })
+                                .catch((err: Error) => {
+                                    showToast('搜索组织结构失败 ' + err)
+                                })
+                        }
                         break
                     case 'message':
                     // TODO
@@ -356,8 +376,63 @@ export default struct SearchResultView {
     }
 
     @Builder
-    searchResultCategoryHeader(title: string) {
-        Text(title)
+    employeeSearchResultBuilder() {
+        if (this.employeeSearchResults.length > 0) {
+            this.searchResultCategoryHeader('组织结构')
+        }
+        ForEach(this.expandEmployeeSearchResult ? this.employeeSearchResults : this.employeeSearchResults.slice(0, 5), (employee: Employee) => {
+            ListItem() {
+                Row() {
+                    Image(employee.portraitUrl)
+                        .alt($r('app.media.avatar_def'))
+                        .width(40)
+                        .height(40)
+                        .borderRadius(4)
+                    Column() {
+                        Text(employee.name)
+                            .fontColor($r('app.color.wf_primary_text'))
+                            .maxLines(1)
+                            .textOverflow({ overflow: TextOverflow.Ellipsis })
+                        if (employee.title) {
+                            Text(employee.title)
+                                .fontSize(12)
+                                .margin({ top: 5 })
+                                .fontColor($r('app.color.wf_tertiary_text'))
+                                .maxLines(1)
+                                .textOverflow({ overflow: TextOverflow.Ellipsis })
+                        }
+                    }
+                    .alignItems(HorizontalAlign.Start)
+                    .padding({ left: 10 })
+                    .layoutWeight(1)
+                }
+                .width('100%')
+                .justifyContent(FlexAlign.Start)
+                .padding(10)
+            }
+            .stateStyles({
+                pressed: {
+                    .backgroundColor($r('app.color.wf_item_pressed'))
+                },
+                normal: {
+                    .backgroundColor($r('app.color.wf_background'))
+                }
+            })
+            .onClick(() => {
+                let employeeSearchModule = this.searchModules.filter(m => m.tag === 'employee')[0]
+                employeeSearchModule.onSearchResultItemClick(employee)
+            })
+        }, (employee: Employee) => employee.employeeId)
+
+        if (!this.expandEmployeeSearchResult && this.employeeSearchResults.length > 5) {
+            this.searchResultCategoryFooter(`展开剩余${this.employeeSearchResults.length - 5}项`, () => {
+                this.expandEmployeeSearchResult = true
+            })
+        }
+    }
+
+    @Builder
+    searchResultCategoryHeader(title: string) {        Text(title)
             .padding({ left: 10 })
             .width('100%')
             .height(32)
@@ -379,13 +454,14 @@ export default struct SearchResultView {
 
     build() {
         if (this.userSearchResults.length + this.contactSearchResults.length + this.groupSearchResults.length + this.channelSearchResults.length
-            + this.conversationSearchResults.length) {
+            + this.conversationSearchResults.length + this.employeeSearchResults.length) {
             List() {
                 this.userSearchResultBuilder()
                 this.contactSearchResultBuilder()
                 this.groupSearchResultBuilder()
                 this.conversationSearchResultBuilder()
                 this.channelSearchResultBuilder()
+                this.employeeSearchResultBuilder()
             }
             .backgroundColor($r('app.color.wf_background'))
         } else {

@@ -24,7 +24,7 @@ export interface MMMediaEntry {
 }
 
 export interface SearchModule {
-    tag: 'user' | 'contact' | 'group' | 'channel' | 'message' | 'conversation' | 'conversationMessage',
+    tag: 'user' | 'contact' | 'group' | 'channel' | 'message' | 'conversation' | 'conversationMessage' | 'employee',
     onSearchResultItemClick: (value: object) => void
 }
 

@@ -33,6 +33,7 @@ import uikit from '@wfc/uikit'
 import { common } from '@kit.AbilityKit'
 import avengineKit from '@wfc/avenginekit'
 import pipHelper from '@wfc/uikit/src/main/ets/pages/voip/pipHelper'
+import window from '@ohos.window'
 
 const TAG = 'Main';
 
@@ -56,6 +57,7 @@ struct MainPage {
     @State @Watch('onUnreadCountUpdated') discoveryTabUnreadCount: number = 0
     @State meTabUnreadCount: number = 0
     @State showPickContactModal: boolean = false
+    @State isMeTab: boolean = false
     @Provide('mainNavPathStack') mainNavPathStack: NavPathStack = uikit.mainNavPathStack
     @LocalStorageProp('wantParams') @Watch('onWantParams') wantParams?: Record<string, Object> = undefined
 
@@ -253,7 +255,8 @@ struct MainPage {
                     },
                     secondaryButton: {
                         value: '以后再说',
-                        action: () => {}
+                        action: () => {
+                        }
                     }
                 })
             }
@@ -273,6 +276,19 @@ struct MainPage {
         this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.GroupInfoPage, {
             'groupId': groupId
         } as Record<string, Object>)
+    }
+
+    private setStatusBarColor(isMe: boolean) {
+        window.getLastWindow(this.getUIContext().getHostContext()).then(win => {
+            win.setWindowSystemBarProperties({
+                statusBarColor: isMe ? '#FFFFFF' : '#00000000',
+                statusBarContentColor: '#000000',
+            }).catch((e: Error) => {
+                console.error(TAG, 'setWindowSystemBarProperties failed', e)
+            })
+        }).catch((e: Error) => {
+            console.error(TAG, 'getLastWindow failed', e)
+        })
     }
 
     tabUnreadCount(tabIndex: number) {
@@ -383,44 +399,48 @@ struct MainPage {
 
     @Builder
     TitleBuilder() {
-        Column() {
-            Text(this.title)
-                .padding({ left: 10 })
-                .fontSize(25)
-                .fontColor($r('app.color.wf_primary_text'))
-                .width('200')
+        if (!this.isMeTab) {
+            Column() {
+                Text(this.title)
+                    .padding({ left: 15 })
+                    .fontSize(20)
+                    .fontColor($r('app.color.wf_primary_text'))
+                    .width('200')
+            }
+            .height('100%')
+            .justifyContent(FlexAlign.Center)
         }
-        .height('100%')
-        .justifyContent(FlexAlign.Center)
     }
 
     @Builder
     NavigationMenus() {
-        Row() {
-            SymbolGlyph($r('sys.symbol.magnifyingglass'))
-                .fontSize(22)
-                .fontColor([$r('app.color.wf_icon_color')])
-                .onClick(() => {
-                    this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.SearchPortalPage, {
-                        'keyword': '1'
-                    } as Record<string, Object>, true)
-                })
+        if (!this.isMeTab) {
+            Row() {
+                SymbolGlyph($r('sys.symbol.magnifyingglass'))
+                    .fontSize(22)
+                    .fontColor([$r('app.color.wf_icon_color')])
+                    .onClick(() => {
+                        this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.SearchPortalPage, {
+                            'keyword': '1'
+                        } as Record<string, Object>, true)
+                    })
 
-            SymbolGlyph($r('sys.symbol.plus_circle'))
-                .fontSize(22)
-                .fontColor([$r('app.color.wf_icon_color')])
-                .margin({ left: 12 })
-                .bindMenu(this.SubMoreMenus())
-                .bindContentCover($$this.showPickContactModal, this.pickMultiContactModal(), {
-                    modalTransition: ModalTransition.DEFAULT,
-                    onAppear: () => {
-                    },
-                })
+                SymbolGlyph($r('sys.symbol.plus_circle'))
+                    .fontSize(22)
+                    .fontColor([$r('app.color.wf_icon_color')])
+                    .margin({ left: 12 })
+                    .bindMenu(this.SubMoreMenus())
+                    .bindContentCover($$this.showPickContactModal, this.pickMultiContactModal(), {
+                        modalTransition: ModalTransition.DEFAULT,
+                        onAppear: () => {
+                        },
+                    })
+            }
+            .margin({ right: 18 })
+            .height('100%')
+            .justifyContent(FlexAlign.Start)
+            .alignItems(VerticalAlign.Center)
         }
-        .margin({ right: 18 })
-        .height('100%')
-        .justifyContent(FlexAlign.Start)
-        .alignItems(VerticalAlign.Center)
     }
 
     build() {
@@ -466,10 +486,22 @@ struct MainPage {
             .backgroundColor($r('app.color.wf_background'))
             .onChange(index => {
                 this.currentIndex = index
-                this.title = this.tabTitles[index]
+                this.title = this.isMeTab ? this.tabTitles[index - 1] : this.tabTitles[index]
+            })
+            .onAnimationStart((index: number, targetIndex: number) => {
+                const isMe = targetIndex === (Config.OPEN_PLATFORM_WORK_SPACE_URL ? 4 : 3)
+                this.isMeTab = isMe
+                this.setStatusBarColor(isMe)
+            })
+            .onAnimationEnd((index: number) => {
+                const isMe = index === (Config.OPEN_PLATFORM_WORK_SPACE_URL ? 4 : 3)
+                this.isMeTab = isMe
+                this.setStatusBarColor(isMe)
             })
         }
-        .title(this.TitleBuilder())
+        .title(this.TitleBuilder(), {
+            backgroundColor: this.isMeTab ? $r('app.color.wf_background') : $r('app.color.wf_primary_background_color')
+        })
         .titleMode(NavigationTitleMode.Mini)
         .backgroundColor($r('app.color.wf_primary_background_color'))
         .hideBackButton(true)

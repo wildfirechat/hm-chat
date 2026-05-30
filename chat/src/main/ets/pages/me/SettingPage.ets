@@ -137,6 +137,5 @@ export default struct SettingPage {
         .title('设置')
         .height('100%')
         .width('100%')
-        .backgroundColor($r('app.color.wf_primary_background_color'))
     }
 }

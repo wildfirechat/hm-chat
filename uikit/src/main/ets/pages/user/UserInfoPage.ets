@@ -268,7 +268,9 @@ export default struct UserInfoPage {
         }
         .backgroundColor($r('app.color.wf_primary_background_color'))
         .hideTitleBar(false)
-        .title('用户信息')
+        .title('用户信息', {
+            backgroundColor: $r('app.color.wf_background')
+        })
         .height('100%')
         .width('100%')
         .menus([

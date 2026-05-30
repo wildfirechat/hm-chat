@@ -70,7 +70,7 @@ export default struct MeTab {
                 .justifyContent(FlexAlign.SpaceBetween)
                 .layoutWeight(1)
                 .height(60)
-                .padding({ top: 5, bottom: 5 })
+                .padding({ bottom: 5 })
                 .margin({ left: 16 })
 
                 Image($r('app.media.ic_public_arrow_right'))
@@ -79,12 +79,10 @@ export default struct MeTab {
                     .fillColor($r('app.color.c_gray'))
             }
             .width('100%')
-            .height(100)
             .padding({
                 left:26,
                 right: 20,
-                top: 10,
-                bottom: 10
+                bottom: 20
             })
             .alignItems(VerticalAlign.Center)
             .backgroundColor($r('app.color.wf_background'))

@@ -3,7 +3,7 @@ import ContactListTab from '@wfc/uikit/src/main/ets/pages/ContactListTab'
 import DiscoveryTab from './DiscoveryTab'
 import MeTab from './MeTab'
 import AbilityAccessCtrl, { Permissions } from '@ohos.abilityAccessCtrl'
-import { bundleManager } from '@kit.AbilityKit';
+import { bundleManager, ConfigurationConstant } from '@kit.AbilityKit';
 import { scanCore, scanBarcode } from '@kit.ScanKit';
 import { showToast } from '@wfc/uikit/src/main/ets/common/utils/Toast'
 import PickMultiContactModal from '@wfc/uikit/src/main/ets/pages/picker/PickMultiContactModal'
@@ -60,6 +60,7 @@ struct MainPage {
     @State isMeTab: boolean = false
     @Provide('mainNavPathStack') mainNavPathStack: NavPathStack = uikit.mainNavPathStack
     @LocalStorageProp('wantParams') @Watch('onWantParams') wantParams?: Record<string, Object> = undefined
+    @StorageProp('currentColorMode') @Watch('onCurrentColorModeChange') currentColorMode: ConfigurationConstant.ColorMode = ConfigurationConstant.ColorMode.COLOR_MODE_NOT_SET;
 
     onWantParams() {
         let conversation = this.wantParams?.conversation as Conversation
@@ -192,6 +193,10 @@ struct MainPage {
         wfc.eventEmitter?.off(EventType.FriendRequestUpdate, this.onFriendRequestUpdate)
     }
 
+    onCurrentColorModeChange(): void {
+        this.setStatusBarColor(this.isMeTab)
+    }
+
     showPCLoginPage(token: string, isConfirmPCLogin = false, platform = 0) {
         this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.PCLoginPage, {
             'token': token,
@@ -279,10 +284,11 @@ struct MainPage {
     }
 
     private setStatusBarColor(isMe: boolean) {
+        let colorMode = AppStorage.get<ConfigurationConstant.ColorMode>('currentColorMode')
         window.getLastWindow(this.getUIContext().getHostContext()).then(win => {
             win.setWindowSystemBarProperties({
-                statusBarColor: isMe ? '#FFFFFF' : '#00000000',
-                statusBarContentColor: '#000000',
+                statusBarColor: isMe && colorMode == ConfigurationConstant.ColorMode.COLOR_MODE_DARK ? '#111111' : '#00000000',
+                statusBarContentColor: colorMode == ConfigurationConstant.ColorMode.COLOR_MODE_DARK ? '#FFFFFF' : '#000000',
             }).catch((e: Error) => {
                 console.error(TAG, 'setWindowSystemBarProperties failed', e)
             })

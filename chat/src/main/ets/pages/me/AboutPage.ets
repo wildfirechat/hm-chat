@@ -184,6 +184,5 @@ export default struct AboutPage {
         .title(getContext().resourceManager.getStringSync($r('app.string.app_about').id))
         .height('100%')
         .width('100%')
-        .backgroundColor($r('app.color.wf_primary_background_color'))
     }
 }

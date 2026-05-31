@@ -4,7 +4,7 @@ import window from '@ohos.window';
 import data_preferences from '@ohos.data.preferences';
 import wfc from '@wfc/client'
 import Config from '@wfc/client/src/main/ets/config'
-import { AbilityConstant, common, Context, Want } from '@kit.AbilityKit';
+import { AbilityConstant, common, ConfigurationConstant, Configuration, Context, Want } from '@kit.AbilityKit';
 import { pushCommon, pushService } from '@kit.PushKit';
 
 import EventType from '@wfc/client/src/main/ets/wfc/client/wfcEvent';
@@ -37,6 +37,7 @@ export default class EntryAbility extends UIAbility {
     async onCreate(want: Want, launchParam: AbilityConstant.LaunchParam) {
         hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onCreate');
         AppStorage.setOrCreate('context', this.context);
+        AppStorage.setOrCreate<ConfigurationConstant.ColorMode>('currentColorMode', this.context.config.colorMode);
         this.applicationContext = this.context.getApplicationContext()
 
         wfc.init(this.applicationContext, this.context.eventHub, this.applicationContext.filesDir, Config.getWFCPlatform());
@@ -86,6 +87,13 @@ export default class EntryAbility extends UIAbility {
         })
 
         this.parseLaunchParamsAndThen(want);
+    }
+
+    onConfigurationUpdate(newConfig: Configuration): void {
+        const currentColorMode: ConfigurationConstant.ColorMode | undefined = AppStorage.get('currentColorMode');
+        if (currentColorMode !== newConfig.colorMode) {
+            AppStorage.setOrCreate<ConfigurationConstant.ColorMode>('currentColorMode', newConfig.colorMode);
+        }
     }
 
     onNewWant(want: Want, launchParam: AbilityConstant.LaunchParam): void {

@@ -29,7 +29,6 @@ export default struct FriendRequestListPage {
 
     build() {
         NavDestination() {
-            Navigation() {
                 Column() {
                     if (this.computedRequests.length === 0) {
                         Column() {
@@ -60,26 +59,20 @@ export default struct FriendRequestListPage {
                 }
                 .height('100%')
                 .width('100%')
-            }
-            .title('好友请求')
-            .titleMode(NavigationTitleMode.Mini)
-            .hideBackButton(false)
-            .height('100%')
-            .width('100%')
-            .navBarPosition(NavBarPosition.Start)
-            .menus([
-                {
-                    value: '',
-                    icon: "resources/base/media/ic_add.png",
-                    action: () => {
-                        this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.SearchUserPage, {} as Record<string, Object>)
-                    }
-                }
-            ])
         }
+        .title('好友请求')
         .width('100%')
         .height('100%')
-        .hideTitleBar(true)
+        .menus([
+            {
+                value: '',
+                icon: "resources/base/media/ic_add.png",
+                action: () => {
+                    this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.SearchUserPage, {} as Record<string, Object>)
+                }
+            }
+        ])
+        .backgroundColor($r('app.color.wf_primary_background_color'))
         .onShown(() => {
 
         })

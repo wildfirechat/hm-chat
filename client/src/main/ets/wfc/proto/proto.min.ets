@@ -395,6 +395,14 @@ class WfcImpl {
         protoProxy.useAES256();
     }
 
+    setDataVerify(enabled: boolean) {
+        protoProxy.useDataVerify(enabled);
+    }
+
+    setEncryptMaxMinutes(minutes: number) {
+        protoProxy.useEncryptMaxMinutes(minutes);
+    }
+
     setTimeOffset(offset: number) {
         protoProxy.setTimeOffset(offset);
     }

@@ -94,6 +94,9 @@ export class WfcManager {
         //     pttClient.init();
         // }
         //self.setProxyInfo("", "192.168.1.80", 1080, "", "");
+        // self.useSM4();
+        // self.setDataVerify(true);
+        // self.setEncryptMaxMinutes(5);
     }
 
     /**
@@ -136,6 +139,25 @@ export class WfcManager {
     useAES256() {
         impl.useAES256();
     }
+
+    /**
+     * 启用数据校验。需要在connect之前调用。注意必须和服务器同时配置，否则无法连接。
+     *
+     * @param {boolean} enabled 是否启用
+     */
+    setDataVerify(enabled: boolean) {
+        impl.setDataVerify(enabled);
+    }
+
+    /**
+     * 设置加密最大时间段（分钟）。需要在connect之前调用。注意必须和服务器同时配置，否则无法连接。
+     *
+     * @param {int} minutes 有效时间
+     */
+    setEncryptMaxMinutes(minutes: number) {
+        impl.setEncryptMaxMinutes(minutes);
+    }
+
 
     /*
      * 添加设置时间偏移接口，可以让时间不正确的设备能够正常运行

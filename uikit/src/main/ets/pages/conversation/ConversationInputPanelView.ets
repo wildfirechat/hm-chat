@@ -13,6 +13,8 @@ import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import router from '@ohos.router'
 import ActionSheetDialog from '../../view/ActionSheetDialog'
 import EmojiInputPanelView from './emoji/EmojiInputPanelView'
+import { config as emojiConfig } from './emoji/EmojiAndStickerConfig'
+import { Emoji } from './emoji/emojis'
 import { curves, KeyboardAvoidMode, window } from '@kit.ArkUI'
 import MentionGroupMemberView from './mention/MentionGroupMemberView'
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
@@ -66,15 +68,15 @@ interface MultiCheckAction {
 export default struct ConversationInputPanelView {
     @Prop conversation: Conversation
     @Prop conversationInfo: ConversationInfo
-    @Link text: string
+    @Link @Watch('onTextChange') text: string
     @State caretPosition: number = 0
     @State selectionStart: number = 0
     @State selectionEnd: number = 0
-    @State textInputFocused: boolean = false
+    @State @Watch('onFocusStateChanged') textInputFocused: boolean = false
     @State @Watch('onExpandConversationInputPanelView') showEmojiPanel: boolean = false
     @State @Watch('onExpandConversationInputPanelView') showExtPanel: boolean = false
     @State showMentionSheet: boolean = false
-    @State keyboardHeight: number = 320
+    @State @Watch('onKeyboardHeightChanged') keyboardHeight: number = 320
     @State showAudioRecorderButton: boolean = false
     @State showChannelMenu: boolean = false
     @State enable: boolean = false
@@ -103,6 +105,11 @@ export default struct ConversationInputPanelView {
     @Link @Watch('onLongPressToMentionUser') longPressToMentionUser: string
     private mentions: MentionBlock[] = []
     @State showExtContentCoverModal: boolean = false
+    // Callbacks for ConversationPage-level overlays
+    onPreviewChange?: (emoji: Emoji | null, col: number, colW: number, rowY: number) => void
+    onSuggestionsChange?: (stickers: Emoji[]) => void
+    onPanelHeightChange?: (h: number) => void
+    private allStickers: Emoji[] = []
     private voipAudioOnly: boolean = false
     private forwardDialogController?: CustomDialogController
     private conversationExts: ConversationExt[] = [
@@ -411,6 +418,16 @@ export default struct ConversationInputPanelView {
         }
     ]
 
+    private onKeyboardHeightChanged(propName: string) {
+        this.onPanelHeightChange?.(this.keyboardHeight)
+    }
+
+    private onFocusStateChanged() {
+        if (this.textInputFocused) {
+            this.onTextChange()
+        }
+    }
+
     onCollapseConversationInputPanelView(propName: string) {
         if (!this.collapseConversationInputPanelViewTimestamp) {
             return
@@ -427,6 +444,10 @@ export default struct ConversationInputPanelView {
         console.log('on onExpandConversationInputPanelView', this.showEmojiPanel, this.showExtPanel);
         if (this.showEmojiPanel || this.showExtPanel) {
             this.scrollMessageListToBottom();
+            this.onSuggestionsChange?.([])
+        } else {
+            // Panel just closed — re-evaluate suggestions for current text
+            this.onTextChange()
         }
     }
 
@@ -445,6 +466,18 @@ export default struct ConversationInputPanelView {
         let userInfo = wfc.getUserInfo(this.longPressToMentionUser, false, this.groupId!)
         this.onMentionGroupMember(userInfo)
         this.longPressToMentionUser = ''
+    }
+
+    private onTextChange() {
+        const trimmed = this.text.trim()
+        if (trimmed.length === 0 || this.showEmojiPanel || this.showExtPanel) {
+            this.onSuggestionsChange?.([])
+            return
+        }
+        const matches = this.allStickers.filter(emoji =>
+            emoji.aliases.some(alias => alias !== 'sticker' && alias === trimmed)
+        )
+        this.onSuggestionsChange?.(matches)
     }
 
     onMentionGroupMember = (userInfo: UserInfo) => {
@@ -538,6 +571,9 @@ export default struct ConversationInputPanelView {
         wfc.eventEmitter?.on(EventType.GroupMembersUpdate, this.onGroupMembersUpdate)
         wfc.eventEmitter?.on(EventType.GroupInfosUpdate, this.onGroupInfosUpdate)
         wfc.eventEmitter?.on(EventType.ChannelInfosUpdate, this.onChannelInfoUpdate)
+
+        let cfg = emojiConfig()
+        this.allStickers = (cfg['emojis'] as Emoji[]).filter(e => e.category.startsWith('Sticker-'))
     }
 
     updateGroupConversationMuteState() {
@@ -1057,7 +1093,8 @@ export default struct ConversationInputPanelView {
                         selectionStart: this.selectionStart,
                         selectionEnd: this.selectionEnd,
                         conversation: this.conversation,
-                        textInputController: this.textInputController
+                        textInputController: this.textInputController,
+                        onPreviewChange: this.onPreviewChange
                     })
                         .focusable(true)
                         .width('100%')

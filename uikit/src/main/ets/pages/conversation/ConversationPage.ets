@@ -40,6 +40,8 @@ import StreamingTextGeneratedMessageContent from '@wfc/client/src/main/ets/wfc/m
 import GroupType from '@wfc/client/src/main/ets/wfc/model/groupType'
 import archiveServer from '../../api/archiveServer'
 import ArchiveMessageResult from '../../api/model/archiveMessageResult'
+import { Emoji } from './emoji/emojis'
+import StickerMessageContent from '@wfc/client/src/main/ets/wfc/messages/stickerMessageContent'
 
 @Component
 export default struct ConversationPage {
@@ -72,6 +74,14 @@ export default struct ConversationPage {
     @State longPressToMentionUser: string = ''
     @State unreadJoinGroupRequestCount: number = 0
     @State private archiveNextStartMid: number = 0  // 归档消息分页起始ID
+    @State private previewEmoji: Emoji | null = null
+    @State private previewCol: number = 0
+    @State private previewColW: number = 0
+    @State private previewRowY: number = 0
+    @State private suggestedStickers: Emoji[] = []
+    @State private panelHeight: number = 320
+    @State private pageWidth: number = 0
+    @State private pageHeight: number = 0
 
     aboutToAppear() {
         this.audioPlayerManager.init(getContext(this))
@@ -626,8 +636,27 @@ export default struct ConversationPage {
         }
     }
 
+    private previewCardSize(): number {
+        return this.previewEmoji?.category === 'Peoples' ? 88 : 130
+    }
+
+    private previewCardX(): number {
+        const size = this.previewCardSize()
+        const cx = (this.previewCol + 0.5) * this.previewColW
+        return Math.max(0, Math.min(this.pageWidth - size, cx - size / 2))
+    }
+
+    private previewCardY(): number {
+        const GRID_OFFSET = 50  // tab list (40) + stack top padding (10) inside EmojiInputPanelView
+        const size = this.previewCardSize()
+        const rowTopY = this.pageHeight - this.panelHeight + GRID_OFFSET + this.previewRowY
+        return Math.max(0, rowTopY - size - 4)
+    }
+
     build() {
         NavDestination() {
+            Stack() {
+            Column() {
             Scroll() {
                 Stack() {
                     Refresh({ refreshing: $$this.refreshStatus }) {
@@ -944,6 +973,42 @@ export default struct ConversationPage {
                 this.collapseConversationInputPanelViewTimestamp = new Date().getTime()
             })
 
+            if (this.suggestedStickers.length > 0) {
+                Row() {
+                    Scroll() {
+                        Row() {
+                            ForEach(this.suggestedStickers, (sticker: Emoji) => {
+                                Image(sticker.data)
+                                    .width(60)
+                                    .height(60)
+                                    .objectFit(ImageFit.Contain)
+                                    .borderRadius(6)
+                                    .margin({ left: 4, right: 4 })
+                                    .onClick(() => {
+                                        let stickerMsg = new StickerMessageContent('', sticker.data, 200, 200)
+                                        wfc.sendConversationMessage(this.conversation!, stickerMsg)
+                                        this.toReeditText = ''
+                                        this.suggestedStickers = []
+                                    })
+                            }, (sticker: Emoji, index: number) => index + '')
+                        }
+                    }
+                    .scrollable(ScrollDirection.Horizontal)
+                    .scrollBar(BarState.Off)
+                    .edgeEffect(EdgeEffect.Spring)
+                    .constraintSize({ maxWidth: '75%' })
+                    .padding(6)
+                    .backgroundColor($r('app.color.wf_background'))
+                    .borderRadius(10)
+                    .shadow({ radius: 8, color: '#30000000', offsetX: 0, offsetY: -3 })
+                }
+                .width('100%')
+                .backgroundColor($r('app.color.wf_secondary_background'))
+                .justifyContent(FlexAlign.End)
+                .padding({ right: 10 })
+                .margin({ bottom: 4 })
+            }
+
             if (this.conversation) {
                 ConversationInputPanelView({
                     text: this.toReeditText,
@@ -954,9 +1019,58 @@ export default struct ConversationPage {
                     quotedMessage: $quotedMessage,
                     collapseConversationInputPanelViewTimestamp: $collapseConversationInputPanelViewTimestamp,
                     messageListScroller: this.scroller,
-                    longPressToMentionUser: $longPressToMentionUser
+                    longPressToMentionUser: $longPressToMentionUser,
+                    onPreviewChange: (emoji, col, colW, rowY) => {
+                        this.previewEmoji = emoji
+                        this.previewCol = col
+                        this.previewColW = colW
+                        this.previewRowY = rowY
+                    },
+                    onSuggestionsChange: (stickers) => {
+                        this.suggestedStickers = stickers
+                    },
+                    onPanelHeightChange: (h) => {
+                        this.panelHeight = h
+                    }
                 })
             }
+
+            } // end Column
+            .width('100%')
+            .height('100%')
+
+            // Long-press preview: floating card above pressed emoji/sticker
+            if (this.previewEmoji !== null) {
+                Column() {
+                    if (this.previewEmoji!.category === 'Peoples') {
+                        Text(this.previewEmoji!.data)
+                            .fontSize(56)
+                    } else {
+                        Image(this.previewEmoji!.data)
+                            .width(this.previewCardSize() - 20)
+                            .height(this.previewCardSize() - 20)
+                            .objectFit(ImageFit.Contain)
+                            .borderRadius(8)
+                    }
+                }
+                .width(this.previewCardSize())
+                .height(this.previewCardSize())
+                .justifyContent(FlexAlign.Center)
+                .alignItems(HorizontalAlign.Center)
+                .backgroundColor($r('app.color.wf_background'))
+                .borderRadius(10)
+                .shadow({ radius: 14, color: '#50000000', offsetX: 0, offsetY: 4 })
+                .position({ x: this.previewCardX(), y: this.previewCardY() })
+                .hitTestBehavior(HitTestMode.None)
+            }
+
+            } // end Stack
+            .width('100%')
+            .height('100%')
+            .onAreaChange((_, area) => {
+                this.pageWidth = area.width as number
+                this.pageHeight = area.height as number
+            })
 
         }
         .onReady(ctx => {

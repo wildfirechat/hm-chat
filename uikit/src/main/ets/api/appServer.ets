@@ -31,8 +31,12 @@ class AppServer {
         return this._post('/send_code', params)
     }
 
-    requestDestroyAuthCode() {
-        return this._post('/send_destroy_code')
+    requestDestroyAuthCode(slideVerifyToken?: string) {
+        let params = {} as Record<string, Object>
+        if (slideVerifyToken) {
+            params['slideVerifyToken'] = slideVerifyToken
+        }
+        return this._post('/send_destroy_code', params)
     }
 
     loginWithAuthCode(phone: string, authCode: string, slideVerifyToken?: string) {

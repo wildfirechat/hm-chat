@@ -1,5 +1,5 @@
 import OptionItemView from '@wfc/uikit/src/main/ets/view/OptionItemView'
-import { uikitNavigationDestinations } from '@wfc/uikit/src/main/ets/pages/uikitNavigationConfig'
+import { appNavigationDestinations } from '../mainNavigationConfig'
 
 
 @CustomDialog
@@ -37,10 +37,10 @@ export default struct AccountPage {
 
             onItemClick: (item) => {
                 if (item == getContext().resourceManager.getStringSync($r('app.string.sms_verification_code_verification').id)) {
-                    this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ResetPasswordPage, {
+                    this.mainNavPathStack.pushPathByName(appNavigationDestinations.ResetPasswordPage, {
                     } as Record<string, Object>)
                 } else if (item == getContext().resourceManager.getStringSync($r('app.string.password_verification').id)) {
-                    this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ChangePasswordPage, {
+                    this.mainNavPathStack.pushPathByName(appNavigationDestinations.ChangePasswordPage, {
                     } as Record<string, Object>)
                 }
             }

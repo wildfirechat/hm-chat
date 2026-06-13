@@ -96,7 +96,7 @@ export default struct MeTab {
                 OptionItemView({ icon: $r('app.media.ic_account'), title: '账号与安全' })
                     .margin({ top: 10 })
                     .onClick(() => {
-                        this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.AccountPage, {} as Record<string, Object>)
+                        this.mainNavPathStack.pushPathByName(appNavigationDestinations.AccountPage, {} as Record<string, Object>)
                     })
             }
 

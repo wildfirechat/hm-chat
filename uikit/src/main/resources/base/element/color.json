@@ -13,6 +13,10 @@
       "value": "#EEEEEE"
     },
     {
+      "name": "wf_record_view_background_color",
+      "value": "#A0000000"
+    },
+    {
       "name": "wf_background",
       "value": "#FFFFFF"
     },

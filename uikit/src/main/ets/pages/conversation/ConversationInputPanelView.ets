@@ -46,6 +46,7 @@ import CardMessageContent from '@wfc/client/src/main/ets/wfc/messages/cardMessag
 import fileUri from '@ohos.file.fileuri'
 import { checkAndRequestPermission, checkPermissions } from '../../helper/permissionHelper'
 import { Permissions } from '@kit.AbilityKit'
+import AudioRecorderDialog, { AudioRecorderDialogState } from './audio/AudioRecorderDialog'
 
 const INPUT_ICON_WIDTH = 30
 
@@ -80,10 +81,6 @@ export default struct ConversationInputPanelView {
     @State muted: boolean = false
     @State channelInfo?: ChannelInfo = undefined
     @Link quotedMessage: Message | null
-    // for audioRecorderView
-    @Link showAudioRecorderView: boolean
-    @Link showCancelRecordIndicator: boolean
-    @Link recordCountDown: number
     @Link @Watch('onCollapseConversationInputPanelView') collapseConversationInputPanelViewTimestamp: number
     // 取消多选时，需要先将 enableMultiCheck 置为 false，在清空 checkedMessages
     @Link enableMultiCheck: boolean
@@ -93,6 +90,10 @@ export default struct ConversationInputPanelView {
     private textInputBottomWhenBlur: number = 0
     private textInputController: TextInputController = new TextInputController()
     private recordTouchDownY: number = 0
+    private _cancelRecording: boolean = false
+    private _recordingActive: boolean = false
+    private audioDialogState: AudioRecorderDialogState = new AudioRecorderDialogState()
+    private audioDialogController?: CustomDialogController
     private recorder?: AudioRecordManager
     private recordOutputAudioFile: string = ''
     private recordAudioStartMillis: number = 0
@@ -477,6 +478,15 @@ export default struct ConversationInputPanelView {
     }
 
     aboutToAppear() {
+        this.audioDialogController = new CustomDialogController({
+            builder: AudioRecorderDialog({
+                controller: this.audioDialogController!,
+                dialogState: this.audioDialogState
+            }),
+            customStyle: true,
+            autoCancel: false
+        })
+
         // 计算软键盘高度
         window.getLastWindow(getContext(this)).then(currentWindow => {
             let property = currentWindow.getWindowProperties();
@@ -886,28 +896,35 @@ export default struct ConversationInputPanelView {
                                         let deniedPermissions = await checkPermissions(getContext(this), ['ohos.permission.MICROPHONE'])
                                         if (deniedPermissions.length === 0) {
                                             this.startRecordAudio()
-                                            this.showAudioRecorderView = true
-                                            this.showCancelRecordIndicator = false
+                                            this._cancelRecording = false
+                                            this._recordingActive = true
+                                            this.audioDialogState.updateCancelIndicator(false)
+                                            this.audioDialogController?.open()
                                             this.recordTouchDownY = event.touches[0].screenY
                                         } else {
                                             checkAndRequestPermission(getContext(this), 'ohos.permission.MICROPHONE')
                                         }
                                     } else {
-                                        if (!this.showAudioRecorderView) {
+                                        if (!this._recordingActive) {
                                             return
                                         }
                                         if (event.type === TouchType.Up) {
-                                            this.stopRecordAudio(this.showCancelRecordIndicator)
-                                            this.showAudioRecorderView = false
-                                            this.showCancelRecordIndicator = false
+                                            this._recordingActive = false
+                                            this.stopRecordAudio(this._cancelRecording)
+                                            this._cancelRecording = false
+                                            this.audioDialogController?.close()
                                         } else if (event.type === TouchType.Move) {
                                             let y = event.touches[0].screenY;
-                                            if (this.recordTouchDownY - y > 100) {
-                                                this.showCancelRecordIndicator = true;
-                                            } else {
-                                                this.showCancelRecordIndicator = false;
+                                            let shouldCancel = this.recordTouchDownY - y > 100
+                                            if (shouldCancel !== this._cancelRecording) {
+                                                this._cancelRecording = shouldCancel
+                                                this.audioDialogState.updateCancelIndicator(shouldCancel)
                                             }
                                         } else if (event.type === TouchType.Cancel) {
+                                            this._recordingActive = false
+                                            this.stopRecordAudio(false)
+                                            this._cancelRecording = false
+                                            this.audioDialogController?.close()
                                         }
                                     }
                                 })

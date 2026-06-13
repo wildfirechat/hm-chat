@@ -10,7 +10,6 @@ import MessageContentType from '@wfc/client/src/main/ets/wfc/messages/messageCon
 import NormalMessageContentView from './message/NormalMessageContentView'
 import ConversationInputPanelView from './ConversationInputPanelView'
 import AudioPlayManager from './audio/AudioPlayManager'
-import AudioRecorderView from './audio/AudioRecorderView'
 import NotificationMessageContent from '@wfc/client/src/main/ets/wfc/messages/notification/notificationMessageContent'
 import SimpleNotificationMessageContentView from './message/SimpleNotificationMessageContentView'
 import { timeFormat } from '../../util/helper'
@@ -50,10 +49,6 @@ export default struct ConversationPage {
     @State conversationInfo?: ConversationInfo = undefined
     @State refreshStatus: boolean = false;
     @State hasNoMoreHistoryMessage: boolean = false
-    // for audioRecorderView
-    @State showAudioRecorderView: boolean = false
-    @State showCancelRecordIndicator: boolean = false
-    @State recordCountDown: number = 0
     @State readEntries: Map<string, number> = new Map();
     @State collapseConversationInputPanelViewTimestamp: number = 0
     @State enableMultiCheck: boolean = false
@@ -913,17 +908,6 @@ export default struct ConversationPage {
                     .refreshOffset(64)
                     .pullToRefresh(true)
 
-                    if (this.showAudioRecorderView) {
-                        AudioRecorderView({
-                            showAudioRecorderView: $showAudioRecorderView,
-                            showCancelRecordIndicator: $showCancelRecordIndicator,
-                            recordCountDown: $recordCountDown
-                        })
-                            .width('100%')
-                            .height('100%')
-                            .backgroundColor($r('app.color.unread_hint_background'))
-                            .opacity(0.8)
-                    }
                     Column() {
                         if (this.unreadJoinGroupRequestCount > 0) {
                             Row() {
@@ -965,9 +949,6 @@ export default struct ConversationPage {
                     text: this.toReeditText,
                     conversation: this.conversation,
                     conversationInfo: this.conversationInfo,
-                    showAudioRecorderView: $showAudioRecorderView,
-                    showCancelRecordIndicator: $showCancelRecordIndicator,
-                    recordCountDown: $recordCountDown,
                     enableMultiCheck: $enableMultiCheck,
                     checkedMessages: $checkedMessages,
                     quotedMessage: $quotedMessage,

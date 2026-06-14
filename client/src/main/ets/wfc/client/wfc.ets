@@ -1827,8 +1827,8 @@ export class WfcManager {
      * @param {function (Message)} successCB
      * @param failCB
      */
-    getUserMessagesV2(userId: string, conversation: Conversation, contTypes: numberArray, fromIndex: number, before: boolean, count: number, withUser: string, successCB: CallbackWithValue_1<Message[]>, failCB: FailCallback) {
-        impl.getUserMessagesV2(userId, conversation, contTypes, fromIndex, before, count, withUser, successCB, failCB);
+    getUserMessagesV2(userId: string, conversation: Conversation, contTypes: numberArray, fromIndex: number, before: boolean, count: number, successCB: CallbackWithValue_1<Message[]>, failCB: FailCallback) {
+        impl.getUserMessagesV2(userId, conversation, contTypes, fromIndex, before, count, successCB, failCB);
     }
 
     /**
@@ -1843,8 +1843,8 @@ export class WfcManager {
      * @param {function (Message)} successCB
      * @param failCB
      */
-    getUserMessagesExV2(userId: string, conversationTypes: numberArray, lines: numberArray, contentTypes: numberArray, fromIndex: number, before: boolean, count: number, withUser: string, successCB: CallbackWithValue_1<Message[]>, failCB: FailCallback) {
-        impl.getUserMessagesExV2(userId, conversationTypes, lines, contentTypes, fromIndex, before, count, withUser, successCB, failCB);
+    getUserMessagesExV2(userId: string, conversationTypes: numberArray, lines: numberArray, contentTypes: numberArray, fromIndex: number, before: boolean, count: number, successCB: CallbackWithValue_1<Message[]>, failCB: FailCallback) {
+        impl.getUserMessagesExV2(userId, conversationTypes, lines, contentTypes, fromIndex, before, count, successCB, failCB);
     }
 
     /**

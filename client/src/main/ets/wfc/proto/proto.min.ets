@@ -1995,9 +1995,9 @@ class WfcImpl {
     //     return msgs;
     // }
 
-    getUserMessagesV2(userId: string, conversation: Conversation, contentTypes: number[], fromIndex: number, before: boolean, count: number, withUser: string,
+    getUserMessagesV2(userId: string, conversation: Conversation, contentTypes: number[], fromIndex: number, before: boolean, count: number,
         successCB: CallbackWithValue_1<Message[]>, failCB: FailCallback) {
-        protoProxy.getUserMessagesV2(userId, JSON.stringify(conversation), contentTypes, fromIndex, before, count, withUser, (protoMsgsStr: string) => {
+        protoProxy.getUserMessagesV2(userId, JSON.stringify(conversation), contentTypes, fromIndex, before, count, (protoMsgsStr: string) => {
             let protoMsgs = JSON.parse(protoMsgsStr) as Record<string, Object>[];
             let msgs: Message[] = [];
             protoMsgs.map(m => {
@@ -2029,9 +2029,9 @@ class WfcImpl {
     //     return msgs;
     // }
 
-    getUserMessagesExV2(userId: string, conversationTypes: number[], lines: number[], contentTypes: number[], fromIndex: number, before: boolean, count: number, withUser: string,
+    getUserMessagesExV2(userId: string, conversationTypes: number[], lines: number[], contentTypes: number[], fromIndex: number, before: boolean, count: number,
         successCB: CallbackWithValue_1<Message[]>, failCB: FailCallback) {
-        protoProxy.getUserMessagesExV2(userId, conversationTypes, lines, contentTypes, fromIndex, before, count, withUser, (protoMsgsStr: string) => {
+        protoProxy.getUserMessagesExV2(userId, conversationTypes, lines, contentTypes, fromIndex, before, count, (protoMsgsStr: string) => {
             let protoMsgs = JSON.parse(protoMsgsStr) as Record<string, Object>[];
             let msgs: Message[] = [];
             protoMsgs.map(m => {

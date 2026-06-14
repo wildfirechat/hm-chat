@@ -8,6 +8,7 @@ import AVSessionManager from '@ohos.multimedia.avsession';
 import { startContinuousTask, stopContinuousTask } from './helper/continuousTaskHelper';
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType';
 import AVEngineCallback from '@wfc/avenginekit/src/main/ets/wfc/av/engine/avengineCallback';
+import media from '@ohos.multimedia.media';
 
 import { uikitNavigationDestinations } from './pages/uikitNavigationConfig';
 import { common } from '@kit.AbilityKit';
@@ -23,6 +24,7 @@ export default class AVEngineCallbackImpl extends AVEngineCallback {
     private context: common.UIAbilityContext
     private avSession?: AVSessionManager.AVSession
     private mainNavPathStack?: NavPathStack
+    private ringPlayer?: media.AVPlayer
 
     constructor(context: common.UIAbilityContext, mainNavPathStack: NavPathStack) {
         super(context)
@@ -60,6 +62,7 @@ export default class AVEngineCallbackImpl extends AVEngineCallback {
             // TODO 会议
         }
         this.mainNavPathStack?.pushPathByName(name, {} as Record<string, object>)
+        this.shouldStartRing(true)
     }
 
     /**
@@ -85,6 +88,7 @@ export default class AVEngineCallbackImpl extends AVEngineCallback {
             // TODO 会议
         }
         this.mainNavPathStack?.pushPathByName(name, {} as Record<string, object>)
+        this.shouldStartRing(false)
     }
 
     /**
@@ -96,12 +100,36 @@ export default class AVEngineCallbackImpl extends AVEngineCallback {
         // 不加载页面，仅仅开始 avSession
     }
 
-    shouldStartRing(isIncoming: boolean) {
-        // TODO
+    async shouldStartRing(isIncoming: boolean) {
+        const fileName = isIncoming ? 'incoming_call_ring.mp3' : 'outgoing_call_ring.mp3'
+        try {
+            const player = await media.createAVPlayer()
+            this.ringPlayer = player
+            player.on('stateChange', async (state: media.AVPlayerState) => {
+                if (state === 'initialized') {
+                    await player.prepare()
+                } else if (state === 'prepared') {
+                    player.loop = true
+                    await player.play()
+                }
+            })
+            const rawFd = await this.context.resourceManager.getRawFd(fileName)
+            player.fdSrc = { fd: rawFd.fd, offset: rawFd.offset, length: rawFd.length }
+        } catch (e) {
+            console.error('shouldStartRing error', JSON.stringify(e))
+        }
     }
 
-    shouldStopRing() {
-        // TODO
+    async shouldStopRing() {
+        if (this.ringPlayer) {
+            try {
+                await this.ringPlayer.stop()
+                await this.ringPlayer.release()
+            } catch (e) {
+                console.error('shouldStopRing error', JSON.stringify(e))
+            }
+            this.ringPlayer = undefined
+        }
     }
 
     didCallEnded(session: CallSession) {
@@ -112,6 +140,7 @@ export default class AVEngineCallbackImpl extends AVEngineCallback {
 
         let mainWindow = AppStorage.get<window.Window>('window')
         mainWindow?.setWindowKeepScreenOn(false)
+        this.shouldStopRing()
     }
 
     private async createAVSessionAndStartContinuousTask(callSession: CallSession) {

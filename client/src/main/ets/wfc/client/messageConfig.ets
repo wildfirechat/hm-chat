@@ -404,6 +404,16 @@ export default class MessageConfig {
             type: MessageContentType.Composite_Message,
         },
         {
+            name: 'streamingTextGenerating',
+            flag: PersistFlag.Transparent,
+            type: MessageContentType.Streaming_Text_Generating,
+        },
+        {
+            name: 'streamingTextGenerating',
+            flag: PersistFlag.Persist_And_Count,
+            type: MessageContentType.Streaming_Text_Generated,
+        },
+        {
             name: 'tip',
             flag: PersistFlag.Persist,
             type: MessageContentType.Tip_Notification,

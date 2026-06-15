@@ -4,6 +4,7 @@ import CheckableUserListView from '../../view/CheckableUserListView'
 import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
 import Employee from '../../api/model/employee'
 import Organization from '../../api/model/organization'
+import orgServer from '../../api/orgServer'
 
 @Component
 export default struct AddGroupMemberModal {
@@ -34,23 +35,28 @@ export default struct AddGroupMemberModal {
         }
     }
 
-    onCheckUser = (info: UserInfo, checked?: boolean) => {
-        let index = this.checkedUsers.findIndex(checkedUser => checkedUser.uid === info.uid)
-        if (checked) {
-            if (index < 0) {
-                this.checkedUsers.push(info)
-            }
-        } else {
-            if (index >= 0) {
-                this.checkedUsers.splice(index, 1)
-            } else {
-                this.checkedUsers.push(info)
-            }
-        }
-    }
-
     newlyCheckedUsers(): UserInfo[] {
         return this.checkedUsers.filter(info => this.initialCheckedUserIds.indexOf(info.uid) === -1)
+    }
+
+    async allNewlyCheckedUsers(): Promise<UserInfo[]> {
+        let users = this.checkedUsers.filter(info => this.initialCheckedUserIds.indexOf(info.uid) === -1)
+        let checkedUserMap = new Map<string, UserInfo>()
+        users.forEach(u => {
+            checkedUserMap.set(u.uid, u);
+        })
+        if (this.checkedOrganizations.length > 0) {
+            let employees = await orgServer.getOrganizationEmployees(this.checkedOrganizations.map(o => o.id))
+            employees.forEach(e => {
+                let u = Employee.toUserInfo(e);
+                checkedUserMap.set(u.uid, u);
+            })
+        }
+        this.checkedEmployees.forEach(e => {
+            let u = Employee.toUserInfo(e);
+            checkedUserMap.set(u.uid, u);
+        })
+        return Array.from(checkedUserMap.values());
     }
 
     build() {
@@ -65,7 +71,8 @@ export default struct AddGroupMemberModal {
                         userInfos: this.userInfos,
                         uncheckableUserIds: this.initialCheckedUserIds,
                         showCategory: true,
-                        showSearchView: true
+                        showSearchView: true,
+                        showOrganization: true,
                     })
                 }
                 .height('100%')
@@ -93,12 +100,13 @@ export default struct AddGroupMemberModal {
                 .height(30)
                 .width(60)
                 .margin({ right: 18 })
-                .enabled(this.newlyCheckedUsers().length > 0)
+                .enabled(this.newlyCheckedUsers().length + this.checkedOrganizations.length + this.checkedEmployees.length > 0)
                 .fontSize(14)
                 .borderRadius(4)// .backgroundColor(Color.Blue)
-                .onClick(() => {
+                .onClick(async () => {
+                    let users = await this.allNewlyCheckedUsers();
                     LocalStorage.getShared()
-                        .setOrCreate<UserInfo[]>(AddGroupMemberModal.PICK_RESULT, this.newlyCheckedUsers());
+                        .setOrCreate<UserInfo[]>(AddGroupMemberModal.PICK_RESULT, users);
                     this.showAddGroupMemberModal = false;
                 })
         }

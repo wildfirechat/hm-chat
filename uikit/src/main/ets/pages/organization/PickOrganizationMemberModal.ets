@@ -133,6 +133,9 @@ export default struct PickOrganizationMemberModal {
                                         .enabled(!this.isOrganizationChecked(org))
                                         .fontColor($r('app.color.wf_primary'))
                                         .visibility(this.isOrganizationChecked(org) ? Visibility.None : Visibility.Visible)
+                                        .onTouch((event: TouchEvent) => {
+                                            event.stopPropagation()
+                                        })
                                         .onClick((event: ClickEvent) => {
                                             this.onClickOrg(org)
                                         })

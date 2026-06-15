@@ -6,6 +6,7 @@ import Config from '@wfc/client/src/main/ets/config'
 import MessageStatus from '@wfc/client/src/main/ets/wfc/messages/messageStatus'
 import WfcAVEngineKit from '@wfc/avenginekit/src/main/ets/wfc/av/engine/avenginekit'
 import wfc, { WfcManager } from '@wfc/client/src/main/ets/wfc/client/wfc'
+import { playRawSound } from '../../../helper/soundEffectHelper'
 
 @Component
 export default struct AudioMessageContentView {
@@ -104,6 +105,9 @@ export default struct AudioMessageContentView {
                 this.message.status = MessageStatus.Played
                 this.audioPlayManager!.play(url, true, (err?: Error) => {
                     this.stopAudioPlayingAnimation()
+                    if (!err) {
+                        playRawSound(getContext(this), 'audio_msg_play_completion.mp3')
+                    }
                 })
             })
 

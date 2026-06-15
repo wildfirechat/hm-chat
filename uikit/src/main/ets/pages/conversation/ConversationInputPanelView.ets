@@ -49,6 +49,7 @@ import fileUri from '@ohos.file.fileuri'
 import { checkAndRequestPermission, checkPermissions } from '../../helper/permissionHelper'
 import { Permissions } from '@kit.AbilityKit'
 import AudioRecorderDialog, { AudioRecorderDialogState } from './audio/AudioRecorderDialog'
+import { playRawSound } from '../../helper/soundEffectHelper'
 
 const INPUT_ICON_WIDTH = 30
 
@@ -650,10 +651,12 @@ export default struct ConversationInputPanelView {
 
         let fd = fs.openSync(this.recordOutputAudioFile, fs.OpenMode.READ_WRITE | fs.OpenMode.CREATE)
         this.recorder.start(fd.fd);
+        // playRawSound(getContext(this), 'ptt_begin.mp3')
     }
 
     async stopRecordAudio(canceled: boolean) {
         await this.recorder!.finish()
+        // playRawSound(getContext(this), 'ptt_end.mp3')
         let stat = fs.statSync(this.recordOutputAudioFile)
         console.log('AudioRecordManager', 'record file size', stat.size)
 
@@ -663,6 +666,7 @@ export default struct ConversationInputPanelView {
         }
         let audioMessageContent = new SoundMessageContent(this.recordOutputAudioFile, '', Math.round((new Date().getTime() - this.recordAudioStartMillis) / 1000))
         wfc.sendConversationMessage(this.conversation, audioMessageContent, [], null, null, null, null, null)
+        playRawSound(getContext(this), 'audido_msg_send_success.mp3')
         this.recordOutputAudioFile = ''
     }
 

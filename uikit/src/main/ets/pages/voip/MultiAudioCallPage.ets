@@ -257,7 +257,11 @@ export default struct MultiAudioCallPage {
                             .height(50)
                             .padding(10)
                             .onClick(async () => {
-                                // TODO
+                                this.pipController?.startPiP()
+                                    .catch((reason: BusinessError) => {
+                                        console.error('startPiP error', reason.code, reason.name, reason.message)
+                                    })
+                                this.mainNavPathStack.pop()
                             })
                     }
                     .width('100%')

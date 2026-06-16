@@ -46,7 +46,7 @@ function buildVoipPiPNode(params: VoipPiPParams) {
         .padding(20)
         .justifyContent(FlexAlign.Center)
         .alignItems(HorizontalAlign.Center)
-        .backgroundColor(Color.Red)
+        .backgroundColor($r('app.color.wf_record_view_background_color'))
         .width('100%') // 宽度方向充满画中画窗口
         .height('100%') // 高度方向充满画中画窗口
     }
@@ -95,8 +95,12 @@ export default class VoipPiPNodeController extends NodeController {
             return
         }
 
-        let millis = new Date().getTime() - callSession!.connectedTime
-        let durationText = timestampFormat(millis)
+        let durationText = ''
+        if(callSession!.connectedTime > 0){
+            let millis = new Date().getTime() - callSession!.connectedTime
+            durationText = timestampFormat(millis)
+        }
+        
         let audioOnly = this._audioOnly(callSession)
         if (!audioOnly) {
             let pfs = [...callSession.getParticipantProfiles()]

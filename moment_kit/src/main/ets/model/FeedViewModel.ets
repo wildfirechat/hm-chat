@@ -91,23 +91,20 @@ export class FeedViewModel {
         return this.feed.text.substring(0, maxLength) + '...';
     }
 
-    getImages(){
-        return this.feed.medias
+    getImages(): FeedEntry[] {
+        return this.feed.medias || [];
     }
 
-    /**
-     * 是否需要展开按钮
-     */
     needsExpansion(): boolean {
-        return this.feed.text.length > 120;
+        return (this.feed.text?.length || 0) > 120;
     }
 
-    hasLikes() {
-        return this.feed.comments.filter(c => c.type === FeedCommentType.Comment_Thumbup_Type).length > 0
+    hasLikes(): boolean {
+        return (this.feed.comments || []).some(c => c.type === FeedCommentType.Comment_Thumbup_Type);
     }
 
-    hasComments() {
-        return this.feed.comments.filter(c => c.type !== FeedCommentType.Comment_Thumbup_Type).length > 0
+    hasComments(): boolean {
+        return (this.feed.comments || []).some(c => c.type !== FeedCommentType.Comment_Thumbup_Type);
     }
 }
 

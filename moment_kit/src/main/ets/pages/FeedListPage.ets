@@ -11,7 +11,6 @@ import { promptAction, window, KeyboardAvoidMode } from '@kit.ArkUI';
 
 @Component
 export struct FeedListPage {
-    // 状态管理
     @State feedListState: FeedListState = {
         feeds: [],
         isLoading: false,
@@ -30,7 +29,6 @@ export struct FeedListPage {
     @State commentText: string = '';
     @State unreadCount: number = 0;
     @State userProfile: Profile | undefined = undefined;
-    @State isKeyboardShowing: boolean = false;
 
     @State titleBarOpacity: number = 0;
     private listScroller: Scroller = new Scroller();
@@ -47,300 +45,159 @@ export struct FeedListPage {
         alignment: DialogAlignment.Center
     });
 
-    // 当前用户ID
     private currentUserId: string = '';
 
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
 
     aboutToAppear() {
-        // 获取当前用户ID
-        this.currentUserId = wfc.getUserId()
+        this.currentUserId = wfc.getUserId();
         this.loadInitialFeeds();
         this.loadUserProfile();
         this.loadUnreadCount();
-
         try {
             this.getUIContext().setKeyboardAvoidMode(KeyboardAvoidMode.RESIZE);
-        } catch (e) {
-            console.error('setKeyboardAvoidMode failed:', e);
-        }
+        } catch (e) {}
     }
 
     private loadUserProfile() {
         momentClient.getUserProfile(this.currentUserId, (profile: Profile) => {
             this.userProfile = profile;
-        }, (err) => {
-            console.error('Load user profile failed:', err);
-        });
+        }, () => {});
     }
 
     private loadUnreadCount() {
-        // 鸿蒙 momentClient 似乎没直接暴露 getUnreadCount，
-        // 参考 MomentClientImpl.ets 的 getFeedMessages(fromIndex, isNew)
         const newMsgs = momentClient.getFeedMessages(BigInt(0), true);
         this.unreadCount = newMsgs?.length || 0;
     }
 
-    /**
-     * 加载初始朋友圈数据
-     */
     private loadInitialFeeds() {
         this.feedListState.isLoading = true;
-
-        momentClient.getFeeds(
-            BigInt(0), // 从最新开始
-            20, // 获取20条
-            null, // 获取所有用户的朋友圈
-            (feeds: Feed[]) => {
-                this.feedListState.feeds = feeds.map(feed => new FeedViewModel(feed));
-                this.feedListState.isLoading = false;
-                this.feedListState.error = undefined;
-            },
-            (errorCode: number) => {
-                this.feedListState.isLoading = false;
-                this.feedListState.error = `加载失败: ${errorCode}`;
-                console.error('Load feeds failed:', errorCode);
-            }
-        );
+        momentClient.getFeeds(BigInt(0), 20, null, (feeds: Feed[]) => {
+            this.feedListState.feeds = feeds.map(f => new FeedViewModel(f));
+            this.feedListState.isLoading = false;
+            this.feedListState.error = undefined;
+        }, (errorCode: number) => {
+            this.feedListState.isLoading = false;
+            this.feedListState.error = `加载失败 (${errorCode})`;
+        });
     }
 
-    /**
-     * 下拉刷新
-     */
     private onRefresh() {
         this.feedListState.isRefreshing = true;
-
-        momentClient.getFeeds(
-            BigInt(0),
-            20,
-            null,
-            (feeds: Feed[]) => {
-                this.feedListState.feeds = feeds.map(feed => new FeedViewModel(feed));
-                this.feedListState.isRefreshing = false;
-                this.feedListState.error = undefined;
-            },
-            (errorCode: number) => {
-                this.feedListState.isRefreshing = false;
-                this.feedListState.error = `刷新失败: ${errorCode}`;
-            }
-        );
+        momentClient.getFeeds(BigInt(0), 20, null, (feeds: Feed[]) => {
+            this.feedListState.feeds = feeds.map(f => new FeedViewModel(f));
+            this.feedListState.isRefreshing = false;
+            this.feedListState.error = undefined;
+            this.loadUnreadCount();
+        }, () => {
+            this.feedListState.isRefreshing = false;
+        });
     }
 
-    /**
-     * 加载更多
-     */
     private onLoadMore() {
-        if (this.feedListState.isLoadingMore || !this.feedListState.hasMore) {
-            return;
-        }
-
+        if (this.feedListState.isLoadingMore || !this.feedListState.hasMore) return;
         this.feedListState.isLoadingMore = true;
-
         const lastFeed = this.feedListState.feeds[this.feedListState.feeds.length - 1];
         const fromIndex = lastFeed?.feed.feedId || BigInt(0);
-
-        momentClient.getFeeds(
-            fromIndex,
-            20,
-            null,
-            (feeds: Feed[]) => {
-                if (feeds.length === 0) {
-                    this.feedListState.hasMore = false;
-                } else {
-                    this.feedListState.feeds.push(...feeds.map(feed => new FeedViewModel(feed)));
-                }
-                this.feedListState.isLoadingMore = false;
-            },
-            (errorCode: number) => {
-                this.feedListState.isLoadingMore = false;
-                console.error('Load more feeds failed:', errorCode);
+        momentClient.getFeeds(fromIndex, 20, null, (feeds: Feed[]) => {
+            if (feeds.length === 0) {
+                this.feedListState.hasMore = false;
+            } else {
+                this.feedListState.feeds.push(...feeds.map(f => new FeedViewModel(f)));
             }
-        );
+            this.feedListState.isLoadingMore = false;
+        }, () => {
+            this.feedListState.isLoadingMore = false;
+        });
     }
 
-    /**
-     * 交互事件处理
-     */
     private interactionEvents: FeedInteractionEvents = {
         onLike: (feed: FeedViewModel) => {
-            if (feed.isLiking) {
-                return;
-            }
-
+            if (feed.isLiking) return;
             feed.isLiking = true;
             const isLiked = feed.isLiked(this.currentUserId);
-
             if (isLiked) {
-                // 取消点赞 - 需要找到对应的点赞评论并删除
                 const likeComment = feed.getLikesList().find(like => like.sender === this.currentUserId);
                 if (likeComment && likeComment.commentId !== undefined && feed.feed.feedId !== undefined) {
-                    momentClient.deleteComment(
-                        likeComment.commentId,
-                        feed.feed.feedId,
-                        () => {
-                            // 从本地移除点赞
-                            if (feed.feed.comments) {
-                                const index = feed.feed.comments.findIndex(c => c.commentId === likeComment.commentId);
-                                if (index !== -1) {
-                                    feed.feed.comments.splice(index, 1);
-                                }
-                            }
-                            feed.isLiking = false;
-
-                            // 刷新UI
-                            const feedIndex = this.feedListState.feeds.findIndex(f => f.feed.feedId === feed.feed.feedId);
-                            if (feedIndex !== -1) {
-                                const newFeeds = [...this.feedListState.feeds];
-                                newFeeds[feedIndex] = new FeedViewModel(feed.feed);
-                                this.feedListState.feeds = newFeeds;
-                            }
-                        },
-                        (errorCode: number) => {
-                            feed.isLiking = false;
-                            console.error('Unlike failed:', errorCode);
+                    momentClient.deleteComment(likeComment.commentId, feed.feed.feedId, () => {
+                        if (feed.feed.comments) {
+                            const idx = feed.feed.comments.findIndex(c => c.commentId === likeComment.commentId);
+                            if (idx !== -1) feed.feed.comments.splice(idx, 1);
                         }
-                    );
+                        feed.isLiking = false;
+                        this.refreshFeedItem(feed);
+                    }, () => { feed.isLiking = false; });
                 } else {
                     feed.isLiking = false;
                 }
             } else {
-                // 点赞
                 if (feed.feed.feedId) {
-                    momentClient.postComment(
-                        1, // FeedCommentType.Comment_Thumbup_Type
-                        feed.feed.feedId,
-                        '',
-                        '',
-                        '',
-                        (commentId: bigint, timestamp: number) => {
-                            // 添加到本地点赞列表
-                            const newLike = {
-                                'commentId': commentId,
-                                'feedId': feed.feed.feedId,
-                                'sender': this.currentUserId,
-                                'type': 1,
-                                'text': '',
-                                'replyTo': '',
-                                'serverTime': timestamp,
-                                'extra': ''
-                            } as Record<string, Object>;
-
-                            if (!feed.feed.comments) {
-                                feed.feed.comments = [];
-                            }
-                            let comment = new Comment()
-                            comment.fromJsonObject(newLike);
-                            feed.feed.comments.push(comment);
-                            feed.isLiking = false;
-
-                            // 刷新UI
-                            const feedIndex = this.feedListState.feeds.findIndex(f => f.feed.feedId === feed.feed.feedId);
-                            if (feedIndex !== -1) {
-                                const newFeeds = [...this.feedListState.feeds];
-                                newFeeds[feedIndex] = new FeedViewModel(feed.feed);
-                                this.feedListState.feeds = newFeeds;
-                            }
-                        },
-                        (errorCode: number) => {
-                            feed.isLiking = false;
-                            console.error('Like failed:', errorCode);
-                        }
-                    );
+                    momentClient.postComment(1, feed.feed.feedId, '', '', '', (commentId: bigint, timestamp: number) => {
+                        const newLike = {
+                            'commentId': commentId, 'feedId': feed.feed.feedId,
+                            'sender': this.currentUserId, 'type': 1,
+                            'text': '', 'replyTo': '', 'serverTime': timestamp, 'extra': ''
+                        } as Record<string, Object>;
+                        if (!feed.feed.comments) feed.feed.comments = [];
+                        let comment = new Comment();
+                        comment.fromJsonObject(newLike);
+                        feed.feed.comments.push(comment);
+                        feed.isLiking = false;
+                        this.refreshFeedItem(feed);
+                    }, () => { feed.isLiking = false; });
                 }
             }
         },
 
         onComment: (feed: FeedViewModel, commentText: string, replyTo?: string) => {
-            if (feed.isCommenting || !commentText.trim()) {
-                return;
-            }
-
+            if (feed.isCommenting || !commentText.trim()) return;
             feed.isCommenting = true;
-
             if (feed.feed.feedId) {
-                momentClient.postComment(
-                    0, // FeedCommentType.Comment_Comment_Type
-                    feed.feed.feedId,
-                    commentText.trim(),
-                    replyTo || '',
-                    '',
-                    (commentId: bigint, timestamp: number) => {
-                        // 添加到本地评论列表
-                        const newComment = {
-                            'commentId': commentId,
-                            'feedId': feed.feed.feedId,
-                            'sender': this.currentUserId,
-                            'type': 0,
-                            'text': commentText.trim(),
-                            'replyTo': replyTo || '',
-                            'serverTime': timestamp,
-                            'extra': ''
-                        } as Record<string, Object>;
-
-                        if (!feed.feed.comments) {
-                            feed.feed.comments = [];
-                        }
-                        let comment = new Comment()
-                        comment.fromJsonObject(newComment)
-                        feed.feed.comments.push(comment);
-                        feed.isCommenting = false;
-
-                        // 刷新UI
-                        const index = this.feedListState.feeds.findIndex(f => f.feed.feedId === feed.feed.feedId);
-                        if (index !== -1) {
-                            const newFeeds = [...this.feedListState.feeds];
-                            newFeeds[index] = new FeedViewModel(feed.feed);
-                            this.feedListState.feeds = newFeeds;
-                        }
-
-                        // 隐藏评论输入框
-                        this.commentInputState.isVisible = false;
-                        this.commentText = '';
-                    },
-                    (errorCode: number) => {
-                        feed.isCommenting = false;
-                        console.error('Comment failed:', errorCode);
-                    }
-                );
+                momentClient.postComment(0, feed.feed.feedId, commentText.trim(), replyTo || '', '', (commentId: bigint, timestamp: number) => {
+                    const newComment = {
+                        'commentId': commentId, 'feedId': feed.feed.feedId,
+                        'sender': this.currentUserId, 'type': 0,
+                        'text': commentText.trim(), 'replyTo': replyTo || '',
+                        'serverTime': timestamp, 'extra': ''
+                    } as Record<string, Object>;
+                    if (!feed.feed.comments) feed.feed.comments = [];
+                    let comment = new Comment();
+                    comment.fromJsonObject(newComment);
+                    feed.feed.comments.push(comment);
+                    feed.isCommenting = false;
+                    this.refreshFeedItem(feed);
+                    this.commentInputState.isVisible = false;
+                    this.commentText = '';
+                }, () => { feed.isCommenting = false; });
             }
         },
 
         onDelete: (feed: FeedViewModel) => {
             promptAction.showDialog({
-                title: '提示',
-                message: '确定删除这条朋友圈吗？',
+                title: '删除动态',
+                message: '确定要删除这条朋友圈吗？',
                 buttons: [
-                    { text: '取消', color: $r('app.color.wf_primary_text') },
-                    { text: '删除', color: $r('app.color.wf_danger') }
+                    { text: '取消', color: $r('app.color.text_secondary') },
+                    { text: '删除', color: $r('app.color.like_active') }
                 ]
             }).then(data => {
-                if (data.index === 1) {
-                    if (feed.feed.feedId) {
-                        momentClient.deleteFeed(
-                            feed.feed.feedId,
-                            () => {
-                                // 从列表中移除
-                                const index = this.feedListState.feeds.findIndex(f => f.feed.feedId === feed.feed.feedId);
-                                if (index !== -1) {
-                                    // 必须创建新数组触发状态更新
-                                    const newFeeds = [...this.feedListState.feeds];
-                                    newFeeds.splice(index, 1);
-                                    this.feedListState.feeds = newFeeds;
-                                }
-                            },
-                            (errorCode: number) => {
-                                console.error('Delete feed failed:', errorCode);
-                            }
-                        );
-                    }
+                if (data.index === 1 && feed.feed.feedId) {
+                    momentClient.deleteFeed(feed.feed.feedId, () => {
+                        const idx = this.feedListState.feeds.findIndex(f => f.feed.feedId === feed.feed.feedId);
+                        if (idx !== -1) {
+                            const newFeeds = [...this.feedListState.feeds];
+                            newFeeds.splice(idx, 1);
+                            this.feedListState.feeds = newFeeds;
+                        }
+                    }, () => {});
                 }
-            })
+            }).catch(() => {});
         },
 
         onUserClick: (userId: string) => {
             this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.UserInfoPage, {
                 'userId': userId
-            } as Record<string, Object>)
+            } as Record<string, Object>);
         },
 
         onImageClick: (images: FeedEntry[], index: number) => {
@@ -351,22 +208,28 @@ export struct FeedListPage {
 
         onMoreComments: (feed: FeedViewModel) => {
             feed.showAllComments = true;
+            this.refreshFeedItem(feed);
         }
     };
 
-    /**
-     * 显示评论输入框
-     */
+    private refreshFeedItem(feed: FeedViewModel) {
+        const idx = this.feedListState.feeds.findIndex(f => f.feed.feedId === feed.feed.feedId);
+        if (idx !== -1) {
+            const newFeeds = [...this.feedListState.feeds];
+            newFeeds[idx] = new FeedViewModel(feed.feed);
+            newFeeds[idx].showAllComments = feed.showAllComments;
+            this.feedListState.feeds = newFeeds;
+        }
+    }
+
     private showCommentInput(feed: FeedViewModel, listIndex: number, replyTo?: string, replyToName?: string) {
         this.commentInputState = {
             isVisible: true,
             feedId: feed.feed.feedId,
             replyTo,
             replyToName,
-            placeholder: replyTo ? `回复 ${replyToName || replyTo}:` : '写评论...'
+            placeholder: replyTo ? `回复 ${replyToName || replyTo}` : '写评论...'
         };
-
-        // 等待软键盘弹出及布局重新计算后，将对应的朋友圈滚动到可视区域底部
         setTimeout(() => {
             const targetIndex = listIndex + (this.unreadCount > 0 ? 2 : 1);
             this.listScroller.scrollToIndex(targetIndex, true, ScrollAlign.END);
@@ -378,15 +241,11 @@ export struct FeedListPage {
             Stack({ alignContent: Alignment.Top }) {
                 Stack({ alignContent: Alignment.Top }) {
                     Column() {
-                        // 主内容区域
                         if (this.feedListState.isLoading && this.feedListState.feeds.length === 0) {
-                            // 初始加载状态
-                            this.buildLoadingView()
+                            this.buildSkeletonView()
                         } else if (this.feedListState.error && this.feedListState.feeds.length === 0) {
-                            // 错误状态
                             this.buildErrorView()
                         } else {
-                            // 朋友圈列表
                             this.buildFeedList()
                         }
                     }
@@ -394,7 +253,6 @@ export struct FeedListPage {
                     .height('100%')
                     .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP])
 
-                    // 评论输入框
                     if (this.commentInputState.isVisible) {
                         this.buildCommentInput()
                     }
@@ -403,8 +261,7 @@ export struct FeedListPage {
                 .height('100%')
                 .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP])
 
-
-                // 自定义标题栏 (移出内部Stack，并使用绝对定位避免被键盘推上去)
+                // 自定义标题栏（绝对定位，不随键盘移动）
                 this.buildCustomTitleBar()
             }
             .width('100%')
@@ -413,115 +270,160 @@ export struct FeedListPage {
         .hideTitleBar(true)
         .ignoreLayoutSafeArea([LayoutSafeAreaType.SYSTEM], [LayoutSafeAreaEdge.TOP])
         .onShown(() => {
-            try {
-                this.getUIContext().setKeyboardAvoidMode(KeyboardAvoidMode.RESIZE);
-            } catch (e) {
-                console.error('setKeyboardAvoidMode failed:', e);
-            }
+            try { this.getUIContext().setKeyboardAvoidMode(KeyboardAvoidMode.RESIZE); } catch (e) {}
         })
         .onHidden(() => {
-            try {
-                this.getUIContext().setKeyboardAvoidMode(KeyboardAvoidMode.OFFSET);
-            } catch (e) {
-                console.error('setKeyboardAvoidMode failed:', e);
-            }
+            try { this.getUIContext().setKeyboardAvoidMode(KeyboardAvoidMode.OFFSET); } catch (e) {}
         })
     }
 
     @Builder
     private buildCustomTitleBar() {
         Stack({ alignContent: Alignment.Top }) {
-            // 背景层
+            // 背景
             Row()
                 .width('100%')
                 .height(48 + px2vp(AppStorage.get<number>('SafeAreaTopHeight') || 0))
-                .backgroundColor($r('app.color.title_bar_background'))
+                .backgroundColor(MomentConstants.BACKGROUND_COLOR)
                 .opacity(this.titleBarOpacity)
+                .blur(this.titleBarOpacity > 0 ? 20 : 0)
 
-            // 内容层
             Row() {
-                SymbolGlyph($r('sys.symbol.chevron_backward'))
-                    .fontSize(28)
-                    .fontColor([this.titleBarOpacity > 0.5 ? $r('app.color.wf_primary_text') : Color.White])
-                    .onClick(() => {
-                        this.mainNavPathStack.pop();
-                    })
+                // 返回按钮
+                Button() {
+                    SymbolGlyph($r('sys.symbol.chevron_backward'))
+                        .fontSize(22)
+                        .fontColor([this.titleBarOpacity > 0.5 ? $r('app.color.text_primary') : Color.White])
+                }
+                .width(40)
+                .height(40)
+                .type(ButtonType.Circle)
+                .backgroundColor(Color.Transparent)
+                .onClick(() => this.mainNavPathStack.pop())
 
                 Blank()
-            
-                if (this.titleBarOpacity > 0) {
+
+                if (this.titleBarOpacity > 0.3) {
                     Text('朋友圈')
-                        .fontSize(18)
+                        .fontSize(MomentConstants.FONT_SIZE_TITLE)
                         .fontWeight(FontWeight.Bold)
-                        .fontColor($r('app.color.wf_primary_text'))
-                        .opacity(this.titleBarOpacity)
+                        .fontColor($r('app.color.text_primary'))
+                        .opacity(Math.min(this.titleBarOpacity * 2, 1))
+                        .transition({ type: TransitionType.All, opacity: 0 })
                 }
 
                 Blank()
 
-                SymbolGlyph($r('sys.symbol.camera'))
-                    .fontSize(28)
-                    .fontColor([this.titleBarOpacity > 0.5 ? $r('app.color.wf_primary_text') : Color.White])
-                    .onClick(() => {
-                        promptAction.showActionMenu({
-                            title: '',
-                            buttons: [
-                                { text: '拍摄', color: $r('app.color.wf_primary_text') },
-                                { text: '从相册选择', color: $r('app.color.wf_primary_text') }
-                            ]
-                        }).then(data => {
-                            if (data.index === 0 || data.index === 1) {
-                                this.mainNavPathStack.pushPathByName(momentNavigationDestinations.PostFeedPage, {} as Record<string, Object>)
-                            }
-                        })
-                    })
+                // 相机按钮
+                Button() {
+                    SymbolGlyph($r('sys.symbol.camera'))
+                        .fontSize(22)
+                        .fontColor([this.titleBarOpacity > 0.5 ? $r('app.color.text_primary') : Color.White])
+                }
+                .width(40)
+                .height(40)
+                .type(ButtonType.Circle)
+                .backgroundColor(Color.Transparent)
+                .onClick(() => {
+                    this.mainNavPathStack.pushPathByName(momentNavigationDestinations.PostFeedPage, {} as Record<string, Object>);
+                })
             }
             .width('100%')
             .height(48 + px2vp(AppStorage.get<number>('SafeAreaTopHeight') || 0))
-            .padding({ left: 16, right: 16, top: px2vp(AppStorage.get<number>('SafeAreaTopHeight') || 0) })
+            .padding({ left: 8, right: 8, top: px2vp(AppStorage.get<number>('SafeAreaTopHeight') || 0) })
+            .alignItems(VerticalAlign.Center)
         }
         .width('100%')
         .position({ x: 0, y: 0 })
         .zIndex(100)
     }
 
+    // 骨架屏
     @Builder
-    private buildLoadingView() {
+    private buildSkeletonView() {
         Column() {
-            LoadingProgress()
-                .width(40)
-                .height(40)
-                .color(MomentConstants.PRIMARY_COLOR)
+            // 封面骨架
+            Column()
+                .width('100%')
+                .height(MomentConstants.COVER_HEIGHT + px2vp(AppStorage.get<number>('SafeAreaTopHeight') || 0) + MomentConstants.AVATAR_SIZE_LARGE / 2)
+                .backgroundColor($r('app.color.skeleton_base'))
 
-            Text('加载中...')
-                .fontSize(MomentConstants.FONT_SIZE_MEDIUM)
-                .fontColor(MomentConstants.TEXT_SECONDARY_COLOR)
-                .margin({ top: 8 })
+            // Feed 条目骨架（3条）
+            ForEach([0, 1, 2], (_: number) => {
+                this.buildSkeletonItem()
+            })
         }
         .width('100%')
-        .height('100%')
-        .justifyContent(FlexAlign.Center)
-        .alignItems(HorizontalAlign.Center)
+        .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP])
+    }
+
+    @Builder
+    private buildSkeletonItem() {
+        Row() {
+            // 头像骨架
+            Column()
+                .width(MomentConstants.AVATAR_SIZE)
+                .height(MomentConstants.AVATAR_SIZE)
+                .borderRadius(MomentConstants.BORDER_RADIUS)
+                .backgroundColor($r('app.color.skeleton_base'))
+                .margin({ right: 10 })
+
+            Column({ space: 8 }) {
+                // 用户名骨架
+                Column()
+                    .width('40%')
+                    .height(14)
+                    .borderRadius(4)
+                    .backgroundColor($r('app.color.skeleton_base'))
+                // 文本骨架
+                Column()
+                    .width('90%')
+                    .height(13)
+                    .borderRadius(4)
+                    .backgroundColor($r('app.color.skeleton_highlight'))
+                Column()
+                    .width('70%')
+                    .height(13)
+                    .borderRadius(4)
+                    .backgroundColor($r('app.color.skeleton_highlight'))
+                // 时间骨架
+                Column()
+                    .width('25%')
+                    .height(11)
+                    .borderRadius(4)
+                    .backgroundColor($r('app.color.skeleton_highlight'))
+            }
+            .layoutWeight(1)
+            .alignItems(HorizontalAlign.Start)
+        }
+        .width('100%')
+        .padding({ left: MomentConstants.CARD_PADDING, right: MomentConstants.CARD_PADDING, top: 14, bottom: 14 })
+        .backgroundColor(MomentConstants.CARD_BACKGROUND_COLOR)
+
+        Divider()
+            .color(MomentConstants.DIVIDER_COLOR)
+            .strokeWidth(0.5)
+            .margin({ left: MomentConstants.CARD_PADDING + MomentConstants.AVATAR_SIZE + 10 })
     }
 
     @Builder
     private buildErrorView() {
-        Column() {
-            Text('😞')
-                .fontSize(48)
-                .margin({ bottom: 16 })
+        Column({ space: 16 }) {
+            SymbolGlyph($r('sys.symbol.wifi_slash'))
+                .fontSize(56)
+                .fontColor([MomentConstants.TEXT_SECONDARY_COLOR])
 
-            Text(this.feedListState.error || '加载失败')
+            Text('加载失败')
                 .fontSize(MomentConstants.FONT_SIZE_MEDIUM)
                 .fontColor(MomentConstants.TEXT_SECONDARY_COLOR)
-                .margin({ bottom: 16 })
 
-            Button('重试')
+            Button('重新加载')
                 .backgroundColor(MomentConstants.PRIMARY_COLOR)
+                .fontColor(Color.White)
                 .borderRadius(MomentConstants.BORDER_RADIUS)
-                .onClick(() => {
-                    this.loadInitialFeeds();
-                })
+                .padding({ left: 24, right: 24 })
+                .height(40)
+                .onClick(() => this.loadInitialFeeds())
         }
         .width('100%')
         .height('100%')
@@ -533,16 +435,19 @@ export struct FeedListPage {
     private buildFeedList() {
         Refresh({ refreshing: $$this.feedListState.isRefreshing, offset: 64, friction: 100 }) {
             List({ space: 0, scroller: this.listScroller }) {
+                // 顶部 Header
                 ListItem() {
                     FeedHeaderComponent({ profile: this.userProfile, userId: this.currentUserId })
                 }
 
+                // 未读提示
                 if (this.unreadCount > 0) {
                     ListItem() {
-                        this.buildUnreadCountHint()
+                        this.buildUnreadHint()
                     }
                 }
 
+                // Feed 列表
                 ForEach(this.feedListState.feeds, (feedItem: FeedViewModel, index: number) => {
                     ListItem() {
                         FeedItemComponent({
@@ -554,24 +459,27 @@ export struct FeedListPage {
                             }
                         })
                     }
-                    .backgroundColor(MomentConstants.CARD_BACKGROUND_COLOR)
                 }, (feedItem: FeedViewModel, index: number) => `${feedItem.feed.feedId}_${index}_${feedItem.updateTime}`)
 
-                // 加载更多指示器
-                if (this.feedListState.hasMore) {
+                // 加载更多 / 底部提示
+                if (this.feedListState.feeds.length === 0 && !this.feedListState.isLoading) {
+                    ListItem() { this.buildEmptyView() }
+                } else if (this.feedListState.hasMore) {
                     ListItem() {
                         this.buildLoadMoreView()
                     }
-                    .onAppear(() => {
-                        this.onLoadMore();
-                    })
+                    .onAppear(() => this.onLoadMore())
                 } else if (this.feedListState.feeds.length > 0) {
                     ListItem() {
-                        Text('没有更多了')
-                            .fontSize(MomentConstants.FONT_SIZE_SMALL)
-                            .fontColor(MomentConstants.TEXT_SECONDARY_COLOR)
-                            .textAlign(TextAlign.Center)
-                            .padding(16)
+                        Row({ space: 8 }) {
+                            Divider().layoutWeight(1).color(MomentConstants.DIVIDER_COLOR).strokeWidth(0.5)
+                            Text('以上是全部朋友圈')
+                                .fontSize(MomentConstants.FONT_SIZE_CAPTION)
+                                .fontColor(MomentConstants.TEXT_SECONDARY_COLOR)
+                            Divider().layoutWeight(1).color(MomentConstants.DIVIDER_COLOR).strokeWidth(0.5)
+                        }
+                        .padding({ left: 20, right: 20, top: 20, bottom: 24 })
+                        .alignItems(VerticalAlign.Center)
                     }
                 }
             }
@@ -580,76 +488,83 @@ export struct FeedListPage {
             .edgeEffect(EdgeEffect.None)
             .onDidScroll(() => {
                 const offset = this.listScroller.currentOffset().yOffset;
-                // Fade starts after scrolling 100vp, fully solid after 200vp
-                let opacity = (offset - 100) / 100;
-                if (opacity < 0) opacity = 0;
-                if (opacity > 1) opacity = 1;
-                this.titleBarOpacity = opacity;
-
+                let opacity = (offset - 120) / 80;
+                this.titleBarOpacity = Math.max(0, Math.min(1, opacity));
                 AppStorage.setOrCreate('closeFeedMenuTime', Date.now());
             })
             .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP])
         }
-        .onRefreshing(() => {
-            this.onRefresh();
-        })
+        .onRefreshing(() => this.onRefresh())
         .layoutWeight(1)
         .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP])
     }
 
     @Builder
-    private buildUnreadCountHint() {
-        Row() {
+    private buildUnreadHint() {
+        Row({ space: 8 }) {
             Image(wfc.getUserInfo(this.currentUserId).portrait || $r('app.media.icon'))
-                .width(30)
-                .height(30)
+                .width(28)
+                .height(28)
                 .borderRadius(4)
-                .margin({ right: 10 })
 
-            Text(`${this.unreadCount}条新消息`)
-                .fontSize(14)
+            Text(`${this.unreadCount}条新动态`)
+                .fontSize(13)
                 .fontColor(Color.White)
                 .fontWeight(FontWeight.Medium)
+                .layoutWeight(1)
 
-            Image($r('app.media.icon')) // TODO: 使用右箭头图标
-                .width(12)
-                .height(12)
-                .fillColor(Color.White)
-                .margin({ left: 10 })
+            SymbolGlyph($r('sys.symbol.chevron_up'))
+                .fontSize(13)
+                .fontColor([Color.White])
         }
-        .width(180)
-        .height(40)
+        .height(44)
+        .padding({ left: 14, right: 14 })
+        .borderRadius(MomentConstants.BORDER_RADIUS)
         .backgroundColor($r('app.color.unread_hint_background'))
-        .borderRadius(4)
-        .padding({ left: 8, right: 8 })
-        .alignSelf(ItemAlign.Center)
-        .justifyContent(FlexAlign.Center)
-        .margin({ top: 10, bottom: 10 })
+        .margin({ top: 10, bottom: 10, left: 16, right: 16 })
         .onClick(() => {
-            // 跳转到消息列表
-            // this.mainNavPathStack.pushPathByName(momentNavigationDestinations.FeedMessagePage, {} as Record<string, Object>)
+            this.listScroller.scrollToIndex(1, true, ScrollAlign.START);
             this.unreadCount = 0;
             momentClient.clearUnreadStatus();
         })
     }
 
     @Builder
+    private buildEmptyView() {
+        Column({ space: 16 }) {
+            SymbolGlyph($r('sys.symbol.person_2'))
+                .fontSize(64)
+                .fontColor([MomentConstants.TEXT_SECONDARY_COLOR])
+
+            Text('还没有朋友圈动态')
+                .fontSize(MomentConstants.FONT_SIZE_MEDIUM)
+                .fontColor(MomentConstants.TEXT_SECONDARY_COLOR)
+
+            Text('去分享你的精彩瞬间吧')
+                .fontSize(MomentConstants.FONT_SIZE_SMALL)
+                .fontColor(MomentConstants.TEXT_SECONDARY_COLOR)
+        }
+        .width('100%')
+        .padding({ top: 80, bottom: 40 })
+        .justifyContent(FlexAlign.Center)
+        .alignItems(HorizontalAlign.Center)
+    }
+
+    @Builder
     private buildLoadMoreView() {
-        Row() {
+        Row({ space: 8 }) {
             if (this.feedListState.isLoadingMore) {
                 LoadingProgress()
-                    .width(20)
-                    .height(20)
-                    .color(MomentConstants.PRIMARY_COLOR)
-                    .margin({ right: 8 })
-
+                    .width(18)
+                    .height(18)
+                    .color(MomentConstants.TEXT_SECONDARY_COLOR)
                 Text('加载中...')
-                    .fontSize(MomentConstants.FONT_SIZE_SMALL)
+                    .fontSize(MomentConstants.FONT_SIZE_CAPTION)
                     .fontColor(MomentConstants.TEXT_SECONDARY_COLOR)
             }
         }
         .width('100%')
-        .height(50)
+        .height(48)
         .justifyContent(FlexAlign.Center)
         .alignItems(VerticalAlign.Center)
     }
@@ -657,42 +572,54 @@ export struct FeedListPage {
     @Builder
     private buildCommentInput() {
         Column() {
-            // 遮罩层
+            // 半透明遮罩
             Row()
                 .width('100%')
                 .layoutWeight(1)
-                .backgroundColor('rgba(0,0,0,0.3)')
+                .backgroundColor('rgba(0,0,0,0.25)')
                 .onClick(() => {
                     this.commentInputState.isVisible = false;
                     this.commentText = '';
                 })
 
-            // 输入框区域
-            Row() {
-                TextInput({ placeholder: this.commentInputState.placeholder, text: this.commentText })
+            // 输入框
+            Row({ space: 10 }) {
+                TextInput({
+                    placeholder: this.commentInputState.placeholder,
+                    text: this.commentText
+                })
                     .id('comment_input')
-                    .defaultFocus(true)
                     .layoutWeight(1)
                     .height(40)
-                    .backgroundColor(MomentConstants.CARD_BACKGROUND_COLOR)
+                    .backgroundColor(MomentConstants.BACKGROUND_COLOR)
                     .fontColor(MomentConstants.TEXT_PRIMARY_COLOR)
+                    .fontSize(MomentConstants.FONT_SIZE_CONTENT)
                     .placeholderColor(MomentConstants.TEXT_SECONDARY_COLOR)
                     .borderRadius(20)
-                    .padding({ left: 16, right: 16 })
+                    .padding({ left: 14, right: 14 })
+                    .defaultFocus(true)
                     .onAppear(() => {
                         setTimeout(() => {
                             focusControl.requestFocus('comment_input');
-                        }, 100);
+                        }, 80);
                     })
                     .onChange((value: string) => {
                         this.commentText = value;
                     })
+                    .onSubmit(() => {
+                        const targetFeed = this.feedListState.feeds.find(f => f.feed.feedId === this.commentInputState.feedId);
+                        if (targetFeed && this.commentText.trim()) {
+                            this.interactionEvents.onComment(targetFeed, this.commentText, this.commentInputState.replyTo);
+                        }
+                    })
 
                 Button('发送')
                     .height(40)
+                    .padding({ left: 18, right: 18 })
                     .backgroundColor(this.commentText.trim() ? MomentConstants.PRIMARY_COLOR : $r('app.color.button_disabled'))
+                    .fontColor(this.commentText.trim() ? Color.White : $r('app.color.text_disabled'))
+                    .fontSize(MomentConstants.FONT_SIZE_MEDIUM)
                     .borderRadius(20)
-                    .margin({ left: 8 })
                     .enabled(!!this.commentText.trim())
                     .onClick(() => {
                         const targetFeed = this.feedListState.feeds.find(f => f.feed.feedId === this.commentInputState.feedId);
@@ -702,12 +629,11 @@ export struct FeedListPage {
                     })
             }
             .width('100%')
-            .padding(16)
+            .padding({ left: 14, right: 14, top: 10, bottom: 10 })
             .backgroundColor(MomentConstants.CARD_BACKGROUND_COLOR)
         }
         .width('100%')
         .height('100%')
         .zIndex(999)
     }
-
 }

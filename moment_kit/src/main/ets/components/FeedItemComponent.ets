@@ -3,93 +3,108 @@ import { Comment, FeedCommentType, FeedContentType, FeedEntry } from '@wfc/momen
 import { MomentConstants, TimeFormatter } from '../utils/MomentConstants';
 import wfc from '@wfc/client';
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo';
+import { display, promptAction } from '@kit.ArkUI';
 
 @Component
 export struct FeedItemComponent {
     @Prop feedViewModel: FeedViewModel;
     @Prop currentUserId: string;
     @Prop events: FeedInteractionEvents;
-    onCommentClick: (replyTo?: string, replyToName?: string) => void = () => {
-    };
-    // 内部状态
-    @State expandedText: boolean = false;
-    @State showMenu: boolean = false;
+    onCommentClick: (replyTo?: string, replyToName?: string) => void = () => {};
+
+    @State private expandedText: boolean = false;
+    @State private showMenu: boolean = false;
+    @State private contentWidth: number = 260;
 
     @StorageProp('closeFeedMenuTime') @Watch('onCloseFeedMenu') closeFeedMenuTime: number = 0;
 
     onCloseFeedMenu() {
         if (this.showMenu) {
-            animateTo({ duration: 200 }, () => {
+            animateTo({ duration: MomentConstants.ANIMATION_DURATION }, () => {
                 this.showMenu = false;
             });
         }
     }
 
     aboutToAppear() {
+        // 动态计算内容区宽度
+        const d = display.getDefaultDisplaySync();
+        const screenVp = px2vp(d.width);
+        // 左 padding + 头像 + 头像右间距 + 右 padding
+        this.contentWidth = screenVp - MomentConstants.CARD_PADDING - MomentConstants.AVATAR_SIZE - 10 - MomentConstants.CARD_PADDING;
+
         // 预加载相关用户信息
         const userIds = new Set<string>();
         userIds.add(this.feedViewModel.feed.sender);
-
-        // 添加评论中的用户ID
         if (this.feedViewModel.feed.comments) {
-            this.feedViewModel.feed.comments.forEach(comment => {
-                userIds.add(comment.sender);
-                if (comment.replyTo) {
-                    userIds.add(comment.replyTo);
-                }
+            this.feedViewModel.feed.comments.forEach(c => {
+                userIds.add(c.sender);
+                if (c.replyTo) userIds.add(c.replyTo);
             });
         }
-
-        wfc.getUserInfos(Array.from(userIds))
+        wfc.getUserInfos(Array.from(userIds));
     }
 
-    /**
-     * 获取用户显示信息
-     */
-    private getUserDisplayInfo(userId: string): UserInfo {
+    private getUserInfo(userId: string): UserInfo {
         return wfc.getUserInfo(userId);
+    }
+
+    // 图片网格：每项正方形尺寸
+    private imageItemSize(): number {
+        const cols = this.images().length === 4 ? 2 : 3;
+        return (this.contentWidth - (cols - 1) * MomentConstants.IMAGE_GRID_GAP) / cols;
+    }
+
+    private gridHeight(): number {
+        const count = this.images().length;
+        if (count === 0) return 0;
+        if (count === 1) return Math.min(this.contentWidth * 0.75, 240);
+        const cols = count === 4 ? 2 : 3;
+        const rows = Math.ceil(count / cols);
+        const size = this.imageItemSize();
+        return rows * size + (rows - 1) * MomentConstants.IMAGE_GRID_GAP;
+    }
+
+    images(): FeedEntry[] {
+        return this.feedViewModel.getImages();
     }
 
     build() {
         Column() {
             Row() {
                 // 左侧头像
-                Image(wfc.getUserInfo(this.feedViewModel.feed.sender).portrait || $r("app.media.icon"))
+                Image(this.getUserInfo(this.feedViewModel.feed.sender).portrait || $r('app.media.icon'))
                     .width(MomentConstants.AVATAR_SIZE)
                     .height(MomentConstants.AVATAR_SIZE)
-                    .borderRadius(4)
+                    .borderRadius(MomentConstants.BORDER_RADIUS)
                     .backgroundColor(MomentConstants.COMMENT_BACKGROUND_COLOR)
                     .margin({ right: 10 })
-                    .onClick(() => {
-                        this.events.onUserClick(this.feedViewModel.feed.sender);
-                    })
+                    .onClick(() => this.events.onUserClick(this.feedViewModel.feed.sender))
 
                 // 右侧内容列
                 Column() {
                     // 用户名
-                    Text(this.getUserDisplayInfo(this.feedViewModel.feed.sender).displayName)
-                        .fontSize(17)
+                    Text(this.getUserInfo(this.feedViewModel.feed.sender).displayName)
+                        .fontSize(MomentConstants.FONT_SIZE_USERNAME)
                         .fontColor(MomentConstants.LINK_COLOR)
                         .fontWeight(FontWeight.Medium)
-                        .margin({ bottom: 4 })
-                        .onClick(() => {
-                            this.events.onUserClick(this.feedViewModel.feed.sender);
-                        })
+                        .margin({ bottom: 6 })
+                        .onClick(() => this.events.onUserClick(this.feedViewModel.feed.sender))
 
                     // 文本内容
                     if (this.feedViewModel.feed.text && this.feedViewModel.feed.text.trim()) {
                         this.buildTextContent()
                     }
 
-                    // 媒体内容（图片/视频）
+                    // 图片/视频
                     if (this.feedViewModel.feed.medias?.length > 0) {
                         this.buildMediaContent()
                     }
 
-                    // 时间和操作按钮
+                    // 时间和操作按钮行
                     this.buildTimeAndActions()
 
-                    // 点赞和评论区域
+                    // 点赞 + 评论区
                     if (this.feedViewModel.feed.comments?.length > 0) {
                         this.buildInteractionsArea()
                     }
@@ -98,14 +113,14 @@ export struct FeedItemComponent {
                 .alignItems(HorizontalAlign.Start)
             }
             .width('100%')
-            .padding({ left: 16, right: 16, top: 16, bottom: 0 })
+            .padding({ left: MomentConstants.CARD_PADDING, right: MomentConstants.CARD_PADDING, top: 14, bottom: 0 })
             .alignItems(VerticalAlign.Top)
 
             // 分割线
             Divider()
                 .color(MomentConstants.DIVIDER_COLOR)
                 .strokeWidth(0.5)
-                .margin({ top: 16 })
+                .margin({ top: 14, left: MomentConstants.CARD_PADDING + MomentConstants.AVATAR_SIZE + 10 })
         }
         .width('100%')
         .backgroundColor(MomentConstants.CARD_BACKGROUND_COLOR)
@@ -121,34 +136,25 @@ export struct FeedItemComponent {
     private buildTextContent() {
         Column() {
             Text(this.feedViewModel.feed.text!)
-                .fontSize(16)
+                .fontSize(MomentConstants.FONT_SIZE_CONTENT)
                 .fontColor(MomentConstants.TEXT_PRIMARY_COLOR)
-                // .lineHeight(MomentConstants.FONT_SIZE_CONTENT * 1.4)
-                .maxLines(this.expandedText ? undefined : 6)
+                .lineHeight(MomentConstants.FONT_SIZE_CONTENT * 1.6)
+                .maxLines(this.expandedText ? undefined : MomentConstants.MAX_TEXT_LINES)
                 .textOverflow({ overflow: this.expandedText ? TextOverflow.None : TextOverflow.Ellipsis })
-                .onClick(() => {
-                    if (!this.expandedText && this.feedViewModel.feed.text!.length > 120) {
-                        this.expandedText = true;
-                    }
-                })
+                .width('100%')
 
-            // 展开/收起按钮
-            if (!this.expandedText && this.feedViewModel.feed.text!.length > 120) {
+            if (!this.expandedText && this.feedViewModel.feed.text!.length > MomentConstants.TEXT_COLLAPSE_LENGTH) {
                 Text('全文')
                     .fontSize(MomentConstants.FONT_SIZE_SMALL)
                     .fontColor(MomentConstants.LINK_COLOR)
-                    .margin({ top: 4 })
-                    .onClick(() => {
-                        this.expandedText = true;
-                    })
-            } else if (this.expandedText && this.feedViewModel.feed.text!.length > 120) {
+                    .margin({ top: 2 })
+                    .onClick(() => { this.expandedText = true; })
+            } else if (this.expandedText && this.feedViewModel.feed.text!.length > MomentConstants.TEXT_COLLAPSE_LENGTH) {
                 Text('收起')
                     .fontSize(MomentConstants.FONT_SIZE_SMALL)
                     .fontColor(MomentConstants.LINK_COLOR)
-                    .margin({ top: 4 })
-                    .onClick(() => {
-                        this.expandedText = false;
-                    })
+                    .margin({ top: 2 })
+                    .onClick(() => { this.expandedText = false; })
             }
         }
         .width('100%')
@@ -161,78 +167,83 @@ export struct FeedItemComponent {
         if (this.feedViewModel.feed.type === FeedContentType.Content_Image_Type) {
             this.buildImageGrid()
         } else if (this.feedViewModel.feed.type === FeedContentType.Content_Video_Type) {
-            this.buildVideoPlayer()
+            this.buildVideoThumbnail()
         }
-    }
-
-    images(): FeedEntry[] {
-        return this.feedViewModel.getImages();
     }
 
     @Builder
     private buildImageGrid() {
         if (this.images().length === 1) {
-            // 单张图片
+            // 单张图片：自适应比例，限制最大宽度
             Image(this.images()[0].mediaUrl)
-                .width(MomentConstants.IMAGE_SINGLE_WIDTH)
-                .height(MomentConstants.IMAGE_SINGLE_HEIGHT)
+                .alt(this.images()[0].thumbUrl)
+                .width(Math.min(this.contentWidth * 0.75, 220))
+                .aspectRatio(1)
                 .borderRadius(MomentConstants.BORDER_RADIUS)
                 .objectFit(ImageFit.Cover)
                 .backgroundColor(MomentConstants.COMMENT_BACKGROUND_COLOR)
-                .onClick(() => {
-                    this.events.onImageClick(this.images(), 0);
-                })
+                .onClick(() => this.events.onImageClick(this.images(), 0))
                 .margin({ bottom: 8 })
-        } else if (this.images().length > 1) {
+        } else {
             Grid() {
                 ForEach(this.images().slice(0, 9), (entry: FeedEntry, index: number) => {
                     GridItem() {
                         Image(entry.mediaUrl)
+                            .alt(entry.thumbUrl)
                             .width('100%')
                             .height('100%')
                             .borderRadius(MomentConstants.BORDER_RADIUS_SMALL)
                             .objectFit(ImageFit.Cover)
                             .backgroundColor(MomentConstants.COMMENT_BACKGROUND_COLOR)
-                            .onClick(() => {
-                                this.events.onImageClick(this.images(), index);
-                            })
+                            .onClick(() => this.events.onImageClick(this.images(), index))
                     }
-                }, (entry: FeedEntry, index: number) => `image_${index}`)
+                }, (entry: FeedEntry, index: number) => `img_${index}_${entry.mediaUrl}`)
             }
             .columnsTemplate(this.images().length === 4 ? '1fr 1fr' : '1fr 1fr 1fr')
             .columnsGap(MomentConstants.IMAGE_GRID_GAP)
             .rowsGap(MomentConstants.IMAGE_GRID_GAP)
-            .width(this.images().length === 4 ?
-                (MomentConstants.IMAGE_GRID_WIDTH / 3 * 2 + MomentConstants.IMAGE_GRID_GAP) :
-                MomentConstants.IMAGE_GRID_WIDTH)
-            .height(MomentConstants.calculateImageGridHeight(this.images().length))
+            .width('100%')
+            .height(this.gridHeight())
             .margin({ bottom: 8 })
         }
     }
 
     @Builder
-    private buildVideoPlayer() {
-        // TODO: 实现视频播放器
-        Row() {
-            Image($r('app.media.icon')) // TODO: 使用播放图标
-                .width(40)
-                .height(40)
-                .fillColor($r('app.color.wf_background'))
+    private buildVideoThumbnail() {
+        Stack({ alignContent: Alignment.Center }) {
+            // 视频封面
+            Image(this.images()[0]?.thumbUrl || this.images()[0]?.mediaUrl)
+                .width('100%')
+                .height('100%')
+                .objectFit(ImageFit.Cover)
+                .backgroundColor(MomentConstants.COMMENT_BACKGROUND_COLOR)
 
-            Text('视频')
-                .fontSize(MomentConstants.FONT_SIZE_MEDIUM)
-                .fontColor($r('app.color.wf_background'))
-                .margin({ left: 8 })
+            // 半透明遮罩
+            Column()
+                .width('100%')
+                .height('100%')
+                .backgroundColor($r('app.color.video_overlay'))
+
+            // 播放按钮
+            Column() {
+                SymbolGlyph($r('sys.symbol.play_fill'))
+                    .fontSize(36)
+                    .fontColor([Color.White])
+            }
+            .width(60)
+            .height(60)
+            .borderRadius(30)
+            .backgroundColor('rgba(0,0,0,0.35)')
+            .justifyContent(FlexAlign.Center)
+            .alignItems(HorizontalAlign.Center)
         }
-        .width(MomentConstants.IMAGE_SINGLE_WIDTH)
-        .height(120)
-        .justifyContent(FlexAlign.Center)
-        .alignItems(VerticalAlign.Center)
-        .backgroundColor($r('app.color.wf_primary_text'))
+        .width(Math.min(this.contentWidth * 0.75, 220))
+        .height(Math.min(this.contentWidth * 0.75, 220) * 0.56)
         .borderRadius(MomentConstants.BORDER_RADIUS)
+        .clip(true)
         .margin({ bottom: 8 })
         .onClick(() => {
-            // TODO: 播放视频
+            // TODO: 实现视频全屏播放
         })
     }
 
@@ -241,47 +252,38 @@ export struct FeedItemComponent {
         Row() {
             // 时间
             Text(TimeFormatter.formatFeedTime(this.feedViewModel.feed.serverTime))
-                .fontSize(MomentConstants.FONT_SIZE_SMALL)
+                .fontSize(MomentConstants.FONT_SIZE_CAPTION)
                 .fontColor(MomentConstants.TEXT_SECONDARY_COLOR)
-
-            if (this.feedViewModel.feed.sender === this.currentUserId) {
-                Text('删除')
-                    .fontSize(MomentConstants.FONT_SIZE_SMALL)
-                    .fontColor(MomentConstants.LINK_COLOR)
-                    .margin({ left: 12 })
-                    .onClick(() => {
-                        this.events.onDelete(this.feedViewModel);
-                    })
-            }
 
             Blank()
 
-            // 操作按钮
-            Stack({ alignContent: Alignment.End }) {
+            // 操作菜单触发按钮（三点图标）
+            Stack({ alignContent: Alignment.TopEnd}) {
                 if (this.showMenu) {
                     this.buildInteractionMenu()
                 }
 
                 Button() {
-                    Row({ space: 2 }) {
-                        Circle({ width: 4, height: 4 }).fill(MomentConstants.LINK_COLOR)
-                        Circle({ width: 4, height: 4 }).fill(MomentConstants.LINK_COLOR)
+                    Row({ space: 3 }) {
+                        Circle({ width: 3.5, height: 3.5 }).fill(MomentConstants.TEXT_SECONDARY_COLOR)
+                        Circle({ width: 3.5, height: 3.5 }).fill(MomentConstants.TEXT_SECONDARY_COLOR)
+                        Circle({ width: 3.5, height: 3.5 }).fill(MomentConstants.TEXT_SECONDARY_COLOR)
                     }
-                    .padding({ left: 8, right: 8 })
+                    .padding({ left: 6, right: 6 })
                 }
-                .height(24)
+                .height(26)
+                .type(ButtonType.Normal)
                 .backgroundColor(MomentConstants.INTERACTIONS_BACKGROUND_COLOR)
-                .borderRadius(4)
+                .borderRadius(MomentConstants.BORDER_RADIUS)
                 .onTouch((event: TouchEvent) => {
-                    if (event.type === TouchType.Down) {
-                        event.stopPropagation();
-                    }
+                    if (event.type === TouchType.Down) event.stopPropagation();
                 })
                 .onClick(() => {
-                    this.showMenu = !this.showMenu;
+                    animateTo({ duration: MomentConstants.ANIMATION_DURATION }, () => {
+                        this.showMenu = !this.showMenu;
+                    });
                 })
             }
-            .height(24)
             .clip(false)
         }
         .width('100%')
@@ -292,132 +294,175 @@ export struct FeedItemComponent {
     @Builder
     private buildInteractionMenu() {
         Row() {
-            // 点赞
-            Row() {
-                Text(this.feedViewModel.isLiked(this.currentUserId) ? '❤' : '❤')
-                    .fontSize(16)
-                    .fontColor($r('app.color.wf_background'))
-                Text(this.feedViewModel.isLiked(this.currentUserId) ? '取消' : '赞')
-                    .fontSize(14)
-                    .fontColor($r('app.color.wf_background'))
-                    .margin({ left: 4 })
+            // 点赞 / 取消赞
+            Row({ space: 4 }) {
+                if (this.feedViewModel.isLiked(this.currentUserId)) {
+                    SymbolGlyph($r('sys.symbol.heart_fill'))
+                        .fontSize(15)
+                        .fontColor([$r('app.color.like_active')])
+                    Text('取消')
+                        .fontSize(13)
+                        .fontColor(Color.White)
+                } else {
+                    SymbolGlyph($r('sys.symbol.heart'))
+                        .fontSize(15)
+                        .fontColor([Color.White])
+                    Text('赞')
+                        .fontSize(13)
+                        .fontColor(Color.White)
+                }
             }
             .layoutWeight(1)
             .height('100%')
             .justifyContent(FlexAlign.Center)
             .onClick(() => {
+                animateTo({ duration: MomentConstants.ANIMATION_DURATION }, () => {
+                    this.showMenu = false;
+                });
                 this.events.onLike(this.feedViewModel);
-                this.showMenu = false;
             })
 
-            // 分割线
-            Divider().vertical(true).color($r('app.color.divider')).height(16).strokeWidth(1)
+            // 竖分割线
+            Divider()
+                .vertical(true)
+                .color('rgba(255,255,255,0.25)')
+                .height(16)
+                .strokeWidth(0.5)
 
             // 评论
-            Row() {
-                Text('🗨')
-                    .fontSize(16)
-                    .fontColor($r('app.color.wf_background'))
-                Text('评论')
+            Row({ space: 4 }) {
+                Text('💬')
                     .fontSize(14)
-                    .fontColor($r('app.color.wf_background'))
-                    .margin({ left: 4 })
+                Text('评论')
+                    .fontSize(13)
+                    .fontColor(Color.White)
             }
             .layoutWeight(1)
             .height('100%')
             .justifyContent(FlexAlign.Center)
             .onClick(() => {
+                animateTo({ duration: MomentConstants.ANIMATION_DURATION }, () => {
+                    this.showMenu = false;
+                });
                 this.onCommentClick();
-                this.showMenu = false;
             })
-        }
-        .width(160)
-        .height(38)
-        .backgroundColor($r('app.color.unread_hint_background'))
-        .borderRadius(6)
-        .position({ right: 38, top: -7 }) // 24 height button vs 38 height menu, difference is 14, so top is -7. width 160 vs 24+padding, right is 38
-        .transition({ type: TransitionType.All, opacity: 0, translate: { x: 20 } })
-        .onTouch((event: TouchEvent) => {
-            if (event.type === TouchType.Down) {
-                event.stopPropagation();
+
+            // 自己的动态显示删除
+            if (this.feedViewModel.feed.sender === this.currentUserId) {
+                Divider()
+                    .vertical(true)
+                    .color('rgba(255,255,255,0.25)')
+                    .height(16)
+                    .strokeWidth(0.5)
+
+                Row({ space: 4 }) {
+                    SymbolGlyph($r('sys.symbol.trash'))
+                        .fontSize(15)
+                        .fontColor(['#FF6B6B'])
+                    Text('删除')
+                        .fontSize(13)
+                        .fontColor('#FF6B6B')
+                }
+                .layoutWeight(1)
+                .height('100%')
+                .justifyContent(FlexAlign.Center)
+                .onClick(() => {
+                    animateTo({ duration: MomentConstants.ANIMATION_DURATION }, () => {
+                        this.showMenu = false;
+                    });
+                    this.events.onDelete(this.feedViewModel);
+                })
             }
+        }
+        .height(40)
+        .backgroundColor(MomentConstants.ACTION_MENU_BG_COLOR)
+        .borderRadius(MomentConstants.BORDER_RADIUS)
+        .shadow({ radius: 12, color: '#30000000', offsetX: 0, offsetY: 4 })
+        .position({ right: 34, top: -12 })
+        .width(this.feedViewModel.feed.sender === this.currentUserId ? 225 : 152)
+        .transition({
+            type: TransitionType.All,
+            opacity: 0,
+            scale: { x: 0.92, y: 0.92, centerX: '100%', centerY: '0%' }
+        })
+        .onTouch((event: TouchEvent) => {
+            if (event.type === TouchType.Down) event.stopPropagation();
         })
     }
 
     @Builder
     private buildInteractionsArea() {
-        Column() {
-            // 点赞列表
+        Column({ space: 0 }) {
+            // 点赞区
             if (this.feedViewModel.hasLikes()) {
                 this.buildLikesArea()
             }
 
             if (this.feedViewModel.hasLikes() && this.feedViewModel.hasComments()) {
-                Divider().color(MomentConstants.DIVIDER_COLOR).strokeWidth(0.5).margin({ top: 4, bottom: 4 })
+                Divider()
+                    .color(MomentConstants.DIVIDER_COLOR)
+                    .strokeWidth(0.5)
+                    .margin({ top: 6, bottom: 6 })
             }
 
-            // 评论列表
+            // 评论区
             if (this.feedViewModel.hasComments()) {
                 this.buildCommentsArea()
             }
         }
         .width('100%')
-        .padding(8)
+        .padding({ left: 8, right: 8, top: 8, bottom: 8 })
         .backgroundColor(MomentConstants.INTERACTIONS_BACKGROUND_COLOR)
-        .borderRadius(2)
+        .borderRadius(MomentConstants.BORDER_RADIUS_SMALL)
         .margin({ top: 8 })
     }
 
     @Builder
     private buildLikesArea() {
-        Row() {
-            // 点赞图标 - 使用简单的文本或图标
-            Text('❤')
-                .fontSize(12)
-                .fontColor(MomentConstants.LINK_COLOR)
-                .margin({ right: 6, top: 2 })
-
-            // 点赞用户列表
-            Text(this.buildLikesText())
+        Row({ space: 0 }) {
+            // 爱心图标
+            SymbolGlyph($r('sys.symbol.heart_fill'))
                 .fontSize(13)
-                .fontColor(MomentConstants.LINK_COLOR)
-                .fontWeight(FontWeight.Medium)
-                .layoutWeight(1)
+                .fontColor([MomentConstants.LINK_COLOR])
+                .margin({ right: 6, top: 1 })
+
+            // 点赞用户名列表（Flex 换行，每个名字可点击）
+            Flex({ wrap: FlexWrap.Wrap }) {
+                ForEach(this.feedViewModel.getLikesList(), (like: Comment, idx: number) => {
+                    Text(`${idx > 0 ? '、' : ''}${this.getUserInfo(like.sender).displayName}`)
+                        .fontSize(MomentConstants.FONT_SIZE_SMALL)
+                        .fontColor(MomentConstants.LINK_COLOR)
+                        .onClick(() => this.events.onUserClick(like.sender))
+                }, (like: Comment) => `like_${like.commentId}`)
+            }
+            .layoutWeight(1)
         }
         .width('100%')
         .alignItems(VerticalAlign.Top)
     }
 
-    /**
-     * 构建点赞文本
-     */
-    private buildLikesText(): string {
-        const likes = this.feedViewModel.getLikesList();
-        return likes.map(like => this.getUserDisplayInfo(like.sender).displayName).join('、');
-    }
-
     private getDisplayComments(): Array<Comment> {
         const comments = this.feedViewModel.getCommentsList();
-        const displayComments = this.feedViewModel.showAllComments ? comments : comments.slice(0, 3);
-        return displayComments;
+        return this.feedViewModel.showAllComments ? comments : comments.slice(0, MomentConstants.INITIAL_COMMENTS_COUNT);
     }
 
     @Builder
     private buildCommentsArea() {
-        Column({ space: 6 }) {
-
+        Column({ space: 5 }) {
             ForEach(this.getDisplayComments(), (comment: Comment, index: number) => {
                 this.buildCommentItem(comment)
             }, (comment: Comment, index: number) => `comment_${comment.commentId}_${index}`)
 
-            // 查看更多评论
-            if (!this.feedViewModel.showAllComments && this.feedViewModel.getCommentsList().length > 3) {
-                Text(`查看全部${this.feedViewModel.getCommentsList().length}条评论`)
-                    .fontSize(MomentConstants.FONT_SIZE_SMALL)
-                    .fontColor(MomentConstants.LINK_COLOR)
-                    .onClick(() => {
-                        this.events.onMoreComments(this.feedViewModel);
-                    })
+            if (!this.feedViewModel.showAllComments && this.feedViewModel.getCommentsList().length > MomentConstants.INITIAL_COMMENTS_COUNT) {
+                Row({ space: 3 }) {
+                    Text(`展开${this.feedViewModel.getCommentsList().length}条评论`)
+                        .fontSize(MomentConstants.FONT_SIZE_SMALL)
+                        .fontColor(MomentConstants.LINK_COLOR)
+                    SymbolGlyph($r('sys.symbol.chevron_down'))
+                        .fontSize(11)
+                        .fontColor([MomentConstants.LINK_COLOR])
+                }
+                .onClick(() => this.events.onMoreComments(this.feedViewModel))
             }
         }
         .width('100%')
@@ -426,38 +471,43 @@ export struct FeedItemComponent {
 
     @Builder
     private buildCommentItem(comment: Comment) {
-        Row() {
-            // 评论内容
-            Text() {
-                Span(this.getUserDisplayInfo(comment.sender).displayName)
+        Text() {
+            Span(this.getUserInfo(comment.sender).displayName)
+                .fontColor(MomentConstants.LINK_COLOR)
+                .fontWeight(FontWeight.Medium)
+                .onClick(() => this.events.onUserClick(comment.sender))
+
+            if (comment.replyTo && comment.replyTo !== comment.sender) {
+                Span(' 回复 ')
+                    .fontColor(MomentConstants.TEXT_SECONDARY_COLOR)
+                Span(this.getUserInfo(comment.replyTo).displayName)
                     .fontColor(MomentConstants.LINK_COLOR)
-                    .onClick(() => {
-                        this.events.onUserClick(comment.sender);
-                    })
-
-                if (comment.replyTo && comment.replyTo !== comment.sender) {
-                    Span(' 回复 ')
-                        .fontColor(MomentConstants.TEXT_PRIMARY_COLOR)
-
-                    Span(this.getUserDisplayInfo(comment.replyTo).displayName)
-                        .fontColor(MomentConstants.LINK_COLOR)
-                        .onClick(() => {
-                            this.events.onUserClick(comment.replyTo);
-                        })
-                }
-
-                Span(`: ${comment.text}`)
-                    .fontColor(MomentConstants.TEXT_PRIMARY_COLOR)
+                    .fontWeight(FontWeight.Medium)
+                    .onClick(() => this.events.onUserClick(comment.replyTo))
             }
-            .fontSize(MomentConstants.FONT_SIZE_SMALL)
-            .lineHeight(MomentConstants.FONT_SIZE_SMALL * 1.4)
-            .layoutWeight(1)
-            .onClick(() => {
-                // 点击评论可以回复
-                this.onCommentClick(comment.sender, this.getUserDisplayInfo(comment.sender).displayName);
-            })
+
+            Span('：')
+                .fontColor(MomentConstants.TEXT_SECONDARY_COLOR)
+
+            Span(comment.text)
+                .fontColor(MomentConstants.TEXT_PRIMARY_COLOR)
         }
+        .fontSize(MomentConstants.FONT_SIZE_SMALL)
+        .lineHeight(MomentConstants.FONT_SIZE_SMALL * 1.65)
         .width('100%')
-        .alignItems(VerticalAlign.Top)
+        .onClick(() => {
+            this.onCommentClick(comment.sender, this.getUserInfo(comment.sender).displayName);
+        })
+        .gesture(
+            LongPressGesture()
+                .onAction(() => {
+                    promptAction.showActionMenu({
+                        title: '',
+                        buttons: [
+                            { text: '复制', color: $r('app.color.text_primary') }
+                        ]
+                    }).catch(() => {});
+                })
+        )
     }
 }

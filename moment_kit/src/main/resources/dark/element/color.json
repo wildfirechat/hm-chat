@@ -6,7 +6,7 @@
     },
     {
       "name": "background",
-      "value": "#111111"
+      "value": "#000000"
     },
     {
       "name": "card_background",
@@ -14,7 +14,7 @@
     },
     {
       "name": "text_primary",
-      "value": "#E0E0E0"
+      "value": "#E5E5E7"
     },
     {
       "name": "text_secondary",
@@ -27,6 +27,10 @@
     {
       "name": "like",
       "value": "#58A6FF"
+    },
+    {
+      "name": "like_active",
+      "value": "#FF6B6B"
     },
     {
       "name": "divider",
@@ -46,11 +50,11 @@
     },
     {
       "name": "button_disabled",
-      "value": "#333333"
+      "value": "#333336"
     },
     {
       "name": "text_disabled",
-      "value": "#666666"
+      "value": "#636366"
     },
     {
       "name": "error_background",
@@ -59,6 +63,22 @@
     {
       "name": "title_bar_background",
       "value": "#111111"
+    },
+    {
+      "name": "action_menu_background",
+      "value": "#1A1A1A"
+    },
+    {
+      "name": "skeleton_base",
+      "value": "#2C2C2E"
+    },
+    {
+      "name": "skeleton_highlight",
+      "value": "#3A3A3C"
+    },
+    {
+      "name": "video_overlay",
+      "value": "#80000000"
     }
   ]
 }

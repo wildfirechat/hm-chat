@@ -46,7 +46,6 @@ export default struct GroupConversationInfoPage {
     private enableRemoveMember: boolean = false
     private maxShowGroupMemberCount = 20
     private toShowGroupMemberCount = this.maxShowGroupMemberCount
-
     private joinGroupRequestDialogController?: CustomDialogController = new CustomDialogController({
         builder: JoinGroupRequestDialog({
             confirm: (text: string) => {
@@ -606,16 +605,24 @@ export default struct GroupConversationInfoPage {
                         })
                         .onClick(() => {
                             AlertDialog.show({
-                                // title: '解散群组',
-                                message: '解散群组',
+                                message: this.groupInfo.owner === wfc.getUserId() ? '解散群组' : '删除并退出',
                                 primaryButton: {
                                     value: '确定',
                                     action: () => {
-                                        wfc.dismissGroup(this.groupInfo.target, [0], null, () => {
-                                            this.mainNavPathStack.clear()
-                                        }, err => {
-                                            showToast('解散群组失败 ' + err)
-                                        })
+                                        if (this.groupInfo.owner === wfc.getUserId()) {
+                                            wfc.dismissGroup(this.groupInfo.target, [0], null, () => {
+                                                this.mainNavPathStack.clear()
+                                            }, err => {
+                                                showToast('解散群组失败 ' + err)
+                                            })
+                                        } else {
+                                            wfc.quitGroup(this.groupInfo.target, [0], null, () => {
+                                                this.mainNavPathStack.clear()
+                                            }, err => {
+                                                showToast('退出群组失败 ' + err)
+                                            })
+
+                                        }
                                     }
                                 },
                                 secondaryButton: {

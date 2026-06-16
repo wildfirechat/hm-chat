@@ -112,6 +112,12 @@
                 "usedScene": {
                     "when": "inuse"
                 }
+            },
+            {
+                "name": "ohos.permission.RUNNING_LOCK",
+                "usedScene": {
+                    "when": "inuse"
+                }
             }
         ]
     }

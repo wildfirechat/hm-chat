@@ -42,6 +42,9 @@ export default struct NormaMessageContentView {
     @Link enableMultiCheck: boolean
     @Link quotedMessage: Message
     audioPlayManager?: AudioPlayManager
+    @Prop autoPlayMessageId: number = 0
+    onVoicePlayStart?: (messageId: number) => void
+    onVoicePlayComplete?: (messageId: number, err?: Error) => void
     @State readReceipt: ReadReceipt | null = null
     @Prop @Watch('updateMessageReadReceipt') readEntries: Map<string, number> = new Map();
     @Prop groupMembers: GroupMember[] = []
@@ -81,7 +84,13 @@ export default struct NormaMessageContentView {
             } else if (this.message!.messageContent.type === MessageContentType.Video) {
                 VideoMessageContentView({ message: $message })
             } else if (this.message!.messageContent.type === MessageContentType.Voice) {
-                AudioMessageContentView({ message: $message, audioPlayManager: this.audioPlayManager })
+                AudioMessageContentView({
+                    message: $message,
+                    audioPlayManager: this.audioPlayManager,
+                    autoPlayMessageId: this.autoPlayMessageId,
+                    onPlayStart: this.onVoicePlayStart,
+                    onPlayComplete: this.onVoicePlayComplete
+                })
             } else if (this.message!.messageContent.type === MessageContentType.VOIP_CONTENT_TYPE_START) {
                 CallStartMessageContentView({ message: $message })
             } else if (this.message!.messageContent.type === MessageContentType.Composite_Message) {

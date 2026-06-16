@@ -10,6 +10,7 @@ import MessageContentType from '@wfc/client/src/main/ets/wfc/messages/messageCon
 import NormalMessageContentView from './message/NormalMessageContentView'
 import ConversationInputPanelView from './ConversationInputPanelView'
 import AudioPlayManager from './audio/AudioPlayManager'
+import { playRawSound } from '../../helper/soundEffectHelper'
 import NotificationMessageContent from '@wfc/client/src/main/ets/wfc/messages/notification/notificationMessageContent'
 import SimpleNotificationMessageContentView from './message/SimpleNotificationMessageContentView'
 import { timeFormat } from '../../util/helper'
@@ -64,6 +65,7 @@ export default struct ConversationPage {
     private unreadStatusCleared: boolean = false
     private timer: number = 0
     private audioPlayerManager: AudioPlayManager = new AudioPlayManager()
+    @State autoPlayMessageId: number = 0
     private enableReceipt: boolean = false
     private enableGroupReceipt: boolean = false
     @State groupMembers: GroupMember[] = []
@@ -155,6 +157,43 @@ export default struct ConversationPage {
         wfc.eventEmitter!.off(EventType.GroupJoinRequestUpdate, this.onGroupJoinRequestUpdate)
 
         this.unwatchOnlineState(this.conversation!)
+    }
+
+    // Called when a voice message starts playing. Updates the source-of-truth status (dataSource +
+    // persistence) by stable messageId, so the unplayed red dot clears reliably even across the
+    // LazyForEach rebuilds that happen during continuous playback.
+    onVoicePlayStart = (messageId: number) => {
+        this.conversationMessageDataSource.markMessagePlayed(messageId)
+        wfc.updateMessageStatus(messageId, MessageStatus.Played)
+    }
+
+    // Called when a voice message finishes playing. Auto-plays the next unplayed received voice
+    // message if any. Proximity sensing / the screen lock is kept held across consecutive messages
+    // and only released when the chain ends, so the screen doesn't flicker on between messages.
+    onVoicePlayComplete = (messageId: number, err?: Error) => {
+        if (!err) {
+            let messages = this.conversationMessageDataSource.getMessages()
+            let foundCurrent = false
+            for (let msg of messages) {
+                if (foundCurrent) {
+                    if (msg.direction === 1
+                        && msg.messageContent.type === MessageContentType.Voice
+                        && msg.status !== MessageStatus.Played) {
+                        // Continue the chain; keep proximity sensing active (no flicker).
+                        this.autoPlayMessageId = msg.messageId
+                        return
+                    }
+                } else if (msg.messageId === messageId) {
+                    foundCurrent = true
+                }
+            }
+        }
+        // Chain ended (or errored): release proximity sensing + screen lock, play completion sound.
+        this.autoPlayMessageId = 0
+        this.audioPlayerManager.stopProximitySensing()
+        if (!err) {
+            playRawSound(getContext(this), 'audio_msg_play_completion.mp3')
+        }
     }
 
     unwatchOnlineState(conversation: Conversation) {
@@ -762,6 +801,9 @@ export default struct ConversationPage {
                                                                 enableMultiCheck: $enableMultiCheck,
                                                                 quotedMessage: $quotedMessage,
                                                                 audioPlayManager: this.audioPlayerManager,
+                                                                autoPlayMessageId: this.autoPlayMessageId,
+                                                                onVoicePlayStart: this.onVoicePlayStart,
+                                                                onVoicePlayComplete: this.onVoicePlayComplete,
                                                                 enableReceipt: this.enableReceipt,
                                                                 readEntries: this.readEntries,
                                                                 groupMembers: this.groupMembers
@@ -865,7 +907,10 @@ export default struct ConversationPage {
                                                                 message: msg,
                                                                 enableMultiCheck: $enableMultiCheck,
                                                                 quotedMessage: $quotedMessage,
-                                                                audioPlayManager: this.audioPlayerManager
+                                                                audioPlayManager: this.audioPlayerManager,
+                                                                autoPlayMessageId: this.autoPlayMessageId,
+                                                                onVoicePlayStart: this.onVoicePlayStart,
+                                                                onVoicePlayComplete: this.onVoicePlayComplete
                                                             })//.layoutWeight(1)
                                                                 .enabled(!this.enableMultiCheck)
                                                         }
@@ -1167,6 +1212,18 @@ class ConversationMessageDataSource extends BasicDataSource<Message> {
         if (index >= 0) {
             this.messages.splice(index, 1)
             this.notifyDataDelete(index)
+        }
+    }
+
+    // Mark a message as played on the source-of-truth object, by stable messageId.
+    // Deliberately does NOT call notifyDataChange: status is part of the LazyForEach key, so a
+    // notify would change the key and recreate the currently-playing item (killing its animation).
+    // The dataSource object is updated so any later rebuild reads the correct (Played) status and
+    // the red dot does not reappear.
+    markMessagePlayed(messageId: number) {
+        let index = this.messages.findIndex(msg => msg.messageId === messageId);
+        if (index >= 0) {
+            this.messages[index].status = MessageStatus.Played;
         }
     }
 

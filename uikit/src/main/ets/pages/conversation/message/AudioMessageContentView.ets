@@ -1,17 +1,19 @@
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import SoundMessageContent from '@wfc/client/src/main/ets/wfc/messages/soundMessageContent'
 import AudioPlayManager from '../audio/AudioPlayManager'
-import fs from '@ohos.file.fs'
 import Config from '@wfc/client/src/main/ets/config'
 import MessageStatus from '@wfc/client/src/main/ets/wfc/messages/messageStatus'
-import WfcAVEngineKit from '@wfc/avenginekit/src/main/ets/wfc/av/engine/avenginekit'
-import wfc, { WfcManager } from '@wfc/client/src/main/ets/wfc/client/wfc'
-import { playRawSound } from '../../../helper/soundEffectHelper'
 
 @Component
 export default struct AudioMessageContentView {
     @Link message: Message
     @State imageUrl: Resource = $r('app.media.audio_animation_list_right_1')
+    // When this prop is set to this message's ID, auto-start playback
+    @Prop @Watch('onAutoPlayChanged') autoPlayMessageId: number = 0
+    // Called when playback starts, so the parent can update the source-of-truth played status
+    onPlayStart?: (messageId: number) => void
+    // Called when playback completes (or errors), used by parent to trigger next message
+    onPlayComplete?: (messageId: number, err?: Error) => void
     private animatorInternal: number = 0
     private animatorImageIndex = 3;
     private outAudioPlayingImageUrl: Resource[] = [
@@ -44,6 +46,33 @@ export default struct AudioMessageContentView {
     aboutToAppear() {
         this.imageUrl = this.defaultAudioIndicatorImageUrl()
         this.animatorImageIndex = 3
+    }
+
+    onAutoPlayChanged() {
+        if (this.autoPlayMessageId === this.message.messageId && this.message.messageId > 0) {
+            this.startPlay()
+        }
+    }
+
+    startPlay() {
+        let content = this.message.messageContent as SoundMessageContent
+        this.startAudioPlayingAnimation()
+        let url: string = content.remotePath;
+        if (this.message.direction === 1 || !content.localPath) {
+            url = Config.AMR_TO_MP3_SERVER_ADDRESS + content.remotePath;
+        }
+        // Immediate local feedback (hide red dot on this copy); the parent updates the
+        // source-of-truth status + persistence by stable messageId so it survives list rebuilds.
+        this.message.status = MessageStatus.Played
+        this.onPlayStart?.(this.message.messageId)
+        this.audioPlayManager!.startProximitySensing()
+        this.audioPlayManager!.play(url, true, (err?: Error) => {
+            this.stopAudioPlayingAnimation()
+            // Whether to stop proximity sensing / play the completion sound is decided by the
+            // parent (ConversationPage), so continuous playback doesn't release the screen lock
+            // between consecutive messages.
+            this.onPlayComplete?.(this.message.messageId, err)
+        })
     }
 
     startAudioPlayingAnimation() {
@@ -85,30 +114,7 @@ export default struct AudioMessageContentView {
             .constraintSize({ minWidth: 60 })
             .margin({ top: 4 }) // portrait 的高度是 48, (48 - 40) / 2
             .onClick(() => {
-                let content = this.message.messageContent as SoundMessageContent
-                // audioPlayManager.audioPlayer.on('stateChange', async (state: media.AVPlayerState) => {
-                //     switch (state.toString()) {
-                //         case 'initialized':
-                //         // TODO
-                //             break
-                //         default:
-                //             break
-                //     }
-                //
-                // })
-                this.startAudioPlayingAnimation()
-                let url: string = content.remotePath;
-                if (this.message.direction === 1) {
-                    url = Config.AMR_TO_MP3_SERVER_ADDRESS + content.remotePath;
-                }
-                wfc.updateMessageStatus(this.message.messageId, MessageStatus.Played)
-                this.message.status = MessageStatus.Played
-                this.audioPlayManager!.play(url, true, (err?: Error) => {
-                    this.stopAudioPlayingAnimation()
-                    if (!err) {
-                        playRawSound(getContext(this), 'audio_msg_play_completion.mp3')
-                    }
-                })
+                this.startPlay()
             })
 
             if (this.message.direction === 1 && this.message.status !== MessageStatus.Played) {

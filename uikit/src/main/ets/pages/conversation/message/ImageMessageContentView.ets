@@ -10,6 +10,8 @@ import MessageContentType from '@wfc/client/src/main/ets/wfc/messages/messageCon
 import { eq } from '@wfc/client/src/main/ets/wfc/util/longUtil'
 import MMMessagePreviewDialog from '../../mm/MMMessagePreviewDialog'
 import { getImageSizeByOrgSizeToWeChat } from '../../../util/wechatImageUtil'
+import { mediaMessagePositionRegistry } from '../../../helper/mediaMessagePositionRegistry'
+import { stringValue } from '@wfc/client/src/main/ets/wfc/util/longUtil'
 
 @Component
 export default struct ImageMessageContentView {
@@ -21,6 +23,10 @@ export default struct ImageMessageContentView {
     aboutToAppear(): void {
         let content = this.message.messageContent as ImageMessageContent
         this.scaledSize = getImageSizeByOrgSizeToWeChat(content.imageWidth, content.imageHeight)
+    }
+
+    aboutToDisappear(): void {
+        mediaMessagePositionRegistry.remove(stringValue(this.message.messageUid))
     }
 
     imageMessageContent() {
@@ -54,6 +60,14 @@ export default struct ImageMessageContentView {
             .height(px2vp(this.scaledSize?.height))
             .constraintSize({maxWidth: 200})
             .borderRadius(4)
+            .onAreaChange((_oldValue: Area, newValue: Area) => {
+                mediaMessagePositionRegistry.update(stringValue(this.message.messageUid), {
+                    x: newValue.globalPosition.x as number,
+                    y: newValue.globalPosition.y as number,
+                    width: newValue.width as number,
+                    height: newValue.height as number,
+                })
+            })
             .onClick(event => {
                 let msg: Message | undefined
                 let mediaEntries: MMMediaEntry[] = []
@@ -83,6 +97,8 @@ export default struct ImageMessageContentView {
                     alignment: DialogAlignment.TopStart,
                     autoCancel: false,
                     customStyle: true,
+                    // 关闭时不要默认的向中心淡出动画，预览图已自行缩放到缩略图位置
+                    closeAnimation: { duration: 0 },
                 })
                 this.mmPreviewDialogController.open()
             })

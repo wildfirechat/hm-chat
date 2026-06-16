@@ -6,14 +6,19 @@ import CompositeMessageContent from '@wfc/client/src/main/ets/wfc/messages/compo
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import MessageContentType from '@wfc/client/src/main/ets/wfc/messages/messageContentType'
 import VideoMessageContent from '@wfc/client/src/main/ets/wfc/messages/videoMessageContent'
-import { eq } from '@wfc/client/src/main/ets/wfc/util/longUtil'
+import { eq, stringValue } from '@wfc/client/src/main/ets/wfc/util/longUtil'
 import MMMessagePreviewDialog from '../../mm/MMMessagePreviewDialog'
+import { mediaMessagePositionRegistry } from '../../../helper/mediaMessagePositionRegistry'
 
 @Component
 export default struct VideoMessageContentView {
     @Link message: Message
     @Prop parentCompositeMessage: Message
     private mmPreviewDialogController?: CustomDialogController
+
+    aboutToDisappear(): void {
+        mediaMessagePositionRegistry.remove(stringValue(this.message.messageUid))
+    }
 
     videoMessageContent() {
         return this.message.messageContent as VideoMessageContent
@@ -43,6 +48,14 @@ export default struct VideoMessageContentView {
             .borderRadius(4)
             .constraintSize({ maxWidth: 200 })
             .autoResize(true)
+            .onAreaChange((_oldValue: Area, newValue: Area) => {
+                mediaMessagePositionRegistry.update(stringValue(this.message.messageUid), {
+                    x: newValue.globalPosition.x as number,
+                    y: newValue.globalPosition.y as number,
+                    width: newValue.width as number,
+                    height: newValue.height as number,
+                })
+            })
             .onClick(event => {
                 let msg: Message | undefined
                 let mediaEntries: MMMediaEntry[] = []
@@ -71,6 +84,8 @@ export default struct VideoMessageContentView {
                     alignment: DialogAlignment.TopStart,
                     autoCancel: false,
                     customStyle: true,
+                    // 关闭时不要默认的向中心淡出动画，预览图已自行缩放到缩略图位置
+                    closeAnimation: { duration: 0 },
                 })
                 this.mmPreviewDialogController.open()
             })

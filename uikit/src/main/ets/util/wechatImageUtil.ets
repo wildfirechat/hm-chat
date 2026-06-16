@@ -6,51 +6,42 @@
  * @return
  */
 export function getImageSizeByOrgSizeToWeChat(imgOrgWidth: number, imgOrgHeight: number): Size {
-    let imageWidth = 300;
-    let imageHeight = 300;
-    const maxWidth = 400;
-    const maxHeight = 400;
-    const minWidth = 300;
-    const minHeight = 250;
+    const maxWidth = 540;
+    const maxHeight = 540;
+    const minWidth = 160;
+    const minHeight = 160;
 
-    if (imgOrgWidth === 0 && imgOrgHeight === 0) {
+    if (imgOrgWidth <= 0 || imgOrgHeight <= 0) {
         return {
-            width: imageWidth,
-            height: imageHeight
+            width: 300,
+            height: 300
         }
     }
 
-    if (imgOrgWidth / maxWidth > imgOrgHeight / maxHeight) {
-        if (imgOrgWidth >= maxWidth) {
-            imageWidth = maxWidth;
-            imageHeight = (imgOrgHeight * maxWidth) / imgOrgWidth;
-        } else {
-            imageWidth = imgOrgWidth;
-            imageHeight = imgOrgHeight;
+    const ratio = imgOrgWidth / imgOrgHeight;
+    let width: number;
+    let height: number;
+
+    if (ratio >= 1.0) { // 宽图或正方形
+        width = maxWidth;
+        height = Math.floor(width / ratio);
+        if (height < minHeight) {
+            height = minHeight;
+            // 对于超宽图，宽度保持最大，高度拉伸到最小高度，由裁剪组件处理
         }
-        if (imgOrgHeight < minHeight) {
-            imageHeight = minHeight;
-            const width = (imgOrgWidth * minHeight) / imgOrgHeight;
-            imageWidth = width > maxWidth ? maxWidth : width;
-        }
-    } else {
-        if (imgOrgHeight >= maxHeight) {
-            imageHeight = maxHeight;
-            imageWidth = imgOrgHeight / maxHeight > 10 ? (imgOrgWidth * 5 * maxHeight) / imgOrgHeight : (imgOrgWidth * maxHeight) / imgOrgHeight;
-        } else {
-            imageHeight = imgOrgHeight;
-            imageWidth = imgOrgWidth;
-        }
-        if (imgOrgWidth < minWidth) {
-            imageWidth = minWidth;
-            const height = (imgOrgHeight * minWidth) / imgOrgWidth;
-            imageHeight = height > maxHeight ? maxHeight : height;
+    } else { // 长图
+        height = maxHeight;
+        width = Math.floor(height * ratio);
+        if (width < minWidth) {
+            width = minWidth;
+            // 对于超长图，高度保持最大，宽度拉伸到最小宽度，由裁剪组件处理
         }
     }
 
+    // 最终返回结果，配合 CENTER_CROP 使用效果最佳
     return {
-        width: imageWidth,
-        height: imageHeight
+        width: Math.min(width, maxWidth),
+        height: Math.min(height, maxHeight)
     }
 }
 

@@ -18,6 +18,7 @@ import { showToast } from '../common/utils/Toast';
 import { request } from '@kit.BasicServicesKit';
 import Long from '@wfc/client/src/main/ets/wfc/util/long';
 import { stringValue } from '@wfc/client/src/main/ets/wfc/util/longUtil';
+import { getImageSizeByOrgSizeToWeChat } from '../util/wechatImageUtil';
 
 export interface MediaResult {
     type: number // 1 image, 2 video
@@ -46,7 +47,7 @@ export function selectVideo(maxSelectCount: number = 1): Promise<string[]> {
     return _selectMedia(photoAccessHelper.PhotoViewMIMETypes.VIDEO_TYPE, maxSelectCount);
 }
 
-export async function selectMedia(context: Context, mimeType: photoAccessHelper.PhotoViewMIMETypes = photoAccessHelper.PhotoViewMIMETypes.IMAGE_VIDEO_TYPE, maxSelectCount: number = 9, thumbnailWH: Size = { width: 200, height: 200 }, maxThumbnailSize: number = 20): Promise<MediaResult[]> {
+export async function selectMedia(context: Context, mimeType: photoAccessHelper.PhotoViewMIMETypes = photoAccessHelper.PhotoViewMIMETypes.IMAGE_VIDEO_TYPE, maxSelectCount: number = 9): Promise<MediaResult[]> {
     try {
         let photoSelectOptions = new photoAccessHelper.PhotoSelectOptions();
         photoSelectOptions.MIMEType = mimeType;
@@ -54,7 +55,7 @@ export async function selectMedia(context: Context, mimeType: photoAccessHelper.
         let photoPicker = new photoAccessHelper.PhotoViewPicker();
         let photoUris = (await photoPicker.select(photoSelectOptions)).photoUris
 
-        let results: MediaResult[] = await _uri2MediaResult(context, photoUris, thumbnailWH, maxThumbnailSize)
+        let results: MediaResult[] = await _uri2MediaResult(context, photoUris)
 
         return results
     } catch (err) {
@@ -178,7 +179,7 @@ export function saveMedia(context: Context, messageUid: Long, url: string, type:
         })
 }
 
-async function _uri2MediaResult(context: Context, photoUris: string[], thumbnailWH: Size = { width: 200, height: 200 }, maxThumbnailSize: number = 20) {
+async function _uri2MediaResult(context: Context, photoUris: string[], maxThumbnailSize: number = 20) {
     let results: MediaResult[] = []
     for (const uri of photoUris) {
         let phAccessHelper = photoAccessHelper.getPhotoAccessHelper(context);
@@ -192,10 +193,15 @@ async function _uri2MediaResult(context: Context, photoUris: string[], thumbnail
         let fetchResult: photoAccessHelper.FetchResult<photoAccessHelper.PhotoAsset> = await phAccessHelper.getAssets(fetchOption);
         // 得到uri对应的PhotoAsset对象，读取文件的部分信息
         const asset: photoAccessHelper.PhotoAsset = await fetchResult.getFirstObject();
-        asset.photoType
+
+        // 6.1 developer beta 系统好像有 bug，视频时，width 和 height 是反的
+        let orgWidth = asset.get(photoAccessHelper.PhotoKeys.WIDTH) as number
+        let orgHeight = asset.get(photoAccessHelper.PhotoKeys.HEIGHT) as number
 
         let base64Data = ''
-        let pixelMap = await asset.getThumbnail(thumbnailWH)
+        // 根据原始宽高，按微信展示尺寸算法计算缩略图解码尺寸
+        let thumbnailSize = getImageSizeByOrgSizeToWeChat(orgWidth, orgHeight)
+        let pixelMap = await asset.getThumbnail({ width: thumbnailSize.width, height: thumbnailSize.height })
         if (pixelMap) {
             if (maxThumbnailSize > 0) {
                 let compressedImageData = await compressImage(pixelMap!, maxThumbnailSize)
@@ -205,14 +211,14 @@ async function _uri2MediaResult(context: Context, photoUris: string[], thumbnail
                 base64Data = wfc.arrayBuffer_to_b64(imageData)
             }
         }
-        console.info('asset width: ', asset.get(photoAccessHelper.PhotoKeys.WIDTH));
-        console.info('asset height: ', asset.get(photoAccessHelper.PhotoKeys.HEIGHT));
+        console.info('asset width: ', orgWidth, thumbnailSize.width);
+        console.info('asset height: ', orgHeight, thumbnailSize.height);
 
         results.push({
             type: asset.photoType,
             uri: asset.uri,
-            width: asset.get(photoAccessHelper.PhotoKeys.WIDTH) as number,
-            height: asset.get(photoAccessHelper.PhotoKeys.HEIGHT) as number,
+            width: orgWidth,
+            height: orgHeight,
             duration: asset.photoType === 2 ? asset.get(photoAccessHelper.PhotoKeys.DURATION) as number : 0,
             thumbnail: base64Data
         })

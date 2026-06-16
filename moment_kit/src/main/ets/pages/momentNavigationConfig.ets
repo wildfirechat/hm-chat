@@ -14,12 +14,13 @@ export function MomentPageMap(name: string) {
         FeedListPage()
     } else if (name === momentNavigationDestinations.PostFeedPage) {
         PostFeedPage()
-    }
-    NavDestination() {
-        Column() {
-            Text('TODO Moment')
+    } else {
+        NavDestination() {
+            Column() {
+                Text('TODO Moment')
+            }
+            .width('100%')
+            .height('100%')
         }
-        .width('100%')
-        .height('100%')
     }
 }

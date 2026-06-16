@@ -3,20 +3,20 @@
  * 基于 moment_client 的模型，扩展 UI 相关的状态
  */
 
-import { Feed, FeedEntry, Comment, Profile, FeedCommentType } from '@wfc/moment_client';
+import { Feed, FeedEntry, Comment, FeedCommentType } from '@wfc/moment_client';
 
 /**
  * UI 层的朋友圈数据模型
  */
+@Observed
 export class FeedViewModel {
     // 基础数据
     feed: Feed;
     // UI 状态
     isLiking: boolean = false; // 是否正在点赞
     isCommenting: boolean = false; // 是否正在评论
-    isExpanded: boolean = false; // 文本是否展开（长文本折叠）
     showAllComments: boolean = false; // 是否显示所有评论
-    updateTime: number = Date.now(); // 用于强制UI刷新
+    updateTime: number = Date.now(); // 互动后递增，驱动 @ObjectLink 局部刷新
 
     constructor(feed: Feed) {
         this.feed = feed;
@@ -24,27 +24,10 @@ export class FeedViewModel {
     }
 
     /**
-     * 获取显示的评论列表
+     * 标记数据已变更，递增版本号以触发依赖该 view model 的列表项重建/刷新
      */
-    getDisplayComments(): Comment[] {
-        if (!this.feed.comments || this.feed.comments.length === 0) {
-            return [];
-        }
-
-        // 如果评论数量少于等于3条，全部显示
-        if (this.feed.comments.length <= 3) {
-            return this.feed.comments;
-        }
-
-        // 否则根据展开状态决定显示数量
-        return this.showAllComments ? this.feed.comments : this.feed.comments.slice(0, 3);
-    }
-
-    /**
-     * 是否有更多评论
-     */
-    hasMoreComments(): boolean {
-        return !this.showAllComments && this.feed.comments && this.feed.comments.length > 3;
+    markDirty() {
+        this.updateTime = this.updateTime + 1;
     }
 
     /**
@@ -54,7 +37,7 @@ export class FeedViewModel {
         if (!this.feed.comments) {
             return [];
         }
-        return this.feed.comments.filter(comment => comment.type === 1); // FeedCommentType.Comment_Thumbup_Type
+        return this.feed.comments.filter(comment => comment.type === FeedCommentType.Comment_Thumbup_Type);
     }
 
     /**
@@ -64,7 +47,7 @@ export class FeedViewModel {
         if (!this.feed.comments) {
             return [];
         }
-        return this.feed.comments.filter(comment => comment.type === 0); // FeedCommentType.Comment_Comment_Type
+        return this.feed.comments.filter(comment => comment.type === FeedCommentType.Comment_Comment_Type);
     }
 
     /**
@@ -75,28 +58,8 @@ export class FeedViewModel {
         return likes.some(like => like.sender === currentUserId);
     }
 
-    /**
-     * 获取显示文本
-     */
-    getDisplayText(): string {
-        if (!this.feed.text) {
-            return '';
-        }
-
-        const maxLength = 120; // 最大显示长度
-        if (this.feed.text.length <= maxLength || this.isExpanded) {
-            return this.feed.text;
-        }
-
-        return this.feed.text.substring(0, maxLength) + '...';
-    }
-
     getImages(): FeedEntry[] {
         return this.feed.medias || [];
-    }
-
-    needsExpansion(): boolean {
-        return (this.feed.text?.length || 0) > 120;
     }
 
     hasLikes(): boolean {
@@ -129,6 +92,7 @@ export interface FeedInteractionEvents {
     onDelete: (feed: FeedViewModel) => void;
     onUserClick: (userId: string) => void;
     onImageClick: (images: FeedEntry[], index: number) => void;
+    onVideoClick: (videoUrl: string, thumbUrl: string) => void;
     onMoreComments: (feed: FeedViewModel) => void;
 }
 

@@ -4,12 +4,22 @@ import { MomentConstants, TimeFormatter } from '../utils/MomentConstants';
 import wfc from '@wfc/client';
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo';
 import { display, promptAction } from '@kit.ArkUI';
+import pasteboard from '@ohos.pasteboard';
 
 @Component
 export struct FeedItemComponent {
-    @Prop feedViewModel: FeedViewModel;
+    @ObjectLink feedViewModel: FeedViewModel;
     @Prop currentUserId: string;
-    @Prop events: FeedInteractionEvents;
+    // 回调对象包含闭包，不能用 @Prop（深拷贝会破坏闭包），用普通成员一次性赋值
+    events: FeedInteractionEvents = {
+        onLike: () => {},
+        onComment: () => {},
+        onDelete: () => {},
+        onUserClick: () => {},
+        onImageClick: () => {},
+        onVideoClick: () => {},
+        onMoreComments: () => {}
+    };
     onCommentClick: (replyTo?: string, replyToName?: string) => void = () => {};
 
     @State private expandedText: boolean = false;
@@ -243,7 +253,10 @@ export struct FeedItemComponent {
         .clip(true)
         .margin({ bottom: 8 })
         .onClick(() => {
-            // TODO: 实现视频全屏播放
+            const entry = this.images()[0];
+            if (entry?.mediaUrl) {
+                this.events.onVideoClick(entry.mediaUrl, entry.thumbUrl || '');
+            }
         })
     }
 
@@ -455,7 +468,7 @@ export struct FeedItemComponent {
 
             if (!this.feedViewModel.showAllComments && this.feedViewModel.getCommentsList().length > MomentConstants.INITIAL_COMMENTS_COUNT) {
                 Row({ space: 3 }) {
-                    Text(`展开${this.feedViewModel.getCommentsList().length}条评论`)
+                    Text(`展开${this.feedViewModel.getCommentsList().length - MomentConstants.INITIAL_COMMENTS_COUNT}条评论`)
                         .fontSize(MomentConstants.FONT_SIZE_SMALL)
                         .fontColor(MomentConstants.LINK_COLOR)
                     SymbolGlyph($r('sys.symbol.chevron_down'))
@@ -506,8 +519,20 @@ export struct FeedItemComponent {
                         buttons: [
                             { text: '复制', color: $r('app.color.text_primary') }
                         ]
+                    }).then(result => {
+                        if (result.index === 0) {
+                            this.copyText(comment.text);
+                        }
                     }).catch(() => {});
                 })
         )
+    }
+
+    private copyText(text: string) {
+        if (!text) return;
+        const data = pasteboard.createData(pasteboard.MIMETYPE_TEXT_PLAIN, text);
+        pasteboard.getSystemPasteboard().setData(data).then(() => {
+            promptAction.showToast({ message: '已复制' });
+        }).catch(() => {});
     }
 }

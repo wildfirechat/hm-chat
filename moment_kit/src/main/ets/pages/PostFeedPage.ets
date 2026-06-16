@@ -2,9 +2,34 @@ import { momentClient, FeedEntry, FeedContentType } from '@wfc/moment_client';
 import { MomentConstants } from '../utils/MomentConstants';
 import photoAccessHelper from '@ohos.file.photoAccessHelper';
 import { showToast } from '@wfc/uikit/src/main/ets/common/utils/Toast';
+import { imageSize } from '@wfc/uikit/src/main/ets/helper/imageVideoHelper';
+import { uikitNavigationDestinations } from '@wfc/uikit/src/main/ets/pages/uikitNavigationConfig';
+import PickMultiContactModal from '@wfc/uikit/src/main/ets/pages/picker/PickMultiContactModal';
+import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo';
+import wfc from '@wfc/client';
+import { Size, promptAction } from '@kit.ArkUI';
+import hilog from '@ohos.hilog';
 
 const MAX_TEXT_LENGTH = 2000;
 const MAX_IMAGES = 9;
+const LOG_DOMAIN = 0xFF01;
+const LOG_TAG = 'MomentPostFeed';
+
+// 可见范围
+enum VisibleScope {
+    Public = 0,   // 公开
+    Private = 1,  // 私密（仅自己可见）
+    Partial = 2,  // 部分可见（白名单）
+    Exclude = 3,  // 不给谁看（黑名单）
+}
+
+// 当前正在选择联系人的目标
+enum PickTarget {
+    None = 0,
+    Partial = 1,
+    Exclude = 2,
+    Mention = 3,
+}
 
 interface PostFeedState {
     text: string;
@@ -26,6 +51,13 @@ export struct PostFeedPage {
     // TextArea 高度跟随内容动态扩展
     @State textAreaHeight: number = 130;
 
+    // 可见范围 / 提醒谁看
+    @State visibleScope: VisibleScope = VisibleScope.Public;
+    @State partialVisibleUsers: UserInfo[] = [];
+    @State excludeUsers: UserInfo[] = [];
+    @State mentionUsers: UserInfo[] = [];
+    private pickTarget: PickTarget = PickTarget.None;
+
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
 
     private async publishFeed() {
@@ -39,47 +71,81 @@ export struct PostFeedPage {
         this.postState.totalCount = this.postState.selectedImages.length;
         this.postState.uploadingCount = 0;
 
+        const imageCount = this.postState.selectedImages.length;
+        hilog.info(LOG_DOMAIN, LOG_TAG, '开始发布朋友圈, 图片数=%{public}d', imageCount);
+
         try {
-            const uploadedMedias: FeedEntry[] = [];
-            for (const imagePath of this.postState.selectedImages) {
-                const url = await this.uploadImage(imagePath);
-                if (url) {
-                    uploadedMedias.push(new FeedEntry(url, '', 0, 0));
-                }
-                this.postState.uploadingCount++;
-            }
+            // 并行上传所有图片，任意一张失败则整体失败
+            const uploadedMedias: FeedEntry[] = await Promise.all(
+                this.postState.selectedImages.map((path, index) => this.uploadImage(path, index))
+            );
 
             const feedType = uploadedMedias.length > 0
                 ? FeedContentType.Content_Image_Type
                 : FeedContentType.Content_Text_Type;
 
+            const toUsers = this.computeToUsers();
+            const excludeUsers = this.visibleScope === VisibleScope.Exclude
+                ? this.excludeUsers.map(u => u.uid) : [];
+            const mentionedUsers = this.mentionUsers.map(u => u.uid);
+
             momentClient.postFeed(
                 feedType,
                 this.postState.text.trim(),
                 uploadedMedias,
-                [], [], [], '',
+                toUsers, excludeUsers, mentionedUsers, '',
                 () => {
                     this.postState.isPosting = false;
+                    hilog.info(LOG_DOMAIN, LOG_TAG, '发布成功');
+                    // 通知列表页刷新
+                    AppStorage.setOrCreate('momentNeedRefresh', true);
                     showToast('发布成功');
                     this.goBack();
                 },
                 (errorCode: number) => {
                     this.postState.isPosting = false;
+                    hilog.error(LOG_DOMAIN, LOG_TAG,
+                        '发布失败, errorCode=%{public}d, 图片数=%{public}d', errorCode, imageCount);
                     showToast(`发布失败 (${errorCode})`);
                 }
             );
         } catch (e) {
             this.postState.isPosting = false;
-            showToast('发布失败，请重试');
+            hilog.error(LOG_DOMAIN, LOG_TAG,
+                '图片上传失败, 图片数=%{public}d, msg=%{public}s', imageCount, `${e}`);
+            showToast('图片上传失败，请重试');
         }
     }
 
-    private uploadImage(path: string): Promise<string> {
-        return new Promise((resolve) => {
+    // 公开/不给谁看 -> 全部可见(toUsers 为空)；私密 -> 仅自己；部分可见 -> 白名单
+    private computeToUsers(): string[] {
+        if (this.visibleScope === VisibleScope.Private) {
+            return [wfc.getUserId()];
+        }
+        if (this.visibleScope === VisibleScope.Partial) {
+            return this.partialVisibleUsers.map(u => u.uid);
+        }
+        return [];
+    }
+
+    private async uploadImage(path: string, index: number): Promise<FeedEntry> {
+        // 先读取原图尺寸，失败时退化为 0（不阻断上传）
+        let size: Size = { width: 0, height: 0 };
+        try {
+            size = await imageSize(path);
+        } catch (e) {
+            hilog.warn(LOG_DOMAIN, LOG_TAG,
+                '读取图片尺寸失败, index=%{public}d, msg=%{public}s', index, `${e}`);
+        }
+        return new Promise<FeedEntry>((resolve, reject) => {
             momentClient.uploadMedia('', path, (url: string) => {
-                resolve(url);
+                this.postState.uploadingCount++;
+                hilog.info(LOG_DOMAIN, LOG_TAG, '图片上传成功, index=%{public}d', index);
+                // 朋友圈图片暂无独立缩略图，缩略图复用原图 url
+                resolve(new FeedEntry(url, url, size.width, size.height));
             }, () => {
-                resolve('');
+                hilog.error(LOG_DOMAIN, LOG_TAG, '图片上传失败, index=%{public}d, path=%{public}s', index, path);
+                reject(new Error(`upload failed at index ${index}`));
             });
         });
     }
@@ -115,6 +181,88 @@ export struct PostFeedPage {
         this.mainNavPathStack.pop();
     }
 
+    // ===== 可见范围 / 提醒谁看 =====
+
+    // 点击「谁可以看」，弹出范围选择
+    private showScopeMenu(): void {
+        promptAction.showActionMenu({
+            title: '谁可以看',
+            buttons: [
+                { text: '公开', color: $r('app.color.text_primary') },
+                { text: '私密', color: $r('app.color.text_primary') },
+                { text: '部分可见', color: $r('app.color.text_primary') },
+                { text: '不给谁看', color: $r('app.color.text_primary') },
+            ]
+        }).then(result => {
+            switch (result.index) {
+                case 0:
+                    this.visibleScope = VisibleScope.Public;
+                    break;
+                case 1:
+                    this.visibleScope = VisibleScope.Private;
+                    break;
+                case 2:
+                    this.visibleScope = VisibleScope.Partial;
+                    this.openContactPicker(PickTarget.Partial);
+                    break;
+                case 3:
+                    this.visibleScope = VisibleScope.Exclude;
+                    this.openContactPicker(PickTarget.Exclude);
+                    break;
+            }
+        }).catch(() => {});
+    }
+
+    private openContactPicker(target: PickTarget): void {
+        this.pickTarget = target;
+        // 先清空上次结果，便于区分「取消选择」
+        LocalStorage.getShared().setOrCreate<UserInfo[]>(PickMultiContactModal.PICK_RESULT, []);
+        this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.PickMultiContactPage, {} as Record<string, Object>);
+    }
+
+    // 从联系人选择页返回时读取结果
+    private consumePickResult(): void {
+        if (this.pickTarget === PickTarget.None) return;
+        const result = LocalStorage.getShared().get<UserInfo[]>(PickMultiContactModal.PICK_RESULT);
+        const target = this.pickTarget;
+        this.pickTarget = PickTarget.None;
+        // 确定按钮在 0 人时禁用，故有结果即视为用户确认；为空表示取消，保留原选择
+        if (!result || result.length === 0) {
+            // 取消「部分可见 / 不给谁看」且尚未选过人时，回退到公开
+            if (target === PickTarget.Partial && this.partialVisibleUsers.length === 0) {
+                this.visibleScope = VisibleScope.Public;
+            } else if (target === PickTarget.Exclude && this.excludeUsers.length === 0) {
+                this.visibleScope = VisibleScope.Public;
+            }
+            return;
+        }
+        if (target === PickTarget.Partial) {
+            this.partialVisibleUsers = result;
+        } else if (target === PickTarget.Exclude) {
+            this.excludeUsers = result;
+        } else if (target === PickTarget.Mention) {
+            this.mentionUsers = result;
+        }
+        LocalStorage.getShared().setOrCreate<UserInfo[]>(PickMultiContactModal.PICK_RESULT, []);
+    }
+
+    private scopeLabel(): string {
+        switch (this.visibleScope) {
+            case VisibleScope.Private:
+                return '私密';
+            case VisibleScope.Partial:
+                return this.partialVisibleUsers.length > 0 ? `部分可见(${this.partialVisibleUsers.length})` : '部分可见';
+            case VisibleScope.Exclude:
+                return this.excludeUsers.length > 0 ? `不给谁看(${this.excludeUsers.length})` : '不给谁看';
+            default:
+                return '公开';
+        }
+    }
+
+    private mentionLabel(): string {
+        return this.mentionUsers.length > 0 ? `${this.mentionUsers.length}人` : '';
+    }
+
     private canPublish(): boolean {
         return !this.postState.isPosting &&
             (this.postState.text.trim().length > 0 || this.postState.selectedImages.length > 0);
@@ -136,6 +284,9 @@ export struct PostFeedPage {
                 // 图片选择区
                 this.buildImageSelector()
 
+                // 可见范围 / 提醒谁看
+                this.buildOptions()
+
                 // 上传进度
                 if (this.postState.isPosting && this.postState.totalCount > 0) {
                     this.buildUploadProgress()
@@ -151,29 +302,77 @@ export struct PostFeedPage {
         .title('发表朋友圈')
         .menus(this.buildPostMenu)
         .backgroundColor(MomentConstants.BACKGROUND_COLOR)
+        .onShown(() => this.consumePickResult())
     }
 
     @Builder
     private buildPostMenu() {
-        if (this.postState.isPosting) {
-            LoadingProgress()
-                .width(22)
-                .height(22)
-                .color(MomentConstants.PRIMARY_COLOR)
-                .margin({ right: 16 })
-        } else {
-            Button('发表')
-                .backgroundColor(this.canPublish() ? MomentConstants.PRIMARY_COLOR : $r('app.color.button_disabled'))
-                .fontColor(this.canPublish() ? Color.White : $r('app.color.text_disabled'))
-                .fontSize(15)
-                .height(34)
-                .padding({ left: 18, right: 18 })
-                .borderRadius(MomentConstants.BORDER_RADIUS)
-                .margin({ right: 16 })
-                .onClick(() => {
-                    if (this.canPublish()) this.publishFeed();
-                })
+        Row() {
+            if (this.postState.isPosting) {
+                LoadingProgress()
+                    .width(22)
+                    .height(22)
+                    .color(MomentConstants.PRIMARY_COLOR)
+            } else {
+                Button('发表')
+                    .backgroundColor(this.canPublish() ? MomentConstants.PRIMARY_COLOR : $r('app.color.button_disabled'))
+                    .fontColor(this.canPublish() ? Color.White : $r('app.color.text_disabled'))
+                    .fontSize(15)
+                    .height(32)
+                    .padding({ left: 18, right: 18 })
+                    .borderRadius(MomentConstants.BORDER_RADIUS)
+                    .enabled(this.canPublish())
+                    .onClick(() => {
+                        if (this.canPublish()) this.publishFeed();
+                    })
+            }
         }
+        .height('100%')
+        .margin({ right: 16 })
+        .justifyContent(FlexAlign.Center)
+        .alignItems(VerticalAlign.Center)
+    }
+
+    @Builder
+    private buildOptions() {
+        Column() {
+            this.buildOptionRow('谁可以看', this.scopeLabel(), (): void => this.showScopeMenu())
+            Divider()
+                .color(MomentConstants.DIVIDER_COLOR)
+                .strokeWidth(0.5)
+            this.buildOptionRow('提醒谁看', this.mentionLabel(), (): void => this.openContactPicker(PickTarget.Mention))
+        }
+        .width('100%')
+        .borderRadius(MomentConstants.BORDER_RADIUS)
+        .backgroundColor(MomentConstants.CARD_BACKGROUND_COLOR)
+        .margin({ top: 4 })
+    }
+
+    @Builder
+    private buildOptionRow(title: string, value: string, action: () => void) {
+        Row() {
+            Text(title)
+                .fontSize(MomentConstants.FONT_SIZE_CONTENT)
+                .fontColor(MomentConstants.TEXT_PRIMARY_COLOR)
+                .layoutWeight(1)
+
+            Text(value)
+                .fontSize(MomentConstants.FONT_SIZE_MEDIUM)
+                .fontColor(MomentConstants.TEXT_SECONDARY_COLOR)
+                .maxLines(1)
+                .textOverflow({ overflow: TextOverflow.Ellipsis })
+                .constraintSize({ maxWidth: '60%' })
+                .margin({ right: 6 })
+
+            SymbolGlyph($r('sys.symbol.chevron_right'))
+                .fontSize(14)
+                .fontColor([MomentConstants.TEXT_SECONDARY_COLOR])
+        }
+        .width('100%')
+        .height(50)
+        .padding({ left: 14, right: 14 })
+        .alignItems(VerticalAlign.Center)
+        .onClick(action)
     }
 
     @Builder

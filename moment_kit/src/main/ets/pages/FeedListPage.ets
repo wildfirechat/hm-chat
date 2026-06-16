@@ -1,24 +1,27 @@
-import { momentClient, Feed, Comment, Profile, FeedEntry } from '@wfc/moment_client';
-import { FeedViewModel, FeedListState, FeedInteractionEvents, CommentInputState } from '../model/FeedViewModel';
+import { momentClient, Feed, Comment, Profile, FeedEntry, FeedCommentType } from '@wfc/moment_client';
+import { FeedViewModel, FeedInteractionEvents, CommentInputState } from '../model/FeedViewModel';
 import { MomentConstants, TimeFormatter } from '../utils/MomentConstants';
 import { FeedItemComponent } from '../components/FeedItemComponent';
 import { FeedHeaderComponent } from '../components/FeedHeaderComponent';
 import { FeedImagePreviewDialog } from '../components/FeedImagePreviewDialog';
+import { FeedVideoPlayerDialog } from '../components/FeedVideoPlayerDialog';
 import wfc from '@wfc/client';
 import { momentNavigationDestinations } from '../../../../Index';
 import { uikitNavigationDestinations } from '@wfc/uikit/src/main/ets/pages/uikitNavigationConfig';
+import { showToast } from '@wfc/uikit/src/main/ets/common/utils/Toast';
 import { promptAction, window, KeyboardAvoidMode } from '@kit.ArkUI';
+
+const PAGE_SIZE = 20;
 
 @Component
 export struct FeedListPage {
-    @State feedListState: FeedListState = {
-        feeds: [],
-        isLoading: false,
-        isRefreshing: false,
-        isLoadingMore: false,
-        hasMore: true,
-        error: undefined
-    };
+    // 顶层 @State，保证数组的增删改能被观测刷新
+    @State feeds: FeedViewModel[] = [];
+    @State isLoading: boolean = false;
+    @State isRefreshing: boolean = false;
+    @State isLoadingMore: boolean = false;
+    @State hasMore: boolean = true;
+    @State errorMsg: string = '';
     @State commentInputState: CommentInputState = {
         isVisible: false,
         feedId: undefined,
@@ -39,6 +42,18 @@ export struct FeedListPage {
         builder: FeedImagePreviewDialog({
             images: this.$previewImages,
             index: this.$previewIndex,
+        }),
+        customStyle: true,
+        autoCancel: true,
+        alignment: DialogAlignment.Center
+    });
+
+    @State previewVideoUrl: string = '';
+    @State previewVideoThumb: string = '';
+    videoDialogController: CustomDialogController = new CustomDialogController({
+        builder: FeedVideoPlayerDialog({
+            videoUrl: this.$previewVideoUrl,
+            thumbUrl: this.$previewVideoThumb,
         }),
         customStyle: true,
         autoCancel: true,
@@ -71,43 +86,46 @@ export struct FeedListPage {
     }
 
     private loadInitialFeeds() {
-        this.feedListState.isLoading = true;
-        momentClient.getFeeds(BigInt(0), 20, null, (feeds: Feed[]) => {
-            this.feedListState.feeds = feeds.map(f => new FeedViewModel(f));
-            this.feedListState.isLoading = false;
-            this.feedListState.error = undefined;
+        this.isLoading = true;
+        momentClient.getFeeds(BigInt(0), PAGE_SIZE, null, (feeds: Feed[]) => {
+            this.feeds = feeds.map(f => new FeedViewModel(f));
+            this.hasMore = feeds.length >= PAGE_SIZE;
+            this.isLoading = false;
+            this.errorMsg = '';
         }, (errorCode: number) => {
-            this.feedListState.isLoading = false;
-            this.feedListState.error = `加载失败 (${errorCode})`;
+            this.isLoading = false;
+            this.errorMsg = `加载失败 (${errorCode})`;
         });
     }
 
     private onRefresh() {
-        this.feedListState.isRefreshing = true;
-        momentClient.getFeeds(BigInt(0), 20, null, (feeds: Feed[]) => {
-            this.feedListState.feeds = feeds.map(f => new FeedViewModel(f));
-            this.feedListState.isRefreshing = false;
-            this.feedListState.error = undefined;
+        this.isRefreshing = true;
+        momentClient.getFeeds(BigInt(0), PAGE_SIZE, null, (feeds: Feed[]) => {
+            this.feeds = feeds.map(f => new FeedViewModel(f));
+            this.hasMore = feeds.length >= PAGE_SIZE;
+            this.isRefreshing = false;
+            this.errorMsg = '';
             this.loadUnreadCount();
         }, () => {
-            this.feedListState.isRefreshing = false;
+            this.isRefreshing = false;
         });
     }
 
     private onLoadMore() {
-        if (this.feedListState.isLoadingMore || !this.feedListState.hasMore) return;
-        this.feedListState.isLoadingMore = true;
-        const lastFeed = this.feedListState.feeds[this.feedListState.feeds.length - 1];
+        if (this.isLoadingMore || !this.hasMore) return;
+        this.isLoadingMore = true;
+        const lastFeed = this.feeds[this.feeds.length - 1];
         const fromIndex = lastFeed?.feed.feedId || BigInt(0);
-        momentClient.getFeeds(fromIndex, 20, null, (feeds: Feed[]) => {
+        momentClient.getFeeds(fromIndex, PAGE_SIZE, null, (feeds: Feed[]) => {
             if (feeds.length === 0) {
-                this.feedListState.hasMore = false;
+                this.hasMore = false;
             } else {
-                this.feedListState.feeds.push(...feeds.map(f => new FeedViewModel(f)));
+                this.feeds = [...this.feeds, ...feeds.map(f => new FeedViewModel(f))];
+                this.hasMore = feeds.length >= PAGE_SIZE;
             }
-            this.feedListState.isLoadingMore = false;
+            this.isLoadingMore = false;
         }, () => {
-            this.feedListState.isLoadingMore = false;
+            this.isLoadingMore = false;
         });
     }
 
@@ -125,17 +143,17 @@ export struct FeedListPage {
                             if (idx !== -1) feed.feed.comments.splice(idx, 1);
                         }
                         feed.isLiking = false;
-                        this.refreshFeedItem(feed);
+                        this.updateFeed(feed);
                     }, () => { feed.isLiking = false; });
                 } else {
                     feed.isLiking = false;
                 }
             } else {
                 if (feed.feed.feedId) {
-                    momentClient.postComment(1, feed.feed.feedId, '', '', '', (commentId: bigint, timestamp: number) => {
+                    momentClient.postComment(FeedCommentType.Comment_Thumbup_Type, feed.feed.feedId, '', '', '', (commentId: bigint, timestamp: number) => {
                         const newLike = {
                             'commentId': commentId, 'feedId': feed.feed.feedId,
-                            'sender': this.currentUserId, 'type': 1,
+                            'sender': this.currentUserId, 'type': FeedCommentType.Comment_Thumbup_Type,
                             'text': '', 'replyTo': '', 'serverTime': timestamp, 'extra': ''
                         } as Record<string, Object>;
                         if (!feed.feed.comments) feed.feed.comments = [];
@@ -143,7 +161,7 @@ export struct FeedListPage {
                         comment.fromJsonObject(newLike);
                         feed.feed.comments.push(comment);
                         feed.isLiking = false;
-                        this.refreshFeedItem(feed);
+                        this.updateFeed(feed);
                     }, () => { feed.isLiking = false; });
                 }
             }
@@ -153,10 +171,10 @@ export struct FeedListPage {
             if (feed.isCommenting || !commentText.trim()) return;
             feed.isCommenting = true;
             if (feed.feed.feedId) {
-                momentClient.postComment(0, feed.feed.feedId, commentText.trim(), replyTo || '', '', (commentId: bigint, timestamp: number) => {
+                momentClient.postComment(FeedCommentType.Comment_Comment_Type, feed.feed.feedId, commentText.trim(), replyTo || '', '', (commentId: bigint, timestamp: number) => {
                     const newComment = {
                         'commentId': commentId, 'feedId': feed.feed.feedId,
-                        'sender': this.currentUserId, 'type': 0,
+                        'sender': this.currentUserId, 'type': FeedCommentType.Comment_Comment_Type,
                         'text': commentText.trim(), 'replyTo': replyTo || '',
                         'serverTime': timestamp, 'extra': ''
                     } as Record<string, Object>;
@@ -165,7 +183,7 @@ export struct FeedListPage {
                     comment.fromJsonObject(newComment);
                     feed.feed.comments.push(comment);
                     feed.isCommenting = false;
-                    this.refreshFeedItem(feed);
+                    this.updateFeed(feed);
                     this.commentInputState.isVisible = false;
                     this.commentText = '';
                 }, () => { feed.isCommenting = false; });
@@ -183,13 +201,10 @@ export struct FeedListPage {
             }).then(data => {
                 if (data.index === 1 && feed.feed.feedId) {
                     momentClient.deleteFeed(feed.feed.feedId, () => {
-                        const idx = this.feedListState.feeds.findIndex(f => f.feed.feedId === feed.feed.feedId);
-                        if (idx !== -1) {
-                            const newFeeds = [...this.feedListState.feeds];
-                            newFeeds.splice(idx, 1);
-                            this.feedListState.feeds = newFeeds;
-                        }
-                    }, () => {});
+                        this.feeds = this.feeds.filter(f => f.feed.feedId !== feed.feed.feedId);
+                    }, (errorCode: number) => {
+                        showToast(`删除失败 (${errorCode})`);
+                    });
                 }
             }).catch(() => {});
         },
@@ -206,20 +221,24 @@ export struct FeedListPage {
             this.previewDialogController.open();
         },
 
+        onVideoClick: (videoUrl: string, thumbUrl: string) => {
+            this.previewVideoUrl = videoUrl;
+            this.previewVideoThumb = thumbUrl;
+            this.videoDialogController.open();
+        },
+
         onMoreComments: (feed: FeedViewModel) => {
             feed.showAllComments = true;
-            this.refreshFeedItem(feed);
+            this.updateFeed(feed);
         }
     };
 
-    private refreshFeedItem(feed: FeedViewModel) {
-        const idx = this.feedListState.feeds.findIndex(f => f.feed.feedId === feed.feed.feedId);
-        if (idx !== -1) {
-            const newFeeds = [...this.feedListState.feeds];
-            newFeeds[idx] = new FeedViewModel(feed.feed);
-            newFeeds[idx].showAllComments = feed.showAllComments;
-            this.feedListState.feeds = newFeeds;
-        }
+    // 朋友圈互动（点赞/评论/展开）后刷新对应项：
+    // 1) 递增 updateTime 使该项的 ForEach key 变化，强制重建该条目；
+    // 2) 重新赋值数组引用，触发父组件 List 重新求值。
+    private updateFeed(feed: FeedViewModel) {
+        feed.markDirty();
+        this.feeds = this.feeds.slice();
     }
 
     private showCommentInput(feed: FeedViewModel, listIndex: number, replyTo?: string, replyToName?: string) {
@@ -241,9 +260,9 @@ export struct FeedListPage {
             Stack({ alignContent: Alignment.Top }) {
                 Stack({ alignContent: Alignment.Top }) {
                     Column() {
-                        if (this.feedListState.isLoading && this.feedListState.feeds.length === 0) {
+                        if (this.isLoading && this.feeds.length === 0) {
                             this.buildSkeletonView()
-                        } else if (this.feedListState.error && this.feedListState.feeds.length === 0) {
+                        } else if (this.errorMsg && this.feeds.length === 0) {
                             this.buildErrorView()
                         } else {
                             this.buildFeedList()
@@ -271,6 +290,11 @@ export struct FeedListPage {
         .ignoreLayoutSafeArea([LayoutSafeAreaType.SYSTEM], [LayoutSafeAreaEdge.TOP])
         .onShown(() => {
             try { this.getUIContext().setKeyboardAvoidMode(KeyboardAvoidMode.RESIZE); } catch (e) {}
+            // 发布新朋友圈后返回时刷新列表
+            if (AppStorage.get<boolean>('momentNeedRefresh')) {
+                AppStorage.setOrCreate('momentNeedRefresh', false);
+                this.onRefresh();
+            }
         })
         .onHidden(() => {
             try { this.getUIContext().setKeyboardAvoidMode(KeyboardAvoidMode.OFFSET); } catch (e) {}
@@ -433,7 +457,7 @@ export struct FeedListPage {
 
     @Builder
     private buildFeedList() {
-        Refresh({ refreshing: $$this.feedListState.isRefreshing, offset: 64, friction: 100 }) {
+        Refresh({ refreshing: $$this.isRefreshing, offset: 64, friction: 100 }) {
             List({ space: 0, scroller: this.listScroller }) {
                 // 顶部 Header
                 ListItem() {
@@ -448,7 +472,7 @@ export struct FeedListPage {
                 }
 
                 // Feed 列表
-                ForEach(this.feedListState.feeds, (feedItem: FeedViewModel, index: number) => {
+                ForEach(this.feeds, (feedItem: FeedViewModel, index: number) => {
                     ListItem() {
                         FeedItemComponent({
                             feedViewModel: feedItem,
@@ -459,17 +483,17 @@ export struct FeedListPage {
                             }
                         })
                     }
-                }, (feedItem: FeedViewModel, index: number) => `${feedItem.feed.feedId}_${index}_${feedItem.updateTime}`)
+                }, (feedItem: FeedViewModel, index: number) => `feed_${feedItem.feed.feedId}_${feedItem.updateTime}`)
 
                 // 加载更多 / 底部提示
-                if (this.feedListState.feeds.length === 0 && !this.feedListState.isLoading) {
+                if (this.feeds.length === 0 && !this.isLoading) {
                     ListItem() { this.buildEmptyView() }
-                } else if (this.feedListState.hasMore) {
+                } else if (this.hasMore) {
                     ListItem() {
                         this.buildLoadMoreView()
                     }
                     .onAppear(() => this.onLoadMore())
-                } else if (this.feedListState.feeds.length > 0) {
+                } else if (this.feeds.length > 0) {
                     ListItem() {
                         Row({ space: 8 }) {
                             Divider().layoutWeight(1).color(MomentConstants.DIVIDER_COLOR).strokeWidth(0.5)
@@ -553,7 +577,7 @@ export struct FeedListPage {
     @Builder
     private buildLoadMoreView() {
         Row({ space: 8 }) {
-            if (this.feedListState.isLoadingMore) {
+            if (this.isLoadingMore) {
                 LoadingProgress()
                     .width(18)
                     .height(18)
@@ -607,7 +631,7 @@ export struct FeedListPage {
                         this.commentText = value;
                     })
                     .onSubmit(() => {
-                        const targetFeed = this.feedListState.feeds.find(f => f.feed.feedId === this.commentInputState.feedId);
+                        const targetFeed = this.feeds.find(f => f.feed.feedId === this.commentInputState.feedId);
                         if (targetFeed && this.commentText.trim()) {
                             this.interactionEvents.onComment(targetFeed, this.commentText, this.commentInputState.replyTo);
                         }
@@ -622,7 +646,7 @@ export struct FeedListPage {
                     .borderRadius(20)
                     .enabled(!!this.commentText.trim())
                     .onClick(() => {
-                        const targetFeed = this.feedListState.feeds.find(f => f.feed.feedId === this.commentInputState.feedId);
+                        const targetFeed = this.feeds.find(f => f.feed.feedId === this.commentInputState.feedId);
                         if (targetFeed) {
                             this.interactionEvents.onComment(targetFeed, this.commentText, this.commentInputState.replyTo);
                         }

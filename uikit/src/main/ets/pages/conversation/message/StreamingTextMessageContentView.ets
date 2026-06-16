@@ -35,6 +35,13 @@ export default struct StreamingTextMessageContentView {
                     .dataDetectorConfig({
                         types: [TextDataDetectorType.URL, TextDataDetectorType.PHONE_NUMBER, TextDataDetectorType.EMAIL]
                     })
+                    .onClick(() => {
+                        if (this.isGenerated()) {
+                            this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.TextMessagePreviewPage, {
+                                'message': this.message
+                            } as Record<string, object>)
+                        }
+                    })
             } else {
                 Text() {
                     ForEach(parseTextLinks(this.streamingMessageContent()), (segment: TextSegment, index: number) => {
@@ -50,8 +57,15 @@ export default struct StreamingTextMessageContentView {
                         }
                     }, (segment: TextSegment, index: number) => index.toString())
                 }
-                    .constraintSize({ minHeight: 40 })
-                    .padding(10)
+                .constraintSize({ minHeight: 40 })
+                .padding(10)
+                .onClick(() => {
+                    if (this.isGenerated()) {
+                        this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.TextMessagePreviewPage, {
+                            'message': this.message
+                        } as Record<string, object>)
+                    }
+                })
             }
 
             if (!this.isGenerated()) {
@@ -60,7 +74,7 @@ export default struct StreamingTextMessageContentView {
                 Text('本内容由 AI 生成')
                     .fontSize(12)
                     .fontColor($r('app.color.wf_tertiary_text'))
-                    .padding({left: 10, top: 5, bottom: 5})
+                    .padding({ left: 10, top: 5, bottom: 5 })
             }
         }
         .borderRadius(4)
@@ -85,7 +99,8 @@ export default struct StreamingTextMessageContentView {
                 },
                 secondaryButton: {
                     value: '关闭',
-                    action: () => {}
+                    action: () => {
+                    }
                 }
             })
             return

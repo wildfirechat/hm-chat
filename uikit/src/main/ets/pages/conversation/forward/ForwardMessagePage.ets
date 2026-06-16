@@ -155,7 +155,7 @@ export default struct ForwardMessagePage {
                         } else {
                             if (this.forwardType === 'oneByOne') {
                                 this.messages.forEach(msg => {
-                                    msg.messageContent = this.filterMessageContent(msg)
+                                    msg.messageContent = this.mapMessageContent(msg)
                                     wfc.sendConversationMessage(conversation, msg.messageContent)
                                 })
                             } else {
@@ -172,7 +172,7 @@ export default struct ForwardMessagePage {
                                     title = '聊天记录'
                                 }
                                 let msgs = this.messages.map(m => {
-                                    m.messageContent = this.filterMessageContent(m)
+                                    m.messageContent = this.mapMessageContent(m)
                                     return m
                                 })
                                 composeMessageContent.setMessages(msgs)
@@ -198,7 +198,7 @@ export default struct ForwardMessagePage {
         this.forwardDialogController.open()
     }
 
-    filterMessageContent(msg: Message): MessageContent {
+    mapMessageContent(msg: Message): MessageContent {
         let content = msg.messageContent
         if (content instanceof CallStartMessageContent) {
             content = new TextMessageContent(content.digest())

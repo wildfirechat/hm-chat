@@ -27,6 +27,7 @@ export default struct CompositeMessageContentContainerView {
                     message: $message,
                     selectedText: $selectedText,
                     textPadding: 0,
+                    clearBackGround: true
                 })
             } else if (this.message!.messageContent.type === MessageContentType.Sticker) {
                 StickerMessageContentView({ message: $message })
@@ -36,7 +37,7 @@ export default struct CompositeMessageContentContainerView {
                 VideoMessageContentView({ message: $message })
             } else if (this.message!.messageContent.type === MessageContentType.Voice) {
                 //AudioMessageContent({ message: $message, audioPlayManager: this.audioPlayManager })
-                TextMessageContentView({ message: $message, selectedText: $selectedText })
+                TextMessageContentView({ message: $message, selectedText: $selectedText, clearBackGround: true })
             } else if (this.message!.messageContent.type === MessageContentType.VOIP_CONTENT_TYPE_START) {
                 CallStartMessageContentView({ message: $message })
             } else if (this.message!.messageContent.type === MessageContentType.Composite_Message) {

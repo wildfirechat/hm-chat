@@ -21,7 +21,9 @@ export default struct CompositeMessageContentView {
                 Text(this.compositeMessageContent?.compositeDigest())
                     .fontSize(14)
                     .margin({ top: 5, bottom: 5 })
-                    .fontColor($r('app.color.wf_tertiary_text'))
+                    .maxLines(5)
+                    .textOverflow({ overflow: TextOverflow.Ellipsis })
+                    .fontColor($r('app.color.wf_secondary_text'))
             }
             .borderWidth({ bottom: '1px' })
             .borderColor($r('app.color.wf_divider'))

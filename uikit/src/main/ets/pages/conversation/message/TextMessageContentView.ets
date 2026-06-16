@@ -21,6 +21,7 @@ export default struct TextMessageContentView {
     @Link message: Message
     @Prop textPadding: Length | Padding = 10
     @Prop menuItems: MessageContextMenuItem[] = []
+    @Prop clearBackGround: boolean = false
     @State selectionStart: number = -1
     @State selectionEnd: number = -1
     @Link selectedText:string
@@ -101,7 +102,7 @@ export default struct TextMessageContentView {
                     Text(this.getTextContent())
                         .padding(this.textPadding)
                         .constraintSize({ minHeight: 40 })
-                        .backgroundColor(this.message.direction === 0 ? $r('app.color.wf_sent_bubble_bg') : $r('app.color.wf_received_bubble_bg'))
+                        .backgroundColor(this.clearBackGround ? Color.Transparent : this.message.direction === 0 ? $r('app.color.wf_sent_bubble_bg') : $r('app.color.wf_received_bubble_bg'))
                         .fontColor($r('app.color.wf_primary_text'))
                         .borderRadius(4)
                         .enableDataDetector(true)
@@ -161,7 +162,7 @@ export default struct TextMessageContentView {
                     }
                         .padding(this.textPadding)
                         .constraintSize({ minHeight: 40 })
-                        .backgroundColor(this.message.direction === 0 ? $r('app.color.wf_sent_bubble_bg') : $r('app.color.wf_received_bubble_bg'))
+                        .backgroundColor(this.clearBackGround ? Color.Transparent : this.message.direction === 0 ? $r('app.color.wf_sent_bubble_bg') : $r('app.color.wf_received_bubble_bg'))
                         .fontColor($r('app.color.wf_primary_text'))
                         .borderRadius(4)
                         .copyOption(this.menuItems.length > 0 ? CopyOptions.InApp : CopyOptions.None)
@@ -222,7 +223,7 @@ export default struct TextMessageContentView {
                 Text(this.getTextContent())
                     .padding(this.textPadding)
                     .constraintSize({ minHeight: 40 })
-                    .backgroundColor(this.message.direction === 0 ? $r('app.color.wf_sent_bubble_bg') : $r('app.color.wf_received_bubble_bg'))
+                    .backgroundColor(this.clearBackGround ? Color.Transparent : this.message.direction === 0 ? $r('app.color.wf_sent_bubble_bg') : $r('app.color.wf_received_bubble_bg'))
                     .fontColor($r('app.color.wf_primary_text'))
                     .borderRadius(4)
                     .enableDataDetector(true)
@@ -278,7 +279,7 @@ export default struct TextMessageContentView {
                 }
                     .padding(this.textPadding)
                     .constraintSize({ minHeight: 40 })
-                    .backgroundColor(this.message.direction === 0 ? $r('app.color.wf_sent_bubble_bg') : $r('app.color.wf_received_bubble_bg'))
+                    .backgroundColor(this.clearBackGround ? Color.Transparent : this.message.direction === 0 ? $r('app.color.wf_sent_bubble_bg') : $r('app.color.wf_received_bubble_bg'))
                     .fontColor($r('app.color.wf_primary_text'))
                     .borderRadius(4)
                     .copyOption(this.menuItems.length > 0 ? CopyOptions.InApp : CopyOptions.None)

@@ -1,12 +1,19 @@
 import wfc from '@wfc/client';
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import TextMessageContent from '@wfc/client/src/main/ets/wfc/messages/textMessageContent'
+import FileMessageContent from '@wfc/client/src/main/ets/wfc/messages/fileMessageContent'
+import MessageContentType from '@wfc/client/src/main/ets/wfc/messages/messageContentType'
 import { showToast } from '../../../common/utils/Toast';
 import { parseTextLinks, TextSegment, normalizeUrl, isHttpUrl } from '../../../common/utils/TextLinkParser';
 import { common } from '@kit.AbilityKit';
 import { uikitNavigationDestinations } from '../../uikitNavigationConfig';
 import { MessageContextMenuItem } from './MessageContextMenuItem';
 import Config from '@wfc/client/src/main/ets/config';
+import MMMessagePreviewDialog from '../../mm/MMMessagePreviewDialog';
+import { downloadMedia } from '../../../helper/mediaHelper';
+import { filePreview } from '@kit.PreviewKit';
+import { fileUri } from '@kit.CoreFileKit';
+import { uniformTypeDescriptor } from '@kit.ArkData';
 
 @Component
 export default struct TextMessageContentView {
@@ -19,6 +26,7 @@ export default struct TextMessageContentView {
     @Link selectedText:string
     // 延迟取消选择的定时器 ID
     private clearSelectionTimerId: number = -1
+    private mmPreviewDialogController?: CustomDialogController
 
     quoteInfoDesc() {
         let quoteInfo = (this.message.messageContent as TextMessageContent).quoteInfo
@@ -29,12 +37,56 @@ export default struct TextMessageContentView {
         let quoteInfo = (this.message.messageContent as TextMessageContent).quoteInfo
         let messageUid = quoteInfo!.messageUid
         let msg = wfc.getMessageByUid(messageUid)
-        if (msg) {
+        if (!msg) {
+            showToast('引用的消息本地不存在')
+            return
+        }
+        let type = msg.messageContent.type
+        if (type === MessageContentType.Text || type === MessageContentType.P_Text
+            || type === MessageContentType.Streaming_Text_Generated || type === MessageContentType.Streaming_Text_Generating) {
             this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.TextMessagePreviewPage, {
                 'message': msg
             } as Record<string, object>)
+        } else if (type === MessageContentType.Image || type === MessageContentType.Video) {
+            this.mmPreviewDialogController = new CustomDialogController({
+                builder: MMMessagePreviewDialog({
+                    message: msg,
+                    index: 0,
+                    controller: this.mmPreviewDialogController,
+                }),
+                alignment: DialogAlignment.TopStart,
+                autoCancel: false,
+                customStyle: true,
+            })
+            this.mmPreviewDialogController.open()
+        } else if (type === MessageContentType.File) {
+            let fileContent = msg.messageContent as FileMessageContent
+            let ext = fileContent.name.substring(fileContent.name.lastIndexOf('.') + 1).toLowerCase()
+            if (Config.DISABLED_RECEIVE_FILE_TYPES.includes(ext)) {
+                showToast('禁止打开此类型')
+                return
+            }
+            let context = getContext(this)
+            downloadMedia(context, msg.messageUid, fileContent.remotePath)
+                .then(async filePath => {
+                    let canPreview = await filePreview.canPreview(context, fileUri.getUriFromPath(filePath))
+                    if (canPreview) {
+                        let uri = fileUri.getUriFromPath(filePath)
+                        let typeId = uniformTypeDescriptor.getUniformDataTypeByFilenameExtension(filePath.substring(filePath.lastIndexOf('.')))
+                        let typeObj = uniformTypeDescriptor.getTypeDescriptor(typeId)
+                        filePreview.openPreview(context, {
+                            title: fileContent.name,
+                            uri: uri,
+                            mimeType: typeObj.mimeTypes[0],
+                        })
+                    }
+                })
+        } else if (type === MessageContentType.Composite_Message) {
+            this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.CompositeMessagePreviewPage, {
+                'message': msg
+            } as Record<string, object>)
         } else {
-            showToast('引用的消息本地不存在')
+            showToast('不支持预览此类型消息')
         }
     }
 

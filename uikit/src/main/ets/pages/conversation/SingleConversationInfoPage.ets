@@ -1,5 +1,5 @@
 import { showToast } from '../../common/utils/Toast';
-import BottomActionSheetDialog from '../../view/ActionSheetDialog';
+import BottomActionSheetDialog from '../../view/BottomActionSheetDialog';
 import OptionItemView from '../../view/OptionItemView';
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc';
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation';

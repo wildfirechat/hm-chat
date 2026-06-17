@@ -119,5 +119,7 @@ export default struct BottomActionSheetDialog {
         .width('100%')
         .clip(true)
         .borderRadius({ topLeft: 16, topRight: 16 })
+        .transition(TransitionEffect.move(TransitionEdge.BOTTOM)
+            .animation({ duration: 250, curve: Curve.Friction }))
     }
 }

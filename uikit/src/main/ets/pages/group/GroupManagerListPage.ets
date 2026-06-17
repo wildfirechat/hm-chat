@@ -4,7 +4,7 @@ import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
 import GroupMemberType from '@wfc/client/src/main/ets/wfc/model/groupMemberType'
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
 import PickGroupMemberModal from './PickGroupMemberModal'
-import BottomActionSheetDialog from '../../view/ActionSheetDialog'
+import BottomActionSheetDialog from '../../view/BottomActionSheetDialog'
 
 @Component
 export default struct GroupManagerListPage {

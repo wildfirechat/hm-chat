@@ -5,7 +5,7 @@ import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationTyp
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo';
 import EventType from '@wfc/client/src/main/ets/wfc/client/wfcEvent';
 import { uikitNavigationDestinations } from '../uikitNavigationConfig';
-import BottomActionSheetDialog from '../../view/ActionSheetDialog';
+import BottomActionSheetDialog from '../../view/BottomActionSheetDialog';
 import { selectImage } from '../../helper/mediaHelper';
 import { imageThumbnail } from '../../helper/imageVideoHelper';
 import MessageContentMediaType from '@wfc/client/src/main/ets/wfc/messages/messageContentMediaType';

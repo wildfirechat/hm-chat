@@ -8,7 +8,7 @@ import GroupMember from '@wfc/client/src/main/ets/wfc/model/groupMember';
 import GroupMemberType from '@wfc/client/src/main/ets/wfc/model/groupMemberType';
 import GroupType from '@wfc/client/src/main/ets/wfc/model/groupType';
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo';
-import BottomActionSheetDialog from '../../view/ActionSheetDialog';
+import BottomActionSheetDialog from '../../view/BottomActionSheetDialog';
 import AddGroupMemberModal from '../group/AddGroupMemberModal';
 import PickGroupMemberModal from '../group/PickGroupMemberModal';
 import appServer from '../../api/appServer';

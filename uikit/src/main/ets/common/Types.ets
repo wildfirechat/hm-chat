@@ -15,6 +15,16 @@ export interface MediaEntry {
     thumbnail: string
 }
 
+// 其他应用通过系统分享发到本应用的单条内容。纯数据结构，便于经
+// LocalStorage / NavPathStack 参数传递（不含方法）。
+export interface ShareItem {
+    type: 'text' | 'image' | 'video' | 'file',
+    text?: string,     // type === 'text'
+    filePath?: string, // 已拷贝到本应用沙箱的本地绝对路径
+    name?: string,
+    size?: number
+}
+
 export interface MMMediaEntry {
     message: Message,
     type: 'image' | 'video',

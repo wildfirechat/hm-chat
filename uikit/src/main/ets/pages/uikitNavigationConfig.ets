@@ -4,6 +4,7 @@ import FriendRequestListPage from './contact/FriendRequestListPage'
 import ChannelConversationInfoPage from './conversation/ChannelConversationInfoPage'
 import ConversationPage from './conversation/ConversationPage'
 import ForwardMessagePage from './conversation/forward/ForwardMessagePage'
+import ShareToConversationPage from './conversation/share/ShareToConversationPage'
 import GroupConversationInfoPage from './conversation/GroupConversationInfoPage'
 import CompositeMessagePreviewPage from './conversation/CompositeMessagePreviewPage'
 import SingleConversationInfoPage from './conversation/SingleConversationInfoPage'
@@ -109,6 +110,7 @@ export class uikitNavigationDestinations {
     static SearchOrganizationEmployeePage = UIKIT_NAV_DESTINATION_PREFIX + 'searchOrganizationEmployeePage'
     static PickOrganizationMemberPage = UIKIT_NAV_DESTINATION_PREFIX + 'pickOrganizationMemberPage'
     static ForwardMessagePage = UIKIT_NAV_DESTINATION_PREFIX + 'forwardMessagePage'
+    static ShareToConversationPage = UIKIT_NAV_DESTINATION_PREFIX + 'shareToConversationPage'
     static GroupInfoPage = UIKIT_NAV_DESTINATION_PREFIX + 'groupInfoPage'
     static PCLoginPage = UIKIT_NAV_DESTINATION_PREFIX + 'pcLoginPage'
     static TextMessagePreviewPage = UIKIT_NAV_DESTINATION_PREFIX + 'textMessagePreviewPage'
@@ -209,6 +211,8 @@ export function UIKitPageMap(name: string) {
         PickOrganizationMemberPage()
     } else if (name === uikitNavigationDestinations.ForwardMessagePage) {
         ForwardMessagePage()
+    } else if (name === uikitNavigationDestinations.ShareToConversationPage) {
+        ShareToConversationPage()
     } else if (name === uikitNavigationDestinations.GroupInfoPage) {
         GroupInfoPage()
     } else if (name === uikitNavigationDestinations.PCLoginPage) {

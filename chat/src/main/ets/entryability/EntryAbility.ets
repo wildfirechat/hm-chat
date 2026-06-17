@@ -18,6 +18,10 @@ import uikit from '@wfc/uikit'
 import { LAST_LOGIN_MOBILE_KEY } from '../pages/login/LoginPage';
 import { backgroundTaskManager } from '@kit.BackgroundTasksKit';
 import { deviceInfo } from '@kit.BasicServicesKit';
+import { systemShare } from '@kit.ShareKit';
+import { copyFileUri, fileNameFromFileUri, fileSize } from '@wfc/uikit/src/main/ets/common/utils/FileUtil';
+import { isImage, isVideo } from '@wfc/uikit/src/main/ets/util/helper';
+import { ShareItem } from '@wfc/uikit/src/main/ets/common/Types';
 
 
 export default class EntryAbility extends UIAbility {
@@ -86,7 +90,7 @@ export default class EntryAbility extends UIAbility {
             }
         })
 
-        this.parseLaunchParamsAndThen(want);
+        this.dispatchWant(want);
     }
 
     onConfigurationUpdate(newConfig: Configuration): void {
@@ -98,7 +102,15 @@ export default class EntryAbility extends UIAbility {
 
     onNewWant(want: Want, launchParam: AbilityConstant.LaunchParam): void {
         console.log('testTag, newWant',)
-        this.parseLaunchParamsAndThen(want);
+        this.dispatchWant(want);
+    }
+
+    private dispatchWant(want: Want) {
+        if (want.action === 'ohos.want.action.sendData') {
+            this.handleShare(want);
+        } else {
+            this.parseLaunchParamsAndThen(want);
+        }
     }
 
     onDestroy() {
@@ -239,6 +251,52 @@ export default class EntryAbility extends UIAbility {
             PersistentStorage.persistProp(LAST_LOGIN_MOBILE_KEY, '');
             hilog.info(0x0000, 'testTag', 'Succeeded in loading the content. Data: %{public}s', JSON.stringify(data) ?? '');
         });
+    }
+
+    // 接收其他应用通过系统分享发来的内容。共享文件的 uri 只有临时读取授权，
+    // 必须在此处立即拷贝进本应用沙箱（cacheDir），再把可序列化的 ShareItem[]
+    // 交给 MainPage 去选择会话并发送。
+    private async handleShare(want: Want) {
+        try {
+            let data = await systemShare.getSharedData(want);
+            let items: ShareItem[] = [];
+            let records = data.getRecords();
+            for (let record of records) {
+                try {
+                    // 只有 file:// 的 uri 才是需要拷贝的本地文件；网页链接（general.hyperlink）
+                    // 等内容类数据的 URL 在 record.content 里，也可能以 http(s) 形式出现在
+                    // record.uri 里，这些都按文本/链接消息发送，不能当作文件拷贝。
+                    if (record.uri && record.uri.startsWith('file://')) {
+                        let name = fileNameFromFileUri(record.uri);
+                        let dstPath = this.context.getApplicationContext().cacheDir + '/' + new Date().getTime() + '-' + name;
+                        copyFileUri(record.uri, dstPath);
+                        let ext = name.substring(name.lastIndexOf('.') + 1).toLowerCase();
+                        let type: 'image' | 'video' | 'file' = isImage(ext) ? 'image' : (isVideo(ext) ? 'video' : 'file');
+                        items.push({
+                            type: type,
+                            filePath: dstPath,
+                            name: name,
+                            size: fileSize(dstPath)
+                        });
+                    } else {
+                        let text = record.content ? record.content : record.uri;
+                        if (text) {
+                            items.push({
+                                type: 'text',
+                                text: text
+                            });
+                        }
+                    }
+                } catch (e) {
+                    hilog.error(0x0000, 'testTag', 'handle share record failed: %{public}s', JSON.stringify(e) ?? '');
+                }
+            }
+            if (items.length > 0) {
+                this.storage.setOrCreate<ShareItem[]>('shareParams', items);
+            }
+        } catch (e) {
+            hilog.error(0x0000, 'testTag', 'getSharedData failed: %{public}s', JSON.stringify(e) ?? '');
+        }
     }
 
     private parseLaunchParamsAndThen(want: Want) {

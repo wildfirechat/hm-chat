@@ -39,6 +39,46 @@
                         "actions": [
                             "action.system.home"
                         ]
+                    },
+                    {
+                        "actions": [
+                            "ohos.want.action.sendData"
+                        ],
+                        "uris": [
+                            // 系统分享面板按 utd + maxFileSupported 匹配（maxFileSupported
+                            // 缺省为 0，等于不接收任何内容，故文本/链接也必须显式置 >=1）。
+                            // utd 匹配支持层级，但仍显式声明 hyperlink/plain-text 以确保命中。
+                            {
+                                "scheme": "file",
+                                "utd": "general.text",
+                                "maxFileSupported": 1
+                            },
+                            {
+                                "scheme": "file",
+                                "utd": "general.plain-text",
+                                "maxFileSupported": 1
+                            },
+                            {
+                                "scheme": "file",
+                                "utd": "general.hyperlink",
+                                "maxFileSupported": 1
+                            },
+                            {
+                                "scheme": "file",
+                                "utd": "general.image",
+                                "maxFileSupported": 9
+                            },
+                            {
+                                "scheme": "file",
+                                "utd": "general.video",
+                                "maxFileSupported": 9
+                            },
+                            {
+                                "scheme": "file",
+                                "utd": "general.file",
+                                "maxFileSupported": 9
+                            }
+                        ]
                     }
                 ]
             }

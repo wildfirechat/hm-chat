@@ -19,6 +19,7 @@ import WorkSpaceTab from '@wfc/uikit/src/main/ets/pages/WorkSpaceTab'
 import Config from '@wfc/client/src/main/ets/config'
 import { checkPermissions, requestPermissions } from '@wfc/uikit/src/main/ets/helper/permissionHelper'
 import { uikitNavigationDestinations } from '@wfc/uikit/src/main/ets/pages/uikitNavigationConfig'
+import { ShareItem } from '@wfc/uikit/src/main/ets/common/Types'
 import { MainPageMap } from './mainNavigationConfig'
 import orgServer from '@wfc/uikit/src/main/ets/api/orgServer'
 import appServer from '@wfc/uikit/src/main/ets/api/appServer'
@@ -60,6 +61,7 @@ struct MainPage {
     @State isMeTab: boolean = false
     @Provide('mainNavPathStack') mainNavPathStack: NavPathStack = uikit.mainNavPathStack
     @LocalStorageProp('wantParams') @Watch('onWantParams') wantParams?: Record<string, Object> = undefined
+    @LocalStorageProp('shareParams') @Watch('onShareParams') shareParams?: ShareItem[] = undefined
     @StorageProp('currentColorMode') @Watch('onCurrentColorModeChange') currentColorMode: ConfigurationConstant.ColorMode = ConfigurationConstant.ColorMode.COLOR_MODE_NOT_SET;
 
     onWantParams() {
@@ -97,6 +99,18 @@ struct MainPage {
             // } else {
             //     this.mainNavPathStack.pushPathByName(callSession.audioOnly ? navigationDestinations.MultiAudioCallPage : navigationDestinations.MultiVideoCallPage, params)
             // }
+        }
+    }
+
+    onShareParams() {
+        let items = this.shareParams
+        if (items && items.length > 0) {
+            // 仅在已登录（即当前展示 MainPage）时消费；未登录场景留存数据，
+            // 不在此处导航，避免崩溃。消费后立即清除，防止重复触发。
+            storage.delete('shareParams')
+            this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ShareToConversationPage, {
+                'shareItems': items
+            } as Record<string, Object>)
         }
     }
 

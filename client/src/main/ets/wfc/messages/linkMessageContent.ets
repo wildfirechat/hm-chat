@@ -39,7 +39,7 @@ export default class LinkMessageContent extends MessageContent {
 
     digest(message: Message) {
         let tmp = this.title ? this.title.trim() : this.contentDigest ? this.contentDigest.trim() : null;
-        return tmp ? tmp : this.url;
+        return '[链接] ' + (tmp ? tmp : this.url);
     }
 }
 

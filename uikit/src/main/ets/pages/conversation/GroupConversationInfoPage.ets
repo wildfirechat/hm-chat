@@ -604,9 +604,11 @@ export default struct GroupConversationInfoPage {
                         })
                         .onClick(() => {
                             AlertDialog.show({
-                                message: this.groupInfo.owner === wfc.getUserId() ? '解散群组' : '删除并退出',
+                                title: this.groupInfo.owner === wfc.getUserId() ? '解散群组' : '删除并退出',
+                                message: '聊天记录将被同步删除',
                                 primaryButton: {
                                     value: '确定',
+                                    fontColor: Color.Red,
                                     action: () => {
                                         if (this.groupInfo.owner === wfc.getUserId()) {
                                             wfc.dismissGroup(this.groupInfo.target, [0], null, () => {

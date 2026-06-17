@@ -340,6 +340,7 @@ export default struct ContactListTab {
                 .scrollBar(BarState.Off)
                 .width('100%')
                 .height('100%')
+                .contentEndOffset(56)
             }
             .height('100%')
             .width('100%')

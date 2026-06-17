@@ -503,7 +503,9 @@ struct MainPage {
                     .tabBar(this.TabBuilder(this.tabTitles[4], 4, $r('app.media.me_press'), $r('app.media.me_normal')))
                 }
             }
-            .backgroundColor($r('app.color.wf_background'))
+            .barOverlap(true)
+            .barBackgroundBlurStyle(BlurStyle.COMPONENT_THICK)
+            .barBackgroundColor($r('app.color.wf_tab_background'))
             .onChange(index => {
                 this.currentIndex = index
                 this.title = this.isMeTab ? this.tabTitles[index - 1] : this.tabTitles[index]

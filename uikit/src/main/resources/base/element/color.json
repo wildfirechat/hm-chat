@@ -21,6 +21,10 @@
       "value": "#FFFFFF"
     },
     {
+      "name": "wf_tab_background",
+      "value": "#33EFEFEF"
+    },
+    {
       "name": "wf_secondary_background",
       "value": "#F7F7F7"
     },

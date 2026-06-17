@@ -293,7 +293,7 @@ export default struct ConversationListTab {
                             .backgroundColor($r('app.color.wf_item_pressed'))
                         },
                         normal: {
-                            .backgroundColor(Color.Transparent)
+                            .backgroundColor($r('app.color.wf_background'))
                         }
                     })
                 }, (info: ConversationInfo) => this.conversationKey(info))
@@ -305,7 +305,8 @@ export default struct ConversationListTab {
             })
             .width('100%')
             .cachedCount(5)
-            .backgroundColor($r('app.color.wf_background'))
+            .contentEndOffset(56)
+            .backgroundColor($r('app.color.wf_primary_background_color'))
         }
         .backgroundColor($r('app.color.wf_primary_background_color'))
         .width('100%')

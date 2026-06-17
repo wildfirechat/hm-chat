@@ -279,11 +279,22 @@ export default class EntryAbility extends UIAbility {
                             size: fileSize(dstPath)
                         });
                     } else {
-                        let text = record.content ? record.content : record.uri;
-                        if (text) {
+                        let url = record.content ? record.content : record.uri;
+                        let isHyperlink = (record.utd && record.utd.indexOf('hyperlink') >= 0)
+                            || (!!url && (url.startsWith('http://') || url.startsWith('https://')));
+                        if (isHyperlink && url) {
+                            // 网页分享：连同分享方携带的 title/description/缩略图一起做成链接消息。
+                            items.push({
+                                type: 'link',
+                                url: url,
+                                title: record.title ? record.title : '',
+                                description: record.description ? record.description : '',
+                                thumbnail: this.shareThumbnail(record)
+                            });
+                        } else if (url) {
                             items.push({
                                 type: 'text',
-                                text: text
+                                text: url
                             });
                         }
                     }
@@ -297,6 +308,23 @@ export default class EntryAbility extends UIAbility {
         } catch (e) {
             hilog.error(0x0000, 'testTag', 'getSharedData failed: %{public}s', JSON.stringify(e) ?? '');
         }
+    }
+
+    // 取分享记录的缩略图，转成 Image 可直接加载的字符串：
+    // 优先用 http(s) 封面地址；否则把缩略图字节转成 base64 data uri（避免依赖
+    // 临时授权的 file:// thumbnailUri，发送后仍可显示）。
+    private shareThumbnail(record: systemShare.SharedRecord): string {
+        try {
+            if (record.thumbnailUri && record.thumbnailUri.startsWith('http')) {
+                return record.thumbnailUri;
+            }
+            if (record.thumbnail && record.thumbnail.byteLength > 0) {
+                return 'data:image/png;base64,' + wfc.arrayBuffer_to_b64(record.thumbnail.buffer as ArrayBuffer);
+            }
+        } catch (e) {
+            hilog.error(0x0000, 'testTag', 'share thumbnail failed: %{public}s', JSON.stringify(e) ?? '');
+        }
+        return '';
     }
 
     private parseLaunchParamsAndThen(want: Want) {

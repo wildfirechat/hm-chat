@@ -11,6 +11,7 @@ import TextMessageContent from '@wfc/client/src/main/ets/wfc/messages/textMessag
 import ImageMessageContent from '@wfc/client/src/main/ets/wfc/messages/imageMessageContent'
 import VideoMessageContent from '@wfc/client/src/main/ets/wfc/messages/videoMessageContent'
 import FileMessageContent from '@wfc/client/src/main/ets/wfc/messages/fileMessageContent'
+import LinkMessageContent from '@wfc/client/src/main/ets/wfc/messages/linkMessageContent'
 import MessageContent from '@wfc/client/src/main/ets/wfc/messages/messageContent'
 import { SearchModule, ShareItem } from '../../../common/Types'
 import ConversationInfoDataSource from '../../datasource/ConversationInfoDataSource'
@@ -56,6 +57,8 @@ export default struct ShareToConversationPage {
                 return '[图片]'
             case 'video':
                 return '[视频]'
+            case 'link':
+                return `[链接] ${item.title ? item.title : item.url ?? ''}`
             default:
                 return `[文件] ${item.name ?? ''}`
         }
@@ -66,6 +69,14 @@ export default struct ShareToConversationPage {
             switch (item.type) {
                 case 'text':
                     return new TextMessageContent(item.text ?? '')
+                case 'link': {
+                    let link = new LinkMessageContent()
+                    link.url = item.url ?? ''
+                    link.title = item.title ? item.title : (item.url ?? '')
+                    link.contentDigest = item.description ?? ''
+                    link.thumbnail = item.thumbnail ?? ''
+                    return link
+                }
                 case 'image': {
                     let thumbnail = await imageThumbnail(getContext(this), fileUri.getUriFromPath(item.filePath!), { width: 200, height: 200 })
                     return new ImageMessageContent(item.filePath, '', thumbnail)
@@ -84,6 +95,9 @@ export default struct ShareToConversationPage {
             }
             if (item.type === 'image' || item.type === 'file') {
                 return new FileMessageContent(item.filePath, '', item.name ?? '', item.size ?? 0)
+            }
+            if (item.type === 'link') {
+                return new TextMessageContent(item.url ?? '')
             }
             return null
         }

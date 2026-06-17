@@ -16,28 +16,46 @@ export default struct LinkMessageContentView {
     }
 
     build() {
-        Row() {
-            Column() {
-                Text(this.linkMessageContent().title)
-                    .constraintSize({ maxWidth: 150 })
-                    .maxLines(1)
-                    .fontSize(18)
-                Text(this.linkMessageContent().contentDigest)
-                    .margin({ top: 10 })
-                    .constraintSize({ maxWidth: 150 })
-                    .maxLines(3)
-                    .fontColor('#c8969696')
-            }
-            .padding(10)
+        Column() {
+            Text(this.linkMessageContent().title ? this.linkMessageContent().title : this.linkMessageContent().url)
+                .fontSize(15)
+                .fontWeight(FontWeight.Medium)
+                .fontColor($r('app.color.wf_primary_text'))
+                .lineHeight(21)
+                .maxLines(2)
+                .textOverflow({ overflow: TextOverflow.Ellipsis })
+                .width('100%')
+                .textAlign(TextAlign.Start)
 
-            Image(this.linkMessageContent().thumbnail)
-                .width(60)
-                .height(60)
-                .objectFit(ImageFit.CENTER)
-                .borderRadius(4)
+            Row() {
+                Text(this.linkMessageContent().contentDigest ? this.linkMessageContent().contentDigest : this.linkMessageContent().url)
+                    .fontSize(13)
+                    .fontColor($r('app.color.wf_tertiary_text'))
+                    .lineHeight(18)
+                    .maxLines(2)
+                    .textOverflow({ overflow: TextOverflow.Ellipsis })
+                    .layoutWeight(1)
+                    .textAlign(TextAlign.Start)
+
+                Image(this.linkMessageContent().thumbnail ? this.linkMessageContent().thumbnail : $r('app.media.ic_file_type_html'))
+                    .alt($r('app.media.ic_file_type_html'))
+                    .width(40)
+                    .height(40)
+                    .objectFit(ImageFit.Cover)
+                    .borderRadius(4)
+                    .backgroundColor($r('app.color.wf_image_placeholder_bg'))
+                    .margin({ left: 10 })
+            }
+            .width('100%')
+            .alignItems(VerticalAlign.Top)
+            .margin({ top: 10 })
         }
-        .backgroundColor(this.message.direction === 0 ? $r('app.color.wf_sent_bubble_bg') : $r('app.color.wf_received_bubble_bg'))
-        .borderRadius(4)
+        .width(240)
+        .padding(12)
+        .alignItems(HorizontalAlign.Start)
+        .backgroundColor($r('app.color.wf_background'))
+        .borderRadius(8)
+        .shadow({ radius: 6, color: '#14000000', offsetX: 0, offsetY: 1 })
         .onClick(() => {
             this.openLink(this.linkMessageContent().url, this.linkMessageContent().title)
         })

@@ -168,6 +168,20 @@ export default struct EmojiInputPanelView {
         }
     }
 
+    // Number of UTF-16 code units the character before the caret occupies.
+    // Returns 2 for a surrogate pair (emoji), 1 otherwise.
+    private deleteLengthBeforeCaret(): number {
+        const pos = this.caretPosition
+        if (pos >= 2) {
+            const low = this.text.charCodeAt(pos - 1)
+            const high = this.text.charCodeAt(pos - 2)
+            if (low >= 0xDC00 && low <= 0xDFFF && high >= 0xD800 && high <= 0xDBFF) {
+                return 2
+            }
+        }
+        return 1
+    }
+
     private insertEmoji(data: string) {
         this.text = this.text.slice(0, this.selectionStart) + data + this.text.slice(this.selectionEnd)
         this.caretPosition = this.selectionStart + data.length
@@ -331,20 +345,23 @@ export default struct EmojiInputPanelView {
                     })
                     .alignSelf(ItemAlign.End)
                     .onClick(() => {
+                        if (this.caretPosition <= 0) {
+                            return
+                        }
+                        // Emoji are UTF-16 surrogate pairs (2 code units). Delete the
+                        // full code point before the caret, not a single code unit,
+                        // otherwise half the pair is left behind as a garbled char.
+                        const deleteLen = this.deleteLengthBeforeCaret()
                         if (deviceInfo.sdkApiVersion >= 15) {
                             this.textInputController?.deleteText(
                                 {
-                                    start: this.caretPosition - 1,
+                                    start: this.caretPosition - deleteLen,
                                     end: this.caretPosition
                                 }
                             )
                         } else {
-                            if (this.caretPosition > 0) {
-                                const lastChar = this.text.length >= 2 ? this.text.codePointAt(this.text.length - 2) : this.text.charCodeAt(this.text.length - 1)
-                                let lastCharLen = lastChar! > 65536 ? 2 : 1;
-                                this.text = this.text.substring(0, this.caretPosition - lastCharLen) + this.text.substring(this.caretPosition);
-                                this.caretPosition = this.caretPosition - lastCharLen;
-                            }
+                            this.text = this.text.substring(0, this.caretPosition - deleteLen) + this.text.substring(this.caretPosition);
+                            this.caretPosition = this.caretPosition - deleteLen;
                         }
                     })
                 }

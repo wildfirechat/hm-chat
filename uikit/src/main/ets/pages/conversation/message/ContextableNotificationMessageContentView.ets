@@ -1,6 +1,6 @@
 import { showToast } from '../../../common/utils/Toast'
 import Config from '@wfc/client/src/main/ets/config'
-import ActionSheetDialog from '../../../view/ActionSheetDialog'
+import BottomActionSheetDialog from '../../../view/ActionSheetDialog'
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import MessageContentType from '@wfc/client/src/main/ets/wfc/messages/messageContentType'
@@ -66,20 +66,19 @@ export default struct ContextableNotificationMessageContentView {
                 tag: 'delete',
                 action: () => {
                     let deleteMessageDialogController = new CustomDialogController({
-                        builder: ActionSheetDialog({
+                        builder: BottomActionSheetDialog({
                             title: '删除消息?',
+                            dismiss: () => { deleteMessageDialogController.close() },
                             sheets: [
                                 {
                                     title: '删除本地消息',
                                     action: () => {
-                                        deleteMessageDialogController.close()
                                         wfc.deleteMessage(this.message!.messageId)
                                     }
                                 },
                                 {
                                     title: '删除远程消息',
                                     action: () => {
-                                        deleteMessageDialogController.close()
                                         wfc.deleteRemoteMessageByUid(this.message!.messageUid, () => {
 
                                         }, (err: number) => {
@@ -90,9 +89,9 @@ export default struct ContextableNotificationMessageContentView {
                             ]
                         }),
                         autoCancel: true,
-                        alignment: DialogAlignment.Center,
-                        gridCount: 6,
-                        customStyle: false
+                        alignment: DialogAlignment.Bottom,
+                        gridCount: 4,
+                        customStyle: true
                     })
 
                     deleteMessageDialogController.open()

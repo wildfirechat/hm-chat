@@ -2,7 +2,7 @@ import OptionItemView from '../../view/OptionItemView'
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
 import { uikitNavigationDestinations } from '../uikitNavigationConfig'
-import ActionSheetDialog from '../../view/ActionSheetDialog'
+import BottomActionSheetDialog from '../../view/ActionSheetDialog'
 import ModifyGroupInfoType from '@wfc/client/src/main/ets/wfc/model/modifyGroupInfoType'
 import { showToast } from '../../common/utils/Toast'
 import GroupType from '@wfc/client/src/main/ets/wfc/model/groupType'
@@ -101,13 +101,8 @@ export default struct GroupManagePage {
                                     })
                                 }
                                 let customDialogController = new CustomDialogController({
-                                    builder: ActionSheetDialog({
-                                        cancel: {
-                                            title: '取消',
-                                            action: () => {
-                                                customDialogController.close()
-                                            }
-                                        },
+                                    builder: BottomActionSheetDialog({
+                                        dismiss: () => { customDialogController.close() },
                                         sheets: [
                                             {
                                                 title: '不限制加入',
@@ -136,9 +131,9 @@ export default struct GroupManagePage {
                                         ]
                                     }),
                                     autoCancel: true,
-                                    alignment: DialogAlignment.Center,
-                                    // gridCount: 4,
-                                    customStyle: false
+                                    alignment: DialogAlignment.Bottom,
+                                    gridCount: 4,
+                                    customStyle: true
                                 })
 
                                 customDialogController.open()
@@ -160,13 +155,8 @@ export default struct GroupManagePage {
                                 })
                             }
                             let customDialogController = new CustomDialogController({
-                                builder: ActionSheetDialog({
-                                    cancel: {
-                                        title: '取消',
-                                        action: () => {
-                                            customDialogController.close()
-                                        }
-                                    },
+                                builder: BottomActionSheetDialog({
+                                    dismiss: () => { customDialogController.close() },
                                     sheets: [
                                         {
                                             title: '允许查找',
@@ -183,9 +173,9 @@ export default struct GroupManagePage {
                                     ]
                                 }),
                                 autoCancel: true,
-                                alignment: DialogAlignment.Center,
-                                // gridCount: 4,
-                                customStyle: false
+                                alignment: DialogAlignment.Bottom,
+                                gridCount: 4,
+                                customStyle: true
                             })
 
                             customDialogController.open()
@@ -206,13 +196,8 @@ export default struct GroupManagePage {
                                 })
                             }
                             let customDialogController = new CustomDialogController({
-                                builder: ActionSheetDialog({
-                                    cancel: {
-                                        title: '取消',
-                                        action: () => {
-                                            customDialogController.close()
-                                        }
-                                    },
+                                builder: BottomActionSheetDialog({
+                                    dismiss: () => { customDialogController.close() },
                                     sheets: [
                                         {
                                             title: '不允许新成员查看历史消息',
@@ -229,9 +214,9 @@ export default struct GroupManagePage {
                                     ]
                                 }),
                                 autoCancel: true,
-                                alignment: DialogAlignment.Center,
-                                // gridCount: 4,
-                                customStyle: false
+                                alignment: DialogAlignment.Bottom,
+                                gridCount: 4,
+                                customStyle: true
                             })
 
                             customDialogController.open()

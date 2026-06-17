@@ -5,7 +5,7 @@ import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationTyp
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo';
 import EventType from '@wfc/client/src/main/ets/wfc/client/wfcEvent';
 import { uikitNavigationDestinations } from '../uikitNavigationConfig';
-import ActionSheetDialog from '../../view/ActionSheetDialog';
+import BottomActionSheetDialog from '../../view/ActionSheetDialog';
 import { selectImage } from '../../helper/mediaHelper';
 import { imageThumbnail } from '../../helper/imageVideoHelper';
 import MessageContentMediaType from '@wfc/client/src/main/ets/wfc/messages/messageContentMediaType';
@@ -194,18 +194,12 @@ export default struct UserInfoPage {
                         })
                         .onClick(() => {
                             let voipDialogController = new CustomDialogController({
-                                builder: ActionSheetDialog({
-                                    cancel: {
-                                        title: '取消',
-                                        action: () => {
-                                            voipDialogController.close()
-                                        }
-                                    },
+                                builder: BottomActionSheetDialog({
+                                    dismiss: () => { voipDialogController.close() },
                                     sheets: [
                                         {
                                             title: '语音通话',
                                             action: async () => {
-                                                voipDialogController.close()
                                                 let granted = await checkAndRequestPermission(getContext(this), 'ohos.permission.MICROPHONE')
                                                 if (granted) {
                                                     let conversation = new Conversation(ConversationType.Single, this.userInfo!.uid, 0)
@@ -218,7 +212,6 @@ export default struct UserInfoPage {
                                         {
                                             title: '视频通话',
                                             action: async () => {
-                                                voipDialogController.close()
                                                 let cameraGranted = await checkAndRequestPermission(getContext(this), 'ohos.permission.CAMERA')
                                                 let microphoneGranted = await checkAndRequestPermission(getContext(this), 'ohos.permission.MICROPHONE')
                                                 if (cameraGranted && microphoneGranted) {
@@ -232,9 +225,9 @@ export default struct UserInfoPage {
                                     ]
                                 }),
                                 autoCancel: true,
-                                alignment: DialogAlignment.Center,
-                                // gridCount: 4,
-                                customStyle: false
+                                alignment: DialogAlignment.Bottom,
+                                gridCount: 4,
+                                customStyle: true
                             })
 
                             voipDialogController.open()

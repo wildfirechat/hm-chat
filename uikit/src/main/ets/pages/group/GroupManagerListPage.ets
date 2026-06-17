@@ -4,7 +4,7 @@ import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
 import GroupMemberType from '@wfc/client/src/main/ets/wfc/model/groupMemberType'
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
 import PickGroupMemberModal from './PickGroupMemberModal'
-import ActionSheetDialog from '../../view/ActionSheetDialog'
+import BottomActionSheetDialog from '../../view/ActionSheetDialog'
 
 @Component
 export default struct GroupManagerListPage {
@@ -99,7 +99,8 @@ export default struct GroupManagerListPage {
                                 })
                                 .onClick(() => {
                                     let customDialogController: CustomDialogController = new CustomDialogController({
-                                        builder: ActionSheetDialog({
+                                        builder: BottomActionSheetDialog({
+                                            dismiss: () => { customDialogController.close() },
                                             sheets: [
                                                 {
                                                     title: '移除管理员',
@@ -110,15 +111,14 @@ export default struct GroupManagerListPage {
                                                             showToast('移除管理员失败 ' + err)
 
                                                         })
-                                                        customDialogController.close()
                                                     }
                                                 },
                                             ],
                                         }),
                                         autoCancel: true,
-                                        alignment: DialogAlignment.Center,
-                                        // gridCount: 4,
-                                        customStyle: false
+                                        alignment: DialogAlignment.Bottom,
+                                        gridCount: 4,
+                                        customStyle: true
                                     })
 
                                     customDialogController.open()

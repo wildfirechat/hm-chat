@@ -8,7 +8,7 @@ import GroupMember from '@wfc/client/src/main/ets/wfc/model/groupMember';
 import GroupMemberType from '@wfc/client/src/main/ets/wfc/model/groupMemberType';
 import GroupType from '@wfc/client/src/main/ets/wfc/model/groupType';
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo';
-import ActionSheetDialog from '../../view/ActionSheetDialog';
+import BottomActionSheetDialog from '../../view/ActionSheetDialog';
 import AddGroupMemberModal from '../group/AddGroupMemberModal';
 import PickGroupMemberModal from '../group/PickGroupMemberModal';
 import appServer from '../../api/appServer';
@@ -550,20 +550,19 @@ export default struct GroupConversationInfoPage {
                         })
                         .onClick(event => {
                             let clearConversationHistoryDialogController = new CustomDialogController({
-                                builder: ActionSheetDialog({
+                                builder: BottomActionSheetDialog({
                                     title: '清空聊天记录?',
+                                    dismiss: () => { clearConversationHistoryDialogController.close() },
                                     sheets: [
                                         {
                                             title: '清除本地聊天记录',
                                             action: () => {
-                                                clearConversationHistoryDialogController.close()
                                                 wfc.clearMessages(this.conversationInfo!.conversation)
                                             }
                                         },
                                         {
                                             title: '清除远程聊天记录',
                                             action: () => {
-                                                clearConversationHistoryDialogController.close()
                                                 wfc.clearRemoteConversationMessages(this.conversationInfo!.conversation, () => {
                                                     showToast('清除远程远程会话消息失败')
                                                 }, err => {
@@ -574,9 +573,9 @@ export default struct GroupConversationInfoPage {
                                     ]
                                 }),
                                 autoCancel: true,
-                                alignment: DialogAlignment.Center,
-                                gridCount: 6,
-                                customStyle: false
+                                alignment: DialogAlignment.Bottom,
+                                gridCount: 4,
+                                customStyle: true
                             })
 
                             clearConversationHistoryDialogController.open()

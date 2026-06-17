@@ -11,7 +11,7 @@ import fs from '@ohos.file.fs'
 import SoundMessageContent from '@wfc/client/src/main/ets/wfc/messages/soundMessageContent'
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import router from '@ohos.router'
-import ActionSheetDialog from '../../view/ActionSheetDialog'
+import BottomActionSheetDialog from '../../view/ActionSheetDialog'
 import EmojiInputPanelView from './emoji/EmojiInputPanelView'
 import { config as emojiConfig } from './emoji/EmojiAndStickerConfig'
 import { Emoji } from './emoji/emojis'
@@ -151,12 +151,12 @@ export default struct ConversationInputPanelView {
             icon: $r('app.media.ic_func_video'),
             action: () => {
                 let voipDialogController = new CustomDialogController({
-                    builder: ActionSheetDialog({
+                    builder: BottomActionSheetDialog({
+                        dismiss: () => { voipDialogController.close() },
                         sheets: [
                             {
                                 title: '视频通话',
                                 action: async () => {
-                                    voipDialogController.close()
                                     let cameraGranted = await checkAndRequestPermission(getContext(this), 'ohos.permission.CAMERA')
                                     let microphoneGranted = await checkAndRequestPermission(getContext(this), 'ohos.permission.MICROPHONE')
                                     if (cameraGranted && microphoneGranted) {
@@ -177,7 +177,6 @@ export default struct ConversationInputPanelView {
                             {
                                 title: '音频通话',
                                 action: async () => {
-                                    voipDialogController.close()
                                     let granted = await checkAndRequestPermission(getContext(this), 'ohos.permission.MICROPHONE')
                                     if (granted) {
                                         if (this.conversation.type === ConversationType.Single) {
@@ -195,9 +194,9 @@ export default struct ConversationInputPanelView {
                         ]
                     }),
                     autoCancel: true,
-                    alignment: DialogAlignment.Center,
-                    gridCount: 6,
-                    customStyle: false
+                    alignment: DialogAlignment.Bottom,
+                    gridCount: 4,
+                    customStyle: true
                 })
 
                 voipDialogController.open()
@@ -330,9 +329,9 @@ export default struct ConversationInputPanelView {
                         fontColor: $r('app.color.wf_danger'),
                         action: () => {
                             this.deleteMessageDialogController = new CustomDialogController({
-                                builder: ActionSheetDialog({
+                                builder: BottomActionSheetDialog({
                                     title: '删除消息?',
-                                    controller: this.deleteMessageDialogController,
+                                    dismiss: () => { this.deleteMessageDialogController?.close() },
                                     sheets: [
                                         {
                                             title: '删除本地消息',
@@ -362,9 +361,9 @@ export default struct ConversationInputPanelView {
                                     ]
                                 }),
                                 autoCancel: true,
-                                alignment: DialogAlignment.Center,
-                                gridCount: 6,
-                                customStyle: false
+                                alignment: DialogAlignment.Bottom,
+                                gridCount: 4,
+                                customStyle: true
                             })
 
                             this.deleteMessageDialogController.open()
@@ -378,9 +377,9 @@ export default struct ConversationInputPanelView {
             icon: $r('app.media.ic_forward'),
             action: () => {
                 this.forwardMessageDialogController = new CustomDialogController({
-                    builder: ActionSheetDialog({
+                    builder: BottomActionSheetDialog({
                         title: '',
-                        controller: this.forwardMessageDialogController,
+                        dismiss: () => { this.forwardMessageDialogController?.close() },
                         sheets: [
                             {
                                 title: '逐条转发',
@@ -409,9 +408,9 @@ export default struct ConversationInputPanelView {
                         ]
                     }),
                     autoCancel: true,
-                    alignment: DialogAlignment.Center,
-                    gridCount: 6,
-                    customStyle: false
+                    alignment: DialogAlignment.Bottom,
+                    gridCount: 4,
+                    customStyle: true
                 })
 
                 this.forwardMessageDialogController.open()

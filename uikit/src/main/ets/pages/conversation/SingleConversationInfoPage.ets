@@ -1,5 +1,5 @@
 import { showToast } from '../../common/utils/Toast';
-import ActionSheetDialog from '../../view/ActionSheetDialog';
+import BottomActionSheetDialog from '../../view/ActionSheetDialog';
 import OptionItemView from '../../view/OptionItemView';
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc';
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation';
@@ -160,20 +160,19 @@ export default struct SingleConversationInfoPage {
                     OptionItemView({ title: '清空聊天记录' })
                         .onClick(event => {
                             let clearConversationHistoryDialogController = new CustomDialogController({
-                                builder: ActionSheetDialog({
+                                builder: BottomActionSheetDialog({
                                     title: '清空聊天记录?',
+                                    dismiss: () => { clearConversationHistoryDialogController.close() },
                                     sheets: [
                                         {
                                             title: '清除本地聊天记录',
                                             action: () => {
-                                                clearConversationHistoryDialogController.close()
                                                 wfc.clearMessages(this.conversationInfo!.conversation)
                                             }
                                         },
                                         {
                                             title: '清除远程聊天记录',
                                             action: () => {
-                                                clearConversationHistoryDialogController.close()
                                                 wfc.clearRemoteConversationMessages(this.conversationInfo!.conversation, () => {
                                                     showToast('清除远程远程会话消息失败')
                                                 }, err => {
@@ -184,9 +183,9 @@ export default struct SingleConversationInfoPage {
                                     ]
                                 }),
                                 autoCancel: true,
-                                alignment: DialogAlignment.Center,
-                                gridCount: 6,
-                                customStyle: false
+                                alignment: DialogAlignment.Bottom,
+                                gridCount: 4,
+                                customStyle: true
                             })
 
                             clearConversationHistoryDialogController.open()

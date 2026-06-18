@@ -41,6 +41,9 @@ export default struct MMMessagePreviewDialog {
     private lastScale: number = 1.0
     private lastTranslateX: number = 0
     private lastTranslateY: number = 0
+    // 捏合开始时位于双指中心下方的内容点（缩放不变的基准点，vp，scale=1 坐标系）
+    private pivotX: number = 0
+    private pivotY: number = 0
     // 拖拽返回时手指按下的位置（vp，相对屏幕左上角）
     private grabX: number = 0
     private grabY: number = 0
@@ -236,12 +239,19 @@ export default struct MMMessagePreviewDialog {
 
     onPinchStart(event: GestureEvent) {
         this.lastScale = this.scaleValue
+        // 反解出当前位于双指中心下方的内容点：screen = s*P + t  =>  P = (center - t) / s
+        this.pivotX = (event.pinchCenterX - this.translateX) / this.scaleValue
+        this.pivotY = (event.pinchCenterY - this.translateY) / this.scaleValue
     }
 
     onPinchUpdate(event: GestureEvent) {
         let s = this.lastScale * event.scale
         s = Math.min(Math.max(s, 0.5), MAX_ZOOM_SCALE)
-        this.zoomAboutCenter(s)
+        // 以双指中心为基准缩放：保持 pivot 点始终落在当前双指中心下方
+        // screen = s*pivot + t = center  =>  t = center - s*pivot
+        this.scaleValue = s
+        this.translateX = event.pinchCenterX - s * this.pivotX
+        this.translateY = event.pinchCenterY - s * this.pivotY
         this.applyMatrix()
     }
 
@@ -249,6 +259,12 @@ export default struct MMMessagePreviewDialog {
         if (this.scaleValue < 1) {
             animateTo({ curve: curves.responsiveSpringMotion() }, () => {
                 this.resetTransform()
+            })
+        } else {
+            // 缩放结束后把位移收回边界内，避免出现黑边
+            animateTo({ curve: curves.responsiveSpringMotion() }, () => {
+                this.clampToBounds()
+                this.applyMatrix()
             })
         }
         this.lastScale = this.scaleValue
@@ -273,22 +289,28 @@ export default struct MMMessagePreviewDialog {
     // ============ 放大状态下拖动图片 ============
 
     onMoveUpdate(event: GestureEvent) {
-        this.translateX = this.lastTranslateX + event.offsetX
-        this.translateY = this.lastTranslateY + event.offsetY
+        // 手势偏移量是组件缩放(transform)前的局部坐标，被缩放比 s 缩小了 s 倍；
+        // 这里乘回 scaleValue 换算成屏幕位移，保证拖动 1:1 跟手（否则放大后拖动很慢）
+        this.translateX = this.lastTranslateX + event.offsetX * this.scaleValue
+        this.translateY = this.lastTranslateY + event.offsetY * this.scaleValue
         this.applyMatrix()
     }
 
-    onMoveEnd() {
+    // 把当前位移限制在边界内，保证缩放后内容区不出现黑边
+    clampToBounds() {
         let size = this.contentSize()
         let s = this.scaleValue
-        // 变换后内容区在屏幕内的可移动范围，保证不出现黑边
         let lowerX = this.screenWvp - s * (this.screenWvp + size.cw) / 2
         let upperX = -s * (this.screenWvp - size.cw) / 2
         let lowerY = this.screenHvp - s * (this.screenHvp + size.ch) / 2
         let upperY = -s * (this.screenHvp - size.ch) / 2
+        this.translateX = this.clamp(this.translateX, lowerX, upperX)
+        this.translateY = this.clamp(this.translateY, lowerY, upperY)
+    }
+
+    onMoveEnd() {
         animateTo({ curve: curves.responsiveSpringMotion() }, () => {
-            this.translateX = this.clamp(this.translateX, lowerX, upperX)
-            this.translateY = this.clamp(this.translateY, lowerY, upperY)
+            this.clampToBounds()
             this.applyMatrix()
         })
         this.lastTranslateX = this.translateX

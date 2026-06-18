@@ -30,6 +30,11 @@ const VOICE_RENDERER_INFO: audio.AudioRendererInfo = {
 };
 
 export default class AudioPlayManager {
+    // Error message passed to a playback's completion callback when its playback is cut short by a
+    // new play() (i.e. the user tapped another voice message). The interrupted view uses this to
+    // stop its own animation without running normal completion handling (chain / proximity release).
+    static readonly INTERRUPTED: string = 'interrupted_by_new_playback';
+
     public audioPlayer?: media.AVPlayer;
     private playCompleteCallback?: (err?: Error) => void
     private audioRoutingManager?: audio.AudioRoutingManager
@@ -55,9 +60,14 @@ export default class AudioPlayManager {
 
         // Create the proximity screen-control lock once; held only while a voice message plays.
         try {
-            if (runningLock.isSupported(runningLock.RunningLockType.PROXIMITY_SCREEN_CONTROL)) {
+            const supported = runningLock.isSupported(runningLock.RunningLockType.PROXIMITY_SCREEN_CONTROL);
+            Logger.info(TAG, `PROXIMITY_SCREEN_CONTROL supported=${supported}`);
+            if (supported) {
                 runningLock.create('voice_msg_proximity', runningLock.RunningLockType.PROXIMITY_SCREEN_CONTROL)
-                    .then(lock => this.screenLock = lock)
+                    .then(lock => {
+                        this.screenLock = lock;
+                        Logger.info(TAG, 'proximity screen lock created');
+                    })
                     .catch((e: Error) => Logger.error(TAG, `create proximity screen lock failed: ${e.message}`));
             }
         } catch (e) {
@@ -77,7 +87,7 @@ export default class AudioPlayManager {
                         this.applyRendererInfo();
                         this.audioPlayer!.prepare((e) => {
                             if (e) {
-                                this.playCompleteCallback?.(e)
+                                this.firePlayComplete(e)
                                 Logger.error(TAG, `AVPlayer prepare failed: ${e.message}`);
                             }
                         });
@@ -85,7 +95,7 @@ export default class AudioPlayManager {
                     case 'prepared':
                         this.audioPlayer!.play((e) => {
                             if (e) {
-                                this.playCompleteCallback?.(e)
+                                this.firePlayComplete(e)
                                 Logger.error(TAG, `AVPlayer play failed: ${e.message}`);
                             }
                         });
@@ -99,14 +109,14 @@ export default class AudioPlayManager {
                         }
                         break;
                     case 'completed':
-                        this.playCompleteCallback?.()
+                        this.firePlayComplete()
                         break;
                     default:
                         break;
                 }
             });
             this.audioPlayer.on('error', (error) => {
-                this.playCompleteCallback?.(error)
+                this.firePlayComplete(error)
                 Logger.error(TAG, `AVPlayer error: ${error.code} ${error.message}`);
             });
         });
@@ -120,7 +130,20 @@ export default class AudioPlayManager {
         }
     }
 
+    // Invoke the current playback's completion callback exactly once, clearing it first so it can't
+    // be called again (e.g. a natural 'completed' after an interruption, or vice versa).
+    private firePlayComplete(err?: Error) {
+        const cb = this.playCompleteCallback
+        this.playCompleteCallback = undefined
+        cb?.(err)
+    }
+
     play(filePath: string, isNewAudio: boolean = true, callback?: (err?: Error) => void) {
+        // If a previous voice message is still playing, interrupt it so its view stops animating.
+        // (Skipped for a self-restart, which clears playCompleteCallback before calling play().)
+        if (this.playCompleteCallback) {
+            this.firePlayComplete(new Error(AudioPlayManager.INTERRUPTED))
+        }
         this.playCompleteCallback = callback
         this.currentUrl = filePath
         if (!isNewAudio) {
@@ -195,9 +218,12 @@ export default class AudioPlayManager {
         if (this.screenLock !== undefined) {
             try {
                 this.screenLock.hold(-1);
+                Logger.info(TAG, 'proximity screen lock held');
             } catch (e) {
                 Logger.error(TAG, `hold screen lock failed: ${e.message}`);
             }
+        } else {
+            Logger.warn(TAG, 'no proximity screen lock to hold (unsupported or not yet created); screen-off disabled');
         }
 
         try {
@@ -261,6 +287,10 @@ export default class AudioPlayManager {
         if (state !== 'playing' && state !== 'paused' && state !== 'prepared' && state !== 'completed') {
             return; // nothing active to restart
         }
-        this.play(this.currentUrl, true, this.playCompleteCallback);
+        // Self-restart, not an interruption: detach the callback first so play() won't fire it with
+        // an INTERRUPTED error, then re-attach the same callback for the restarted playback.
+        const cb = this.playCompleteCallback
+        this.playCompleteCallback = undefined
+        this.play(this.currentUrl, true, cb);
     }
 }

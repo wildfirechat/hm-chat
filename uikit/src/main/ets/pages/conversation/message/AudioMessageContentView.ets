@@ -68,6 +68,12 @@ export default struct AudioMessageContentView {
         this.audioPlayManager!.startProximitySensing()
         this.audioPlayManager!.play(url, true, (err?: Error) => {
             this.stopAudioPlayingAnimation()
+            if (err && err.message === AudioPlayManager.INTERRUPTED) {
+                // Another voice message took over playback. Only stop this view's animation; the new
+                // playback now owns proximity sensing / the chain, so skip completion handling (don't
+                // release the screen lock or play the completion sound).
+                return
+            }
             // Whether to stop proximity sensing / play the completion sound is decided by the
             // parent (ConversationPage), so continuous playback doesn't release the screen lock
             // between consecutive messages.

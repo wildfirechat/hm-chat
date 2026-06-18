@@ -19,6 +19,10 @@ import { request } from '@kit.BasicServicesKit';
 import Long from '@wfc/client/src/main/ets/wfc/util/long';
 import { stringValue } from '@wfc/client/src/main/ets/wfc/util/longUtil';
 import { getImageSizeByOrgSizeToWeChat } from '../util/wechatImageUtil';
+import ImageMessageContent from '@wfc/client/src/main/ets/wfc/messages/imageMessageContent';
+import VideoMessageContent from '@wfc/client/src/main/ets/wfc/messages/videoMessageContent';
+import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation';
+import { copyFileUri } from '../common/utils/FileUtil';
 
 export interface MediaResult {
     type: number // 1 image, 2 video
@@ -29,8 +33,28 @@ export interface MediaResult {
     thumbnail: string
 }
 
-
 const TAG = "MediaHelper"
+
+/**
+ * 将一个 MediaResult 作为图片/视频消息发送到会话。
+ * 通过 request 包上传时只能使用 applicationContext.cacheDir 目录下的文件，
+ * 因此先把 uri 拷贝到 cacheDir 再构建消息内容。
+ */
+export function sendMediaResult(context: Context, conversation: Conversation, result: MediaResult) {
+    if (result.type === 2) {
+        let filePath = context.getApplicationContext().cacheDir + '/' + new Date().getTime() + '.mp4'
+        copyFileUri(result.uri, filePath);
+        let content = new VideoMessageContent(filePath, '', result.thumbnail, result.duration)
+        wfc.sendConversationMessage(conversation, content, [], null, null, null, null, null);
+    } else {
+        let filePath = context.getApplicationContext().cacheDir + '/' + new Date().getTime() + '.jpg'
+        copyFileUri(result.uri, filePath);
+        let content = new ImageMessageContent(filePath, '', result.thumbnail)
+        content.imageWidth = result.width;
+        content.imageHeight = result.height;
+        wfc.sendConversationMessage(conversation, content, [], null, null, null, null, null);
+    }
+}
 
 /**
  * 选择图片
@@ -55,7 +79,7 @@ export async function selectMedia(context: Context, mimeType: photoAccessHelper.
         let photoPicker = new photoAccessHelper.PhotoViewPicker();
         let photoUris = (await photoPicker.select(photoSelectOptions)).photoUris
 
-        let results: MediaResult[] = await _uri2MediaResult(context, photoUris)
+        let results: MediaResult[] = await uri2MediaResult(context, photoUris)
 
         return results
     } catch (err) {
@@ -108,7 +132,7 @@ export async function takePhoto(context: common.UIAbilityContext): Promise<Media
         console.log("the pick pickerResult is:" + JSON.stringify(pickerResult));
 
         if (pickerResult.resultCode === 0) {
-            return await _uri2MediaResult(context, [pickerResult.resultUri])
+            return await uri2MediaResult(context, [pickerResult.resultUri])
         } else {
             return []
         }
@@ -179,7 +203,7 @@ export function saveMedia(context: Context, messageUid: Long, url: string, type:
         })
 }
 
-async function _uri2MediaResult(context: Context, photoUris: string[], maxThumbnailSize: number = 20) {
+export async function uri2MediaResult(context: Context, photoUris: string[], maxThumbnailSize: number = 20) {
     let results: MediaResult[] = []
     for (const uri of photoUris) {
         let phAccessHelper = photoAccessHelper.getPhotoAccessHelper(context);

@@ -43,6 +43,14 @@ import archiveServer from '../../api/archiveServer'
 import ArchiveMessageResult from '../../api/model/archiveMessageResult'
 import { Emoji } from './emoji/emojis'
 import StickerMessageContent from '@wfc/client/src/main/ets/wfc/messages/stickerMessageContent'
+import { sendMediaResult, uri2MediaResult } from '../../helper/mediaHelper'
+import { RecentPhotoComponent, RecentPhotoOptions, PhotoSource, RecentPhotoCheckResultCallback, RecentPhotoClickCallback } from '@ohos.file.RecentPhotoComponent'
+import { BaseItemInfo } from '@ohos.file.PhotoPickerComponent'
+
+// 「猜你想发送」：上次消失（发送/取消/其他操作）的时间。
+// API 12 的最近图片控件回调拿不到图片标识，故用「动态时间窗口」实现“同一张只提示一次”：
+// 每次只查询「上次消失之后、且 5 分钟内」拍摄/截图的图片——老图必然落在窗口外，只有更新的截图才会再次出现。
+let lastRecentPhotoDismissMillis = 0
 
 @Component
 export default struct ConversationPage {
@@ -75,7 +83,7 @@ export default struct ConversationPage {
     @State showGroupMemberNickName: boolean = false
     @State longPressToMentionUser: string = ''
     @State unreadJoinGroupRequestCount: number = 0
-    @State private archiveNextStartMid: number = 0  // 归档消息分页起始ID
+    @State private archiveNextStartMid: number = 0 // 归档消息分页起始ID
     @State private previewEmoji: Emoji | null = null
     @State private previewCol: number = 0
     @State private previewColW: number = 0
@@ -84,9 +92,62 @@ export default struct ConversationPage {
     @State private panelHeight: number = 320
     @State private pageWidth: number = 0
     @State private pageHeight: number = 0
+    // 输入面板（含展开的加号/表情面板）的实际高度，用于把悬浮建议层定位到输入栏正上方
+    @State private inputPanelHeight: number = 56
+    // 「猜你想发送」：点加号时由输入面板置位；浮于输入栏上方（与表情建议同位置）。免权限的系统最近图片控件。
+    @State @Watch('onRecentPhotoRequestedChange') private recentPhotoRequested: boolean = false
+    @State private recentPhotoExists: boolean = false
+    private recentPhotoOptions: RecentPhotoOptions = new RecentPhotoOptions()
+    private recentPhotoCheckResultCallback: RecentPhotoCheckResultCallback = (exists: boolean) => {
+        if (exists) {
+            this.recentPhotoExists = true
+        } else {
+            // 时间窗口内无符合条件的图片（含已提示过的老图）→ 收起整块
+            this.recentPhotoExists = false
+            this.recentPhotoRequested = false
+        }
+    }
+    private recentPhotoClickCallback: RecentPhotoClickCallback = (info: BaseItemInfo): boolean => {
+        this.onRecentPhotoClick(info)
+        return true
+    }
+
+    private onRecentPhotoRequestedChange() {
+        if (this.recentPhotoRequested) {
+            // 仅查询「上次消失之后、且 5 分钟内」的图片，实现“同一张只提示一次、直到有更新截图”
+            let sinceDismiss = Math.floor((Date.now() - lastRecentPhotoDismissMillis) / 1000)
+            let period = Math.min(5 * 60, sinceDismiss)
+            this.recentPhotoOptions.period = period > 0 ? period : 1
+            this.recentPhotoExists = false
+        } else {
+            // 任意消失都记录时间点，使更早的图片落在下次查询窗口之外
+            lastRecentPhotoDismissMillis = Date.now()
+            this.recentPhotoExists = false
+        }
+    }
+
+    private async onRecentPhotoClick(info: BaseItemInfo) {
+        if (!info || !info.uri || !this.conversation) {
+            this.recentPhotoRequested = false
+            return
+        }
+        try {
+            // 必须在组件卸载前消费 uri：点击只授予该 uri 临时只读权限，提前卸载会回收权限导致读取失败
+            let results = await uri2MediaResult(getContext(this), [info.uri])
+            if (results.length > 0) {
+                sendMediaResult(getContext(this), this.conversation, results[0])
+            }
+        } catch (reason) {
+            showToast('发送失败: ' + reason)
+        }
+        this.recentPhotoRequested = false
+    }
 
     aboutToAppear() {
         this.audioPlayerManager.init(getContext(this))
+
+        // 「猜你想发送」：展示拍摄或截图的图片/视频（period 在每次点加号时按动态窗口设置）
+        this.recentPhotoOptions.photoSource = PhotoSource.ALL
 
         let params = this.mainNavPathStack.getParamByIndex(this.mainNavPathStack.size() - 1) as Record<string, Object>;
         let conversation = params['conversation'] as Conversation;
@@ -166,7 +227,6 @@ export default struct ConversationPage {
         this.conversationMessageDataSource.markMessagePlayed(messageId)
         wfc.updateMessageStatus(messageId, MessageStatus.Played)
     }
-
     // Called when a voice message finishes playing. Auto-plays the next unplayed received voice
     // message if any. Proximity sensing / the screen lock is kept held across consecutive messages
     // and only released when the chain ends, so the screen doesn't flicker on between messages.
@@ -216,7 +276,7 @@ export default struct ConversationPage {
         }
 
         this.conversation = conversation;
-        
+
         // 重置归档消息分页状态
         this.archiveNextStartMid = 0;
         this.hasNoMoreHistoryMessage = false;
@@ -401,7 +461,7 @@ export default struct ConversationPage {
                 this.conversation!.target,
                 this.conversation!.line,
                 startMid,
-                true,  // before: 获取更早的消息
+                true, // before: 获取更早的消息
                 10     // limit: 每次加载10条
             )
 
@@ -410,15 +470,15 @@ export default struct ConversationPage {
                 let filteredMsgs = result.messages.filter((m: Message) => {
                     return m.messageId != 0 && this.conversationMessageDataSource.getMessages().findIndex((dm: Message) => eq(dm.messageUid, m.messageUid)) === -1
                 })
-                
+
                 if (filteredMsgs.length > 0) {
                     this.conversationMessageDataSource.insertMessages(0, filteredMsgs)
                     this.scroller.scrollToIndex(filteredMsgs.length - 1, false)
                 }
-                
+
                 // 更新分页状态
                 this.archiveNextStartMid = result.nextStartMid
-                
+
                 // 如果没有更多归档消息
                 if (!result.hasMore) {
                     this.hasNoMoreHistoryMessage = true
@@ -686,7 +746,7 @@ export default struct ConversationPage {
     }
 
     private previewCardY(): number {
-        const GRID_OFFSET = 50  // tab list (40) + stack top padding (10) inside EmojiInputPanelView
+        const GRID_OFFSET = 50 // tab list (40) + stack top padding (10) inside EmojiInputPanelView
         const size = this.previewCardSize()
         const rowTopY = this.pageHeight - this.panelHeight + GRID_OFFSET + this.previewRowY
         return Math.max(0, rowTopY - size - 4)
@@ -695,331 +755,366 @@ export default struct ConversationPage {
     build() {
         NavDestination() {
             Stack() {
-            Column() {
-            Scroll() {
-                Stack() {
-                    Refresh({ refreshing: $$this.refreshStatus }) {
-                        Column() {
-                            if (this.hasNoMoreHistoryMessage) {
-                                Text('没有更多消息')
-                                    .padding(5)
-                                    .fontSize(13)
-                                    .fontColor($r('app.color.wf_tertiary_text'))
-                            }
-                            Blank()
-                                .width('100%')
-                                .layoutWeight(1)
+                Column() {
+                    Scroll() {
+                        Stack() {
+                            Refresh({ refreshing: $$this.refreshStatus }) {
+                                Column() {
+                                    if (this.hasNoMoreHistoryMessage) {
+                                        Text('没有更多消息')
+                                            .padding(5)
+                                            .fontSize(13)
+                                            .fontColor($r('app.color.wf_tertiary_text'))
+                                    }
+                                    Blank()
+                                        .width('100%')
+                                        .layoutWeight(1)
 
-                            List({ scroller: this.scroller }) {
-                                LazyForEach(this.conversationMessageDataSource,
-                                    (msg: Message, index: number) => {
-                                        ListItem() {
-                                            if (msg.messageContent instanceof NotificationMessageContent) {
-                                                Row() {
-                                                    // 自定义通知消息 start
-                                                    if (msg.messageContent instanceof TestCustomNotificationMessageContent) {
-                                                        TestCustomNotificationMessageContentView({ message: msg })
-                                                    }
-                                                    // 自定义通知消息 end
-                                                    else if (msg.messageContent.type === MessageContentType.RecallMessage_Notification) {
-                                                        RecallNotificationMessageContentView({
-                                                            message: msg, onClickReedit: () => {
-                                                                let recallMsgContent = msg.messageContent as RecallMessageNotification
-                                                                this.toReeditText = recallMsgContent.originalSearchableContent
-                                                            }
-                                                        })
-                                                    } else if (msg.messageContent instanceof RichNotificationMessageContent) {
-                                                        RichNotificationMessageContentView({ message: msg })
-                                                    } else {
-                                                        SimpleNotificationMessageContentView({ message: msg })
-                                                    }
-                                                }
-                                                .width('100%')
-                                                .justifyContent(FlexAlign.Center)
-
-                                                // contextable notificaiton like messages
-                                                // 支持长按菜单的类通知消息，居中显示，不显示发送者，长按支持显示菜单
-                                            } else if (msg.messageContent instanceof ArticlesMessageContent) {
-                                                ContextableNotificationMessageContentView({ message: msg, enableMultiCheck: this.enableMultiCheck })
-                                                // out
-                                            } else if (msg.direction === 0) {
-                                                Column() {
-                                                    if (this.showMessageTimeInfo(index)) {
-                                                        Text(timeFormat(msg.timestamp))
-                                                            .fontSize(12)
-                                                            .fontColor($r('app.color.wf_tertiary_text'))
-                                                            .padding(10)
-                                                    }
-                                                    Row() {
-                                                        if (this.enableMultiCheck) {
-                                                            Row() {
-                                                                Checkbox()
-                                                                    .select(this.isMessageChecked(msg))
-                                                                    .margin({ left: 10 })
-                                                                    .onChange((value => {
-                                                                        // if (!this.enableMultiCheck) {
-                                                                        //     return
-                                                                        // }
-                                                                        if (this.checkValueChangeTriggerByClick) {
-                                                                            this.checkValueChangeTriggerByClick = false
-                                                                            return
-                                                                        }
-                                                                        this.checkOrUncheckMessage(msg)
-                                                                    }))
-                                                            }
-                                                            .margin({ top: 10 })
-                                                            .height(40)
-                                                            .alignItems(VerticalAlign.Center)
-                                                        }
+                                    List({ scroller: this.scroller }) {
+                                        LazyForEach(this.conversationMessageDataSource,
+                                            (msg: Message, index: number) => {
+                                                ListItem() {
+                                                    if (msg.messageContent instanceof NotificationMessageContent) {
                                                         Row() {
-
-                                                            if (msg.status === MessageStatus.SendFailure) {
-                                                                // 重试
-                                                                Row() {
-                                                                    Text('重试')
-                                                                        .fontSize(12)
-                                                                        .padding({ right: 5 })
-                                                                    Image($r('app.media.img_error'))
-                                                                        .width(20)
-                                                                        .height(20)
-                                                                        .objectFit(ImageFit.ScaleDown)
-
-                                                                }
-                                                                .padding({ right: 5 })
-                                                                .alignItems(VerticalAlign.Bottom)
-                                                                .onClick(() => {
-                                                                    this.resendMessage(msg)
+                                                            // 自定义通知消息 start
+                                                            if (msg.messageContent instanceof TestCustomNotificationMessageContent) {
+                                                                TestCustomNotificationMessageContentView({ message: msg })
+                                                            }
+                                                            // 自定义通知消息 end
+                                                            else if (msg.messageContent.type === MessageContentType.RecallMessage_Notification) {
+                                                                RecallNotificationMessageContentView({
+                                                                    message: msg, onClickReedit: () => {
+                                                                        let recallMsgContent = msg.messageContent as RecallMessageNotification
+                                                                        this.toReeditText = recallMsgContent.originalSearchableContent
+                                                                    }
                                                                 })
+                                                            } else if (msg.messageContent instanceof RichNotificationMessageContent) {
+                                                                RichNotificationMessageContentView({ message: msg })
+                                                            } else {
+                                                                SimpleNotificationMessageContentView({ message: msg })
                                                             }
-
-                                                            if (msg.status === MessageStatus.Sending) {
-                                                                LoadingProgress().width(20).height(20)
-                                                            }
-
-                                                            NormalMessageContentView({
-                                                                message: msg,
-                                                                enableMultiCheck: $enableMultiCheck,
-                                                                quotedMessage: $quotedMessage,
-                                                                audioPlayManager: this.audioPlayerManager,
-                                                                autoPlayMessageId: this.autoPlayMessageId,
-                                                                onVoicePlayStart: this.onVoicePlayStart,
-                                                                onVoicePlayComplete: this.onVoicePlayComplete,
-                                                                enableReceipt: this.enableReceipt,
-                                                                readEntries: this.readEntries,
-                                                                groupMembers: this.groupMembers
-                                                            })//.layoutWeight(1)
-                                                                .margin({ top: 10 })
-                                                                .enabled(!this.enableMultiCheck)
                                                         }
-                                                        .justifyContent(FlexAlign.End)
-                                                        .layoutWeight(1)
-                                                        .margin({ left: 70 })
+                                                        .width('100%')
+                                                        .justifyContent(FlexAlign.Center)
 
-                                                        Image(wfc.getUserInfo(msg.from).portrait)
-                                                            .width(40)
-                                                            .height(40)
-                                                            .borderRadius(4)
-                                                            .draggable(false)
-                                                            .margin(10)
-                                                            .enabled(!this.enableMultiCheck)
-                                                            .onClick(() => {
-                                                                this.showUserInfo(msg.from)
-                                                            })
-                                                    }
-                                                    .width('100%')
-                                                    .justifyContent(FlexAlign.End)
-                                                    .alignItems(VerticalAlign.Top)
-                                                    .backgroundColor(this.focusMessageId && msg.messageId === this.focusMessageId ? this.focusMessageBackgroundColor : undefined)
-                                                    .animation(this.focusMessageId && msg.messageId === this.focusMessageId ? {
-                                                        curve: Curve.Linear,
-                                                        duration: 1000,
-                                                        iterations: 5,
-                                                        playMode: PlayMode.Normal,
-                                                        onFinish: () => {
-                                                            this.focusMessageBackgroundColor = Color.Red
-                                                        }
-                                                    } : undefined)
-                                                    .onClick((event) => {
-                                                        if (!this.enableMultiCheck) {
-                                                            return
-                                                        }
-                                                        this.checkValueChangeTriggerByClick = true
-                                                        this.checkOrUncheckMessage(msg)
-                                                    })
-                                                }
-                                                .width('100%')
-                                                .alignItems(HorizontalAlign.Center)
-
-                                                // in
-                                            } else {
-                                                Column() {
-                                                    if (this.showMessageTimeInfo(index)) {
-                                                        Text(timeFormat(msg.timestamp))
-                                                            .fontSize(12)
-                                                            .fontColor($r('app.color.wf_tertiary_text'))
-                                                            .padding(10)
-                                                    }
-                                                    Row() {
-                                                        if (this.enableMultiCheck) {
-                                                            Row() {
-                                                                Checkbox()
-                                                                    .select(this.isMessageChecked(msg))
-                                                                    .margin({ left: 10 })
-                                                                    .onChange((value => {
-                                                                        if (this.checkValueChangeTriggerByClick) {
-                                                                            this.checkValueChangeTriggerByClick = false
-                                                                            return
-                                                                        }
-                                                                        this.checkOrUncheckMessage(msg)
-                                                                    }))
-                                                            }
-                                                            .margin({ top: 10 })
-                                                            .height(40)
-                                                            .alignItems(VerticalAlign.Center)
-
-                                                            // .alignSelf(ItemAlign.Center)
-                                                        }
-                                                        Image(wfc.getUserInfo(msg.from).portrait)
-                                                            .width(40)
-                                                            .height(40)
-                                                            .margin(10)
-                                                            .draggable(false)
-                                                            .borderRadius(4)
-                                                            .enabled(!this.enableMultiCheck)
-                                                            .onClick(() => {
-                                                                this.showUserInfo(msg.from)
-                                                            })
-                                                            .gesture(
-                                                                LongPressGesture({ repeat: false })
-                                                                    .onAction(evt => {
-                                                                        this.onUserPortraitLongClick(msg.from)
-                                                                    })
-                                                                , GestureMask.Normal
-                                                            )
+                                                        // contextable notificaiton like messages
+                                                        // 支持长按菜单的类通知消息，居中显示，不显示发送者，长按支持显示菜单
+                                                    } else if (msg.messageContent instanceof ArticlesMessageContent) {
+                                                        ContextableNotificationMessageContentView({ message: msg, enableMultiCheck: this.enableMultiCheck })
+                                                        // out
+                                                    } else if (msg.direction === 0) {
                                                         Column() {
-                                                            if (this.showGroupMemberNickName) {
-                                                                Text(wfc.getGroupMemberDisplayName(this.conversation!.target, msg.from))
+                                                            if (this.showMessageTimeInfo(index)) {
+                                                                Text(timeFormat(msg.timestamp))
                                                                     .fontSize(12)
                                                                     .fontColor($r('app.color.wf_tertiary_text'))
-                                                                    .padding({ bottom: 2 })
+                                                                    .padding(10)
                                                             }
-                                                            NormalMessageContentView({
-                                                                message: msg,
-                                                                enableMultiCheck: $enableMultiCheck,
-                                                                quotedMessage: $quotedMessage,
-                                                                audioPlayManager: this.audioPlayerManager,
-                                                                autoPlayMessageId: this.autoPlayMessageId,
-                                                                onVoicePlayStart: this.onVoicePlayStart,
-                                                                onVoicePlayComplete: this.onVoicePlayComplete
-                                                            })//.layoutWeight(1)
-                                                                .enabled(!this.enableMultiCheck)
+                                                            Row() {
+                                                                if (this.enableMultiCheck) {
+                                                                    Row() {
+                                                                        Checkbox()
+                                                                            .select(this.isMessageChecked(msg))
+                                                                            .margin({ left: 10 })
+                                                                            .onChange((value => {
+                                                                                // if (!this.enableMultiCheck) {
+                                                                                //     return
+                                                                                // }
+                                                                                if (this.checkValueChangeTriggerByClick) {
+                                                                                    this.checkValueChangeTriggerByClick = false
+                                                                                    return
+                                                                                }
+                                                                                this.checkOrUncheckMessage(msg)
+                                                                            }))
+                                                                    }
+                                                                    .margin({ top: 10 })
+                                                                    .height(40)
+                                                                    .alignItems(VerticalAlign.Center)
+                                                                }
+                                                                Row() {
+
+                                                                    if (msg.status === MessageStatus.SendFailure) {
+                                                                        // 重试
+                                                                        Row() {
+                                                                            Text('重试')
+                                                                                .fontSize(12)
+                                                                                .padding({ right: 5 })
+                                                                            Image($r('app.media.img_error'))
+                                                                                .width(20)
+                                                                                .height(20)
+                                                                                .objectFit(ImageFit.ScaleDown)
+
+                                                                        }
+                                                                        .padding({ right: 5 })
+                                                                        .alignItems(VerticalAlign.Bottom)
+                                                                        .onClick(() => {
+                                                                            this.resendMessage(msg)
+                                                                        })
+                                                                    }
+
+                                                                    if (msg.status === MessageStatus.Sending) {
+                                                                        LoadingProgress().width(20).height(20)
+                                                                    }
+
+                                                                    NormalMessageContentView({
+                                                                        message: msg,
+                                                                        enableMultiCheck: $enableMultiCheck,
+                                                                        quotedMessage: $quotedMessage,
+                                                                        audioPlayManager: this.audioPlayerManager,
+                                                                        autoPlayMessageId: this.autoPlayMessageId,
+                                                                        onVoicePlayStart: this.onVoicePlayStart,
+                                                                        onVoicePlayComplete: this.onVoicePlayComplete,
+                                                                        enableReceipt: this.enableReceipt,
+                                                                        readEntries: this.readEntries,
+                                                                        groupMembers: this.groupMembers
+                                                                    })//.layoutWeight(1)
+                                                                        .margin({ top: 10 })
+                                                                        .enabled(!this.enableMultiCheck)
+                                                                }
+                                                                .justifyContent(FlexAlign.End)
+                                                                .layoutWeight(1)
+                                                                .margin({ left: 70 })
+
+                                                                Image(wfc.getUserInfo(msg.from).portrait)
+                                                                    .width(40)
+                                                                    .height(40)
+                                                                    .borderRadius(4)
+                                                                    .draggable(false)
+                                                                    .margin(10)
+                                                                    .enabled(!this.enableMultiCheck)
+                                                                    .onClick(() => {
+                                                                        this.showUserInfo(msg.from)
+                                                                    })
+                                                            }
+                                                            .width('100%')
+                                                            .justifyContent(FlexAlign.End)
+                                                            .alignItems(VerticalAlign.Top)
+                                                            .backgroundColor(this.focusMessageId && msg.messageId === this.focusMessageId ? this.focusMessageBackgroundColor : undefined)
+                                                            .animation(this.focusMessageId && msg.messageId === this.focusMessageId ? {
+                                                                curve: Curve.Linear,
+                                                                duration: 1000,
+                                                                iterations: 5,
+                                                                playMode: PlayMode.Normal,
+                                                                onFinish: () => {
+                                                                    this.focusMessageBackgroundColor = Color.Red
+                                                                }
+                                                            } : undefined)
+                                                            .onClick((event) => {
+                                                                if (!this.enableMultiCheck) {
+                                                                    return
+                                                                }
+                                                                this.checkValueChangeTriggerByClick = true
+                                                                this.checkOrUncheckMessage(msg)
+                                                            })
                                                         }
-                                                        .justifyContent(FlexAlign.Start)
-                                                        .alignItems(HorizontalAlign.Start)
-                                                        .layoutWeight(1)
-                                                        .margin({ right: 70, top: 10 })
+                                                        .width('100%')
+                                                        .alignItems(HorizontalAlign.Center)
+
+                                                        // in
+                                                    } else {
+                                                        Column() {
+                                                            if (this.showMessageTimeInfo(index)) {
+                                                                Text(timeFormat(msg.timestamp))
+                                                                    .fontSize(12)
+                                                                    .fontColor($r('app.color.wf_tertiary_text'))
+                                                                    .padding(10)
+                                                            }
+                                                            Row() {
+                                                                if (this.enableMultiCheck) {
+                                                                    Row() {
+                                                                        Checkbox()
+                                                                            .select(this.isMessageChecked(msg))
+                                                                            .margin({ left: 10 })
+                                                                            .onChange((value => {
+                                                                                if (this.checkValueChangeTriggerByClick) {
+                                                                                    this.checkValueChangeTriggerByClick = false
+                                                                                    return
+                                                                                }
+                                                                                this.checkOrUncheckMessage(msg)
+                                                                            }))
+                                                                    }
+                                                                    .margin({ top: 10 })
+                                                                    .height(40)
+                                                                    .alignItems(VerticalAlign.Center)
+
+                                                                    // .alignSelf(ItemAlign.Center)
+                                                                }
+                                                                Image(wfc.getUserInfo(msg.from).portrait)
+                                                                    .width(40)
+                                                                    .height(40)
+                                                                    .margin(10)
+                                                                    .draggable(false)
+                                                                    .borderRadius(4)
+                                                                    .enabled(!this.enableMultiCheck)
+                                                                    .onClick(() => {
+                                                                        this.showUserInfo(msg.from)
+                                                                    })
+                                                                    .gesture(
+                                                                        LongPressGesture({ repeat: false })
+                                                                            .onAction(evt => {
+                                                                                this.onUserPortraitLongClick(msg.from)
+                                                                            })
+                                                                        , GestureMask.Normal
+                                                                    )
+                                                                Column() {
+                                                                    if (this.showGroupMemberNickName) {
+                                                                        Text(wfc.getGroupMemberDisplayName(this.conversation!.target, msg.from))
+                                                                            .fontSize(12)
+                                                                            .fontColor($r('app.color.wf_tertiary_text'))
+                                                                            .padding({ bottom: 2 })
+                                                                    }
+                                                                    NormalMessageContentView({
+                                                                        message: msg,
+                                                                        enableMultiCheck: $enableMultiCheck,
+                                                                        quotedMessage: $quotedMessage,
+                                                                        audioPlayManager: this.audioPlayerManager,
+                                                                        autoPlayMessageId: this.autoPlayMessageId,
+                                                                        onVoicePlayStart: this.onVoicePlayStart,
+                                                                        onVoicePlayComplete: this.onVoicePlayComplete
+                                                                    })//.layoutWeight(1)
+                                                                        .enabled(!this.enableMultiCheck)
+                                                                }
+                                                                .justifyContent(FlexAlign.Start)
+                                                                .alignItems(HorizontalAlign.Start)
+                                                                .layoutWeight(1)
+                                                                .margin({ right: 70, top: 10 })
+                                                            }
+                                                            .width('100%')
+                                                            .justifyContent(FlexAlign.Start)
+                                                            .alignItems(VerticalAlign.Top)
+                                                            .backgroundColor(this.focusMessageId && msg.messageId === this.focusMessageId ? this.focusMessageBackgroundColor : undefined)
+                                                            .animation(this.focusMessageId && msg.messageId === this.focusMessageId ? {
+                                                                curve: Curve.Linear,
+                                                                duration: 1000,
+                                                                iterations: 5,
+                                                                playMode: PlayMode.Normal,
+                                                                onFinish: () => {
+                                                                    this.focusMessageBackgroundColor = Color.Red
+                                                                }
+                                                            } : undefined)
+                                                            .onClick((event) => {
+                                                                if (!this.enableMultiCheck) {
+                                                                    return
+                                                                }
+                                                                this.checkValueChangeTriggerByClick = true
+                                                                this.checkOrUncheckMessage(msg)
+                                                            })
+                                                        }
+                                                        .width('100%')
+                                                        .alignItems(HorizontalAlign.Center)
                                                     }
-                                                    .width('100%')
-                                                    .justifyContent(FlexAlign.Start)
-                                                    .alignItems(VerticalAlign.Top)
-                                                    .backgroundColor(this.focusMessageId && msg.messageId === this.focusMessageId ? this.focusMessageBackgroundColor : undefined)
-                                                    .animation(this.focusMessageId && msg.messageId === this.focusMessageId ? {
-                                                        curve: Curve.Linear,
-                                                        duration: 1000,
-                                                        iterations: 5,
-                                                        playMode: PlayMode.Normal,
-                                                        onFinish: () => {
-                                                            this.focusMessageBackgroundColor = Color.Red
-                                                        }
-                                                    } : undefined)
-                                                    .onClick((event) => {
-                                                        if (!this.enableMultiCheck) {
-                                                            return
-                                                        }
-                                                        this.checkValueChangeTriggerByClick = true
-                                                        this.checkOrUncheckMessage(msg)
-                                                    })
                                                 }
-                                                .width('100%')
-                                                .alignItems(HorizontalAlign.Center)
-                                            }
-                                        }
-                                    },
-                                    (msg: Message) => this.messageItemKey(msg))
+                                            },
+                                            (msg: Message) => this.messageItemKey(msg))
 
-                            }
-                            .onScrollIndex((start, end) => {
-                                this.currentMessageIndex = start;
-                                if (!this.unreadStatusCleared && end == this.conversationMessageDataSource.totalCount() - 1) {
-                                    this.unreadStatusCleared = true
-                                    // wfc.clearUnreadStatusBeforeMessage(this.conversation, )
-                                    wfc.clearConversationUnreadStatus(this.conversation!);
-                                }
-                                if (this.focusMessageId && end === this.conversationMessageDataSource.totalCount() - 1) {
-                                    wfc.getMessagesV2(this.conversation!, this.conversationMessageDataSource.getData(this.conversationMessageDataSource.totalCount() - 1)
-                                        .messageId, false, 20, '', (messages) => {
-                                        if (messages.length > 0) {
-                                            this.conversationMessageDataSource.appendMessages(messages)
-                                        } else {
-                                            this.focusMessageId = 0
+                                    }
+                                    .onScrollIndex((start, end) => {
+                                        this.currentMessageIndex = start;
+                                        if (!this.unreadStatusCleared && end == this.conversationMessageDataSource.totalCount() - 1) {
+                                            this.unreadStatusCleared = true
+                                            // wfc.clearUnreadStatusBeforeMessage(this.conversation, )
+                                            wfc.clearConversationUnreadStatus(this.conversation!);
                                         }
-                                    }, err => {
-                                        console.error('getMessageV2 error', err)
+                                        if (this.focusMessageId && end === this.conversationMessageDataSource.totalCount() - 1) {
+                                            wfc.getMessagesV2(this.conversation!, this.conversationMessageDataSource.getData(this.conversationMessageDataSource.totalCount() - 1)
+                                                .messageId, false, 20, '', (messages) => {
+                                                if (messages.length > 0) {
+                                                    this.conversationMessageDataSource.appendMessages(messages)
+                                                } else {
+                                                    this.focusMessageId = 0
+                                                }
+                                            }, err => {
+                                                console.error('getMessageV2 error', err)
+                                            })
+                                        }
                                     })
-                                }
-                            })
-                            .listDirection(Axis.Vertical)
-                            .height('100%')
-                            .width('100%')
-                        }
-                        .justifyContent(FlexAlign.End)
-                        .width('100%')
-                        .height('100%')
-                    }
-                    .onRefreshing(() => {
-                        this.loadHistoryMessage()
-                    })
-                    .refreshOffset(64)
-                    .pullToRefresh(true)
-
-                    Column() {
-                        if (this.unreadJoinGroupRequestCount > 0) {
-                            Row() {
-                                Text(this.unreadJoinGroupRequestCount + '条加群申请')
-                                    .padding(5)
-                                    .fontSize(13)
-                                    .fontColor(Color.Red)
-                                    .backgroundColor($r('app.color.wf_background'))
+                                    .listDirection(Axis.Vertical)
+                                    .height('100%')
                                     .width('100%')
-                                    .height(40)
-                                    .textAlign(TextAlign.Center)
-                                    .onClick(() => {
-                                        wfc.clearJoinGroupRequestUnread(this.conversation!.target)
-                                        this.unreadJoinGroupRequestCount = 0
-                                        this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.GroupJoinRequestListPage, {
-                                            'groupId': this.conversation?.target
-                                        } as Record<string, Object>)
-                                    })
+                                }
+                                .justifyContent(FlexAlign.End)
+                                .width('100%')
+                                .height('100%')
                             }
-                            .alignItems(VerticalAlign.Center)
-                        }
-                    }
-                }
-                .height('100%')
-                .width('100%')
-                .alignContent(Alignment.Top)
-            }
-            .scrollBar(BarState.Off)
-            .edgeEffect(EdgeEffect.Spring)
-            .width('100%')
-            .layoutWeight(1)
-            .backgroundColor($r('app.color.wf_secondary_background'))
-            .onTouch((event?: TouchEvent) => {
-                this.collapseConversationInputPanelViewTimestamp = new Date().getTime()
-            })
+                            .onRefreshing(() => {
+                                this.loadHistoryMessage()
+                            })
+                            .refreshOffset(64)
+                            .pullToRefresh(true)
 
-            if (this.suggestedStickers.length > 0) {
-                Row() {
+                            Column() {
+                                if (this.unreadJoinGroupRequestCount > 0) {
+                                    Row() {
+                                        Text(this.unreadJoinGroupRequestCount + '条加群申请')
+                                            .padding(5)
+                                            .fontSize(13)
+                                            .fontColor(Color.Red)
+                                            .backgroundColor($r('app.color.wf_background'))
+                                            .width('100%')
+                                            .height(40)
+                                            .textAlign(TextAlign.Center)
+                                            .onClick(() => {
+                                                wfc.clearJoinGroupRequestUnread(this.conversation!.target)
+                                                this.unreadJoinGroupRequestCount = 0
+                                                this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.GroupJoinRequestListPage, {
+                                                    'groupId': this.conversation?.target
+                                                } as Record<string, Object>)
+                                            })
+                                    }
+                                    .alignItems(VerticalAlign.Center)
+                                }
+                            }
+                        }
+                        .height('100%')
+                        .width('100%')
+                        .alignContent(Alignment.Top)
+                    }
+                    .scrollBar(BarState.Off)
+                    .edgeEffect(EdgeEffect.Spring)
+                    .width('100%')
+                    .layoutWeight(1)
+                    .backgroundColor($r('app.color.wf_secondary_background'))
+                    .onTouch((event?: TouchEvent) => {
+                        this.collapseConversationInputPanelViewTimestamp = new Date().getTime()
+                    })
+
+                    if (this.conversation) {
+                        ConversationInputPanelView({
+                            text: this.toReeditText,
+                            conversation: this.conversation,
+                            conversationInfo: this.conversationInfo,
+                            enableMultiCheck: $enableMultiCheck,
+                            checkedMessages: $checkedMessages,
+                            quotedMessage: $quotedMessage,
+                            collapseConversationInputPanelViewTimestamp: $collapseConversationInputPanelViewTimestamp,
+                            messageListScroller: this.scroller,
+                            recentPhotoRequested: $recentPhotoRequested,
+                            longPressToMentionUser: $longPressToMentionUser,
+                            onPreviewChange: (emoji, col, colW, rowY) => {
+                                this.previewEmoji = emoji
+                                this.previewCol = col
+                                this.previewColW = colW
+                                this.previewRowY = rowY
+                            },
+                            onSuggestionsChange: (stickers) => {
+                                this.suggestedStickers = stickers
+                            },
+                            onPanelHeightChange: (h) => {
+                                this.panelHeight = h
+                            }
+                        })
+                            .onAreaChange((_, area) => {
+                                this.inputPanelHeight = area.height as number
+                            })
+                    }
+
+                } // end Column
+                .width('100%')
+                .height('100%')
+
+                // 表情建议：内容尺寸的悬浮卡片，靠 Stack 的 BottomEnd 对齐定位到输入栏右上方。
+                // 不做成全屏浮层，避免覆盖消息列表导致点击/滑动被透传到列表（从而误触发收起键盘）。
+                if (this.suggestedStickers.length > 0) {
                     Scroll() {
                         Row() {
                             ForEach(this.suggestedStickers, (sticker: Emoji) => {
@@ -1046,70 +1141,66 @@ export default struct ConversationPage {
                     .backgroundColor($r('app.color.wf_background'))
                     .borderRadius(10)
                     .shadow({ radius: 8, color: '#30000000', offsetX: 0, offsetY: -3 })
+                    .margin({ bottom: this.inputPanelHeight + 4, right: 10 })
                 }
-                .width('100%')
-                .backgroundColor($r('app.color.wf_secondary_background'))
-                .justifyContent(FlexAlign.End)
-                .padding({ right: 10 })
-                .margin({ bottom: 4 })
-            }
 
-            if (this.conversation) {
-                ConversationInputPanelView({
-                    text: this.toReeditText,
-                    conversation: this.conversation,
-                    conversationInfo: this.conversationInfo,
-                    enableMultiCheck: $enableMultiCheck,
-                    checkedMessages: $checkedMessages,
-                    quotedMessage: $quotedMessage,
-                    collapseConversationInputPanelViewTimestamp: $collapseConversationInputPanelViewTimestamp,
-                    messageListScroller: this.scroller,
-                    longPressToMentionUser: $longPressToMentionUser,
-                    onPreviewChange: (emoji, col, colW, rowY) => {
-                        this.previewEmoji = emoji
-                        this.previewCol = col
-                        this.previewColW = colW
-                        this.previewRowY = rowY
-                    },
-                    onSuggestionsChange: (stickers) => {
-                        this.suggestedStickers = stickers
-                    },
-                    onPanelHeightChange: (h) => {
-                        this.panelHeight = h
+                // 「猜你想发送」：内容尺寸的悬浮卡片，与表情建议同位置。recentPhotoRequested 时即挂载组件查询
+                // （opacity=0 不可见，既能完成查询/回调，又隐藏嵌入式组件挂载瞬间的闪烁），确认有图后整体显现。
+                if (this.recentPhotoRequested) {
+                    Column() {
+                        Text('猜你想发送')
+                            .fontSize(12)
+                            .fontColor($r('app.color.wf_secondary_text'))
+                            .margin({ right: 8 })
+                        RecentPhotoComponent({
+                            recentPhotoOptions: this.recentPhotoOptions,
+                            onRecentPhotoCheckResult: this.recentPhotoCheckResultCallback,
+                            onRecentPhotoClick: this.recentPhotoClickCallback,
+                        })
+                            .width(60)
+                            .height(60)
                     }
-                })
-            }
-
-            } // end Column
-            .width('100%')
-            .height('100%')
-
-            // Long-press preview: floating card above pressed emoji/sticker
-            if (this.previewEmoji !== null) {
-                Column() {
-                    if (this.previewEmoji!.category === 'Peoples') {
-                        Text(this.previewEmoji!.data)
-                            .fontSize(56)
-                    } else {
-                        Image(this.previewEmoji!.data)
-                            .width(this.previewCardSize() - 20)
-                            .height(this.previewCardSize() - 20)
-                            .objectFit(ImageFit.Contain)
-                            .borderRadius(8)
-                    }
+                    .alignItems(HorizontalAlign.Center)
+                    .padding(6)
+                    .backgroundColor($r('app.color.wf_background'))
+                    .borderRadius(10)
+                    .shadow({ radius: 8, color: '#30000000', offsetX: 0, offsetY: -3 })
+                    .opacity(this.recentPhotoExists ? 1 : 0)
+                    .margin({ bottom: this.inputPanelHeight + 4, right: 10 })
                 }
-                .width(this.previewCardSize())
-                .height(this.previewCardSize())
-                .justifyContent(FlexAlign.Center)
-                .alignItems(HorizontalAlign.Center)
-                .backgroundColor($r('app.color.wf_background'))
-                .borderRadius(10)
-                .shadow({ radius: 14, color: '#50000000', offsetX: 0, offsetY: 4 })
-                .position({ x: this.previewCardX(), y: this.previewCardY() })
-                .hitTestBehavior(HitTestMode.None)
-            }
+
+                // Long-press preview: floating card above pressed emoji/sticker
+                if (this.previewEmoji !== null) {
+                    Column() {
+                        if (this.previewEmoji!.category === 'Peoples') {
+                            Text(this.previewEmoji!.data)
+                                .fontSize(56)
+                        } else {
+                            Image(this.previewEmoji!.data)
+                                .width(this.previewCardSize() - 20)
+                                .height(this.previewCardSize() - 20)
+                                .objectFit(ImageFit.Contain)
+                                .borderRadius(8)
+                        }
+                    }
+                    .width(this.previewCardSize())
+                    .height(this.previewCardSize())
+                    .justifyContent(FlexAlign.Center)
+                    .alignItems(HorizontalAlign.Center)
+                    .backgroundColor($r('app.color.wf_background'))
+                    .borderRadius(10)
+                    .shadow({
+                        radius: 14,
+                        color: '#50000000',
+                        offsetX: 0,
+                        offsetY: 4
+                    })
+                    .position({ x: this.previewCardX(), y: this.previewCardY() })
+                    .hitTestBehavior(HitTestMode.None)
+                }
 
             } // end Stack
+            .alignContent(Alignment.BottomEnd)
             .width('100%')
             .height('100%')
             .onAreaChange((_, area) => {

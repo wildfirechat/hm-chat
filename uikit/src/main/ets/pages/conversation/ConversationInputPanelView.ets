@@ -1,7 +1,7 @@
 import common from '@ohos.app.ability.common'
 import { copyFileUri, fileNameFromFileUri, fileSize } from '../../common/utils/FileUtil'
 import { showToast } from '../../common/utils/Toast'
-import { selectFile, selectMedia, takePhoto } from '../../helper/mediaHelper'
+import { MediaResult, selectFile, selectMedia, sendMediaResult, takePhoto } from '../../helper/mediaHelper'
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import ImageMessageContent from '@wfc/client/src/main/ets/wfc/messages/imageMessageContent'
 import TextMessageContent from '@wfc/client/src/main/ets/wfc/messages/textMessageContent'
@@ -47,7 +47,6 @@ import ForwardMessageDialog from './forward/ForwardMessageDialog'
 import CardMessageContent from '@wfc/client/src/main/ets/wfc/messages/cardMessageContent'
 import fileUri from '@ohos.file.fileuri'
 import { checkAndRequestPermission, checkPermissions } from '../../helper/permissionHelper'
-import { Permissions } from '@kit.AbilityKit'
 import AudioRecorderDialog, { AudioRecorderDialogState } from './audio/AudioRecorderDialog'
 import { playRawSound } from '../../helper/soundEffectHelper'
 
@@ -106,6 +105,8 @@ export default struct ConversationInputPanelView {
     @Link @Watch('onLongPressToMentionUser') longPressToMentionUser: string
     private mentions: MentionBlock[] = []
     @State showExtContentCoverModal: boolean = false
+    // 「猜你想发送」：与表情建议一样由 ConversationPage 渲染于输入栏上方；此处仅控制其显隐
+    @Link recentPhotoRequested: boolean
     // Callbacks for ConversationPage-level overlays
     onPreviewChange?: (emoji: Emoji | null, col: number, colW: number, rowY: number) => void
     onSuggestionsChange?: (stickers: Emoji[]) => void
@@ -120,26 +121,8 @@ export default struct ConversationInputPanelView {
             action: async () => {
                 try {
                     let results = await selectMedia(getContext());
-                    results.forEach(async result => {
-                        if (result.type === 2) {
-                            let filePath = getContext(this)
-                                .getApplicationContext()
-                                .cacheDir + '/' + new Date().getTime() + '.mp4'
-                            copyFileUri(result.uri, filePath);
-                            let content = new VideoMessageContent(filePath, '', result.thumbnail, result.duration)
-                            wfc.sendConversationMessage(this.conversation, content, [], null, null, null, null, null);
-                            return
-                        } else {
-                            // 通过request包上传时，只能使用 applicationContext.cacheDir 目录下的文件
-                            let filePath = getContext(this)
-                                .getApplicationContext()
-                                .cacheDir + '/' + new Date().getTime() + '.jpg'
-                            copyFileUri(result.uri, filePath);
-                            let content = new ImageMessageContent(filePath, '', result.thumbnail)
-                            content.imageWidth = result.width;
-                            content.imageHeight = result.height;
-                            wfc.sendConversationMessage(this.conversation, content, [], null, null, null, null, null);
-                        }
+                    results.forEach((result: MediaResult) => {
+                        sendMediaResult(getContext(this), this.conversation, result)
                     })
                 } catch (reason) {
                     showToast('选取照片失败: ' + reason)
@@ -208,26 +191,8 @@ export default struct ConversationInputPanelView {
             action: async () => {
                 try {
                     let results = await takePhoto(getContext() as common.UIAbilityContext)
-                    results.forEach(async result => {
-                        if (result.type === 2) {
-                            let filePath = getContext(this)
-                                .getApplicationContext()
-                                .cacheDir + '/' + new Date().getTime() + '.mp4'
-                            copyFileUri(result.uri, filePath);
-                            let content = new VideoMessageContent(filePath, '', result.thumbnail, result.duration)
-                            wfc.sendConversationMessage(this.conversation, content, [], null, null, null, null, null);
-                            return
-                        } else {
-                            // 通过request包上传时，只能使用 applicationContext.cacheDir 目录下的文件
-                            let filePath = getContext(this)
-                                .getApplicationContext()
-                                .cacheDir + '/' + new Date().getTime() + '.jpg'
-                            copyFileUri(result.uri, filePath);
-                            let content = new ImageMessageContent(filePath, '', result.thumbnail)
-                            content.imageWidth = result.width;
-                            content.imageHeight = result.height;
-                            wfc.sendConversationMessage(this.conversation, content, [], null, null, null, null, null);
-                        }
+                    results.forEach((result: MediaResult) => {
+                        sendMediaResult(getContext(this), this.conversation, result)
                     })
                 } catch (reason) {
                     showToast('拍摄照片失败: ' + reason)
@@ -432,6 +397,7 @@ export default struct ConversationInputPanelView {
         if (!this.collapseConversationInputPanelViewTimestamp) {
             return
         }
+        this.recentPhotoRequested = false
         this.showEmojiPanel = false
         this.showExtPanel = false
         this.setKeyboardAvoidMode(KeyboardAvoidMode.RESIZE)
@@ -470,7 +436,9 @@ export default struct ConversationInputPanelView {
 
     private onTextChange() {
         const trimmed = this.text.trim()
-        if (trimmed.length === 0 || this.showEmojiPanel || this.showExtPanel) {
+        // 不再用 showEmojiPanel/showExtPanel 抑制：建议已是悬浮于输入栏上方的浮层，
+        // 不会与面板冲突；这样用过 emoji/加号面板后输入匹配文字仍能正常出现表情建议
+        if (trimmed.length === 0) {
             this.onSuggestionsChange?.([])
             return
         }
@@ -850,6 +818,7 @@ export default struct ConversationInputPanelView {
                             .width(INPUT_ICON_WIDTH)
                             .height(INPUT_ICON_WIDTH)
                             .onClick(() => {
+                                this.recentPhotoRequested = false
                                 this.showAudioRecorderButton = !this.showAudioRecorderButton
                                 this.showExtPanel = false
                                 this.showEmojiPanel = false
@@ -866,6 +835,7 @@ export default struct ConversationInputPanelView {
                                         }
                                     })// .caretPosition(this.caretPosition)
                                     .onFocus(() => {
+                                        this.recentPhotoRequested = false
                                         this.textInputFocused = true
                                     })
                                     .focusable(this.collapseConversationInputPanelViewTimestamp === 0)
@@ -976,6 +946,7 @@ export default struct ConversationInputPanelView {
                             .defaultFocus(false)
                             .focusOnTouch(true)
                             .onClick(() => {
+                                this.recentPhotoRequested = false
                                 this.showExtPanel = false
                                 this.showEmojiPanel = !this.showEmojiPanel;
                                 if (!this.showEmojiPanel) {
@@ -992,6 +963,7 @@ export default struct ConversationInputPanelView {
                                 .height(INPUT_ICON_WIDTH)
                                 .borderRadius(4)
                                 .onClick(() => {
+                                    this.recentPhotoRequested = false
                                     let textMessageContent = new TextMessageContent(this.text.trim());
                                     if (this.mentions.length > 0) {
                                         for (const mention of this.mentions) {
@@ -1026,6 +998,8 @@ export default struct ConversationInputPanelView {
                                 .focusable(true)
                                 .focusOnTouch(true)
                                 .onClick(() => {
+                                    // 点加号：切换「猜你想发送」（再次点击则消失）；是否真正显示由 ConversationPage 按是否有新截图决定
+                                    this.recentPhotoRequested = !this.recentPhotoRequested
                                     this.showExtPanel = true
                                     this.showEmojiPanel = false
                                     this.showAudioRecorderButton = false

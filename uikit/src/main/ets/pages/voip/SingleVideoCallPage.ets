@@ -422,7 +422,7 @@ export default struct SingleVideoCallPage {
                 // 要包一层，click 才能在 ets 层捕获到 click 事件
                 Column() {
                     XComponent({
-                        id: this.targetUserInfo?.uid + this.callSession!.callId,
+                        id: (this.targetUserInfo?.uid ?? '') + (this.callSession?.callId ?? ''),
                         type: XComponentType.SURFACE,
                         controller: this.focusXComponentController,
                     })
@@ -448,7 +448,7 @@ export default struct SingleVideoCallPage {
 
                         Column() {
                             XComponent({
-                                id: this.selfUserInfo!.uid + this.callSession?.callId,
+                                id: (this.selfUserInfo?.uid ?? '') + (this.callSession?.callId ?? ''),
                                 type: XComponentType.SURFACE,
                                 controller: this.previewXComponentController,
                             })
@@ -470,9 +470,9 @@ export default struct SingleVideoCallPage {
                     .justifyContent(FlexAlign.Start)
                     .alignItems(HorizontalAlign.Start)
 
-                    if (this.callSession!.status === CallState.STATUS_OUTGOING
-                        || this.callSession!.status === CallState.STATUS_INCOMING
-                        || this.callSession!.status === CallState.STATUS_CONNECTING) {
+                    if (this.callSession?.status === CallState.STATUS_OUTGOING
+                        || this.callSession?.status === CallState.STATUS_INCOMING
+                        || this.callSession?.status === CallState.STATUS_CONNECTING) {
                         Row() {
                             Image(this.targetUserInfo?.portrait || Config.DEFAULT_PORTRAIT_URL)
                                 .draggable(false)

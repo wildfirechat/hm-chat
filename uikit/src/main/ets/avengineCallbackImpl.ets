@@ -25,6 +25,11 @@ export default class AVEngineCallbackImpl extends AVEngineCallback {
     private avSession?: AVSessionManager.AVSession
     private mainNavPathStack?: NavPathStack
     private ringPlayer?: media.AVPlayer
+    // 记录本次通话 push 到导航栈的页面名。后台收到来电时页面虽被 push 但不会 mount，
+    // 其 aboutToAppear/sessionCallback 不会执行，didCallEndWithReason 也就没机会 pop。
+    // 通话结束时由全局回调 didCallEnded 按名字把这个残留页面移除，避免点击通知进入
+    // App 后再去渲染已失效的通话页面而 crash。
+    private pushedCallPageName?: string
 
     constructor(context: common.UIAbilityContext, mainNavPathStack: NavPathStack) {
         super(context)
@@ -61,6 +66,7 @@ export default class AVEngineCallbackImpl extends AVEngineCallback {
         } else {
             // TODO 会议
         }
+        this.pushedCallPageName = name
         this.mainNavPathStack?.pushPathByName(name, {} as Record<string, object>)
         this.shouldStartRing(true)
     }
@@ -87,6 +93,7 @@ export default class AVEngineCallbackImpl extends AVEngineCallback {
         } else {
             // TODO 会议
         }
+        this.pushedCallPageName = name
         this.mainNavPathStack?.pushPathByName(name, {} as Record<string, object>)
         this.shouldStartRing(false)
     }
@@ -132,7 +139,9 @@ export default class AVEngineCallbackImpl extends AVEngineCallback {
         }
     }
 
-    didCallEnded(session: CallSession) {
+    // 注意：引擎实际传入的是结束原因（reason）与时长（duration），并非 CallSession，
+    // 这里拿不到会话对象，因此用之前记录的 pushedCallPageName 来定位要移除的页面。
+    didCallEnded(reason: number, duration?: number) {
         this.avSession?.deactivate()
         this.avSession?.destroy()
         this.avSession = undefined
@@ -141,6 +150,13 @@ export default class AVEngineCallbackImpl extends AVEngineCallback {
         let mainWindow = AppStorage.get<window.Window>('window')
         mainWindow?.setWindowKeepScreenOn(false)
         this.shouldStopRing()
+
+        // 移除残留的通话页面（主要覆盖后台场景；前台正常结束时页面已被
+        // didCallEndWithReason pop 掉，这里 removeByName 找不到即为 no-op，不会重复 pop）。
+        if (this.pushedCallPageName) {
+            this.mainNavPathStack?.removeByName(this.pushedCallPageName)
+            this.pushedCallPageName = undefined
+        }
     }
 
     private async createAVSessionAndStartContinuousTask(callSession: CallSession) {

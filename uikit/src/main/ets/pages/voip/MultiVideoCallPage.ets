@@ -350,7 +350,7 @@ export default struct MultiVideoCallPage {
             .margin({ top: this.statusBarHeight })
 
             // bottom actions
-            if (this.callSession!.status === CallState.STATUS_INCOMING || this.callSession!.status === CallState.STATUS_OUTGOING) {
+            if (this.callSession?.status === CallState.STATUS_INCOMING || this.callSession?.status === CallState.STATUS_OUTGOING) {
                 Column() {
                     Row() {
                         Column() {
@@ -472,7 +472,7 @@ export default struct MultiVideoCallPage {
             Stack() {
                 Column() {
                     XComponent({
-                        id: this.selfUserInfo!.uid + this.callSession?.callId,
+                        id: (this.selfUserInfo?.uid ?? '') + (this.callSession?.callId ?? ''),
                         type: XComponentType.SURFACE,
                         controller: this.focusVideoRenderController
                     })

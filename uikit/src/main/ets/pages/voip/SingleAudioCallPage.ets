@@ -199,7 +199,7 @@ export default struct SingleAudioCallPage {
             Stack() {
                 // 仅仅用来实现pip
                 XComponent({
-                    id: this.targetUserInfo?.uid + this.callSession!.callId,
+                    id: (this.targetUserInfo?.uid ?? '') + (this.callSession?.callId ?? ''),
                     type: XComponentType.SURFACE,
                     controller: this.dummyXComponentController,
                 })
@@ -238,7 +238,7 @@ export default struct SingleAudioCallPage {
                     .width('100%')
                     .padding(20)
 
-                    if (this.callSession!.status === CallState.STATUS_INCOMING || this.callSession!.status === CallState.STATUS_OUTGOING) {
+                    if (this.callSession?.status === CallState.STATUS_INCOMING || this.callSession?.status === CallState.STATUS_OUTGOING) {
                         Column() {
                             Image(this.targetUserInfo?.portrait|| Config.DEFAULT_PORTRAIT_URL)
                                 .draggable(false)

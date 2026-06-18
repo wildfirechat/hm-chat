@@ -300,26 +300,28 @@ export default struct MultiAudioCallPage {
                         .alignItems(HorizontalAlign.Center)
                     }, (userInfo: UserInfo) => userInfo.uid + '-' + userInfo.updateDt)
 
-                    Column() {
-                        Stack() {
-                            Image(this.selfUserInfo!.portrait)
-                                .width(100)
-                                .height(100)
-                                .borderRadius(4)
-                            Text(this.participantStatus(this.selfUserInfo!))
-                                .maxLines(1)
-                                .fontColor('#7E7E7E')
-                                .fontSize(12)
-                                .margin({ top: 5 })
-                        }
+                    if (this.selfUserInfo) {
+                        Column() {
+                            Stack() {
+                                Image(this.selfUserInfo.portrait)
+                                    .width(100)
+                                    .height(100)
+                                    .borderRadius(4)
+                                Text(this.participantStatus(this.selfUserInfo))
+                                    .maxLines(1)
+                                    .fontColor('#7E7E7E')
+                                    .fontSize(12)
+                                    .margin({ top: 5 })
+                            }
 
-                        Text(this.selfUserInfo!.displayName)
-                            .maxLines(1)
-                            .fontColor(Color.White)
-                            .fontSize(13)
-                            .margin({ top: 10 })
+                            Text(this.selfUserInfo.displayName)
+                                .maxLines(1)
+                                .fontColor(Color.White)
+                                .fontSize(13)
+                                .margin({ top: 10 })
+                        }
+                        .margin(10)
                     }
-                    .margin(10)
                 }
                 .width('100%')
 

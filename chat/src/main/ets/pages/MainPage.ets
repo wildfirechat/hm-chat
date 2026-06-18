@@ -33,6 +33,7 @@ import PCLoginRequestMessageContent from '@wfc/client/src/main/ets/wfc/messages/
 import uikit from '@wfc/uikit'
 import { common } from '@kit.AbilityKit'
 import avengineKit from '@wfc/avenginekit'
+import CallState from '@wfc/avenginekit/src/main/ets/wfc/av/engine/callState'
 import pipHelper from '@wfc/uikit/src/main/ets/pages/voip/pipHelper'
 import window from '@ohos.window'
 
@@ -66,7 +67,12 @@ struct MainPage {
 
     onWantParams() {
         let conversation = this.wantParams?.conversation as Conversation
-        if (conversation) {
+        // 后台收到音视频来电时，avenginekit 已经把通话页面 push 到了导航栈顶（见
+        // AVEngineCallbackImpl.onReceiveCall）。此时来电同时会弹出一条消息通知，
+        // 点击该通知会唤起 App 并触发这里的会话跳转，从而把通话页面覆盖。
+        // 因此当存在进行中的通话时，跳过会话跳转，保持通话页面在最上层。
+        let activeCallSession = avengineKit.getCurrentSession()
+        if (conversation && (!activeCallSession || activeCallSession.status === CallState.STATUS_IDLE)) {
             storage.delete('targetConversation')
             wfc.clearConversationUnreadStatus(conversation!)
             // TODO

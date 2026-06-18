@@ -563,7 +563,7 @@ export default struct ConversationInputPanelView {
     }
 
     aboutToDisappear(): void {
-        if (this.text.trim()) {
+        if (this.text.trim() || this.conversationInfo.draft) {
             wfc.setConversationDraft(this.conversation, this.text.trim())
         }
         wfc.eventEmitter?.off(EventType.GroupMembersUpdate, this.onGroupMembersUpdate)

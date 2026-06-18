@@ -68,6 +68,8 @@ export default struct ConversationPage {
     private focusMessageId: number = 0
     private checkValueChangeTriggerByClick = false
     private scroller: Scroller = new Scroller()
+    // 首次进入会话时，LazyForEach 布局与消息图片为异步完成，记录上次贴底偏移用于判断内容是否已稳定
+    private lastInitialScrollOffset: number = -1
     private touchDownOffsetY: number = 0
     private currentMessageIndex: number = 0
     private unreadStatusCleared: boolean = false
@@ -355,7 +357,8 @@ export default struct ConversationPage {
             wfc.getMessagesV2(this.conversation, 0, true, 20, '', (messages) => {
                 this.conversationMessageDataSource.setMessages(messages);
 
-                this.scroller.scrollEdge(Edge.Bottom)
+                this.lastInitialScrollOffset = -1
+                this.scrollToBottomOnEnter(8)
             }, err => {
                 console.error('getMessageV2 error', err)
             })
@@ -388,6 +391,23 @@ export default struct ConversationPage {
             this.unreadJoinGroupRequestCount = unread
         } else {
             this.unreadJoinGroupRequestCount = 0
+        }
+    }
+
+    /**
+     * 首次进入会话时贴底。
+     * LazyForEach 的首帧布局在下一帧才完成，消息中的图片等内容还会异步加载使高度继续变化，
+     * 同帧只调用一次 scrollEdge 会基于不完整布局，导致未真正滚动到最底部。
+     * 这里在内容布局稳定前重复贴底：每次贴底后比较滚动偏移，偏移不再变化即认为已稳定并停止。
+     */
+    scrollToBottomOnEnter(remaining: number) {
+        this.scroller.scrollEdge(Edge.Bottom)
+        let yOffset = this.scroller.currentOffset().yOffset
+        if (remaining > 0 && yOffset !== this.lastInitialScrollOffset) {
+            this.lastInitialScrollOffset = yOffset
+            setTimeout(() => {
+                this.scrollToBottomOnEnter(remaining - 1)
+            }, 80)
         }
     }
 

@@ -1151,14 +1151,16 @@ export default struct ConversationPage {
                         Text('猜你想发送')
                             .fontSize(12)
                             .fontColor($r('app.color.wf_secondary_text'))
-                            .margin({ right: 8 })
+                            .margin({ bottom: 8 })
                         RecentPhotoComponent({
                             recentPhotoOptions: this.recentPhotoOptions,
                             onRecentPhotoCheckResult: this.recentPhotoCheckResultCallback,
                             onRecentPhotoClick: this.recentPhotoClickCallback,
                         })
                             .width(60)
-                            .height(60)
+                            .height(90)
+                            .clip(true)
+                            .borderRadius(4)
                     }
                     .alignItems(HorizontalAlign.Center)
                     .padding(6)

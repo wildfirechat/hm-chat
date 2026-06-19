@@ -1,6 +1,6 @@
 import { WantAgent, wantAgent } from '@kit.AbilityKit';
 import { backgroundTaskManager } from '@kit.BackgroundTasksKit';
-import { BusinessError } from '@kit.BasicServicesKit';
+import { BusinessError, deviceInfo } from '@kit.BasicServicesKit';
 import uikit from '../uikit';
 
 export function startContinuousTask(context: Context, continuousTaskLabel: string) {
@@ -26,8 +26,12 @@ export function startContinuousTask(context: Context, continuousTaskLabel: strin
 
     // 通过wantAgent模块下getWantAgent方法获取WantAgent对象
     wantAgent.getWantAgent(wantAgentInfo).then((wantAgentObj: WantAgent) => {
+        let bgMode: backgroundTaskManager.BackgroundMode = backgroundTaskManager.BackgroundMode.AUDIO_RECORDING
+        if (deviceInfo.sdkApiVersion >= 13) {
+            bgMode = backgroundTaskManager.BackgroundMode.VOIP
+        }
         backgroundTaskManager.startBackgroundRunning(context,
-            backgroundTaskManager.BackgroundMode.AUDIO_RECORDING, wantAgentObj).then(() => {
+            bgMode, wantAgentObj).then(() => {
             console.info(`Succeeded in operationing startBackgroundRunning.`);
         }).catch((err: BusinessError) => {
             console.error(`Failed to operation startBackgroundRunning. Code is ${err.code}, message is ${err.message}`);

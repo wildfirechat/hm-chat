@@ -306,7 +306,9 @@ export default struct ConversationListTab {
             .width('100%')
             .cachedCount(5)
             .contentEndOffset(56)
-            .backgroundColor($r('app.color.wf_background'))
+            // 下拉回弹（over-scroll）露出的是 List 自身背景；会话行各自绘制白色背景
+            // 这里改用标题栏底色，使下拉区域与标题色一致。
+            .backgroundColor($r('app.color.wf_primary_background_color'))
         }
         .width('100%')
         .height('100%')

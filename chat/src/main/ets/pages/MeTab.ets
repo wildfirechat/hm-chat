@@ -155,6 +155,7 @@ export default struct MeTab {
             .padding({ bottom: 60 })
         }
         .scrollBar(BarState.Off)
+        .align(Alignment.Top)
         .width('100%')
         .height('100%')
         .backgroundColor($r('app.color.wf_primary_background_color'))

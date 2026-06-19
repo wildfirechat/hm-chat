@@ -10,6 +10,7 @@ import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import OptionItemView from '@wfc/uikit/src/main/ets/view/OptionItemView'
 import { appNavigationDestinations } from '../mainNavigationConfig'
 import { showToast } from '@wfc/uikit/src/main/ets/common/utils/Toast'
+import { FontSize } from '@wfc/uikit/src/main/ets/common/design/Tokens'
 
 @Preview
 @Component
@@ -61,7 +62,7 @@ export default struct RestoreSourcePage {
           title: '从电脑端恢复',
           showDivider: false
         })
-          .margin({ top: 10 })
+          .margin({ top: 12 })
           .opacity(this.isPCOnline ? 1.0 : 0.4)
           .onClick(() => {
             this.selectPCRestore()
@@ -69,7 +70,7 @@ export default struct RestoreSourcePage {
 
         // 提示信息
         Text(this.isPCOnline ? '提示：从电脑端恢复需要电脑端在线' : '提示：电脑端未在线，无法从电脑端恢复')
-          .fontSize(14)
+          .fontSize(FontSize.sm)
           .fontColor($r('app.color.wf_secondary_text'))
           .margin({ top: 20 })
           .padding({ left: 16, right: 16 })

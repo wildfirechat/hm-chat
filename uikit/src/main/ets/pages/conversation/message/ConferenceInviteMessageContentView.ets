@@ -2,6 +2,7 @@ import ConferenceInviteMessageContent from '@wfc/client/src/main/ets/wfc/av/mess
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import { uikitNavigationDestinations } from '../../uikitNavigationConfig'
+import { FontSize, Radius } from '../../../common/design/Tokens'
 
 @Component
 export default struct ConferenceInviteMessageContentView {
@@ -26,31 +27,31 @@ export default struct ConferenceInviteMessageContentView {
         Column() {
             Row() {
                 Image(this.hostPortrait)
-                    .width(50)
-                    .height(50)
-                    .margin(10)
+                    .width(52)
+                    .height(52)
+                    .margin(12)
                 Column() {
                     Text(this.conferenceInviteMessageContent().title)
                         .textOverflow({ overflow: TextOverflow.Ellipsis })
                         .width(120)
-                        .fontSize(14)
+                        .fontSize(FontSize.sm)
                         .maxLines(1)
                     Text(this.conferenceInviteMessageContent().desc)
-                        .fontSize(12)
+                        .fontSize(FontSize.xs)
                         .maxLines(1)
                 }
-                .padding({ right: 10 })
+                .padding({ right: 12 })
                 .justifyContent(FlexAlign.SpaceBetween)
                 .alignItems(HorizontalAlign.Start)
             }
             .justifyContent(FlexAlign.Start)
 
             Divider()
-                .margin({ left: 10, right: 10, bottom: 10 })
+                .margin({ left: 12, right: 12, bottom: 12 })
             Text('会议邀请')
                 .maxLines(1)
-                .fontSize(12)
-                .margin({ left: 10, bottom: 10 })
+                .fontSize(FontSize.xs)
+                .margin({ left: 12, bottom: 12 })
         }
         .onClick(() => {
             this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ConferenceInfoPage, {
@@ -61,6 +62,6 @@ export default struct ConferenceInviteMessageContentView {
         .width(200)
         .alignItems(HorizontalAlign.Start)
         .backgroundColor(this.message.direction === 0 ? $r('app.color.wf_sent_bubble_bg') : $r('app.color.wf_received_bubble_bg'))
-        .borderRadius(4)
+        .borderRadius(Radius.sm)
     }
 }

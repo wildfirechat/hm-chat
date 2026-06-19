@@ -12,6 +12,7 @@ import PollMessageContent from '@wfc/client/src/main/ets/wfc/messages/pollMessag
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc';
 import { uikitNavigationDestinations } from '../uikitNavigationConfig';
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo';
+import { FontSize, Radius } from '../../common/design/Tokens'
 
 interface PollCallback {
     onSuccess: (poll: Poll) => void;
@@ -357,7 +358,7 @@ export default struct PollDetailPage {
                             .height(20)
                             .fill($r('app.color.wf_primary'))
                         Text('✓')
-                            .fontSize(12)
+                            .fontSize(FontSize.xs)
                             .fontColor($r('app.color.wf_background'))
                     }
                     .width(32)
@@ -374,17 +375,17 @@ export default struct PollDetailPage {
             }
 
             // 中间选项文字和进度条
-            Column({ space: 6 }) {
+            Column({ space: 8 }) {
                 Row() {
                     Text(option.optionText)
-                        .fontSize(14)
+                        .fontSize(FontSize.sm)
                         .fontColor(this.getOptionFontColor(option.optionId))
                         .layoutWeight(1)
 
                     // 百分比（显示结果时）
                     if (this.poll?.shouldShowResult()) {
                         Text(`${option.votePercent}% (${option.voteCount}票)`)
-                            .fontSize(12)
+                            .fontSize(FontSize.xs)
                             .fontColor($r('app.color.wf_secondary_text'))
                             .margin({ left: 8 })
                     }
@@ -399,14 +400,14 @@ export default struct PollDetailPage {
                             .width('100%')
                             .height(4)
                             .backgroundColor($r('app.color.wf_divider'))
-                            .borderRadius(2)
+                            .borderRadius(Radius.xs)
 
                         // 进度条
                         Row()
                             .width(`${option.votePercent}%`)
                             .height(4)
                             .backgroundColor($r('app.color.wf_primary'))
-                            .borderRadius(2)
+                            .borderRadius(Radius.xs)
                     }
                     .width('100%')
                 }
@@ -431,7 +432,7 @@ export default struct PollDetailPage {
                         .height(40)
                         .color($r('app.color.wf_primary'))
                     Text('加载中...')
-                        .fontSize(14)
+                        .fontSize(FontSize.sm)
                         .fontColor($r('app.color.wf_tertiary_text'))
                         .margin({ top: 8 })
                 }
@@ -441,7 +442,7 @@ export default struct PollDetailPage {
             } else if (!this.poll) {
                 Column() {
                     Text('加载失败')
-                        .fontSize(16)
+                        .fontSize(FontSize.md)
                         .fontColor($r('app.color.wf_tertiary_text'))
                 }
                 .width('100%')
@@ -458,26 +459,26 @@ export default struct PollDetailPage {
                                     Image(this.creatorInfo?.portrait || $r('app.media.avatar_def'))
                                         .width(24)
                                         .height(24)
-                                        .borderRadius(12)
+                                        .borderRadius(Radius.xl)
                                     
                                     Text(`发起者：${this.getCreatorName()}`)
-                                        .fontSize(12)
+                                        .fontSize(FontSize.xs)
                                         .fontColor($r('app.color.wf_secondary_text'))
                                     
                                     // 状态标签
                                     Text(this.getStatusText())
-                                        .fontSize(11)
+                                        .fontSize(FontSize.xs)
                                         .fontColor(this.getStatusColor())
-                                        .padding({ left: 6, right: 6, top: 2, bottom: 2 })
+                                        .padding({ left: 8, right: 8, top: 2, bottom: 2 })
                                         .backgroundColor($r('app.color.wf_secondary_background'))
-                                        .borderRadius(4)
+                                        .borderRadius(Radius.sm)
                                         .visibility(this.getStatusText() ? Visibility.Visible : Visibility.None)
                                 }
                                 .width('100%')
 
                                 // 标题
                                 Text(this.poll.title)
-                                    .fontSize(18)
+                                    .fontSize(FontSize.lg)
                                     .fontWeight(FontWeight.Bold)
                                     .fontColor($r('app.color.wf_primary_text'))
                                     .width('100%')
@@ -485,7 +486,7 @@ export default struct PollDetailPage {
                                 // 描述
                                 if (this.poll.desc) {
                                     Text(this.poll.desc)
-                                        .fontSize(14)
+                                        .fontSize(FontSize.sm)
                                         .fontColor($r('app.color.wf_secondary_text'))
                                         .width('100%')
                                 }
@@ -493,22 +494,22 @@ export default struct PollDetailPage {
                                 // 类型标签
                                 Row({ space: 8 }) {
                                     Text(this.poll.pollType === 1 ? '单选' : '多选')
-                                        .fontSize(12)
+                                        .fontSize(FontSize.xs)
                                         .fontColor($r('app.color.wf_primary'))
                                         .padding({ left: 8, right: 8, top: 4, bottom: 4 })
                                         .backgroundColor($r('app.color.wf_secondary_background'))
-                                        .borderRadius(4)
+                                        .borderRadius(Radius.sm)
                                 }
                                 .width('100%')
                             }
                             .width('100%')
                             .padding(16)
                             .backgroundColor($r('app.color.wf_background'))
-                            .borderRadius(12)
+                            .borderRadius(Radius.xl)
 
                             // 选项列表标题
                             Text('选项')
-                                .fontSize(14)
+                                .fontSize(FontSize.sm)
                                 .fontColor($r('app.color.wf_secondary_text'))
                                 .fontWeight(FontWeight.Medium)
                                 .width('100%')
@@ -530,12 +531,12 @@ export default struct PollDetailPage {
                             }
                             .width('100%')
                             .backgroundColor($r('app.color.wf_background'))
-                            .borderRadius(12)
+                            .borderRadius(Radius.xl)
                             .clip(true)
 
                             // 底部状态
                             Text(this.getFooterStatusText())
-                                .fontSize(12)
+                                .fontSize(FontSize.xs)
                                 .fontColor($r('app.color.wf_tertiary_text'))
                                 .width('100%')
                                 .textAlign(TextAlign.Center)
@@ -554,10 +555,10 @@ export default struct PollDetailPage {
                             Button('提交投票')
                                 .width('100%')
                                 .height(44)
-                                .fontSize(16)
+                                .fontSize(FontSize.md)
                                 .fontColor($r('app.color.wf_background'))
                                 .backgroundColor(this.selectedOptions.size > 0 ? $r('app.color.wf_primary') : $r('app.color.wf_divider'))
-                                .borderRadius(8)
+                                .borderRadius(Radius.lg)
                                 .enabled(this.selectedOptions.size > 0)
                                 .onClick(() => { this.submitVote(); })
                         }
@@ -572,10 +573,10 @@ export default struct PollDetailPage {
                                 Button('导出明细')
                                     .layoutWeight(1)
                                     .height(44)
-                                    .fontSize(14)
+                                    .fontSize(FontSize.sm)
                                     .fontColor($r('app.color.wf_background'))
                                     .backgroundColor($r('app.color.wf_primary'))
-                                    .borderRadius(8)
+                                    .borderRadius(Radius.lg)
                                     .onClick(() => { this.exportPollDetails(); })
                             }
 
@@ -584,19 +585,19 @@ export default struct PollDetailPage {
                                 Button('删除投票')
                                     .layoutWeight(this.poll.anonymous === 0 ? 1 : 2)
                                     .height(44)
-                                    .fontSize(14)
+                                    .fontSize(FontSize.sm)
                                     .fontColor($r('app.color.wf_background'))
                                     .backgroundColor($r('app.color.wf_danger'))
-                                    .borderRadius(8)
+                                    .borderRadius(Radius.lg)
                                     .onClick(() => { this.deletePoll(); })
                             } else {
                                 Button('结束投票')
                                     .layoutWeight(this.poll.anonymous === 0 ? 1 : 2)
                                     .height(44)
-                                    .fontSize(14)
+                                    .fontSize(FontSize.sm)
                                     .fontColor($r('app.color.wf_background'))
                                     .backgroundColor($r('app.color.wf_warning'))
-                                    .borderRadius(8)
+                                    .borderRadius(Radius.lg)
                                     .onClick(() => { this.closePoll(); })
                             }
                         }

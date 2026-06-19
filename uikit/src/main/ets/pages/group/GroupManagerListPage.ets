@@ -5,6 +5,7 @@ import GroupMemberType from '@wfc/client/src/main/ets/wfc/model/groupMemberType'
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
 import PickGroupMemberModal from './PickGroupMemberModal'
 import BottomActionSheetDialog from '../../view/BottomActionSheetDialog'
+import { Radius } from '../../common/design/Tokens'
 
 @Component
 export default struct GroupManagerListPage {
@@ -46,14 +47,14 @@ export default struct GroupManagerListPage {
                 Text('群主')
                     .textAlign(TextAlign.Start)
                     .backgroundColor($r('app.color.wf_secondary_background'))
-                    .padding({ left: 10, top: 5, bottom: 5 })
+                    .padding({ left: 12, top: 4, bottom: 4 })
                     .width('100%')
                 Row() {
                     Image(this.groupOwnerUerInfo!.portrait)
                         .width(40)
                         .height(40)
-                        .margin(10)
-                        .borderRadius(4)
+                        .margin(12)
+                        .borderRadius(Radius.sm)
                     Text(this.groupOwnerUerInfo?.displayName)
                         .maxLines(1)
                         .fontColor($r('app.color.wf_primary_text'))
@@ -72,7 +73,7 @@ export default struct GroupManagerListPage {
                     Text('管理员')
                         .textAlign(TextAlign.Start)
                         .backgroundColor($r('app.color.wf_secondary_background'))
-                        .padding({ left: 10, top: 5, bottom: 5 })
+                        .padding({ left: 12, top: 4, bottom: 4 })
                         .width('100%')
                     List() {
                         ForEach(this.groupManagerUserInfos, (info: UserInfo) => {
@@ -81,8 +82,8 @@ export default struct GroupManagerListPage {
                                     Image(info.portrait)
                                         .width(40)
                                         .height(40)
-                                        .margin(10)
-                                        .borderRadius(4)
+                                        .margin(12)
+                                        .borderRadius(Radius.sm)
                                     Text(info.displayName)
                                         .maxLines(1)
                                         .fontColor($r('app.color.wf_primary_text'))
@@ -138,8 +139,8 @@ export default struct GroupManagerListPage {
                         Image($r('app.media.avatar_def'))
                             .width(40)
                             .height(40)
-                            .margin(10)
-                            .borderRadius(4)
+                            .margin(12)
+                            .borderRadius(Radius.sm)
                         Text('添加管理员')
                             .maxLines(1)
                             .fontColor($r('app.color.wf_primary_text'))

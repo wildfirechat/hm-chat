@@ -5,6 +5,7 @@ import MessageContentType from '@wfc/client/src/main/ets/wfc/messages/messageCon
 import LinkMessageContent from '@wfc/client/src/main/ets/wfc/messages/linkMessageContent'
 import { uikitNavigationDestinations } from '../uikitNavigationConfig'
 import { timeFormat } from '../../util/helper'
+import { FontSize, Radius } from '../../common/design/Tokens'
 
 @Component
 export default struct SearchMessageLinkPage {
@@ -52,7 +53,7 @@ export default struct SearchMessageLinkPage {
                 if (this.messages.length === 0 && !this.isLoading) {
                     Column() {
                         Text('暂无链接')
-                            .fontSize(14)
+                            .fontSize(FontSize.sm)
                             .fontColor($r('app.color.wf_tertiary_text'))
                     }
                     .width('100%')
@@ -92,44 +93,44 @@ export default struct SearchMessageLinkPage {
         Row() {
             Column() {
                 Text(this.linkMessageContent(msg).title)
-                    .fontSize(16)
+                    .fontSize(FontSize.md)
                     .maxLines(2)
                     .textOverflow({ overflow: TextOverflow.Ellipsis })
                     .fontColor($r('app.color.wf_primary_text'))
 
                 Row() {
                     Text(wfc.getUserDisplayName(msg.from))
-                        .fontSize(12)
+                        .fontSize(FontSize.xs)
                         .fontColor($r('app.color.wf_tertiary_text'))
-                        .margin({ right: 10 })
+                        .margin({ right: 12 })
                     Text(timeFormat(msg.timestamp))
-                        .fontSize(12)
+                        .fontSize(FontSize.xs)
                         .fontColor($r('app.color.wf_tertiary_text'))
                 }
-                .margin({ top: 5 })
+                .margin({ top: 4 })
             }
             .layoutWeight(1)
             .alignItems(HorizontalAlign.Start)
-            .margin({ right: 10 })
+            .margin({ right: 12 })
 
             if (this.linkMessageContent(msg).thumbnail) {
                 Image(this.linkMessageContent(msg).thumbnail)
                     .width(60)
                     .height(60)
                     .objectFit(ImageFit.Cover)
-                    .borderRadius(4)
+                    .borderRadius(Radius.sm)
             } else {
                 // TODO
                 Image($r('app.media.ic_file_type_html')) // Assuming this icon exists or similar, or just a default
                     .width(60)
                     .height(60)
                     .objectFit(ImageFit.Cover)
-                    .borderRadius(4)
+                    .borderRadius(Radius.sm)
                     .backgroundColor($r('app.color.wf_primary_background_color'))
             }
         }
         .width('100%')
-        .padding(10)
+        .padding(12)
         .backgroundColor($r('app.color.wf_background'))
     }
 

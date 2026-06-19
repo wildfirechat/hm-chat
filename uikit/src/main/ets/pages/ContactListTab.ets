@@ -10,6 +10,7 @@ import Config from '@wfc/client/src/main/ets/config'
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
 import { showToast } from '../common/utils/Toast'
 import UserSettingScope from '@wfc/client/src/main/ets/wfc/client/userSettingScope'
+import { FontSize, Radius, scaledSize, LayoutScale } from '../common/design/Tokens'
 
 interface ContactListHeader {
     title: string,
@@ -22,6 +23,7 @@ interface ContactListHeader {
 
 @Component
 export default struct ContactListTab {
+    @StorageProp('fontScale') fontScale: number = 1.0;
     @Link contactTabUnreadCount: number
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
     @State contactListHeaders: ContactListHeader[] = [
@@ -223,41 +225,49 @@ export default struct ContactListTab {
                             ListItem() {
                                 Row() {
                                     Image(header.icon)
-                                        .width(40)
-                                        .height(40)
+                                        .width(scaledSize(40, this.fontScale))
+                                        .height(scaledSize(40, this.fontScale))
                                         .draggable(false)
-                                        .borderRadius(4)
+                                        .borderRadius(Radius.sm)
                                     if (header.badgeValue) {
                                         Badge({
                                             position: BadgePosition.Right,
                                             value: header.badgeValue,
-                                            style: { badgeSize: 14, badgeColor: $r('app.color.wf_badge_color') }
+                                            style: { badgeSize: scaledSize(14, this.fontScale), badgeColor: $r('app.color.wf_badge_color') }
                                         }) {
                                             Text(header.title)
                                                 .fontColor($r('app.color.wf_primary_text'))
                                                 .padding({ left: 16 })
+                                                .width('100%')
+                                                .maxLines(1)
+                                                .textOverflow({ overflow: TextOverflow.Ellipsis })
                                         }
                                         .padding({ left: 20 })
+                                        .layoutWeight(1)
                                     } else {
                                         Badge({
                                             position: BadgePosition.Right,
                                             maxCount: 99,
                                             count: header.badgeCount,
-                                            style: { badgeSize: 14, badgeColor: $r('app.color.wf_badge_color') }
+                                            style: { badgeSize: scaledSize(14, this.fontScale), badgeColor: $r('app.color.wf_badge_color') }
                                         }) {
                                             Text(header.title)
                                                 .fontColor($r('app.color.wf_primary_text'))
                                                 .padding({ left: 16 })
+                                                .width('100%')
+                                                .maxLines(1)
+                                                .textOverflow({ overflow: TextOverflow.Ellipsis })
                                         }
                                         .padding({ left: 20 })
+                                        .layoutWeight(1)
                                     }
                                 }
                                 .onClick(() => {
                                     header.action()
                                 })
-                                .padding({ left: 16, right: 10 })
+                                .padding({ left: 16, right: 12 })
                                 .width('100%')
-                                .height(60)
+                                .constraintSize({ minHeight: scaledSize(60, this.fontScale, LayoutScale.row) })
                             }
                             .stateStyles({
                                 pressed: {
@@ -279,10 +289,10 @@ export default struct ContactListTab {
                                     Row() {
                                         Text(groupedUserInfo.category)
                                             .width('100%')
-                                            .fontSize(13)
+                                            .fontSize(FontSize.sm)
                                             .fontColor($r('app.color.wf_secondary_text'))
                                     }
-                                    .height(30)
+                                    .height(32)
                                     .padding({ left: 16 })
                                     .alignItems(VerticalAlign.Center)
                                     .backgroundColor($r('app.color.wf_secondary_background'))
@@ -291,27 +301,32 @@ export default struct ContactListTab {
                                     Image(groupedUserInfo.userInfo.portrait)
                                         .alt($r('app.media.avatar_def'))
                                         .draggable(false)
-                                        .width(40)
-                                        .height(40)
-                                        .borderRadius(4)
+                                        .width(scaledSize(40, this.fontScale))
+                                        .height(scaledSize(40, this.fontScale))
+                                        .borderRadius(Radius.sm)
                                     Column() {
                                         Text(groupedUserInfo.userInfo.friendAlias ? groupedUserInfo.userInfo.friendAlias : groupedUserInfo.userInfo.displayName)
                                             .fontColor($r('app.color.wf_primary_text'))
                                             .maxLines(1)
+                                            .textOverflow({ overflow: TextOverflow.Ellipsis })
+                                            .width('100%')
                                             .padding({ left: 16 })
                                         if (groupedUserInfo.onlineState) {
                                             Text(groupedUserInfo.onlineState.desc())
                                                 .fontColor($r('app.color.wf_tertiary_text'))
                                                 .maxLines(1)
+                                                .textOverflow({ overflow: TextOverflow.Ellipsis })
+                                                .width('100%')
                                                 .padding({ left: 16, top: 4 })
-                                                .fontSize(11)
+                                                .fontSize(FontSize.xs)
                                         }
                                     }
+                                    .layoutWeight(1)
                                     .alignItems(HorizontalAlign.Start)
                                 }
-                                .height(60)
+                                .constraintSize({ minHeight: scaledSize(60, this.fontScale, LayoutScale.row) })
                                 .width('100%')
-                                .padding({ left: 16, right: 10 })
+                                .padding({ left: 16, right: 12,top:8, bottom:8 })
                                 .onClick(() => {
                                     this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.UserInfoPage, {
                                         'userInfo': groupedUserInfo.userInfo
@@ -335,7 +350,7 @@ export default struct ContactListTab {
                     strokeWidth: 0.4,
                     color: $r('app.color.wf_divider'),
                     // TODO groupedUserInfo 里面添加一个 isLast，然后就能实现动态 startMargin 了
-                    startMargin: 72,
+                    startMargin: scaledSize(72, this.fontScale),
                 })
                 .scrollBar(BarState.Off)
                 .width('100%')
@@ -346,7 +361,7 @@ export default struct ContactListTab {
             .width('100%')
             .justifyContent(FlexAlign.Start)
             .backgroundColor($r('app.color.wf_background'))
-            .padding({ top: 5 })
+            .padding({ top: 4 })
 
             AlphabetIndexer({ arrayValue: this.contactCategories, selected: 0 })
                 .selectedColor(Color.White)// 选中项文本颜色
@@ -355,7 +370,7 @@ export default struct ContactListTab {
                 .popupBackground($r('app.color.wf_alphabet_indexer_popup_bg'))// 弹出框背景颜色
                 .usingPopup(true)// 是否显示弹出框
                 .selectedFont({ size: 16, weight: FontWeight.Bolder })// 选中项字体样式
-                .popupFont({ size: 30, weight: FontWeight.Bolder })// 弹出框内容的字体样式
+                .popupFont({ size: 32, weight: FontWeight.Bolder })// 弹出框内容的字体样式
                 .itemSize(28)// 每一项的尺寸大小
                 .alignStyle(IndexerAlign.Left)// 弹出框在索引条右侧弹出
                 .onSelect((index: number) => {

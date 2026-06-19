@@ -3,7 +3,6 @@ import Config from '@wfc/client/src/main/ets/config'
 import WfcWebView from './workspace/WfcWebView'
 import DSBridge from './workspace/dsBridge'
 
-
 @Component
 export default struct WorkSpaceTab {
     webviewController: web_webview.WebviewController = new web_webview.WebviewController()

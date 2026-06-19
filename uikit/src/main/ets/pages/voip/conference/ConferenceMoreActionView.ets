@@ -4,6 +4,7 @@ import { BusinessError } from "@kit.BasicServicesKit"
 import { uikitNavigationDestinations} from "../../uikitNavigationConfig";
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType'
+import { FontSize } from '../../../common/design/Tokens'
 
 @Component
 export default struct ConferenceMoreActionView {
@@ -46,11 +47,11 @@ export default struct ConferenceMoreActionView {
             Column() {
                 Image(src)
                     .draggable(false)
-                    .width(30)
-                    .height(30)
+                    .width(32)
+                    .height(32)
                 Text(title)
-                    .margin({ top: 10 })
-                    .fontSize(13)
+                    .margin({ top: 12 })
+                    .fontSize(FontSize.sm)
             }
             .onClick(cb)
         }

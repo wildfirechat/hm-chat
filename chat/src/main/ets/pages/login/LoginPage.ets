@@ -8,6 +8,7 @@ import { inputMethod } from '@kit.IMEKit';
 import { SlideVerifyView, SlideVerifyViewDelegate } from '@wfc/uikit/src/main/ets/view/SlideVerifyView';
 import Config from '@wfc/client/src/main/ets/config';
 import { bundleManager } from '@kit.AbilityKit';
+import { FontSize, Radius } from '@wfc/uikit/src/main/ets/common/design/Tokens'
 
 import('@wfc/uikit/src/main/ets/pages/misc/WebViewPageWithRouter') //引入共享包中的命名路由页面
 
@@ -43,7 +44,6 @@ struct LoginPage {
     @State pendingAction: string = '' // 'send_code', 'password_login', 'code_login'
 
     controller: TextInputController = new TextInputController()
-
 
     aboutToAppear(): void {
         this.phoneNumber = this.lastLoginMobile
@@ -122,12 +122,12 @@ struct LoginPage {
             // 原有的登录界面
             Column() {
                 Text(this.isLoginByPassword ? '密码登录' : '验证码登录')
-                    .fontSize(26)
+                    .fontSize(FontSize.xxl)
                     .fontColor($r('app.color.wf_primary_text'))
 
                 Row() {
                     Text('手机号')
-                        .width(50)
+                        .width(52)
                         .fontColor($r('app.color.wf_primary_text'))
                     TextInput({
                         text: this.phoneNumber,
@@ -135,13 +135,13 @@ struct LoginPage {
                         controller: this.controller
                     })
                         .placeholderColor($r('app.color.wf_tertiary_text'))
-                        .placeholderFont({ size: 14, weight: 400 })
+                        .placeholderFont({ size: 16, weight: 400 })
                         .caretColor($r('app.color.wf_primary'))
                         .layoutWeight(1)
                         .height(40)
                         .margin({ left: 20 })
-                        .fontSize(14)
-                        .borderRadius(4)
+                        .fontSize(FontSize.sm)
+                        .borderRadius(Radius.sm)
                         .type(InputType.Number)
                         .enabled(!this.isLogin)
                         .fontColor($r('app.color.wf_primary_text'))
@@ -151,22 +151,22 @@ struct LoginPage {
                         })
                 }
                 .width('100%')
-                .margin({ top: 30 })
+                .margin({ top: 32 })
 
                 Row() {
                     Text(this.isLoginByPassword ? '密码' : '验证码')
-                        .width(50)
+                        .width(52)
                         .fontColor($r('app.color.wf_primary_text'))
                     if (this.isLoginByPassword) {
                         TextInput({ text: this.password, placeholder: '请输入密码', controller: this.controller })
                             .placeholderColor($r('app.color.wf_tertiary_text'))
-                            .placeholderFont({ size: 14, weight: 400 })
+                            .placeholderFont({ size: 16, weight: 400 })
                             .caretColor($r('app.color.wf_primary'))
                             .layoutWeight(1)
                             .height(40)
                             .margin({ left: 20, bottom: 20, top: 20 })
-                            .fontSize(14)
-                            .borderRadius(4)
+                            .fontSize(FontSize.sm)
+                            .borderRadius(Radius.sm)
                             .type(InputType.Password)
                             .fontColor($r('app.color.wf_primary_text'))
                             .backgroundColor($r('app.color.wf_background'))
@@ -178,13 +178,13 @@ struct LoginPage {
                     } else {
                         TextInput({ text: this.authCode, placeholder: '请输入验证码', controller: this.controller })
                             .placeholderColor($r('app.color.wf_tertiary_text'))
-                            .placeholderFont({ size: 14, weight: 400 })
+                            .placeholderFont({ size: 16, weight: 400 })
                             .caretColor($r('app.color.wf_primary'))
                             .layoutWeight(1)
                             .height(40)
                             .margin(20)
-                            .fontSize(14)
-                            .borderRadius(4)
+                            .fontSize(FontSize.sm)
+                            .borderRadius(Radius.sm)
                             .type(InputType.Number)
                             .fontColor($r('app.color.wf_primary_text'))
                             .backgroundColor($r('app.color.wf_background'))
@@ -194,9 +194,9 @@ struct LoginPage {
                             })
 
                         Button('获取验证码')
-                            .fontSize(12)
+                            .fontSize(FontSize.xs)
                             .type(ButtonType.Normal)
-                            .borderRadius(4)
+                            .borderRadius(Radius.sm)
                             .enabled(!this.isLogin && this.phoneNumber.length === 11)
                             .onClick(() => {
                                 inputMethod.getController().stopInputSession()
@@ -224,7 +224,7 @@ struct LoginPage {
                     Blank()
                         .layoutWeight(1)
                     Text(this.isLoginByPassword ? '注册/验证码登录' : '使用密码登录')
-                        .fontSize(13)
+                        .fontSize(FontSize.sm)
                         .fontColor($r('app.color.wf_secondary_text'))
                         .textAlign(TextAlign.End)
                         .onClick(() => {
@@ -238,10 +238,10 @@ struct LoginPage {
                             if (this.isLogin) {
                                 LoadingProgress().width(20).height(20).margin({ left: 12 }).color(Color.White)
                             }
-                            Text(this.isLogin ? '登录中...' : '登录').fontColor(Color.White).margin({ left: 5 })
+                            Text(this.isLogin ? '登录中...' : '登录').fontColor(Color.White).margin({ left: 4 })
                         }.alignItems(VerticalAlign.Center)
                     }
-                    .borderRadius(4)
+                    .borderRadius(Radius.sm)
                     .backgroundColor($r('app.color.wf_primary'))
                     .width('100%')
                     .height(40)
@@ -294,7 +294,6 @@ struct LoginPage {
                 .margin({ top: 40 })
                 .width('100%')
 
-
                 Blank()
                     .layoutWeight(1)
 
@@ -305,11 +304,11 @@ struct LoginPage {
                             this.isAgreeUserAgreementAndPrivacyPolicy = checked
                         })
                     Text('登录即代表同意')
-                        .fontSize(12)
+                        .fontSize(FontSize.xs)
                         .fontColor($r('app.color.wf_secondary_text'))
                     Text('《野火IM用户协议》')
                         .fontColor($r('app.color.wf_link'))
-                        .fontSize(12)
+                        .fontSize(FontSize.xs)
                         .onClick(() => {
                             router.pushNamedRoute({
                                 name: 'webViewPageWithRouter',
@@ -320,11 +319,11 @@ struct LoginPage {
                             }, router.RouterMode.Standard)
                         })
                     Text('和')
-                        .fontSize(12)
+                        .fontSize(FontSize.xs)
                         .fontColor($r('app.color.wf_secondary_text'))
                     Text('《野火IM隐私政策》')
                         .fontColor($r('app.color.wf_link'))
-                        .fontSize(12)
+                        .fontSize(FontSize.xs)
                         .onClick(() => {
                             router.pushNamedRoute({
                                 name: 'webViewPageWithRouter',
@@ -336,7 +335,7 @@ struct LoginPage {
                         })
                 }
                 .justifyContent(FlexAlign.Center)
-                .padding({ bottom: 10 })
+                .padding({ bottom: 12 })
                 .width('100%')
             }
             .alignItems(HorizontalAlign.Start)

@@ -15,6 +15,7 @@ import OptionItemView from '../../view/OptionItemView';
 import avenginekit from '@wfc/avenginekit';
 import { checkAndRequestPermission } from '../../helper/permissionHelper';
 import WfcScheme from '../../wfcScheme'
+import { FontSize, Radius } from '../../common/design/Tokens'
 
 @Component
 export default struct UserInfoPage {
@@ -97,7 +98,7 @@ export default struct UserInfoPage {
                     Image(this.userInfo!.portrait)
                         .width(60)
                         .height(60)
-                        .borderRadius(4)
+                        .borderRadius(Radius.sm)
                         .onClick(() => {
                             if (this.userInfo?.uid === wfc.getUserId()) {
                                 this.updatePortrait()
@@ -108,21 +109,21 @@ export default struct UserInfoPage {
                             .width('100%')
                             .maxLines(1)
                             .textOverflow({ overflow: TextOverflow.Ellipsis })
-                            .fontSize(20)
+                            .fontSize(FontSize.xl)
                             .fontColor($r('app.color.wf_primary_text'))
                         Text(`野火ID： ${this.userInfo!.name}`)
                             .width('100%')
                             .maxLines(1)
                             .wordBreak(WordBreak.BREAK_ALL)
                             .textOverflow({ overflow: TextOverflow.Ellipsis })
-                            .fontSize(14)
+                            .fontSize(FontSize.sm)
                             .fontColor($r('app.color.wf_tertiary_text'))
                     }
-                    .padding({ left: 10 })
+                    .padding({ left: 12 })
                     .layoutWeight(1)
                     .alignItems(HorizontalAlign.Start)
                 }
-                .padding(10)
+                .padding(12)
                 .width('100%')
                 .justifyContent(FlexAlign.Start)
                 .backgroundColor($r('app.color.wf_background'))
@@ -159,7 +160,7 @@ export default struct UserInfoPage {
                 Column() {
                     Text('发消息')
                         .width('100%')
-                        .padding(15)
+                        .padding(16)
                         .textAlign(TextAlign.Center)
                         .fontColor($r('app.color.wf_primary_text'))
                         .stateStyles({
@@ -181,7 +182,7 @@ export default struct UserInfoPage {
 
                     Text('音视频通话')
                         .width('100%')
-                        .padding(15)
+                        .padding(16)
                         .textAlign(TextAlign.Center)
                         .fontColor($r('app.color.wf_primary_text'))
                         .stateStyles({
@@ -239,7 +240,7 @@ export default struct UserInfoPage {
                 if (!this.isMyFriend && this.userInfo!.uid !== wfc.getUserId()) {
                     Text('添加到通讯录')
                         .width('100%')
-                        .padding(15)
+                        .padding(16)
                         .margin({ top: 20 })
                         .textAlign(TextAlign.Center)
                         .fontColor($r('app.color.wf_primary_text'))

@@ -4,6 +4,7 @@ import AppServerError from '../../api/appServerError'
 import { showToast } from '../../common/utils/Toast'
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import PCSession from '@wfc/client/src/main/ets/wfc/model/pcsession'
+import { FontSize, Radius } from '../../common/design/Tokens'
 
 @Component
 @Preview
@@ -49,12 +50,12 @@ export default struct PCLoginPage {
         NavDestination() {
             Column() {
                 Text(`允许 ${this.platform?.getPlatFormName()} 登录`)
-                    .fontSize(20)
+                    .fontSize(FontSize.xl)
                     .fontColor($r('app.color.wf_primary_text'))
                     .margin({ top: 80 })
 
                 Image($r('app.media.pc'))
-                    .height(250)
+                    .height(252)
 
                 Blank()
 
@@ -62,14 +63,14 @@ export default struct PCLoginPage {
                     Button('确定', { type: ButtonType.Normal, stateEffect: true })
                         .backgroundColor($r('app.color.wf_primary'))
                         .fontColor(Color.White)
-                        .borderRadius(8)
+                        .borderRadius(Radius.lg)
                         .height(44)
                         .enabled(this.enableConfirmButton)
                         .focusable(true)
                         .focusOnTouch(true)
                         .type(ButtonType.Normal)
                         .width('100%')
-                        .borderRadius(4)
+                        .borderRadius(Radius.sm)
                         .onClick(() => {
                             appServer.confirmPCLogin(this.token, wfc.getUserId())
                                 .then(async res => {
@@ -81,7 +82,7 @@ export default struct PCLoginPage {
                                 })
                         })
                     Button('取消', { type: ButtonType.Normal, stateEffect: true })
-                        .borderRadius(8)
+                        .borderRadius(Radius.lg)
                         .backgroundColor($r('app.color.wf_secondary_background'))
                         .fontColor($r('app.color.wf_primary_text'))
                         .height(44)
@@ -90,7 +91,7 @@ export default struct PCLoginPage {
                         .focusOnTouch(true)
                         .type(ButtonType.Normal)
                         .width('100%')
-                        .borderRadius(4)
+                        .borderRadius(Radius.sm)
                         .onClick(() => {
                             appServer.cancelPCLogin(this.token)
                                 .then(async res => {
@@ -101,7 +102,7 @@ export default struct PCLoginPage {
                                 })
                         })
                 }
-                .padding({ bottom: 50, left: 30, right: 30 })
+                .padding({ bottom: 52, left: 32, right: 32 })
                 .width('100%')
             }
             .width('100%')

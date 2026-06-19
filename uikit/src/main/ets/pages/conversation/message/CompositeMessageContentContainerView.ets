@@ -47,7 +47,7 @@ export default struct CompositeMessageContentContainerView {
             } else {
                 Text(this.message!.messageContent.digest(this.message))
                     .margin({ top: 4 })
-                    .padding(10)
+                    .padding(12)
                     .fontColor($r('app.color.wf_primary_text'))
             }
         }

@@ -6,7 +6,7 @@ import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
 import SearchConversationMessageResultView from './SearchConversationMessageResultView'
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import { uikitNavigationDestinations } from '../uikitNavigationConfig'
-
+import { FontSize, Radius } from '../../common/design/Tokens'
 
 @Component
 @Preview
@@ -42,19 +42,19 @@ export default struct SearchConversationMessagePage {
                     TextInput({ placeholder: '会话消息搜索...', text: $$this.keyword })
                         .type(InputType.Normal)
                         .layoutWeight(1)
-                        .borderRadius(4)
+                        .borderRadius(Radius.sm)
                         .enableKeyboardOnFocus(false)
                         .onChange((value: string) => {
                             this.keyword = value
                         })
                     Text('取消')
-                        .padding(5)
-                        .margin({ left: 10 })
+                        .padding(4)
+                        .margin({ left: 12 })
                         .onClick(() => {
                             this.mainNavPathStack.pop()
                         })
                 }
-                .padding(10)
+                .padding(12)
                 .width('100%')
 
                 if (this.keyword && this.keyword.trim().length > 0) {
@@ -73,13 +73,13 @@ export default struct SearchConversationMessagePage {
                 } else {
                     Column() {
                         Text('搜索指定内容')
-                            .fontSize(14)
+                            .fontSize(FontSize.sm)
                             .fontColor($r('app.color.wf_tertiary_text'))
-                            .margin({ top: 30, bottom: 20 })
+                            .margin({ top: 32, bottom: 20 })
                         Row() {
                             Column() {
                                 Text('日期')
-                                    .fontSize(16)
+                                    .fontSize(FontSize.md)
                                     .fontColor('#5B6E8E')
                                     .onClick(() => {
                                         this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.SearchMessageByDatePage, {
@@ -92,7 +92,7 @@ export default struct SearchConversationMessagePage {
 
                             Column() {
                                 Text('图片与视频')
-                                    .fontSize(16)
+                                    .fontSize(FontSize.md)
                                     .fontColor('#5B6E8E')
                                     .onClick(() => {
                                         this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.SearchMessagePictureVideoPage, {
@@ -105,7 +105,7 @@ export default struct SearchConversationMessagePage {
 
                             Column() {
                                 Text('文件')
-                                    .fontSize(16)
+                                    .fontSize(FontSize.md)
                                     .fontColor('#5B6E8E')
                                     .onClick(() => {
                                         this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.SearchMessageFilePage, {
@@ -122,7 +122,7 @@ export default struct SearchConversationMessagePage {
                         Row() {
                             Column() {
                                 Text('链接')
-                                    .fontSize(16)
+                                    .fontSize(FontSize.md)
                                     .fontColor('#5B6E8E')
                                     .onClick(() => {
                                         this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.SearchMessageLinkPage, {
@@ -135,7 +135,7 @@ export default struct SearchConversationMessagePage {
                         }
                         .width('100%')
                         .justifyContent(FlexAlign.Start)
-                        .margin({ top: 30 })
+                        .margin({ top: 32 })
 
                     }
                     .width('100%')

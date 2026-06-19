@@ -15,6 +15,7 @@ import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import RestoreRequestNotificationContent from '@wfc/client/src/main/ets/wfc/messages/backup/restoreRequestNotificationContent'
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
 import Long from '@wfc/client/src/main/ets/wfc/util/long'
+import { FontSize } from '@wfc/uikit/src/main/ets/common/design/Tokens'
 
 // 恢复请求接口
 interface RestoreRequestContent {
@@ -264,12 +265,12 @@ export default struct PCRestoreListPage {
           // 加载中
           Column() {
             Progress({ value: 0, total: 100, type: ProgressType.Ring })
-              .width(50)
-              .height(50)
+              .width(52)
+              .height(52)
               .margin({ top: 100 })
 
             Text(this.isWaitingResponse ? '正在等待电脑端确认...' : '正在获取备份列表...')
-              .fontSize(14)
+              .fontSize(FontSize.sm)
               .fontColor($r('app.color.wf_secondary_text'))
               .margin({ top: 20 })
           }
@@ -279,7 +280,7 @@ export default struct PCRestoreListPage {
           // 错误状态
           Column() {
             Text(this.errorMessage)
-              .fontSize(16)
+              .fontSize(FontSize.md)
               .fontColor($r('app.color.wf_danger'))
               .margin({ top: 100 })
           }
@@ -289,7 +290,7 @@ export default struct PCRestoreListPage {
           // 空列表
           Column() {
             Text('电脑端没有可用的备份')
-              .fontSize(16)
+              .fontSize(FontSize.md)
               .fontColor($r('app.color.wf_secondary_text'))
               .margin({ top: 100 })
           }
@@ -303,18 +304,18 @@ export default struct PCRestoreListPage {
                 Row() {
                   Column() {
                     Text(this.formatBackupTime(backup.time))
-                      .fontSize(16)
+                      .fontSize(FontSize.md)
                       .fontWeight(FontWeight.Medium)
                       .fontColor($r('app.color.wf_primary_text'))
 
                     Text(`${backup.deviceName} • ${backup.conversationCount}个会话 • ${backup.messageCount}条消息`)
-                      .fontSize(14)
+                      .fontSize(FontSize.sm)
                       .fontColor($r('app.color.wf_secondary_text'))
                       .margin({ top: 4 })
 
                     if (backup.mediaFileCount > 0) {
                       Text(`${backup.mediaFileCount}个媒体文件 • ${backup.fileCount}个文件`)
-                        .fontSize(12)
+                        .fontSize(FontSize.xs)
                         .fontColor($r('app.color.wf_tertiary_text'))
                         .margin({ top: 2 })
                     }

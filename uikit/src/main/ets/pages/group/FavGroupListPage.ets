@@ -4,6 +4,7 @@ import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType'
 import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
 import { uikitNavigationDestinations } from '../uikitNavigationConfig'
+import { FontSize, Radius } from '../../common/design/Tokens'
 
 @Component
 export default struct FavGroupListPage {
@@ -27,9 +28,9 @@ export default struct FavGroupListPage {
         NavDestination() {
             Text('保存到通讯录的群组')
                 .width('100%')
-                .fontSize(13)
+                .fontSize(FontSize.sm)
                 .fontColor($r('app.color.wf_secondary_text'))
-                .padding(10)
+                .padding(12)
                 .backgroundColor($r('app.color.wf_secondary_background'))
 
             List() {
@@ -40,18 +41,18 @@ export default struct FavGroupListPage {
                                 .alt($r('app.media.ic_group_chat'))
                                 .width(40)
                                 .height(40)
-                                .borderRadius(4)
+                                .borderRadius(Radius.sm)
                             Text(groupInfo.name)
                                 .layoutWeight(1)
                                 .maxLines(1)
                                 .fontColor($r('app.color.wf_primary_text'))
                                 .textOverflow({ overflow: TextOverflow.Ellipsis })
                                 .ellipsisMode(EllipsisMode.END)
-                                .padding({ left: 10, right: 10 })
+                                .padding({ left: 12, right: 12 })
                         }
                         .height(60)
                         .width('100%')
-                        .padding({ left: 10, right: 10 })
+                        .padding({ left: 12, right: 12 })
                         .stateStyles({
                             pressed: {
                                 .backgroundColor($r('app.color.wf_item_pressed'))

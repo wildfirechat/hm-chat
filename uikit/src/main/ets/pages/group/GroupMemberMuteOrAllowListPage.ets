@@ -6,6 +6,7 @@ import GroupMemberType from '@wfc/client/src/main/ets/wfc/model/groupMemberType'
 import ModifyGroupInfoType from '@wfc/client/src/main/ets/wfc/model/modifyGroupInfoType';
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo';
 import PickGroupMemberModal from './PickGroupMemberModal';
+import { Radius } from '../../common/design/Tokens'
 
 @Component
 export default struct GroupMemberMuteOrAllowListPage {
@@ -78,7 +79,7 @@ export default struct GroupMemberMuteOrAllowListPage {
                     Image($r('app.media.ic_add_team_member'))
                         .width(40)
                         .height(40)
-                        .margin(10)
+                        .margin(12)
                     Text(this.groupInfo?.mute === 0 ? '禁言成员' : '发言白名单')
                         .fontColor($r('app.color.wf_primary_text'))
                 }
@@ -143,8 +144,8 @@ export default struct GroupMemberMuteOrAllowListPage {
                                 Image(info.portrait)
                                     .width(40)
                                     .height(40)
-                                    .margin(10)
-                                    .borderRadius(4)
+                                    .margin(12)
+                                    .borderRadius(Radius.sm)
                                 Text(info.displayName)
                                     .maxLines(1)
                                     .fontColor($r('app.color.wf_primary_text'))

@@ -26,6 +26,7 @@ import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationTyp
 import JoinGroupRequestDialog from '../group/JoinGroupRequestDialog';
 import ErrorCode from '@wfc/client/src/main/ets/wfc/client/errorCode';
 import WfcScheme from '../../wfcScheme'
+import { FontSize, Radius } from '../../common/design/Tokens'
 
 @Preview
 @Component
@@ -183,12 +184,12 @@ export default struct GroupConversationInfoPage {
                                 Image(groupMember.getPortrait())
                                     .width(48)
                                     .height(48)
-                                    .borderRadius(4)
+                                    .borderRadius(Radius.sm)
                                 Text(groupMember.getName())
                                     .maxLines(1)
                                     .fontColor($r('app.color.wf_tertiary_text'))
-                                    .fontSize(12)
-                                    .margin({ top: 5 })
+                                    .fontSize(FontSize.xs)
+                                    .margin({ top: 4 })
                             }
                             .onClick(() => {
                                 if (this.groupInfo.privateChat === 1 && [GroupMemberType.Owner, GroupMemberType.Manager].indexOf(this.groupMember!.type) === -1) {
@@ -292,7 +293,7 @@ export default struct GroupConversationInfoPage {
                             })
                         }
                     }
-                    .padding(10)
+                    .padding(12)
                     .width('100%')
                     .backgroundColor($r('app.color.wf_background'))
 
@@ -300,7 +301,7 @@ export default struct GroupConversationInfoPage {
                         // TODO
 
                     }
-                    .margin({ top: 10 })
+                    .margin({ top: 12 })
                     .width('100%')
 
                     Column() {
@@ -416,7 +417,7 @@ export default struct GroupConversationInfoPage {
                                 })
                             })
                     }
-                    .margin({ top: 10 })
+                    .margin({ top: 12 })
                     .width('100%')
                     .backgroundColor($r('app.color.wf_background'))
 
@@ -434,7 +435,7 @@ export default struct GroupConversationInfoPage {
                                 } as Record<string, Object>)
                             })
                     }
-                    .margin({ top: 10 })
+                    .margin({ top: 12 })
                     .width('100%')
                     .backgroundColor($r('app.color.wf_background'))
 
@@ -453,12 +454,12 @@ export default struct GroupConversationInfoPage {
                         .justifyContent(FlexAlign.SpaceBetween)
                         .width('100%')
                         .height(56)
-                        .padding({ left: 10, right: 10 })
+                        .padding({ left: 12, right: 12 })
 
                         Divider()
                             .strokeWidth(0.6)
                             .color($r('app.color.wf_divider'))
-                            .padding({ left: 10 })
+                            .padding({ left: 12 })
 
                         Row() {
                             Text('置顶聊天')
@@ -474,12 +475,12 @@ export default struct GroupConversationInfoPage {
                         .justifyContent(FlexAlign.SpaceBetween)
                         .width('100%')
                         .height(56)
-                        .padding({ left: 10, right: 10 })
+                        .padding({ left: 12, right: 12 })
 
                         Divider()
                             .strokeWidth(0.6)
                             .color($r('app.color.wf_divider'))
-                            .padding({ left: 10 })
+                            .padding({ left: 12 })
 
                         Row() {
                             Text('保存到通讯录')
@@ -496,9 +497,9 @@ export default struct GroupConversationInfoPage {
                         .justifyContent(FlexAlign.SpaceBetween)
                         .width('100%')
                         .height(56)
-                        .padding({ left: 10, right: 10 })
+                        .padding({ left: 12, right: 12 })
                     }
-                    .margin({ top: 10 })
+                    .margin({ top: 12 })
                     .width('100%')
                     .backgroundColor($r('app.color.wf_background'))
 
@@ -524,10 +525,10 @@ export default struct GroupConversationInfoPage {
                         .justifyContent(FlexAlign.SpaceBetween)
                         .width('100%')
                         .height(56)
-                        .padding({ left: 10, right: 10 })
+                        .padding({ left: 12, right: 12 })
 
                     }
-                    .margin({ top: 10 })
+                    .margin({ top: 12 })
                     .width('100%')
                     .backgroundColor($r('app.color.wf_background'))
 
@@ -634,7 +635,7 @@ export default struct GroupConversationInfoPage {
                             })
                         })
                     }
-                    .margin({ top: 10, bottom: 20 })
+                    .margin({ top: 12, bottom: 20 })
                     .width('100%')
                     .backgroundColor($r('app.color.wf_background'))
                 }

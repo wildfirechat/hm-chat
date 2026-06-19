@@ -14,6 +14,7 @@ import { appNavigationDestinations } from '../mainNavigationConfig'
 import { showToast } from '@wfc/uikit/src/main/ets/common/utils/Toast'
 import ConversationInfoDataSource from '@wfc/uikit/src/main/ets/pages/datasource/ConversationInfoDataSource'
 import CheckableConversationInfoItemView from '@wfc/uikit/src/main/ets/view/CheckableConversationInfoItemView'
+import { FontSize, Radius } from '@wfc/uikit/src/main/ets/common/design/Tokens'
 
 @Preview
 @Component
@@ -83,7 +84,7 @@ export default struct ConversationSelectPage {
         // 全选按钮
         Row() {
           Text('全选')
-            .fontSize(16)
+            .fontSize(FontSize.md)
             .layoutWeight(1)
             .fontColor($r('app.color.wf_primary_text'))
           Toggle({ type: ToggleType.Switch, isOn: this.selectAll })
@@ -124,14 +125,14 @@ export default struct ConversationSelectPage {
         // 底部按钮
         Row() {
           Text(`已选择 ${this.getSelectedCount()} 个会话`)
-            .fontSize(14)
+            .fontSize(FontSize.sm)
             .fontColor($r('app.color.wf_secondary_text'))
             .layoutWeight(1)
 
           Button('下一步')
-            .fontSize(16)
-            .borderRadius(4)
-            .margin({ left: 10 })
+            .fontSize(FontSize.md)
+            .borderRadius(Radius.sm)
+            .margin({ left: 12 })
             .onClick(() => {
               this.onNext()
             })

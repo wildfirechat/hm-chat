@@ -1,11 +1,13 @@
 import { UIUserInfo } from '../common/Types'
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
+import { FontSize, Radius, scaledSize, LayoutScale } from '../common/design/Tokens'
 
 let isChangeTriggeredByClick: boolean = false
 
 @Preview
 @Component
 export default struct CheckableUserItemView {
+    @StorageProp('fontScale') fontScale: number = 1.0;
     enable: boolean = true
     initialChecked: boolean = false
     paddingLeft: number = 10
@@ -29,11 +31,11 @@ export default struct CheckableUserItemView {
                 Row() {
                     Text(this.uiUserInfo.category)
                         .width('100%')
-                        .fontSize(13)
+                        .fontSize(FontSize.sm)
                         .fontColor($r('app.color.wf_secondary_text'))
                 }
-                .height(30)
-                .padding({ left: 10 })
+                .height(32)
+                .padding({ left: 12 })
                 .alignItems(VerticalAlign.Center)
                 .backgroundColor($r('app.color.wf_primary_background_color'))
             }
@@ -57,18 +59,19 @@ export default struct CheckableUserItemView {
                     })
                 Image(this.uiUserInfo.userInfo.portrait)
                     .alt($r('app.media.avatar_def'))
-                    .width(40)
-                    .height(40)
-                    .borderRadius(4)
-                    .margin({ left: 10, right: 10 })
+                    .width(scaledSize(40, this.fontScale))
+                    .height(scaledSize(40, this.fontScale))
+                    .borderRadius(Radius.sm)
+                    .margin({ left: 12, right: 12 })
                 Text(this.uiUserInfo.userInfo.displayName)
                     .maxLines(1)
-                    .fontSize(15)
+                    .fontSize(FontSize.sm)
+                    .textOverflow({overflow: TextOverflow.Ellipsis})
                     .layoutWeight(1)
                     .fontColor($r('app.color.wf_primary_text'))
             }
             .width('100%')
-            .height(60)
+            .constraintSize({ minHeight: scaledSize(60, this.fontScale, LayoutScale.row) })
             .padding({ left: this.paddingLeft, right: this.paddingRight })
             .onClick(event => {
                 if (this.enable) {

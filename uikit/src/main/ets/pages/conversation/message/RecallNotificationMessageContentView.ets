@@ -2,6 +2,7 @@ import { showToast } from '../../../common/utils/Toast'
 import Config from '@wfc/client/src/main/ets/config'
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
+import { FontSize } from '../../../common/design/Tokens'
 
 @Component
 export default struct RecallNotificationMessageContentView {
@@ -43,13 +44,13 @@ export default struct RecallNotificationMessageContentView {
     build() {
         Row() {
             Text(this.message!.messageContent.digest(this.message))
-                .padding(10)
-                .fontSize(12)
+                .padding(12)
+                .fontSize(FontSize.xs)
                 .constraintSize({ minHeight: 40 })
             if (this.enableReEdit) {
                 Text('编辑')
                     .margin({ left: 8 })
-                    .fontSize(13)
+                    .fontSize(FontSize.sm)
                     .fontColor($r('app.color.wf_primary'))
                     .onClick(() => {
                         this.onClickReedit?.()

@@ -9,6 +9,7 @@ import GroupType from '@wfc/client/src/main/ets/wfc/model/groupType';
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo';
 import { uikitNavigationDestinations } from '../uikitNavigationConfig';
 import PickMultiContactModal from '../picker/PickMultiContactModal';
+import { Radius } from '../../common/design/Tokens'
 
 @Preview
 @Component
@@ -48,7 +49,7 @@ export default struct SingleConversationInfoPage {
                     Image(this.targetUserInfo.portrait)
                         .width(48)
                         .height(48)
-                        .borderRadius(4)
+                        .borderRadius(Radius.sm)
                     Image($r('app.media.ic_add_team_member'))
                         .width(48)
                         .height(48)
@@ -132,8 +133,8 @@ export default struct SingleConversationInfoPage {
                     .width('100%')
                     .height(56)
                 }
-                .padding({ left: 10, right: 10 })
-                .margin({ top: 10 })
+                .padding({ left: 12, right: 12 })
+                .margin({ top: 12 })
                 .width('100%')
                 .backgroundColor($r('app.color.wf_background'))
 
@@ -153,7 +154,7 @@ export default struct SingleConversationInfoPage {
                             } as Record<string, Object>)
                         })
                 }
-                .margin({ top: 10 })
+                .margin({ top: 12 })
                 .width('100%')
 
                 Column() {
@@ -215,7 +216,7 @@ export default struct SingleConversationInfoPage {
                             })
                         })
                 }
-                .margin({ top: 10 })
+                .margin({ top: 12 })
                 .width('100%')
                 .backgroundColor($r('app.color.wf_background'))
             }

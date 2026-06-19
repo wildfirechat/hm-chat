@@ -1,7 +1,8 @@
-import { Core } from "@ohos/hypium"
+import { FontSize, scaledSize, LayoutScale } from '../common/design/Tokens'
 @Preview
 @Component
 export default struct ToggleItemView {
+    @StorageProp('fontScale') fontScale: number = 1.0;
     title: string = '测试标题'
     paddingLeft: number = 10
     paddingRight: number = 10
@@ -20,8 +21,8 @@ export default struct ToggleItemView {
                     if (this.desc) {
                         Text(this.desc)
                             .fontColor($r('app.color.wf_tertiary_text'))
-                            .fontSize(13)
-                            .padding({ top: 5 })
+                            .fontSize(FontSize.sm)
+                            .padding({ top: 4 })
                     }
                 }
                 .alignItems(HorizontalAlign.Start)
@@ -30,7 +31,7 @@ export default struct ToggleItemView {
                     .onChange(this.onChange)
             }
             .padding({ left: this.paddingLeft, right: this.paddingRight })
-            .height(56)
+            .constraintSize({ minHeight: scaledSize(56, this.fontScale, LayoutScale.row) })
             .width('100%')
             .justifyContent(FlexAlign.SpaceBetween)
 

@@ -11,6 +11,7 @@ import OptionItemView from '@wfc/uikit/src/main/ets/view/OptionItemView'
 import { appNavigationDestinations } from '../mainNavigationConfig'
 import ConversationInfo from '@wfc/client/src/main/ets/wfc/model/conversationInfo'
 import { showToast } from '@wfc/uikit/src/main/ets/common/utils/Toast'
+import { FontSize } from '@wfc/uikit/src/main/ets/common/design/Tokens'
 
 @Preview
 @Component
@@ -71,7 +72,7 @@ export default struct BackupTargetPage {
           title: '备份到电脑端',
           showDivider: false
         })
-          .margin({ top: 10 })
+          .margin({ top: 12 })
           .opacity(this.isPCOnline ? 1.0 : 0.4)
           .onClick(() => {
             this.selectPCBackup()
@@ -79,7 +80,7 @@ export default struct BackupTargetPage {
 
         // 提示信息
         Text(this.isPCOnline ? '提示：备份到电脑端需要电脑端在线' : '提示：电脑端未在线，无法备份到电脑端')
-          .fontSize(14)
+          .fontSize(FontSize.sm)
           .fontColor($r('app.color.wf_secondary_text'))
           .margin({ top: 20 })
           .padding({ left: 16, right: 16 })

@@ -23,6 +23,7 @@ import { window } from '@kit.ArkUI'
 import CheckableConversationInfoItemView from '../../../view/CheckableConversationInfoItemView'
 import ConversationPortraitView from '../../../view/ConversationPortraitView'
 import ConversationInfoDataSource from '../../../pages/datasource/ConversationInfoDataSource'
+import { FontSize, Radius } from '../../../common/design/Tokens'
 
 @Component
 @Preview
@@ -270,7 +271,7 @@ export default struct ForwardMessagePage {
                                         .width(40)
                                         .height(40)
                                         .padding(2)
-                                        .borderRadius(4)
+                                        .borderRadius(Radius.sm)
                                         .onClick(() => {
                                             this.toggleConversation(info.conversation)
                                             this.updateSearchInputViewWidthAndScroll()
@@ -284,8 +285,8 @@ export default struct ForwardMessagePage {
                             //             .alt($r('app.media.ic_deparment'))
                             //             .width(40)
                             //             .height(40)
-                            //             .borderRadius(4)
-                            //             .margin({ left: 10 })
+                            //             .borderRadius(Radius.sm)
+                            //             .margin({ left: 12 })
                             //             .onClick(() => {
                             //                 this.checkedOrganizations = this.checkedOrganizations.filter(o => o.id !== org.id)
                             //             })
@@ -298,8 +299,8 @@ export default struct ForwardMessagePage {
                             //             .alt($r('app.media.avatar_def'))
                             //             .width(40)
                             //             .height(40)
-                            //             .borderRadius(4)
-                            //             .margin({ left: 10 })
+                            //             .borderRadius(Radius.sm)
+                            //             .margin({ left: 12 })
                             //             .onClick(() => {
                             //                 this.checkedEmployees = this.checkedEmployees.filter(e => e.employeeId !== employee.employeeId)
                             //             })
@@ -312,7 +313,7 @@ export default struct ForwardMessagePage {
                                         .onChange((value: string) => {
                                             this.keyword = value
                                         })
-                                        .borderRadius(4)
+                                        .borderRadius(Radius.sm)
                                         .backgroundColor($r('app.color.wf_background'))
                                         .fontColor($r('app.color.wf_primary_text'))
                                         .placeholderColor($r('app.color.wf_tertiary_text'))
@@ -326,7 +327,7 @@ export default struct ForwardMessagePage {
                         .height(60)
                         .alignListItem(ListItemAlign.Center)
                     }
-                    .padding({ left: 10, right: 10 })
+                    .padding({ left: 12, right: 12 })
                     .width('100%')
 
                     Stack() {
@@ -336,10 +337,10 @@ export default struct ForwardMessagePage {
                                     ListItem() {
                                         Text('创建新聊天')
                                             .fontColor($r('app.color.wf_secondary_text'))
-                                            .fontSize(13)
+                                            .fontSize(FontSize.sm)
                                             .width('100%')
                                             .height(40)
-                                            .padding({ left: 10, right: 10 })
+                                            .padding({ left: 12, right: 12 })
                                             .stateStyles({
                                                 pressed: {
                                                     .backgroundColor($r('app.color.wf_item_pressed'))
@@ -363,11 +364,11 @@ export default struct ForwardMessagePage {
                                 ListItem() {
                                     Text('最近聊天')
                                         .fontColor($r('app.color.wf_tertiary_text'))
-                                        .fontSize(13)
+                                        .fontSize(FontSize.sm)
                                         .width('100%')
                                         .height(40)
                                         .backgroundColor($r('app.color.wf_primary_background_color'))
-                                        .padding({ left: 10, right: 10 })
+                                        .padding({ left: 12, right: 12 })
                                 }
 
                                 LazyForEach(this.conversationInfoDataSource, (info: ConversationInfo, index: number) => {
@@ -423,7 +424,6 @@ export default struct ForwardMessagePage {
                     .width('100%')
                     .layoutWeight(1)
                 }
-                .padding({ bottom: 40 })
                 .width('100%')
 
                 if (this.enableMultiCheck) {
@@ -432,16 +432,15 @@ export default struct ForwardMessagePage {
                             .fontColor($r('app.color.wf_primary_text'))
                         Button('发送')
                             .type(ButtonType.Normal)
-                            .height(30)
-                            .width(60)
-                            .borderRadius(4)
+                            .height(32)
+                            .borderRadius(Radius.sm)
+                            .borderRadius(Radius.sm)
                             .enabled(this.checkedConversationInfos.length > 0)
                             .onClick(e => {
                                 this.forwardMessage(this.checkedConversationInfos.map(info => info.conversation))
                             })
                     }
-                    .padding(10)
-                    .height(40)
+                    .padding(12)
                     .width('100%')
                     .justifyContent(FlexAlign.SpaceBetween)
                     .alignItems(VerticalAlign.Center)
@@ -462,8 +461,8 @@ export default struct ForwardMessagePage {
     NavigationMenus() {
         Row() {
             Text(this.enableMultiCheck ? '取消多选' : '多选')
-                .height(30)
-                .fontSize(15)
+                .height(32)
+                .fontSize(FontSize.sm)
                 .fontColor($r('app.color.wf_primary_text'))
                 .padding({ right: 16 })
                 .onClick(() => {

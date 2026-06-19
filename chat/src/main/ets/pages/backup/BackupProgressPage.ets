@@ -14,6 +14,7 @@ import { BackupError } from '@wfc/client/src/main/ets/wfc/backup/backupTypes'
 import ConversationInfo from '@wfc/client/src/main/ets/wfc/model/conversationInfo'
 import { showToast } from '@wfc/uikit/src/main/ets/common/utils/Toast'
 import fs from '@ohos.file.fs'
+import { FontSize } from '@wfc/uikit/src/main/ets/common/design/Tokens'
 
 @Preview
 @Component
@@ -239,22 +240,22 @@ export default struct BackupProgressPage {
         Column() {
           // 百分比
           Text(`${this.progress}%`)
-            .fontSize(32)
+            .fontSize(FontSize.d2)
             .fontWeight(FontWeight.Bold)
             .fontColor($r('app.color.wf_primary_text'))
             .margin({ top: 60 })
 
           // 状态
           Text(this.currentStep)
-            .fontSize(18)
+            .fontSize(FontSize.lg)
             .fontColor($r('app.color.wf_primary_text'))
             .margin({ top: 20 })
 
           // 详情
           Text(this.detail)
-            .fontSize(14)
+            .fontSize(FontSize.sm)
             .fontColor($r('app.color.wf_secondary_text'))
-            .margin({ top: 10 })
+            .margin({ top: 12 })
 
           // 进度条
           if (!this.isBackupComplete) {
@@ -278,7 +279,7 @@ export default struct BackupProgressPage {
         // 取消按钮
         Button(this.isBackupComplete ? '完成' : '取消备份')
           .width('80%')
-          .fontSize(16)
+          .fontSize(FontSize.md)
           .type(ButtonType.Normal)
           .margin({ bottom: 40 })
           .onClick(() => {

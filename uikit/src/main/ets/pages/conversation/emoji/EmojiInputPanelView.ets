@@ -4,6 +4,7 @@ import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
 import StickerMessageContent from '@wfc/client/src/main/ets/wfc/messages/stickerMessageContent'
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import { deviceInfo } from '@kit.BasicServicesKit'
+import { FontSize, Radius } from '../../../common/design/Tokens'
 
 const EMOJI_COLS = 8
 const STICKER_COLS = 5
@@ -200,7 +201,7 @@ export default struct EmojiInputPanelView {
                             .height(24)
                     }
                     .padding(8)
-                    .borderRadius(4)
+                    .borderRadius(Radius.sm)
                     .stateStyles({
                         pressed: {
                             .backgroundColor($r('app.color.wf_item_pressed'))
@@ -218,7 +219,7 @@ export default struct EmojiInputPanelView {
             .alignListItem(ListItemAlign.Center)
             .width('100%')
             .height(40)
-            .padding({ left: 10, right: 10 })
+            .padding({ left: 12, right: 12 })
 
             Stack() {
                 Swiper() {
@@ -228,11 +229,12 @@ export default struct EmojiInputPanelView {
                                 ForEach(this.emojis, (emoji: Emoji) => {
                                     GridItem() {
                                         Text(emoji.data)
-                                            .fontSize(22)
+                                            .maxFontScale(1)
+                                            .fontSize(30)
                                     }
                                     .width(EMOJI_ITEM_H)
                                     .height(EMOJI_ITEM_H)
-                                    .borderRadius(4)
+                                    .borderRadius(Radius.sm)
                                     .align(Alignment.Center)
                                     .stateStyles({
                                         pressed: {
@@ -252,7 +254,7 @@ export default struct EmojiInputPanelView {
                                 }, (emoji: Emoji, index: number) => index + '')
                             }
                             .enableScrollInteraction(!this.isLongPressing)
-                            .columnsTemplate('1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr')
+                            .columnsTemplate('1fr 1fr 1fr 1fr 1fr 1fr 1fr')
                             .scrollBar(BarState.Off)
                             .padding({ bottom: 40 })
                             .edgeEffect(EdgeEffect.Spring)
@@ -275,7 +277,7 @@ export default struct EmojiInputPanelView {
                                     }
                                     .width(STICKER_ITEM_H)
                                     .height(STICKER_ITEM_H)
-                                    .borderRadius(4)
+                                    .borderRadius(Radius.sm)
                                     .stateStyles({
                                         pressed: {
                                             .backgroundColor($r('app.color.wf_item_pressed'))
@@ -297,7 +299,7 @@ export default struct EmojiInputPanelView {
                             .columnsTemplate('1fr 1fr 1fr 1fr 1fr')
                             .enableScrollInteraction(!this.isLongPressing)
                             .scrollBar(BarState.Off)
-                            .padding({ top: 10 })
+                            .padding({ top: 12 })
                             .height('100%')
                             .edgeEffect(EdgeEffect.Spring, {
                                 alwaysEnabled: true,
@@ -334,7 +336,7 @@ export default struct EmojiInputPanelView {
                     .height(40)
                     .justifyContent(FlexAlign.Center)
                     .alignItems(VerticalAlign.Center)
-                    .borderRadius(4)
+                    .borderRadius(Radius.sm)
                     .stateStyles({
                         pressed: {
                             .backgroundColor($r('app.color.wf_item_pressed'))
@@ -366,7 +368,7 @@ export default struct EmojiInputPanelView {
                     })
                 }
             }
-            .padding(10)
+            .padding(12)
             .layoutWeight(1)
             .backgroundColor(Color.Transparent)
             .alignContent(Alignment.BottomEnd)

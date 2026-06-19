@@ -8,6 +8,7 @@ import wfc from '@wfc/client'
 import { uikitNavigationDestinations } from '@wfc/uikit/src/main/ets/pages/uikitNavigationConfig';
 import uikit from '@wfc/uikit';
 import { showToast } from '@wfc/uikit/src/main/ets/common/utils/Toast';
+import { FontSize } from '@wfc/uikit/src/main/ets/common/design/Tokens'
 
 @Preview
 @Component
@@ -103,7 +104,8 @@ export default struct AboutPage {
                 },
                 secondaryButton: {
                     value: '以后再说',
-                    action: () => {}
+                    action: () => {
+                    }
                 }
             })
         }
@@ -111,73 +113,75 @@ export default struct AboutPage {
 
     build() {
         NavDestination() {
-            Column() {
-
-                Image($r('app.media.app_icon'))
-                    .width(80)
-
-                Text($r('app.string.app_name'))
-                    .margin({ top: 8 })
-                    .fontColor($r('app.color.wf_primary_text'))
-
-                Text($r('app.string.version_tag_s', this.version))
-                    .fontColor($r('app.color.wf_tertiary_text'))
-                    .fontSize(12)
-                    .margin({ top: 4 })
-
-                Text(this.appInfo)
-                    .textAlign(TextAlign.Start)
-                    .lineSpacing({ value: 4, unit: LengthUnit.VP })
-                    .padding(16)
-                    .width('100%')
-                    .fontColor($r('app.color.wf_tertiary_text'))
-
+            Scroll() {
                 Column() {
-                    OptionItemView({
-                        title: '当前版本',
-                        desc: this.version,
-                        showDivider: true,
-                        showBadge: this.needUpdate
-                    }).onClick(() => {
-                        this.showVersionUpdateDialog()
-                    })
-                    OptionItemView({
-                        title: getContext().resourceManager.getStringSync($r('app.string.feature_introduction').id),
-                        showDivider: true
-                    }).onClick(() => {
-                        this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.WebViewPage, {
-                            'url': 'https://docs.wildfirechat.cn/',
-                            'title': '野火IM功能介绍'
-                        } as Record<string, Object>)
-                    })
-                    OptionItemView({
-                        title: getContext().resourceManager.getStringSync($r('app.string.user_agreement').id),
-                        showDivider: true
-                    }).onClick(() => {
-                        if (!Config.USER_AGREEMENT_URL || Config.USER_AGREEMENT_URL.indexOf('https://example.com') >= 0) {
-                            showToast('请配置用户协议链接地址')
-                            return
-                        }
-                        this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.WebViewPage, {
-                            'url': Config.USER_AGREEMENT_URL,
-                            'title': '野火IM用户协议'
-                        } as Record<string, Object>)
-                    })
-                    OptionItemView({
-                        title: getContext().resourceManager.getStringSync($r('app.string.privacy_policy').id),
-                    }).onClick(() => {
-                        if (!Config.PRIVACY_AGREEMENT_URL || Config.PRIVACY_AGREEMENT_URL.indexOf('https://example.com') >= 0) {
-                            showToast('请配置隐私政策链接地址')
-                            return
-                        }
-                        this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.WebViewPage, {
-                            'url': Config.PRIVACY_AGREEMENT_URL,
-                            'title': '野火IM个人信息保护政策'
-                        } as Record<string, Object>)
-                    })
+                    Image($r('app.media.app_icon'))
+                        .width(80)
+
+                    Text($r('app.string.app_name'))
+                        .margin({ top: 8 })
+                        .fontColor($r('app.color.wf_primary_text'))
+
+                    Text($r('app.string.version_tag_s', this.version))
+                        .fontColor($r('app.color.wf_tertiary_text'))
+                        .fontSize(FontSize.xs)
+                        .margin({ top: 4 })
+
+                    Text(this.appInfo)
+                        .textAlign(TextAlign.Start)
+                        .lineSpacing({ value: 4, unit: LengthUnit.VP })
+                        .padding(16)
+                        .width('100%')
+                        .fontColor($r('app.color.wf_tertiary_text'))
+
+                    Column() {
+                        OptionItemView({
+                            title: '当前版本',
+                            desc: this.version,
+                            showDivider: true,
+                            showBadge: this.needUpdate
+                        }).onClick(() => {
+                            this.showVersionUpdateDialog()
+                        })
+                        OptionItemView({
+                            title: getContext().resourceManager.getStringSync($r('app.string.feature_introduction').id),
+                            showDivider: true
+                        }).onClick(() => {
+                            this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.WebViewPage, {
+                                'url': 'https://docs.wildfirechat.cn/',
+                                'title': '野火IM功能介绍'
+                            } as Record<string, Object>)
+                        })
+                        OptionItemView({
+                            title: getContext().resourceManager.getStringSync($r('app.string.user_agreement').id),
+                            showDivider: true
+                        }).onClick(() => {
+                            if (!Config.USER_AGREEMENT_URL || Config.USER_AGREEMENT_URL.indexOf('https://example.com') >= 0) {
+                                showToast('请配置用户协议链接地址')
+                                return
+                            }
+                            this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.WebViewPage, {
+                                'url': Config.USER_AGREEMENT_URL,
+                                'title': '野火IM用户协议'
+                            } as Record<string, Object>)
+                        })
+                        OptionItemView({
+                            title: getContext().resourceManager.getStringSync($r('app.string.privacy_policy').id),
+                        }).onClick(() => {
+                            if (!Config.PRIVACY_AGREEMENT_URL || Config.PRIVACY_AGREEMENT_URL.indexOf('https://example.com') >= 0) {
+                                showToast('请配置隐私政策链接地址')
+                                return
+                            }
+                            this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.WebViewPage, {
+                                'url': Config.PRIVACY_AGREEMENT_URL,
+                                'title': '野火IM个人信息保护政策'
+                            } as Record<string, Object>)
+                        })
+                    }
                 }
-                .backgroundColor($r('app.color.wf_background'))
             }
+            .backgroundColor($r('app.color.wf_background'))
+            .scrollBar(BarState.Off)
             .width('100%')
             .height('100%')
         }

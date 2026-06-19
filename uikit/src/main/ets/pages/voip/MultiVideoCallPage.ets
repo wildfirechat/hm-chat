@@ -15,6 +15,7 @@ import VoipPiPNodeController from './VoipPiPNodeController'
 import uikit from '../../uikit'
 import { BusinessError } from '@kit.BasicServicesKit'
 import { uikitNavigationDestinations } from '../uikitNavigationConfig'
+import { FontSize } from '../../common/design/Tokens'
 
 @Component
 export default struct MultiVideoCallPage {
@@ -310,9 +311,9 @@ export default struct MultiVideoCallPage {
             Row() {
                 Image($r('app.media.av_minimize'))
                     .draggable(false)
-                    .width(50)
-                    .height(50)
-                    .padding(10)
+                    .width(52)
+                    .height(52)
+                    .padding(12)
                     .onClick(async () => {
                         this.pipController?.startPiP()
                             .catch((reason: BusinessError) => {
@@ -329,9 +330,9 @@ export default struct MultiVideoCallPage {
                 Image($r('app.media.ic_tab_add'))
                     .fillColor(Color.Red)
                     .draggable(false)
-                    .width(50)
-                    .height(50)
-                    .padding(10)
+                    .width(52)
+                    .height(52)
+                    .padding(12)
                     .onClick(() => {
                         this.showPickGroupMemberModal = true;
                     })
@@ -363,8 +364,8 @@ export default struct MultiVideoCallPage {
                                     this.callSession?.hangup()
                                 })
                             Text('挂断')
-                                .margin({ top: 10 })
-                                .fontSize(13)
+                                .margin({ top: 12 })
+                                .fontSize(FontSize.sm)
                                 .fontColor(Color.White)
                         }
 
@@ -379,8 +380,8 @@ export default struct MultiVideoCallPage {
                                         this.callSession?.call()
                                     })
                                 Text('接听')
-                                    .margin({ top: 10 })
-                                    .fontSize(13)
+                                    .margin({ top: 12 })
+                                    .fontSize(FontSize.sm)
                                     .fontColor(Color.White)
                             }
                         }
@@ -391,7 +392,7 @@ export default struct MultiVideoCallPage {
 
                 }
                 .width('100%')
-                .margin({ bottom: 30 })
+                .margin({ bottom: 32 })
                 .flexGrow(1)
                 .justifyContent(FlexAlign.End)
             } else {
@@ -408,8 +409,8 @@ export default struct MultiVideoCallPage {
                                     }
                                 })
                             Text('麦克风')
-                                .margin({ top: 10 })
-                                .fontSize(13)
+                                .margin({ top: 12 })
+                                .fontSize(FontSize.sm)
                                 .fontColor(Color.White)
                         }
 
@@ -422,8 +423,8 @@ export default struct MultiVideoCallPage {
                                     this.callSession?.hangup()
                                 })
                             Text('挂断')
-                                .margin({ top: 10 })
-                                .fontSize(13)
+                                .margin({ top: 12 })
+                                .fontSize(FontSize.sm)
                                 .fontColor(Color.White)
                         }
 
@@ -443,8 +444,8 @@ export default struct MultiVideoCallPage {
                                 .border({ width: 1, radius: 30, color: Color.White })
 
                             Text('扬声器已关')
-                                .margin({ top: 10 })
-                                .fontSize(13)
+                                .margin({ top: 12 })
+                                .fontSize(FontSize.sm)
                                 .fontColor(Color.White)
                         }
                     }
@@ -454,7 +455,7 @@ export default struct MultiVideoCallPage {
 
                 }
                 .width('100%')
-                .margin({ bottom: 30 })
+                .margin({ bottom: 32 })
                 .flexGrow(1)
                 .justifyContent(FlexAlign.End)
             }
@@ -522,7 +523,7 @@ export default struct MultiVideoCallPage {
                                 this.swapVideo(userInfo.uid)
                             }
                         })
-                        .padding(5)
+                        .padding(4)
                         .width(this.participantWidth)
                     }, (userInfo: UserInfo) => userInfo.uid + '-' + userInfo.updateDt)
                 }

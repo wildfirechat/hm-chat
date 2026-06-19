@@ -8,6 +8,7 @@ import { showToast } from "../../../common/utils/Toast";
 import wfc from "@wfc/client";
 import { uikitNavigationDestinations } from "../../uikitNavigationConfig";
 import { checkAndRequestPermission } from "../../../helper/permissionHelper";
+import { Radius } from '../../../common/design/Tokens'
 
 @Component
 export default struct ConferenceInfoPage {
@@ -124,7 +125,7 @@ export default struct ConferenceInfoPage {
                     Button(this.expired ? '会议已过期' : '加入会议')
                         .enabled(!this.expired)
                         .type(ButtonType.Normal)
-                        .borderRadius(4)
+                        .borderRadius(Radius.sm)
                         .width('50%')
                         .onClick(async () => {
                             let context = this.getUIContext().getHostContext()!

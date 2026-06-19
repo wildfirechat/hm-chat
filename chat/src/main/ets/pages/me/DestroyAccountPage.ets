@@ -7,9 +7,9 @@ import { showToast } from '@wfc/uikit/src/main/ets/common/utils/Toast';
 import { inputMethod } from '@kit.IMEKit';
 import { SlideVerifyView, SlideVerifyViewDelegate } from '@wfc/uikit/src/main/ets/view/SlideVerifyView';
 import Config from '@wfc/client/src/main/ets/config';
+import { FontSize, Radius } from '@wfc/uikit/src/main/ets/common/design/Tokens'
 
 import('@wfc/uikit/src/main/ets/pages/misc/WebViewPageWithRouter') //引入共享包中的命名路由页面
-
 
 @Preview
 @Component
@@ -33,16 +33,16 @@ export default struct DestroyAccountPage {
 
                     Row() {
                         Text('验证码')
-                            .width(50)
+                            .width(52)
                         TextInput({ text: this.authCode, placeholder: '请输入验证码', controller: this.controller })
                             .placeholderColor($r('app.color.wf_tertiary_text'))
-                            .placeholderFont({ size: 14, weight: 400 })
+                            .placeholderFont({ size: 16, weight: 400 })
                             .caretColor($r('app.color.wf_primary'))
                             .layoutWeight(1)
                             .height(40)
                             .margin(20)
-                            .fontSize(14)
-                            .borderRadius(4)
+                            .fontSize(FontSize.sm)
+                            .borderRadius(Radius.sm)
                             .type(InputType.Number)
                             .fontColor($r('app.color.wf_primary_text'))
                             .enabled(!this.isDestroy)
@@ -54,9 +54,9 @@ export default struct DestroyAccountPage {
                             })
 
                         Button('获取验证码')
-                            .fontSize(12)
+                            .fontSize(FontSize.xs)
                             .type(ButtonType.Normal)
-                            .borderRadius(4)
+                            .borderRadius(Radius.sm)
                             .enabled(!this.isDestroy)
                             .onClick(() => {
                                 inputMethod.getController().stopInputSession()
@@ -83,19 +83,19 @@ export default struct DestroyAccountPage {
                                 if (this.isDestroy) {
                                     LoadingProgress().width(20).height(20).margin({ left: 12 }).color($r('app.color.wf_background'))
                                 }
-                                Text(this.isDestroy ? '注销中...' : '注销').fontColor($r('app.color.wf_danger')).margin({ left: 5 })
+                                Text(this.isDestroy ? '注销中...' : '注销').fontColor($r('app.color.wf_danger')).margin({ left: 4 })
                             }.alignItems(VerticalAlign.Center)
                         }
-                        .borderRadius(8)
+                        .borderRadius(Radius.lg)
                         .backgroundColor("#e1e1e1")
-                        .width(90)
+                        .width(92)
                         .height(40)
                         .focusable(true)
                         .focusOnTouch(true)
                         .enabled(!this.isDestroy && this.authCode.length > 0)
                         .type(ButtonType.Normal)
                         .width('100%')
-                        .borderRadius(4)
+                        .borderRadius(Radius.sm)
                         .onClick(() => {
                             inputMethod.getController().stopInputSession()
                             this.isDestroy = true
@@ -116,7 +116,6 @@ export default struct DestroyAccountPage {
                     .justifyContent(FlexAlign.Center)
                     .margin({ top: 40 })
                     .width('100%')
-
 
                     Blank()
                         .layoutWeight(1)

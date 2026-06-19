@@ -1,6 +1,7 @@
 import { exist } from '../../../common/utils/FileUtil'
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import StickerMessageContent from '@wfc/client/src/main/ets/wfc/messages/stickerMessageContent'
+import { Radius } from '../../../common/design/Tokens'
 
 @Component
 export default struct StickerMessageContentView {
@@ -23,7 +24,7 @@ export default struct StickerMessageContentView {
         Image(this.imageUrl())
             .objectFit(ImageFit.Contain)
             .constraintSize({ maxWidth: 200, maxHeight: 200 })
-            .borderRadius(4)
+            .borderRadius(Radius.sm)
             .onClick(event => {
                 // TODO
             })

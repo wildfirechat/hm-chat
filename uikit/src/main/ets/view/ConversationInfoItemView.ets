@@ -2,10 +2,12 @@ import Utils from '../common/Utils';
 import { timeFormat } from '../util/helper';
 import ConversationInfo from '@wfc/client/src/main/ets/wfc/model/conversationInfo';
 import MessageStatus from '@wfc/client/src/main/ets/wfc/messages/messageStatus';
+import { FontSize, Radius, scaledSize, LayoutScale } from '../common/design/Tokens';
 
 @Component
 @Preview
 export default struct ConversationInfoItemView {
+    @StorageProp('fontScale') fontScale: number = 1.0;
     conversationInfo?: ConversationInfo = undefined
     @State conversationItemPortrait: string = ''
     @State conversationItemName: string = ''
@@ -59,48 +61,46 @@ export default struct ConversationInfoItemView {
                         Image(this.conversationItemPortrait)
                             .alt($r('app.media.avatar_def'))
                             .draggable(false)
-                            .height(48)
-                            .width(48)
-                            .borderRadius(6)
+                            .height(scaledSize(48, this.fontScale))
+                            .width(scaledSize(48, this.fontScale))
+                            .borderRadius(Radius.md)
                     } else if (this.conversationInfo!.isSilent && this.conversationUnreadCount() > 0) {
                         Badge({
                             // count: this.conversationInfo!.unreadCount ? (this.conversationInfo!.unreadCount.unreadMention + this.conversationInfo!.unreadCount.unread + this.conversationInfo!.unreadCount.unreadMentionAll) : 0,
                             // maxCount: 99,
                             value: '',
                             position: BadgePosition.RightTop,
-                            style: { badgeSize: 10, badgeColor: $r('app.color.wf_badge_color') }
+                            style: { badgeSize: scaledSize(10, this.fontScale), badgeColor: $r('app.color.wf_badge_color') }
                         }) {
                             Image(this.conversationItemPortrait)
                                 .alt($r('app.media.avatar_def'))
                                 .draggable(false)
-                                .height(52)
-                                .width(52)
+                                .height(scaledSize(52, this.fontScale))
+                                .width(scaledSize(52, this.fontScale))
                                 .padding(2)
-                                .borderRadius(6)
+                                .borderRadius(Radius.md)
                         }
                     } else {
                         Badge({
                             count: this.conversationUnreadCount(),
                             maxCount: 99,
                             position: BadgePosition.RightTop,
-                            style: { badgeSize: 16, badgeColor: $r('app.color.wf_badge_color') }
+                            style: { badgeSize: scaledSize(16, this.fontScale), badgeColor: $r('app.color.wf_badge_color') }
                         }) {
                             Image(this.conversationItemPortrait)
                                 .alt($r('app.media.avatar_def'))
                                 .draggable(false)
-                                .height(52)
-                                .width(52)
+                                .height(scaledSize(52, this.fontScale))
+                                .width(scaledSize(52, this.fontScale))
                                 .padding(2)
-                                .borderRadius(6)
+                                .borderRadius(Radius.md)
                         }
                     }
                 }
-                .width(64)
-                .height(64)
-                .margin({
-                    left: 8,
-                    right: 8,
-                })
+                .width(scaledSize(64, this.fontScale))
+                .height(scaledSize(64, this.fontScale))
+                .margin({ left: 8,
+                    right: 8, })
                 .justifyContent(FlexAlign.Center)
                 .alignItems(VerticalAlign.Center)
 
@@ -108,13 +108,13 @@ export default struct ConversationInfoItemView {
                     Row() {
                         Text(this.conversationItemName)
                             .fontColor($r('app.color.wf_primary_text'))
-                            .fontSize(16)
+                            .fontSize(FontSize.md)
                             .maxLines(1)
                             .layoutWeight(1)
                             .textOverflow({ overflow: TextOverflow.Ellipsis })
                         if (!this.basicMode) {
                             Text(timeFormat(this.conversationInfo!.timestamp))
-                                .fontSize(12)
+                                .fontSize(FontSize.xs)
                                 .fontColor($r('app.color.wf_tertiary_text'))
                         }
                     }
@@ -123,38 +123,40 @@ export default struct ConversationInfoItemView {
                         Row() {
                             if (this.conversationInfoSpanText()) {
                                 Text() {
-                                    Span(this.conversationInfoSpanText()).fontSize(13).fontColor($r('app.color.wf_danger'))
+                                    Span(this.conversationInfoSpanText()).fontSize(FontSize.sm).fontColor($r('app.color.wf_danger'))
                                 }
                             }
 
                             Text(`${this.conversationInfo!.draft ? this.conversationInfo!.draft : this.conversationInfo!.lastMessage ? (this.conversationInfo!.lastMessage.messageContent!.digest(this.conversationInfo!.lastMessage)) : ''}`)
                                 .textOverflow({ overflow: TextOverflow.Ellipsis })
                                 .wordBreak(WordBreak.BREAK_ALL)
-                                .fontSize(13)
+                                .fontSize(FontSize.sm)
                                 .fontColor($r('app.color.wf_tertiary_text'))
-                                .margin({ right: 10 })
+                                .margin({ right: 12 })
                                 .maxLines(1)
                                 .layoutWeight(1)
                             if (this.conversationInfo!.isSilent) {
                                 Image($r('app.media.block_notification'))
                                     .draggable(false)
-                                    .width(14)
-                                    .height(14)
+                                    .width(12)
+                                    .height(12)
                                     .alt('')
                             }
                         }
                         .width('100%')
+                        .padding({ top: 8 })
                     }
                 }
-                .height('100%')
                 .layoutWeight(1)
-                .padding({ right: 10, top: 7, bottom: 7 })
+                .padding({ right: 12, top: 8, bottom: 8 })
                 .alignItems(HorizontalAlign.Start)
-                .justifyContent(FlexAlign.SpaceAround)
+                .justifyContent(FlexAlign.Center)
             }
-            .height(72)
+            // 用 minHeight 而非固定高度，放大字体时随内容撑高
+            .constraintSize({ minHeight: scaledSize(72, this.fontScale, this.basicMode ? LayoutScale.cap : LayoutScale.row) })
             .width('100%')
-            .padding({ top: 7, bottom: 7 })
+            .alignItems(VerticalAlign.Center)
+            .padding({ top: 4, bottom: 4 })
 
             Divider()
                 .margin({ left: 60 })

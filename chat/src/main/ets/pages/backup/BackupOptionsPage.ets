@@ -10,6 +10,7 @@ import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import { appNavigationDestinations } from '../mainNavigationConfig'
 import ConversationInfo from '@wfc/client/src/main/ets/wfc/model/conversationInfo'
 import { showToast } from '@wfc/uikit/src/main/ets/common/utils/Toast'
+import { FontSize } from '@wfc/uikit/src/main/ets/common/design/Tokens'
 
 @Preview
 @Component
@@ -56,7 +57,7 @@ export default struct BackupOptionsPage {
         // 已选择的会话信息
         Column() {
           Text(`已选择 ${this.selectedConversations.length} 个会话`)
-            .fontSize(14)
+            .fontSize(FontSize.sm)
             .fontColor($r('app.color.wf_secondary_text'))
             .width('100%')
             .padding(16)
@@ -67,7 +68,7 @@ export default struct BackupOptionsPage {
         // 是否包含媒体文件
         Row() {
           Text('包含媒体文件')
-            .fontSize(16)
+            .fontSize(FontSize.md)
             .layoutWeight(1)
             .fontColor($r('app.color.wf_primary_text'))
           Toggle({ type: ToggleType.Switch, isOn: this.includeMedia })
@@ -78,13 +79,13 @@ export default struct BackupOptionsPage {
         .width('100%')
         .padding(16)
         .backgroundColor($r('app.color.wf_background'))
-        .margin({ top: 10 })
+        .margin({ top: 12 })
 
         // 开始备份按钮
         Button('开始备份')
           .width('100%')
-          .fontSize(16)
-          .margin({ top: 30 })
+          .fontSize(FontSize.md)
+          .margin({ top: 32 })
           .onClick(() => {
             this.onStartBackup()
           })

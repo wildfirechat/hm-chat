@@ -1,6 +1,7 @@
 /**
  * 朋友圈常量定义
  */
+import { FontSize } from '@wfc/uikit/src/main/ets/common/design/Tokens'
 
 export class MomentConstants {
     /**
@@ -52,14 +53,14 @@ export class MomentConstants {
     // Header
     static readonly COVER_HEIGHT = 260;
 
-    // 字体大小
-    static readonly FONT_SIZE_TITLE = 18;
-    static readonly FONT_SIZE_USERNAME = 16;
-    static readonly FONT_SIZE_CONTENT = 15;
-    static readonly FONT_SIZE_LARGE = 15;
-    static readonly FONT_SIZE_MEDIUM = 14;
-    static readonly FONT_SIZE_SMALL = 13;
-    static readonly FONT_SIZE_CAPTION = 11;
+    // 字体大小（统一指向设计令牌 FontSize；全局字号缩放由 setFontSizeScale 自动生效）
+    static readonly FONT_SIZE_TITLE = FontSize.lg;
+    static readonly FONT_SIZE_USERNAME = FontSize.md;
+    static readonly FONT_SIZE_CONTENT = FontSize.sm;
+    static readonly FONT_SIZE_LARGE = FontSize.sm;
+    static readonly FONT_SIZE_MEDIUM = FontSize.sm;
+    static readonly FONT_SIZE_SMALL = FontSize.sm;
+    static readonly FONT_SIZE_CAPTION = FontSize.xs;
 
     // 布局常量
     static readonly MAX_IMAGES_PER_ROW = 3;

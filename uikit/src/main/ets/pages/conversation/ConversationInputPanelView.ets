@@ -20,6 +20,7 @@ import MentionGroupMemberView from './mention/MentionGroupMemberView'
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType'
 import { preferences } from '@kit.ArkData'
+import { TextStyleToken, FontSize, Radius } from '../../common/design/Tokens'
 import avenginekit from '@wfc/avenginekit'
 import MessageContent from '@wfc/client/src/main/ets/wfc/messages/messageContent'
 import VideoMessageContent from '@wfc/client/src/main/ets/wfc/messages/videoMessageContent'
@@ -752,7 +753,7 @@ export default struct ConversationInputPanelView {
                 })
             }
             .enabled(this.checkedMessages.length > 0)
-            .padding(10)
+            .padding(12)
             .height(INPUT_ICON_WIDTH + 10)
             .width('100%')
             .justifyContent(FlexAlign.SpaceAround)
@@ -760,7 +761,7 @@ export default struct ConversationInputPanelView {
             Row() {
                 Text('群禁言或者群已被解散')
             }
-            .padding(10)
+            .padding(12)
             .height(INPUT_ICON_WIDTH + 10)
             .width('100%')
             .justifyContent(FlexAlign.SpaceAround)
@@ -771,7 +772,7 @@ export default struct ConversationInputPanelView {
                         Image(this.showChannelMenu ? $r('app.media.ic_chat_keyboard') : $r('app.media.ic_chat_menu'))
                             .draggable(false)
                             .id('channelMenu')
-                            .margin({ right: 10 })
+                            .margin({ right: 12 })
                             .width(INPUT_ICON_WIDTH)
                             .height(INPUT_ICON_WIDTH)
                             .onClick(() => {
@@ -789,10 +790,10 @@ export default struct ConversationInputPanelView {
                         Row() {
                             ForEach(this.channelInfo?.menus, (menu: ChannelMenu) => {
                                 Text(menu.name)
-                                    .height('100%')// .padding(10)
+                                    .height('100%')// .padding(12)
                                     .layoutWeight(1)
                                     .textAlign(TextAlign.Center)
-                                    .borderRadius(4)
+                                    .borderRadius(Radius.sm)
                                     .stateStyles({
                                         pressed: {
                                             .backgroundColor('#E5E5E5')
@@ -827,6 +828,7 @@ export default struct ConversationInputPanelView {
                             Column() {
                                 TextArea({ text: this.text, controller: this.textInputController })
                                     .id('textInput')
+                                    .fontSize(TextStyleToken.inputText)
                                     .onChange(value => {
                                         if (this.text + "@" === value) {
                                             this.showMentionSheet = true;
@@ -854,7 +856,7 @@ export default struct ConversationInputPanelView {
                                     .textOverflow(TextOverflow.Clip)
                                     .wordBreak(WordBreak.BREAK_ALL)
                                     .constraintSize({ maxHeight: 80 })
-                                    .borderRadius(4)
+                                    .borderRadius(Radius.sm)
                                     .backgroundColor($r('app.color.wf_background'))
                                     .fontColor($r('app.color.wf_primary_text'))
 
@@ -865,30 +867,30 @@ export default struct ConversationInputPanelView {
                                             .layoutWeight(1)
                                             .fontColor($r('app.color.wf_tertiary_text'))
                                         Image($r('app.media.ic_delete'))
-                                            .width(15)
-                                            .height(15)
+                                            .width(16)
+                                            .height(16)
                                             .padding(2)
-                                            .margin({ left: 10 })
+                                            .margin({ left: 12 })
                                             .draggable(false)
-                                            .borderRadius(10)
+                                            .borderRadius(Radius.xl)
                                             .backgroundColor($r('app.color.c_gray'))
                                             .onClick(() => {
                                                 this.quotedMessage = null
                                             })
                                     }
-                                    .margin({ top: 10 })
+                                    .margin({ top: 12 })
                                     .padding(8)
-                                    .borderRadius(4)
+                                    .borderRadius(Radius.sm)
                                     .backgroundColor($r('app.color.wf_primary_background_color'))
                                 }
                             }
-                            .margin({ left: 10, right: 10 })
+                            .margin({ left: 12, right: 12 })
                             .layoutWeight(1)
                         } else {
                             Button('按住录音')
                                 .layoutWeight(1)
-                                .margin({ left: 10, right: 10 })
-                                .borderRadius(4)
+                                .margin({ left: 12, right: 12 })
+                                .borderRadius(Radius.sm)
                                 .fontColor($r('app.color.wf_secondary_text'))// .backgroundColor('#F3F3F3')
                                 .type(ButtonType.Normal)
                                 .stateStyles({
@@ -959,9 +961,9 @@ export default struct ConversationInputPanelView {
                         if (this.text.trim().length > 0) {
                             Button('发送')
                                 .type(ButtonType.Normal)
-                                .margin({ left: 10 })
+                                .margin({ left: 12 })
                                 .height(INPUT_ICON_WIDTH)
-                                .borderRadius(4)
+                                .borderRadius(Radius.sm)
                                 .onClick(() => {
                                     this.recentPhotoRequested = false
                                     let textMessageContent = new TextMessageContent(this.text.trim());
@@ -994,7 +996,7 @@ export default struct ConversationInputPanelView {
                             Image($r('app.media.ic_chat_add'))
                                 .width(INPUT_ICON_WIDTH)
                                 .height(INPUT_ICON_WIDTH)
-                                .margin({ left: 10 })
+                                .margin({ left: 12 })
                                 .focusable(true)
                                 .focusOnTouch(true)
                                 .onClick(() => {
@@ -1008,7 +1010,7 @@ export default struct ConversationInputPanelView {
                     }
                 }
                 .alignItems(VerticalAlign.Bottom)
-                .padding(10)
+                .padding(12)
                 .width('100%')
 
                 if (this.showExtPanel) {
@@ -1020,23 +1022,31 @@ export default struct ConversationInputPanelView {
                                         .width(60)
                                         .draggable(false)
                                         .height(60)
+                                        .borderRadius(Radius.lg)
+                                        .stateStyles({
+                                            pressed: {
+                                                .backgroundColor($r('app.color.wf_item_pressed'))
+                                            },
+                                            normal: {
+                                                .backgroundColor($r('app.color.wf_background'))
+                                            }
+                                        })
+                                    // 标签宽度不影响格子大小：占满格宽、居中、单行省略，
+                                    // 避免「视频通话」等较长文案把扩展项撑得比别人大
                                     Text(ext.title)
                                         .margin({ top: 8 })
-                                        .fontSize(12)
+                                        .fontSize(FontSize.xs)
                                         .fontColor($r('app.color.wf_secondary_text'))
+                                        .width('100%')
+                                        .textAlign(TextAlign.Center)
+                                        .maxLines(1)
+                                        .textOverflow({ overflow: TextOverflow.Ellipsis })
                                 }
-                                .borderRadius(4)
-                                .margin(10)
-                                .padding(4)
+                                .width('100%')
+                                .borderRadius(Radius.sm)
+                                .padding({ top: 8, bottom: 8 })
+                                .alignItems(HorizontalAlign.Center)
                                 .onClick(ext.action)
-                                .stateStyles({
-                                    pressed: {
-                                        .backgroundColor($r('app.color.wf_item_pressed'))
-                                    },
-                                    normal: {
-                                        .backgroundColor($r('app.color.wf_background'))
-                                    }
-                                })
                             }
 
                         }, (ext: ConversationExt) => ext.title)

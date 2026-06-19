@@ -1,3 +1,4 @@
+import { FontSize } from '@wfc/uikit/src/main/ets/common/design/Tokens'
 @CustomDialog
 export struct FeedVideoPlayerDialog {
     controller?: CustomDialogController;
@@ -23,7 +24,7 @@ export struct FeedVideoPlayerDialog {
             // 关闭按钮
             Button() {
                 SymbolGlyph($r('sys.symbol.xmark'))
-                    .fontSize(18)
+                    .fontSize(FontSize.lg)
                     .fontColor([Color.White])
             }
             .width(36)

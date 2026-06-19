@@ -14,6 +14,7 @@ import { downloadMedia } from '../../../helper/mediaHelper';
 import { filePreview } from '@kit.PreviewKit';
 import { fileUri } from '@kit.CoreFileKit';
 import { uniformTypeDescriptor } from '@kit.ArkData';
+import { TextStyleToken, FontSize, Radius } from '../../../common/design/Tokens'
 
 @Component
 export default struct TextMessageContentView {
@@ -103,8 +104,8 @@ export default struct TextMessageContentView {
                         .padding(this.textPadding)
                         .constraintSize({ minHeight: 40 })
                         .backgroundColor(this.clearBackGround ? Color.Transparent : this.message.direction === 0 ? $r('app.color.wf_sent_bubble_bg') : $r('app.color.wf_received_bubble_bg'))
-                        .fontColor($r('app.color.wf_primary_text'))
-                        .borderRadius(4)
+                        .fontColor($r('app.color.wf_primary_text')).fontSize(TextStyleToken.messageText)
+                        .borderRadius(Radius.sm)
                         .enableDataDetector(true)
                         .dataDetectorConfig({
                             types: [TextDataDetectorType.URL, TextDataDetectorType.PHONE_NUMBER, TextDataDetectorType.EMAIL]
@@ -163,8 +164,8 @@ export default struct TextMessageContentView {
                         .padding(this.textPadding)
                         .constraintSize({ minHeight: 40 })
                         .backgroundColor(this.clearBackGround ? Color.Transparent : this.message.direction === 0 ? $r('app.color.wf_sent_bubble_bg') : $r('app.color.wf_received_bubble_bg'))
-                        .fontColor($r('app.color.wf_primary_text'))
-                        .borderRadius(4)
+                        .fontColor($r('app.color.wf_primary_text')).fontSize(TextStyleToken.messageText)
+                        .borderRadius(Radius.sm)
                         .copyOption(this.menuItems.length > 0 ? CopyOptions.InApp : CopyOptions.None)
                         .textSelectable(this.menuItems.length > 0 ? TextSelectableMode.SELECTABLE_UNFOCUSABLE : TextSelectableMode.UNSELECTABLE)
                         .selection(this.selectionStart, this.selectionEnd)
@@ -210,8 +211,8 @@ export default struct TextMessageContentView {
                     .maxLines(2)
                     .textOverflow({ overflow: TextOverflow.Ellipsis })
                     .backgroundColor($r('app.color.wf_primary_background_color'))
-                    .fontColor($r('app.color.wf_tertiary_text'))
-                    .borderRadius(4)
+                    .fontColor($r('app.color.wf_tertiary_text')).fontSize(TextStyleToken.messageQuote)
+                    .borderRadius(Radius.sm)
                     .onClick(() => {
                         this.showQuoteMessage()
                     })
@@ -224,8 +225,8 @@ export default struct TextMessageContentView {
                     .padding(this.textPadding)
                     .constraintSize({ minHeight: 40 })
                     .backgroundColor(this.clearBackGround ? Color.Transparent : this.message.direction === 0 ? $r('app.color.wf_sent_bubble_bg') : $r('app.color.wf_received_bubble_bg'))
-                    .fontColor($r('app.color.wf_primary_text'))
-                    .borderRadius(4)
+                    .fontColor($r('app.color.wf_primary_text')).fontSize(TextStyleToken.messageText)
+                    .borderRadius(Radius.sm)
                     .enableDataDetector(true)
                     .dataDetectorConfig({
                         types: [TextDataDetectorType.URL, TextDataDetectorType.PHONE_NUMBER, TextDataDetectorType.EMAIL]
@@ -280,8 +281,8 @@ export default struct TextMessageContentView {
                     .padding(this.textPadding)
                     .constraintSize({ minHeight: 40 })
                     .backgroundColor(this.clearBackGround ? Color.Transparent : this.message.direction === 0 ? $r('app.color.wf_sent_bubble_bg') : $r('app.color.wf_received_bubble_bg'))
-                    .fontColor($r('app.color.wf_primary_text'))
-                    .borderRadius(4)
+                    .fontColor($r('app.color.wf_primary_text')).fontSize(TextStyleToken.messageText)
+                    .borderRadius(Radius.sm)
                     .copyOption(this.menuItems.length > 0 ? CopyOptions.InApp : CopyOptions.None)
                     .textSelectable(this.menuItems.length > 0 ? TextSelectableMode.SELECTABLE_UNFOCUSABLE : TextSelectableMode.UNSELECTABLE)
                     .selection(this.selectionStart, this.selectionEnd)
@@ -368,12 +369,12 @@ export default struct TextMessageContentView {
                                 .width(24)
                                 .height(24)
                             Text(menuItem.title)
-                                .fontSize(13)
+                                .fontSize(FontSize.sm)
                                 .fontColor(Color.White)
                         }
                         .justifyContent(FlexAlign.Center)
                         .width(60)
-                        .height(70)
+                        .height(72)
                         .onClick(() => {
                             // 先取消选择
                             this.selectionStart = -1
@@ -398,13 +399,11 @@ export default struct TextMessageContentView {
             .height(this.getMenuHeight())
         }
         .backgroundColor($r('app.color.wf_message_context_memu_background'))
-        .borderRadius(8)
-        .padding({
-            left: 10,
-            right: 10,
-            top: 10,
-            bottom: 10
-        })
+        .borderRadius(Radius.lg)
+        .padding({ left: 12,
+            right: 12,
+            top: 12,
+            bottom: 12 })
     }
 
     getRowsTemplate(): string {

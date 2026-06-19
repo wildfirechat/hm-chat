@@ -3,10 +3,12 @@ import { timeFormat } from '../util/helper';
 import ConversationInfo from '@wfc/client/src/main/ets/wfc/model/conversationInfo';
 import MessageStatus from '@wfc/client/src/main/ets/wfc/messages/messageStatus';
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation';
+import { FontSize, Radius, scaledSize } from '../common/design/Tokens'
 
 @Component
 @Preview
 export default struct CheckableConversationInfoItemView {
+    @StorageProp('fontScale') fontScale: number = 1.0;
     conversationInfo?: ConversationInfo = undefined
     @State conversationItemPortrait: string = ''
     @State conversationItemName: string = ''
@@ -68,51 +70,51 @@ export default struct CheckableConversationInfoItemView {
                             .select(this.isChecked())
                             .enabled(true)
                             .hitTestBehavior(HitTestMode.None)
-                            .margin({right: 8})
+                            .margin({ right: 8 })
                     }
                     if (this.basicMode) {
                         Image(this.conversationItemPortrait)
                             .alt($r('app.media.avatar_def'))
                             .draggable(false)
-                            .height(44)
-                            .width(44)
+                            .height(scaledSize(48, this.fontScale))
+                            .width(scaledSize(48, this.fontScale))
                             .padding(2)
-                            .borderRadius(4)
+                            .borderRadius(Radius.sm)
                     } else if (this.conversationInfo!.isSilent && this.conversationUnreadCount() > 0) {
                         Badge({
                             // count: this.conversationInfo!.unreadCount ? (this.conversationInfo!.unreadCount.unreadMention + this.conversationInfo!.unreadCount.unread + this.conversationInfo!.unreadCount.unreadMentionAll) : 0,
                             // maxCount: 99,
                             value: '',
                             position: BadgePosition.RightTop,
-                            style: { badgeSize: 10, badgeColor: $r('app.color.wf_badge_color') }
+                            style: { badgeSize: scaledSize(10, this.fontScale), badgeColor: $r('app.color.wf_badge_color') }
                         }) {
                             Image(this.conversationItemPortrait)
                                 .alt($r('app.media.avatar_def'))
                                 .draggable(false)
-                                .height(44)
-                                .width(44)
+                                .height(scaledSize(48, this.fontScale))
+                                .width(scaledSize(48, this.fontScale))
                                 .padding(2)
-                                .borderRadius(4)
+                                .borderRadius(Radius.sm)
                         }
                     } else {
                         Badge({
                             count: this.conversationUnreadCount(),
                             maxCount: 99,
                             position: BadgePosition.RightTop,
-                            style: { badgeSize: 16, badgeColor: $r('app.color.wf_badge_color') }
+                            style: { badgeSize: scaledSize(16, this.fontScale), badgeColor: $r('app.color.wf_badge_color') }
                         }) {
                             Image(this.conversationItemPortrait)
                                 .alt($r('app.media.avatar_def'))
                                 .draggable(false)
-                                .height(44)
-                                .width(44)
+                                .height(scaledSize(48, this.fontScale))
+                                .width(scaledSize(48, this.fontScale))
                                 .padding(2)
-                                .borderRadius(4)
+                                .borderRadius(Radius.sm)
                         }
                     }
                 }
-                .height(64)
-                .padding({left: 10, right: 10})
+                .height(scaledSize(64, this.fontScale))
+                .padding({ left: 12, right: 12 })
                 .justifyContent(FlexAlign.Center)
                 .alignItems(VerticalAlign.Center)
 
@@ -120,13 +122,13 @@ export default struct CheckableConversationInfoItemView {
                     Row() {
                         Text(this.conversationItemName)
                             .fontColor($r('app.color.wf_primary_text'))
-                            .fontSize(16)
+                            .fontSize(FontSize.md)
                             .maxLines(1)
                             .layoutWeight(1)
                             .textOverflow({ overflow: TextOverflow.Ellipsis })
                         if (!this.basicMode) {
                             Text(timeFormat(this.conversationInfo!.timestamp))
-                                .fontSize(12)
+                                .fontSize(FontSize.xs)
                                 .fontColor($r('app.color.wf_tertiary_text'))
                         }
                     }
@@ -135,23 +137,23 @@ export default struct CheckableConversationInfoItemView {
                         Row() {
                             if (this.conversationInfoSpanText()) {
                                 Text() {
-                                    Span(this.conversationInfoSpanText()).fontSize(13).fontColor($r('app.color.wf_danger'))
+                                    Span(this.conversationInfoSpanText()).fontSize(FontSize.sm).fontColor($r('app.color.wf_danger'))
                                 }
                             }
 
                             Text(`${this.conversationInfo!.draft ? this.conversationInfo!.draft : this.conversationInfo!.lastMessage ? (this.conversationInfo!.lastMessage.messageContent!.digest(this.conversationInfo!.lastMessage)) : ''}`)
                                 .textOverflow({ overflow: TextOverflow.Ellipsis })
                                 .wordBreak(WordBreak.BREAK_ALL)
-                                .fontSize(13)
+                                .fontSize(FontSize.sm)
                                 .fontColor($r('app.color.wf_tertiary_text'))
-                                .margin({ right: 10 })
+                                .margin({ right: 12 })
                                 .maxLines(1)
                                 .layoutWeight(1)
                             if (this.conversationInfo!.isSilent) {
                                 Image($r('app.media.block_notification'))
                                     .draggable(false)
-                                    .width(14)
-                                    .height(14)
+                                    .width(16)
+                                    .height(16)
                                     .alt('')
                             }
                         }
@@ -160,13 +162,13 @@ export default struct CheckableConversationInfoItemView {
                 }
                 .height('100%')
                 .layoutWeight(1)
-                .padding({ right: 10, top: 7, bottom: 7 })
+                .padding({ right: 12, top: 8, bottom: 8 })
                 .alignItems(HorizontalAlign.Start)
                 .justifyContent(FlexAlign.SpaceAround)
             }
-            .height(72)
+            .height(scaledSize(72, this.fontScale))
             .width('100%')
-            .padding({ top: 7, bottom: 7 })
+            .padding({ top: 4, bottom: 4 })
 
             Divider()
                 .margin({ left: 60 })

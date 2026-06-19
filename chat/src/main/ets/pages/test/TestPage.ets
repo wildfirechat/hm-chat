@@ -8,7 +8,7 @@ import { PiPWindow } from '@kit.ArkUI';
 import uikit from '@wfc/uikit';
 import { BusinessError } from '@kit.BasicServicesKit';
 import TestTextNodeController from './TestTextNodeController';
-
+import { FontSize } from '@wfc/uikit/src/main/ets/common/design/Tokens'
 
 @Component
 export default struct TestPage {
@@ -47,7 +47,7 @@ export default struct TestPage {
                     .height(300)
                     .backgroundColor(Color.Green)
                 Text('测试123')
-                    .fontSize(20)
+                    .fontSize(FontSize.xl)
                     .fontColor(Color.Red)
                     .onClick(() => {
                         this.pipController?.startPiP()

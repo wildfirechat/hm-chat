@@ -1,6 +1,7 @@
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
 import { LengthUnit } from '@kit.ArkUI'
+import { TextStyleToken } from '../../common/design/Tokens'
 
 @Component
 export default struct TextMessagePreviewPage {
@@ -20,7 +21,7 @@ export default struct TextMessagePreviewPage {
                 Scroll() {
                     Text(this.message?.messageContent.digest(this.message))
                         .width('100%')
-                        .fontSize(20)
+                        .fontSize(TextStyleToken.messagePreview)
                         .lineSpacing({ value: 12, unit: LengthUnit.VP })
 
                 }

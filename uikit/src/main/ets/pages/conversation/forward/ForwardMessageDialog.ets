@@ -3,6 +3,7 @@ import Utils from '../../../common/Utils'
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
 import { LengthUnit } from '@kit.ArkUI'
 import { flexButtonSpace } from '../../../common/Styles'
+import { FontSize, Radius } from '../../../common/design/Tokens'
 
 @Preview
 @CustomDialog
@@ -36,8 +37,8 @@ export default struct ForwardMessageDialog {
     build() {
         Column() {
             Text('发送给：')
-                .fontSize(18)
-                .margin({ top: 10, bottom: 10 })
+                .fontSize(FontSize.lg)
+                .margin({ top: 12, bottom: 12 })
                 .width('100%')
                 .textAlign(TextAlign.Start)
                 .fontColor($r('app.color.wf_primary_text'))
@@ -49,17 +50,17 @@ export default struct ForwardMessageDialog {
                             Image(pn.portrait)
                                 .width(40)
                                 .height(40)
-                                .borderRadius(4)
-                                .margin({ right: 10 })
+                                .borderRadius(Radius.sm)
+                                .margin({ right: 12 })
                             Text(pn.name)
-                                .fontSize(16)
+                                .fontSize(FontSize.md)
                                 .maxLines(1)
                                 .textOverflow({ overflow: TextOverflow.Ellipsis })
                                 .layoutWeight(1)
                                 .fontColor($r('app.color.wf_primary_text'))
                         }
                         .width('100%')
-                        .padding({ top: 5, bottom: 5 })
+                        .padding({ top: 4, bottom: 4 })
                         .alignItems(VerticalAlign.Center)
                     }
                 }, (pn: PortraitAndName, index: number) => index + '')
@@ -71,17 +72,15 @@ export default struct ForwardMessageDialog {
 
             if (this.forwardMessageDesc) {
                 Text(this.forwardMessageDesc)
-                    .fontSize(13)
+                    .fontSize(FontSize.sm)
                     .fontColor($r('app.color.wf_tertiary_text'))
-                    .margin({ top: 15 })
-                    .padding({
-                        left: 20,
+                    .margin({ top: 16 })
+                    .padding({ left: 20,
                         right: 20,
-                        top: 10,
-                        bottom: 10
-                    })
+                        top: 12,
+                        bottom: 12 })
                     .maxLines(3)
-                    .borderRadius(4)
+                    .borderRadius(Radius.sm)
                     .width('100%')
                     .textOverflow({ overflow: TextOverflow.Ellipsis })
                     .backgroundColor($r('app.color.wf_primary_background_color'))
@@ -90,14 +89,13 @@ export default struct ForwardMessageDialog {
                     .width('100%')
                     .constraintSize({ maxHeight: 100 })
                     .objectFit(ImageFit.Contain)
-                    .margin({ top: 15 })
+                    .margin({ top: 16 })
             }
 
             Row() {
                 TextInput({ placeholder: '给朋友留言' })
-                    .height(40)
                     .layoutWeight(1)
-                    .borderRadius(4)
+                    .borderRadius(Radius.sm)
                     .backgroundColor($r('app.color.wf_primary_background_color'))
                     .fontColor($r('app.color.wf_primary_text'))
                     .placeholderColor($r('app.color.wf_tertiary_text'))
@@ -114,24 +112,22 @@ export default struct ForwardMessageDialog {
                 if (this.isInputFocused) {
                     Button('发送')
                         .type(ButtonType.Normal)
-                        .height(30)
-                        .width(60)
-                        .borderRadius(4)
+                        .height(32)
+                        .borderRadius(Radius.sm)
                         .onClick(() => {
                             this.controller.close()
                             this.confirm(this.textValue)
                         })
                         .fontColor(Color.White)
                         .backgroundColor($r('app.color.wf_primary'))
-                        .margin({ left: 10 })
+                        .margin({ left: 12 })
                 }
             }
             .width('100%')
             .margin({ top: 20 })
 
-
             if (!this.isInputFocused) {
-                Flex({ justifyContent: FlexAlign.End, space: flexButtonSpace }) {
+                Flex({ justifyContent: FlexAlign.End, alignItems: ItemAlign.Center, space: flexButtonSpace }) {
                     Button('取消')
                         .onClick(() => {
                             this.controller.close()
@@ -139,14 +135,13 @@ export default struct ForwardMessageDialog {
                         })
                         .backgroundColor(Color.Transparent)
                         .fontColor($r('app.color.wf_primary_text'))
-                        .fontSize(16)
+                        .fontSize(FontSize.md)
                         .padding({ left: 20, right: 20 })
 
                     Button('发送')
                         .type(ButtonType.Normal)
-                        .height(30)
-                        .width(60)
-                        .borderRadius(4)
+                        .height(32)
+                        .borderRadius(Radius.sm)
                         .onClick(() => {
                             this.controller.close()
                             this.confirm(this.textValue)

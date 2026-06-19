@@ -4,6 +4,7 @@ import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
 import ModifyMyInfoEntry from '@wfc/client/src/main/ets/wfc/model/modifyMyInfoEntry';
 import ModifyMyInfoType from '@wfc/client/src/main/ets/wfc/model/modifyMyInfoType';
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo';
+import { FontSize, Radius } from '../../common/design/Tokens'
 
 @Component
 export default struct UpdateUserNickNameOrAliasPage {
@@ -18,7 +19,6 @@ export default struct UpdateUserNickNameOrAliasPage {
         this.userInfo = params['userInfo'] as UserInfo
 
         this.isSelf = this.userInfo.uid === wfc.getUserId()
-
 
         if (this.isSelf) {
             this.placeHolder = this.userInfo.displayName
@@ -48,14 +48,14 @@ export default struct UpdateUserNickNameOrAliasPage {
         NavDestination() {
             Column() {
                 Text(this.isSelf ? '昵称' : ' 备注')
-                    .fontSize(20)
+                    .fontSize(FontSize.xl)
                     .margin({ top: 40 })
 
                 Text(this.isSelf ? '好名字，可以让朋友更容易记住你' : '为朋友设置一个仅自己可见的备注')
                     .margin({ top: 20 })
 
                 Divider()
-                    .margin({ top: 30 })
+                    .margin({ top: 32 })
                     .strokeWidth(0.4)
                     .color($r('app.color.wf_divider'))
 
@@ -65,13 +65,13 @@ export default struct UpdateUserNickNameOrAliasPage {
                         placeholder: this.placeHolder
                     })
                         .defaultFocus(true)
-                        .borderRadius(2)
+                        .borderRadius(Radius.xs)
                         .backgroundColor(Color.Transparent)
                         .maxLines(1)
                         .layoutWeight(1)
                 }
                 .width('100%')
-                .padding({ top: 5, bottom: 5 })
+                .padding({ top: 4, bottom: 4 })
 
                 Divider()
                     .strokeWidth(0.4)
@@ -82,15 +82,15 @@ export default struct UpdateUserNickNameOrAliasPage {
                     stateEffect: true
                 })
                     .enabled(!!this.text.trim() && this.text !== this.placeHolder)
-                    .padding({ top: 3, bottom: 3 })
+                    .padding({ top: 4, bottom: 4 })
                     .width(160)
-                    .borderRadius(6)
+                    .borderRadius(Radius.md)
                     .margin({ top: 100 })
                     .onClick(() => {
                         this.updateNickNameOrAlias()
                     })
             }
-            .padding(30)
+            .padding(32)
         }
         .title('')
         .height('100%')

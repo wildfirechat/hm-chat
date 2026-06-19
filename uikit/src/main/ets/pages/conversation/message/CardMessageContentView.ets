@@ -4,6 +4,7 @@ import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import CardMessageContent from '@wfc/client/src/main/ets/wfc/messages/cardMessageContent'
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import { uikitNavigationDestinations } from '../../uikitNavigationConfig'
+import { FontSize, Radius } from '../../../common/design/Tokens'
 
 @Component
 export default struct CardMessageContentView {
@@ -63,30 +64,30 @@ export default struct CardMessageContentView {
         Column() {
             Row() {
                 Image(this.cardMessageContent().portrait)
-                    .width(50)
-                    .height(50)
-                    .margin(10)
+                    .width(52)
+                    .height(52)
+                    .margin(12)
                 Column() {
                     Text(this.cardMessageContent().displayName)
                         .textOverflow({ overflow: TextOverflow.Ellipsis })
-                        .fontSize(18)
+                        .fontSize(FontSize.lg)
                         .maxLines(1)
                     // Text(this.conferenceInviteMessageContent().desc)
-                    //     .fontSize(12)
+                    //     .fontSize(FontSize.xs)
                     //     .maxLines(1)
                 }
-                .padding({ right: 10 })
+                .padding({ right: 12 })
                 .justifyContent(FlexAlign.SpaceBetween)
                 .alignItems(HorizontalAlign.Start)
             }
             .justifyContent(FlexAlign.Start)
 
             Divider()
-                .margin({ left: 10, right: 10, bottom: 10 })
+                .margin({ left: 12, right: 12, bottom: 12 })
             Text(this.desc())
                 .maxLines(1)
-                .fontSize(12)
-                .margin({ left: 10, bottom: 10 })
+                .fontSize(FontSize.xs)
+                .margin({ left: 12, bottom: 12 })
         }
         .onClick(() => {
             this.showCardInfo()
@@ -94,6 +95,6 @@ export default struct CardMessageContentView {
         .width(200)
         .alignItems(HorizontalAlign.Start)
         .backgroundColor($r('app.color.wf_background'))
-        .borderRadius(4)
+        .borderRadius(Radius.sm)
     }
 }

@@ -18,6 +18,7 @@ import { util } from '@kit.ArkTS'
 import BackupRequestNotificationContent from '@wfc/client/src/main/ets/wfc/messages/backup/backupRequestNotificationContent'
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
 import Long from '@wfc/client/src/main/ets/wfc/util/long'
+import { FontSize } from '@wfc/uikit/src/main/ets/common/design/Tokens'
 
 // 会话信息接口
 interface ConversationInfoData {
@@ -533,14 +534,14 @@ export default struct PCBackupProgressPage {
         Column() {
           // 状态
           Text(this.currentStep)
-            .fontSize(18)
+            .fontSize(FontSize.lg)
             .fontWeight(FontWeight.Bold)
             .fontColor($r('app.color.wf_primary_text'))
             .margin({ top: 60 })
 
           // 详情
           Text(this.detail)
-            .fontSize(14)
+            .fontSize(FontSize.sm)
             .fontColor($r('app.color.wf_secondary_text'))
             .margin({ top: 20 })
 
@@ -556,8 +557,8 @@ export default struct PCBackupProgressPage {
           // 等待响应时的活动指示器
           if (this.isWaitingResponse) {
             Progress({ value: 0, total: 100, type: ProgressType.Ring })
-              .width(50)
-              .height(50)
+              .width(52)
+              .height(52)
               .margin({ top: 40 })
           }
         }
@@ -569,7 +570,7 @@ export default struct PCBackupProgressPage {
         if (!this.isComplete) {
           Button('取消')
             .width('80%')
-            .fontSize(16)
+            .fontSize(FontSize.md)
             .type(ButtonType.Normal)
             .margin({ bottom: 40 })
             .onClick(() => {

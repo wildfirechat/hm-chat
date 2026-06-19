@@ -4,6 +4,7 @@ import CallSession from "@wfc/avenginekit/src/main/ets/wfc/av/engine/callSession
 import CallState from "@wfc/avenginekit/src/main/ets/wfc/av/engine/callState";
 import WFCVideoRenderController, { ScalingMode } from '@wfc/avenginekit/src/main/ets/wfc/av/xcomponent/WFCVideoRenderController'
 import { timestampFormat } from "../../util/helper";
+import { FontSize } from '../../common/design/Tokens'
 
 class VoipPiPParams {
     durationText: string = '';
@@ -16,7 +17,6 @@ class VoipPiPParams {
         this.videoRenderController = videoRenderController;
     }
 }
-
 
 @Builder
 function buildVoipPiPNode(params: VoipPiPParams) {
@@ -40,7 +40,7 @@ function buildVoipPiPNode(params: VoipPiPParams) {
                 .height(vp2px(40))
 
             Text(params.durationText)
-                .fontSize(30)
+                .fontSize(FontSize.d2)
                 .fontColor(Color.White)
         }
         .padding(20)
@@ -51,7 +51,6 @@ function buildVoipPiPNode(params: VoipPiPParams) {
         .height('100%') // 高度方向充满画中画窗口
     }
 }
-
 
 // 开发者可通过继承NodeController实现自定义UI控制器
 export default class VoipPiPNodeController extends NodeController {

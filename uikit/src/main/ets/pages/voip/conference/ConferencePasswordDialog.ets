@@ -1,3 +1,4 @@
+import { FontSize, Radius } from '../../../common/design/Tokens'
 @CustomDialog
 export default struct ConferencePasswordDialog {
     controller: CustomDialogController
@@ -7,24 +8,24 @@ export default struct ConferencePasswordDialog {
     build() {
         Column() {
             Text('请输入会议密码')
-                .fontSize(17)
+                .fontSize(FontSize.md)
                 .fontColor($r('app.color.wf_primary_text'))
                 .padding(20)
 
             Column() {
                 Text('会议密码')
-                    .fontSize(15)
+                    .fontSize(FontSize.sm)
                     .fontColor($r('app.color.wf_primary_text'))
                 TextInput({ placeholder: '请输入会议密码', text: this.password })
-                    .fontSize(14)
-                    .borderRadius(4)
+                    .fontSize(FontSize.sm)
+                    .borderRadius(Radius.sm)
                     .type(InputType.Number)
                     .fontColor($r('app.color.wf_primary_text'))
                     .placeholderColor($r('app.color.wf_tertiary_text'))
                     .backgroundColor(Color.Transparent)
                     .maxLines(1)
                     .maxLength(50)
-                    .margin({ top: 5 })
+                    .margin({ top: 4 })
                     .onChange(value => {
                         this.password = value
                     })
@@ -53,7 +54,7 @@ export default struct ConferencePasswordDialog {
             .justifyContent(FlexAlign.End)
             .margin({ top: 20 })
         }
-        .padding({ top: 10, bottom: 10 })
+        .padding({ top: 12, bottom: 12 })
         .margin({ left: 40, right: 40 })
     }
 }

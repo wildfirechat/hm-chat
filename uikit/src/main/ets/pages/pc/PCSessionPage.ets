@@ -6,6 +6,7 @@ import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType'
 import PCOnlineInfo from '@wfc/client/src/main/ets/wfc/model/pcOnlineInfo'
 import { uikitNavigationDestinations } from '../uikitNavigationConfig'
+import { FontSize, Radius } from '../../common/design/Tokens'
 
 @Component
 export default struct PCSessionPage {
@@ -51,11 +52,11 @@ export default struct PCSessionPage {
                 Image($r('app.media.pc'))
                     .width(120)
                     .height(120)
-                    .margin({ top: 30 })
+                    .margin({ top: 32 })
 
                 // 状态文字
                 Text(`${this.pcOnineInfo?.platform?.getPlatFormName()} 已登录`)
-                    .fontSize(16)
+                    .fontSize(FontSize.md)
                     .fontColor($r('app.color.wf_tertiary_text'))
                     .margin({ top: 16 })
 
@@ -64,7 +65,7 @@ export default struct PCSessionPage {
                     // 静音
                     Row() {
                         Text('手机静音')
-                            .fontSize(16)
+                            .fontSize(FontSize.md)
                             .fontColor($r('app.color.wf_primary_text'))
                             .layoutWeight(1)
 
@@ -90,7 +91,7 @@ export default struct PCSessionPage {
                     // 锁定
                     Row() {
                         Text('锁定电脑')
-                            .fontSize(16)
+                            .fontSize(FontSize.md)
                             .fontColor($r('app.color.wf_primary_text'))
                             .layoutWeight(1)
 
@@ -116,12 +117,12 @@ export default struct PCSessionPage {
                     // 文件助手
                     Row() {
                         Text('传文件')
-                            .fontSize(16)
+                            .fontSize(FontSize.md)
                             .fontColor($r('app.color.wf_primary_text'))
                             .layoutWeight(1)
 
                         Text('>')
-                            .fontSize(18)
+                            .fontSize(FontSize.lg)
                             .fontColor($r('app.color.wf_tertiary_text'))
                     }
                     .width('100%')
@@ -135,7 +136,7 @@ export default struct PCSessionPage {
                 }
                 .width('100%')
                 .backgroundColor($r('app.color.wf_background'))
-                .margin({ top: 30 })
+                .margin({ top: 32 })
 
                 Blank()
 
@@ -143,9 +144,9 @@ export default struct PCSessionPage {
                 Button(`退出${this.pcOnineInfo?.platform.getPlatFormName()}登录`, { type: ButtonType.Normal, stateEffect: true })
                     .backgroundColor(0xFA5151)
                     .fontColor(Color.White)
-                    .fontSize(16)
+                    .fontSize(FontSize.md)
                     .height(44)
-                    .borderRadius(5)
+                    .borderRadius(Radius.sm)
                     .width('90%')
                     .margin({ bottom: 40 })
                     .onClick(() => {

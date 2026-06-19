@@ -11,6 +11,7 @@ import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
 import Long from '@wfc/client/src/main/ets/wfc/util/long'
 import { eq, stringValue } from '@wfc/client/src/main/ets/wfc/util/longUtil'
 import { uikitNavigationDestinations } from '../uikitNavigationConfig'
+import { FontSize } from '../../common/design/Tokens'
 
 @Component
 export default struct FileRecordPage {
@@ -83,10 +84,10 @@ export default struct FileRecordPage {
                 Text('文件记录')
                     .backgroundColor($r('app.color.wf_secondary_background'))
                     .fontColor($r('app.color.wf_tertiary_text'))
-                    .fontSize(13)
-                    .padding({ left: 10 })
+                    .fontSize(FontSize.sm)
+                    .padding({ left: 12 })
                     .width('100%')
-                    .height(23)
+                    .height(24)
                 if (this.fileRecordDataSource.totalCount() === 0) {
                     Text('没有文件记录')
                         .width('100%')
@@ -99,25 +100,25 @@ export default struct FileRecordPage {
                             ListItem() {
                                 Row() {
                                     Image(getFiletypeIcon(fileRecord.name))
-                                        .width(50)
-                                        .height(50)
-                                        .margin(10)
+                                        .width(52)
+                                        .height(52)
+                                        .margin(12)
                                     Column() {
                                         Text(fileRecord.name)
-                                            .fontSize(16)
+                                            .fontSize(FontSize.md)
                                             .maxLines(1)
                                             .fontColor($r('app.color.wf_primary_text'))
                                             .textOverflow({ overflow: TextOverflow.Ellipsis })
                                         Row() {
                                             Text(this.fileSenderDisplayName(fileRecord))
                                                 .maxLines(1)
-                                                .fontSize(12)
+                                                .fontSize(FontSize.xs)
                                                 .fontColor($r('app.color.wf_tertiary_text'))
                                             Text(humanSize(fileRecord.size))
                                                 .maxLines(1)
-                                                .fontSize(12)
+                                                .fontSize(FontSize.xs)
                                                 .fontColor($r('app.color.wf_tertiary_text'))
-                                                .margin({ left: 10 })
+                                                .margin({ left: 12 })
                                         }
                                         .margin({ top: 4 })
                                         .justifyContent(FlexAlign.Start)

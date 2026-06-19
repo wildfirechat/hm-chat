@@ -3,6 +3,7 @@ import SoundMessageContent from '@wfc/client/src/main/ets/wfc/messages/soundMess
 import AudioPlayManager from '../audio/AudioPlayManager'
 import Config from '@wfc/client/src/main/ets/config'
 import MessageStatus from '@wfc/client/src/main/ets/wfc/messages/messageStatus'
+import { Radius } from '../../../common/design/Tokens'
 
 @Component
 export default struct AudioMessageContentView {
@@ -106,17 +107,17 @@ export default struct AudioMessageContentView {
         Row() {
             Row() {
                 Image(this.imageUrl)
-                    .width(20)
-                    .height(20)
+                    .width(16)
+                    .height(16)
                 Text(`${this.soundMessageContent().duration} ''`)
-                    .margin({ left: 10 })
+                    .margin({ left: 12 })
             }
             .width(`${this.soundMessageContent().duration / 60 * 100}%`)
             .backgroundColor(this.message.direction === 0 ? $r('app.color.wf_sent_bubble_bg') : $r('app.color.wf_received_bubble_bg'))
             .alignItems(VerticalAlign.Center)
             .height(40)
-            .padding(5)
-            .borderRadius(4)
+            .padding(4)
+            .borderRadius(Radius.sm)
             .constraintSize({ minWidth: 60 })
             .margin({ top: 4 }) // portrait 的高度是 48, (48 - 40) / 2
             .onClick(() => {
@@ -129,7 +130,7 @@ export default struct AudioMessageContentView {
                     .height(8)
                     .margin({ left: 8 })
                     .backgroundColor($r('app.color.wf_danger'))
-                    .borderRadius(8)
+                    .borderRadius(Radius.lg)
             }
         }
     }

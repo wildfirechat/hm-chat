@@ -12,6 +12,7 @@ import type { BackupInfo } from '@wfc/client/src/main/ets/wfc/backup'
 import { MessageBackupManager } from '@wfc/client/src/main/ets/wfc/backup/messageBackupManager'
 import { showToast } from '@wfc/uikit/src/main/ets/common/utils/Toast'
 import fs from '@ohos.file.fs'
+import { FontSize } from '@wfc/uikit/src/main/ets/common/design/Tokens'
 
 interface BackupInfoWithPath extends BackupInfo {
   backupPath: string;
@@ -185,11 +186,11 @@ export default struct BackupListPage {
           // 加载中
           Column() {
             Progress({ value: 0, total: 100, type: ProgressType.Ring })
-              .width(50)
-              .height(50)
+              .width(52)
+              .height(52)
               .margin({ top: 100 })
             Text('加载中...')
-              .fontSize(14)
+              .fontSize(FontSize.sm)
               .fontColor($r('app.color.wf_secondary_text'))
               .margin({ top: 20 })
           }
@@ -199,7 +200,7 @@ export default struct BackupListPage {
           // 空列表
           Column() {
             Text('暂无本地备份')
-              .fontSize(16)
+              .fontSize(FontSize.md)
               .fontColor($r('app.color.wf_secondary_text'))
               .margin({ top: 100 })
           }
@@ -213,16 +214,16 @@ export default struct BackupListPage {
                 Row() {
                   Column() {
                     Text(`${this.formatDate(info.backupTime)}`)
-                      .fontSize(16)
+                      .fontSize(FontSize.md)
                       .fontWeight(FontWeight.Medium)
                       .fontColor($r('app.color.wf_primary_text'))
                     Text(`${info.deviceName} · ${info.totalConversations}个会话 · ${info.totalMessages}条消息`)
-                      .fontSize(14)
+                      .fontSize(FontSize.sm)
                       .fontColor($r('app.color.wf_secondary_text'))
                       .margin({ top: 4 })
                     if (info.mediaFileCount > 0) {
                       Text(`${info.mediaFileCount}个媒体文件 · ${this.formatFileSize(info.mediaTotalSize)}`)
-                        .fontSize(12)
+                        .fontSize(FontSize.xs)
                         .fontColor($r('app.color.wf_tertiary_text'))
                         .margin({ top: 2 })
                     }

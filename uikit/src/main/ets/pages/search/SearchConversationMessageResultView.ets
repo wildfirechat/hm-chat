@@ -12,6 +12,7 @@ import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
 import Utils from '../../common/Utils'
 import { drawing } from '@kit.ArkGraphics2D'
 import { timeFormat } from '../../util/helper'
+import { FontSize, Radius } from '../../common/design/Tokens'
 
 @Component
 @Preview
@@ -76,31 +77,31 @@ export default struct SearchConversationMessageResultView {
                         .alt($r('app.media.avatar_def'))
                         .width(40)
                         .height(40)
-                        .borderRadius(4)
+                        .borderRadius(Radius.sm)
                     Column() {
                         Text(resultWrapper.senderName)
                             .maxLines(1)
                             .textOverflow({ overflow: TextOverflow.Ellipsis })
 
                         Text(resultWrapper.digest)
-                            .fontSize(12)
-                            .margin({ top: 5 })
+                            .fontSize(FontSize.xs)
+                            .margin({ top: 4 })
                             .fontColor($r('app.color.wf_tertiary_text'))
                             .maxLines(1)
                             .textOverflow({ overflow: TextOverflow.Ellipsis })
                     }
                     .alignItems(HorizontalAlign.Start)
                     .layoutWeight(1)
-                    .padding({ left: 10 })
+                    .padding({ left: 12 })
 
                     Text(resultWrapper.timestamp)
-                        .fontSize(11)
+                        .fontSize(FontSize.xs)
                         .alignSelf(ItemAlign.Start)
                 }
                 .width('100%')
                 .justifyContent(FlexAlign.Start)
                 .constraintSize({ maxWidth: '100%' })
-                .padding(10)
+                .padding(12)
             }
             .width('100%')
             .stateStyles({
@@ -121,22 +122,22 @@ export default struct SearchConversationMessageResultView {
     @Builder
     searchResultCategoryHeader(title: string) {
         Text(title)
-            .padding({ left: 10 })
+            .padding({ left: 12 })
             .width('100%')
             .height(32)
             .fontColor($r('app.color.wf_tertiary_text'))
-            .fontSize(13)
+            .fontSize(FontSize.sm)
             .backgroundColor($r('app.color.wf_secondary_background'))
     }
 
     @Builder
     searchResultCategoryFooter(title: string, action: () => void) {
         Text(title)
-            .padding({ left: 10 })
+            .padding({ left: 12 })
             .width('100%')
             .height(32)
             .fontColor('#5B6E8E')
-            .fontSize(13)
+            .fontSize(FontSize.sm)
             .onClick(action)
     }
 

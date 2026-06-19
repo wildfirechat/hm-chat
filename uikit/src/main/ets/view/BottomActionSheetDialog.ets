@@ -1,3 +1,4 @@
+import { FontSize } from '../common/design/Tokens'
 @Preview
 @CustomDialog
 export default struct BottomActionSheetDialog {
@@ -28,19 +29,19 @@ export default struct BottomActionSheetDialog {
         Row() {
             if (item.icon) {
                 Image(item.icon)
-                    .width(22)
-                    .height(22)
+                    .width(24)
+                    .height(24)
                     .objectFit(ImageFit.Contain)
                     .margin({ right: 8 })
             }
             Text(item.title)
-                .fontSize(16)
+                .fontSize(FontSize.md)
                 .fontColor($r('app.color.wf_primary_text'))
                 .textAlign(TextAlign.Center)
         }
         .justifyContent(FlexAlign.Center)
         .width('100%')
-        .height(54)
+        .height(56)
         .stateStyles({
             pressed: {
                 .backgroundColor($r('app.color.wf_item_pressed'))
@@ -58,16 +59,14 @@ export default struct BottomActionSheetDialog {
             Column() {
                 if (this.title) {
                     Text(this.title)
-                        .fontSize(13)
+                        .fontSize(FontSize.sm)
                         .fontColor($r('app.color.wf_secondary_text'))
                         .textAlign(TextAlign.Center)
                         .width('100%')
-                        .padding({
-                            top: 18,
-                            bottom: 18,
+                        .padding({ top: 20,
+                            bottom: 20,
                             left: 16,
-                            right: 16
-                        })
+                            right: 16 })
                     Divider()
                         .color($r('app.color.wf_divider'))
                         .width('100%')
@@ -96,8 +95,8 @@ export default struct BottomActionSheetDialog {
             // 取消项（默认显示，位于最下方，与上面分隔）
             Column() {
                 Text('取消')
-                    .fontSize(16)
-                    .height(54)
+                    .fontSize(FontSize.md)
+                    .height(56)
                     .fontColor($r('app.color.wf_primary_text'))
                     .textAlign(TextAlign.Center)
             }

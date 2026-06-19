@@ -7,9 +7,9 @@ import wfc from '@wfc/client/src/main/ets/wfc/client/wfc';
 import CollectionMessageContent from '@wfc/client/src/main/ets/wfc/messages/CollectionMessageContent';
 
 import archiveServer from './api/archiveServer';
+import { fontSizeManager } from './common/design/Tokens';
 
 export { archiveServer };
-
 
 export class UIKit {
     bundleName = ''
@@ -19,6 +19,7 @@ export class UIKit {
     init(context: common.UIAbilityContext) {
         this.bundleName = context.abilityInfo.bundleName
         this.entryAbilityName = context.abilityInfo.name
+        fontSizeManager.init(context.getApplicationContext())
         avenginekitImpl.setup(context, new AVEngineCallbackImpl(context, this.mainNavPathStack));
         avenginekit.SCREEN_SHARING_REPLACE_MODE = true;
         // 仅高级版音视频 SDK 支持

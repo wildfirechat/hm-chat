@@ -29,6 +29,7 @@ import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import SoundMessageContent from '@wfc/client/src/main/ets/wfc/messages/soundMessageContent'
 import AudioPlayManager from '../conversation/audio/AudioPlayManager'
 import http from '@ohos.net.http'
+import { FontSize, Radius } from '../../common/design/Tokens'
 
 @Component
 export default struct FavRecordPage {
@@ -257,15 +258,15 @@ export default struct FavRecordPage {
                                             Image(getFiletypeIcon(favItem.title))
                                                 .width(40)
                                                 .height(40)
-                                                .margin({ right: 10 })
+                                                .margin({ right: 12 })
                                             Column() {
                                                 Text(favItem.title)
                                                     .textOverflow({ overflow: TextOverflow.Ellipsis })
-                                                    .fontSize(16)
+                                                    .fontSize(FontSize.md)
                                                     .fontColor($r('app.color.wf_primary_text'))
                                                     .maxLines(1)
                                                 Text(humanSize(this.fileSize(favItem)))
-                                                    .fontSize(12)
+                                                    .fontSize(FontSize.xs)
                                                     .fontColor($r('app.color.wf_tertiary_text'))
                                                     .margin({ top: 4 })
                                             }
@@ -278,44 +279,44 @@ export default struct FavRecordPage {
                                             .width(160)
                                             .height(160)
                                             .objectFit(ImageFit.Cover)
-                                            .borderRadius(4)
+                                            .borderRadius(Radius.sm)
                                     } else if (favItem.type === MessageContentType.Image) {
                                         Image(favItem.url)
                                             .width(160)
                                             .height(160)
                                             .objectFit(ImageFit.Cover)
-                                            .borderRadius(4)
+                                            .borderRadius(Radius.sm)
                                     } else if (favItem.type === MessageContentType.Voice) {
                                         Row() {
                                             Image($r('app.media.ic_file_type_audio'))
                                                 .width(24)
                                                 .height(24)
-                                                .margin({ right: 10 })
+                                                .margin({ right: 12 })
                                             Text(this.voiceDuration(favItem) + '"')
-                                                .fontSize(16)
+                                                .fontSize(FontSize.md)
                                                 .fontColor($r('app.color.wf_primary_text'))
                                             if (favItem.messageUid && this.playingVoiceId === favItem.messageUid.toString()) {
                                                 Text('播放中...')
-                                                    .fontSize(12)
+                                                    .fontSize(FontSize.xs)
                                                     .fontColor($r('app.color.wf_primary'))
-                                                    .margin({ left: 10 })
+                                                    .margin({ left: 12 })
                                             }
                                         }
                                     } else if (favItem.type === MessageContentType.Composite_Message) {
                                         Column() {
                                             Text(favItem.title)
-                                                .fontSize(16)
+                                                .fontSize(FontSize.md)
                                                 .maxLines(1)
                                                 .textOverflow({ overflow: TextOverflow.Ellipsis })
                                                 .fontWeight(FontWeight.Medium)
                                                 .fontColor($r('app.color.wf_primary_text'))
                                             Text(this.compositeMessageText(favItem))
                                                 .lineSpacing({ value: 4, unit: LengthUnit.VP })
-                                                .fontSize(14)
+                                                .fontSize(FontSize.sm)
                                                 .fontColor($r('app.color.wf_tertiary_text'))
                                                 .maxLines(3)
                                                 .textOverflow({ overflow: TextOverflow.Ellipsis })
-                                                .margin({ top: 6 })
+                                                .margin({ top: 8 })
                                         }
                                         .alignItems(HorizontalAlign.Start)
                                     } else if (favItem.type === MessageContentType.Link || favItem.type === MessageContentType.Articles) {
@@ -323,20 +324,20 @@ export default struct FavRecordPage {
                                             Column() {
                                                 Text(favItem.title)
                                                     .maxLines(2)
-                                                    .fontSize(16)
+                                                    .fontSize(FontSize.md)
                                                     .fontColor($r('app.color.wf_primary_text'))
                                                     .textOverflow({ overflow: TextOverflow.Ellipsis })
                                             }
                                             .layoutWeight(1)
                                             .alignItems(HorizontalAlign.Start)
-                                            .margin({ right: 10 })
+                                            .margin({ right: 12 })
 
                                             if (favItem.url) {
                                                 Image(favItem.url)
                                                     .width(60)
                                                     .height(60)
                                                     .objectFit(ImageFit.Cover)
-                                                    .borderRadius(4)
+                                                    .borderRadius(Radius.sm)
                                             }
                                         }
                                         .width('100%')
@@ -345,13 +346,13 @@ export default struct FavRecordPage {
                                             Image($r('app.media.ic_user_card'))
                                                 .width(40)
                                                 .height(40)
-                                                .margin({ right: 10 })
+                                                .margin({ right: 12 })
                                             Column() {
                                                 Text(favItem.title)
-                                                    .fontSize(16)
+                                                    .fontSize(FontSize.md)
                                                     .fontColor($r('app.color.wf_primary_text'))
                                                 Text('个人名片')
-                                                    .fontSize(12)
+                                                    .fontSize(FontSize.xs)
                                                     .fontColor($r('app.color.wf_tertiary_text'))
                                                     .margin({ top: 4 })
                                             }
@@ -362,14 +363,14 @@ export default struct FavRecordPage {
                                             Image($r('app.media.ic_func_video'))
                                                 .width(40)
                                                 .height(40)
-                                                .margin({ right: 10 })
+                                                .margin({ right: 12 })
                                             Column() {
                                                 Text(favItem.title)
-                                                    .fontSize(16)
+                                                    .fontSize(FontSize.md)
                                                     .fontColor($r('app.color.wf_primary_text'))
                                                     .maxLines(1)
                                                 Text('会议邀请')
-                                                    .fontSize(12)
+                                                    .fontSize(FontSize.xs)
                                                     .fontColor($r('app.color.wf_tertiary_text'))
                                                     .margin({ top: 4 })
                                             }
@@ -380,9 +381,9 @@ export default struct FavRecordPage {
                                             Image($r('app.media.ic_func_location'))
                                                 .width(32)
                                                 .height(32)
-                                                .margin({ right: 10 })
+                                                .margin({ right: 12 })
                                             Text('位置: ' + favItem.title)
-                                                .fontSize(16)
+                                                .fontSize(FontSize.md)
                                                 .fontColor($r('app.color.wf_primary_text'))
                                                 .layoutWeight(1)
                                                 .maxLines(2)
@@ -390,29 +391,29 @@ export default struct FavRecordPage {
                                         }
                                     } else if (favItem.type === MessageContentType.Sticker) {
                                         Text('[表情] ' + favItem.title)
-                                            .fontSize(16)
+                                            .fontSize(FontSize.md)
                                             .fontColor($r('app.color.wf_primary_text'))
                                     } else {
                                         Text(favItem.title)
                                             .lineSpacing({ value: 4, unit: LengthUnit.VP })
-                                            .fontSize(16)
+                                            .fontSize(FontSize.md)
                                             .fontColor($r('app.color.wf_primary_text'))
                                             .maxLines(5)
                                             .textOverflow({ overflow: TextOverflow.Ellipsis })
                                     }
                                     Row() {
                                         Text(favItem.origin)
-                                            .fontSize(12)
+                                            .fontSize(FontSize.xs)
                                             .fontColor($r('app.color.wf_tertiary_text'))
 
                                         Text(timeFormat(favItem.timestamp))
-                                            .margin({ left: 10 })
-                                            .fontSize(12)
+                                            .margin({ left: 12 })
+                                            .fontSize(FontSize.xs)
                                             .fontColor($r('app.color.wf_tertiary_text'))
                                     }
-                                    .margin({ top: 10 })
+                                    .margin({ top: 12 })
                                 }
-                                .padding(15)
+                                .padding(16)
                                 .alignItems(HorizontalAlign.Start)
                                 .onClick(() => {
                                     this.previewMessage(favItem)

@@ -8,6 +8,8 @@ import Employee from '../../api/model/employee'
 import orgServer from '../../api/orgServer'
 import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
 import { uikitNavigationDestinations } from '../uikitNavigationConfig'
+import { FontSize, Radius } from '../../common/design/Tokens'
+import { Available } from '@kit.BasicServicesKit'
 
 @Component
 export default struct PickMultiContactModal {
@@ -17,14 +19,12 @@ export default struct PickMultiContactModal {
     @State userInfos?: UserInfo[] = undefined
     @State @Watch('_onCheckFavGroup') checkedFavGroupInfo?: GroupInfo = undefined
     @Link showPickContactModal: boolean
-
     initialCheckedUserIds: string[] = []
     uncheckableUserIds: string[] = []
     organization?: Organization
     onCheckFavGroup?: (info: GroupInfo) => void
     onCheckUser?: (users: UserInfo[]) => void
-    showFavGroup:boolean = true
-
+    showFavGroup: boolean = true
     public static PICK_RESULT: string = 'pickContactResult'
 
     // TODO
@@ -118,12 +118,11 @@ export default struct PickMultiContactModal {
         Row() {
             Button('确定')
                 .type(ButtonType.Normal)
-                .height(30)
-                .width(60)
-                .margin({ right: 18 })
+                .height(32)
+                .margin({ right: 20 })
                 .enabled(this.newlyCheckedUsers().length + this.checkedOrganizations.length + this.checkedEmployees.length > 0)
-                .fontSize(14)
-                .borderRadius(4)// .backgroundColor(Color.Blue)
+                .fontSize(FontSize.sm)
+                .borderRadius(Radius.sm)// .backgroundColor(Color.Blue)
                 .onClick(async () => {
                     let users = await this.allNewlyCheckedUsers();
                     this.showPickContactModal = false

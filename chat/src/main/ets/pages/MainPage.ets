@@ -36,6 +36,8 @@ import avengineKit from '@wfc/avenginekit'
 import CallState from '@wfc/avenginekit/src/main/ets/wfc/av/engine/callState'
 import pipHelper from '@wfc/uikit/src/main/ets/pages/voip/pipHelper'
 import window from '@ohos.window'
+import { FontSize , scaledSize } from '@wfc/uikit/src/main/ets/common/design/Tokens'
+import { deviceInfo } from '@kit.BasicServicesKit'
 
 const TAG = 'Main';
 
@@ -45,10 +47,10 @@ const permissions: Array<Permissions> = [
 
 let storage = LocalStorage.getShared()
 
-
 @Entry(storage)
 @Component
 struct MainPage {
+    @StorageProp('fontScale') fontScale: number = 1.0;
     private tabsController: TabsController = new TabsController()
     private tabTitles: string[] = ['野火', '通讯录', '工作台', '发现', '我的']
     @State message: string = 'Hello World'
@@ -343,7 +345,7 @@ struct MainPage {
                 count: this.tabUnreadCount(targetIndex),
                 maxCount: 99,
                 position: BadgePosition.RightTop,
-                style: { badgeSize: 14, badgeColor: $r('app.color.wf_badge_color') }
+                style: { badgeSize: scaledSize(14, this.fontScale), badgeColor: $r('app.color.wf_badge_color') }
             }) {
                 Image(this.currentIndex === targetIndex ? selectedImg : normalImg)
                     .size({ width: 20 })
@@ -352,8 +354,11 @@ struct MainPage {
 
             Text(title)
                 .fontColor(this.currentIndex === targetIndex ? $r('app.color.wf_tab_text_selected') : $r('app.color.wf_tab_text_normal'))
-                .fontSize(14)
-                .padding({ top: 5, bottom: 5 })
+                .fontSize(FontSize.sm)
+                // 底部 Tab 文字不跟随字体大小调节
+                .minFontScale(1)
+                .maxFontScale(1)
+                .padding({ top: 4, bottom: 4 })
         }
         .width('100%')
         .height(60)
@@ -428,8 +433,11 @@ struct MainPage {
         if (!this.isMeTab) {
             Column() {
                 Text(this.title)
-                    .padding({ left: 15 })
-                    .fontSize(20)
+                    .padding({ left: 16 })
+                    .fontSize(FontSize.xl)
+                    // 标题栏不跟随字体大小调节
+                    .minFontScale(1)
+                    .maxFontScale(1)
                     .fontColor($r('app.color.wf_primary_text'))
                     .width('200')
             }
@@ -442,27 +450,55 @@ struct MainPage {
     NavigationMenus() {
         if (!this.isMeTab) {
             Row() {
-                SymbolGlyph($r('sys.symbol.magnifyingglass'))
-                    .fontSize(22)
-                    .fontColor([$r('app.color.wf_icon_color')])
-                    .onClick(() => {
-                        this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.SearchPortalPage, {
-                            'keyword': '1'
-                        } as Record<string, Object>, true)
-                    })
+                if (deviceInfo.sdkApiVersion >= 18) {
+                    SymbolGlyph($r('sys.symbol.magnifyingglass'))
+                        .fontSize(FontSize.xxl)
+                        .fontColor([$r('app.color.wf_icon_color')])
+                        .minFontScale(1)
+                        .maxFontScale(1)
+                        .onClick(() => {
+                            this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.SearchPortalPage, {
+                                'keyword': '1'
+                            } as Record<string, Object>, true)
+                        })
+                } else {
+                    SymbolGlyph($r('sys.symbol.magnifyingglass'))
+                        .fontSize(FontSize.xxl)
+                        .fontColor([$r('app.color.wf_icon_color')])
+                        .onClick(() => {
+                            this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.SearchPortalPage, {
+                                'keyword': '1'
+                            } as Record<string, Object>, true)
+                        })
+                }
 
-                SymbolGlyph($r('sys.symbol.plus_circle'))
-                    .fontSize(22)
-                    .fontColor([$r('app.color.wf_icon_color')])
-                    .margin({ left: 12 })
-                    .bindMenu(this.SubMoreMenus())
-                    .bindContentCover($$this.showPickContactModal, this.pickMultiContactModal(), {
-                        modalTransition: ModalTransition.DEFAULT,
-                        onAppear: () => {
-                        },
-                    })
+                if (deviceInfo.sdkApiVersion >= 18) {
+                    SymbolGlyph($r('sys.symbol.plus_circle'))
+                        .fontSize(FontSize.xxl)
+                        .fontColor([$r('app.color.wf_icon_color')])
+                        .minFontScale(1)
+                        .maxFontScale(1)
+                        .margin({ left: 12 })
+                        .bindMenu(this.SubMoreMenus())
+                        .bindContentCover($$this.showPickContactModal, this.pickMultiContactModal(), {
+                            modalTransition: ModalTransition.DEFAULT,
+                            onAppear: () => {
+                            },
+                        })
+                } else {
+                    SymbolGlyph($r('sys.symbol.plus_circle'))
+                        .fontSize(FontSize.xxl)
+                        .fontColor([$r('app.color.wf_icon_color')])
+                        .margin({ left: 12 })
+                        .bindMenu(this.SubMoreMenus())
+                        .bindContentCover($$this.showPickContactModal, this.pickMultiContactModal(), {
+                            modalTransition: ModalTransition.DEFAULT,
+                            onAppear: () => {
+                            },
+                        })
+                }
             }
-            .margin({ right: 18 })
+            .margin({ right: 20 })
             .height('100%')
             .justifyContent(FlexAlign.Start)
             .alignItems(VerticalAlign.Center)

@@ -4,6 +4,7 @@ import FileRecord from '@wfc/client/src/main/ets/wfc/model/fileRecord'
 import Long from '@wfc/client/src/main/ets/wfc/util/long'
 import { uikitNavigationDestinations } from '../uikitNavigationConfig'
 import { getFiletypeIcon, humanSize, timeFormat } from '../../util/helper'
+import { FontSize } from '../../common/design/Tokens'
 
 @Component
 export default struct SearchMessageFilePage {
@@ -51,7 +52,7 @@ export default struct SearchMessageFilePage {
                 if (this.fileRecords.length === 0 && !this.isLoading) {
                     Column() {
                         Text('暂无文件')
-                            .fontSize(14)
+                            .fontSize(FontSize.sm)
                             .fontColor(Color.Gray)
                     }
                     .width('100%')
@@ -66,33 +67,33 @@ export default struct SearchMessageFilePage {
                                     Image(getFiletypeIcon(record.name))
                                         .width(40)
                                         .height(40)
-                                        .margin({ right: 10 })
+                                        .margin({ right: 12 })
 
                                     Column() {
                                         Text(record.name)
-                                            .fontSize(16)
+                                            .fontSize(FontSize.md)
                                             .maxLines(1)
                                             .textOverflow({ overflow: TextOverflow.Ellipsis })
                                         Row() {
                                             Text(humanSize(record.size))
-                                                .fontSize(12)
+                                                .fontSize(FontSize.xs)
                                                 .fontColor(Color.Gray)
-                                                .margin({ right: 10 })
+                                                .margin({ right: 12 })
                                             Text(wfc.getUserDisplayName(record.userId))
-                                                .fontSize(12)
+                                                .fontSize(FontSize.xs)
                                                 .fontColor(Color.Gray)
-                                                .margin({ right: 10 })
+                                                .margin({ right: 12 })
                                             Text(timeFormat(record.timestamp))
-                                                .fontSize(12)
+                                                .fontSize(FontSize.xs)
                                                 .fontColor(Color.Gray)
                                         }
-                                        .margin({ top: 5 })
+                                        .margin({ top: 4 })
                                     }
                                     .layoutWeight(1)
                                     .alignItems(HorizontalAlign.Start)
                                 }
                                 .width('100%')
-                                .padding(10)
+                                .padding(12)
                                 .backgroundColor($r('app.color.wf_background'))
                                 .onClick(() => {
                                     // Jump to message

@@ -11,7 +11,7 @@ import ConversationSearchResult from '@wfc/client/src/main/ets/wfc/model/convers
 import { uikitNavigationDestinations } from '../uikitNavigationConfig'
 import Employee from '../../api/model/employee'
 import orgServer from '../../api/orgServer'
-
+import { Radius } from '../../common/design/Tokens'
 
 @Component
 @Preview
@@ -87,7 +87,7 @@ export default struct SearchPortalPage {
                     TextInput({ placeholder: '搜索...', text: $$this.keyword })
                         .type(InputType.Normal)
                         .layoutWeight(1)
-                        .borderRadius(4)
+                        .borderRadius(Radius.sm)
                         .enableKeyboardOnFocus(true)
                         .backgroundColor($r('app.color.wf_background'))
                         .fontColor($r('app.color.wf_primary_text'))
@@ -96,14 +96,14 @@ export default struct SearchPortalPage {
                             this.keyword = value
                         })
                     Text('取消')
-                        .padding(5)
-                        .margin({ left: 10 })
+                        .padding(4)
+                        .margin({ left: 12 })
                         .fontColor($r('app.color.wf_link'))
                         .onClick(() => {
                             this.mainNavPathStack.pop()
                         })
                 }
-                .padding(10)
+                .padding(12)
                 .width('100%')
                 .backgroundColor($r('app.color.wf_primary_background_color'))
 

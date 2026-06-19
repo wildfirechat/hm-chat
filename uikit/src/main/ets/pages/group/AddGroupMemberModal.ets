@@ -5,6 +5,7 @@ import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
 import Employee from '../../api/model/employee'
 import Organization from '../../api/model/organization'
 import orgServer from '../../api/orgServer'
+import { FontSize, Radius } from '../../common/design/Tokens'
 
 @Component
 export default struct AddGroupMemberModal {
@@ -81,7 +82,7 @@ export default struct AddGroupMemberModal {
             }
             .width('100%')
             .height('100%')
-            .padding({ top: 5 })
+            .padding({ top: 4 })
         }
         .title('添加群成员')
         .titleMode(NavigationTitleMode.Mini)
@@ -97,12 +98,11 @@ export default struct AddGroupMemberModal {
         Row() {
             Button('确定')
                 .type(ButtonType.Normal)
-                .height(30)
-                .width(60)
-                .margin({ right: 18 })
+                .height(32)
+                .margin({ right: 20 })
                 .enabled(this.newlyCheckedUsers().length + this.checkedOrganizations.length + this.checkedEmployees.length > 0)
-                .fontSize(14)
-                .borderRadius(4)// .backgroundColor(Color.Blue)
+                .fontSize(FontSize.sm)
+                .borderRadius(Radius.sm)// .backgroundColor(Color.Blue)
                 .onClick(async () => {
                     let users = await this.allNewlyCheckedUsers();
                     LocalStorage.getShared()

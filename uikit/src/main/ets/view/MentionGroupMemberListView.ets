@@ -9,6 +9,7 @@ import { groupUserInfos } from '../helper/asyncTaskHelper'
 import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
 import Config from '@wfc/client/src/main/ets/config'
 import { it } from '@ohos/hypium'
+import { FontSize, Radius } from '../common/design/Tokens'
 
 @Component
 export default struct MentionGroupMemberListView {
@@ -80,16 +81,16 @@ export default struct MentionGroupMemberListView {
             if (this.showSearchView) {
                 Row() {
                     TextInput({ placeholder: '搜索' })
-                        .margin({ left: 10, right: 10 })
+                        .margin({ left: 12, right: 12 })
                         .onChange((value: string) => {
                             this.filter(value)
                         })
-                        .borderRadius(4)
+                        .borderRadius(Radius.sm)
                 }
                 .constraintSize({ minWidth: '25%', maxWidth: this.searchInputViewMaxWidth })
                 .width('100%')
                 .height(60)
-                .margin({ left: 10, right: 10 })
+                .margin({ left: 12, right: 12 })
             }
             List() {
                 ForEach(this.filteredRobotUserInfos, (item: UserInfo, index: number) => {
@@ -112,11 +113,11 @@ export default struct MentionGroupMemberListView {
                             Row() {
                                 Text('群成员')
                                     .width('100%')
-                                    .fontSize(13)
+                                    .fontSize(FontSize.sm)
                                     .fontColor($r('app.color.wf_secondary_text'))
                             }
-                            .height(30)
-                            .padding({ left: 10 })
+                            .height(32)
+                            .padding({ left: 12 })
                             .alignItems(VerticalAlign.Center)
                             .backgroundColor($r('app.color.wf_secondary_background'))
 
@@ -125,17 +126,17 @@ export default struct MentionGroupMemberListView {
                                     .alt($r('app.media.avatar_def'))
                                     .width(40)
                                     .height(40)
-                                    .borderRadius(4)
-                                    .margin({ left: 10, right: 10 })
+                                    .borderRadius(Radius.sm)
+                                    .margin({ left: 12, right: 12 })
                                 Text('所有人')
                                     .maxLines(1)
-                                    .fontSize(15)
+                                    .fontSize(FontSize.sm)
                                     .layoutWeight(1)
                                     .fontColor($r('app.color.wf_primary_text'))
                             }
                             .width('100%')
                             .height(60)
-                            .padding({ left: 10, right: 10 })
+                            .padding({ left: 12, right: 12 })
                             .onClick(event => {
                                 this.onClickMentionAll?.();
                             })

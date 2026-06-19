@@ -306,9 +306,8 @@ export default struct ConversationListTab {
             .width('100%')
             .cachedCount(5)
             .contentEndOffset(56)
-            .backgroundColor($r('app.color.wf_primary_background_color'))
+            .backgroundColor($r('app.color.wf_background'))
         }
-        .backgroundColor($r('app.color.wf_primary_background_color'))
         .width('100%')
         .height('100%')
     }
@@ -360,7 +359,6 @@ export default struct ConversationListTab {
         //         }
         //     })
         // }
-
 
         let unreadCount = conversationInfo.unreadCount
         if ((unreadCount.unread || unreadCount.unreadMention || unreadCount.unreadMentionAll)) {

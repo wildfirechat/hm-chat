@@ -12,6 +12,7 @@ import VoipPiPNodeController from './VoipPiPNodeController'
 import uikit from '../../uikit'
 import { BusinessError } from '@kit.BasicServicesKit'
 import { uikitNavigationDestinations } from '../uikitNavigationConfig'
+import { FontSize, Radius } from '../../common/design/Tokens'
 
 @Component
 export default struct MultiAudioCallPage {
@@ -131,25 +132,25 @@ export default struct MultiAudioCallPage {
             Image(this.invitor!.portrait)
                 .width(120)
                 .height(120)
-                .borderRadius(8)
+                .borderRadius(Radius.lg)
                 .margin({ top: 120 })
             Text(this.invitor?.displayName)
                 .maxLines(1)
                 .fontColor(Color.White)
-                .fontSize(20)
+                .fontSize(FontSize.xl)
                 .margin({ top: 20 })
 
             Text('邀请你加入多人通话')
                 .maxLines(1)
                 .fontColor('#7E7E7E')
-                .fontSize(16)
+                .fontSize(FontSize.md)
                 .margin({ top: 20 })
 
             Text('参与通话的还有：')
                 .maxLines(1)
                 .fontColor('#7E7E7E')
-                .fontSize(14)
-                .margin({ top: 120, bottom: 10 })
+                .fontSize(FontSize.sm)
+                .margin({ top: 120, bottom: 12 })
 
             Flex({
                 direction: FlexDirection.Row,
@@ -161,8 +162,8 @@ export default struct MultiAudioCallPage {
                     Image(userInfo.portrait)
                         .width(40)
                         .height(40)
-                        .borderRadius(4)
-                        .margin(10)
+                        .borderRadius(Radius.sm)
+                        .margin(12)
                 }, (userInfo: UserInfo) => userInfo.uid + '-' + userInfo.updateDt)
             }
             .width('100%')
@@ -181,8 +182,8 @@ export default struct MultiAudioCallPage {
                                 this.callSession?.hangup()
                             })
                         Text('挂断')
-                            .margin({ top: 10 })
-                            .fontSize(13)
+                            .margin({ top: 12 })
+                            .fontSize(FontSize.sm)
                             .fontColor(Color.White)
                     }
 
@@ -196,8 +197,8 @@ export default struct MultiAudioCallPage {
                                 this.callSession?.call()
                             })
                         Text('接听')
-                            .margin({ top: 10 })
-                            .fontSize(13)
+                            .margin({ top: 12 })
+                            .fontSize(FontSize.sm)
                             .fontColor(Color.White)
                     }
                 }
@@ -253,9 +254,9 @@ export default struct MultiAudioCallPage {
                     Row() {
                         Image($r('app.media.av_minimize'))
                             .draggable(false)
-                            .width(50)
-                            .height(50)
-                            .padding(10)
+                            .width(52)
+                            .height(52)
+                            .padding(12)
                             .onClick(async () => {
                                 this.pipController?.startPiP()
                                     .catch((reason: BusinessError) => {
@@ -281,21 +282,21 @@ export default struct MultiAudioCallPage {
                                 Image(userInfo.portrait)
                                     .width(100)
                                     .height(100)
-                                    .borderRadius(4)
+                                    .borderRadius(Radius.sm)
                                 Text(this.participantStatus(userInfo))
                                     .maxLines(1)
                                     .fontColor('#7E7E7E')
-                                    .fontSize(12)
-                                    .margin({ top: 5 })
+                                    .fontSize(FontSize.xs)
+                                    .margin({ top: 4 })
                             }
 
                             Text(userInfo.displayName)
                                 .maxLines(1)
                                 .fontColor(Color.White)
-                                .fontSize(13)
-                                .margin({ top: 10 })
+                                .fontSize(FontSize.sm)
+                                .margin({ top: 12 })
                         }
-                        .margin(10)
+                        .margin(12)
                         .justifyContent(FlexAlign.Center)
                         .alignItems(HorizontalAlign.Center)
                     }, (userInfo: UserInfo) => userInfo.uid + '-' + userInfo.updateDt)
@@ -306,25 +307,24 @@ export default struct MultiAudioCallPage {
                                 Image(this.selfUserInfo.portrait)
                                     .width(100)
                                     .height(100)
-                                    .borderRadius(4)
+                                    .borderRadius(Radius.sm)
                                 Text(this.participantStatus(this.selfUserInfo))
                                     .maxLines(1)
                                     .fontColor('#7E7E7E')
-                                    .fontSize(12)
-                                    .margin({ top: 5 })
+                                    .fontSize(FontSize.xs)
+                                    .margin({ top: 4 })
                             }
 
                             Text(this.selfUserInfo.displayName)
                                 .maxLines(1)
                                 .fontColor(Color.White)
-                                .fontSize(13)
-                                .margin({ top: 10 })
+                                .fontSize(FontSize.sm)
+                                .margin({ top: 12 })
                         }
-                        .margin(10)
+                        .margin(12)
                     }
                 }
                 .width('100%')
-
 
                 // bottom actions
                 Row() {
@@ -339,8 +339,8 @@ export default struct MultiAudioCallPage {
                                 }
                             })
                         Text('麦克风')
-                            .margin({ top: 10 })
-                            .fontSize(13)
+                            .margin({ top: 12 })
+                            .fontSize(FontSize.sm)
                             .fontColor(Color.White)
                     }
 
@@ -353,8 +353,8 @@ export default struct MultiAudioCallPage {
                                 this.callSession?.hangup()
                             })
                         Text('挂断')
-                            .margin({ top: 10 })
-                            .fontSize(13)
+                            .margin({ top: 12 })
+                            .fontSize(FontSize.sm)
                             .fontColor(Color.White)
                     }
 
@@ -365,8 +365,8 @@ export default struct MultiAudioCallPage {
                             .border({ width: 1, radius: 30, color: Color.White })
 
                         Text('扬声器已关')
-                            .margin({ top: 10 })
-                            .fontSize(13)
+                            .margin({ top: 12 })
+                            .fontSize(FontSize.sm)
                             .fontColor(Color.White)
                     }
                 }

@@ -3,6 +3,7 @@ import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import { JoinGroupRequest } from '@wfc/client/src/main/ets/wfc/model/JoinGroupRequest'
 import { uikitNavigationDestinations } from '../uikitNavigationConfig'
+import { FontSize, Radius } from '../../common/design/Tokens'
 
 @Component
 export default struct GroupJoinRequestListPage {
@@ -95,26 +96,26 @@ struct NewGroupJoinRequestsCard {
                 .alt($r('app.media.avatar_def'))
                 .width(40)
                 .height(40)
-                .borderRadius(4)
+                .borderRadius(Radius.sm)
             Column() {
                 Text(this.req.userInfo!!.displayName)
-                    .fontSize(14)
+                    .fontSize(FontSize.sm)
                     .fontColor($r('app.color.wf_primary_text'))
                 Text(this.req.request!!.reason)
                     .padding({ top: 2 })
-                    .fontSize(12)
+                    .fontSize(FontSize.xs)
                     .fontColor($r('app.color.wf_tertiary_text'))
             }
             .alignItems(HorizontalAlign.Start)
-            .padding({ left: 10 })
+            .padding({ left: 12 })
             .layoutWeight(1)
 
             if (this.status === 0) {
                 Button('接受')
                     .type(ButtonType.Normal)
-                    .fontSize(12)
-                    .height(30)
-                    .borderRadius(4)
+                    .fontSize(FontSize.xs)
+                    .height(32)
+                    .borderRadius(Radius.sm)
                     .onClick(() => {
                         wfc.handleJoinGroupRequest(this.req.request.groupId, this.req.request.memberId, this.req.request.requestUserId, 1, '', [0], () => {
                             this.status = 1
@@ -126,17 +127,17 @@ struct NewGroupJoinRequestsCard {
                     })
             } else if (this.status === 1) {
                 Text('已接受')
-                    .fontSize(12)
+                    .fontSize(FontSize.xs)
                     .fontColor($r('app.color.wf_tertiary_text'))
             } else if (this.status === 2) {
                 Text('已拒绝')
-                    .fontSize(12)
+                    .fontSize(FontSize.xs)
                     .fontColor($r('app.color.wf_tertiary_text'))
             }
         }
         .width('100%')
         .justifyContent(FlexAlign.Start)
-        .padding(10)
+        .padding(12)
         .backgroundColor($r('app.color.wf_background'))
     }
 }

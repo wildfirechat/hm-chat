@@ -1,3 +1,4 @@
+import { FontSize, Radius } from '../../common/design/Tokens'
 @Component
 export default struct QRCodePage {
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
@@ -23,12 +24,12 @@ export default struct QRCodePage {
                     Image(this.portraitUrl)
                         .width(80)
                         .height(80)
-                        .borderRadius(4)
+                        .borderRadius(Radius.sm)
                         .margin({ top: 40 })
                 }
                 if (this.name) {
                     Text(this.name)
-                        .fontSize(18)
+                        .fontSize(FontSize.lg)
                         .fontColor($r('app.color.wf_primary_text'))
                         .margin({ top: 16 })
                 }
@@ -39,13 +40,13 @@ export default struct QRCodePage {
                         .color(0xFF000000)
                         .backgroundColor(Color.White)
                 }
-                .padding(10)
-                .margin({ top: 30 })
+                .padding(12)
+                .margin({ top: 32 })
                 .backgroundColor(Color.White)
-                .borderRadius(8)
+                .borderRadius(Radius.lg)
                 if (this.hint) {
                     Text(this.hint)
-                        .fontSize(14)
+                        .fontSize(FontSize.sm)
                         .fontColor($r('app.color.wf_secondary_text'))
                         .margin({ top: 20 })
                 }

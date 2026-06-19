@@ -5,6 +5,7 @@
 import Message from '@wfc/client/src/main/ets/wfc/messages/message';
 import PollResultMessageContent from '@wfc/client/src/main/ets/wfc/messages/pollResultMessageContent';
 import { uikitNavigationDestinations } from '../../uikitNavigationConfig';
+import { FontSize, Radius } from '../../../common/design/Tokens'
 
 @Component
 export default struct PollResultMessageContentView {
@@ -35,7 +36,7 @@ export default struct PollResultMessageContentView {
         Column() {
             // 标题
             Text('📊 ' + this.pollResultContent().title)
-                .fontSize(16)
+                .fontSize(FontSize.md)
                 .fontWeight(FontWeight.Medium)
                 .fontColor($r('app.color.wf_primary_text'))
                 .maxLines(2)
@@ -45,7 +46,7 @@ export default struct PollResultMessageContentView {
             // 获胜选项 - 使用条件渲染
             if (this.winnerText) {
                 Text('🏆 获胜: ' + this.winnerText)
-                    .fontSize(14)
+                    .fontSize(FontSize.sm)
                     .fontColor($r('app.color.wf_warning'))
                     .maxLines(1)
                     .textOverflow({ overflow: TextOverflow.Ellipsis })
@@ -63,11 +64,11 @@ export default struct PollResultMessageContentView {
             // 统计信息
             Row() {
                 Text(`${this.pollResultContent().voterCount}人参与投票`)
-                    .fontSize(12)
+                    .fontSize(FontSize.xs)
                     .fontColor($r('app.color.wf_tertiary_text'))
 
                 Text('查看详情')
-                    .fontSize(12)
+                    .fontSize(FontSize.xs)
                     .fontColor($r('app.color.wf_primary'))
             }
             .width('100%')
@@ -76,7 +77,7 @@ export default struct PollResultMessageContentView {
         .width(240)
         .padding(12)
         .backgroundColor(this.message.direction === 0 ? $r('app.color.wf_sent_bubble_bg') : $r('app.color.wf_received_bubble_bg'))
-        .borderRadius(8)
+        .borderRadius(Radius.lg)
         .alignItems(HorizontalAlign.Start)
         .onClick(() => this.handleClick())
     }

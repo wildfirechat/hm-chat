@@ -1,6 +1,7 @@
 import { Profile } from '@wfc/moment_client';
 import wfc from '@wfc/client';
 import { MomentConstants } from '../utils/MomentConstants';
+import { FontSize } from '@wfc/uikit/src/main/ets/common/design/Tokens'
 
 @Component
 export struct FeedHeaderComponent {
@@ -35,11 +36,11 @@ export struct FeedHeaderComponent {
             Row() {
                 // 用户名
                 Text(wfc.getUserInfo(this.userId).displayName)
-                    .fontSize(18)
+                    .fontSize(FontSize.lg)
                     .fontColor(Color.White)
                     .fontWeight(FontWeight.Bold)
                     .textShadow({ radius: 4, color: '#40000000', offsetX: 0, offsetY: 1 })
-                    .margin({ right: 14, bottom: 4 })
+                    .margin({ right: 16, bottom: 4 })
                     .maxLines(1)
                     .textOverflow({ overflow: TextOverflow.Ellipsis })
                     .constraintSize({ maxWidth: '60%' })

@@ -2,6 +2,7 @@ import Employee from '../../api/model/employee'
 import orgServer from '../../api/orgServer'
 import { showToast } from '../../common/utils/Toast'
 import { uikitNavigationDestinations } from '../uikitNavigationConfig'
+import { Radius } from '../../common/design/Tokens'
 
 @Component
 export default struct SearchOrganizationEmployeePage {
@@ -54,19 +55,19 @@ export default struct SearchOrganizationEmployeePage {
                     TextInput({ placeholder: '搜索员工' })
                         .type(InputType.Normal)
                         .layoutWeight(1)
-                        .borderRadius(4)
+                        .borderRadius(Radius.sm)
                         .onChange((value: string) => {
                             this.onSearchKeywordChange(value)
                         })
                     Text('取消')
-                        .padding(5)
-                        .margin({ left: 10 })
+                        .padding(4)
+                        .margin({ left: 12 })
                         .fontColor($r('app.color.wf_primary'))
                         .onClick(() => {
                             this.mainNavPathStack.pop(true)
                         })
                 }
-                .padding(10)
+                .padding(12)
                 .backgroundColor($r('app.color.wf_primary_background_color'))
                 .width('100%')
 
@@ -79,16 +80,16 @@ export default struct SearchOrganizationEmployeePage {
                                         .alt($r('app.media.avatar_def'))
                                         .width(40)
                                         .height(40)
-                                        .borderRadius(4)
+                                        .borderRadius(Radius.sm)
                                     Text(employee.name)
                                         .maxLines(1)
-                                        .padding({ left: 10 })
+                                        .padding({ left: 12 })
                                         .fontColor($r('app.color.wf_primary_text'))
                                         .textOverflow({ overflow: TextOverflow.Ellipsis })
                                 }
                                 .height(60)
                                 .width('100%')
-                                .padding({ left: 10, right: 10 })
+                                .padding({ left: 12, right: 12 })
                                 .justifyContent(FlexAlign.Start)
                                 .stateStyles({
                                     pressed: {

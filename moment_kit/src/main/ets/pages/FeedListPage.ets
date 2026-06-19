@@ -10,6 +10,7 @@ import { momentNavigationDestinations } from '../../../../Index';
 import { uikitNavigationDestinations } from '@wfc/uikit/src/main/ets/pages/uikitNavigationConfig';
 import { showToast } from '@wfc/uikit/src/main/ets/common/utils/Toast';
 import { promptAction, window, KeyboardAvoidMode } from '@kit.ArkUI';
+import { FontSize, Radius } from '@wfc/uikit/src/main/ets/common/design/Tokens'
 
 const PAGE_SIZE = 20;
 
@@ -316,7 +317,7 @@ export struct FeedListPage {
                 // 返回按钮
                 Button() {
                     SymbolGlyph($r('sys.symbol.chevron_backward'))
-                        .fontSize(22)
+                        .fontSize(FontSize.xl)
                         .fontColor([this.titleBarOpacity > 0.5 ? $r('app.color.text_primary') : Color.White])
                 }
                 .width(40)
@@ -330,6 +331,8 @@ export struct FeedListPage {
                 if (this.titleBarOpacity > 0.3) {
                     Text('朋友圈')
                         .fontSize(MomentConstants.FONT_SIZE_TITLE)
+                        .minFontScale(1)
+                        .maxFontScale(1)
                         .fontWeight(FontWeight.Bold)
                         .fontColor($r('app.color.text_primary'))
                         .opacity(Math.min(this.titleBarOpacity * 2, 1))
@@ -341,7 +344,7 @@ export struct FeedListPage {
                 // 相机按钮
                 Button() {
                     SymbolGlyph($r('sys.symbol.camera'))
-                        .fontSize(22)
+                        .fontSize(FontSize.xl)
                         .fontColor([this.titleBarOpacity > 0.5 ? $r('app.color.text_primary') : Color.White])
                 }
                 .width(40)
@@ -390,38 +393,38 @@ export struct FeedListPage {
                 .height(MomentConstants.AVATAR_SIZE)
                 .borderRadius(MomentConstants.BORDER_RADIUS)
                 .backgroundColor($r('app.color.skeleton_base'))
-                .margin({ right: 10 })
+                .margin({ right: 12 })
 
             Column({ space: 8 }) {
                 // 用户名骨架
                 Column()
                     .width('40%')
-                    .height(14)
-                    .borderRadius(4)
+                    .height(16)
+                    .borderRadius(Radius.sm)
                     .backgroundColor($r('app.color.skeleton_base'))
                 // 文本骨架
                 Column()
                     .width('90%')
-                    .height(13)
-                    .borderRadius(4)
+                    .height(12)
+                    .borderRadius(Radius.sm)
                     .backgroundColor($r('app.color.skeleton_highlight'))
                 Column()
                     .width('70%')
-                    .height(13)
-                    .borderRadius(4)
+                    .height(12)
+                    .borderRadius(Radius.sm)
                     .backgroundColor($r('app.color.skeleton_highlight'))
                 // 时间骨架
                 Column()
                     .width('25%')
-                    .height(11)
-                    .borderRadius(4)
+                    .height(12)
+                    .borderRadius(Radius.sm)
                     .backgroundColor($r('app.color.skeleton_highlight'))
             }
             .layoutWeight(1)
             .alignItems(HorizontalAlign.Start)
         }
         .width('100%')
-        .padding({ left: MomentConstants.CARD_PADDING, right: MomentConstants.CARD_PADDING, top: 14, bottom: 14 })
+        .padding({ left: MomentConstants.CARD_PADDING, right: MomentConstants.CARD_PADDING, top: 16, bottom: 16 })
         .backgroundColor(MomentConstants.CARD_BACKGROUND_COLOR)
 
         Divider()
@@ -434,7 +437,7 @@ export struct FeedListPage {
     private buildErrorView() {
         Column({ space: 16 }) {
             SymbolGlyph($r('sys.symbol.wifi_slash'))
-                .fontSize(56)
+                .fontSize(FontSize.huge)
                 .fontColor([MomentConstants.TEXT_SECONDARY_COLOR])
 
             Text('加载失败')
@@ -529,23 +532,23 @@ export struct FeedListPage {
             Image(wfc.getUserInfo(this.currentUserId).portrait || $r('app.media.icon'))
                 .width(28)
                 .height(28)
-                .borderRadius(4)
+                .borderRadius(Radius.sm)
 
             Text(`${this.unreadCount}条新动态`)
-                .fontSize(13)
+                .fontSize(FontSize.sm)
                 .fontColor(Color.White)
                 .fontWeight(FontWeight.Medium)
                 .layoutWeight(1)
 
             SymbolGlyph($r('sys.symbol.chevron_up'))
-                .fontSize(13)
+                .fontSize(FontSize.sm)
                 .fontColor([Color.White])
         }
         .height(44)
-        .padding({ left: 14, right: 14 })
+        .padding({ left: 16, right: 16 })
         .borderRadius(MomentConstants.BORDER_RADIUS)
         .backgroundColor($r('app.color.unread_hint_background'))
-        .margin({ top: 10, bottom: 10, left: 16, right: 16 })
+        .margin({ top: 12, bottom: 12, left: 16, right: 16 })
         .onClick(() => {
             this.listScroller.scrollToIndex(1, true, ScrollAlign.START);
             this.unreadCount = 0;
@@ -557,7 +560,7 @@ export struct FeedListPage {
     private buildEmptyView() {
         Column({ space: 16 }) {
             SymbolGlyph($r('sys.symbol.person_2'))
-                .fontSize(64)
+                .fontSize(FontSize.huge)
                 .fontColor([MomentConstants.TEXT_SECONDARY_COLOR])
 
             Text('还没有朋友圈动态')
@@ -579,8 +582,8 @@ export struct FeedListPage {
         Row({ space: 8 }) {
             if (this.isLoadingMore) {
                 LoadingProgress()
-                    .width(18)
-                    .height(18)
+                    .width(20)
+                    .height(20)
                     .color(MomentConstants.TEXT_SECONDARY_COLOR)
                 Text('加载中...')
                     .fontSize(MomentConstants.FONT_SIZE_CAPTION)
@@ -607,7 +610,7 @@ export struct FeedListPage {
                 })
 
             // 输入框
-            Row({ space: 10 }) {
+            Row({ space: 12 }) {
                 TextInput({
                     placeholder: this.commentInputState.placeholder,
                     text: this.commentText
@@ -619,8 +622,8 @@ export struct FeedListPage {
                     .fontColor(MomentConstants.TEXT_PRIMARY_COLOR)
                     .fontSize(MomentConstants.FONT_SIZE_CONTENT)
                     .placeholderColor(MomentConstants.TEXT_SECONDARY_COLOR)
-                    .borderRadius(20)
-                    .padding({ left: 14, right: 14 })
+                    .borderRadius(Radius.full)
+                    .padding({ left: 16, right: 16 })
                     .defaultFocus(true)
                     .onAppear(() => {
                         setTimeout(() => {
@@ -639,11 +642,11 @@ export struct FeedListPage {
 
                 Button('发送')
                     .height(40)
-                    .padding({ left: 18, right: 18 })
+                    .padding({ left: 20, right: 20 })
                     .backgroundColor(this.commentText.trim() ? MomentConstants.PRIMARY_COLOR : $r('app.color.button_disabled'))
                     .fontColor(this.commentText.trim() ? Color.White : $r('app.color.text_disabled'))
                     .fontSize(MomentConstants.FONT_SIZE_MEDIUM)
-                    .borderRadius(20)
+                    .borderRadius(Radius.full)
                     .enabled(!!this.commentText.trim())
                     .onClick(() => {
                         const targetFeed = this.feeds.find(f => f.feed.feedId === this.commentInputState.feedId);
@@ -653,7 +656,7 @@ export struct FeedListPage {
                     })
             }
             .width('100%')
-            .padding({ left: 14, right: 14, top: 10, bottom: 10 })
+            .padding({ left: 16, right: 16, top: 12, bottom: 12 })
             .backgroundColor(MomentConstants.CARD_BACKGROUND_COLOR)
         }
         .width('100%')

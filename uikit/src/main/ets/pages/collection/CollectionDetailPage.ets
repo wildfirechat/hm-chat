@@ -6,6 +6,7 @@ import wfc from '@wfc/client/src/main/ets/wfc/client/wfc';
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo';
 import promptAction from '@ohos.promptAction';
 import { NavigationMenu } from '../../view/BuilderHelper';
+import { FontSize, Radius } from '../../common/design/Tokens'
 
 @Component
 export default struct CollectionDetailPage {
@@ -100,13 +101,13 @@ export default struct CollectionDetailPage {
                                     Image(this.creatorInfo?.portrait || $r('app.media.avatar_def'))
                                         .width(40)
                                         .height(40)
-                                        .borderRadius(4)
+                                        .borderRadius(Radius.sm)
                                     Column() {
                                         Text(`${this.creatorInfo?.displayName || this.collection.creatorId} 发起的接龙`)
-                                            .fontSize(14)
+                                            .fontSize(FontSize.sm)
                                             .fontColor(Color.Gray)
                                         Text(`已参与 ${this.collection.calculateParticipantCount()} 人`)
-                                            .fontSize(12)
+                                            .fontSize(FontSize.xs)
                                             .fontColor(Color.Gray)
                                             .margin({ top: 4 })
                                     }
@@ -116,14 +117,14 @@ export default struct CollectionDetailPage {
                                 .width('100%')
 
                                 Text(this.collection.title)
-                                    .fontSize(18)
+                                    .fontSize(FontSize.lg)
                                     .fontWeight(FontWeight.Bold)
                                     .margin({ top: 16, bottom: 8 })
                                     .width('100%')
 
                                 if (this.collection.desc) {
                                     Text(this.collection.desc)
-                                        .fontSize(14)
+                                        .fontSize(FontSize.sm)
                                         .fontColor($r('app.color.wf_primary_text'))
                                         .margin({ bottom: 8 })
                                         .width('100%')
@@ -131,7 +132,7 @@ export default struct CollectionDetailPage {
 
                                 if (this.collection.template) {
                                     Text(`填写格式: ${this.collection.template}`)
-                                        .fontSize(12)
+                                        .fontSize(FontSize.xs)
                                         .fontColor(Color.Gray)
                                         .margin({ bottom: 8 })
                                         .width('100%')
@@ -139,7 +140,7 @@ export default struct CollectionDetailPage {
 
                                 if (this.collection.expireType === 1) {
                                     Text(`截止时间: ${new Date(this.collection.expireAt).toLocaleString()}`)
-                                        .fontSize(12)
+                                        .fontSize(FontSize.xs)
                                         .fontColor(Color.Red)
                                         .margin({ bottom: 8 })
                                         .width('100%')
@@ -185,19 +186,17 @@ export default struct CollectionDetailPage {
     buildEntryRow(index: number, content: string) {
         Row() {
             Text(`${index}.`)
-                .fontSize(14)
+                .fontSize(FontSize.sm)
                 .fontColor(Color.Gray)
-                .width(30)
+                .width(32)
             Text(content)
-                .fontSize(16)
+                .fontSize(FontSize.md)
                 .layoutWeight(1)
         }
-        .padding({
-            left: 16,
+        .padding({ left: 16,
             right: 16,
             top: 12,
-            bottom: 12
-        })
+            bottom: 12 })
         .width('100%')
         .backgroundColor($r('app.color.wf_background'))
     }
@@ -206,9 +205,9 @@ export default struct CollectionDetailPage {
     buildEditRow(index: number) {
         Row() {
             Text(`${index}.`)
-                .fontSize(14)
+                .fontSize(FontSize.sm)
                 .fontColor(Color.Gray)
-                .width(30)
+                .width(32)
             TextInput({
                 placeholder: this.collection?.template || '参与接龙',
                 text: $$this.myEntryContent
@@ -225,12 +224,10 @@ export default struct CollectionDetailPage {
                     }
                 })
         }
-        .padding({
-            left: 16,
+        .padding({ left: 16,
             right: 16,
             top: 8,
-            bottom: 8
-        })
+            bottom: 8 })
         .width('100%')
         .backgroundColor(Color.White)
     }

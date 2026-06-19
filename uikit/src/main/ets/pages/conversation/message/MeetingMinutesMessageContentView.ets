@@ -2,6 +2,7 @@ import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import MeetingMinutesMessageContent from '@wfc/client/src/main/ets/wfc/messages/meetingMinutesMessageContent'
 import Config from '@wfc/client/src/main/ets/config'
 import { uikitNavigationDestinations } from '../../uikitNavigationConfig'
+import { FontSize, Radius } from '../../../common/design/Tokens'
 
 @Component
 export default struct MeetingMinutesMessageContentView {
@@ -16,7 +17,7 @@ export default struct MeetingMinutesMessageContentView {
         Column() {
             if (this.content().title && this.content().title.length > 0) {
                 Text(this.content().title)
-                    .fontSize(15)
+                    .fontSize(FontSize.sm)
                     .fontWeight(FontWeight.Bold)
                     .fontColor('#303133')
                     .maxLines(2)
@@ -25,16 +26,16 @@ export default struct MeetingMinutesMessageContentView {
             }
             if (this.content().text && this.content().text.length > 0) {
                 Text(this.content().text)
-                    .fontSize(13)
+                    .fontSize(FontSize.sm)
                     .fontColor('#606266')
                     .maxLines(5)
                     .textOverflow({ overflow: TextOverflow.Ellipsis })
             }
         }
         .alignItems(HorizontalAlign.Start)
-        .padding(10)
+        .padding(12)
         .backgroundColor('#f5f7fa')
-        .borderRadius(5)
+        .borderRadius(Radius.sm)
         .width('100%')
         .onClick(() => {
             let meetingId = this.content().meetingId;

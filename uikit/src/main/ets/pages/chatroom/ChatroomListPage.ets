@@ -1,6 +1,7 @@
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation';
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType';
 import { uikitNavigationDestinations } from '../uikitNavigationConfig';
+import { Radius } from '../../common/design/Tokens'
 
 @Component
 export default struct ChatroomListPage {
@@ -33,16 +34,16 @@ export default struct ChatroomListPage {
                                 .alt($r('app.media.ic_chatroom'))
                                 .width(20)
                                 .height(20)
-                                .borderRadius(4)
+                                .borderRadius(Radius.sm)
                                 .fillColor($r('app.color.wf_icon_color'))
                             Text(chatroom.title)
                                 .maxLines(1)
-                                .padding({ left: 10 })
+                                .padding({ left: 12 })
                                 .fontColor($r('app.color.wf_primary_text'))
                         }
                         .height(60)
                         .width('100%')
-                        .padding({ left: 10, right: 10 })
+                        .padding({ left: 12, right: 12 })
                         .backgroundColor($r('app.color.wf_background'))
                         .onClick(() => {
                             this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ConversationPage, {

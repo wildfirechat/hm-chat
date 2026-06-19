@@ -3,6 +3,7 @@ import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import ConversationInfoItemView from '../../view/ConversationInfoItemView'
 import SearchResultView from '../search/SearchPortalResultView'
 import { SearchModule } from '../../common/Types'
+import { FontSize, Radius } from '../../common/design/Tokens'
 
 @Component
 @Preview
@@ -33,12 +34,12 @@ export default struct PickConversationModal {
                     TextInput({ placeholder: '搜索...' })
                         .type(InputType.Normal)
                         .layoutWeight(1)
-                        .borderRadius(4)
+                        .borderRadius(Radius.sm)
                         .onChange((value: string) => {
                             this.keyword = value
                         })
                 }
-                .padding(10)
+                .padding(12)
                 .width('100%')
 
                 Stack() {
@@ -47,11 +48,11 @@ export default struct PickConversationModal {
                             ListItem() {
                                 Text('最近聊天')
                                     .fontColor('#989898')
-                                    .fontSize(13)
+                                    .fontSize(FontSize.sm)
                                     .width('100%')
                                     .height(40)
                                     .backgroundColor($r('app.color.wf_secondary_background'))
-                                    .padding({ left: 10, right: 10 })
+                                    .padding({ left: 12, right: 12 })
                             }
 
                             ForEach(this.recentConversationInfos, (info: ConversationInfo, index: number) => {

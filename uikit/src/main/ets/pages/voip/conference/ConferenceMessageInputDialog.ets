@@ -1,3 +1,4 @@
+import { FontSize, Radius } from '../../../common/design/Tokens'
 @CustomDialog
 export default struct ConferenceMessageInputDialog {
     controller: CustomDialogController
@@ -8,8 +9,8 @@ export default struct ConferenceMessageInputDialog {
         Column() {
             Row() {
                 TextInput({ placeholder: '请输入消息', text: this.text })
-                    .fontSize(14)
-                    .borderRadius(4)
+                    .fontSize(FontSize.sm)
+                    .borderRadius(Radius.sm)
                     .type(InputType.Normal)
                     .maxLines(1)
                     .maxLength(50)
@@ -30,7 +31,7 @@ export default struct ConferenceMessageInputDialog {
             .width('100%')
             .justifyContent(FlexAlign.SpaceBetween)
         }
-        .padding({ top: 10, bottom: 10 })
-        .margin({ left: 10, right: 10 })
+        .padding({ top: 12, bottom: 12 })
+        .margin({ left: 12, right: 12 })
     }
 }

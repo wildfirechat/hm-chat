@@ -8,6 +8,7 @@ import PickGroupMemberModal from '../../group/PickGroupMemberModal';
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
 import { checkAndRequestPermission } from '../../../helper/permissionHelper';
+import { Radius } from '../../../common/design/Tokens'
 
 @Component
 export default struct CallStartMessageContentView {
@@ -36,12 +37,12 @@ export default struct CallStartMessageContentView {
                 .height(20)
             Text(this.desc())
                 .constraintSize({ minHeight: 40 })
-                .padding({ left: 10 })
+                .padding({ left: 12 })
         }
-        .padding({ left: 10, right: 10 })
+        .padding({ left: 12, right: 12 })
         .backgroundColor(this.message.direction === 0 ? $r('app.color.wf_sent_bubble_bg') : $r('app.color.wf_received_bubble_bg'))
         .align(Alignment.Center)
-        .borderRadius(4)
+        .borderRadius(Radius.sm)
         .onClick(async () => {
             let content = this.message.messageContent as CallStartMessageContent;
 

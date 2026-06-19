@@ -1,6 +1,6 @@
 import OptionItemView from '@wfc/uikit/src/main/ets/view/OptionItemView'
 import { appNavigationDestinations } from '../mainNavigationConfig'
-
+import { FontSize } from '@wfc/uikit/src/main/ets/common/design/Tokens'
 
 @CustomDialog
 struct CustomListDialog {
@@ -13,16 +13,16 @@ struct CustomListDialog {
 
             ForEach(this.items, (item: string) => {
                 Text(item)
-                    .fontSize(16)
-                    .padding(10)
+                    .fontSize(FontSize.md)
+                    .padding(12)
                     .onClick(() => {
                         this.controller.close()
                         this.onItemClick(item)
                     })
             })
         }
-        .padding({top:10, bottom:10})
-        .margin({left:48, right:48})
+        .padding({ top: 12, bottom: 12 })
+        .margin({ left: 48, right: 48 })
     }
 }
 
@@ -48,7 +48,6 @@ export default struct AccountPage {
         alignment: DialogAlignment.Center,
         gridCount: 3,
     })
-
 
     aboutToAppear() {
     }

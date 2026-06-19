@@ -1,3 +1,4 @@
+import { FontSize, Radius } from '../../../common/design/Tokens'
 @CustomDialog
 export default struct JoinConferenceDialog {
     controller: CustomDialogController
@@ -8,24 +9,24 @@ export default struct JoinConferenceDialog {
     build() {
         Column() {
             Text('请输入会议号及密码')
-                .fontSize(17)
+                .fontSize(FontSize.md)
                 .fontColor($r('app.color.wf_primary_text'))
                 .padding(20)
 
             Column() {
                 Text('会议号')
-                    .fontSize(15)
+                    .fontSize(FontSize.sm)
                     .fontColor($r('app.color.wf_primary_text'))
                 TextInput({ placeholder: '请输入会议号', text: this.conferenceId })
-                    .fontSize(14)
-                    .borderRadius(4)
+                    .fontSize(FontSize.sm)
+                    .borderRadius(Radius.sm)
                     .type(InputType.Number)
                     .fontColor($r('app.color.wf_primary_text'))
                     .placeholderColor($r('app.color.wf_tertiary_text'))
                     .backgroundColor(Color.Transparent)
                     .maxLines(1)
                     .maxLength(50)
-                    .margin({ top: 5 })
+                    .margin({ top: 4 })
                     .onChange((value) => {
                         this.conferenceId = value;
                     })
@@ -35,17 +36,17 @@ export default struct JoinConferenceDialog {
 
             Column() {
                 Text('会议密码')
-                    .fontSize(15)
+                    .fontSize(FontSize.sm)
                     .fontColor($r('app.color.wf_primary_text'))
                 TextInput({ placeholder: '如果没有，请忽略', text: this.password })
-                    .fontSize(14)
-                    .borderRadius(4)
+                    .fontSize(FontSize.sm)
+                    .borderRadius(Radius.sm)
                     .fontColor($r('app.color.wf_primary_text'))
                     .placeholderColor($r('app.color.wf_tertiary_text'))
                     .backgroundColor(Color.Transparent)
                     .maxLines(1)
                     .maxLength(50)
-                    .margin({ top: 5 })
+                    .margin({ top: 4 })
                     .onChange((value) => {
                         this.password = value;
                     })
@@ -75,7 +76,7 @@ export default struct JoinConferenceDialog {
             .justifyContent(FlexAlign.End)
             .margin({ top: 20 })
         }
-        .padding({ top: 10, bottom: 10 })
+        .padding({ top: 12, bottom: 12 })
         .margin({ left: 40, right: 40 })
     }
 }

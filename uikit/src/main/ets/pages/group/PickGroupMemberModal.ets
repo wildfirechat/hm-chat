@@ -4,6 +4,7 @@ import CheckableUserListView from '../../view/CheckableUserListView'
 import Employee from '../../api/model/employee'
 import Organization from '../../api/model/organization'
 import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
+import { FontSize, Radius } from '../../common/design/Tokens'
 
 @Component
 export default struct PickGroupMemberModal {
@@ -71,7 +72,7 @@ export default struct PickGroupMemberModal {
             }
             .width('100%')
             .height('100%')
-            .padding({ top: 5 })
+            .padding({ top: 4 })
         }
         .title(this.title)
         .titleMode(NavigationTitleMode.Mini)
@@ -87,12 +88,11 @@ export default struct PickGroupMemberModal {
         Row() {
             Button('确定')
                 .type(ButtonType.Normal)
-                .height(30)
-                .width(60)
-                .margin({ right: 18 })
+                .height(32)
+                .margin({ right: 20 })
                 .enabled(this.newlyCheckedUsers().length > 0)
-                .fontSize(14)
-                .borderRadius(4)// .backgroundColor(Color.Blue)
+                .fontSize(FontSize.sm)
+                .borderRadius(Radius.sm)// .backgroundColor(Color.Blue)
                 .onClick(() => {
                     if (this.onPickResult) {
                         this.onPickResult(this.newlyCheckedUsers())

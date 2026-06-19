@@ -7,6 +7,7 @@ import ChangePasswordPage from "./me/ChangePasswordPage"
 import DestroyAccountPage from "./me/DestroyAccountPage"
 import ResetPasswordPage from "./me/ResetPasswordPage"
 import SettingPage from "./me/SettingPage"
+import FontSizeSettingPage from "./me/FontSizeSettingPage"
 import TestPage from "./test/TestPage"
 import BackupAndRestorePage from "./backup/BackupAndRestorePage"
 import BackupTargetPage from "./backup/BackupTargetPage"
@@ -29,6 +30,7 @@ export class appNavigationDestinations {
     static ResetPasswordPage = APP_NAV_DESTINATION_PREFIX + 'resetPasswordPage'
     static ChangePasswordPage = APP_NAV_DESTINATION_PREFIX + 'changePasswordPage'
     static SettingPage = APP_NAV_DESTINATION_PREFIX + 'settingPage'
+    static FontSizeSettingPage = APP_NAV_DESTINATION_PREFIX + 'fontSizeSettingPage'
     static DestroyAccountPage = APP_NAV_DESTINATION_PREFIX + 'destroyAccountPage'
     static BackupAndRestorePage = APP_NAV_DESTINATION_PREFIX + 'backupAndRestorePage'
     static BackupTargetPage = APP_NAV_DESTINATION_PREFIX + 'backupTargetPage'
@@ -56,6 +58,8 @@ export function AppPageMap(name: string) {
         ChangePasswordPage()
     } else if (name === appNavigationDestinations.SettingPage) {
         SettingPage()
+    } else if (name === appNavigationDestinations.FontSizeSettingPage) {
+        FontSizeSettingPage()
     } else if (name === 'testPage') {
         TestPage()
     } else if (name === appNavigationDestinations.DestroyAccountPage) {

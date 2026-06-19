@@ -6,6 +6,7 @@ import { showToast } from '../../common/utils/Toast';
 import pollService, { OnPollCallback } from '../../api/pollService';
 import Poll from './model/poll';
 import { uikitNavigationDestinations } from '../uikitNavigationConfig';
+import { FontSize, Radius } from '../../common/design/Tokens'
 
 interface PollsCallback {
     onSuccess: (result: Poll[]) => void;
@@ -182,7 +183,7 @@ export default struct PollListPage {
                         .fill($r('app.color.wf_secondary_background'))
 
                     Text(poll.pollType === 1 ? '单' : '多')
-                        .fontSize(14)
+                        .fontSize(FontSize.sm)
                         .fontColor($r('app.color.wf_primary'))
                         .fontWeight(FontWeight.Bold)
                 }
@@ -191,7 +192,7 @@ export default struct PollListPage {
                 Column({ space: 4 }) {
                     Row({ space: 8 }) {
                         Text(poll.title)
-                            .fontSize(16)
+                            .fontSize(FontSize.md)
                             .fontColor($r('app.color.wf_primary_text'))
                             .fontWeight(FontWeight.Medium)
                             .layoutWeight(1)
@@ -199,21 +200,21 @@ export default struct PollListPage {
                             .textOverflow({ overflow: TextOverflow.Ellipsis })
 
                         Text(this.getStatusText(poll))
-                            .fontSize(11)
+                            .fontSize(FontSize.xs)
                             .fontColor(this.getStatusColor(poll))
-                            .padding({ left: 6, right: 6, top: 2, bottom: 2 })
+                            .padding({ left: 8, right: 8, top: 2, bottom: 2 })
                             .backgroundColor(this.getStatusBgColor(poll))
-                            .borderRadius(4)
+                            .borderRadius(Radius.sm)
                     }
                     .width('100%')
 
                     Row({ space: 8 }) {
                         Text(`${poll.voterCount}人参与`)
-                            .fontSize(13)
+                            .fontSize(FontSize.sm)
                             .fontColor($r('app.color.wf_tertiary_text'))
 
                         Text(this.formatTime(poll.createdAt))
-                            .fontSize(13)
+                            .fontSize(FontSize.sm)
                             .fontColor($r('app.color.wf_tertiary_text'))
                     }
                     .width('100%')
@@ -238,7 +239,7 @@ export default struct PollListPage {
         Row({ space: 8 }) {
             if (!this.isPollEnded(poll)) {
                 Button('结束')
-                    .fontSize(14)
+                    .fontSize(FontSize.sm)
                     .fontColor($r('app.color.wf_background'))
                     .backgroundColor($r('app.color.wf_warning'))
                     .width(60)
@@ -249,7 +250,7 @@ export default struct PollListPage {
             }
 
             Button('删除')
-                .fontSize(14)
+                .fontSize(FontSize.sm)
                 .fontColor($r('app.color.wf_background'))
                 .backgroundColor($r('app.color.wf_danger'))
                 .width(60)
@@ -267,7 +268,7 @@ export default struct PollListPage {
                 if (this.pollList.length === 0 && !this.isLoading) {
                     Column() {
                         Text('暂无投票')
-                            .fontSize(16)
+                            .fontSize(FontSize.md)
                             .fontColor($r('app.color.wf_tertiary_text'))
                     }
                     .width('100%')

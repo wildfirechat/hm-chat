@@ -5,6 +5,7 @@ import { uikitNavigationDestinations } from "../../uikitNavigationConfig";
 import { showToast } from '../../../common/utils/Toast';
 import { isHttpUrl } from '../../../common/utils/TextLinkParser';
 import { common } from '@kit.AbilityKit';
+import { FontSize, Radius } from '../../../common/design/Tokens'
 
 @Component
 export default struct LinkMessageContentView {
@@ -18,7 +19,7 @@ export default struct LinkMessageContentView {
     build() {
         Column() {
             Text(this.linkMessageContent().title ? this.linkMessageContent().title : this.linkMessageContent().url)
-                .fontSize(15)
+                .fontSize(FontSize.sm)
                 .fontWeight(FontWeight.Medium)
                 .fontColor($r('app.color.wf_primary_text'))
                 .lineHeight(21)
@@ -29,7 +30,7 @@ export default struct LinkMessageContentView {
 
             Row() {
                 Text(this.linkMessageContent().contentDigest ? this.linkMessageContent().contentDigest : this.linkMessageContent().url)
-                    .fontSize(13)
+                    .fontSize(FontSize.sm)
                     .fontColor($r('app.color.wf_tertiary_text'))
                     .lineHeight(18)
                     .maxLines(2)
@@ -42,19 +43,19 @@ export default struct LinkMessageContentView {
                     .width(40)
                     .height(40)
                     .objectFit(ImageFit.Cover)
-                    .borderRadius(4)
+                    .borderRadius(Radius.sm)
                     .backgroundColor($r('app.color.wf_image_placeholder_bg'))
-                    .margin({ left: 10 })
+                    .margin({ left: 12 })
             }
             .width('100%')
             .alignItems(VerticalAlign.Top)
-            .margin({ top: 10 })
+            .margin({ top: 12 })
         }
         .width(240)
         .padding(12)
         .alignItems(HorizontalAlign.Start)
         .backgroundColor($r('app.color.wf_background'))
-        .borderRadius(8)
+        .borderRadius(Radius.lg)
         .shadow({ radius: 6, color: '#14000000', offsetX: 0, offsetY: 1 })
         .onClick(() => {
             this.openLink(this.linkMessageContent().url, this.linkMessageContent().title)

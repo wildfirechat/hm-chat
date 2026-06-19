@@ -15,6 +15,7 @@ import pipHelper from './pipHelper'
 import { uikitNavigationDestinations } from '../uikitNavigationConfig'
 import WFCVideoRenderController from '@wfc/avenginekit/src/main/ets/wfc/av/xcomponent/WFCVideoRenderController'
 import VoipPiPNodeController from './VoipPiPNodeController'
+import { FontSize, Radius } from '../../common/design/Tokens'
 
 @Component
 export default struct SingleVideoCallPage {
@@ -271,9 +272,9 @@ export default struct SingleVideoCallPage {
                 Row() {
                     Image($r('app.media.av_minimize'))
                         .draggable(false)
-                        .width(50)
-                        .height(50)
-                        .padding(10)
+                        .width(52)
+                        .height(52)
+                        .padding(12)
                         .onClick(async () => {
                             this.pipController?.startPiP()
                                 .catch((reason: BusinessError) => {
@@ -290,9 +291,9 @@ export default struct SingleVideoCallPage {
 
                     Image(false ? $r('app.media.av_camera_hover') : $r('app.media.av_camera'))
                         .draggable(false)
-                        .width(50)
-                        .height(50)
-                        .padding(10)
+                        .width(52)
+                        .height(52)
+                        .padding(12)
                         .onClick(() => {
                             if (this.callSession?.status === CallState.STATUS_CONNECTED) {
                                 this.callSession?.switchCamera()
@@ -319,8 +320,8 @@ export default struct SingleVideoCallPage {
                             })
                         Text('挂断')
                             .visibility(Visibility.Hidden)
-                            .margin({ top: 10 })
-                            .fontSize(13)
+                            .margin({ top: 12 })
+                            .fontSize(FontSize.sm)
                             .fontColor(Color.White)
                     }
 
@@ -336,14 +337,14 @@ export default struct SingleVideoCallPage {
                                 })
                             Text('接听')
                                 .visibility(Visibility.Hidden)
-                                .margin({ top: 10 })
-                                .fontSize(13)
+                                .margin({ top: 12 })
+                                .fontSize(FontSize.sm)
                                 .fontColor(Color.White)
                         }
                     }
                 }
                 .width('100%')
-                .margin({ bottom: 30 })
+                .margin({ bottom: 32 })
                 .justifyContent(FlexAlign.SpaceAround)
 
             } else {
@@ -360,8 +361,8 @@ export default struct SingleVideoCallPage {
                             })
                         Text('麦克风')
                             .visibility(Visibility.Hidden)
-                            .margin({ top: 10 })
-                            .fontSize(13)
+                            .margin({ top: 12 })
+                            .fontSize(FontSize.sm)
                             .fontColor(Color.White)
                     }
 
@@ -375,8 +376,8 @@ export default struct SingleVideoCallPage {
                             })
                         Text('挂断')
                             .visibility(Visibility.Hidden)
-                            .margin({ top: 10 })
-                            .fontSize(13)
+                            .margin({ top: 12 })
+                            .fontSize(FontSize.sm)
                             .fontColor(Color.White)
                     }
 
@@ -397,13 +398,13 @@ export default struct SingleVideoCallPage {
 
                         Text('扬声器已关')
                             .visibility(Visibility.Hidden)
-                            .margin({ top: 10 })
-                            .fontSize(13)
+                            .margin({ top: 12 })
+                            .fontSize(FontSize.sm)
                             .fontColor(Color.White)
                     }
                     .justifyContent(FlexAlign.Center)
                 }
-                .margin({ bottom: 30 })
+                .margin({ bottom: 32 })
                 .width('100%')
                 .justifyContent(FlexAlign.SpaceAround)
             }
@@ -442,7 +443,6 @@ export default struct SingleVideoCallPage {
                     this.lastTriggerToShowActionAndDurationViewTimestamp = Date.now()
                 })
 
-
                 Stack() {
                     Column() {
 
@@ -452,14 +452,12 @@ export default struct SingleVideoCallPage {
                                 type: XComponentType.SURFACE,
                                 controller: this.previewXComponentController,
                             })
-                                .borderRadius(4)
+                                .borderRadius(Radius.sm)
                                 .enableAnalyzer(false)
                                 .width(this.callSession?.status === CallState.STATUS_CONNECTED ? '120' : '100%')
                                 .height(this.callSession?.status === CallState.STATUS_CONNECTED ? '160' : '100%')
-                                .margin({
-                                    left: this.callSession?.status === CallState.STATUS_CONNECTED ? 10 : 0,
-                                    top: this.callSession?.status === CallState.STATUS_CONNECTED ? this.statusBarHeight + 50 : 0
-                                })
+                                .margin({ left: this.callSession?.status === CallState.STATUS_CONNECTED ? 10 : 0,
+                                    top: this.callSession?.status === CallState.STATUS_CONNECTED ? this.statusBarHeight + 50 : 0 })
                         }
                         .onClick(() => {
                             this.swapVideo()
@@ -478,22 +476,22 @@ export default struct SingleVideoCallPage {
                                 .draggable(false)
                                 .width(80)
                                 .height(80)
-                                .borderRadius(4)
+                                .borderRadius(Radius.sm)
                             Column() {
                                 Text(this.targetUserInfo?.displayName)
-                                    .fontSize(14)
+                                    .fontSize(FontSize.sm)
                                     .fontColor('#848687')
                                 Text(this.tip())
-                                    .margin({ top: 10 })
-                                    .fontSize(13)
+                                    .margin({ top: 12 })
+                                    .fontSize(FontSize.sm)
                                     .fontColor('#848687')
                             }
                             .height(80)
-                            .margin({ left: 10 })
+                            .margin({ left: 12 })
                             .justifyContent(FlexAlign.Center)
                             .alignItems(HorizontalAlign.Start)
                         }
-                        .margin({ left: 10, top: 50 + this.statusBarHeight })
+                        .margin({ left: 12, top: 52 + this.statusBarHeight })
                         .width('100%')
                         .height('100%')
                         .justifyContent(FlexAlign.Start)

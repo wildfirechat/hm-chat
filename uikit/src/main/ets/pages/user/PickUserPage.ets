@@ -5,6 +5,7 @@ import CheckableUserListView from '../../view/CheckableUserListView'
 import Employee from '../../api/model/employee'
 import Organization from '../../api/model/organization'
 import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
+import { FontSize, Radius } from '../../common/design/Tokens'
 
 @Component
 export default struct PickUserPage {
@@ -67,7 +68,7 @@ export default struct PickUserPage {
             }
             .width('100%')
             .height('100%')
-            .padding({ top: 5 })
+            .padding({ top: 4 })
         }
         .backgroundColor($r('app.color.wf_primary_background_color'))
         .title('选取联系人')
@@ -84,10 +85,9 @@ export default struct PickUserPage {
         Row() {
             Button('确定')
                 .type(ButtonType.Normal)
-                .height(30)
-                .width(60)
-                .fontSize(14)
-                .borderRadius(4)// .backgroundColor(Color.Blue)
+                .height(32)
+                .fontSize(FontSize.sm)
+                .borderRadius(Radius.sm)// .backgroundColor(Color.Blue)
                     // TODO
                 .onClick(() => {
                     let options: router.RouterOptions = {

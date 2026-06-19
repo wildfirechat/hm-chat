@@ -46,6 +46,7 @@ import StickerMessageContent from '@wfc/client/src/main/ets/wfc/messages/sticker
 import { sendMediaResult, uri2MediaResult } from '../../helper/mediaHelper'
 import { RecentPhotoComponent, RecentPhotoOptions, PhotoSource, RecentPhotoCheckResultCallback, RecentPhotoClickCallback } from '@ohos.file.RecentPhotoComponent'
 import { BaseItemInfo } from '@ohos.file.PhotoPickerComponent'
+import { FontSize, Radius, scaledSize } from '../../common/design/Tokens'
 
 // 「猜你想发送」：上次消失（发送/取消/其他操作）的时间。
 // API 12 的最近图片控件回调拿不到图片标识，故用「动态时间窗口」实现“同一张只提示一次”：
@@ -54,6 +55,7 @@ let lastRecentPhotoDismissMillis = 0
 
 @Component
 export default struct ConversationPage {
+    @StorageProp('fontScale') fontScale: number = 1.0;
     @State toReeditText: string = ''
     @State title: string = ''
     @State conversation?: Conversation = undefined
@@ -351,7 +353,6 @@ export default struct ConversationPage {
             }, err => {
                 console.error('getMessageV2 error', err)
             })
-
 
         } else {
             wfc.getMessagesV2(this.conversation, 0, true, 20, '', (messages) => {
@@ -782,8 +783,8 @@ export default struct ConversationPage {
                                 Column() {
                                     if (this.hasNoMoreHistoryMessage) {
                                         Text('没有更多消息')
-                                            .padding(5)
-                                            .fontSize(13)
+                                            .padding(4)
+                                            .fontSize(FontSize.sm)
                                             .fontColor($r('app.color.wf_tertiary_text'))
                                     }
                                     Blank()
@@ -826,16 +827,16 @@ export default struct ConversationPage {
                                                         Column() {
                                                             if (this.showMessageTimeInfo(index)) {
                                                                 Text(timeFormat(msg.timestamp))
-                                                                    .fontSize(12)
+                                                                    .fontSize(FontSize.xs)
                                                                     .fontColor($r('app.color.wf_tertiary_text'))
-                                                                    .padding(10)
+                                                                    .padding(12)
                                                             }
                                                             Row() {
                                                                 if (this.enableMultiCheck) {
                                                                     Row() {
                                                                         Checkbox()
                                                                             .select(this.isMessageChecked(msg))
-                                                                            .margin({ left: 10 })
+                                                                            .margin({ left: 12 })
                                                                             .onChange((value => {
                                                                                 // if (!this.enableMultiCheck) {
                                                                                 //     return
@@ -847,7 +848,7 @@ export default struct ConversationPage {
                                                                                 this.checkOrUncheckMessage(msg)
                                                                             }))
                                                                     }
-                                                                    .margin({ top: 10 })
+                                                                    .margin({ top: 12 })
                                                                     .height(40)
                                                                     .alignItems(VerticalAlign.Center)
                                                                 }
@@ -857,15 +858,15 @@ export default struct ConversationPage {
                                                                         // 重试
                                                                         Row() {
                                                                             Text('重试')
-                                                                                .fontSize(12)
-                                                                                .padding({ right: 5 })
+                                                                                .fontSize(FontSize.xs)
+                                                                                .padding({ right: 4 })
                                                                             Image($r('app.media.img_error'))
                                                                                 .width(20)
                                                                                 .height(20)
                                                                                 .objectFit(ImageFit.ScaleDown)
 
                                                                         }
-                                                                        .padding({ right: 5 })
+                                                                        .padding({ right: 4 })
                                                                         .alignItems(VerticalAlign.Bottom)
                                                                         .onClick(() => {
                                                                             this.resendMessage(msg)
@@ -888,19 +889,19 @@ export default struct ConversationPage {
                                                                         readEntries: this.readEntries,
                                                                         groupMembers: this.groupMembers
                                                                     })//.layoutWeight(1)
-                                                                        .margin({ top: 10 })
+                                                                        .margin({ top: 12 })
                                                                         .enabled(!this.enableMultiCheck)
                                                                 }
                                                                 .justifyContent(FlexAlign.End)
                                                                 .layoutWeight(1)
-                                                                .margin({ left: 70 })
+                                                                .margin({ left: 72 })
 
                                                                 Image(wfc.getUserInfo(msg.from).portrait)
-                                                                    .width(40)
-                                                                    .height(40)
-                                                                    .borderRadius(4)
+                                                                    .width(scaledSize(40, this.fontScale))
+                                                                    .height(scaledSize(40, this.fontScale))
+                                                                    .borderRadius(Radius.sm)
                                                                     .draggable(false)
-                                                                    .margin(10)
+                                                                    .margin(12)
                                                                     .enabled(!this.enableMultiCheck)
                                                                     .onClick(() => {
                                                                         this.showUserInfo(msg.from)
@@ -935,16 +936,16 @@ export default struct ConversationPage {
                                                         Column() {
                                                             if (this.showMessageTimeInfo(index)) {
                                                                 Text(timeFormat(msg.timestamp))
-                                                                    .fontSize(12)
+                                                                    .fontSize(FontSize.xs)
                                                                     .fontColor($r('app.color.wf_tertiary_text'))
-                                                                    .padding(10)
+                                                                    .padding(12)
                                                             }
                                                             Row() {
                                                                 if (this.enableMultiCheck) {
                                                                     Row() {
                                                                         Checkbox()
                                                                             .select(this.isMessageChecked(msg))
-                                                                            .margin({ left: 10 })
+                                                                            .margin({ left: 12 })
                                                                             .onChange((value => {
                                                                                 if (this.checkValueChangeTriggerByClick) {
                                                                                     this.checkValueChangeTriggerByClick = false
@@ -953,18 +954,18 @@ export default struct ConversationPage {
                                                                                 this.checkOrUncheckMessage(msg)
                                                                             }))
                                                                     }
-                                                                    .margin({ top: 10 })
+                                                                    .margin({ top: 12 })
                                                                     .height(40)
                                                                     .alignItems(VerticalAlign.Center)
 
                                                                     // .alignSelf(ItemAlign.Center)
                                                                 }
                                                                 Image(wfc.getUserInfo(msg.from).portrait)
-                                                                    .width(40)
-                                                                    .height(40)
-                                                                    .margin(10)
+                                                                    .width(scaledSize(40, this.fontScale))
+                                                                    .height(scaledSize(40, this.fontScale))
+                                                                    .margin(12)
                                                                     .draggable(false)
-                                                                    .borderRadius(4)
+                                                                    .borderRadius(Radius.sm)
                                                                     .enabled(!this.enableMultiCheck)
                                                                     .onClick(() => {
                                                                         this.showUserInfo(msg.from)
@@ -979,7 +980,7 @@ export default struct ConversationPage {
                                                                 Column() {
                                                                     if (this.showGroupMemberNickName) {
                                                                         Text(wfc.getGroupMemberDisplayName(this.conversation!.target, msg.from))
-                                                                            .fontSize(12)
+                                                                            .fontSize(FontSize.xs)
                                                                             .fontColor($r('app.color.wf_tertiary_text'))
                                                                             .padding({ bottom: 2 })
                                                                     }
@@ -997,7 +998,7 @@ export default struct ConversationPage {
                                                                 .justifyContent(FlexAlign.Start)
                                                                 .alignItems(HorizontalAlign.Start)
                                                                 .layoutWeight(1)
-                                                                .margin({ right: 70, top: 10 })
+                                                                .margin({ right: 72, top: 12 })
                                                             }
                                                             .width('100%')
                                                             .justifyContent(FlexAlign.Start)
@@ -1066,8 +1067,8 @@ export default struct ConversationPage {
                                 if (this.unreadJoinGroupRequestCount > 0) {
                                     Row() {
                                         Text(this.unreadJoinGroupRequestCount + '条加群申请')
-                                            .padding(5)
-                                            .fontSize(13)
+                                            .padding(4)
+                                            .fontSize(FontSize.sm)
                                             .fontColor(Color.Red)
                                             .backgroundColor($r('app.color.wf_background'))
                                             .width('100%')
@@ -1142,7 +1143,7 @@ export default struct ConversationPage {
                                     .width(60)
                                     .height(60)
                                     .objectFit(ImageFit.Contain)
-                                    .borderRadius(6)
+                                    .borderRadius(Radius.md)
                                     .margin({ left: 4, right: 4 })
                                     .onClick(() => {
                                         let stickerMsg = new StickerMessageContent('', sticker.data, 200, 200)
@@ -1157,11 +1158,11 @@ export default struct ConversationPage {
                     .scrollBar(BarState.Off)
                     .edgeEffect(EdgeEffect.Spring)
                     .constraintSize({ maxWidth: '75%' })
-                    .padding(6)
+                    .padding(8)
                     .backgroundColor($r('app.color.wf_background'))
-                    .borderRadius(10)
+                    .borderRadius(Radius.xl)
                     .shadow({ radius: 8, color: '#30000000', offsetX: 0, offsetY: -3 })
-                    .margin({ bottom: this.inputPanelHeight + 4, right: 10 })
+                    .margin({ bottom: this.inputPanelHeight + 4, right: 12 })
                 }
 
                 // 「猜你想发送」：内容尺寸的悬浮卡片，与表情建议同位置。recentPhotoRequested 时即挂载组件查询
@@ -1169,7 +1170,7 @@ export default struct ConversationPage {
                 if (this.recentPhotoRequested) {
                     Column() {
                         Text('猜你想发送')
-                            .fontSize(12)
+                            .fontSize(FontSize.xs)
                             .fontColor($r('app.color.wf_secondary_text'))
                             .margin({ bottom: 8 })
                         RecentPhotoComponent({
@@ -1178,17 +1179,17 @@ export default struct ConversationPage {
                             onRecentPhotoClick: this.recentPhotoClickCallback,
                         })
                             .width(60)
-                            .height(90)
+                            .height(92)
                             .clip(true)
-                            .borderRadius(4)
+                            .borderRadius(Radius.sm)
                     }
                     .alignItems(HorizontalAlign.Center)
-                    .padding(6)
+                    .padding(8)
                     .backgroundColor($r('app.color.wf_background'))
-                    .borderRadius(10)
+                    .borderRadius(Radius.xl)
                     .shadow({ radius: 8, color: '#30000000', offsetX: 0, offsetY: -3 })
                     .opacity(this.recentPhotoExists ? 1 : 0)
-                    .margin({ bottom: this.inputPanelHeight + 4, right: 10 })
+                    .margin({ bottom: this.inputPanelHeight + 4, right: 12 })
                 }
 
                 // Long-press preview: floating card above pressed emoji/sticker
@@ -1196,13 +1197,14 @@ export default struct ConversationPage {
                     Column() {
                         if (this.previewEmoji!.category === 'Peoples') {
                             Text(this.previewEmoji!.data)
-                                .fontSize(56)
+                                .maxFontScale(1)
+                                .fontSize(FontSize.huge)
                         } else {
                             Image(this.previewEmoji!.data)
                                 .width(this.previewCardSize() - 20)
                                 .height(this.previewCardSize() - 20)
                                 .objectFit(ImageFit.Contain)
-                                .borderRadius(8)
+                                .borderRadius(Radius.lg)
                         }
                     }
                     .width(this.previewCardSize())
@@ -1210,7 +1212,7 @@ export default struct ConversationPage {
                     .justifyContent(FlexAlign.Center)
                     .alignItems(HorizontalAlign.Center)
                     .backgroundColor($r('app.color.wf_background'))
-                    .borderRadius(10)
+                    .borderRadius(Radius.xl)
                     .shadow({
                         radius: 14,
                         color: '#50000000',

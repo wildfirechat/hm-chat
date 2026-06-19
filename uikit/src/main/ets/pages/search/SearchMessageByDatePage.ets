@@ -1,6 +1,7 @@
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import { uikitNavigationDestinations } from '../uikitNavigationConfig'
+import { FontSize, Radius } from '../../common/design/Tokens'
 
 @Component
 export default struct SearchMessageByDatePage {
@@ -123,9 +124,9 @@ struct MonthView {
     build() {
         Column() {
             Text(`${this.year}年${this.month + 1}月`)
-                .fontSize(16)
+                .fontSize(FontSize.md)
                 .fontWeight(FontWeight.Bold)
-                .padding(10)
+                .padding(12)
                 .width('100%')
                 .textAlign(TextAlign.Start)
                 .backgroundColor($r('app.color.wf_secondary_background'))
@@ -135,10 +136,10 @@ struct MonthView {
                 ForEach(['日', '一', '二', '三', '四', '五', '六'], (day: string) => {
                     GridItem() {
                         Text(day)
-                            .fontSize(14)
+                            .fontSize(FontSize.sm)
                             .fontColor($r('app.color.wf_tertiary_text'))
                     }
-                    .height(30)
+                    .height(32)
                 })
 
                 // Days
@@ -147,7 +148,7 @@ struct MonthView {
                         if (day) {
                             Column() {
                                 Text(`${day}`)
-                                    .fontSize(16)
+                                    .fontSize(FontSize.md)
                                     .fontWeight(this.hasMessage(day) ? FontWeight.Bold : FontWeight.Normal)
                                     .fontColor(this.hasMessage(day) ? $r('app.color.wf_primary_text') : $r('app.color.wf_tertiary_text'))
 
@@ -162,7 +163,7 @@ struct MonthView {
                             .justifyContent(FlexAlign.Center)
                             .alignItems(HorizontalAlign.Center)
                             // .backgroundColor(this.hasMessage(day) ? '#E0E0E0' : Color.Transparent)
-                            // .borderRadius(4)
+                            // .borderRadius(Radius.sm)
                             .onClick(() => {
                                 if (this.onDateClick) {
                                     this.onDateClick(this.year, this.month, day)
@@ -170,7 +171,7 @@ struct MonthView {
                             })
                         }
                     }
-                    .height(50)
+                    .height(52)
                 })
             }
             .columnsTemplate('1fr 1fr 1fr 1fr 1fr 1fr 1fr')

@@ -12,6 +12,7 @@ import type { BackupInfo, RestoreResult } from '@wfc/client/src/main/ets/wfc/bac
 import { MessageBackupManager } from '@wfc/client/src/main/ets/wfc/backup/messageBackupManager'
 import { BackupError } from '@wfc/client/src/main/ets/wfc/backup/backupTypes'
 import { showToast } from '@wfc/uikit/src/main/ets/common/utils/Toast'
+import { FontSize } from '@wfc/uikit/src/main/ets/common/design/Tokens'
 
 interface BackupInfoWithPath extends BackupInfo {
   backupPath: string;
@@ -207,22 +208,22 @@ export default struct RestoreProgressPage {
         Column() {
           // 百分比
           Text(`${this.progress}%`)
-            .fontSize(32)
+            .fontSize(FontSize.d2)
             .fontWeight(FontWeight.Bold)
             .fontColor($r('app.color.wf_primary_text'))
             .margin({ top: 60 })
 
           // 状态
           Text(this.currentStep)
-            .fontSize(18)
+            .fontSize(FontSize.lg)
             .fontColor($r('app.color.wf_primary_text'))
             .margin({ top: 20 })
 
           // 详情
           Text(this.detail)
-            .fontSize(14)
+            .fontSize(FontSize.sm)
             .fontColor($r('app.color.wf_secondary_text'))
-            .margin({ top: 10 })
+            .margin({ top: 12 })
 
           // 进度条
           if (!this.isRestoreComplete) {
@@ -246,7 +247,7 @@ export default struct RestoreProgressPage {
         // 取消按钮
         Button(this.isRestoreComplete ? '完成' : '取消恢复')
           .width('80%')
-          .fontSize(16)
+          .fontSize(FontSize.md)
           .type(ButtonType.Normal)
           .margin({ bottom: 40 })
           .onClick(() => {

@@ -53,7 +53,7 @@ export default struct UpdateUserInfoPage {
                         }
                     })
                 }
-                .margin({ top: 10 })
+                .margin({ top: 12 })
                 .backgroundColor($r('app.color.wf_background'))
             }
 

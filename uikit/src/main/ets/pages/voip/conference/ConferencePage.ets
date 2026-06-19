@@ -31,6 +31,7 @@ import MessageContentType from '@wfc/client/src/main/ets/wfc/messages/messageCon
 import EventType from '@wfc/client/src/main/ets/wfc/client/wfcEvent'
 import VideoType from '@wfc/avenginekit/src/main/ets/wfc/av/engine/videoType'
 import BasicDataSource from '../../../common/BasicDataSource'
+import { FontSize, Radius } from '../../../common/design/Tokens'
 
 @Component
 export default struct ConferencePage {
@@ -421,9 +422,7 @@ export default struct ConferencePage {
         })
             .width('100%')
             .height('100%')
-            .padding({
-                top: 5
-            })
+            .padding({ top: 4 })
     }
 
     @Builder
@@ -433,17 +432,17 @@ export default struct ConferencePage {
             // top actions
             Row() {
                 AVCastPicker({ normalColor: Color.White, activeColor: Color.White })
-                    .width(50)
-                    .height(50)
+                    .width(52)
+                    .height(52)
                     .border({ width: 1, radius: 4, color: Color.Transparent })
 
                 Image($r('app.media.av_conference_switch_camera'))
                     .draggable(false)
-                    .width(50)
-                    .height(50)
+                    .width(52)
+                    .height(52)
                     .colorFilter(WHITE_FILTER)
                     .objectFit(ImageFit.Contain)
-                    .padding({ left: 10, right: 10 })
+                    .padding({ left: 12, right: 12 })
                     .onClick(async () => {
                         if (this.callSession?.status === CallState.STATUS_CONNECTED) {
                             this.callSession?.switchCamera()
@@ -465,19 +464,19 @@ export default struct ConferencePage {
                 Image($r('app.media.av_conference_hangup'))
                     .draggable(false)
                     .clickEffect({ level: ClickEffectLevel.MIDDLE })
-                    .width(50)
-                    .height(50)
+                    .width(52)
+                    .height(52)
                     .objectFit(ImageFit.Contain)
-                    .padding({ left: 10, right: 10 })
+                    .padding({ left: 12, right: 12 })
                     .onClick(() => {
                         this.callSession?.hangup()
                     })
                 // Image($r('app.media.ic_tab_add'))
                 //     .fillColor(Color.Red)
                 //     .draggable(false)
-                //     .width(50)
-                //     .height(50)
-                //     .padding(10)
+                //     .width(52)
+                //     .height(52)
+                //     .padding(12)
                 //     .onClick(() => {
                 //         this.showPickGroupMemberModal = true;
                 //     })
@@ -492,7 +491,7 @@ export default struct ConferencePage {
                 //     })
             }
             .justifyContent(FlexAlign.SpaceBetween)
-            .padding({ left: 10, right: 10 })
+            .padding({ left: 12, right: 12 })
             .width('100%')
             .margin({ top: this.statusBarHeight })
 
@@ -503,8 +502,8 @@ export default struct ConferencePage {
                         Column() {
                             Image(this.callSession?.audioMuted ? $r('app.media.av_conference_audio_mute') : $r('app.media.av_conference_audio'))
                                 .draggable(false)
-                                .width(30)
-                                .height(30)
+                                .width(32)
+                                .height(32)
                                 .colorFilter(WHITE_FILTER)
                                 .onClick(() => {
                                     if (this.callSession?.isScreenSharing() && avengineKit.SCREEN_SHARING_REPLACE_MODE) {
@@ -538,16 +537,16 @@ export default struct ConferencePage {
                                     }
                                 })
                             Text('麦克风')
-                                .margin({ top: 10 })
-                                .fontSize(13)
+                                .margin({ top: 12 })
+                                .fontSize(FontSize.sm)
                                 .fontColor(Color.White)
                         }
 
                         Column() {
                             Image(this.callSession?.videoMuted ? $r('app.media.av_conference_video_mute') : $r('app.media.av_conference_video'))
                                 .draggable(false)
-                                .width(30)
-                                .height(30)
+                                .width(32)
+                                .height(32)
                                 .colorFilter(WHITE_FILTER)
                                 .hitTestBehavior(HitTestMode.Block)
                                 .onClick(() => {
@@ -579,16 +578,16 @@ export default struct ConferencePage {
                                     }
                                 })
                             Text('视频')
-                                .margin({ top: 10 })
-                                .fontSize(13)
+                                .margin({ top: 12 })
+                                .fontSize(FontSize.sm)
                                 .fontColor(Color.White)
                         }
 
                         Column() {
                             Image($r('app.media.av_conference_screen_sharing'))
                                 .draggable(false)
-                                .width(30)
-                                .height(30)
+                                .width(32)
+                                .height(32)
                                 .colorFilter(WHITE_FILTER)
                                 .onClick(() => {
                                     if (this.callSession?.audience) {
@@ -603,16 +602,16 @@ export default struct ConferencePage {
                                     }
                                 })
                             Text('共享屏幕')
-                                .margin({ top: 10 })
-                                .fontSize(13)
+                                .margin({ top: 12 })
+                                .fontSize(FontSize.sm)
                                 .fontColor(Color.White)
                         }
 
                         Column() {
                             Image($r('app.media.av_conference_members'))
                                 .draggable(false)
-                                .width(30)
-                                .height(30)
+                                .width(32)
+                                .height(32)
                                 .colorFilter(WHITE_FILTER)
                                 .onClick(() => {
                                     let params = {} as Record<string, Object>
@@ -621,20 +620,20 @@ export default struct ConferencePage {
                                     this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ConferenceParticipantListPage, params)
                                 })
                             Text('管理')
-                                .margin({ top: 10 })
-                                .fontSize(13)
+                                .margin({ top: 12 })
+                                .fontSize(FontSize.sm)
                                 .fontColor(Color.White)
                         }
 
                         Column() {
                             Image($r('app.media.av_conference_more'))
                                 .draggable(false)
-                                .width(30)
-                                .height(30)
+                                .width(32)
+                                .height(32)
                                 .colorFilter(WHITE_FILTER)
                             Text('更多')
-                                .margin({ top: 10 })
-                                .fontSize(13)
+                                .margin({ top: 12 })
+                                .fontSize(FontSize.sm)
                                 .fontColor(Color.White)
                         }
                         .enabled(true)
@@ -656,7 +655,7 @@ export default struct ConferencePage {
 
                 }
                 .width('100%')
-                .margin({ bottom: 30 })
+                .margin({ bottom: 32 })
                 .flexGrow(1)
                 .justifyContent(FlexAlign.End)
             }
@@ -706,11 +705,11 @@ export default struct ConferencePage {
             ForEach(this.latest5TranscriptionMessages, (msg: Message, index: number) => {
                 Row() {
                     Text(wfc.getUserInfo((msg.messageContent as TranscriptionMessageContent).userId).displayName)
-                        .fontSize(12)
+                        .fontSize(FontSize.xs)
                         .fontColor('#FFA500')
                         .margin({ right: 4 })
                     Text((msg.messageContent as TranscriptionMessageContent).content)
-                        .fontSize(12)
+                        .fontSize(FontSize.xs)
                         .fontColor(Color.White)
                         .layoutWeight(1)
                 }
@@ -735,19 +734,19 @@ export default struct ConferencePage {
                     Row() {
                         Text(wfc.getUserInfo(msg.from).displayName + ':  ')
                             .fontColor(Color.White)
-                            .fontSize(12)
+                            .fontSize(FontSize.xs)
                             .maxLines(1)
                             .constraintSize({ maxWidth: 70 })
                         Text(msg.messageContent.digest(msg))
                             .fontColor(Color.White)
-                            .fontSize(12)
+                            .fontSize(FontSize.xs)
                             .maxLines(2)
                             .textOverflow({ overflow: TextOverflow.Ellipsis })
                             .layoutWeight(1)
                     }
                     .padding({ top: 4, bottom: 4, left: 8, right: 8 })
                     // .backgroundColor('rgba(0,0,0,0.45)')
-                    .borderRadius(6)
+                    .borderRadius(Radius.md)
                     .margin({ bottom: 4 })
                     .width('100%')
                 }
@@ -765,8 +764,8 @@ export default struct ConferencePage {
             this.chatroomLatestMessageListView()
             Row() {
                 TextInput({ placeholder: '说点什么...', text: this.inputText })
-                    .fontSize(14)
-                    .borderRadius(20)
+                    .fontSize(FontSize.sm)
+                    .borderRadius(Radius.full)
                     .backgroundColor('rgba(255,255,255,0.15)')
                     .fontColor(Color.White)
                     .placeholderColor('rgba(255,255,255,0.5)')
@@ -801,7 +800,7 @@ export default struct ConferencePage {
             .width('100%')
             .padding({ top: 8, bottom: 8, left: 12, right: 12 })
             .backgroundColor('rgba(255,255,255,0.1)')
-            .borderRadius(24)
+            .borderRadius(Radius.full)
             .margin({ top: 8 })
         }
         .padding({ left: 16, right: 16, top: 12, bottom: this.keyboardHeight > 0 ? this.keyboardHeight + 20 : 20 })
@@ -816,9 +815,9 @@ export default struct ConferencePage {
             // 点击后通过 bindSheet 弹出输入面板；sheet 是系统级浮层，键盘弹出时只有 sheet 上移，视频画面完全不动
             Text('说点什么')
                 .fontColor(Color.White)
-                .fontSize(13)
+                .fontSize(FontSize.sm)
                 .backgroundColor('rgba(0,0,0,0.45)')
-                .borderRadius(16)
+                .borderRadius(Radius.xxl)
                 .padding(8)
                 .margin({ top: 4 })
                 .onClick(() => {
@@ -839,7 +838,7 @@ export default struct ConferencePage {
         .alignItems(HorizontalAlign.Start)
         .width('55%')
         .height('100%')
-        .padding({ left: 10, top: 10, right: 10, bottom: 100 })
+        .padding({ left: 12, top: 12, right: 12, bottom: 100 })
         .justifyContent(FlexAlign.End)
         .hitTestBehavior(HitTestMode.Transparent)
         .visibility(this.showInputPanel ? Visibility.Hidden: Visibility.Visible)
@@ -879,11 +878,11 @@ export default struct ConferencePage {
                                     currentSwiperIndex: this.currentSwiperIndex,
                                     xcomponentController: this.previewXComponentController,
                                 })
-                                    .padding(5)
+                                    .padding(4)
                                     .margin({ top: this.statusBarHeight + 50 })
                                     .width(120)
                                     .height(160)
-                                    .borderRadius(4)
+                                    .borderRadius(Radius.sm)
                                     .onClick(() => {
                                         if (this.callSession?.status === CallState.STATUS_CONNECTED) {
                                             // this.swapVideo(`${p.userId}-${this.callSession.callId}`)

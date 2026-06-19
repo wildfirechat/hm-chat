@@ -5,6 +5,7 @@ import ChannelInfo from '@wfc/client/src/main/ets/wfc/model/channelInfo'
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType'
 import { uikitNavigationDestinations } from '../uikitNavigationConfig'
+import { FontSize, Radius } from '../../common/design/Tokens'
 
 @Component
 export default struct ChannelListPage {
@@ -47,9 +48,9 @@ export default struct ChannelListPage {
             Navigation() {
                 Text('我订阅的频道')
                     .width('100%')
-                    .fontSize(13)
+                    .fontSize(FontSize.sm)
                     .fontColor($r('app.color.wf_tertiary_text'))
-                    .padding(10)
+                    .padding(12)
                     .backgroundColor($r('app.color.wf_primary_background_color'))
 
                 List() {
@@ -60,15 +61,15 @@ export default struct ChannelListPage {
                                     .alt($r('app.media.ic_channel_1'))
                                     .width(40)
                                     .height(40)
-                                    .borderRadius(4)
+                                    .borderRadius(Radius.sm)
                                 Text(channelInfo.name)
                                     .maxLines(1)
-                                    .padding({ left: 10 })
+                                    .padding({ left: 12 })
                                     .fontColor($r('app.color.wf_primary_text'))
                             }
                             .height(60)
                             .width('100%')
-                            .padding({ left: 10, right: 10 })
+                            .padding({ left: 12, right: 12 })
                             .backgroundColor($r('app.color.wf_background'))
                             .onClick(() => {
                                 this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ConversationPage, {

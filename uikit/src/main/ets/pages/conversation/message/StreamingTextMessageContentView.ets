@@ -6,6 +6,7 @@ import { showToast } from '../../../common/utils/Toast';
 import { parseTextLinks, TextSegment, normalizeUrl, isHttpUrl } from '../../../common/utils/TextLinkParser';
 import { common } from '@kit.AbilityKit';
 import { uikitNavigationDestinations } from '../../uikitNavigationConfig';
+import { TextStyleToken, FontSize, Radius } from '../../../common/design/Tokens'
 
 @Component
 export default struct StreamingTextMessageContentView {
@@ -30,7 +31,8 @@ export default struct StreamingTextMessageContentView {
             if (Config.OPEN_LINK_POLICY === 0) {
                 Text(this.streamingMessageContent())
                     .constraintSize({ minHeight: 40 })
-                    .padding(10)
+                    .padding(12)
+                    .fontSize(TextStyleToken.messageText)
                     .enableDataDetector(true)
                     .dataDetectorConfig({
                         types: [TextDataDetectorType.URL, TextDataDetectorType.PHONE_NUMBER, TextDataDetectorType.EMAIL]
@@ -58,7 +60,8 @@ export default struct StreamingTextMessageContentView {
                     }, (segment: TextSegment, index: number) => index.toString())
                 }
                 .constraintSize({ minHeight: 40 })
-                .padding(10)
+                .padding(12)
+                .fontSize(TextStyleToken.messageText)
                 .onClick(() => {
                     if (this.isGenerated()) {
                         this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.TextMessagePreviewPage, {
@@ -72,12 +75,12 @@ export default struct StreamingTextMessageContentView {
                 LoadingProgress().width(20).height(20)
             } else {
                 Text('本内容由 AI 生成')
-                    .fontSize(12)
+                    .fontSize(FontSize.xs)
                     .fontColor($r('app.color.wf_tertiary_text'))
-                    .padding({ left: 10, top: 5, bottom: 5 })
+                    .padding({ left: 12, top: 4, bottom: 4 })
             }
         }
-        .borderRadius(4)
+        .borderRadius(Radius.sm)
         .backgroundColor(this.message.direction === 0 ? $r('app.color.wf_sent_bubble_bg') : $r('app.color.wf_received_bubble_bg'))
         .alignItems(HorizontalAlign.Start)
     }

@@ -9,6 +9,7 @@ import ConferenceInviteMessageContent from '@wfc/client/src/main/ets/wfc/av/mess
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
 import ConferenceInfo from "@wfc/avenginekit/src/main/ets/wfc/av/model/conferenceInfo";
+import { Radius } from '../../../common/design/Tokens'
 
 @Component
 export default struct ConferenceParticipantListPage {
@@ -24,10 +25,10 @@ export default struct ConferenceParticipantListPage {
                         Image(userInfo.portrait)
                             .width(40)
                             .height(40)
-                            .borderRadius(4)
-                            .margin({ left: 10 })
+                            .borderRadius(Radius.sm)
+                            .margin({ left: 12 })
                         Text(userInfo.displayName)
-                            .margin({ left: 10 })
+                            .margin({ left: 12 })
                             .maxLines(1)
                     }
                     .height(60)

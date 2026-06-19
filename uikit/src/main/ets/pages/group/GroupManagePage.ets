@@ -47,7 +47,7 @@ export default struct GroupManagePage {
                     Text('成员管理')
                         .textAlign(TextAlign.Start)
                         .backgroundColor($r('app.color.wf_secondary_background'))
-                        .padding({ left: 10, top: 5, bottom: 5 })
+                        .padding({ left: 12, top: 4, bottom: 4 })
                         .width('100%')
                     OptionItemView({
                         title: '管理员',
@@ -82,7 +82,7 @@ export default struct GroupManagePage {
                     Text('群基本设置')
                         .textAlign(TextAlign.Start)
                         .backgroundColor($r('app.color.wf_secondary_background'))
-                        .padding({ left: 10, top: 15, bottom: 5 })
+                        .padding({ left: 12, top: 16, bottom: 4 })
                         .width('100%')
                     if (this.groupInfo?.type === GroupType.Restricted) {
                         OptionItemView({
@@ -227,7 +227,7 @@ export default struct GroupManagePage {
                             Text('加群申请')
                                 .textAlign(TextAlign.Start)
                                 .backgroundColor($r('app.color.wf_secondary_background'))
-                                .padding({ left: 10, top: 15, bottom: 5 })
+                                .padding({ left: 12, top: 16, bottom: 4 })
                                 .width('100%')
                             OptionItemView({
                                 title: '加群申请',

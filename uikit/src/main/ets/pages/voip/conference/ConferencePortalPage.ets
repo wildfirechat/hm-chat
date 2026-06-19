@@ -9,6 +9,7 @@ import ConferenceInfo from '@wfc/avenginekit/src/main/ets/wfc/av/model/conferenc
 import JoinConferenceDialog from './JoinConferenceDialog'
 import { showToast } from '../../../common/utils/Toast'
 import OptionItemView from '../../../view/OptionItemView'
+import { Radius } from '../../../common/design/Tokens'
 
 @Component
 export default struct ConferencePortalPage {
@@ -37,9 +38,9 @@ export default struct ConferencePortalPage {
                         Image($r('app.media.av_join_conference'))
                             .height(60)
                             .width(60)
-                            .borderRadius(4)
+                            .borderRadius(Radius.sm)
                         Text('加入会议')
-                            .padding({ top: 5 })
+                            .padding({ top: 4 })
                             .fontColor($r('app.color.wf_primary_text'))
                     }
                     .onClick(() => {
@@ -62,9 +63,9 @@ export default struct ConferencePortalPage {
                         Image($r('app.media.av_start_conference'))
                             .height(60)
                             .width(60)
-                            .borderRadius(4)
+                            .borderRadius(Radius.sm)
                         Text('发起会议')
-                            .padding({ top: 5 })
+                            .padding({ top: 4 })
                             .fontColor($r('app.color.wf_primary_text'))
                     }
                     .onClick(async () => {
@@ -75,9 +76,9 @@ export default struct ConferencePortalPage {
                         Image($r('app.media.av_book_conference'))
                             .height(60)
                             .width(60)
-                            .borderRadius(4)
+                            .borderRadius(Radius.sm)
                         Text('预定会议')
-                            .padding({ top: 5 })
+                            .padding({ top: 4 })
                             .fontColor($r('app.color.wf_primary_text'))
                     }
                     .onClick(() => {
@@ -121,7 +122,7 @@ export default struct ConferencePortalPage {
 
                     Row() {
                         Text('会议记录')
-                            .padding({ right: 10 })
+                            .padding({ right: 12 })
                             .fontColor($r('app.color.wf_primary'))
                             .onClick(() => {
                                 showToast('TODO')
@@ -132,7 +133,7 @@ export default struct ConferencePortalPage {
                     .justifyContent(FlexAlign.End)
                 }
                 .width('100%')
-                .margin({ top: 10 })
+                .margin({ top: 12 })
                 .layoutWeight(1)
             }
             .height('100%')

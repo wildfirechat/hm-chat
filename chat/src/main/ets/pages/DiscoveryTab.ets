@@ -7,6 +7,7 @@ import uikit from '@wfc/uikit'
 
 // 如果需要支持朋友圈时，请取消注释
 import { momentNavigationDestinations } from '@wfc/momentkit'
+import { fontSizeManager, scaledSize } from '@wfc/uikit/src/main/ets/common/design/Tokens'
 
 @Preview
 @Component
@@ -14,6 +15,7 @@ export default struct DiscoveryTab {
     @State unreadMomentCount: number = 10
     @Link discoveryTabUnreadCount: number
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
+    @StorageProp('fontScale') fontScale: number = 1.0;
 
     aboutToAppear() {
     }
@@ -40,22 +42,22 @@ export default struct DiscoveryTab {
                                     position: BadgePosition.Right,
                                     maxCount: 99,
                                     count: this.unreadMomentCount,
-                                    style: { badgeSize: 14, badgeColor: $r('app.color.wf_badge_color') }
+                                    style: { badgeSize: scaledSize(14, this.fontScale), badgeColor: $r('app.color.wf_badge_color') }
                                 }) {
                                     Text('朋友圈')
-                                        .padding({ left: 10 })
+                                        .padding({ left: 12 })
                                         .fontColor($r('app.color.wf_primary_text'))
                                 }
                                 .padding({ left: 20 })
                             }
                             .onClick(() => {
-                                showToast('当前版本不支持朋友圈功能')
+                                // showToast('当前版本不支持朋友圈功能')
                                 // 如果需要支持朋友圈时，请取消注释
                                 this.mainNavPathStack.pushPathByName(momentNavigationDestinations.FeedListPage, {} as Record<string, Object>)
                             })
-                            .padding({ left: 10, right: 10 })
+                            .padding({ left: 12, right: 12 })
                             .width('100%')
-                            .height(56)
+                            .height(scaledSize(56, this.fontScale))
                         }
                         .stateStyles({
                             pressed: {
@@ -75,15 +77,15 @@ export default struct DiscoveryTab {
                                     .height(20)
                                     .objectFit(ImageFit.Contain)
                                 Text('聊天室')
-                                    .padding({ left: 10 })
+                                    .padding({ left: 12 })
                                     .fontColor($r('app.color.wf_primary_text'))
                             }
                             .onClick(() => {
                                 this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ChatroomListPage, {} as Record<string, Object>)
                             })
-                            .padding({ left: 10, right: 10 })
+                            .padding({ left: 12, right: 12 })
                             .width('100%')
-                            .height(56)
+                            .height(scaledSize(56, this.fontScale))
                         }
                         .stateStyles({
                             pressed: {
@@ -102,7 +104,7 @@ export default struct DiscoveryTab {
                                 .height(20)
                                 .objectFit(ImageFit.Contain)
                             Text('机器人')
-                                .padding({ left: 10 })
+                                .padding({ left: 12 })
                                 .fontColor($r('app.color.wf_primary_text'))
                         }
                         .onClick(() => {
@@ -111,9 +113,9 @@ export default struct DiscoveryTab {
                                 'conversation': conversation
                             } as Record<string, Object>)
                         })
-                        .padding({ left: 10, right: 10 })
+                        .padding({ left: 12, right: 12 })
                         .width('100%')
-                        .height(56)
+                        .height(scaledSize(56, this.fontScale))
                     }
                     .stateStyles({
                         pressed: {
@@ -131,7 +133,7 @@ export default struct DiscoveryTab {
                                 .height(20)
                                 .objectFit(ImageFit.Contain)
                             Text('会议')
-                                .padding({ left: 10 })
+                                .padding({ left: 12 })
                                 .fontColor($r('app.color.wf_primary_text'))
                         }
                         .onClick(() => {
@@ -141,9 +143,9 @@ export default struct DiscoveryTab {
                                 showToast('多人版音视频 SDK，不支持会议功能')
                             }
                         })
-                        .padding({ left: 10, right: 10 })
+                        .padding({ left: 12, right: 12 })
                         .width('100%')
-                        .height(56)
+                        .height(scaledSize(56, this.fontScale))
                     }
                     .stateStyles({
                         pressed: {
@@ -160,7 +162,7 @@ export default struct DiscoveryTab {
                                 .width(20)
                                 .height(20)
                             Text('开发手册')
-                                .padding({ left: 10 })
+                                .padding({ left: 12 })
                                 .fontColor($r('app.color.wf_primary_text'))
                         }
                         .onClick(() => {
@@ -169,9 +171,9 @@ export default struct DiscoveryTab {
                                 'title': '野火IM 开发文档'
                             } as Record<string, Object>)
                         })
-                        .padding({ left: 10, right: 10 })
+                        .padding({ left: 12, right: 12 })
                         .width('100%')
-                        .height(56)
+                        .height(scaledSize(56, this.fontScale))
                     }
                     .stateStyles({
                         pressed: {
@@ -187,6 +189,7 @@ export default struct DiscoveryTab {
                     color: $r('app.color.wf_divider'),
                     startMargin: 40
                 })
+                .backgroundColor($r('app.color.wf_background'))
             }
             .width('100%')
             .height('100%')

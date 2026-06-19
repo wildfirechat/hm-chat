@@ -9,6 +9,7 @@ import Long from '@wfc/client/src/main/ets/wfc/util/long'
 import { eq, stringValue } from '@wfc/client/src/main/ets/wfc/util/longUtil'
 import CompositeMessageContentContainerView from './message/CompositeMessageContentContainerView'
 import { http } from '@kit.NetworkKit'
+import { FontSize, Radius } from '../../common/design/Tokens'
 
 @Component
 export default struct CompositeMessagePreviewPage {
@@ -35,9 +36,9 @@ export default struct CompositeMessagePreviewPage {
         NavDestination() {
             Text('TODO 时间区间')
                 .width('100%')
-                .fontSize(13)
+                .fontSize(FontSize.sm)
                 .fontColor($r('app.color.wf_tertiary_text'))
-                .padding(10)
+                .padding(12)
                 .visibility(Visibility.None)
                 .backgroundColor($r('app.color.wf_primary_background_color'))
             List() {
@@ -49,20 +50,20 @@ export default struct CompositeMessagePreviewPage {
                                     Image(wfc.getUserInfo(msg.from).portrait)
                                         .width(40)
                                         .height(40)
-                                        .margin(10)
-                                        .borderRadius(4)
+                                        .margin(12)
+                                        .borderRadius(Radius.sm)
                                         .visibility(this.showPortrait(index) ? Visibility.Visible : Visibility.Hidden)
                                         .enabled(false)
                                     Column() {
                                         Row() {
                                             Text(wfc.getUserDisplayName(msg.from))
-                                                .fontSize(12)
+                                                .fontSize(FontSize.xs)
                                                 .padding({ bottom: 2 })
                                                 .fontColor($r('app.color.wf_tertiary_text'))
                                             Text(timeFormat(msg.timestamp))
-                                                .fontSize(12)
+                                                .fontSize(FontSize.xs)
                                                 .fontColor($r('app.color.wf_tertiary_text'))
-                                                .padding(10)
+                                                .padding(12)
                                         }
                                         .width('100%')
                                         .justifyContent(FlexAlign.SpaceBetween)
@@ -80,7 +81,7 @@ export default struct CompositeMessagePreviewPage {
                             .width('100%')
                             .alignItems(HorizontalAlign.Center)
                         }
-                        .padding({ bottom: 10 })
+                        .padding({ bottom: 12 })
                     },
                     (msg: Message) => stringValue(msg.messageUid))
 
@@ -88,7 +89,7 @@ export default struct CompositeMessagePreviewPage {
             .scrollBar(BarState.Off)
             .width('100%')
             .height('100%')
-            .padding({ right: 10 })
+            .padding({ right: 12 })
             .divider({ strokeWidth: 1, startMargin: 60, color: $r('app.color.wf_divider') })
             .backgroundColor($r('app.color.wf_background'))
 

@@ -1,6 +1,8 @@
+import { FontSize, Radius, scaledSize, LayoutScale } from '../common/design/Tokens'
 @Preview
 @Component
 export default struct OptionItemView {
+    @StorageProp('fontScale') fontScale: number = 1.0;
     // TODO 应该用 @prop，但是不允许可选，故
     icon: ResourceStr = ''
     title: string = ''
@@ -10,7 +12,7 @@ export default struct OptionItemView {
     showRightArrow: boolean = true
     showBadge: boolean = false
     paddingLeft: number = 16
-    paddingRight: number = 16
+    paddingRight: number = 8
     showDivider: boolean = true
 
     build() {
@@ -25,7 +27,7 @@ export default struct OptionItemView {
                 Column() {
                     Row() {
                         Text(this.title)
-                            .fontSize(16)
+                            .fontSize(FontSize.md)
                             .fontColor($r('app.color.wf_primary_text'))
                             .maxLines(1)
                             .textOverflow({ overflow: TextOverflow.Ellipsis })
@@ -34,8 +36,8 @@ export default struct OptionItemView {
                                 .width(8)
                                 .height(8)
                                 .backgroundColor('#FF0000')
-                                .borderRadius(4)
-                                .margin({ left: 6 })
+                                .borderRadius(Radius.sm)
+                                .margin({ left: 8 })
                         }
                     }
                     .justifyContent(FlexAlign.Start)
@@ -43,7 +45,7 @@ export default struct OptionItemView {
                     if (this.subTitle) {
                         Text(this.subTitle)
                             .padding({ top: 2 })
-                            .fontSize(13)
+                            .fontSize(FontSize.sm)
                             .fontColor($r('app.color.wf_tertiary_text'))
                             .maxLines(1)
                             .textOverflow({ overflow: TextOverflow.Ellipsis })
@@ -54,8 +56,8 @@ export default struct OptionItemView {
 
                 if (this.desc) {
                     Text(this.desc)
-                        .padding({ left: 10, right: 10 })
-                        .fontSize(13)
+                        .padding({ left: 12, right: 12 })
+                        .fontSize(FontSize.sm)
                         .fontColor($r('app.color.wf_tertiary_text'))
                         .maxLines(1)
                         .constraintSize({ maxWidth: 200 })
@@ -65,18 +67,18 @@ export default struct OptionItemView {
                     Image(this.imgUrl)
                         .width(20)
                         .height(20)
-                        .borderRadius(4)
-                        .margin({ right: 10 })
+                        .borderRadius(Radius.sm)
+                        .margin({ right: 12 })
                 }
                 if (this.showRightArrow) {
                     Image($r('app.media.ic_public_arrow_right'))
-                        .width(22)
-                        .height(22)
+                        .width(24)
+                        .height(24)
                         .fillColor($r('app.color.c_gray'))
                 }
             }
             .width('100%')
-            .height(56)
+            .constraintSize({ minHeight: scaledSize(56, this.fontScale, LayoutScale.row)})
             .padding({ left: this.paddingLeft, right: this.paddingRight })
             .justifyContent(FlexAlign.SpaceBetween)
             .stateStyles({

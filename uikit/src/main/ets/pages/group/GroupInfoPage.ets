@@ -7,6 +7,7 @@ import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationTyp
 import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo';
 import { uikitNavigationDestinations } from '../uikitNavigationConfig';
 import JoinGroupRequestDialog from './JoinGroupRequestDialog';
+import { Radius } from '../../common/design/Tokens'
 
 @Component
 export default struct GroupInfoPage {
@@ -79,17 +80,17 @@ export default struct GroupInfoPage {
                     Image(this.groupInfo?.portrait)
                         .width(100)
                         .height(100)
-                        .borderRadius(4)
-                        .margin({ top: 50 })
+                        .borderRadius(Radius.sm)
+                        .margin({ top: 52 })
                         .alt('')
                     Text(this.groupInfo?.name)
-                        .margin({ top: 10 })
+                        .margin({ top: 12 })
                         .textOverflow({ overflow: TextOverflow.Ellipsis })
                         .maxLines(1)
                         .fontColor($r('app.color.wf_primary_text'))
                     Button(this.actionButtonText())
                         .margin({ top: 20 })
-                        .borderRadius(8)
+                        .borderRadius(Radius.lg)
                         .width('70%')
                         .onClick(() => {
                             this.action()

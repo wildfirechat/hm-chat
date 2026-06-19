@@ -1,6 +1,7 @@
 import { showToast } from '../../common/utils/Toast'
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
+import { FontSize, Radius } from '../../common/design/Tokens'
 
 @Component
 export default struct UpdateGroupRemarkPage {
@@ -20,7 +21,7 @@ export default struct UpdateGroupRemarkPage {
         NavDestination() {
             Column() {
                 Text('备注')
-                    .fontSize(20)
+                    .fontSize(FontSize.xl)
                     .margin({ top: 40 })
                     .fontColor($r('app.color.wf_primary_text'))
 
@@ -29,7 +30,7 @@ export default struct UpdateGroupRemarkPage {
                     .fontColor($r('app.color.wf_secondary_text'))
 
                 Divider()
-                    .margin({ top: 30 })
+                    .margin({ top: 32 })
                     .strokeWidth(0.4)
                     .color($r('app.color.wf_divider'))
 
@@ -37,7 +38,7 @@ export default struct UpdateGroupRemarkPage {
                     Image(this.groupInfo.portrait)
                         .draggable(false)
                         .backgroundColor($r('app.color.wf_secondary_background'))
-                        .borderRadius(4)
+                        .borderRadius(Radius.sm)
                         .width(40)
                         .height(40)
 
@@ -45,14 +46,14 @@ export default struct UpdateGroupRemarkPage {
                         text: $$this.text,
                         placeholder: this.placeHolder
                     })
-                        .borderRadius(2)
+                        .borderRadius(Radius.xs)
                         .backgroundColor(Color.Transparent)
                         .fontColor($r('app.color.wf_primary_text'))
                         .maxLines(1)
                         .layoutWeight(1)
                 }
                 .width('100%')
-                .padding({ top: 5, bottom: 5 })
+                .padding({ top: 4, bottom: 4 })
 
                 Divider()
                     .strokeWidth(0.4)
@@ -60,20 +61,20 @@ export default struct UpdateGroupRemarkPage {
 
                 Text(`群聊名称：${this.groupInfo.name}`)
                     .fontColor($r('app.color.wf_tertiary_text'))
-                    .fontSize(13)
+                    .fontSize(FontSize.sm)
                     .maxLines(1)
                     .ellipsisMode(EllipsisMode.START)
                     .textOverflow({ overflow: TextOverflow.Ellipsis })
-                    .margin({ top: 10 })
+                    .margin({ top: 12 })
 
                 Button('完成', {
                     type: ButtonType.Normal,
                     stateEffect: true
                 })
                     .enabled(!!this.text.trim() && this.text !== this.placeHolder)
-                    .padding({ top: 3, bottom: 3 })
+                    .padding({ top: 4, bottom: 4 })
                     .width(160)
-                    .borderRadius(6)
+                    .borderRadius(Radius.md)
                     .margin({ top: 100 })
                     .onClick(() => {
                         wfc.setGroupRemark(this.groupInfo.target, this.text.trim(), () => {
@@ -84,7 +85,7 @@ export default struct UpdateGroupRemarkPage {
                         })
                     })
             }
-            .padding(30)
+            .padding(32)
         }
         .title('')
         .height('100%')

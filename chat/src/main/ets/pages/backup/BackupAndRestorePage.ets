@@ -33,7 +33,7 @@ export default struct BackupAndRestorePage {
           title: '恢复备份',
           showDivider: false
         })
-          .margin({ top: 10 })
+          .margin({ top: 12 })
           .onClick(() => {
             this.mainNavPathStack.pushPathByName(appNavigationDestinations.RestoreSourcePage, {} as Record<string, Object>)
           })

@@ -15,6 +15,7 @@ import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation';
 import ConnectionStatus from '@wfc/client/src/main/ets/wfc/client/connectionStatus';
 import CustomMessageConfig from '@wfc/client/src/main/ets/wfc_custom_message/customMessageConfig';
 import uikit from '@wfc/uikit'
+import { fontSizeManager } from '@wfc/uikit/src/main/ets/common/design/Tokens'
 import { LAST_LOGIN_MOBILE_KEY } from '../pages/login/LoginPage';
 import { backgroundTaskManager } from '@kit.BackgroundTasksKit';
 import { deviceInfo } from '@kit.BasicServicesKit';
@@ -22,7 +23,6 @@ import { systemShare } from '@kit.ShareKit';
 import { copyFileUri, fileNameFromFileUri, fileSize } from '@wfc/uikit/src/main/ets/common/utils/FileUtil';
 import { isImage, isVideo } from '@wfc/uikit/src/main/ets/util/helper';
 import { ShareItem } from '@wfc/uikit/src/main/ets/common/Types';
-
 
 export default class EntryAbility extends UIAbility {
     private windowStage?: window.WindowStage
@@ -122,6 +122,11 @@ export default class EntryAbility extends UIAbility {
         hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onWindowStageCreate');
         this.windowStage = windowStage;
         AppStorage.setOrCreate('windowStage', windowStage);
+
+        // 应用用户「字体大小」设置（全 App 生效）
+        if (this.applicationContext) {
+            fontSizeManager.apply(this.applicationContext);
+        }
 
         let url = 'pages/login/LoginPage';
         data_preferences.getPreferences(this.applicationContext, 'wfcstore', async (err, val) => {

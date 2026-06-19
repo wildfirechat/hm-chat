@@ -7,6 +7,7 @@ import { showToast } from "../../../common/utils/Toast";
 import wfc from "@wfc/client";
 import ConferencePasswordDialog from "./ConferencePasswordDialog";
 import { uikitNavigationDestinations } from "../../uikitNavigationConfig";
+import { Radius } from '../../../common/design/Tokens'
 
 @Component
 export default struct OrderConferencePage {
@@ -32,7 +33,7 @@ export default struct OrderConferencePage {
                     Text('会议主题')
                         .fontColor($r('app.color.wf_primary_text'))
                     TextInput({ text: this.title })
-                        .borderRadius(0)
+                        .borderRadius(Radius.none)
                         .backgroundColor(Color.Transparent)
                         .fontColor($r('app.color.wf_primary_text'))
                         .border({ color: $r('app.color.wf_divider') })
@@ -50,12 +51,10 @@ export default struct OrderConferencePage {
                         })
                 }
                 .alignItems(HorizontalAlign.Start)
-                .padding({
-                    left: 20,
+                .padding({ left: 20,
                     right: 20,
-                    top: 10,
-                    bottom: 10
-                })
+                    top: 12,
+                    bottom: 12 })
                 .backgroundColor($r('app.color.wf_background'))
 
                 Column() {
@@ -124,7 +123,6 @@ export default struct OrderConferencePage {
                 .margin({ top: 20 })
                 .backgroundColor($r('app.color.wf_background'))
 
-
                 Column() {
                     ToggleItemView({
                         title: '启用会议密码',
@@ -176,7 +174,7 @@ export default struct OrderConferencePage {
                     Button('预定')
                         .enabled(true)
                         .type(ButtonType.Normal)
-                        .borderRadius(4)
+                        .borderRadius(Radius.sm)
                         .width('50%')
                         .onClick(async () => {
                             if (this.title.trim().length === 0) {

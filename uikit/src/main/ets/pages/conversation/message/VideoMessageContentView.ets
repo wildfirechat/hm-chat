@@ -9,6 +9,7 @@ import VideoMessageContent from '@wfc/client/src/main/ets/wfc/messages/videoMess
 import { eq, stringValue } from '@wfc/client/src/main/ets/wfc/util/longUtil'
 import MMMessagePreviewDialog from '../../mm/MMMessagePreviewDialog'
 import { mediaMessagePositionRegistry } from '../../../helper/mediaMessagePositionRegistry'
+import { Radius } from '../../../common/design/Tokens'
 
 @Component
 export default struct VideoMessageContentView {
@@ -45,7 +46,7 @@ export default struct VideoMessageContentView {
         Image(this.thumbnail())
             .draggable(false)
             .objectFit(ImageFit.Contain)
-            .borderRadius(4)
+            .borderRadius(Radius.sm)
             .constraintSize({ maxWidth: 200 })
             .autoResize(true)
             .onAreaChange((_oldValue: Area, newValue: Area) => {

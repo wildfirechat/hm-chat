@@ -23,7 +23,7 @@ export default struct ContextableNotificationMessageContentView {
                 ArticleMessageContentView({ message: $message })
             }
         }
-        .margin(10)
+        .margin(12)
         // .alignItems(HorizontalAlign.End)
         .bindContextMenu(this.MessageContextMenuBuilder, ResponseType.LongPress)
     }

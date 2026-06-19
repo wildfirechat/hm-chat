@@ -6,6 +6,7 @@ import { showToast } from '../../common/utils/Toast';
 import pollService from '../../api/pollService';
 import Poll from './model/poll';
 import { uikitNavigationDestinations } from '../uikitNavigationConfig';
+import { FontSize, Radius } from '../../common/design/Tokens'
 
 interface OptionItem {
     id: number;
@@ -229,7 +230,7 @@ export default struct CreatePollPage {
                     // 标题输入
                     Column({ space: 8 }) {
                         Text('投票标题')
-                            .fontSize(14)
+                            .fontSize(FontSize.sm)
                             .fontColor($r('app.color.wf_tertiary_text'))
                             .width('100%')
 
@@ -238,14 +239,14 @@ export default struct CreatePollPage {
                             .fontColor($r('app.color.wf_primary_text'))
                             .placeholderColor($r('app.color.wf_tertiary_text'))
                             .backgroundColor($r('app.color.wf_primary_background_color'))
-                            .borderRadius(8)
+                            .borderRadius(Radius.lg)
                     }
                     .width('100%')
 
                     // 描述输入
                     Column({ space: 8 }) {
                         Text('投票描述')
-                            .fontSize(14)
+                            .fontSize(FontSize.sm)
                             .fontColor($r('app.color.wf_tertiary_text'))
                             .width('100%')
 
@@ -254,14 +255,14 @@ export default struct CreatePollPage {
                             .fontColor($r('app.color.wf_primary_text'))
                             .placeholderColor($r('app.color.wf_tertiary_text'))
                             .backgroundColor($r('app.color.wf_primary_background_color'))
-                            .borderRadius(8)
+                            .borderRadius(Radius.lg)
                     }
                     .width('100%')
 
                     // 选项列表
                     Column({ space: 8 }) {
                         Text('投票选项')
-                            .fontSize(14)
+                            .fontSize(FontSize.sm)
                             .fontColor($r('app.color.wf_tertiary_text'))
                             .width('100%')
 
@@ -273,14 +274,14 @@ export default struct CreatePollPage {
                                     .fontColor($r('app.color.wf_primary_text'))
                                     .placeholderColor($r('app.color.wf_tertiary_text'))
                                     .backgroundColor($r('app.color.wf_primary_background_color'))
-                                    .borderRadius(8)
+                                    .borderRadius(Radius.lg)
                                     .onChange((value: string) => {
                                         this.updateOption(index, value);
                                     })
 
                                 if (this.options.length > this.MIN_OPTIONS) {
                                     Button('删除')
-                                        .fontSize(12)
+                                        .fontSize(FontSize.xs)
                                         .fontColor($r('app.color.wf_danger'))
                                         .backgroundColor(Color.Transparent)
                                         .onClick(() => {
@@ -296,17 +297,17 @@ export default struct CreatePollPage {
                             Button('+ 添加选项')
                                 .width('100%')
                                 .height(44)
-                                .fontSize(14)
+                                .fontSize(FontSize.sm)
                                 .fontColor($r('app.color.wf_primary'))
                                 .backgroundColor($r('app.color.wf_primary_background_color'))
-                                .borderRadius(8)
+                                .borderRadius(Radius.lg)
                                 .onClick(() => {
                                     this.addOption();
                                 })
                         }
 
                         Text(`至少${this.MIN_OPTIONS}个选项，最多${this.MAX_OPTIONS}个选项`)
-                            .fontSize(12)
+                            .fontSize(FontSize.xs)
                             .fontColor($r('app.color.wf_tertiary_text'))
                             .width('100%')
                     }
@@ -315,20 +316,20 @@ export default struct CreatePollPage {
                     // 设置项
                     Column({ space: 8 }) {
                         Text('投票设置')
-                            .fontSize(14)
+                            .fontSize(FontSize.sm)
                             .fontColor($r('app.color.wf_tertiary_text'))
                             .width('100%')
 
-                        Column({ space: 1 }) {
+                        Column({ space: 2 }) {
                             // 投票类型
                             Row() {
                                 Text('投票类型')
-                                    .fontSize(16)
+                                    .fontSize(FontSize.md)
                                     .fontColor($r('app.color.wf_primary_text'))
 
                                 Row({ space: 4 }) {
                                     Text(this.getPollTypeText())
-                                        .fontSize(14)
+                                        .fontSize(FontSize.sm)
                                         .fontColor($r('app.color.wf_tertiary_text'))
                                     Image($r('app.media.ic_public_arrow_right'))
                                         .width(16)
@@ -352,7 +353,7 @@ export default struct CreatePollPage {
                             // 匿名投票
                             Row() {
                                 Text('匿名投票')
-                                    .fontSize(16)
+                                    .fontSize(FontSize.md)
                                     .fontColor($r('app.color.wf_primary_text'))
 
                                 Toggle({ type: ToggleType.Switch, isOn: $$this.anonymous })
@@ -372,7 +373,7 @@ export default struct CreatePollPage {
                             // 始终显示结果
                             Row() {
                                 Text('始终显示结果')
-                                    .fontSize(16)
+                                    .fontSize(FontSize.md)
                                     .fontColor($r('app.color.wf_primary_text'))
 
                                 Toggle({ type: ToggleType.Switch, isOn: $$this.showResult })
@@ -392,12 +393,12 @@ export default struct CreatePollPage {
                             // 截止时间
                             Row() {
                                 Text('截止时间')
-                                    .fontSize(16)
+                                    .fontSize(FontSize.md)
                                     .fontColor($r('app.color.wf_primary_text'))
 
                                 Row({ space: 4 }) {
                                     Text(this.getEndTimeText())
-                                        .fontSize(14)
+                                        .fontSize(FontSize.sm)
                                         .fontColor($r('app.color.wf_tertiary_text'))
                                     Image($r('app.media.ic_public_arrow_right'))
                                         .width(16)
@@ -421,12 +422,12 @@ export default struct CreatePollPage {
                             // 可见性
                             Row() {
                                 Text('可见性')
-                                    .fontSize(16)
+                                    .fontSize(FontSize.md)
                                     .fontColor($r('app.color.wf_primary_text'))
 
                                 Row({ space: 4 }) {
                                     Text(this.getVisibilityText())
-                                        .fontSize(14)
+                                        .fontSize(FontSize.sm)
                                         .fontColor($r('app.color.wf_tertiary_text'))
                                     Image($r('app.media.ic_public_arrow_right'))
                                         .width(16)
@@ -443,7 +444,7 @@ export default struct CreatePollPage {
                             })
                         }
                         .width('100%')
-                        .borderRadius(8)
+                        .borderRadius(Radius.lg)
                         .clip(true)
                     }
                     .width('100%')
@@ -452,10 +453,10 @@ export default struct CreatePollPage {
                     Button('发布投票')
                         .width('100%')
                         .height(48)
-                        .fontSize(16)
+                        .fontSize(FontSize.md)
                         .fontColor($r('app.color.wf_background'))
                         .backgroundColor($r('app.color.wf_primary'))
-                        .borderRadius(8)
+                        .borderRadius(Radius.lg)
                         .margin({ top: 16 })
                         .enabled(!this.isLoading)
                         .onClick(() => {

@@ -12,6 +12,7 @@ import MMMessagePreviewDialog from '../../mm/MMMessagePreviewDialog'
 import { getImageSizeByOrgSizeToWeChat } from '../../../util/wechatImageUtil'
 import { mediaMessagePositionRegistry } from '../../../helper/mediaMessagePositionRegistry'
 import { stringValue } from '@wfc/client/src/main/ets/wfc/util/longUtil'
+import { Radius } from '../../../common/design/Tokens'
 
 @Component
 export default struct ImageMessageContentView {
@@ -59,7 +60,7 @@ export default struct ImageMessageContentView {
             .width(px2vp(this.scaledSize?.width))
             .height(px2vp(this.scaledSize?.height))
             .constraintSize({maxWidth: 200})
-            .borderRadius(4)
+            .borderRadius(Radius.sm)
             .onAreaChange((_oldValue: Area, newValue: Area) => {
                 mediaMessagePositionRegistry.update(stringValue(this.message.messageUid), {
                     x: newValue.globalPosition.x as number,

@@ -2,6 +2,7 @@ import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
 import SearchResultView from './SearchPortalResultView'
 import { SearchModule } from '../../common/Types'
 import { uikitNavigationDestinations } from '../uikitNavigationConfig'
+import { Radius } from '../../common/design/Tokens'
 
 @Component
 @Preview
@@ -27,18 +28,18 @@ export default struct SearchUserPage {
                     TextInput({ placeholder: '搜索...' })
                         .type(InputType.Normal)
                         .layoutWeight(1)
-                        .borderRadius(4)
+                        .borderRadius(Radius.sm)
                         .onChange((value: string) => {
                             this.keyword = value
                         })
                     Text('取消')
-                        .padding(5)
-                        .margin({ left: 10 })
+                        .padding(4)
+                        .margin({ left: 12 })
                         .onClick(() => {
                             this.mainNavPathStack.pop(true)
                         })
                 }
-                .padding(10)
+                .padding(12)
                 .width('100%')
 
                 SearchResultView({

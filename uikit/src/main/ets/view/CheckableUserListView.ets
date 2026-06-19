@@ -11,9 +11,11 @@ import { uikitNavigationDestinations } from '../pages/uikitNavigationConfig'
 import PickOrganizationMemberModal from '../pages/organization/PickOrganizationMemberModal'
 import Employee from '../api/model/employee'
 import PickFavGroupModal from '../pages/picker/PickFavGroupModal'
+import { Radius, scaledSize } from '../common/design/Tokens'
 
 @Component
 export default struct CheckableUserListView {
+    @StorageProp('fontScale') fontScale: number = 1.0;
     @Link checkedUsers: UserInfo[]
     @State filteredUserInfos: UserInfo[] = []
     @State searchInputViewMaxWidth: string = '100%'
@@ -150,10 +152,10 @@ export default struct CheckableUserListView {
                     ForEach(this.checkedUsers.filter(info => this.uncheckableUserIds.indexOf(info.uid) === -1), (info: UserInfo) => {
                         ListItem() {
                             Image(info.portrait)
-                                .width(40)
-                                .height(40)
-                                .borderRadius(4)
-                                .margin({ left: 10 })
+                                .width(scaledSize(40, this.fontScale))
+                                .height(scaledSize(40, this.fontScale))
+                                .borderRadius(Radius.sm)
+                                .margin({ left: 12 })
                                 .onClick(() => {
                                     this.checkedUsers = this.checkedUsers.filter(userInfo => userInfo.uid !== info.uid)
                                 })
@@ -164,10 +166,10 @@ export default struct CheckableUserListView {
                         ListItem() {
                             Image(org.portraitUrl)
                                 .alt($r('app.media.ic_deparment'))
-                                .width(40)
-                                .height(40)
-                                .borderRadius(4)
-                                .margin({ left: 10 })
+                                .width(scaledSize(40, this.fontScale))
+                                .height(scaledSize(40, this.fontScale))
+                                .borderRadius(Radius.sm)
+                                .margin({ left: 12 })
                                 .onClick(() => {
                                     this.checkedOrganizations = this.checkedOrganizations.filter(o => o.id !== org.id)
                                 })
@@ -178,10 +180,10 @@ export default struct CheckableUserListView {
                         ListItem() {
                             Image(employee.portraitUrl)
                                 .alt($r('app.media.avatar_def'))
-                                .width(40)
-                                .height(40)
-                                .borderRadius(4)
-                                .margin({ left: 10 })
+                                .width(scaledSize(40, this.fontScale))
+                                .height(scaledSize(40, this.fontScale))
+                                .borderRadius(Radius.sm)
+                                .margin({ left: 12 })
                                 .onClick(() => {
                                     this.checkedEmployees = this.checkedEmployees.filter(e => e.employeeId !== employee.employeeId)
                                 })
@@ -191,11 +193,11 @@ export default struct CheckableUserListView {
                     ListItem() {
                         Row() {
                             TextInput({ placeholder: '搜索' })
-                                .margin({ left: 10, right: 10 })
+                                .margin({ left: 12, right: 12 })
                                 .onChange((value: string) => {
                                     this.filter(value)
                                 })
-                                .borderRadius(4)
+                                .borderRadius(Radius.sm)
                         }
                         .constraintSize({ minWidth: '25%', maxWidth: this.searchInputViewMaxWidth })
                     }
@@ -204,7 +206,7 @@ export default struct CheckableUserListView {
                 .listDirection(Axis.Horizontal)
                 .width('100%')
                 .height(60)
-                .margin({ left: 10, right: 10 })
+                .margin({ left: 12, right: 12 })
                 .alignListItem(ListItemAlign.Center)
             }
             if (this.userInfoDataSource) {
@@ -216,17 +218,18 @@ export default struct CheckableUserListView {
                                     Row() {
                                         Image(org.portraitUrl)
                                             .alt($r('app.media.ic_organization'))
-                                            .width(40)
-                                            .height(40)
-                                            .borderRadius(4)
+                                            .width(scaledSize(40, this.fontScale))
+                                            .height(scaledSize(40, this.fontScale))
+                                            .borderRadius(Radius.sm)
                                         Text(org.name)
                                             .maxLines(1)
-                                            .padding({ left: 10 })
+                                            .margin({ left: 12 })
+                                            .textOverflow({ overflow: TextOverflow.Ellipsis })
                                             .fontColor($r('app.color.wf_primary_text'))
                                     }
                                     .height(60)
                                     .width('100%')
-                                    .padding({ left: 10, right: 10 })
+                                    .padding({ left: 12, right: 12 })
                                     .stateStyles({
                                         pressed: {
                                             .backgroundColor($r('app.color.wf_item_pressed'))
@@ -248,6 +251,7 @@ export default struct CheckableUserListView {
                                         // }, router.RouterMode.Standard)
                                     })
                                 }
+                                .width('100%')
                                 .bindContentCover($$this.showPickOrganizationModal,
                                     this.pickOrganizationModal(org),
                                     {
@@ -263,17 +267,18 @@ export default struct CheckableUserListView {
                             ListItem() {
                                 Row() {
                                     Image($r('app.media.ic_group_chat'))
-                                        .width(40)
-                                        .height(40)
-                                        .borderRadius(4)
+                                        .width(scaledSize(40, this.fontScale))
+                                        .height(scaledSize(40, this.fontScale))
+                                        .borderRadius(Radius.sm)
                                     Text('群聊(保存到通讯录的群组)')
                                         .maxLines(1)
-                                        .padding({ left: 10 })
+                                        .margin({ left: 12 })
+                                        .textOverflow({ overflow: TextOverflow.Ellipsis })
                                         .fontColor($r('app.color.wf_primary_text'))
                                 }
-                                .height(60)
+                                .height(scaledSize(60, this.fontScale))
                                 .width('100%')
-                                .padding({ left: 10, right: 10 })
+                                .padding({ left: 12, right: 12 })
                                 .stateStyles({
                                     pressed: {
                                         .backgroundColor($r('app.color.wf_item_pressed'))
@@ -286,6 +291,7 @@ export default struct CheckableUserListView {
                                     this.showPickFavGroupModal = true
                                 })
                             }
+                            .width('100%')
                             .bindContentCover($$this.showPickFavGroupModal,
                                 this.pickSingleFavGroupModal(),
                                 {
@@ -296,6 +302,7 @@ export default struct CheckableUserListView {
                                 })
                         }
                     }
+                    .width('100%')
                     .divider({ strokeWidth: 1, startMargin: 10 })
 
                     LazyForEach(this.userInfoDataSource, (info: UIUserInfo) => {
@@ -314,9 +321,10 @@ export default struct CheckableUserListView {
                 }
                 .width('100%')
                 .layoutWeight(1)
+                .backgroundColor($r('app.color.wf_background'))
                 .divider({
                     strokeWidth: 1,
-                    startMargin: 80
+                    startMargin: scaledSize(80, this.fontScale),
                 })
             } else {
                 Text('加载中..')

@@ -2,6 +2,7 @@ import { showToast } from '../../common/utils/Toast'
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
 import ModifyGroupInfoType from '@wfc/client/src/main/ets/wfc/model/modifyGroupInfoType'
+import { FontSize, Radius } from '../../common/design/Tokens'
 
 @Component
 export default struct UpdateGroupNamePage {
@@ -21,7 +22,7 @@ export default struct UpdateGroupNamePage {
         NavDestination() {
             Column() {
                 Text('修改群聊名称')
-                    .fontSize(20)
+                    .fontSize(FontSize.xl)
                     .margin({ top: 40 })
                     .fontColor($r('app.color.wf_primary_text'))
 
@@ -29,9 +30,8 @@ export default struct UpdateGroupNamePage {
                     .margin({ top: 20 })
                     .fontColor($r('app.color.wf_secondary_text'))
 
-
                 Divider()
-                    .margin({ top: 30 })
+                    .margin({ top: 32 })
                     .strokeWidth(0.4)
                     .color($r('app.color.wf_divider'))
 
@@ -39,7 +39,7 @@ export default struct UpdateGroupNamePage {
                     Image(this.groupInfo.portrait)
                         .draggable(false)
                         .backgroundColor($r('app.color.wf_secondary_background'))
-                        .borderRadius(4)
+                        .borderRadius(Radius.sm)
                         .width(40)
                         .height(40)
 
@@ -47,14 +47,14 @@ export default struct UpdateGroupNamePage {
                         text: $$this.text,
                         placeholder: this.placeHolder
                     })
-                        .borderRadius(2)
+                        .borderRadius(Radius.xs)
                         .backgroundColor(Color.Transparent)
                         .fontColor($r('app.color.wf_primary_text'))
                         .maxLines(1)
                         .layoutWeight(1)
                 }
                 .width('100%')
-                .padding({ top: 5, bottom: 5 })
+                .padding({ top: 4, bottom: 4 })
 
                 Divider()
                     .strokeWidth(0.4)
@@ -65,9 +65,9 @@ export default struct UpdateGroupNamePage {
                     stateEffect: true
                 })
                     .enabled(!!this.text.trim() && this.text !== this.placeHolder)
-                    .padding({ top: 3, bottom: 3 })
+                    .padding({ top: 4, bottom: 4 })
                     .width(160)
-                    .borderRadius(6)
+                    .borderRadius(Radius.md)
                     .margin({ top: 100 })
                     .onClick(() => {
                         wfc.modifyGroupInfo(this.groupInfo.target, ModifyGroupInfoType.Modify_Group_Name, this.text.trim(), [0], null, () => {
@@ -79,7 +79,7 @@ export default struct UpdateGroupNamePage {
 
                     })
             }
-            .padding(30)
+            .padding(32)
         }
         .title('')
         .height('100%')

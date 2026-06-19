@@ -1,6 +1,7 @@
 import CompositeMessageContent from '@wfc/client/src/main/ets/wfc/messages/compositeMessageContent'
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import { uikitNavigationDestinations } from '../../uikitNavigationConfig'
+import { FontSize, Radius } from '../../../common/design/Tokens'
 
 @Component
 export default struct CompositeMessageContentView {
@@ -16,11 +17,11 @@ export default struct CompositeMessageContentView {
         Column() {
             Column() {
                 Text(this.compositeMessageContent?.title)
-                    .fontSize(16)
+                    .fontSize(FontSize.md)
                     .fontColor($r('app.color.wf_primary_text'))
                 Text(this.compositeMessageContent?.compositeDigest())
-                    .fontSize(14)
-                    .margin({ top: 5, bottom: 5 })
+                    .fontSize(FontSize.sm)
+                    .margin({ top: 4, bottom: 4 })
                     .maxLines(5)
                     .textOverflow({ overflow: TextOverflow.Ellipsis })
                     .fontColor($r('app.color.wf_secondary_text'))
@@ -31,14 +32,14 @@ export default struct CompositeMessageContentView {
             .constraintSize({minWidth: 200})
 
             Text('聊天记录')
-                .fontSize(12)
-                .margin({ top: 5 })
+                .fontSize(FontSize.xs)
+                .margin({ top: 4 })
                 .fontColor($r('app.color.wf_tertiary_text'))
         }
         .margin({ top: 4 })
         .alignItems(HorizontalAlign.Start)
-        .padding(10)
-        .borderRadius(4)
+        .padding(12)
+        .borderRadius(Radius.sm)
         .backgroundColor(this.message.direction === 0 ? $r('app.color.wf_sent_bubble_bg') : $r('app.color.wf_received_bubble_bg'))
         .onClick(() => {
             this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.CompositeMessagePreviewPage, {

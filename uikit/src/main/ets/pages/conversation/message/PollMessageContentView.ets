@@ -5,6 +5,7 @@
 import Message from '@wfc/client/src/main/ets/wfc/messages/message';
 import PollMessageContent from '@wfc/client/src/main/ets/wfc/messages/pollMessageContent';
 import { uikitNavigationDestinations } from '../../uikitNavigationConfig';
+import { FontSize, Radius } from '../../../common/design/Tokens'
 
 @Component
 export default struct PollMessageContentView {
@@ -44,7 +45,7 @@ export default struct PollMessageContentView {
         Column() {
             // 标题
             Text('🗳️ ' + this.pollContent().title)
-                .fontSize(16)
+                .fontSize(FontSize.md)
                 .fontWeight(FontWeight.Medium)
                 .fontColor($r('app.color.wf_primary_text'))
                 .maxLines(2)
@@ -54,7 +55,7 @@ export default struct PollMessageContentView {
             // 描述
             if (this.pollContent().desc) {
                 Text(this.pollContent().desc)
-                    .fontSize(14)
+                    .fontSize(FontSize.sm)
                     .fontColor($r('app.color.wf_tertiary_text'))
                     .maxLines(2)
                     .textOverflow({ overflow: TextOverflow.Ellipsis })
@@ -72,11 +73,11 @@ export default struct PollMessageContentView {
             // 状态信息
             Row() {
                 Text(this.getStatusText() + ' · ' + this.getTypeText())
-                    .fontSize(12)
+                    .fontSize(FontSize.xs)
                     .fontColor($r('app.color.wf_tertiary_text'))
 
                 Text('点击参与')
-                    .fontSize(12)
+                    .fontSize(FontSize.xs)
                     .fontColor($r('app.color.wf_primary'))
             }
             .width('100%')
@@ -85,7 +86,7 @@ export default struct PollMessageContentView {
         .width(240)
         .padding(12)
         .backgroundColor(this.message.direction === 0 ? $r('app.color.wf_sent_bubble_bg') : $r('app.color.wf_received_bubble_bg'))
-        .borderRadius(8)
+        .borderRadius(Radius.lg)
         .alignItems(HorizontalAlign.Start)
         .onClick(() => this.handleClick())
     }

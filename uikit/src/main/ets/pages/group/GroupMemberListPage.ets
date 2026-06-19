@@ -4,6 +4,7 @@ import GroupMember from "@wfc/client/src/main/ets/wfc/model/groupMember";
 import GroupMemberType from "@wfc/client/src/main/ets/wfc/model/groupMemberType";
 import { showToast } from "../../common/utils/Toast";
 import { uikitNavigationDestinations } from "../uikitNavigationConfig";
+import { FontSize, Radius } from '../../common/design/Tokens'
 
 @Component
 export default struct GroupMemberListPage {
@@ -38,12 +39,12 @@ export default struct GroupMemberListPage {
                                 Image(groupMember.getPortrait())
                                     .width(48)
                                     .height(48)
-                                    .borderRadius(4)
+                                    .borderRadius(Radius.sm)
                                 Text(groupMember.getName())
                                     .maxLines(1)
                                     .fontColor($r('app.color.wf_tertiary_text'))
-                                    .fontSize(12)
-                                    .margin({ top: 5 })
+                                    .fontSize(FontSize.xs)
+                                    .margin({ top: 4 })
                             }
                             .onClick(() => {
                                 if (this.groupInfo!.privateChat === 1 && [GroupMemberType.Owner, GroupMemberType.Manager].indexOf(this.groupMember!.type) === -1) {
@@ -61,7 +62,7 @@ export default struct GroupMemberListPage {
                         }, (groupMember: GroupMember) => groupMember.memberId + '-' + groupMember.updateDt)
 
                     }
-                    .padding(10)
+                    .padding(12)
                     .width('100%')
                     .backgroundColor($r('app.color.wf_background'))
                 }

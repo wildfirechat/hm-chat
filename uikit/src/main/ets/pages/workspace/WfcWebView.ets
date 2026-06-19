@@ -6,9 +6,9 @@ import Config from '@wfc/client/src/main/ets/config'
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import data_preferences from '@ohos.data.preferences';
 
-
 @Component
 export default struct WfcWebView {
+    @StorageProp('fontScale') fontScale: number = 1.0;
     controller?: web_webview.WebviewController
     url: string = ''
     onTitleReceive?: (title?: string) => void
@@ -51,6 +51,7 @@ export default struct WfcWebView {
                 .darkMode(this.darkMode)
                 .forceDarkAccess(true)
                 .javaScriptAccess(true)
+                .textZoomRatio(this.fontScale * 100)
                 .javaScriptProxy({
                     object: this.dsBridge,
                     name: '_dsbridge',

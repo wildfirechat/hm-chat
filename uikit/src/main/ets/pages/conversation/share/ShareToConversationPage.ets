@@ -19,6 +19,7 @@ import { imageThumbnail, videoThumbnail } from '../../../helper/imageVideoHelper
 import { showToast } from '../../../common/utils/Toast'
 import fileUri from '@ohos.file.fileuri'
 import { window } from '@kit.ArkUI'
+import { FontSize, Radius } from '../../../common/design/Tokens'
 
 @Component
 export default struct ShareToConversationPage {
@@ -167,12 +168,12 @@ export default struct ShareToConversationPage {
                         .onChange((value: string) => {
                             this.keyword = value
                         })
-                        .borderRadius(4)
+                        .borderRadius(Radius.sm)
                         .backgroundColor($r('app.color.wf_background'))
                         .fontColor($r('app.color.wf_primary_text'))
                         .placeholderColor($r('app.color.wf_tertiary_text'))
                 }
-                .padding({ left: 10, right: 10 })
+                .padding({ left: 12, right: 12 })
                 .width('100%')
                 .height(60)
                 .alignItems(VerticalAlign.Center)
@@ -183,11 +184,11 @@ export default struct ShareToConversationPage {
                             ListItem() {
                                 Text('最近聊天')
                                     .fontColor($r('app.color.wf_tertiary_text'))
-                                    .fontSize(13)
+                                    .fontSize(FontSize.sm)
                                     .width('100%')
                                     .height(40)
                                     .backgroundColor($r('app.color.wf_primary_background_color'))
-                                    .padding({ left: 10, right: 10 })
+                                    .padding({ left: 12, right: 12 })
                             }
 
                             LazyForEach(this.conversationInfoDataSource, (info: ConversationInfo) => {

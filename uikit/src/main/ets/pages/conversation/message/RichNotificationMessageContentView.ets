@@ -1,6 +1,7 @@
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import RichNotificationMessageContent, { NData } from '@wfc/client/src/main/ets/wfc/messages/notification/richNotificationMessageContent'
 import { uikitNavigationDestinations } from '../../uikitNavigationConfig';
+import { FontSize, Radius } from '../../../common/design/Tokens'
 
 @Component
 export default struct RichNotificationMessageContentView {
@@ -15,30 +16,30 @@ export default struct RichNotificationMessageContentView {
         Column() {
             Text(this.richNotificationMessageContent().title)
                 .maxLines(1)
-                .fontSize(15)
+                .fontSize(FontSize.sm)
             Text(this.richNotificationMessageContent().desc)
                 .maxLines(2)
-                .fontSize(14)
-                .padding({ top: 5, bottom: 5 })
+                .fontSize(FontSize.sm)
+                .padding({ top: 4, bottom: 4 })
             ForEach(this.richNotificationMessageContent().datas, (item: NData, index) => {
                 Row() {
                     Text(item.key)
                         .width(100)
-                        .fontSize(14)
+                        .fontSize(FontSize.sm)
                     Text(item.value)
-                        .fontSize(14)
+                        .fontSize(FontSize.sm)
                 }
             }, (item: NData, index) => index + '')
             Divider()
-                .margin({ top: 10, bottom: 10 })
+                .margin({ top: 12, bottom: 12 })
             Text(this.richNotificationMessageContent().exName)
         }
-        .padding(10)
-        .margin({ top: 10, bottom: 10 })
+        .padding(12)
+        .margin({ top: 12, bottom: 12 })
         .backgroundColor(this.message.direction === 0 ? $r('app.color.wf_sent_bubble_bg') : $r('app.color.wf_received_bubble_bg'))
         .alignItems(HorizontalAlign.Start)
         .constraintSize({ maxWidth: 300 })
-        .borderRadius(4)
+        .borderRadius(Radius.sm)
         .onClick(() => {
             this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.WebViewPage, {
                 'url': this.richNotificationMessageContent().exUrl,

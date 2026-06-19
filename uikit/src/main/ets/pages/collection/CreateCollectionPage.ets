@@ -1,6 +1,7 @@
 import { showToast } from '../../common/utils/Toast';
 import CollectionService from '../../api/collectionService';
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation';
+import { FontSize, Radius } from '../../common/design/Tokens'
 
 @Component
 export default struct CreateCollectionPage {
@@ -33,7 +34,7 @@ export default struct CreateCollectionPage {
                     Column() {
                         // Title
                         Text('接龙主题')
-                            .fontSize(14)
+                            .fontSize(FontSize.sm)
                             .fontColor(Color.Gray)
                             .width('100%')
                             .margin({ top: 16, bottom: 8 })
@@ -41,11 +42,11 @@ export default struct CreateCollectionPage {
                             .backgroundColor($r('app.color.wf_background'))
                             .width('100%')
                             .height(48)
-                            .borderRadius(4)
+                            .borderRadius(Radius.sm)
 
                         // Description
                         Text('接龙描述')
-                            .fontSize(14)
+                            .fontSize(FontSize.sm)
                             .fontColor(Color.Gray)
                             .width('100%')
                             .margin({ top: 16, bottom: 8 })
@@ -53,11 +54,11 @@ export default struct CreateCollectionPage {
                             .backgroundColor($r('app.color.wf_background'))
                             .width('100%')
                             .height(100)
-                            .borderRadius(4)
+                            .borderRadius(Radius.sm)
 
                         // Template
                         Text('填写格式')
-                            .fontSize(14)
+                            .fontSize(FontSize.sm)
                             .fontColor(Color.Gray)
                             .width('100%')
                             .margin({ top: 16, bottom: 8 })
@@ -65,11 +66,11 @@ export default struct CreateCollectionPage {
                             .backgroundColor($r('app.color.wf_background'))
                             .width('100%')
                             .height(48)
-                            .borderRadius(4)
+                            .borderRadius(Radius.sm)
 
                         // Expire Type
                         Text('截止时间')
-                            .fontSize(14)
+                            .fontSize(FontSize.sm)
                             .fontColor(Color.Gray)
                             .width('100%')
                             .margin({ top: 16, bottom: 8 })
@@ -81,7 +82,7 @@ export default struct CreateCollectionPage {
                                     if (isChecked) this.expireType = 0;
                                 })
                             Text('永久有效')
-                                .fontSize(16)
+                                .fontSize(FontSize.md)
                                 .margin({ left: 8 })
                         }
                         .width('100%')
@@ -97,7 +98,7 @@ export default struct CreateCollectionPage {
                                     if (isChecked) this.expireType = 1;
                                 })
                             Text('设置截止时间')
-                                .fontSize(16)
+                                .fontSize(FontSize.md)
                                 .margin({ left: 8 })
                         }
                         .width('100%')
@@ -109,7 +110,7 @@ export default struct CreateCollectionPage {
                         if (this.expireType === 1) {
                             Row() {
                                 Text(this.formatDate(this.expireDate))
-                                    .fontSize(16)
+                                    .fontSize(FontSize.md)
                                 Blank()
                                 Image($r('app.media.ic_public_arrow_right'))
                                     .width(16)
@@ -120,7 +121,7 @@ export default struct CreateCollectionPage {
                             .backgroundColor($r('app.color.wf_background'))
                             .padding({ left: 16, right: 16 })
                             .margin({ top: 8 })
-                            .borderRadius(4)
+                            .borderRadius(Radius.sm)
                             .onClick(() => {
                                 this.showDatePicker();
                             })
@@ -146,12 +147,11 @@ export default struct CreateCollectionPage {
         Row() {
             Button('确定')
                 .type(ButtonType.Normal)
-                .height(30)
-                .width(60)
-                .margin({ right: 18 })
+                .height(32)
+                .margin({ right: 20 })
                 .enabled(this.title.trim().length > 0)
-                .fontSize(14)
-                .borderRadius(4)
+                .fontSize(FontSize.sm)
+                .borderRadius(Radius.sm)
                 .onClick(() => {
                     this.createCollection();
                 })

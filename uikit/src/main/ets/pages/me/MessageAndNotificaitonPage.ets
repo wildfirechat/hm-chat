@@ -58,9 +58,8 @@ export default struct MessageAndNotificationPage {
                         }
                     })
                 }
-                .margin({ top: 10 })
+                .margin({ top: 12 })
                 .backgroundColor($r('app.color.wf_background'))
-
 
                 Column() {
                     ToggleItemView({
@@ -72,7 +71,7 @@ export default struct MessageAndNotificationPage {
                         }
                     })
                 }
-                .margin({ top: 10 })
+                .margin({ top: 12 })
                 .backgroundColor($r('app.color.wf_background'))
             }
             .width('100%')

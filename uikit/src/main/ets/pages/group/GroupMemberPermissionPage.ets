@@ -41,7 +41,7 @@ export default struct GroupMemberPermissionPage {
                 .width('100%')
                 .height(56)
                 .backgroundColor($r('app.color.wf_background'))
-                .padding({ left: 10, right: 10 })
+                .padding({ left: 12, right: 12 })
             }
         }
         .title('群成员权限')

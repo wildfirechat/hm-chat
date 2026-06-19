@@ -57,7 +57,7 @@ export default struct FileRecordPortalPage {
                 title: '所有文件',
                 showDivider: false
             })
-                .margin({ top: 10 })
+                .margin({ top: 12 })
                 .onClick(() => {
                     this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.FileRecordPage, {} as Record<string, Object>)
                 })
@@ -65,7 +65,7 @@ export default struct FileRecordPortalPage {
                 title: '我的文件',
                 showDivider: false
             })
-                .margin({ top: 10 })
+                .margin({ top: 12 })
                 .onClick(() => {
                     this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.FileRecordPage, {
                         'myFile': true
@@ -75,7 +75,7 @@ export default struct FileRecordPortalPage {
                 title: '会话文件',
                 showDivider: false
             })
-                .margin({ top: 10 })
+                .margin({ top: 12 })
                 .onClick(() => {
                     this.showPickConversationModal = true
                 })
@@ -90,7 +90,7 @@ export default struct FileRecordPortalPage {
                 title: '用户文件',
                 showDivider: false
             })
-                .margin({ top: 10 })
+                .margin({ top: 12 })
                 .onClick(() => {
                     this.showPickContactModal = true
                 })

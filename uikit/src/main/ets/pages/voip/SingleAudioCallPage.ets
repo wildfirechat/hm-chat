@@ -12,6 +12,7 @@ import uikit from '../../uikit'
 import { PiPWindow } from '@kit.ArkUI'
 import VoipPiPNodeController from './VoipPiPNodeController'
 import { uikitNavigationDestinations } from '../uikitNavigationConfig'
+import { FontSize, Radius } from '../../common/design/Tokens'
 
 @Component
 export default struct SingleAudioCallPage {
@@ -222,9 +223,9 @@ export default struct SingleAudioCallPage {
                         Row() {
                             Image($r('app.media.av_minimize'))
                                 .draggable(false)
-                                .width(50)
-                                .height(50)
-                                .padding(10)
+                                .width(52)
+                                .height(52)
+                                .padding(12)
                                 .onClick(async () => {
                                     this.pipController?.startPiP()
                                         .catch((reason: BusinessError) => {
@@ -242,20 +243,20 @@ export default struct SingleAudioCallPage {
                         Column() {
                             Image(this.targetUserInfo?.portrait|| Config.DEFAULT_PORTRAIT_URL)
                                 .draggable(false)
-                                .borderRadius(6)
+                                .borderRadius(Radius.md)
                                 .width(100)
                                 .height(100)
                                 .margin({ top: 60 })
                             Text(this.targetUserInfo?.displayName)
-                                .margin({ top: 10 })
-                                .fontSize(14)
+                                .margin({ top: 12 })
+                                .fontSize(FontSize.sm)
                                 .fontColor(Color.White)
 
                             Blank()
 
                             Text(this.tip())
-                                .margin({ bottom: 10 })
-                                .fontSize(14)
+                                .margin({ bottom: 12 })
+                                .fontSize(FontSize.sm)
                                 .fontColor('#848687')
 
                             Row() {
@@ -270,8 +271,8 @@ export default struct SingleAudioCallPage {
                                         })
                                     Text('挂断')
                                         .visibility(Visibility.Hidden)
-                                        .margin({ top: 10 })
-                                        .fontSize(13)
+                                        .margin({ top: 12 })
+                                        .fontSize(FontSize.sm)
                                         .fontColor(Color.White)
                                 }
 
@@ -287,13 +288,13 @@ export default struct SingleAudioCallPage {
                                             })
                                         Text('接听')
                                             .visibility(Visibility.Hidden)
-                                            .margin({ top: 10 })
-                                            .fontSize(13)
+                                            .margin({ top: 12 })
+                                            .fontSize(FontSize.sm)
                                             .fontColor(Color.White)
                                     }
                                 }
                             }
-                            .padding({ top: 40, bottom: 50 })
+                            .padding({ top: 40, bottom: 52 })
                             .width('100%')
                             .justifyContent(FlexAlign.SpaceAround)
 
@@ -305,20 +306,20 @@ export default struct SingleAudioCallPage {
                         Column() {
                             Image(this.targetUserInfo?.portrait || Config.DEFAULT_PORTRAIT_URL)
                                 .draggable(false)
-                                .borderRadius(6)
+                                .borderRadius(Radius.md)
                                 .width(100)
                                 .height(100)
                                 .margin({ top: 60 })
                             Text(this.targetUserInfo?.displayName)
-                                .margin({ top: 10 })
-                                .fontSize(14)
+                                .margin({ top: 12 })
+                                .fontSize(FontSize.sm)
                                 .fontColor(Color.White)
 
                             Blank()
 
                             Text(this.tip())
-                                .margin({ bottom: 10 })
-                                .fontSize(14)
+                                .margin({ bottom: 12 })
+                                .fontSize(FontSize.sm)
                                 .fontColor('#848687')
 
                             Row() {
@@ -334,8 +335,8 @@ export default struct SingleAudioCallPage {
                                         })
                                     Text('麦克风')
                                         .visibility(Visibility.Hidden)
-                                        .margin({ top: 10 })
-                                        .fontSize(13)
+                                        .margin({ top: 12 })
+                                        .fontSize(FontSize.sm)
                                         .fontColor(Color.White)
                                 }
 
@@ -349,8 +350,8 @@ export default struct SingleAudioCallPage {
                                         })
                                     Text('挂断')
                                         .visibility(Visibility.Hidden)
-                                        .margin({ top: 10 })
-                                        .fontSize(13)
+                                        .margin({ top: 12 })
+                                        .fontSize(FontSize.sm)
                                         .fontColor(Color.White)
                                 }
 
@@ -371,13 +372,13 @@ export default struct SingleAudioCallPage {
 
                                     Text('扬声器已关')
                                         .visibility(Visibility.Hidden)
-                                        .margin({ top: 10 })
-                                        .fontSize(13)
+                                        .margin({ top: 12 })
+                                        .fontSize(FontSize.sm)
                                         .fontColor(Color.White)
                                 }
                                 .justifyContent(FlexAlign.Center)
                             }
-                            .padding({ top: 40, bottom: 50 })
+                            .padding({ top: 40, bottom: 52 })
                             .width('100%')
                             .justifyContent(FlexAlign.SpaceAround)
 

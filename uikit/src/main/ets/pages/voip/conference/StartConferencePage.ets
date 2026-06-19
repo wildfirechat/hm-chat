@@ -7,6 +7,7 @@ import { showToast } from "../../../common/utils/Toast";
 import wfc from "@wfc/client";
 import ConferencePasswordDialog from "./ConferencePasswordDialog";
 import { uikitNavigationDestinations } from "../../uikitNavigationConfig";
+import { FontSize, Radius } from '../../../common/design/Tokens'
 
 @Component
 export default struct StartConferencePage {
@@ -31,7 +32,7 @@ export default struct StartConferencePage {
                     Text('会议主题')
                         .fontColor($r('app.color.wf_primary_text'))
                     TextInput({ text: this.title })
-                        .borderRadius(0)
+                        .borderRadius(Radius.none)
                         .backgroundColor(Color.Transparent)
                         .fontColor($r('app.color.wf_primary_text'))
                         .border({ color: $r('app.color.wf_divider') })
@@ -49,12 +50,10 @@ export default struct StartConferencePage {
                         })
                 }
                 .alignItems(HorizontalAlign.Start)
-                .padding({
-                    left: 20,
+                .padding({ left: 20,
                     right: 20,
-                    top: 10,
-                    bottom: 10
-                })
+                    top: 12,
+                    bottom: 12 })
                 .backgroundColor($r('app.color.wf_background'))
 
                 Column() {
@@ -112,7 +111,6 @@ export default struct StartConferencePage {
                 .margin({ top: 20 })
                 .backgroundColor($r('app.color.wf_background'))
 
-
                 Column() {
                     ToggleItemView({
                         title: '启用会议密码',
@@ -164,7 +162,7 @@ export default struct StartConferencePage {
                     Button('进入会议')
                         .enabled(true)
                         .type(ButtonType.Normal)
-                        .borderRadius(4)
+                        .borderRadius(Radius.sm)
                         .width('50%')
                         .onClick(async () => {
                             if (this.title.trim().length === 0) {
@@ -209,11 +207,11 @@ export default struct StartConferencePage {
         Row() {
             Button('创建')
                 .type(ButtonType.Normal)
-                .height(30)
+                .height(32)
                 .width(60)
-                .margin({ right: 14 })
-                .fontSize(14)
-                .borderRadius(4)// .backgroundColor(Color.Blue)
+                .margin({ right: 16 })
+                .fontSize(FontSize.sm)
+                .borderRadius(Radius.sm)// .backgroundColor(Color.Blue)
                 .backgroundColor(Color.Transparent)
                 .fontColor(Color.Blue)
                 .onClick(async () => {

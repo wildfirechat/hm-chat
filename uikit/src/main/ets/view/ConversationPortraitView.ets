@@ -1,5 +1,6 @@
 import Conversation from "@wfc/client/src/main/ets/wfc/model/conversation"
 import Utils from "../common/Utils"
+import { Radius } from '../common/design/Tokens'
 
 @Preview
 // TODO 暂不支持 reuse
@@ -23,7 +24,7 @@ export default struct ConversationPortraitView {
         Image(this.conversationItemPortrait)
             .alt(this.alt)
             .draggable(false)
-            .borderRadius(4)
+            .borderRadius(Radius.sm)
             .width('100%')
             .height('100%')
     }

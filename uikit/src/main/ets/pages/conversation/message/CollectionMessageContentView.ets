@@ -3,6 +3,7 @@ import { uikitNavigationDestinations } from '../../uikitNavigationConfig';
 import CollectionMessageContent from '@wfc/client/src/main/ets/wfc/messages/CollectionMessageContent';
 import Collection from '@wfc/client/src/main/ets/wfc/model/collection';
 import CollectionEntry from '@wfc/client/src/main/ets/wfc/model/collectionEntry';
+import { FontSize, Radius } from '../../../common/design/Tokens'
 
 @Component
 export default struct CollectionMessageContentView {
@@ -18,13 +19,13 @@ export default struct CollectionMessageContentView {
             // Title Area: Icon + Title + Count
             Row() {
                 Image($r('app.media.ic_func_collection'))
-                    .width(18)
-                    .height(18)
+                    .width(20)
+                    .height(20)
                     .fillColor($r('app.color.wf_link'))
-                    .margin({ right: 6 })
+                    .margin({ right: 8 })
 
                 Text(this.collectionMessageContent().title)
-                    .fontSize(16)
+                    .fontSize(FontSize.md)
                     .fontWeight(FontWeight.Bold)
                     .fontColor($r('app.color.wf_primary_text'))
                     .maxLines(2)
@@ -32,7 +33,7 @@ export default struct CollectionMessageContentView {
                     .layoutWeight(1)
 
                 Text(`${this.collectionMessageContent().entries ? this.collectionMessageContent().entries.length : 0}人参与`)
-                    .fontSize(12)
+                    .fontSize(FontSize.xs)
                     .fontColor($r('app.color.wf_tertiary_text'))
                     .margin({ left: 4 })
             }
@@ -42,7 +43,7 @@ export default struct CollectionMessageContentView {
             // Description
             if (this.collectionMessageContent().desc) {
                 Text(this.collectionMessageContent().desc)
-                    .fontSize(13)
+                    .fontSize(FontSize.sm)
                     .fontColor($r('app.color.wf_tertiary_text'))
                     .maxLines(2)
                     .textOverflow({ overflow: TextOverflow.Ellipsis })
@@ -61,7 +62,7 @@ export default struct CollectionMessageContentView {
                 if (this.collectionMessageContent().entries && this.collectionMessageContent().entries.length > 0) {
                     ForEach(this.collectionMessageContent().entries.slice(0, 3), (entry: CollectionEntry, index: number) => {
                          Text(`${index + 1}. ${entry.content}`)
-                            .fontSize(14)
+                            .fontSize(FontSize.sm)
                             .fontColor($r('app.color.wf_tertiary_text'))
                             .maxLines(1)
                             .textOverflow({ overflow: TextOverflow.Ellipsis })
@@ -70,13 +71,13 @@ export default struct CollectionMessageContentView {
                     })
                     if (this.collectionMessageContent().entries.length > 3) {
                          Text('...')
-                            .fontSize(12)
+                            .fontSize(FontSize.xs)
                             .fontColor($r('app.color.wf_tertiary_text'))
                             .margin({ top: 4 })
                     }
                 } else {
                     Text('暂无参与，快来抢沙发吧~')
-                        .fontSize(13)
+                        .fontSize(FontSize.sm)
                         .fontColor($r('app.color.wf_tertiary_text'))
                 }
             }
@@ -92,7 +93,7 @@ export default struct CollectionMessageContentView {
             // Action Button
             Row() {
                 Text(this.collectionMessageContent().status === 0 ? '参与接龙' : '已结束')
-                    .fontSize(14)
+                    .fontSize(FontSize.sm)
                     .fontColor(this.collectionMessageContent().status === 0 ? $r('app.color.wf_link') : $r('app.color.wf_tertiary_text'))
             }
             .width('100%')
@@ -100,7 +101,7 @@ export default struct CollectionMessageContentView {
         .width(240)
         .padding(12)
         .backgroundColor(this.message.direction === 0 ? $r('app.color.wf_sent_bubble_bg') : $r('app.color.wf_received_bubble_bg'))
-        .borderRadius(8)
+        .borderRadius(Radius.lg)
         .onClick(() => {
             let collectionId = parseInt(this.collectionMessageContent().collectionId);
             this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.CollectionDetailPage, {

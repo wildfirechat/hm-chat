@@ -2,6 +2,7 @@ import http from '@ohos.net.http';
 import image from '@ohos.multimedia.image';
 // Import at module level to avoid circular dependency
 import appServer from '../api/appServer';
+import { FontSize, Radius } from '../common/design/Tokens'
 
 export interface SlideVerifyViewDelegate {
   slideVerifyViewDidVerifySuccess(token: string): void;
@@ -37,7 +38,7 @@ export struct SlideVerifyView {
       // 标题
       Row(){
         Text('安全验证')
-          .fontSize(18)
+          .fontSize(FontSize.lg)
           .fontWeight(FontWeight.Bold)
           .fontColor($r('app.color.wf_primary_text'))
 
@@ -54,7 +55,7 @@ export struct SlideVerifyView {
         // 背景图
         Image(this.bgImageData)
           .width('100%')
-          .height(150)
+          .height(152)
           .objectFit(ImageFit.Contain)
           .onComplete(() => {
             this.calculateScale()
@@ -62,21 +63,21 @@ export struct SlideVerifyView {
 
         // 滑块图
         Image(this.sliderImageData)
-          .width(50)
-          .height(50)
+          .width(52)
+          .height(52)
           .position({ x: this.imageOffsetX + this.currentX, y: this.sliderImageTop })
       }
       .width('100%')
-      .height(150)
+      .height(152)
       .backgroundColor($r('app.color.wf_primary_background_color'))
-      .borderRadius(4)
-      .margin({ bottom: 15 })
+      .borderRadius(Radius.sm)
+      .margin({ bottom: 16 })
 
       // 滑块轨道
       Stack() {
         // 提示文字
         Text('向右滑动完成验证')
-          .fontSize(14)
+          .fontSize(FontSize.sm)
           .fontColor($r('app.color.wf_tertiary_text'))
           .opacity(this.hintOpacity)
 
@@ -122,13 +123,13 @@ export struct SlideVerifyView {
       .width('100%')
       .height(40)
       .backgroundColor($r('app.color.wf_secondary_background'))
-      .borderRadius(20)
-      .margin({ bottom: 10 })
+      .borderRadius(Radius.full)
+      .margin({ bottom: 12 })
 
       // 刷新按钮
       Row() {
         Text('🔄')
-          .fontSize(20)
+          .fontSize(FontSize.xl)
           .onClick(() => {
             this.refreshVerify()
           })
@@ -138,7 +139,7 @@ export struct SlideVerifyView {
       .justifyContent(FlexAlign.Center)
       .alignItems(VerticalAlign.Center)
       .backgroundColor($r('app.color.wf_background'))
-      .borderRadius(4)
+      .borderRadius(Radius.sm)
       .shadow({ radius: 8, color: '#80000000', offsetX: 0, offsetY: 2 })
       .position({ x: 290, y: 10 })
 
@@ -146,7 +147,7 @@ export struct SlideVerifyView {
     .width(320)
     .padding(20)
     .backgroundColor($r('app.color.wf_background'))
-    .borderRadius(12)
+    .borderRadius(Radius.xl)
     .shadow({ radius: 20, color: '#80000000', offsetX: 0, offsetY: 4 })
   }
 

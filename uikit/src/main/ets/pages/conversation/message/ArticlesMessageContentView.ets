@@ -1,6 +1,7 @@
 import ArticlesMessageContent, { Article } from "@wfc/client/src/main/ets/wfc/messages/articlesMessageContent";
 import Message from "@wfc/client/src/main/ets/wfc/messages/message";
 import { uikitNavigationDestinations } from "../../uikitNavigationConfig";
+import { Radius } from '../../../common/design/Tokens'
 
 @Component
 export default struct ArticleMessageContentView {
@@ -26,7 +27,7 @@ export default struct ArticleMessageContentView {
                     .objectFit(ImageFit.CENTER)
                 Text(this.articlesMessageContent().topArticle?.title)
                     .maxLines(2)
-                    .padding(10)
+                    .padding(12)
             }
             .alignItems(HorizontalAlign.Start)
             .width('100%')
@@ -43,7 +44,7 @@ export default struct ArticleMessageContentView {
                         Text(this.articlesMessageContent().topArticle?.title)
                             .maxLines(2)
                             .layoutWeight(1)
-                            .padding(10)
+                            .padding(12)
                         Image(this.articlesMessageContent().topArticle!.cover)
                             .enabled(false)
                             .height(60)
@@ -59,8 +60,8 @@ export default struct ArticleMessageContentView {
         }
         .alignItems(HorizontalAlign.Start)
         .backgroundColor(this.message.direction === 0 ? $r('app.color.wf_sent_bubble_bg') : $r('app.color.wf_received_bubble_bg'))
-        .padding(10)
+        .padding(12)
         .width('100%')
-        .borderRadius(5)
+        .borderRadius(Radius.sm)
     }
 }

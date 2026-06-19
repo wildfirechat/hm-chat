@@ -4,6 +4,7 @@ import OrganizationEx from '../../api/model/organizationEx';
 import orgServer from '../../api/orgServer';
 import { showToast } from '../../common/utils/Toast';
 import { uikitNavigationDestinations } from '../uikitNavigationConfig';
+import { Radius } from '../../common/design/Tokens'
 
 @Component
 export default struct OrganizationTreePage {
@@ -76,7 +77,7 @@ export default struct OrganizationTreePage {
                             }
                         }, (org: Organization, index: number) => index + '')
                     }
-                    .padding({ left: 10, right: 10 })
+                    .padding({ left: 12, right: 12 })
                     .justifyContent(FlexAlign.Start)
                 }
                 .align(Alignment.Start)
@@ -95,14 +96,14 @@ export default struct OrganizationTreePage {
                                         .alt($r('app.media.ic_deparment'))
                                         .width(40)
                                         .height(40)
-                                        .borderRadius(4)
+                                        .borderRadius(Radius.sm)
                                     Text(org.name + `(${org.memberCount})`)
                                         .maxLines(1)
-                                        .padding({ left: 10 })
+                                        .padding({ left: 12 })
                                 }
                                 .height(60)
                                 .width('100%')
-                                .padding({ left: 10, right: 10 })
+                                .padding({ left: 12, right: 12 })
                                 .stateStyles({
                                     pressed: {
                                         .backgroundColor($r('app.color.wf_divider'))
@@ -124,14 +125,14 @@ export default struct OrganizationTreePage {
                                         .alt($r('app.media.avatar_def'))
                                         .width(40)
                                         .height(40)
-                                        .borderRadius(4)
+                                        .borderRadius(Radius.sm)
                                     Text(employee.name)
                                         .maxLines(1)
-                                        .padding({ left: 10 })
+                                        .padding({ left: 12 })
                                 }
                                 .height(60)
                                 .width('100%')
-                                .padding({ left: 10, right: 10 })
+                                .padding({ left: 12, right: 12 })
                                 .stateStyles({
                                     pressed: {
                                         .backgroundColor($r('app.color.wf_divider'))

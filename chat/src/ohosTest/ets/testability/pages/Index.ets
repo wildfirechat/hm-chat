@@ -18,9 +18,7 @@ struct Index {
                  .fontSize(20)
                  .fontWeight(FontWeight.Bold)
              }.type(ButtonType.Capsule)
-             .margin({
-               top: 20
-             })
+             .margin({ top: 20 })
              .backgroundColor('#0D9FFB')
              .width('35%')
              .height('5%')

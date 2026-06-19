@@ -36,6 +36,7 @@ import PollMessageContent from '@wfc/client/src/main/ets/wfc/messages/pollMessag
 import PollResultMessageContent from '@wfc/client/src/main/ets/wfc/messages/pollResultMessageContent'
 import MeetingMinutesMessageContentView from './MeetingMinutesMessageContentView'
 import { trustedAppService } from '@kit.DeviceSecurityKit'
+import { FontSize, Radius } from '../../../common/design/Tokens'
 
 @Component
 export default struct NormaMessageContentView {
@@ -126,20 +127,20 @@ export default struct NormaMessageContentView {
             else {
                 Text(this.message!.messageContent.digest(this.message))
                     .margin({ top: 4 })
-                    .padding(10)
+                    .padding(12)
             }
             // out
             if (this.message!.direction === 0) {
                 if (this.readReceipt) {
                     if (this.message!.conversation.type === ConversationType.Group) {
                         Text(`已读 ${this.readReceipt.readCount}/${this.readReceipt.readCount + this.readReceipt.unreadCount}`)
-                            .fontSize(12)
+                            .fontSize(FontSize.xs)
                             .fontColor($r('app.color.wf_tertiary_text'))
                             .margin({ top: 4 })
                             .alignSelf(ItemAlign.End)
                     } else if (this.message!.conversation.type === ConversationType.Single) {
                         Text(this.readReceipt.readCount > 0 ? '已读' : '未读')
-                            .fontSize(12)
+                            .fontSize(FontSize.xs)
                             .fontColor($r('app.color.wf_tertiary_text'))
                             .margin({ top: 4 })
                             .alignSelf(ItemAlign.End)
@@ -328,12 +329,12 @@ export default struct NormaMessageContentView {
                             .width(24)
                             .height(24)
                         Text(menuItem.title)
-                            .fontSize(13)
+                            .fontSize(FontSize.sm)
                             .fontColor(Color.White)
                     }
                     .justifyContent(FlexAlign.Center)
                     .width(60)
-                    .height(70)
+                    .height(72)
                     .onClick(() => {
                         menuItem.action()
                     })
@@ -351,13 +352,11 @@ export default struct NormaMessageContentView {
         .columnsTemplate('1fr '.repeat(this.menuColumnCount).trim())
         .width(this.menuWidth)
         .backgroundColor($r('app.color.wf_message_context_memu_background'))
-        .borderRadius(8)
-        .padding({
-            left: 10,
-            right: 10,
-            top: 10,
-            bottom: 10
-        })
+        .borderRadius(Radius.lg)
+        .padding({ left: 12,
+            right: 12,
+            top: 12,
+            bottom: 12 })
     }
 
     updateMessageReadReceipt(): void {

@@ -9,6 +9,7 @@ import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo';
 import wfc from '@wfc/client';
 import { Size, promptAction } from '@kit.ArkUI';
 import hilog from '@ohos.hilog';
+import { FontSize, Radius } from '@wfc/uikit/src/main/ets/common/design/Tokens'
 
 const MAX_TEXT_LENGTH = 2000;
 const MAX_IMAGES = 9;
@@ -310,16 +311,16 @@ export struct PostFeedPage {
         Row() {
             if (this.postState.isPosting) {
                 LoadingProgress()
-                    .width(22)
-                    .height(22)
+                    .width(24)
+                    .height(24)
                     .color(MomentConstants.PRIMARY_COLOR)
             } else {
                 Button('发表')
                     .backgroundColor(this.canPublish() ? MomentConstants.PRIMARY_COLOR : $r('app.color.button_disabled'))
                     .fontColor(this.canPublish() ? Color.White : $r('app.color.text_disabled'))
-                    .fontSize(15)
+                    .fontSize(FontSize.sm)
                     .height(32)
-                    .padding({ left: 18, right: 18 })
+                    .padding({ left: 20, right: 20 })
                     .borderRadius(MomentConstants.BORDER_RADIUS)
                     .enabled(this.canPublish())
                     .onClick(() => {
@@ -362,15 +363,15 @@ export struct PostFeedPage {
                 .maxLines(1)
                 .textOverflow({ overflow: TextOverflow.Ellipsis })
                 .constraintSize({ maxWidth: '60%' })
-                .margin({ right: 6 })
+                .margin({ right: 8 })
 
             SymbolGlyph($r('sys.symbol.chevron_right'))
-                .fontSize(14)
+                .fontSize(FontSize.sm)
                 .fontColor([MomentConstants.TEXT_SECONDARY_COLOR])
         }
         .width('100%')
-        .height(50)
-        .padding({ left: 14, right: 14 })
+        .height(52)
+        .padding({ left: 16, right: 16 })
         .alignItems(VerticalAlign.Center)
         .onClick(action)
     }
@@ -389,7 +390,7 @@ export struct PostFeedPage {
                 .fontColor(MomentConstants.TEXT_PRIMARY_COLOR)
                 .placeholderColor(MomentConstants.TEXT_SECONDARY_COLOR)
                 .borderRadius(MomentConstants.BORDER_RADIUS)
-                .padding({ left: 14, right: 14, top: 12, bottom: 12 })
+                .padding({ left: 16, right: 16, top: 12, bottom: 12 })
                 .maxLength(MAX_TEXT_LENGTH)
                 .onChange((value: string) => {
                     this.postState.text = value;
@@ -454,11 +455,11 @@ export struct PostFeedPage {
             // 删除按钮
             Button() {
                 SymbolGlyph($r('sys.symbol.xmark'))
-                    .fontSize(11)
+                    .fontSize(FontSize.xs)
                     .fontColor([Color.White])
             }
-            .width(22)
-            .height(22)
+            .width(24)
+            .height(24)
             .type(ButtonType.Circle)
             .backgroundColor('rgba(0,0,0,0.55)')
             .margin({ top: 4, right: 4 })
@@ -469,9 +470,9 @@ export struct PostFeedPage {
 
     @Builder
     private buildAddImageButton() {
-        Column({ space: 6 }) {
+        Column({ space: 8 }) {
             SymbolGlyph($r('sys.symbol.plus'))
-                .fontSize(28)
+                .fontSize(FontSize.d1)
                 .fontColor([MomentConstants.TEXT_SECONDARY_COLOR])
         }
         .width('100%')
@@ -500,7 +501,7 @@ export struct PostFeedPage {
                 .height(4)
                 .color(MomentConstants.PRIMARY_COLOR)
                 .backgroundColor(MomentConstants.DIVIDER_COLOR)
-                .borderRadius(2)
+                .borderRadius(Radius.xs)
 
             Text(`上传中 ${this.postState.uploadingCount}/${this.postState.totalCount}`)
                 .fontSize(MomentConstants.FONT_SIZE_CAPTION)

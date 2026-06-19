@@ -10,6 +10,7 @@ import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import { appNavigationDestinations } from '../mainNavigationConfig'
 import type { BackupInfo } from '@wfc/client/src/main/ets/wfc/backup'
 import { showToast } from '@wfc/uikit/src/main/ets/common/utils/Toast'
+import { FontSize, Radius } from '@wfc/uikit/src/main/ets/common/design/Tokens'
 
 interface BackupInfoWithPath extends BackupInfo {
   backupPath: string;
@@ -83,11 +84,11 @@ export default struct RestoreOptionsPage {
             // 备份时间
             Row() {
               Text('备份时间')
-                .fontSize(16)
+                .fontSize(FontSize.md)
                 .fontColor($r('app.color.wf_secondary_text'))
                 .width(100)
               Text(this.formatDate(this.backupInfo.backupTime))
-                .fontSize(16)
+                .fontSize(FontSize.md)
                 .fontWeight(FontWeight.Medium)
                 .fontColor($r('app.color.wf_primary_text'))
                 .layoutWeight(1)
@@ -101,11 +102,11 @@ export default struct RestoreOptionsPage {
             // 备份设备
             Row() {
               Text('备份设备')
-                .fontSize(16)
+                .fontSize(FontSize.md)
                 .fontColor($r('app.color.wf_secondary_text'))
                 .width(100)
               Text(this.backupInfo.deviceName)
-                .fontSize(16)
+                .fontSize(FontSize.md)
                 .fontWeight(FontWeight.Medium)
                 .fontColor($r('app.color.wf_primary_text'))
                 .layoutWeight(1)
@@ -119,11 +120,11 @@ export default struct RestoreOptionsPage {
             // 会话数量
             Row() {
               Text('会话数量')
-                .fontSize(16)
+                .fontSize(FontSize.md)
                 .fontColor($r('app.color.wf_secondary_text'))
                 .width(100)
               Text(`${this.backupInfo.totalConversations}`)
-                .fontSize(16)
+                .fontSize(FontSize.md)
                 .fontWeight(FontWeight.Medium)
                 .fontColor($r('app.color.wf_primary_text'))
                 .layoutWeight(1)
@@ -137,11 +138,11 @@ export default struct RestoreOptionsPage {
             // 消息数量
             Row() {
               Text('消息数量')
-                .fontSize(16)
+                .fontSize(FontSize.md)
                 .fontColor($r('app.color.wf_secondary_text'))
                 .width(100)
               Text(`${this.backupInfo.totalMessages}`)
-                .fontSize(16)
+                .fontSize(FontSize.md)
                 .fontWeight(FontWeight.Medium)
                 .fontColor($r('app.color.wf_primary_text'))
                 .layoutWeight(1)
@@ -156,11 +157,11 @@ export default struct RestoreOptionsPage {
               // 媒体文件
               Row() {
                 Text('媒体文件')
-                  .fontSize(16)
+                  .fontSize(FontSize.md)
                   .fontColor($r('app.color.wf_secondary_text'))
                   .width(100)
                 Text(`${this.backupInfo.mediaFileCount} (${this.formatFileSize(this.backupInfo.mediaTotalSize)})`)
-                  .fontSize(16)
+                  .fontSize(FontSize.md)
                   .fontWeight(FontWeight.Medium)
                   .fontColor($r('app.color.wf_primary_text'))
                   .layoutWeight(1)
@@ -175,11 +176,11 @@ export default struct RestoreOptionsPage {
 
             Row() {
               Text('备份路径')
-                .fontSize(14)
+                .fontSize(FontSize.sm)
                 .fontColor($r('app.color.wf_tertiary_text'))
                 .width(100)
               Text(this.backupInfo.backupPath)
-                .fontSize(12)
+                .fontSize(FontSize.xs)
                 .fontColor($r('app.color.wf_tertiary_text'))
                 .maxLines(2)
                 .textOverflow({ overflow: TextOverflow.Ellipsis })
@@ -190,12 +191,12 @@ export default struct RestoreOptionsPage {
             }
             .width('100%')
             .backgroundColor($r('app.color.wf_background'))
-            .borderRadius(8)
+            .borderRadius(Radius.lg)
             .width('100%')
             .height('100%')
             .padding(16)
             .backgroundColor($r('app.color.wf_secondary_background'))
-            .margin({ top: 30 })
+            .margin({ top: 32 })
             .onClick(() => {
               this.startRestore()
             })

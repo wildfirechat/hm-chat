@@ -5,6 +5,7 @@ import wfc from '@wfc/client';
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo';
 import { display, promptAction } from '@kit.ArkUI';
 import pasteboard from '@ohos.pasteboard';
+import { FontSize, Radius } from '@wfc/uikit/src/main/ets/common/design/Tokens'
 
 @Component
 export struct FeedItemComponent {
@@ -88,7 +89,7 @@ export struct FeedItemComponent {
                     .height(MomentConstants.AVATAR_SIZE)
                     .borderRadius(MomentConstants.BORDER_RADIUS)
                     .backgroundColor(MomentConstants.COMMENT_BACKGROUND_COLOR)
-                    .margin({ right: 10 })
+                    .margin({ right: 12 })
                     .onClick(() => this.events.onUserClick(this.feedViewModel.feed.sender))
 
                 // 右侧内容列
@@ -98,7 +99,7 @@ export struct FeedItemComponent {
                         .fontSize(MomentConstants.FONT_SIZE_USERNAME)
                         .fontColor(MomentConstants.LINK_COLOR)
                         .fontWeight(FontWeight.Medium)
-                        .margin({ bottom: 6 })
+                        .margin({ bottom: 8 })
                         .onClick(() => this.events.onUserClick(this.feedViewModel.feed.sender))
 
                     // 文本内容
@@ -123,14 +124,14 @@ export struct FeedItemComponent {
                 .alignItems(HorizontalAlign.Start)
             }
             .width('100%')
-            .padding({ left: MomentConstants.CARD_PADDING, right: MomentConstants.CARD_PADDING, top: 14, bottom: 0 })
+            .padding({ left: MomentConstants.CARD_PADDING, right: MomentConstants.CARD_PADDING, top: 16, bottom: 0 })
             .alignItems(VerticalAlign.Top)
 
             // 分割线
             Divider()
                 .color(MomentConstants.DIVIDER_COLOR)
                 .strokeWidth(0.5)
-                .margin({ top: 14, left: MomentConstants.CARD_PADDING + MomentConstants.AVATAR_SIZE + 10 })
+                .margin({ top: 16, left: MomentConstants.CARD_PADDING + MomentConstants.AVATAR_SIZE + 10 })
         }
         .width('100%')
         .backgroundColor(MomentConstants.CARD_BACKGROUND_COLOR)
@@ -237,12 +238,12 @@ export struct FeedItemComponent {
             // 播放按钮
             Column() {
                 SymbolGlyph($r('sys.symbol.play_fill'))
-                    .fontSize(36)
+                    .fontSize(FontSize.d3)
                     .fontColor([Color.White])
             }
             .width(60)
             .height(60)
-            .borderRadius(30)
+            .borderRadius(Radius.full)
             .backgroundColor('rgba(0,0,0,0.35)')
             .justifyContent(FlexAlign.Center)
             .alignItems(HorizontalAlign.Center)
@@ -277,14 +278,14 @@ export struct FeedItemComponent {
                 }
 
                 Button() {
-                    Row({ space: 3 }) {
+                    Row({ space: 4 }) {
                         Circle({ width: 3.5, height: 3.5 }).fill(MomentConstants.TEXT_SECONDARY_COLOR)
                         Circle({ width: 3.5, height: 3.5 }).fill(MomentConstants.TEXT_SECONDARY_COLOR)
                         Circle({ width: 3.5, height: 3.5 }).fill(MomentConstants.TEXT_SECONDARY_COLOR)
                     }
-                    .padding({ left: 6, right: 6 })
+                    .padding({ left: 8, right: 8 })
                 }
-                .height(26)
+                .height(28)
                 .type(ButtonType.Normal)
                 .backgroundColor(MomentConstants.INTERACTIONS_BACKGROUND_COLOR)
                 .borderRadius(MomentConstants.BORDER_RADIUS)
@@ -311,17 +312,17 @@ export struct FeedItemComponent {
             Row({ space: 4 }) {
                 if (this.feedViewModel.isLiked(this.currentUserId)) {
                     SymbolGlyph($r('sys.symbol.heart_fill'))
-                        .fontSize(15)
+                        .fontSize(FontSize.sm)
                         .fontColor([$r('app.color.like_active')])
                     Text('取消')
-                        .fontSize(13)
+                        .fontSize(FontSize.sm)
                         .fontColor(Color.White)
                 } else {
                     SymbolGlyph($r('sys.symbol.heart'))
-                        .fontSize(15)
+                        .fontSize(FontSize.sm)
                         .fontColor([Color.White])
                     Text('赞')
-                        .fontSize(13)
+                        .fontSize(FontSize.sm)
                         .fontColor(Color.White)
                 }
             }
@@ -345,9 +346,9 @@ export struct FeedItemComponent {
             // 评论
             Row({ space: 4 }) {
                 Text('💬')
-                    .fontSize(14)
+                    .fontSize(FontSize.sm)
                 Text('评论')
-                    .fontSize(13)
+                    .fontSize(FontSize.sm)
                     .fontColor(Color.White)
             }
             .layoutWeight(1)
@@ -370,10 +371,10 @@ export struct FeedItemComponent {
 
                 Row({ space: 4 }) {
                     SymbolGlyph($r('sys.symbol.trash'))
-                        .fontSize(15)
+                        .fontSize(FontSize.sm)
                         .fontColor(['#FF6B6B'])
                     Text('删除')
-                        .fontSize(13)
+                        .fontSize(FontSize.sm)
                         .fontColor('#FF6B6B')
                 }
                 .layoutWeight(1)
@@ -415,7 +416,7 @@ export struct FeedItemComponent {
                 Divider()
                     .color(MomentConstants.DIVIDER_COLOR)
                     .strokeWidth(0.5)
-                    .margin({ top: 6, bottom: 6 })
+                    .margin({ top: 8, bottom: 8 })
             }
 
             // 评论区
@@ -435,9 +436,9 @@ export struct FeedItemComponent {
         Row({ space: 0 }) {
             // 爱心图标
             SymbolGlyph($r('sys.symbol.heart_fill'))
-                .fontSize(13)
+                .fontSize(FontSize.sm)
                 .fontColor([MomentConstants.LINK_COLOR])
-                .margin({ right: 6, top: 1 })
+                .margin({ right: 8, top: 2 })
 
             // 点赞用户名列表（Flex 换行，每个名字可点击）
             Flex({ wrap: FlexWrap.Wrap }) {
@@ -461,18 +462,18 @@ export struct FeedItemComponent {
 
     @Builder
     private buildCommentsArea() {
-        Column({ space: 5 }) {
+        Column({ space: 4 }) {
             ForEach(this.getDisplayComments(), (comment: Comment, index: number) => {
                 this.buildCommentItem(comment)
             }, (comment: Comment, index: number) => `comment_${comment.commentId}_${index}`)
 
             if (!this.feedViewModel.showAllComments && this.feedViewModel.getCommentsList().length > MomentConstants.INITIAL_COMMENTS_COUNT) {
-                Row({ space: 3 }) {
+                Row({ space: 4 }) {
                     Text(`展开${this.feedViewModel.getCommentsList().length - MomentConstants.INITIAL_COMMENTS_COUNT}条评论`)
                         .fontSize(MomentConstants.FONT_SIZE_SMALL)
                         .fontColor(MomentConstants.LINK_COLOR)
                     SymbolGlyph($r('sys.symbol.chevron_down'))
-                        .fontSize(11)
+                        .fontSize(FontSize.xs)
                         .fontColor([MomentConstants.LINK_COLOR])
                 }
                 .onClick(() => this.events.onMoreComments(this.feedViewModel))

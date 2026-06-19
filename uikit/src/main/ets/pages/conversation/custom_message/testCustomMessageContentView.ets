@@ -1,5 +1,6 @@
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import TextMessageContent from '@wfc/client/src/main/ets/wfc/messages/textMessageContent'
+import { Radius } from '../../../common/design/Tokens'
 
 @Component
 export default struct TestCustomMessageContentView {
@@ -11,6 +12,6 @@ export default struct TestCustomMessageContentView {
             .padding(this.textPadding)
             .constraintSize({ minHeight: 40 })
             .backgroundColor(Color.White)
-            .borderRadius(4)
+            .borderRadius(Radius.sm)
     }
 }

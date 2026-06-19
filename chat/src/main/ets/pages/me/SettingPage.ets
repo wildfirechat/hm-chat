@@ -9,6 +9,7 @@ import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationTyp
 import BuildProfile from 'BuildProfile';
 import appServer from '@wfc/uikit/src/main/ets/api/appServer';
 import { bundleManager } from '@kit.AbilityKit';
+import { Radius } from '@wfc/uikit/src/main/ets/common/design/Tokens'
 
 @Preview
 @Component
@@ -46,12 +47,23 @@ export default struct SettingPage {
             Column() {
                 if (BuildProfile.DEBUG) {
                     OptionItemView({
-                        title: '隐私设置'
+                        title: '隐私设置',
+                        showDivider: true,
                     })
                         .onClick(() => {
                             showToast('TODO')
                         })
                 }
+
+                Column() {
+                    OptionItemView({
+                        title: '字体大小',
+                        showDivider: true
+                    }).onClick(() => {
+                        this.mainNavPathStack.pushPathByName(appNavigationDestinations.FontSizeSettingPage, {} as Record<string, Object>)
+                    })
+                }
+                .backgroundColor($r('app.color.wf_background'))
 
                 Column() {
                     OptionItemView({
@@ -95,7 +107,6 @@ export default struct SettingPage {
                             })
                         })
                 }
-                .margin({ top: 10 })
                 .backgroundColor($r('app.color.wf_background'))
 
                 OptionItemView({ title: '注销' })
@@ -122,8 +133,8 @@ export default struct SettingPage {
                 Button('退出')
                     .width(200)
                     .type(ButtonType.Normal)
-                    .borderRadius(4)
-                    .margin({ top: 30 })
+                    .borderRadius(Radius.sm)
+                    .margin({ top: 32 })
                     .onClick(() => {
                         showToast('正在退出登录，请稍后...')
                         data_preferences.deletePreferences(getContext(this).getApplicationContext(), 'wfcstore')

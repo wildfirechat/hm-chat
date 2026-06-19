@@ -4,9 +4,11 @@ import { UIUserInfo } from '../common/Types'
 import BasicDataSource from '../common/BasicDataSource'
 import UserItemView from './UserItemView'
 import { groupUserInfos } from '../helper/asyncTaskHelper'
+import { Radius, scaledSize } from '../common/design/Tokens'
 
 @Component
 export default struct UserListView {
+    @StorageProp('fontScale') fontScale: number = 1.0;
     @State filteredUserInfos: UserInfo[] = []
     @State searchInputViewMaxWidth: string = '100%'
     userInfos: UserInfo[] = []
@@ -45,11 +47,11 @@ export default struct UserListView {
             if (this.showSearchView) {
                 Row() {
                     TextInput({ placeholder: '搜索' })
-                        .margin({ left: 10, right: 10 })
+                        .margin({ left: 12, right: 12 })
                         .onChange((value: string) => {
                             this.filter(value)
                         })
-                        .borderRadius(4)
+                        .borderRadius(Radius.sm)
                 }
                 .constraintSize({ minWidth: '25%', maxWidth: this.searchInputViewMaxWidth })
                 .width('100%')
@@ -72,7 +74,7 @@ export default struct UserListView {
             .layoutWeight(1)
             .divider({
                 strokeWidth: 1,
-                startMargin: 80
+                startMargin: scaledSize(80, this.fontScale)
             })
         }
         .width('100%')

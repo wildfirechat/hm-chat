@@ -4,7 +4,6 @@ import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
 import DSBridge from '../workspace/dsBridge'
 import PickMultiContactModal from '../picker/PickMultiContactModal'
 
-
 @Component
 export default struct WebViewPage {
     webviewController: web_webview.WebviewController = new web_webview.WebviewController()

@@ -7,6 +7,7 @@ import { filePreview } from '@kit.PreviewKit';
 import { downloadMedia } from '../../../helper/mediaHelper';
 import { fileUri } from '@kit.CoreFileKit';
 import { uniformTypeDescriptor } from '@kit.ArkData';
+import { FontSize, Radius } from '../../../common/design/Tokens'
 
 @Component
 export default struct FileMessageContentView {
@@ -19,27 +20,27 @@ export default struct FileMessageContentView {
     build() {
         Row() {
             Image(getFiletypeIcon(this.fileMessageContent().name))
-                .width(50)
-                .height(50)
-                .margin(10)
+                .width(52)
+                .height(52)
+                .margin(12)
             Column() {
                 Text(this.fileMessageContent().name)
                     .textOverflow({ overflow: TextOverflow.Ellipsis })
                     .constraintSize({ maxWidth: 160 })
-                    .fontSize(18)
+                    .fontSize(FontSize.lg)
                     .maxLines(1)
                     .fontColor($r('app.color.wf_primary_text'))
                 Text(humanSize(this.fileMessageContent().size))
-                    .fontSize(14)
+                    .fontSize(FontSize.sm)
                     .maxLines(1)
                     .fontColor($r('app.color.wf_tertiary_text'))
             }
-            .padding({ right: 10 })
+            .padding({ right: 12 })
             .justifyContent(FlexAlign.SpaceBetween)
             .alignItems(HorizontalAlign.Start)
         }
         .backgroundColor(this.message.direction === 0 ? $r('app.color.wf_sent_bubble_bg') : $r('app.color.wf_received_bubble_bg'))
-        .borderRadius(4)
+        .borderRadius(Radius.sm)
         .justifyContent(FlexAlign.Start)
         .onClick(() => {
             let ext = this.fileMessageContent().name.substring(this.fileMessageContent().name.lastIndexOf('.') + 1).toLowerCase()

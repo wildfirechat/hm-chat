@@ -3,6 +3,7 @@
  */
 
 import { uikitNavigationDestinations } from '../uikitNavigationConfig';
+import { FontSize, Radius } from '../../common/design/Tokens'
 
 @Component
 export default struct PollHomePage {
@@ -25,10 +26,10 @@ export default struct PollHomePage {
                         Image($rawfile('ic_poll_create.svg'))
                             .width(40)
                             .height(40)
-                            .borderRadius(8)
+                            .borderRadius(Radius.lg)
 
                         Text('发起投票')
-                            .fontSize(16)
+                            .fontSize(FontSize.md)
                             .fontColor($r('app.color.wf_primary_text'))
                             .layoutWeight(1)
 
@@ -53,10 +54,10 @@ export default struct PollHomePage {
                         Image($rawfile('ic_poll_list.svg'))
                             .width(40)
                             .height(40)
-                            .borderRadius(8)
+                            .borderRadius(Radius.lg)
 
                         Text('我的投票')
-                            .fontSize(16)
+                            .fontSize(FontSize.md)
                             .fontColor($r('app.color.wf_primary_text'))
                             .layoutWeight(1)
 

@@ -36,7 +36,7 @@ export default struct PickContactModal {
             }
             .width('100%')
             .height('100%')
-            .padding({ top: 5 })
+            .padding({ top: 4 })
         }
         .backgroundColor($r('app.color.wf_background'))
         .title('选取联系人')

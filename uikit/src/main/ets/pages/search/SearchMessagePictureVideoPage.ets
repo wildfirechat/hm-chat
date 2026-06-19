@@ -10,6 +10,7 @@ import { exist } from '../../common/utils/FileUtil'
 import MMMessagePreviewDialog from '../mm/MMMessagePreviewDialog'
 import { MMMediaEntry } from '../../common/Types'
 import { mediaEntry } from '../../helper/messageHelper'
+import { FontSize } from '../../common/design/Tokens'
 
 @Component
 export default struct SearchMessagePictureVideoPage {
@@ -106,7 +107,7 @@ export default struct SearchMessagePictureVideoPage {
                 if (this.allMessages.length === 0 && !this.isLoading) {
                     Column() {
                         Text('暂无图片与视频')
-                            .fontSize(14)
+                            .fontSize(FontSize.sm)
                             .fontColor($r('app.color.wf_tertiary_text'))
                     }
                     .width('100%')
@@ -125,7 +126,7 @@ export default struct SearchMessagePictureVideoPage {
                                             }
                                             .width('33%')
                                             .aspectRatio(1)
-                                            .padding(1)
+                                            .padding(2)
                                             .onClick(() => {
                                                 this.onMessageClick(msg)
                                             })
@@ -155,9 +156,9 @@ export default struct SearchMessagePictureVideoPage {
     groupHeader(group: GroupedMessage) {
         Column() {
             Text(`${group.year}年${group.month}月`)
-                .fontSize(14)
+                .fontSize(FontSize.sm)
                 .fontWeight(FontWeight.Bold)
-                .padding({ left: 10, top: 10, bottom: 10 })
+                .padding({ left: 12, top: 12, bottom: 12 })
         }
         .width('100%')
         .backgroundColor($r('app.color.wf_secondary_background'))
@@ -179,8 +180,8 @@ export default struct SearchMessagePictureVideoPage {
                     .width('100%')
                     .height('100%')
                 Image($r('app.media.img_video_play_session'))
-                    .width(30)
-                    .height(30)
+                    .width(32)
+                    .height(32)
                     .fillColor(Color.White)
             }
         }

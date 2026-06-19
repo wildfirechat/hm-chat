@@ -1,4 +1,5 @@
 import { BuilderNode, FrameNode, NodeController } from "@kit.ArkUI";
+import { FontSize } from '@wfc/uikit/src/main/ets/common/design/Tokens'
 
 class Params {
     text: string = '';
@@ -12,13 +13,12 @@ class Params {
 function buildText(params: Params) {
     Column() {
         Text('测试123')
-            .fontSize(20)
+            .fontSize(FontSize.xl)
             .fontColor(Color.Red)
     }
     .width('100%') // 宽度方向充满画中画窗口
     .height('100%') // 高度方向充满画中画窗口
 }
-
 
 // 开发者可通过继承NodeController实现自定义UI控制器
 export default class TestTextNodeController extends NodeController {

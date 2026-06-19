@@ -3,6 +3,7 @@ import Organization from '../../api/model/organization';
 import OrganizationEx from '../../api/model/organizationEx';
 import orgServer from '../../api/orgServer';
 import { router } from '@kit.ArkUI';
+import { FontSize, Radius } from '../../common/design/Tokens'
 
 @Component
 export default struct PickOrganizationMemberPage{
@@ -92,7 +93,7 @@ export default struct PickOrganizationMemberPage{
                             }
                         }, (org: Organization, index: number) => index + '')
                     }
-                    .padding({ left: 10, right: 10 })
+                    .padding({ left: 12, right: 12 })
                     .justifyContent(FlexAlign.Start)
                 }
                 .align(Alignment.Start)
@@ -122,10 +123,10 @@ export default struct PickOrganizationMemberPage{
                                         .alt($r('app.media.ic_deparment'))
                                         .width(40)
                                         .height(40)
-                                        .borderRadius(4)
+                                        .borderRadius(Radius.sm)
                                     Text(org.name + `(${org.memberCount})`)
                                         .maxLines(1)
-                                        .padding({ left: 10 })
+                                        .padding({ left: 12 })
                                     Blank()
                                     Text('下级')
                                         .enabled(!this.isOrganizationChecked(org))
@@ -137,7 +138,7 @@ export default struct PickOrganizationMemberPage{
                                 }
                                 .height(60)
                                 .width('100%')
-                                .padding({ left: 10, right: 10 })
+                                .padding({ left: 12, right: 12 })
                                 .stateStyles({
                                     pressed: {
                                         .backgroundColor($r('app.color.wf_divider'))
@@ -175,14 +176,14 @@ export default struct PickOrganizationMemberPage{
                                         .alt($r('app.media.avatar_def'))
                                         .width(40)
                                         .height(40)
-                                        .borderRadius(4)
+                                        .borderRadius(Radius.sm)
                                     Text(employee.name)
                                         .maxLines(1)
-                                        .padding({ left: 10 })
+                                        .padding({ left: 12 })
                                 }
                                 .height(60)
                                 .width('100%')
-                                .padding({ left: 10, right: 10 })
+                                .padding({ left: 12, right: 12 })
                                 .stateStyles({
                                     pressed: {
                                         .backgroundColor($r('app.color.wf_divider'))
@@ -221,12 +222,11 @@ export default struct PickOrganizationMemberPage{
         Row() {
             Button('确定')
                 .type(ButtonType.Normal)
-                .height(30)
-                .width(60)
-                .margin({ right: 18 })
+                .height(32)
+                .margin({ right: 20 })
                 .enabled(this.checkedEmployees.length > 0 || this.checkedOrganizations.length > 0)
-                .fontSize(14)
-                .borderRadius(4)// .backgroundColor(Color.Blue)
+                .fontSize(FontSize.sm)
+                .borderRadius(Radius.sm)// .backgroundColor(Color.Blue)
                 .onClick(() => {
                     LocalStorage.getShared()
                         .setOrCreate<PickOrganizationMemberResult>(PickOrganizationMemberPage.PICK_RESULT, {

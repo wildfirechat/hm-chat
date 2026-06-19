@@ -3,6 +3,7 @@ import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType'
 import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
 import { uikitNavigationDestinations } from '../uikitNavigationConfig'
+import { FontSize } from '../../common/design/Tokens'
 
 @Component
 export default struct GroupConversationMessageReceiptPage {
@@ -15,9 +16,9 @@ export default struct GroupConversationMessageReceiptPage {
         NavDestination() {
             Text('TODO ')
                 .width('100%')
-                .fontSize(13)
+                .fontSize(FontSize.sm)
                 .fontColor('#989898')
-                .padding(10)
+                .padding(12)
                 .backgroundColor('#E5E5E5')
 
         }

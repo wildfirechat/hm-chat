@@ -13,6 +13,7 @@ import Utils from '../../common/Utils'
 import { drawing } from '@kit.ArkGraphics2D'
 import Employee from '../../api/model/employee'
 import orgServer from '../../api/orgServer'
+import { FontSize, Radius } from '../../common/design/Tokens'
 
 @Component
 @Preview
@@ -140,16 +141,16 @@ export default struct SearchResultView {
                         .alt($r('app.media.avatar_def'))
                         .width(40)
                         .height(40)
-                        .borderRadius(4)
+                        .borderRadius(Radius.sm)
                     Text(userInfo.displayName)
-                        .padding({ left: 10 })
+                        .padding({ left: 12 })
                         .fontColor($r('app.color.wf_primary_text'))
                         .maxLines(1)
                         .textOverflow({ overflow: TextOverflow.Ellipsis })
                 }
                 .width('100%')
                 .justifyContent(FlexAlign.Start)
-                .padding(10)
+                .padding(12)
             }
             .stateStyles({
                 pressed: {
@@ -184,16 +185,16 @@ export default struct SearchResultView {
                         .alt($r('app.media.avatar_def'))
                         .width(40)
                         .height(40)
-                        .borderRadius(4)
+                        .borderRadius(Radius.sm)
                     Text(userInfo.displayName)
-                        .padding({ left: 10 })
+                        .padding({ left: 12 })
                         .fontColor($r('app.color.wf_primary_text'))
                         .maxLines(1)
                         .textOverflow({ overflow: TextOverflow.Ellipsis })
                 }
                 .width('100%')
                 .justifyContent(FlexAlign.Start)
-                .padding(10)
+                .padding(12)
             }
             .stateStyles({
                 pressed: {
@@ -228,7 +229,7 @@ export default struct SearchResultView {
                         .alt($r('app.media.avatar_def'))
                         .width(40)
                         .height(40)
-                        .borderRadius(4)
+                        .borderRadius(Radius.sm)
                     Column() {
                         Text(groupSearchResult.groupInfo.name)
                             .fontColor($r('app.color.wf_primary_text'))
@@ -236,19 +237,19 @@ export default struct SearchResultView {
                             .textOverflow({ overflow: TextOverflow.Ellipsis })
 
                         Text(groupSearchResult.matchType === 1 ? '群成员名包含：' + this.keyword : '群名称包含：' + this.keyword)
-                            .fontSize(12)
-                            .margin({ top: 5 })
+                            .fontSize(FontSize.xs)
+                            .margin({ top: 4 })
                             .fontColor($r('app.color.wf_tertiary_text'))
                             .maxLines(1)
                             .textOverflow({ overflow: TextOverflow.Ellipsis })
                     }
                     .alignItems(HorizontalAlign.Start)
-                    .padding({ left: 10 })
+                    .padding({ left: 12 })
                     .layoutWeight(1)
                 }
                 .width('100%')
                 .justifyContent(FlexAlign.Start)
-                .padding(10)
+                .padding(12)
             }
             .stateStyles({
                 pressed: {
@@ -283,16 +284,16 @@ export default struct SearchResultView {
                         .alt($r('app.media.ic_channel_1'))
                         .width(40)
                         .height(40)
-                        .borderRadius(4)
+                        .borderRadius(Radius.sm)
                     Text(channelInfo.name)
-                        .padding({ left: 10 })
+                        .padding({ left: 12 })
                         .fontColor($r('app.color.wf_primary_text'))
                         .maxLines(1)
                         .textOverflow({ overflow: TextOverflow.Ellipsis })
                 }
                 .width('100%')
                 .justifyContent(FlexAlign.Start)
-                .padding(10)
+                .padding(12)
             }
             .stateStyles({
                 pressed: {
@@ -332,7 +333,7 @@ export default struct SearchResultView {
                         .alt($r('app.media.avatar_def'))
                         .width(40)
                         .height(40)
-                        .borderRadius(4)
+                        .borderRadius(Radius.sm)
                     Column() {
                         Text(resultWrapper.title)
                             .fontColor($r('app.color.wf_primary_text'))
@@ -340,19 +341,19 @@ export default struct SearchResultView {
                             .textOverflow({ overflow: TextOverflow.Ellipsis })
 
                         Text(resultWrapper.desc)
-                            .fontSize(12)
-                            .margin({ top: 5 })
+                            .fontSize(FontSize.xs)
+                            .margin({ top: 4 })
                             .fontColor($r('app.color.wf_tertiary_text'))
                             .maxLines(1)
                             .textOverflow({ overflow: TextOverflow.Ellipsis })
                     }
                     .alignItems(HorizontalAlign.Start)
-                    .padding({ left: 10 })
+                    .padding({ left: 12 })
                     .layoutWeight(1)
                 }
                 .width('100%')
                 .justifyContent(FlexAlign.Start)
-                .padding(10)
+                .padding(12)
             }
             .stateStyles({
                 pressed: {
@@ -387,7 +388,7 @@ export default struct SearchResultView {
                         .alt($r('app.media.avatar_def'))
                         .width(40)
                         .height(40)
-                        .borderRadius(4)
+                        .borderRadius(Radius.sm)
                     Column() {
                         Text(employee.name)
                             .fontColor($r('app.color.wf_primary_text'))
@@ -395,20 +396,20 @@ export default struct SearchResultView {
                             .textOverflow({ overflow: TextOverflow.Ellipsis })
                         if (employee.title) {
                             Text(employee.title)
-                                .fontSize(12)
-                                .margin({ top: 5 })
+                                .fontSize(FontSize.xs)
+                                .margin({ top: 4 })
                                 .fontColor($r('app.color.wf_tertiary_text'))
                                 .maxLines(1)
                                 .textOverflow({ overflow: TextOverflow.Ellipsis })
                         }
                     }
                     .alignItems(HorizontalAlign.Start)
-                    .padding({ left: 10 })
+                    .padding({ left: 12 })
                     .layoutWeight(1)
                 }
                 .width('100%')
                 .justifyContent(FlexAlign.Start)
-                .padding(10)
+                .padding(12)
             }
             .stateStyles({
                 pressed: {
@@ -433,22 +434,22 @@ export default struct SearchResultView {
 
     @Builder
     searchResultCategoryHeader(title: string) {        Text(title)
-            .padding({ left: 10 })
+            .padding({ left: 12 })
             .width('100%')
             .height(32)
             .fontColor($r('app.color.wf_secondary_text'))
-            .fontSize(13)
+            .fontSize(FontSize.sm)
             .backgroundColor($r('app.color.wf_primary_background_color'))
     }
 
     @Builder
     searchResultCategoryFooter(title: string, action: () => void) {
         Text(title)
-            .padding({ left: 10 })
+            .padding({ left: 12 })
             .width('100%')
             .height(32)
             .fontColor($r('app.color.wf_primary'))
-            .fontSize(13)
+            .fontSize(FontSize.sm)
             .onClick(action)
     }
 

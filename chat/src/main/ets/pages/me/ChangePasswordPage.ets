@@ -5,6 +5,7 @@ import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo';
 import { SlideVerifyView, SlideVerifyViewDelegate } from '@wfc/uikit/src/main/ets/view/SlideVerifyView';
 import { inputMethod } from '@kit.IMEKit';
 import Config from '@wfc/client/src/main/ets/config';
+import { FontSize, Radius } from '@wfc/uikit/src/main/ets/common/design/Tokens'
 
 @Component
 export default struct ChangePasswordPage {
@@ -31,7 +32,7 @@ export default struct ChangePasswordPage {
                 // 原有的修改密码界面
                 Column() {
                     Row() {
-                        Text($r('app.string.original_password')).width(70)
+                        Text($r('app.string.original_password')).width(72)
                             .fontColor($r('app.color.wf_primary_text'))
                         TextInput({
                             text: this.originalPassword,
@@ -39,13 +40,13 @@ export default struct ChangePasswordPage {
                             controller: this.controller
                         })
                             .placeholderColor($r('app.color.wf_tertiary_text'))
-                            .placeholderFont({ size: 14, weight: 400 })
+                            .placeholderFont({ size: 16, weight: 400 })
                             .caretColor($r('app.color.wf_primary'))
                             .layoutWeight(1)
                             .height(40)
                             .margin({ left: 20 })
-                            .fontSize(14)
-                            .borderRadius(4)
+                            .fontSize(FontSize.sm)
+                            .borderRadius(Radius.sm)
                             .type(InputType.Password)
                             .fontColor($r('app.color.wf_primary_text'))
                             .backgroundColor(Color.Transparent)
@@ -56,7 +57,7 @@ export default struct ChangePasswordPage {
                     }
 
                     Row() {
-                        Text($r('app.string.new_password')).width(70)
+                        Text($r('app.string.new_password')).width(72)
                             .fontColor($r('app.color.wf_primary_text'))
                         TextInput({
                             text: this.password,
@@ -64,13 +65,13 @@ export default struct ChangePasswordPage {
                             controller: this.controller
                         })
                             .placeholderColor($r('app.color.wf_tertiary_text'))
-                            .placeholderFont({ size: 14, weight: 400 })
+                            .placeholderFont({ size: 16, weight: 400 })
                             .caretColor($r('app.color.wf_primary'))
                             .layoutWeight(1)
                             .height(40)
                             .margin({ left: 20 })
-                            .fontSize(14)
-                            .borderRadius(4)
+                            .fontSize(FontSize.sm)
+                            .borderRadius(Radius.sm)
                             .type(InputType.Password)
                             .fontColor($r('app.color.wf_primary_text'))
                             .backgroundColor(Color.Transparent)
@@ -78,10 +79,10 @@ export default struct ChangePasswordPage {
                             .onChange((value: string) => {
                                 this.password = value
                             })
-                    }.margin({top: 16})
+                    }.margin({ top: 16 })
 
                     Row() {
-                        Text($r('app.string.confirm_password')).width(70)
+                        Text($r('app.string.confirm_password')).width(72)
                             .fontColor($r('app.color.wf_primary_text'))
                         TextInput({
                             text: this.confirmPassword,
@@ -89,13 +90,13 @@ export default struct ChangePasswordPage {
                             controller: this.controller
                         })
                             .placeholderColor($r('app.color.wf_tertiary_text'))
-                            .placeholderFont({ size: 14, weight: 400 })
+                            .placeholderFont({ size: 16, weight: 400 })
                             .caretColor($r('app.color.wf_primary'))
                             .layoutWeight(1)
                             .height(40)
                             .margin({ left: 20 })
-                            .fontSize(14)
-                            .borderRadius(4)
+                            .fontSize(FontSize.sm)
+                            .borderRadius(Radius.sm)
                             .type(InputType.Password)
                             .fontColor($r('app.color.wf_primary_text'))
                             .backgroundColor(Color.Transparent)
@@ -103,7 +104,7 @@ export default struct ChangePasswordPage {
                             .onChange((value: string) => {
                                 this.confirmPassword = value
                             })
-                    }.margin({top: 16})
+                    }.margin({ top: 16 })
 
                     Row() {
                         Button({ type: ButtonType.Normal, stateEffect: true }) {
@@ -111,12 +112,12 @@ export default struct ChangePasswordPage {
                                 if (this.isProgress) {
                                     LoadingProgress().width(20).height(20).margin({ left: 12 }).color(Color.White)
                                 }
-                                Text($r('app.string.btn_reset_password')).fontColor(Color.White).margin({ left: 5 })
+                                Text($r('app.string.btn_reset_password')).fontColor(Color.White).margin({ left: 4 })
                             }.alignItems(VerticalAlign.Center)
                         }
-                        .borderRadius(8)
+                        .borderRadius(Radius.lg)
                         .backgroundColor($r('app.color.wf_primary'))
-                        .width(90)
+                        .width(92)
                         .height(40)
                         .focusable(true)
                         .focusOnTouch(true)
@@ -124,7 +125,7 @@ export default struct ChangePasswordPage {
                             && this.password.length > 0 && this.confirmPassword.length > 0)
                         .type(ButtonType.Normal)
                         .width('100%')
-                        .borderRadius(4)
+                        .borderRadius(Radius.sm)
                         .onClick(() => {
                             // 判断密码是否一致
                             if (this.password != this.confirmPassword) {

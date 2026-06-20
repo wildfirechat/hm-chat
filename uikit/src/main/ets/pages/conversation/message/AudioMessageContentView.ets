@@ -95,6 +95,7 @@ export default struct AudioMessageContentView {
     }
 
     startAudioPlayingAnimation() {
+        this.stopAudioPlayingAnimation()
         this.animatorInternal = setInterval(() => {
             this.animatorImageIndex++
             if (this.animatorImageIndex > 3) {
@@ -111,6 +112,7 @@ export default struct AudioMessageContentView {
 
     stopAudioPlayingAnimation() {
         clearInterval(this.animatorInternal)
+        this.animatorInternal = 0
         this.animatorImageIndex = 3
         this.imageUrl = this.defaultAudioIndicatorImageUrl()
     }

@@ -36,7 +36,7 @@ import avengineKit from '@wfc/avenginekit'
 import CallState from '@wfc/avenginekit/src/main/ets/wfc/av/engine/callState'
 import pipHelper from '@wfc/uikit/src/main/ets/pages/voip/pipHelper'
 import window from '@ohos.window'
-import { FontSize , scaledSize } from '@wfc/uikit/src/main/ets/common/design/Tokens'
+import { FontSize, scaledSize } from '@wfc/uikit/src/main/ets/common/design/Tokens'
 import { deviceInfo } from '@kit.BasicServicesKit'
 
 const TAG = 'Main';
@@ -145,7 +145,7 @@ struct MainPage {
                     'conversation': new Conversation(ConversationType.Group, groupId, 0)
                 } as Record<string, Object>)
             }, err => {
-
+                showToast('创建群组失败：' + err)
             })
         }
     }

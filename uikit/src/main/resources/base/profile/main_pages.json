@@ -19,6 +19,7 @@
         "pages/mm/MMPreviewPage",
         "pages/misc/WebViewPage",
         "pages/misc/WebViewPageWithRouter",
+        "pages/misc/WaterMarkPage",
         "pages/chatroom/ChatroomListPage",
         "pages/voip/SingleAudioCallPage",
         "pages/voip/SingleVideoCallPage",

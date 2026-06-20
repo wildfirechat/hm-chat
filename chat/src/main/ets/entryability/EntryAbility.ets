@@ -23,6 +23,7 @@ import { systemShare } from '@kit.ShareKit';
 import { copyFileUri, fileNameFromFileUri, fileSize } from '@wfc/uikit/src/main/ets/common/utils/FileUtil';
 import { isImage, isVideo } from '@wfc/uikit/src/main/ets/util/helper';
 import { ShareItem } from '@wfc/uikit/src/main/ets/common/Types';
+import waterMarkWindow from '@wfc/uikit/src/main/ets/common/watermark/waterMarkWindow';
 
 export default class EntryAbility extends UIAbility {
     private windowStage?: window.WindowStage
@@ -251,6 +252,11 @@ export default class EntryAbility extends UIAbility {
             }
             if (url === 'pages/MainPage') {
                 this.isMaiPageLoaded = true;
+                // 登录进入主页面后，创建全局水印子窗口（覆盖所有页面及弹窗）
+                waterMarkWindow.create(this.windowStage!);
+            } else {
+                // 退出登录回到登录页时，销毁水印子窗口
+                waterMarkWindow.destroy();
             }
 
             PersistentStorage.persistProp(LAST_LOGIN_MOBILE_KEY, '');

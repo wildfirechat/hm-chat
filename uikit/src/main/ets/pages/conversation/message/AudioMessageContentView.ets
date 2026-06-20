@@ -4,6 +4,8 @@ import AudioPlayManager from '../audio/AudioPlayManager'
 import Config from '@wfc/client/src/main/ets/config'
 import MessageStatus from '@wfc/client/src/main/ets/wfc/messages/messageStatus'
 import { Radius } from '../../../common/design/Tokens'
+import { voicePlayModeManager } from '../audio/VoicePlayModeManager'
+import { showTipToast } from '../../../common/utils/TipToast'
 
 @Component
 export default struct AudioMessageContentView {
@@ -66,7 +68,12 @@ export default struct AudioMessageContentView {
         // source-of-truth status + persistence by stable messageId so it survives list rebuilds.
         this.message.status = MessageStatus.Played
         this.onPlayStart?.(this.message.messageId)
-        this.audioPlayManager!.startProximitySensing()
+        let earpiece = voicePlayModeManager.isEarpiece()
+        if (earpiece) {
+            // 听筒播放：提示用户贴近手机聆听
+            this.showEarpieceHint()
+        }
+        this.audioPlayManager!.startProximitySensing(earpiece)
         this.audioPlayManager!.play(url, true, (err?: Error) => {
             this.stopAudioPlayingAnimation()
             if (err && err.message === AudioPlayManager.INTERRUPTED) {
@@ -80,6 +87,11 @@ export default struct AudioMessageContentView {
             // between consecutive messages.
             this.onPlayComplete?.(this.message.messageId, err)
         })
+    }
+
+    // 仿微信：听筒模式下点击语音，居中弹出带「耳朵」图标的提示，约 2s 后自动消失。
+    showEarpieceHint() {
+        showTipToast(this.getUIContext(), '听筒播放，请贴近手机聆听', $r('app.media.ic_voice_earpiece'))
     }
 
     startAudioPlayingAnimation() {

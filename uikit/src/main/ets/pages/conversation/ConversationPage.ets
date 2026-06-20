@@ -47,6 +47,7 @@ import { sendMediaResult, uri2MediaResult } from '../../helper/mediaHelper'
 import { RecentPhotoComponent, RecentPhotoOptions, PhotoSource, RecentPhotoCheckResultCallback, RecentPhotoClickCallback } from '@ohos.file.RecentPhotoComponent'
 import { BaseItemInfo } from '@ohos.file.PhotoPickerComponent'
 import { FontSize, Radius, scaledSize } from '../../common/design/Tokens'
+import { STORAGE_KEY_VOICE_EARPIECE } from './audio/VoicePlayModeManager'
 
 // 「猜你想发送」：上次消失（发送/取消/其他操作）的时间。
 // API 12 的最近图片控件回调拿不到图片标识，故用「动态时间窗口」实现“同一张只提示一次”：
@@ -56,6 +57,8 @@ let lastRecentPhotoDismissMillis = 0
 @Component
 export default struct ConversationPage {
     @StorageProp('fontScale') fontScale: number = 1.0;
+    // 语音「听筒播放」全局开关：开启时标题栏显示「耳朵」图标。
+    @StorageProp(STORAGE_KEY_VOICE_EARPIECE) voiceEarpieceMode: boolean = false
     @State toReeditText: string = ''
     @State title: string = ''
     @State conversation?: Conversation = undefined
@@ -773,6 +776,43 @@ export default struct ConversationPage {
         return Math.max(0, rowTopY - size - 4)
     }
 
+    // 自定义标题区宽度不受约束，百分比 maxWidth 不生效；用实测页宽减去左右返回/更多按钮与耳朵图标的占位，
+    // 算出标题文本可用的最大宽度（vp），才能正确触发中间截断。
+    titleMaxWidth(): number {
+        let avail = (this.pageWidth > 0 ? this.pageWidth : 360) - 112
+        if (this.voiceEarpieceMode) {
+            avail -= 46
+        }
+        return avail > 1 ? avail : 1
+    }
+
+    @Builder
+    ConversationTitleBuilder() {
+        Row() {
+            Text(this.title)
+                .fontSize(18)
+                .fontWeight(FontWeight.Medium)
+                .fontColor($r('app.color.wf_primary_text'))
+                .maxLines(1)
+                .textOverflow({ overflow: TextOverflow.Ellipsis })
+                // 标题过长时从中间截断，保证末尾的「耳朵」图标始终可见
+                .ellipsisMode(EllipsisMode.CENTER)
+                .constraintSize({ maxWidth: this.titleMaxWidth() })
+                .minFontScale(1)
+                .maxFontScale(1)
+            if (this.voiceEarpieceMode) {
+                Image($r('app.media.ic_voice_earpiece'))
+                    .width(18)
+                    .height(18)
+                    .fillColor($r('app.color.wf_secondary_text'))
+                    .margin({ left: 6 })
+            }
+        }
+        .height('100%')
+        .margin({ left: 12 })
+        .alignItems(VerticalAlign.Center)
+    }
+
     build() {
         NavDestination() {
             Stack() {
@@ -1161,7 +1201,12 @@ export default struct ConversationPage {
                     .padding(8)
                     .backgroundColor($r('app.color.wf_background'))
                     .borderRadius(Radius.xl)
-                    .shadow({ radius: 8, color: '#30000000', offsetX: 0, offsetY: -3 })
+                    .shadow({
+                        radius: 8,
+                        color: '#30000000',
+                        offsetX: 0,
+                        offsetY: -3
+                    })
                     .margin({ bottom: this.inputPanelHeight + 4, right: 12 })
                 }
 
@@ -1187,7 +1232,12 @@ export default struct ConversationPage {
                     .padding(8)
                     .backgroundColor($r('app.color.wf_background'))
                     .borderRadius(Radius.xl)
-                    .shadow({ radius: 8, color: '#30000000', offsetX: 0, offsetY: -3 })
+                    .shadow({
+                        radius: 8,
+                        color: '#30000000',
+                        offsetX: 0,
+                        offsetY: -3
+                    })
                     .opacity(this.recentPhotoExists ? 1 : 0)
                     .margin({ bottom: this.inputPanelHeight + 4, right: 12 })
                 }
@@ -1247,7 +1297,11 @@ export default struct ConversationPage {
             windowStage?.getUIContext().setKeyboardAvoidMode(KeyboardAvoidMode.OFFSET);
         })
         .mode(NavDestinationMode.STANDARD)
-        .title(this.title)
+        .title({
+            builder: () => {
+                this.ConversationTitleBuilder()
+            }, height: TitleHeight.MainOnly
+        })
         .menus([
             {
                 value: '',

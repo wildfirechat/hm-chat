@@ -6,6 +6,7 @@ import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import MessageContentType from '@wfc/client/src/main/ets/wfc/messages/messageContentType'
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType'
 import AudioPlayManager from '../audio/AudioPlayManager'
+import { voicePlayModeManager, STORAGE_KEY_VOICE_EARPIECE } from '../audio/VoicePlayModeManager'
 import ReadReceipt from '../model/readReceipt'
 import AudioMessageContentView from './AudioMessageContentView'
 import CallStartMessageContentView from './CallStartMessageContentView'
@@ -53,6 +54,8 @@ export default struct NormaMessageContentView {
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
 
     @State textMessageSelectedText:string = ''
+    // 语音播放模式（听筒/扬声器）全局开关；变化时重建上下文菜单以刷新「听筒播放/扬声器播放」项的文案与图标。
+    @StorageProp(STORAGE_KEY_VOICE_EARPIECE) @Watch('updateCurrentMessageContextMenu') voiceEarpieceMode: boolean = false
 
     enableReceipt: boolean = false
 
@@ -191,6 +194,18 @@ export default struct NormaMessageContentView {
     // filter 方法，需要根据 textMessageSelectedText 做一些判断
     messageContextMenus = () => {
         let menus: MessageContextMenuItem[] = [
+            {
+                title: voicePlayModeManager.isEarpiece() ? '扬声器播放' : '听筒播放',
+                tag: 'voicePlayMode',
+                icon: voicePlayModeManager.isEarpiece() ? $r('app.media.ic_voice_speaker') : $r('app.media.ic_voice_earpiece'),
+                action: () => {
+                    let earpiece = voicePlayModeManager.toggle(getContext(this).getApplicationContext())
+                    showToast(earpiece ? '已切换为听筒播放' : '已切换为扬声器播放')
+                },
+                filter: () => {
+                    return this.message.messageContent.type === MessageContentType.Voice
+                }
+            },
             {
                 title: '删除',
                 tag: 'delete',

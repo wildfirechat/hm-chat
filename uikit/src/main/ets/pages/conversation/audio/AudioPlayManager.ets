@@ -48,6 +48,10 @@ export default class AudioPlayManager {
     private lastNear: boolean = false
     // Desired output for voice-message playback: true = speaker, false = earpiece.
     private desiredSpeakerOn: boolean = true
+    // When true, the user globally chose earpiece playback: force the earpiece and ignore the
+    // proximity sensor's far->speaker routing (the explicit choice wins). The proximity screen
+    // lock is still held so the screen turns off when held to the ear.
+    private earpieceMode: boolean = false
 
     init(context: common.Context) {
         this.release();
@@ -207,13 +211,15 @@ export default class AudioPlayManager {
 
     // Begin proximity handling for a playback: hold the screen-control lock and watch the sensor
     // to route audio (speaker <-> earpiece) and restart playback on each transition.
-    startProximitySensing() {
+    startProximitySensing(earpieceMode: boolean = false) {
         if (this.proximitySensing) {
             return;
         }
         this.proximitySensing = true;
+        this.earpieceMode = earpieceMode;
         this.lastNear = false;
-        this.setSpeakerOn(true);
+        // Earpiece mode starts on the earpiece; speaker mode starts on the loudspeaker.
+        this.setSpeakerOn(!earpieceMode);
 
         if (this.screenLock !== undefined) {
             try {
@@ -234,6 +240,11 @@ export default class AudioPlayManager {
                     return; // ignore repeats / the initial baseline report
                 }
                 this.lastNear = near;
+                if (this.earpieceMode) {
+                    // Earpiece is forced by the global setting; the screen lock still drives screen-off,
+                    // but the audio route must not be flipped back to the speaker when held far.
+                    return;
+                }
                 this.setSpeakerOn(!near);
                 // Restart the current voice message from the beginning on the device switch.
                 this.restartCurrentPlayback();
@@ -249,6 +260,7 @@ export default class AudioPlayManager {
             return;
         }
         this.proximitySensing = false;
+        this.earpieceMode = false;
         try {
             sensor.off(sensor.SensorId.PROXIMITY);
         } catch (e) {

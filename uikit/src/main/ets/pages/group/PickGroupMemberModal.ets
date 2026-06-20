@@ -13,6 +13,7 @@ export default struct PickGroupMemberModal {
 
     public groupId: string = ''
     public title: string = ''
+    public singleCheck: boolean = false
 
     @State checkedUsers: UserInfo[] = []
     @State checkedEmployees: Employee[] = []
@@ -22,12 +23,14 @@ export default struct PickGroupMemberModal {
 
     uncheckableUserIds: string[] = []
     initialCheckedUserIds: string[] = []
+    excludeUserIds: string[] = []
     onPickResult?: (users: UserInfo[]) => void = undefined
 
     private userInfos: UserInfo[] = []
 
     aboutToAppear() {
         let groupMemberIds = wfc.getGroupMemberIds(this.groupId, false)
+            .filter((uid: string) => this.excludeUserIds.indexOf(uid) === -1)
         this.userInfos = wfc.getUserInfos(groupMemberIds, '')
     }
 
@@ -63,7 +66,8 @@ export default struct PickGroupMemberModal {
                         uncheckableUserIds: this.uncheckableUserIds,
                         initialCheckedUserIds: this.initialCheckedUserIds,
                         showCategory: true,
-                        showSearchView: true
+                        showSearchView: true,
+                        singleCheck: this.singleCheck
                     })
                 }
                 .height('100%')

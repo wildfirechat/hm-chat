@@ -2,8 +2,6 @@ import { UIUserInfo } from '../common/Types'
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
 import { FontSize, Radius, scaledSize, LayoutScale } from '../common/design/Tokens'
 
-let isChangeTriggeredByClick: boolean = false
-
 @Preview
 @Component
 export default struct CheckableUserItemView {
@@ -43,14 +41,6 @@ export default struct CheckableUserItemView {
                 Checkbox()
                     .select(this.isChecked() || this.initialChecked)
                     .enabled(this.enable)
-                    .onChange((value: boolean) => {
-                        if (isChangeTriggeredByClick) {
-                            isChangeTriggeredByClick = false
-                            return
-                        }
-                        this._checked = value
-                        this.onCheckUser && this.onCheckUser(this.uiUserInfo.userInfo, this._checked)
-                    })
                     .responseRegion({
                         x: 0,
                         y: 0,
@@ -75,8 +65,10 @@ export default struct CheckableUserItemView {
             .padding({ left: this.paddingLeft, right: this.paddingRight })
             .onClick(event => {
                 if (this.enable) {
-                    isChangeTriggeredByClick = true
-                    this._checked = !this._checked
+                    // The checkbox itself isn't tappable (zero responseRegion); the row click is the
+                    // single source of truth. Derive the next state from isChecked() so radio
+                    // (singleCheck) mode stays consistent when switching between members.
+                    this._checked = !this.isChecked()
                     this.onCheckUser && this.onCheckUser(this.uiUserInfo.userInfo, this._checked)
                 }
             })

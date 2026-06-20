@@ -6,16 +6,63 @@ import BottomActionSheetDialog from '../../view/BottomActionSheetDialog'
 import ModifyGroupInfoType from '@wfc/client/src/main/ets/wfc/model/modifyGroupInfoType'
 import { showToast } from '../../common/utils/Toast'
 import GroupType from '@wfc/client/src/main/ets/wfc/model/groupType'
+import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
+import PickGroupMemberModal from './PickGroupMemberModal'
 
 @Component
 export default struct GroupManagePage {
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
     @State groupInfo?: GroupInfo = undefined
+    @State showPickGroupMemberModal: boolean = false
 
     aboutToAppear() {
         let params = this.mainNavPathStack.getParamByIndex(this.mainNavPathStack.size() - 1) as Record<string, Object>;
         this.groupInfo = params['groupInfo'] as GroupInfo
 
+    }
+
+    isGroupOwner(): boolean {
+        return this.groupInfo?.owner === wfc.getUserId()
+    }
+
+    @Builder
+    pickNewOwnerModal(onPickResult: (userInfos: UserInfo[]) => void) {
+        PickGroupMemberModal({
+            groupId: this.groupInfo?.target,
+            title: '转让群主',
+            showPickGroupMemberModal: $showPickGroupMemberModal,
+            singleCheck: true,
+            excludeUserIds: [this.groupInfo!.owner],
+            onPickResult: onPickResult
+        })
+            .height('100%')
+            .width('100%')
+            .margin({ top: px2vp(AppStorage.get<number>('SafeAreaTopHeight')) })
+            .backgroundColor($r('app.color.wf_background'))
+    }
+
+    transferGroup(newOwner: UserInfo) {
+        AlertDialog.show({
+            title: '转让群主',
+            message: `确定将群主转让给 ${newOwner.displayName} 吗？转让后您将自动变为普通成员。`,
+            primaryButton: {
+                value: '确定',
+                fontColor: $r('app.color.wf_danger'),
+                action: () => {
+                    wfc.transferGroup(this.groupInfo!.target, newOwner.uid, [0], null, () => {
+                        showToast('转让群主成功')
+                        this.mainNavPathStack.pop()
+                    }, err => {
+                        showToast('转让群主失败 ' + err)
+                    })
+                }
+            },
+            secondaryButton: {
+                value: '取消',
+                action: () => {
+                }
+            }
+        })
     }
 
     joinType() {
@@ -69,13 +116,30 @@ export default struct GroupManagePage {
                         })
                     OptionItemView({
                         title: '成员权限',
-                        showDivider: false,
+                        showDivider: this.isGroupOwner(),
                     })
                         .onClick(() => {
                             this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.GroupMemberPermissionPage, {
                                 'groupInfo': this.groupInfo
                             } as Record<string, Object>)
                         })
+                    if (this.isGroupOwner()) {
+                        OptionItemView({
+                            title: '转让群主',
+                            showDivider: false,
+                        })
+                            .bindContentCover($$this.showPickGroupMemberModal, this.pickNewOwnerModal((userInfos: UserInfo[]) => {
+                                this.showPickGroupMemberModal = false
+                                if (userInfos?.length) {
+                                    this.transferGroup(userInfos[0])
+                                }
+                            }), {
+                                modalTransition: ModalTransition.DEFAULT
+                            })
+                            .onClick(() => {
+                                this.showPickGroupMemberModal = true
+                            })
+                    }
                 }
 
                 Column() {
@@ -247,6 +311,5 @@ export default struct GroupManagePage {
         .title('群管理')
         .height('100%')
         .width('100%')
-        .backgroundColor($r('app.color.wf_primary_background_color'))
     }
 }

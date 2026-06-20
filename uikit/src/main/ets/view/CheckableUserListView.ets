@@ -27,6 +27,7 @@ export default struct CheckableUserListView {
     showSearchView: boolean = false
     showOrganization: boolean = false
     showFavGroup: boolean = false
+    singleCheck: boolean = false
     @State organizations?: Organization[] = []
     private checkedUserListScroller: Scroller = new Scroller()
     // @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
@@ -67,14 +68,18 @@ export default struct CheckableUserListView {
     }
 
     onCheckUser = (info: UserInfo, checked?: boolean) => {
-        let index = this.checkedUsers.findIndex(checkedUser => checkedUser.uid === info.uid)
-        if (checked) {
-            if (index < 0) {
-                this.checkedUsers.push(info)
-            }
+        if (this.singleCheck) {
+            this.checkedUsers = checked ? [info] : []
         } else {
-            if (index >= 0) {
-                this.checkedUsers.splice(index, 1)
+            let index = this.checkedUsers.findIndex(checkedUser => checkedUser.uid === info.uid)
+            if (checked) {
+                if (index < 0) {
+                    this.checkedUsers.push(info)
+                }
+            } else {
+                if (index >= 0) {
+                    this.checkedUsers.splice(index, 1)
+                }
             }
         }
 

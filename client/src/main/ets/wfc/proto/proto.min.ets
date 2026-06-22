@@ -2801,6 +2801,12 @@ class WfcImpl {
         return Message.fromProtoMessage(JSON.parse(mStr));
     }
 
+    insertMessageEx2(conversation: Conversation, sender: string, messageContent: MessageContent, status: number, notify = false, toUsers: string[] = [], serverTime = 0): Message | null {
+        let protoMessageContent = messageContent.encode();
+        let mStr: string = protoProxy.insertMessage(JSON.stringify(conversation), sender, JSON.stringify(protoMessageContent), status, notify, toUsers, serverTime);
+        return Message.fromProtoMessage(JSON.parse(mStr));
+    }
+
     async updateMessageContent(messageId: number, messageContent: MessageContent) {
         let protoMessageContent = messageContent.encode();
         protoProxy.updateMessage(messageId, JSON.stringify(protoMessageContent));

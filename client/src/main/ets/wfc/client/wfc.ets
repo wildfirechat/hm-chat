@@ -2251,6 +2251,22 @@ export class WfcManager {
     }
 
     /**
+     * 插入消息
+     * @param {Conversation} conversation 目标会话
+     * @param {string} sender 发送者
+     * @param {MessageContent} messageContent 具体的消息内容，一定要求是{@link MessageContent} 的子类，不能是普通的object
+     * @param {number} status 消息状态，可选值参考{@link MessageStatus}
+     * @param {boolean} notify 是否触发onReceiveMessage
+     * @param {[string]} toUsers 定向发送给会话中的某些用户；为空，则发给所有人；另外对单聊会话，本参数无效
+     * @param {Number} serverTime 服务器时间，精度到毫秒
+     *
+     * @return {Message} 插入的消息
+     */
+    insertMessageEx2(conversation: Conversation, sender: string, messageContent: MessageContent, status: number, notify = false, toUsers: string[] = [], serverTime = 0): Message | null {
+        return impl.insertMessageEx2(conversation, sender, messageContent, status, notify, toUsers, serverTime);
+    }
+
+    /**
      * 更新消息
      * @param {number} messageId 消息id
      * @param {MessageContent} messageContent 具体的消息内容，一定要求是{@link MessageContent} 的子类，不能是普通的object

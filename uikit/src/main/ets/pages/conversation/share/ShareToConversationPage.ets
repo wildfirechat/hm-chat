@@ -15,9 +15,8 @@ import LinkMessageContent from '@wfc/client/src/main/ets/wfc/messages/linkMessag
 import MessageContent from '@wfc/client/src/main/ets/wfc/messages/messageContent'
 import { SearchModule, ShareItem } from '../../../common/Types'
 import ConversationInfoDataSource from '../../datasource/ConversationInfoDataSource'
-import { imageThumbnail, videoThumbnail } from '../../../helper/imageVideoHelper'
+import { imageThumbnailFromFilePath, videoThumbnailFromFilePath } from '../../../helper/imageVideoHelper'
 import { showToast } from '../../../common/utils/Toast'
-import fileUri from '@ohos.file.fileuri'
 import { window } from '@kit.ArkUI'
 import { FontSize, Radius } from '../../../common/design/Tokens'
 
@@ -79,12 +78,16 @@ export default struct ShareToConversationPage {
                     return link
                 }
                 case 'image': {
-                    let thumbnail = await imageThumbnail(getContext(this), fileUri.getUriFromPath(item.filePath!), { width: 200, height: 200 })
-                    return new ImageMessageContent(item.filePath, '', thumbnail)
+                    // 分享的文件已拷贝到沙箱 cacheDir，需从文件路径直接解码缩略图（不经过媒体库）。
+                    let t = await imageThumbnailFromFilePath(item.filePath!)
+                    let content = new ImageMessageContent(item.filePath, '', t.thumbnail)
+                    content.imageWidth = t.width
+                    content.imageHeight = t.height
+                    return content
                 }
                 case 'video': {
-                    let durationAndThumbnail = await videoThumbnail(getContext(this), fileUri.getUriFromPath(item.filePath!), { width: 200, height: 200 })
-                    return new VideoMessageContent(item.filePath, '', durationAndThumbnail.thumbnail, durationAndThumbnail.duration)
+                    let t = await videoThumbnailFromFilePath(item.filePath!)
+                    return new VideoMessageContent(item.filePath, '', t.thumbnail, t.duration)
                 }
                 default:
                     return new FileMessageContent(item.filePath, '', item.name ?? '', item.size ?? 0)

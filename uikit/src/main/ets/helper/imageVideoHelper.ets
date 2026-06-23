@@ -2,11 +2,128 @@ import { Size } from '@kit.ArkUI';
 import { dataSharePredicates } from '@kit.ArkData';
 import photoAccessHelper from '@ohos.file.photoAccessHelper';
 import image from '@ohos.multimedia.image';
+import { media } from '@kit.MediaKit';
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc';
 import fs from '@ohos.file.fs';
 import { Context } from '@kit.AbilityKit';
 import { VideoDurationAndThumbnail } from '../common/Types';
+import { getImageSizeByOrgSizeToWeChat } from '../util/wechatImageUtil';
 
+export interface ImageThumbnailResult {
+    thumbnail: string; // base64，不含 data 头部
+    width: number;
+    height: number;
+}
+
+export interface VideoThumbnailResult {
+    thumbnail: string; // base64，不含 data 头部
+    duration: number; // 毫秒
+    width: number;
+    height: number;
+}
+
+/**
+ * 从沙箱内的本地图片文件路径生成缩略图（不经过媒体库，适用于分享拷贝到 cacheDir 的文件）。
+ * 缩略图尺寸按微信展示算法依据原图宽高计算，参考 mediaHelper.uri2MediaResult。
+ *
+ * @param filePath 沙箱内图片绝对路径
+ * @param maxImageSize 压缩后图片大小，单位 K，默认 20，<=0 时不进行大小压缩
+ */
+export async function imageThumbnailFromFilePath(filePath: string, maxImageSize = 20): Promise<ImageThumbnailResult> {
+    let result: ImageThumbnailResult = { thumbnail: '', width: 0, height: 0 };
+    let file: fs.File | undefined;
+    try {
+        file = await fs.open(filePath, fs.OpenMode.READ_ONLY);
+        const imageSource: image.ImageSource = image.createImageSource(file.fd);
+        const imageInfo: image.ImageInfo = await imageSource.getImageInfo();
+        const orgWidth = imageInfo.size.width;
+        const orgHeight = imageInfo.size.height;
+        result.width = orgWidth;
+        result.height = orgHeight;
+
+        const thumbnailSize: Size = getImageSizeByOrgSizeToWeChat(orgWidth, orgHeight);
+        const pixelMap: image.PixelMap = await imageSource.createPixelMap({
+            desiredSize: { width: thumbnailSize.width, height: thumbnailSize.height }
+        });
+        if (pixelMap) {
+            let data: ArrayBuffer = maxImageSize > 0 ? await compressImage(pixelMap, maxImageSize) : await packing(pixelMap, 50);
+            result.thumbnail = wfc.arrayBuffer_to_b64(data);
+            pixelMap.release();
+        }
+        imageSource.release();
+    } catch (e) {
+        console.error('imageThumbnailFromFilePath error', e);
+    } finally {
+        if (file) {
+            fs.closeSync(file);
+        }
+    }
+    return result;
+}
+
+/**
+ * 从沙箱内的本地视频文件路径生成缩略图及时长（不经过媒体库，适用于分享拷贝到 cacheDir 的文件）。
+ * 通过 AVMetadataExtractor 读取时长与原始宽高，AVImageGenerator 取首帧，缩略图尺寸按微信展示算法计算。
+ *
+ * @param filePath 沙箱内视频绝对路径
+ * @param maxImageSize 压缩后图片大小，单位 K，默认 20，<=0 时不进行大小压缩
+ */
+export async function videoThumbnailFromFilePath(filePath: string, maxImageSize = 20): Promise<VideoThumbnailResult> {
+    let result: VideoThumbnailResult = { thumbnail: '', duration: 0, width: 0, height: 0 };
+    // 元数据与缩略图各用一个独立 fd，避免同一句柄被两个实例同时读写（系统不允许）。
+    let metaFile: fs.File | undefined;
+    let frameFile: fs.File | undefined;
+    let extractor: media.AVMetadataExtractor | undefined;
+    let generator: media.AVImageGenerator | undefined;
+    try {
+        metaFile = await fs.open(filePath, fs.OpenMode.READ_ONLY);
+        extractor = await media.createAVMetadataExtractor();
+        extractor.fdSrc = { fd: metaFile.fd };
+        const metadata: media.AVMetadata = await extractor.fetchMetadata();
+        result.duration = metadata.duration ? Number.parseInt(metadata.duration) : 0;
+        result.width = metadata.videoWidth ? Number.parseInt(metadata.videoWidth) : 0;
+        result.height = metadata.videoHeight ? Number.parseInt(metadata.videoHeight) : 0;
+        await extractor.release();
+        extractor = undefined;
+
+        frameFile = await fs.open(filePath, fs.OpenMode.READ_ONLY);
+        generator = await media.createAVImageGenerator();
+        generator.fdSrc = { fd: frameFile.fd };
+        const thumbnailSize: Size = getImageSizeByOrgSizeToWeChat(result.width, result.height);
+        const pixelMap: image.PixelMap = await generator.fetchFrameByTime(0,
+            media.AVImageQueryOptions.AV_IMAGE_QUERY_NEXT_SYNC,
+            { width: thumbnailSize.width, height: thumbnailSize.height });
+        if (pixelMap) {
+            let data: ArrayBuffer = maxImageSize > 0 ? await compressImage(pixelMap, maxImageSize) : await packing(pixelMap, 50);
+            result.thumbnail = wfc.arrayBuffer_to_b64(data);
+            pixelMap.release();
+        }
+        await generator.release();
+        generator = undefined;
+    } catch (e) {
+        console.error('videoThumbnailFromFilePath error', e);
+    } finally {
+        if (extractor) {
+            try {
+                await extractor.release();
+            } catch (e) {
+            }
+        }
+        if (generator) {
+            try {
+                await generator.release();
+            } catch (e) {
+            }
+        }
+        if (metaFile) {
+            fs.closeSync(metaFile);
+        }
+        if (frameFile) {
+            fs.closeSync(frameFile);
+        }
+    }
+    return result;
+}
 
 /**
  *
@@ -144,7 +261,6 @@ export async function imageSize(uri: string): Promise<Size> {
 
     return imageInfo.size
 }
-
 
 // 参考自：https://gitee.com/harmonyos-cases/cases/blob/master/CommonAppDevelopment/feature/imagecompression/src/main/ets/view/ImageCompression.ets
 /**

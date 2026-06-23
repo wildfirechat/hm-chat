@@ -6,6 +6,7 @@ import wfc from '@wfc/client'
 import CallSessionCallback from '@wfc/avenginekit/src/main/ets/wfc/av/engine/callSessionCallback'
 import ParticipantProfile from '@wfc/avenginekit/src/main/ets/wfc/av/engine/participantProfile'
 import { AVCastPicker } from '@kit.AVSessionKit'
+import PickGroupMemberModal from '../group/PickGroupMemberModal'
 import { timestampFormat } from '../../util/helper'
 import { PiPWindow } from '@kit.ArkUI'
 import VoipPiPNodeController from './VoipPiPNodeController'
@@ -24,6 +25,7 @@ export default struct MultiAudioCallPage {
     @State targetUserInfos?: UserInfo[] = []
     @State participantProfiles?: ParticipantProfile[] = []
     @State duration: string = '00:00'
+    @State showPickGroupMemberModal: boolean = false
     private updateDurationInterval: number = 0
 
     private pipController?: PiPWindow.PiPController;
@@ -126,6 +128,28 @@ export default struct MultiAudioCallPage {
     onPageHide(): void {
     }
 
+    participantIdsIncludeSelf() {
+        return [...this.callSession?.getParticipantIds()!, wfc.getUserId()]
+    }
+
+    @Builder
+    pickGroupMemberModal() {
+        PickGroupMemberModal({
+            groupId: this.callSession?.conversation?.target,
+            title: '选择群成员',
+            showPickGroupMemberModal: $showPickGroupMemberModal,
+            initialCheckedUserIds: this.participantIdsIncludeSelf(),
+            uncheckableUserIds: this.participantIdsIncludeSelf(),
+            onPickResult: (users: UserInfo[]) => {
+                this.callSession?.inviteNewParticipants(users.map(user => user.uid), '', false)
+            }
+        })
+            .height('100%')
+            .width('100%')
+            .margin({ top: px2vp(AppStorage.get<number>('SafeAreaTopHeight')) })
+            .backgroundColor($r('app.color.wf_background'))
+    }
+
     @Builder
     incomingView() {
         Column() {
@@ -186,6 +210,9 @@ export default struct MultiAudioCallPage {
                             .fontSize(FontSize.sm)
                             .fontColor(Color.White)
                     }
+                    .justifyContent(FlexAlign.Center)
+                    .alignItems(HorizontalAlign.Center)
+                    .layoutWeight(1)
 
                     Column() {
                         Image($r('app.media.av_voice_answer'))
@@ -201,6 +228,9 @@ export default struct MultiAudioCallPage {
                             .fontSize(FontSize.sm)
                             .fontColor(Color.White)
                     }
+                    .justifyContent(FlexAlign.Center)
+                    .alignItems(HorizontalAlign.Center)
+                    .layoutWeight(1)
                 }
                 .padding({ top: 20 })
                 .width('100%')
@@ -264,8 +294,28 @@ export default struct MultiAudioCallPage {
                                     })
                                 this.mainNavPathStack.pop()
                             })
+
+                        Image($r('app.media.ic_tab_add'))
+                            .fillColor(Color.Red)
+                            .draggable(false)
+                            .width(52)
+                            .height(52)
+                            .padding(12)
+                            .onClick(() => {
+                                this.showPickGroupMemberModal = true;
+                            })
+                            .bindContentCover(this.showPickGroupMemberModal, this.pickGroupMemberModal(), {
+                                modalTransition: ModalTransition.DEFAULT,
+                                onAppear: () => {
+                                },
+
+                                onDisappear: () => {
+                                    this.showPickGroupMemberModal = false
+                                }
+                            })
                     }
                     .width('100%')
+                    .justifyContent(FlexAlign.SpaceBetween)
                 }
                 .width('100%')
                 .padding(20)
@@ -343,6 +393,9 @@ export default struct MultiAudioCallPage {
                             .fontSize(FontSize.sm)
                             .fontColor(Color.White)
                     }
+                    .justifyContent(FlexAlign.Center)
+                    .alignItems(HorizontalAlign.Center)
+                    .layoutWeight(1)
 
                     Column() {
                         Image($r('app.media.av_hang_up'))
@@ -357,6 +410,9 @@ export default struct MultiAudioCallPage {
                             .fontSize(FontSize.sm)
                             .fontColor(Color.White)
                     }
+                    .justifyContent(FlexAlign.Center)
+                    .alignItems(HorizontalAlign.Center)
+                    .layoutWeight(1)
 
                     Column() {
                         AVCastPicker({ normalColor: Color.White, activeColor: Color.White })
@@ -369,6 +425,9 @@ export default struct MultiAudioCallPage {
                             .fontSize(FontSize.sm)
                             .fontColor(Color.White)
                     }
+                    .justifyContent(FlexAlign.Center)
+                    .alignItems(HorizontalAlign.Center)
+                    .layoutWeight(1)
                 }
                 .padding({ top: 20 })
                 .width('100%')

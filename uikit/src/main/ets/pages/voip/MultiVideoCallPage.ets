@@ -368,6 +368,9 @@ export default struct MultiVideoCallPage {
                                 .fontSize(FontSize.sm)
                                 .fontColor(Color.White)
                         }
+                        .justifyContent(FlexAlign.Center)
+                        .alignItems(HorizontalAlign.Center)
+                        .layoutWeight(1)
 
                         if (this.callSession?.status === CallState.STATUS_INCOMING) {
                             Column() {
@@ -384,6 +387,9 @@ export default struct MultiVideoCallPage {
                                     .fontSize(FontSize.sm)
                                     .fontColor(Color.White)
                             }
+                            .justifyContent(FlexAlign.Center)
+                            .alignItems(HorizontalAlign.Center)
+                            .layoutWeight(1)
                         }
                     }
                     .padding({ top: 20 })
@@ -413,6 +419,9 @@ export default struct MultiVideoCallPage {
                                 .fontSize(FontSize.sm)
                                 .fontColor(Color.White)
                         }
+                        .justifyContent(FlexAlign.Center)
+                        .alignItems(HorizontalAlign.Center)
+                        .layoutWeight(1)
 
                         Column() {
                             Image($r('app.media.av_hang_up'))
@@ -427,6 +436,9 @@ export default struct MultiVideoCallPage {
                                 .fontSize(FontSize.sm)
                                 .fontColor(Color.White)
                         }
+                        .justifyContent(FlexAlign.Center)
+                        .alignItems(HorizontalAlign.Center)
+                        .layoutWeight(1)
 
                         Column() {
                             // Image($r('app.media.av_handfree'))
@@ -448,6 +460,9 @@ export default struct MultiVideoCallPage {
                                 .fontSize(FontSize.sm)
                                 .fontColor(Color.White)
                         }
+                        .justifyContent(FlexAlign.Center)
+                        .alignItems(HorizontalAlign.Center)
+                        .layoutWeight(1)
                     }
                     .padding({ top: 20 })
                     .width('100%')

@@ -339,6 +339,9 @@ export default struct SingleAudioCallPage {
                                         .fontSize(FontSize.sm)
                                         .fontColor(Color.White)
                                 }
+                                .justifyContent(FlexAlign.Center)
+                                .alignItems(HorizontalAlign.Center)
+                                .layoutWeight(1)
 
                                 Column() {
                                     Image($r('app.media.av_hang_up'))
@@ -354,6 +357,9 @@ export default struct SingleAudioCallPage {
                                         .fontSize(FontSize.sm)
                                         .fontColor(Color.White)
                                 }
+                                .justifyContent(FlexAlign.Center)
+                                .alignItems(HorizontalAlign.Center)
+                                .layoutWeight(1)
 
                                 Column() {
                                     // Image($r('app.media.av_handfree'))
@@ -377,6 +383,8 @@ export default struct SingleAudioCallPage {
                                         .fontColor(Color.White)
                                 }
                                 .justifyContent(FlexAlign.Center)
+                                .alignItems(HorizontalAlign.Center)
+                                .layoutWeight(1)
                             }
                             .padding({ top: 40, bottom: 52 })
                             .width('100%')

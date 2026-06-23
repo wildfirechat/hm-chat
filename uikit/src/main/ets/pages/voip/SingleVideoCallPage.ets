@@ -365,6 +365,9 @@ export default struct SingleVideoCallPage {
                             .fontSize(FontSize.sm)
                             .fontColor(Color.White)
                     }
+                    .justifyContent(FlexAlign.Center)
+                    .alignItems(HorizontalAlign.Center)
+                    .layoutWeight(1)
 
                     Column() {
                         Image($r('app.media.av_hang_up'))
@@ -380,6 +383,9 @@ export default struct SingleVideoCallPage {
                             .fontSize(FontSize.sm)
                             .fontColor(Color.White)
                     }
+                    .justifyContent(FlexAlign.Center)
+                    .alignItems(HorizontalAlign.Center)
+                    .layoutWeight(1)
 
                     Column() {
                         // Image($r('app.media.av_handfree'))
@@ -403,6 +409,8 @@ export default struct SingleVideoCallPage {
                             .fontColor(Color.White)
                     }
                     .justifyContent(FlexAlign.Center)
+                    .alignItems(HorizontalAlign.Center)
+                    .layoutWeight(1)
                 }
                 .margin({ bottom: 32 })
                 .width('100%')
@@ -480,11 +488,11 @@ export default struct SingleVideoCallPage {
                             Column() {
                                 Text(this.targetUserInfo?.displayName)
                                     .fontSize(FontSize.sm)
-                                    .fontColor('#848687')
+                                    .fontColor($r('app.color.wf_secondary_text'))
                                 Text(this.tip())
                                     .margin({ top: 12 })
                                     .fontSize(FontSize.sm)
-                                    .fontColor('#848687')
+                                    .fontColor($r('app.color.wf_secondary_text'))
                             }
                             .height(80)
                             .margin({ left: 12 })

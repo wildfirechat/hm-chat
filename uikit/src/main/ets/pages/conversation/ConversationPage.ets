@@ -1090,6 +1090,9 @@ export default struct ConversationPage {
                                         }
                                     })
                                     .listDirection(Axis.Vertical)
+                                    // 聊天列表底部对齐：视口因软键盘/表情/加号面板变矮时，内容随之
+                                    // 上移、始终贴住底部，与面板一起平滑顶起（微信效果），无需事后再滚动一下。
+                                    .stackFromEnd(true)
                                     .height('100%')
                                     .width('100%')
                                 }

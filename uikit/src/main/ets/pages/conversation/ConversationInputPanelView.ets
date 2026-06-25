@@ -418,6 +418,9 @@ export default struct ConversationInputPanelView {
         }
     }
 
+    // 软键盘/表情/加号面板弹出时，消息列表已通过 List.stackFromEnd(true) 底部对齐：视口变矮时内容
+    // 会随之上移、始终贴住底部，与面板一起平滑顶起，无需再额外滚动。此处仅作兜底（如运行环境不支持
+    // stackFromEnd 时仍能贴底）；正常情况下列表已在底部，isAtEnd() 为真，不会触发多余滚动。
     private scrollMessageListToBottom() {
         if (!this.messageListScroller?.isAtEnd()) {
             animateTo({ curve: curves.responsiveSpringMotion() }, () => {

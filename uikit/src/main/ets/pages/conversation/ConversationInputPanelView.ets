@@ -52,6 +52,9 @@ import AudioRecorderDialog, { AudioRecorderDialogState } from './audio/AudioReco
 import { playRawSound } from '../../helper/soundEffectHelper'
 
 const INPUT_ICON_WIDTH = 30
+// 软键盘与自定义面板显示/隐藏的过渡动画时间
+const PANEL_ANIM_COLLAPSE = 250
+const PANEL_ANIM_EXPAND = 250
 
 interface ConversationExt {
     title: string,
@@ -74,8 +77,18 @@ export default struct ConversationInputPanelView {
     @State selectionStart: number = 0
     @State selectionEnd: number = 0
     @State @Watch('onFocusStateChanged') textInputFocused: boolean = false
-    @State @Watch('onExpandConversationInputPanelView') showEmojiPanel: boolean = false
-    @State @Watch('onExpandConversationInputPanelView') showExtPanel: boolean = false
+    @State showEmojiPanel: boolean = false
+    @State showExtPanel: boolean = false
+    // 底部表情/加号面板的「显示高度」，用 animateTo 改变它来模拟软键盘的缓慢顶起/落下。
+    // 配合 List.stackFromEnd，消息列表随之平滑移动。
+    @State bottomPanelHeight: number = 0
+    // 输入栏（图标/输入框那一行）的实测高度。this.keyboardHeight 比软键盘真正占据的高度多了一个
+    // 输入栏的高度，面板高度需扣掉它，才能与软键盘等高，且与软键盘升起/落下时幅度相同而相互抵消。
+    @State private inputBarHeight: number = 56
+    // 软键盘当前是否弹起（用于判断「从软键盘切到面板」走键盘同步、还是「无键盘直接展开面板」走动画）。
+    private keyboardShown: boolean = false
+    // avoidAreaChange 去重：本机会连续回调多次相同的键盘避让高度。
+    private lastKbAvoidPx: number = -1
     @State showMentionSheet: boolean = false
     @State @Watch('onKeyboardHeightChanged') keyboardHeight: number = 320
     @State showAudioRecorderButton: boolean = false
@@ -399,23 +412,69 @@ export default struct ConversationInputPanelView {
             return
         }
         this.recentPhotoRequested = false
-        this.showEmojiPanel = false
-        this.showExtPanel = false
-        this.setKeyboardAvoidMode(KeyboardAvoidMode.RESIZE)
+        this.hidePanel()
         setTimeout(() => {
             this.collapseConversationInputPanelViewTimestamp = 0
         }, 100)
     }
 
-    onExpandConversationInputPanelView(propName: string) {
-        console.log('on onExpandConversationInputPanelView', this.showEmojiPanel, this.showExtPanel);
-        if (this.showEmojiPanel || this.showExtPanel) {
-            this.scrollMessageListToBottom();
-            this.onSuggestionsChange?.([])
-        } else {
-            // Panel just closed — re-evaluate suggestions for current text
+    // 面板高度 = 软键盘在内容区撑开的真实高度（来自 avoidAreaChange）。与键盘等高，互切时输入框基本不动。
+    private panelTargetHeight(): number {
+        return this.keyboardHeight
+    }
+
+    // 软键盘显示与隐藏状态处理，配合 KeyboardAvoidMode.NONE 模式实现零抖动无缝切换
+    private onKeyboardShownChange(shown: boolean) {
+        if (shown) {
+            this.showExtPanel = false
+            this.showEmojiPanel = false
             this.onTextChange()
+            animateTo({ duration: PANEL_ANIM_COLLAPSE, curve: Curve.Friction }, () => {
+                this.bottomPanelHeight = this.keyboardHeight
+            })
+        } else {
+            if (!this.showExtPanel && !this.showEmojiPanel) {
+                animateTo({ duration: PANEL_ANIM_COLLAPSE, curve: Curve.Friction }, () => {
+                    this.bottomPanelHeight = 0
+                })
+            }
         }
+        this.scrollMessageListToBottom()
+    }
+
+    // 展开表情(emoji=true)或加号(emoji=false)面板。
+    // 点击按钮已使输入框失焦 → 软键盘收起，avoidAreaChange 会与键盘收起并行把面板撑起（输入框不动）。
+    // 若当前没有软键盘（直接点加号/表情），则这里直接用动画把面板撑起。
+    private showPanel(emoji: boolean) {
+        this.showExtPanel = !emoji
+        this.showEmojiPanel = emoji
+        this.onSuggestionsChange?.([])
+        // 列表若不在最底部，先滚动到底，再升起面板（微信效果）
+        this.scrollMessageListToBottom()
+        if (!this.keyboardShown) {
+            animateTo({ duration: PANEL_ANIM_EXPAND, curve: Curve.Friction }, () => {
+                this.bottomPanelHeight = this.panelTargetHeight()
+            })
+        }
+    }
+
+    // 收起面板到「无」（点消息列表/语音/频道菜单）：缓慢落下到 0，结束后卸载面板内容。
+    private hidePanel() {
+        if (!this.showExtPanel && !this.showEmojiPanel) {
+            return
+        }
+        animateTo({
+            duration: PANEL_ANIM_COLLAPSE,
+            curve: Curve.Friction,
+            onFinish: () => {
+                this.showExtPanel = false
+                this.showEmojiPanel = false
+                // 面板关闭后，按当前文本重新计算表情建议
+                this.onTextChange()
+            }
+        }, () => {
+            this.bottomPanelHeight = 0
+        })
     }
 
     // 软键盘/表情/加号面板弹出时，消息列表已通过 List.stackFromEnd(true) 底部对齐：视口变矮时内容
@@ -423,7 +482,8 @@ export default struct ConversationInputPanelView {
     // stackFromEnd 时仍能贴底）；正常情况下列表已在底部，isAtEnd() 为真，不会触发多余滚动。
     private scrollMessageListToBottom() {
         if (!this.messageListScroller?.isAtEnd()) {
-            animateTo({ curve: curves.responsiveSpringMotion() }, () => {
+            // 用无过冲的缓动曲线，避免像弹簧那样冲过头再回弹
+            animateTo({ duration: 200, curve: Curve.EaseOut }, () => {
                 this.messageListScroller!.scrollEdge(Edge.Bottom);
             })
         }
@@ -492,35 +552,36 @@ export default struct ConversationInputPanelView {
             autoCancel: false
         })
 
-        // 计算软键盘高度
+        // 本机不回调 keyboardHeightChange；改用 avoidAreaChange(TYPE_KEYBOARD) 获取真实软键盘高度与显隐时机。
         window.getLastWindow(getContext(this)).then(currentWindow => {
-            let property = currentWindow.getWindowProperties();
-
             let preference = preferences.getPreferencesSync(getContext(this).getApplicationContext(), { name: 'wfcstore' })
-            let keyboardHeight = preference.getSync('keyboardHeight', 0) as number
-            if (keyboardHeight > 0) {
-                this.keyboardHeight = keyboardHeight;
+            let cached = preference.getSync('keyboardHeight', 0) as number
+            if (cached > 0) {
+                this.keyboardHeight = cached;
             }
-            // currentWindow.on('avoidAreaChange', async data => {
-            //     if (data.type === window.AvoidAreaType.TYPE_KEYBOARD) {
-            //         this.messageListScroller!.scrollEdge(Edge.Bottom);
-            //         if (data.area.bottomRect.height > 0) {
-            //             this.scrollMessageListToBottom()
-            //         }
-            //     }
-            // })
-            currentWindow.on('keyboardHeightChange', async (data: number) => {
-
-                if (data > 0) {
-                    let type = window.AvoidAreaType.TYPE_NAVIGATION_INDICATOR; // 底部导航条
-                    let navIndicatorAvoidArea = currentWindow.getWindowAvoidArea(type);
-                    let h = px2vp(data - navIndicatorAvoidArea.bottomRect.height);
-                    if (this.keyboardHeight !== h) {
+            // 软键盘显隐：avoidAreaChange 在键盘开始显隐时给出最终避让高度（本机会连续回调多次相同值，用 lastKbAvoidPx 去重）。
+            // 这里在键盘「开始」显隐的同一时刻、用与键盘同样的时长动画面板，使二者并行、输入框基本不动。
+            currentWindow.on('avoidAreaChange', (data) => {
+                if (data.type !== window.AvoidAreaType.TYPE_KEYBOARD) {
+                    return
+                }
+                let kbPx = data.area.bottomRect.height
+                if (kbPx === this.lastKbAvoidPx) {
+                    return
+                }
+                this.lastKbAvoidPx = kbPx
+                let shown = kbPx > 0
+                this.keyboardShown = shown
+                if (shown) {
+                    // 真实软键盘在内容区撑开的高度 = 键盘避让高度 - 底部导航条安全区。
+                    let navPx = currentWindow.getWindowAvoidArea(window.AvoidAreaType.TYPE_NAVIGATION_INDICATOR).bottomRect.height
+                    let h = px2vp(kbPx - navPx)
+                    if (h > 0 && Math.abs(this.keyboardHeight - h) > 0.5) {
                         this.keyboardHeight = h
-                        preference.put('keyboardHeight', h);
+                        preference.put('keyboardHeight', h)
                     }
                 }
-                this.scrollMessageListToBottom()
+                this.onKeyboardShownChange(shown)
             })
         })
 
@@ -531,9 +592,9 @@ export default struct ConversationInputPanelView {
             this.channelInfo = wfc.getChannelInfo(this.conversation.target)
         }
 
-        // 避免点击会话列表项进入会话界面时，看起来底部 tabBar 向下移位现象（该现象不明显）
+        // 软键盘不自动避让，通过占位高度手动避让以防抖动
         setTimeout(() => {
-            this.setKeyboardAvoidMode(KeyboardAvoidMode.RESIZE);
+            this.setKeyboardAvoidMode(KeyboardAvoidMode.NONE);
         }, 100)
 
         if (this.conversationInfo.draft) {
@@ -782,8 +843,7 @@ export default struct ConversationInputPanelView {
                                 if (this.channelInfo!.menus.length > 0) {
                                     this.showChannelMenu = !this.showChannelMenu
                                     this.showAudioRecorderButton = false
-                                    this.showExtPanel = false
-                                    this.showEmojiPanel = false
+                                    this.hidePanel()
                                 } else {
                                     showToast('频道暂未配置菜单')
                                 }
@@ -824,8 +884,7 @@ export default struct ConversationInputPanelView {
                             .onClick(() => {
                                 this.recentPhotoRequested = false
                                 this.showAudioRecorderButton = !this.showAudioRecorderButton
-                                this.showExtPanel = false
-                                this.showEmojiPanel = false
+                                this.hidePanel()
                             })
                         if (!this.showAudioRecorderButton) {
                             Column() {
@@ -842,6 +901,9 @@ export default struct ConversationInputPanelView {
                                     .onFocus(() => {
                                         this.recentPhotoRequested = false
                                         this.textInputFocused = true
+                                        // 列表若不在最底部，先滚动到底，再升起键盘（微信效果）
+                                        this.scrollMessageListToBottom()
+                                        // 面板→软键盘的收面板动画由 avoidAreaChange（键盘升起时）与键盘并行处理，这里无需另处理。
                                     })
                                     .focusable(this.collapseConversationInputPanelViewTimestamp === 0)
                                     .onBlur(() => {
@@ -952,11 +1014,12 @@ export default struct ConversationInputPanelView {
                             .focusOnTouch(true)
                             .onClick(() => {
                                 this.recentPhotoRequested = false
-                                this.showExtPanel = false
-                                this.showEmojiPanel = !this.showEmojiPanel;
-                                if (!this.showEmojiPanel) {
+                                if (this.showEmojiPanel) {
+                                    // 已是表情面板 → 切回软键盘：聚焦输入框升起键盘，onFocus 里会收起面板
                                     focusControl.requestFocus('textInput')
-                                    this.setKeyboardAvoidMode(KeyboardAvoidMode.RESIZE)
+                                } else {
+                                    // 切到表情面板（点击按钮已移走输入框焦点 → 软键盘落下）
+                                    this.showPanel(true)
                                 }
                                 this.textInputFocused = false;
                                 this.showAudioRecorderButton = false
@@ -1005,8 +1068,8 @@ export default struct ConversationInputPanelView {
                                 .onClick(() => {
                                     // 点加号：切换「猜你想发送」（再次点击则消失）；是否真正显示由 ConversationPage 按是否有新截图决定
                                     this.recentPhotoRequested = !this.recentPhotoRequested
-                                    this.showExtPanel = true
-                                    this.showEmojiPanel = false
+                                    // 切到加号面板（点击按钮已移走输入框焦点 → 软键盘落下）
+                                    this.showPanel(false)
                                     this.showAudioRecorderButton = false
                                 })
                         }
@@ -1015,86 +1078,93 @@ export default struct ConversationInputPanelView {
                 .alignItems(VerticalAlign.Bottom)
                 .padding(12)
                 .width('100%')
+                .onAreaChange((_, area) => {
+                    // 实测输入栏高度，用于把面板高度修正到与软键盘等高
+                    this.inputBarHeight = area.height as number
+                })
 
-                if (this.showExtPanel) {
-                    Grid() {
-                        ForEach(this.conversationExts, (ext: ConversationExt) => {
-                            GridItem() {
-                                Column() {
-                                    Image(ext.icon)
-                                        .width(60)
-                                        .draggable(false)
-                                        .height(60)
-                                        .borderRadius(Radius.lg)
-                                        .stateStyles({
-                                            pressed: {
-                                                .backgroundColor($r('app.color.wf_item_pressed'))
-                                            },
-                                            normal: {
-                                                .backgroundColor($r('app.color.wf_background'))
-                                            }
-                                        })
-                                    // 标签宽度不影响格子大小：占满格宽、居中、单行省略，
-                                    // 避免「视频通话」等较长文案把扩展项撑得比别人大
-                                    Text(ext.title)
-                                        .margin({ top: 8 })
-                                        .fontSize(FontSize.xs)
-                                        .fontColor($r('app.color.wf_secondary_text'))
-                                        .width('100%')
-                                        .textAlign(TextAlign.Center)
-                                        .maxLines(1)
-                                        .textOverflow({ overflow: TextOverflow.Ellipsis })
+                // 底部面板区：高度由 bottomPanelHeight 经 animateTo 缓慢变化（模拟软键盘顶起/落下），
+                // clip 裁掉超出部分；内容随当前面板类型切换。高度与软键盘一致，配合 List.stackFromEnd
+                // 让消息列表随之平滑移动。
+                Column() {
+                    if (this.showExtPanel) {
+                        Grid() {
+                            ForEach(this.conversationExts, (ext: ConversationExt) => {
+                                GridItem() {
+                                    Column() {
+                                        Image(ext.icon)
+                                            .width(60)
+                                            .draggable(false)
+                                            .height(60)
+                                            .borderRadius(Radius.lg)
+                                            .stateStyles({
+                                                pressed: {
+                                                    .backgroundColor($r('app.color.wf_item_pressed'))
+                                                },
+                                                normal: {
+                                                    .backgroundColor($r('app.color.wf_background'))
+                                                }
+                                            })
+                                        // 标签宽度不影响格子大小：占满格宽、居中、单行省略，
+                                        // 避免「视频通话」等较长文案把扩展项撑得比别人大
+                                        Text(ext.title)
+                                            .margin({ top: 8 })
+                                            .fontSize(FontSize.xs)
+                                            .fontColor($r('app.color.wf_secondary_text'))
+                                            .width('100%')
+                                            .textAlign(TextAlign.Center)
+                                            .maxLines(1)
+                                            .textOverflow({ overflow: TextOverflow.Ellipsis })
+                                    }
+                                    .width('100%')
+                                    .borderRadius(Radius.sm)
+                                    .padding({ top: 8, bottom: 8 })
+                                    .alignItems(HorizontalAlign.Center)
+                                    .onClick(ext.action)
                                 }
-                                .width('100%')
-                                .borderRadius(Radius.sm)
-                                .padding({ top: 8, bottom: 8 })
-                                .alignItems(HorizontalAlign.Center)
-                                .onClick(ext.action)
-                            }
 
-                        }, (ext: ConversationExt) => ext.title)
-                    }
-                    .columnsTemplate('1fr 1fr 1fr 1fr')
-                    .columnsGap(10)
-                    .rowsGap(10)
-                    .margin(0)
-                    .padding(0)
-                    .width('100%')
-                    .height(this.keyboardHeight)
-                    .backgroundColor($r('app.color.wf_primary_background_color'))
-                    .onAppear(() => {
-                        this.setKeyboardAvoidMode(KeyboardAvoidMode.OFFSET)
-                    })
-                    .bindContentCover(this.showExtContentCoverModal, this.extContentCoverBuilderParam, {
-                        modalTransition: ModalTransition.DEFAULT,
-                        onAppear: () => {
-                        },
-
-                        onDisappear: () => {
-                            this.showExtContentCoverModal = false
+                            }, (ext: ConversationExt) => ext.title)
                         }
-                    })
-                }
-
-                if (this.showEmojiPanel) {
-                    EmojiInputPanelView({
-                        text: $text,
-                        caretPosition: $caretPosition,
-                        selectionStart: this.selectionStart,
-                        selectionEnd: this.selectionEnd,
-                        conversation: this.conversation,
-                        textInputController: this.textInputController,
-                        onPreviewChange: this.onPreviewChange
-                    })
-                        .focusable(true)
-                        .width('100%')
+                        .columnsTemplate('1fr 1fr 1fr 1fr')
+                        .columnsGap(10)
+                        .rowsGap(10)
                         .margin(0)
                         .padding(0)
-                        .height(this.keyboardHeight)
-                        .onAppear(() => {
-                            this.setKeyboardAvoidMode(KeyboardAvoidMode.OFFSET)
+                        .width('100%')
+                        .height('100%')
+                        // 面板靠容器高度动画+裁剪平滑展开，自身不要默认的「从右侧滑入」出现动画
+                        .transition(TransitionEffect.IDENTITY)
+                        .backgroundColor($r('app.color.wf_primary_background_color'))
+                        .bindContentCover(this.showExtContentCoverModal, this.extContentCoverBuilderParam, {
+                            modalTransition: ModalTransition.DEFAULT,
+                            onAppear: () => {
+                            },
+
+                            onDisappear: () => {
+                                this.showExtContentCoverModal = false
+                            }
                         })
+                    } else if (this.showEmojiPanel) {
+                        EmojiInputPanelView({
+                            text: $text,
+                            caretPosition: $caretPosition,
+                            selectionStart: this.selectionStart,
+                            selectionEnd: this.selectionEnd,
+                            conversation: this.conversation,
+                            textInputController: this.textInputController,
+                            onPreviewChange: this.onPreviewChange
+                        })
+                            .focusable(true)
+                            .width('100%')
+                            .margin(0)
+                            .padding(0)
+                            .height('100%')
+                            .transition(TransitionEffect.IDENTITY)
+                    }
                 }
+                .width('100%')
+                .height(this.bottomPanelHeight)
+                .clip(true)
             }
             .enabled(this.enable)
             .onAppear(() => {

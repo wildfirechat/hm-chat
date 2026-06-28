@@ -6,7 +6,7 @@ import DSBridge from './workspace/dsBridge'
 @Component
 export default struct WorkSpaceTab {
     webviewController: web_webview.WebviewController = new web_webview.WebviewController()
-    url: string = Config.OPEN_PLATFORM_WORK_SPACE_URL;
+    url: string = Config.getWorkspaceUrl() || '';
     @State title: string = '加载中'
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
 

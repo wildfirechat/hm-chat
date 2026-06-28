@@ -15,10 +15,19 @@ import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo';
 import { parseHostAndPort } from './Util';
 
 class OrgServer {
-    baseUrl = Config.ORGANIZATION_SERVER;
     authToken = '';
     isServiceAvailable = false;
     private isInitialized = false
+    private currentHostPort = '';
+
+    private baseUrl(): string {
+        let address = Config.getOrganizationServer();
+        if (!address) {
+            console.error('Organization server address not configured');
+            return '';
+        }
+        return address;
+    }
 
     // 神奇，会比 entryAbility 的 onCreate 还早早还行
     constructor() {
@@ -148,7 +157,10 @@ class OrgServer {
     private fillDefaultPortrait(obj: Employee | null): void {
         if (!obj) return;
         if (!obj.portraitUrl || !obj.portraitUrl.startsWith('http')) {
-            obj.portraitUrl = `${Config.APP_SERVER}/avatar?name=${encodeURIComponent(obj.name)}`;
+            let appServer = Config.getAppServer();
+            if (appServer) {
+                obj.portraitUrl = `${appServer}/avatar?name=${encodeURIComponent(obj.name)}`;
+            }
         }
     }
 
@@ -164,34 +176,27 @@ class OrgServer {
         })
 
         // 兼容 Android 端迁移过来的数据
-        let hostPort = parseHostAndPort(this.baseUrl)
-        this.authToken = preference.getSync(`authToken:${hostPort.host}-${hostPort.port}`, '') as string
+        let hostPort = parseHostAndPort(this.baseUrl())
+        this.currentHostPort = `${hostPort.host}-${hostPort.port}`;
+        this.authToken = preference.getSync(`authToken:${this.currentHostPort}`, '') as string
     }
 
-    _post(path: string, data?: string | object): Promise<object> {
-        if (!this.isInitialized) {
+    private _ensureInitialized() {
+        let hostPort = parseHostAndPort(this.baseUrl())
+        let newHostPort = `${hostPort.host}-${hostPort.port}`;
+        if (!this.isInitialized || this.currentHostPort !== newHostPort) {
             this._init()
             this.isInitialized = true
         }
+    }
+
+    _post(path: string, data?: string | object): Promise<object> {
+        this._ensureInitialized()
         return new Promise((resolve, reject) => {
             let httpRequest = http.createHttp();
-            // 用于订阅HTTP响应头，此接口会比request请求先返回。可以根据业务需要订阅此消息
-            // 从API 8开始，使用on('headersReceive', Callback)替代on('headerReceive', AsyncCallback)。 8+
-            // httpRequest.on('headersReceive', (header) => {
-            //     console.info('header: ' + JSON.stringify(header));
-            // if (header.toString() === 'authToken') {
-            //     this.authToken = header.toString();
-            //         let context = GlobalContext.getContext().getObject<common.ApplicationContext>('applicationContext');
-            //         let preference = data_preferences.getPreferencesSync(context, {
-            //             name: 'wfcstore'
-            //         })
-            //         let _url = url.URL.parseURL(this.baseUrl)
-            //         preference.put(`authToken-${_url.host}-${_url.port}`, this.authToken)
-            // }
-            // });
             console.log('request', path, data)
             httpRequest.request(// 填写HTTP请求的URL地址，可以带参数也可以不带参数。URL地址需要开发者自定义。请求的参数可以在extraData中指定
-                this.baseUrl + path,
+                this.baseUrl() + path,
                 {
                     method: http.RequestMethod.POST, // 可选，默认为http.RequestMethod.GET
                     // 开发者根据自身业务需要添加header字段
@@ -234,8 +239,7 @@ class OrgServer {
                             let preference = data_preferences.getPreferencesSync(context?.getApplicationContext(), {
                                 name: 'wfcstore'
                             })
-                            let hostPort = parseHostAndPort(this.baseUrl)
-                            preference.putSync(`authToken:${hostPort.host}-${hostPort.port}`, this.authToken)
+                            preference.putSync(`authToken:${this.currentHostPort}`, this.authToken)
                         }
                         resolve(result.result)
                     } else {

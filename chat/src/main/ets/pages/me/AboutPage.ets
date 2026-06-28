@@ -32,8 +32,8 @@ export default struct AboutPage {
                     + `${versionNo} ${this.version}\n`
                     + `${wfc.getProtoRevision()}\n`
                     // + `${Config.IM_SERVER_HOST}\n`
-                    + `${Config.APP_SERVER}\n`
-                    + `${Config.ORGANIZATION_SERVER}\n`;
+                    + `${(Config.getAppServer() || Config.APP_SERVER)}\n`
+                    + `${Config.getOrganizationServer()}\n`;
 
                 if (uikit.isSupportConference && uikit.isSupportConference()) {
                     info += "高级版音视频\n";

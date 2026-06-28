@@ -45,7 +45,7 @@ export default struct MeetingMinutesMessageContentView {
                 && isFromMinutesRobot
                 && meetingId && meetingId.length > 0) {
                 let encodedConferenceId = encodeURIComponent(meetingId);
-                let url = `${Config.MINUTES_URL}?conferenceId=${encodedConferenceId}`;
+                let url = `${Config.getMinutesUrl()}?conferenceId=${encodedConferenceId}`;
                 this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.WebViewPage, {
                     'url': url,
                     'title': this.content().title || '会议纪要'

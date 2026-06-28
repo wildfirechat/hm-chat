@@ -62,7 +62,7 @@ export default struct AudioMessageContentView {
         this.startAudioPlayingAnimation()
         let url: string = content.remotePath;
         if (this.message.direction === 1 || !content.localPath) {
-            url = Config.AMR_TO_MP3_SERVER_ADDRESS + content.remotePath;
+            url = Config.getAmrToMp3ServerAddress() + content.remotePath;
         }
         // Immediate local feedback (hide red dot on this copy); the parent updates the
         // source-of-truth status + persistence by stable messageId so it survives list rebuilds.

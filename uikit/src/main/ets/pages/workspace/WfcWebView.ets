@@ -59,7 +59,7 @@ export default struct WfcWebView {
                     controller: this.controller
                 })
                 .onPageBegin(async (evt) => {
-                    if (evt.url === Config.OPEN_PLATFORM_WORK_SPACE_URL) {
+                    if (evt.url === Config.getWorkspaceUrl()) {
                         let userId = wfc.getUserId()
                         let p = await data_preferences.getPreferences(getContext(this).getApplicationContext(), 'wfcstore')
                         let openUserId = p.getSync('workspace-userId', '')

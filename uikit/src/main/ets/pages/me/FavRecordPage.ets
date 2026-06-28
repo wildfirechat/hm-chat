@@ -177,7 +177,7 @@ export default struct FavRecordPage {
                 this.playingVoiceId = voiceId
                 let url: string = voiceContent.remotePath
                 if (msg.direction === 1) {
-                    url = Config.AMR_TO_MP3_SERVER_ADDRESS + voiceContent.remotePath
+                    url = Config.getAmrToMp3ServerAddress() + voiceContent.remotePath
                 }
                 this.audioPlayManager.play(url, true, (err?: Error) => {
                     this.playingVoiceId = ''

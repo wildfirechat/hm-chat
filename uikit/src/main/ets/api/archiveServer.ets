@@ -24,24 +24,23 @@ import MessagePayload from '@wfc/client/src/main/ets/wfc/messages/messagePayload
  * 用于从归档服务器加载历史消息
  */
 class ArchiveServer {
-    /// 归档服务基础 URL，例如：http://localhost:8088
-    baseUrl: string = Config.ARCHIVE_SERVER_ADDRESS || '';
     /// 消息ID计数器（用于生成负数消息ID）
     messageIdCounter: number = 0;
 
-    /**
-     * 设置归档服务基础 URL
-     * @param url 基础 URL
-     */
-    setBaseUrl(url: string): void {
-        this.baseUrl = url;
+    baseUrl(): string {
+        let address = Config.getArchiveServerAddress();
+        if (!address) {
+            console.error('Archive server address not configured');
+            return '';
+        }
+        return address;
     }
 
     /**
      * 获取归档服务基础 URL
      */
     getBaseUrl(): string {
-        return this.baseUrl;
+        return this.baseUrl();
     }
 
     /**
@@ -220,13 +219,14 @@ class ArchiveServer {
         authCode?: string
     ): Promise<Record<string, Object>> {
         return new Promise((resolve, reject) => {
-            if (!this.baseUrl || this.baseUrl.length === 0) {
+            const serviceUrl = this.baseUrl();
+            if (!serviceUrl || serviceUrl.length === 0) {
                 reject(new Error('Archive server base URL not set'));
                 return;
             }
 
             const httpRequest = http.createHttp();
-            const url = this.baseUrl + path;
+            const url = serviceUrl + path;
 
             const header: Record<string, string> = {
                 'Content-Type': 'application/json'

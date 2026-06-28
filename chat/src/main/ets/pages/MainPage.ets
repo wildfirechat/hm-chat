@@ -196,7 +196,7 @@ struct MainPage {
             showToast(`请授予相关权限，否则不能正常工作 ${ungrantedPermissions[0]}`)
         }
 
-        if (Config.ORGANIZATION_SERVER) {
+        if (Config.ORGANIZATION_SERVER || Config.ORGANIZATION_SERVER_BACKUP) {
             orgServer.login()
         }
 
@@ -518,7 +518,7 @@ struct MainPage {
                 }
                 .tabBar(this.TabBuilder(this.tabTitles[1], 1, $r('app.media.contacts_press'), $r('app.media.contacts_normal')))
 
-                if (Config.OPEN_PLATFORM_WORK_SPACE_URL) {
+                if (Config.getWorkspaceUrl()) {
                     TabContent() {
                         WorkSpaceTab()
                     }
@@ -553,12 +553,12 @@ struct MainPage {
                 this.title = this.isMeTab ? this.tabTitles[index - 1] : this.tabTitles[index]
             })
             .onAnimationStart((index: number, targetIndex: number) => {
-                const isMe = targetIndex === (Config.OPEN_PLATFORM_WORK_SPACE_URL ? 4 : 3)
+                const isMe = targetIndex === (Config.getWorkspaceUrl() ? 4 : 3)
                 this.isMeTab = isMe
                 this.setStatusBarColor(isMe)
             })
             .onAnimationEnd((index: number) => {
-                const isMe = index === (Config.OPEN_PLATFORM_WORK_SPACE_URL ? 4 : 3)
+                const isMe = index === (Config.getWorkspaceUrl() ? 4 : 3)
                 this.isMeTab = isMe
                 this.setStatusBarColor(isMe)
             })

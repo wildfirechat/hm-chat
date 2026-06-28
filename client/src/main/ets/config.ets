@@ -1,4 +1,5 @@
 import wfc from "./wfc/client/wfc";
+import ConnectionStatus from "./wfc/client/connectionStatus";
 
 export default class Config {
     // 调试用
@@ -23,21 +24,39 @@ export default class Config {
     // 上线建议使用https，使用https更安全。
     //static APP_SERVER = 'http://app.wildfirechat.net:8888';
     static APP_SERVER = 'https://app.wildfirechat.net';
+    // 应用服务备选地址，双网环境下使用。
+    static APP_SERVER_BACKUP = null as string | null;
+
+    // 主网媒体地址前缀，双网环境下用于头像/媒体类消息的 URL 转换。
+    // 只在双网环境下配置，不需要双网时保持为 null。
+    static MAIN_MEDIA_URL_PREFIX = null as string | null;
+
+    // 备网媒体地址前缀，双网环境下用于头像/媒体类消息的 URL 转换。
+    // 只在双网环境下配置，不需要双网时保持为 null。
+    static BACKUP_MEDIA_URL_PREFIX = null as string | null;
 
     // 组织结构服务地址，如果没有部署组织结构服务，或者不需要组织结构的话，可置为 null
     // 组织结构项目：https://github.com/wildfirechat/organization-platform 或 https://gitee.com/wfchat/organization-platform
     static ORGANIZATION_SERVER = 'https://org.wildfirechat.net';
+    // 组织结构服务备选地址，双网环境下使用。
+    static ORGANIZATION_SERVER_BACKUP = null as string | null;
 
     // 接龙服务地址，如果需要接龙功能，请部署接龙服务，然后这里填上接龙服务地址；如果不需要接龙功能，请置为 null
     static COLLECTION_SERVER_ADDRESS = "https://jielong.wildfirechat.net";
+    // 接龙服务备选地址，双网环境下使用。
+    static COLLECTION_SERVER_ADDRESS_BACKUP = null as string | null;
 
     // 投票服务地址，如果需要投票功能，请部署投票服务，然后这里填上投票服务地址；如果不需要投票功能，请置为 null
     static POLL_SERVER_ADDRESS = 'https://poll.wildfirechat.net';
+    // 投票服务备选地址，双网环境下使用。
+    static POLL_SERVER_ADDRESS_BACKUP = null as string | null;
 
     // 归档服务器地址，用于加载历史归档消息
     // 归档服务项目：https://github.com/wildfirechat/archive-server
     // 如果没有部署归档服务，或者不需要加载历史归档消息的话，可置为 null 或空字符串
     static ARCHIVE_SERVER_ADDRESS = ''; //'http://192.168.1.81:8088'
+    // 归档服务备选地址，双网环境下使用。
+    static ARCHIVE_SERVER_ADDRESS_BACKUP = null as string | null;
 
     // 野火二维码 scheme，不要修改，如果需要修改的话，所有端都需要一起修改
     static QR_CODE_PREFIX_PC_SESSION = "wildfirechat://pcsession/";
@@ -63,7 +82,9 @@ export default class Config {
     // html5 audio 标签不能播放amr格式的音频，需要将amr格式转换为mp3格式
     // 本服务传入amr音频文件的地址，将音频文件转换为mp3格式，并以application/octet-stream的格式返回
     // 如果语音消息很多，建议使用cdn
-    static AMR_TO_MP3_SERVER_ADDRESS = Config.APP_SERVER + '/amr2mp3?path=';
+    static getAmrToMp3ServerAddress(): string {
+        return (Config.getAppServer() || Config.APP_SERVER) + '/amr2mp3?path=';
+    }
     // 文件传输助手ID
     static FILE_HELPER_ID = 'wfc_file_transfer';
 
@@ -80,6 +101,8 @@ export default class Config {
     static SECRET_CHAT_MEDIA_DECODE_SERVER_PORT = 7982;
     // 如果不支持工作台，将其置空即可
     static OPEN_PLATFORM_WORK_SPACE_URL = 'https://open.wildfirechat.cn/work.html';
+    // 工作台备选地址，双网环境下使用。
+    static OPEN_PLATFORM_WORK_SPACE_URL_BACKUP = null as string | null;
     static OPEN_PLATFORM_SERVE_PORT = 7983;
 
     // 允许主动加入多人音视频通话
@@ -109,6 +132,8 @@ export default class Config {
 
     // 会议纪要详情页地址
     static MINUTES_URL = "http://101.42.4.222:8883/index.html";
+    // 会议纪要详情页备选地址，双网环境下使用。
+    static MINUTES_URL_BACKUP = null as string | null;
 
     // 用户协议地址
     static USER_AGREEMENT_URL = "https://example.com/user_agreement.html";
@@ -118,6 +143,57 @@ export default class Config {
 
     static getWFCPlatform() {
         return Config.CURRENT_PLATFORM;
+    }
+
+    /**
+     * 根据当前网络状态在主/备地址之间选择。
+     *
+     * @param main 主网地址
+     * @param backup 备网地址
+     * @returns 实际应使用的地址
+     */
+    static selectServer(main: string | null, backup: string | null): string | null {
+        if (!main && !backup) {
+            return null;
+        }
+        if (!backup) {
+            return main;
+        }
+        if (!main) {
+            return backup;
+        }
+        if (wfc.getConnectionStatus() === ConnectionStatus.ConnectionStatusConnected) {
+            return wfc.connectedToMainNetwork() ? main : backup;
+        }
+        return main;
+    }
+
+    static getAppServer(): string | null {
+        return Config.selectServer(Config.APP_SERVER, Config.APP_SERVER_BACKUP);
+    }
+
+    static getOrganizationServer(): string | null {
+        return Config.selectServer(Config.ORGANIZATION_SERVER, Config.ORGANIZATION_SERVER_BACKUP);
+    }
+
+    static getCollectionServerAddress(): string | null {
+        return Config.selectServer(Config.COLLECTION_SERVER_ADDRESS, Config.COLLECTION_SERVER_ADDRESS_BACKUP);
+    }
+
+    static getPollServerAddress(): string | null {
+        return Config.selectServer(Config.POLL_SERVER_ADDRESS, Config.POLL_SERVER_ADDRESS_BACKUP);
+    }
+
+    static getArchiveServerAddress(): string | null {
+        return Config.selectServer(Config.ARCHIVE_SERVER_ADDRESS, Config.ARCHIVE_SERVER_ADDRESS_BACKUP);
+    }
+
+    static getWorkspaceUrl(): string | null {
+        return Config.selectServer(Config.OPEN_PLATFORM_WORK_SPACE_URL, Config.OPEN_PLATFORM_WORK_SPACE_URL_BACKUP);
+    }
+
+    static getMinutesUrl(): string | null {
+        return Config.selectServer(Config.MINUTES_URL, Config.MINUTES_URL_BACKUP);
     }
 
 
@@ -133,10 +209,16 @@ export default class Config {
         if (!url) {
             return url;
         }
-        // 示例代码
-        // 双网环境时，将媒体文件地址切到备选网络
-        if (Config.isUseBackupAddress()) {
-            url = url.replace('oss.xxxx.com', '192.168.2.19');
+        if (!Config.MAIN_MEDIA_URL_PREFIX || !Config.BACKUP_MEDIA_URL_PREFIX) {
+            return url;
+        }
+
+        if (wfc.connectedToMainNetwork()) {
+            // 主网下，把备网媒体前缀替换成主网的
+            url = url.replace(Config.BACKUP_MEDIA_URL_PREFIX, Config.MAIN_MEDIA_URL_PREFIX);
+        } else {
+            // 备网下，把主网媒体前缀替换成备网的
+            url = url.replace(Config.MAIN_MEDIA_URL_PREFIX, Config.BACKUP_MEDIA_URL_PREFIX);
         }
         return url;
     }
@@ -146,10 +228,8 @@ export default class Config {
      * @return {boolean}
      */
     static isUseBackupAddress() {
-        //示例代码
-        let host = wfc.getHost();
-        if (host === '192.168.2.169'/* backupHost */) {
-            return true;
+        if (wfc.getConnectionStatus() === ConnectionStatus.ConnectionStatusConnected) {
+            return !wfc.connectedToMainNetwork();
         }
         return false;
     }

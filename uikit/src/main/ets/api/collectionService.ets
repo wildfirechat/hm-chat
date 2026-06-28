@@ -6,7 +6,14 @@ import { JSONObject } from '@wfc/client/src/main/ets/wfc/type/types';
 import { parseHostAndPort } from './Util';
 
 export class CollectionService {
-    baseUrl = Config.COLLECTION_SERVER_ADDRESS;
+    private baseUrl(): string {
+        let address = Config.getCollectionServerAddress();
+        if (!address) {
+            console.error('Collection server address not configured');
+            return '';
+        }
+        return address;
+    }
 
     createCollection(groupId: string, title: string, desc: string, template: string,
         expireType: number, expireAt: number, maxParticipants: number): Promise<Collection> {
@@ -71,16 +78,17 @@ export class CollectionService {
     }
 
     private postWithAuth<T>(path: string, data?: Record<string, Object>): Promise<T> {
-        if (!this.baseUrl) {
+        const serviceUrl = this.baseUrl();
+        if (!serviceUrl) {
             return Promise.reject(new Error('接龙服务未配置'));
         }
 
         return new Promise((resolve, reject) => {
-            const pair = parseHostAndPort(this.baseUrl);
+            const pair = parseHostAndPort(serviceUrl);
             wfc.getAuthCode('collection', 2, pair.host, (authCode: string) => {
                 const httpRequest = http.createHttp();
                 httpRequest.request(
-                    this.baseUrl + path,
+                    serviceUrl + path,
                     {
                         method: http.RequestMethod.POST,
                         header: {

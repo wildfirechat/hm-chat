@@ -32,7 +32,14 @@ export interface OnPollCallback<T> {
  * 投票服务实现类
  */
 export class PollService {
-    baseUrl = Config.POLL_SERVER_ADDRESS;
+    baseUrl(): string {
+        let address = Config.getPollServerAddress();
+        if (!address) {
+            console.error('Poll server address not configured');
+            return '';
+        }
+        return address;
+    }
 
     /**
      * 创建投票
@@ -180,16 +187,17 @@ export class PollService {
     }
 
     private postWithAuth<T>(path: string, data?: Record<string, Object>): Promise<T> {
-        if (!this.baseUrl) {
+        const serviceUrl = this.baseUrl();
+        if (!serviceUrl) {
             return Promise.reject(new Error('投票服务未配置'));
         }
 
         return new Promise((resolve, reject) => {
-            const pair = parseHostAndPort(this.baseUrl);
+            const pair = parseHostAndPort(serviceUrl);
             wfc.getAuthCode('poll', 2, pair.host, (authCode: string) => {
                 const httpRequest = http.createHttp();
                 httpRequest.request(
-                    this.baseUrl + path,
+                    serviceUrl + path,
                     {
                         method: http.RequestMethod.POST,
                         header: {

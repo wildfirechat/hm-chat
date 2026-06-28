@@ -149,7 +149,7 @@ export default struct ContactListTab {
     }
 
     async loadMyOrganization() {
-        if (!Config.ORGANIZATION_SERVER) {
+        if (!Config.ORGANIZATION_SERVER && !Config.ORGANIZATION_SERVER_BACKUP) {
             return
         }
         let rootOrgs = await orgServer.getRootOrganization()

@@ -16,11 +16,20 @@ import ConferenceInfo from '@wfc/avenginekit/src/main/ets/wfc/av/model/conferenc
 import QRLoginSession from './model/qrLoginSession';
 
 class AppServer {
-    baseUrl = Config.APP_SERVER;
     authToken = '';
     private isInitialized = false
+    private currentHostPort = '';
 
     constructor() {
+    }
+
+    private baseUrl(): string {
+        let address = Config.getAppServer();
+        if (!address) {
+            console.error('AppServer address not configured');
+            return '';
+        }
+        return address;
     }
 
     requestAuthCode(mobile: string, slideVerifyToken?: string) {
@@ -286,15 +295,13 @@ class AppServer {
             name: 'wfcstore'
         })
         // 兼容 Android 端迁移过来的数据
-        let hostPort = parseHostAndPort(this.baseUrl)
-        this.authToken = preference.getSync(`authToken:${hostPort.host}-${hostPort.port}`, '') as string
+        let hostPort = parseHostAndPort(this.baseUrl())
+        this.currentHostPort = `${hostPort.host}-${hostPort.port}`;
+        this.authToken = preference.getSync(`authToken:${this.currentHostPort}`, '') as string
     }
 
     _get(url: string): Promise<Record<string, Object>> {
-        if (!this.isInitialized) {
-            this._init()
-            this.isInitialized = true
-        }
+        this._ensureInitialized()
         return new Promise((resolve, reject) => {
             let httpRequest = http.createHttp();
             httpRequest.request(url, {
@@ -319,17 +326,23 @@ class AppServer {
         })
     }
 
-    _post(path: string, data?: string | Object, rawResponseData = false): Promise<string | object | http.HttpResponse> {
-        if (!this.isInitialized) {
+    private _ensureInitialized() {
+        let hostPort = parseHostAndPort(this.baseUrl())
+        let newHostPort = `${hostPort.host}-${hostPort.port}`;
+        if (!this.isInitialized || this.currentHostPort !== newHostPort) {
             this._init()
             this.isInitialized = true
         }
+    }
+
+    _post(path: string, data?: string | Object, rawResponseData = false): Promise<string | object | http.HttpResponse> {
+        this._ensureInitialized()
         return new Promise((resolve, reject) => {
             let httpRequest = http.createHttp();
 
             console.log('request', path, data)
             httpRequest.request(// 填写HTTP请求的URL地址，可以带参数也可以不带参数。URL地址需要开发者自定义。请求的参数可以在extraData中指定
-                this.baseUrl + path,
+                this.baseUrl() + path,
                 {
                     method: http.RequestMethod.POST, // 可选，默认为http.RequestMethod.GET
                     // 开发者根据自身业务需要添加header字段
@@ -381,8 +394,7 @@ class AppServer {
             let preference = data_preferences.getPreferencesSync(context?.getApplicationContext(), {
                 name: 'wfcstore'
             })
-            let hostPort = parseHostAndPort(this.baseUrl)
-            preference.putSync(`authToken:${hostPort.host}-${hostPort.port}`, this.authToken)
+            preference.putSync(`authToken:${this.currentHostPort}`, this.authToken)
         }
     }
 }

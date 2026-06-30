@@ -291,6 +291,13 @@ export default struct ConversationPage {
         this.conversationInfo = wfc.getConversationInfo(this.conversation)
         this.readEntries = wfc.getConversationRead(this.conversation)
         this.enableReceipt = wfc.isReceiptEnabled() && wfc.isUserReceiptEnabled()
+        if(conversation.type === ConversationType.Single){
+            let targetUserInfo = wfc.getUserInfo(conversation.target, false, '')
+            // bot
+            if(targetUserInfo.type === 1){
+                this.enableReceipt = false;
+            }
+        }
         this.enableGroupReceipt = wfc.isGroupReceiptEnabled()
 
         if (this.conversation.type === ConversationType.Group) {

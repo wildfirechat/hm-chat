@@ -10,12 +10,11 @@ import AudioRecordManager from './audio/AudioRecordManager'
 import fs from '@ohos.file.fs'
 import SoundMessageContent from '@wfc/client/src/main/ets/wfc/messages/soundMessageContent'
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
-import router from '@ohos.router'
 import BottomActionSheetDialog from '../../view/BottomActionSheetDialog'
 import EmojiInputPanelView from './emoji/EmojiInputPanelView'
 import { config as emojiConfig } from './emoji/EmojiAndStickerConfig'
 import { Emoji } from './emoji/emojis'
-import { curves, KeyboardAvoidMode, window } from '@kit.ArkUI'
+import { KeyboardAvoidMode, window } from '@kit.ArkUI'
 import MentionGroupMemberView from './mention/MentionGroupMemberView'
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType'
@@ -24,12 +23,8 @@ import { TextStyleToken, FontSize, Radius } from '../../common/design/Tokens'
 import avenginekit from '@wfc/avenginekit'
 import MessageContent from '@wfc/client/src/main/ets/wfc/messages/messageContent'
 import VideoMessageContent from '@wfc/client/src/main/ets/wfc/messages/videoMessageContent'
-import cameraPicker from '@ohos.multimedia.cameraPicker';
-import media from '@ohos.multimedia.media'
-import photoAccessHelper from '@ohos.file.photoAccessHelper'
 import ConversationInfo from '@wfc/client/src/main/ets/wfc/model/conversationInfo'
-import { imageSize, imageThumbnail, videoThumbnail } from '../../helper/imageVideoHelper'
-import { inputMethod } from '@kit.IMEKit'
+import { imageThumbnail, videoThumbnail } from '../../helper/imageVideoHelper'
 import PickGroupMemberModal from '../group/PickGroupMemberModal'
 import Config from '@wfc/client/src/main/ets/config'
 import FileMessageContent from '@wfc/client/src/main/ets/wfc/messages/fileMessageContent'
@@ -51,10 +46,10 @@ import { checkAndRequestPermission, checkPermissions } from '../../helper/permis
 import AudioRecorderDialog, { AudioRecorderDialogState } from './audio/AudioRecorderDialog'
 import { playRawSound } from '../../helper/soundEffectHelper'
 
-const INPUT_ICON_WIDTH = 30
+const INPUT_ICON_WIDTH = 28
 // 软键盘与自定义面板显示/隐藏的过渡动画时间
-const PANEL_ANIM_COLLAPSE = 250
-const PANEL_ANIM_EXPAND = 250
+const PANEL_ANIM_COLLAPSE = 400
+const PANEL_ANIM_EXPAND = 400
 
 interface ConversationExt {
     title: string,
@@ -149,7 +144,9 @@ export default struct ConversationInputPanelView {
             action: () => {
                 let voipDialogController = new CustomDialogController({
                     builder: BottomActionSheetDialog({
-                        dismiss: () => { voipDialogController.close() },
+                        dismiss: () => {
+                            voipDialogController.close()
+                        },
                         sheets: [
                             {
                                 title: '视频通话',
@@ -310,7 +307,9 @@ export default struct ConversationInputPanelView {
                             this.deleteMessageDialogController = new CustomDialogController({
                                 builder: BottomActionSheetDialog({
                                     title: '删除消息?',
-                                    dismiss: () => { this.deleteMessageDialogController?.close() },
+                                    dismiss: () => {
+                                        this.deleteMessageDialogController?.close()
+                                    },
                                     sheets: [
                                         {
                                             title: '删除本地消息',
@@ -358,7 +357,9 @@ export default struct ConversationInputPanelView {
                 this.forwardMessageDialogController = new CustomDialogController({
                     builder: BottomActionSheetDialog({
                         title: '',
-                        dismiss: () => { this.forwardMessageDialogController?.close() },
+                        dismiss: () => {
+                            this.forwardMessageDialogController?.close()
+                        },
                         sheets: [
                             {
                                 title: '逐条转发',
@@ -507,7 +508,7 @@ export default struct ConversationInputPanelView {
             return
         }
         const matches = this.allStickers.filter(emoji =>
-            emoji.aliases.some(alias => alias !== 'sticker' && alias === trimmed)
+        emoji.aliases.some(alias => alias !== 'sticker' && alias === trimmed)
         )
         this.onSuggestionsChange?.(matches)
     }
@@ -521,7 +522,6 @@ export default struct ConversationInputPanelView {
             text: mentionText
         })
     }
-
     onMentionAll = () => {
         this.showMentionSheet = false;
         let mentionText = '@' + '所有人'
@@ -531,8 +531,7 @@ export default struct ConversationInputPanelView {
             text: mentionText
         })
     }
-
-    onMentionRobot= (userInfo: UserInfo) => {
+    onMentionRobot = (userInfo: UserInfo) => {
         this.showMentionSheet = false;
         let mentionText = '@' + userInfo.displayName
         this.text = this.text + mentionText + ' ';
@@ -836,7 +835,7 @@ export default struct ConversationInputPanelView {
                         Image(this.showChannelMenu ? $r('app.media.ic_chat_keyboard') : $r('app.media.ic_chat_menu'))
                             .draggable(false)
                             .id('channelMenu')
-                            .margin({ right: 12 })
+                            .margin({ right: 12, top: 6, bottom: 6 })
                             .width(INPUT_ICON_WIDTH)
                             .height(INPUT_ICON_WIDTH)
                             .onClick(() => {
@@ -881,6 +880,7 @@ export default struct ConversationInputPanelView {
                             .id('audio')
                             .width(INPUT_ICON_WIDTH)
                             .height(INPUT_ICON_WIDTH)
+                            .margin({top: 6, bottom: 6})
                             .onClick(() => {
                                 this.recentPhotoRequested = false
                                 this.showAudioRecorderButton = !this.showAudioRecorderButton
@@ -920,11 +920,12 @@ export default struct ConversationInputPanelView {
                                     })
                                     .textOverflow(TextOverflow.Clip)
                                     .wordBreak(WordBreak.BREAK_ALL)
-                                    .constraintSize({ maxHeight: 80 })
-                                    .borderRadius(Radius.sm)
+                                    .constraintSize({ maxHeight: 80, minHeight: 40})
+                                    .borderRadius(Radius.md)
                                     .backgroundColor($r('app.color.wf_background'))
                                     .fontColor($r('app.color.wf_primary_text'))
-
+                                    .align(Alignment.Center)
+                                    .alignSelf(ItemAlign.Center)
                                 if (this.quotedMessage) {
                                     Row() {
                                         Text(this.quotedMessage.messageContent.digest(this.quotedMessage))
@@ -1009,6 +1010,7 @@ export default struct ConversationInputPanelView {
                         Image(this.textInputFocused || !this.showEmojiPanel ? $r('app.media.ic_chat_emo') : $r('app.media.ic_chat_keyboard'))
                             .width(INPUT_ICON_WIDTH)
                             .height(INPUT_ICON_WIDTH)
+                            .margin({top: 6, bottom: 6})
                             .focusable(true)
                             .defaultFocus(false)
                             .focusOnTouch(true)
@@ -1027,7 +1029,13 @@ export default struct ConversationInputPanelView {
                         if (this.text.trim().length > 0) {
                             Button('发送')
                                 .type(ButtonType.Normal)
-                                .margin({ left: 12 })
+                                .padding({
+                                    left: 10,
+                                    right: 10,
+                                    top: 6,
+                                    bottom: 6
+                                })
+                                .margin({ left: 12, top: 6, bottom: 6 })
                                 .height(INPUT_ICON_WIDTH)
                                 .borderRadius(Radius.sm)
                                 .onClick(() => {
@@ -1062,7 +1070,7 @@ export default struct ConversationInputPanelView {
                             Image($r('app.media.ic_chat_add'))
                                 .width(INPUT_ICON_WIDTH)
                                 .height(INPUT_ICON_WIDTH)
-                                .margin({ left: 12 })
+                                .margin({ left: 12, top: 6, bottom: 6 })
                                 .focusable(true)
                                 .focusOnTouch(true)
                                 .onClick(() => {
@@ -1076,7 +1084,7 @@ export default struct ConversationInputPanelView {
                     }
                 }
                 .alignItems(VerticalAlign.Bottom)
-                .padding(12)
+                .padding(10)
                 .width('100%')
                 .onAreaChange((_, area) => {
                     // 实测输入栏高度，用于把面板高度修正到与软键盘等高

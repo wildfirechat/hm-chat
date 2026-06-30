@@ -1,4 +1,4 @@
-import { FontSize, Radius } from '../../../common/design/Tokens'
+import { FontSize, LayoutScale, Radius, scaledSize } from '../../../common/design/Tokens'
 export class AudioRecorderDialogState {
     private _cancelListener?: (show: boolean) => void
 
@@ -57,12 +57,12 @@ export default struct AudioRecorderDialog {
                     .backgroundColor(this.showCancelRecordIndicator ? $r('app.color.wf_danger') : $r('app.color.wf_tertiary_text'))
                     .borderRadius(Radius.lg)
                     .textAlign(TextAlign.Center)
-                    .margin({ top: 20 })
-                    .height(40)
-                    .width(160)
+                    .margin({ top: 28 })
+                    .constraintSize({minHeight: 40})
+                    .width(scaledSize(160, LayoutScale.cap))
             }
-            .width(200)
-            .height(200)
+            .width(scaledSize(200, LayoutScale.cap))
+            .height(scaledSize(200, LayoutScale.cap))
             .borderRadius(Radius.xl)
             .backgroundColor($r('app.color.wf_record_view_background_color'))
         }

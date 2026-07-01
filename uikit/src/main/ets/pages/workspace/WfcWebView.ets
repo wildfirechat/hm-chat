@@ -51,6 +51,7 @@ export default struct WfcWebView {
                 .darkMode(this.darkMode)
                 .forceDarkAccess(true)
                 .javaScriptAccess(true)
+                .userAgent(Config.CUSTOM_USER_AGENT)
                 .textZoomRatio(this.fontScale * 100)
                 .javaScriptProxy({
                     object: this.dsBridge,

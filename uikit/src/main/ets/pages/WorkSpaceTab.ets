@@ -10,6 +10,13 @@ export default struct WorkSpaceTab {
     @State title: string = '加载中'
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
 
+    aboutToAppear(): void {
+        try {
+            this.webviewController.setCustomUserAgent(Config.CUSTOM_USER_AGENT)
+        } catch (error) {
+        }
+    }
+
     build() {
         Column() {
             WfcWebView({

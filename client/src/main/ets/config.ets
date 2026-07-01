@@ -141,6 +141,8 @@ export default class Config {
     //  隐私协议地址
     static PRIVACY_AGREEMENT_URL = "https://example.com/user_privacy.html";
 
+    static CUSTOM_USER_AGENT = "Mozilla/5.0 (Tablet; OpenHarmony 6.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36  ArkWeb/6.0.0.130 WF-DSBridge"
+
     static getWFCPlatform() {
         return Config.CURRENT_PLATFORM;
     }

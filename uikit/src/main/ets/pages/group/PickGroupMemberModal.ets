@@ -84,6 +84,7 @@ export default struct PickGroupMemberModal {
         .height('100%')
         .width('100%')
         .navBarPosition(NavBarPosition.Start)
+        .mode(NavigationMode.Stack)
         .menus(this.NavigationMenus())
     }
 

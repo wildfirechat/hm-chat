@@ -74,5 +74,6 @@ export default struct PickFavGroupModal {
         .hideBackButton(false)
         .height('100%')
         .width('100%')
+        .mode(NavigationMode.Stack)
     }
 }

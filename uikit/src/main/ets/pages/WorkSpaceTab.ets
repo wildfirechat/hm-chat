@@ -2,6 +2,7 @@ import web_webview from '@ohos.web.webview'
 import Config from '@wfc/client/src/main/ets/config'
 import WfcWebView from './workspace/WfcWebView'
 import DSBridge from './workspace/dsBridge'
+import { WidthBreakpoint } from '../util/windowSizeManager'
 
 @Component
 export default struct WorkSpaceTab {
@@ -9,6 +10,14 @@ export default struct WorkSpaceTab {
     url: string = Config.getWorkspaceUrl() || '';
     @State title: string = '加载中'
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
+    @StorageProp('widthBreakpoint') @Watch('onWidthBreakpointChange') widthBreakpoint: WidthBreakpoint = 'sm'
+
+    onWidthBreakpointChange() {
+        try {
+            this.webviewController.refresh()
+        } catch (error) {
+        }
+    }
 
     aboutToAppear(): void {
         try {

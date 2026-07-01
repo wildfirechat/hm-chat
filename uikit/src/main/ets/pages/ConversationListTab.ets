@@ -10,6 +10,7 @@ import ConversationInfoItemView from '../view/ConversationInfoItemView'
 import { showToast } from '../common/utils/Toast'
 import data_preferences from '@ohos.data.preferences'
 import { uikitNavigationDestinations } from './uikitNavigationConfig'
+import { openConversation, isWideScreen, conversationIdentity, STORAGE_KEY_ACTIVE_CONVERSATION } from '../util/navUtil'
 import PCOnlineInfo from '@wfc/client/src/main/ets/wfc/model/pcOnlineInfo'
 import ConversationInfoDataSource from './datasource/ConversationInfoDataSource'
 import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
@@ -26,6 +27,14 @@ export default struct ConversationListTab {
     private context?: Context
     private  _loadConversationInfoListDebouncer: number = 0
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
+    // 分栏(平板)下右栏正在展示的会话标识，用于高亮列表当前项
+    @StorageProp(STORAGE_KEY_ACTIVE_CONVERSATION) activeConversationKey: string = ''
+
+    // 分栏下且该会话正是右栏展示的会话时高亮
+    isActiveConversation(info: ConversationInfo): boolean {
+        return isWideScreen() && !!info.conversation
+            && this.activeConversationKey === conversationIdentity(info.conversation!)
+    }
 
     aboutToAppear() {
         console.log('conversationList', 'aboutToAppear')
@@ -282,18 +291,15 @@ export default struct ConversationListTab {
                         ConversationInfoItemView({ conversationInfo: info })
                             .onClick(() => {
                                 wfc.clearConversationUnreadStatus(info.conversation!)
-                                this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ConversationPage, {
-                                    'conversation': info.conversation
-                                } as Record<string, Object>)
+                                openConversation(this.mainNavPathStack, info.conversation!)
                             })
-                            .bindContextMenu(this.MenuBuilder(info), ResponseType.LongPress, { preview: MenuPreviewMode.IMAGE })
+                            .bindContextMenu(this.MenuBuilder(info), ResponseType.LongPress, { preview: MenuPreviewMode.NONE })
                     }
+                    // 分栏下高亮右栏当前会话
+                    .backgroundColor(this.isActiveConversation(info) ? $r('app.color.wf_item_pressed') : $r('app.color.wf_background'))
                     .stateStyles({
                         pressed: {
                             .backgroundColor($r('app.color.wf_item_pressed'))
-                        },
-                        normal: {
-                            .backgroundColor($r('app.color.wf_background'))
                         }
                     })
                 }, (info: ConversationInfo) => this.conversationKey(info))

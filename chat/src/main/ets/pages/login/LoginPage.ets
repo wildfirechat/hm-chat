@@ -342,6 +342,8 @@ struct LoginPage {
             .padding({ left: 16, right: 16 })
             .margin({ top: 120 })
             .width('100%')
+            // Pad/宽屏：限制表单最大宽度并居中（外层 Stack 默认居中），避免输入框横铺整屏；手机不受影响
+            .constraintSize({ maxWidth: 480 })
 
             // 滑动验证弹窗
             if (this.showSlideVerify) {

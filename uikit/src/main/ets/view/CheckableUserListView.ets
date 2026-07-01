@@ -12,6 +12,8 @@ import PickOrganizationMemberModal from '../pages/organization/PickOrganizationM
 import Employee from '../api/model/employee'
 import PickFavGroupModal from '../pages/picker/PickFavGroupModal'
 import { Radius, scaledSize } from '../common/design/Tokens'
+import { isWideScreen } from '../util/navUtil'
+import { PickOrganizationMemberResult } from '../pages/organization/PickOrganizationMemberPage'
 
 @Component
 export default struct CheckableUserListView {
@@ -30,9 +32,10 @@ export default struct CheckableUserListView {
     singleCheck: boolean = false
     @State organizations?: Organization[] = []
     private checkedUserListScroller: Scroller = new Scroller()
-    // @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
+    @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
 
     @State showPickOrganizationModal: boolean = false
+    @State activeOrg?: Organization = undefined
     @Link @Watch('onCheckEmployee') checkedEmployees: Employee[]
     @Link @Watch('onCheckOrganization') checkedOrganizations: Organization[]
     @State showPickFavGroupModal: boolean = false
@@ -125,17 +128,19 @@ export default struct CheckableUserListView {
     }
 
     @Builder
-    pickOrganizationModal(org: Organization) {
-        PickOrganizationMemberModal({
-            showPickOrganizationModal: $showPickOrganizationModal,
-            checkedEmployees: $checkedEmployees,
-            checkedOrganizations: $checkedOrganizations,
-            curOrganization: org
-        })
-            .height('100%')
-            .width('100%')
-            .margin({ top: px2vp(AppStorage.get<number>('SafeAreaTopHeight')) })
-            .backgroundColor($r('app.color.wf_background'))
+    pickOrganizationModal(org?: Organization) {
+        if (org) {
+            PickOrganizationMemberModal({
+                showPickOrganizationModal: $showPickOrganizationModal,
+                checkedEmployees: $checkedEmployees,
+                checkedOrganizations: $checkedOrganizations,
+                curOrganization: org
+            })
+                .height('100%')
+                .width('100%')
+                .margin({ top: px2vp(AppStorage.get<number>('SafeAreaTopHeight')) })
+                .backgroundColor($r('app.color.wf_background'))
+        }
     }
 
     @Builder
@@ -244,27 +249,21 @@ export default struct CheckableUserListView {
                                         }
                                     })
                                     .onClick(() => {
-                                        this.showPickOrganizationModal = true
-                                        // this.mainNavPathStack.pushPathByName(navigationDestinations.PickOrganizationMemberPage, {
-                                        //     'organization': org
-                                        // } as Record<string, Object>)
-                                        // router.pushUrl({
-                                        //     url: 'pages/organization/PickOrganizationMemberPage',
-                                        //     params: {
-                                        //         organization: org
-                                        //     }
-                                        // }, router.RouterMode.Standard)
+                                        if (isWideScreen()) {
+                                            this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.PickOrganizationMemberPage, {
+                                                'organization': org,
+                                                'onChecked': (result: PickOrganizationMemberResult) => {
+                                                    this.checkedEmployees = result.employees
+                                                    this.checkedOrganizations = result.organizations
+                                                }
+                                            } as Record<string, Object>)
+                                        } else {
+                                            this.activeOrg = org
+                                            this.showPickOrganizationModal = true
+                                        }
                                     })
                                 }
                                 .width('100%')
-                                .bindContentCover($$this.showPickOrganizationModal,
-                                    this.pickOrganizationModal(org),
-                                    {
-                                        // transition: TransitionEffect.SLIDE,
-                                        modalTransition: ModalTransition.NONE,
-                                        onDisappear: () => {
-                                        }
-                                    })
                             }, (org: Organization, index: number) => org.id + '')
                         }
 
@@ -293,18 +292,18 @@ export default struct CheckableUserListView {
                                     }
                                 })
                                 .onClick(() => {
-                                    this.showPickFavGroupModal = true
+                                    if (isWideScreen()) {
+                                        this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.PickFavGroupPage, {
+                                            'onCheckFavGroup': (groupInfo: GroupInfo) => {
+                                                this.checkedFavGroupInfo = groupInfo
+                                            }
+                                        } as Record<string, Object>)
+                                    } else {
+                                        this.showPickFavGroupModal = true
+                                    }
                                 })
                             }
                             .width('100%')
-                            .bindContentCover($$this.showPickFavGroupModal,
-                                this.pickSingleFavGroupModal(),
-                                {
-                                    // transition: TransitionEffect.SLIDE,
-                                    modalTransition: ModalTransition.NONE,
-                                    onDisappear: () => {
-                                    }
-                                })
                         }
                     }
                     .width('100%')
@@ -338,6 +337,20 @@ export default struct CheckableUserListView {
         }
         .width('100%')
         .height('100%')
+        .bindContentCover(!isWideScreen() && this.showPickOrganizationModal,
+            this.pickOrganizationModal(this.activeOrg),
+            {
+                modalTransition: ModalTransition.NONE,
+                onDisappear: () => {
+                }
+            })
+        .bindContentCover(!isWideScreen() && this.showPickFavGroupModal,
+            this.pickSingleFavGroupModal(),
+            {
+                modalTransition: ModalTransition.NONE,
+                onDisappear: () => {
+                }
+            })
     }
 }
 

@@ -102,7 +102,7 @@ export default struct TextMessageContentView {
                 if (Config.OPEN_LINK_POLICY === 0) {
                     Text(this.getTextContent())
                         .padding(this.textPadding)
-                        .constraintSize({ minHeight: 40 })
+                        .constraintSize({ minHeight: 40, maxWidth: 560 })
                         .backgroundColor(this.clearBackGround ? Color.Transparent : this.message.direction === 0 ? $r('app.color.wf_sent_bubble_bg') : $r('app.color.wf_received_bubble_bg'))
                         .fontColor($r('app.color.wf_primary_text')).fontSize(TextStyleToken.messageText)
                         .borderRadius(Radius.sm)
@@ -162,7 +162,7 @@ export default struct TextMessageContentView {
                         }, (segment: TextSegment, index: number) => index.toString())
                     }
                         .padding(this.textPadding)
-                        .constraintSize({ minHeight: 40 })
+                        .constraintSize({ minHeight: 40, maxWidth: 560 })
                         .backgroundColor(this.clearBackGround ? Color.Transparent : this.message.direction === 0 ? $r('app.color.wf_sent_bubble_bg') : $r('app.color.wf_received_bubble_bg'))
                         .fontColor($r('app.color.wf_primary_text')).fontSize(TextStyleToken.messageText)
                         .borderRadius(Radius.sm)
@@ -207,7 +207,7 @@ export default struct TextMessageContentView {
                 Text(this.quoteInfoDesc())
                     .padding(this.textPadding)
                     .margin({ top: 8 })
-                    .constraintSize({ minHeight: 40 })
+                    .constraintSize({ minHeight: 40, maxWidth: 560 })
                     .maxLines(2)
                     .textOverflow({ overflow: TextOverflow.Ellipsis })
                     .backgroundColor($r('app.color.wf_primary_background_color'))
@@ -223,7 +223,7 @@ export default struct TextMessageContentView {
             if (Config.OPEN_LINK_POLICY === 0) {
                 Text(this.getTextContent())
                     .padding(this.textPadding)
-                    .constraintSize({ minHeight: 40 })
+                    .constraintSize({ minHeight: 40, maxWidth: 560 })
                     .backgroundColor(this.clearBackGround ? Color.Transparent : this.message.direction === 0 ? $r('app.color.wf_sent_bubble_bg') : $r('app.color.wf_received_bubble_bg'))
                     .fontColor($r('app.color.wf_primary_text')).fontSize(TextStyleToken.messageText)
                     .borderRadius(Radius.sm)
@@ -279,7 +279,7 @@ export default struct TextMessageContentView {
                     }, (segment: TextSegment, index: number) => index.toString())
                 }
                     .padding(this.textPadding)
-                    .constraintSize({ minHeight: 40 })
+                    .constraintSize({ minHeight: 40, maxWidth: 560 })
                     .backgroundColor(this.clearBackGround ? Color.Transparent : this.message.direction === 0 ? $r('app.color.wf_sent_bubble_bg') : $r('app.color.wf_received_bubble_bg'))
                     .fontColor($r('app.color.wf_primary_text')).fontSize(TextStyleToken.messageText)
                     .borderRadius(Radius.sm)

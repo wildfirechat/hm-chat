@@ -26,6 +26,9 @@ import OrganizationTreePage from './organization/OrganizationTreePage'
 import SearchOrganizationEmployeePage from './organization/SearchOrganizationEmployeePage'
 import PickOrganizationMemberPage from './organization/PickOrganizationMemberPage'
 import PickMultiContactPage from './picker/PickMultiContactPage'
+import PickFavGroupPage from './picker/PickFavGroupPage'
+import PickGroupMemberPage from './group/PickGroupMemberPage'
+import PickContactPage from './picker/PickContactPage'
 import SearchConversationMessagePage from './search/SearchConversationMessagePage'
 import SearchMessageByDatePage from './search/SearchMessageByDatePage'
 import SearchMessagePictureVideoPage from './search/SearchMessagePictureVideoPage'
@@ -62,10 +65,13 @@ import PollDetailPage from './poll/PollDetailPage'
 import PollHomePage from './poll/PollHomePage'
 import PollListPage from './poll/PollListPage'
 import MMPreviewPage from './mm/MMPreviewPage'
+import WelcomePage from './WelcomePage'
 
 export const UIKIT_NAV_DESTINATION_PREFIX = 'uikit-';
 
 export class uikitNavigationDestinations {
+    // 分栏（Pad/宽屏）模式下右侧内容区的空态占位页
+    static WelcomePage = UIKIT_NAV_DESTINATION_PREFIX + 'welcomePage'
     static MMPreviewPage = UIKIT_NAV_DESTINATION_PREFIX + 'mmPreviewPage'
     static CreateCollectionPage = UIKIT_NAV_DESTINATION_PREFIX + 'createCollectionPage'
     static CollectionDetailPage = UIKIT_NAV_DESTINATION_PREFIX + 'collectionDetailPage'
@@ -129,13 +135,18 @@ export class uikitNavigationDestinations {
     static OrderConferencePage = UIKIT_NAV_DESTINATION_PREFIX + 'orderConferencePage'
     static ConferenceParticipantListPage = UIKIT_NAV_DESTINATION_PREFIX + 'conferenceParticipantListPage'
     static GroupJoinRequestListPage = UIKIT_NAV_DESTINATION_PREFIX + 'groupJoinRequestListPage'
+    static PickFavGroupPage = UIKIT_NAV_DESTINATION_PREFIX + 'pickFavGroupPage'
+    static PickGroupMemberPage = UIKIT_NAV_DESTINATION_PREFIX + 'pickGroupMemberPage'
+    static PickContactPage = UIKIT_NAV_DESTINATION_PREFIX + 'pickSingleContactPage'
 }
 
 @Builder
 export function UIKitPageMap(name: string) {
     // TODO add more
     // TODO FIXME 参数使用 NavDestination.onReady 处理，而不是 aboutToAppear
-    if (name == uikitNavigationDestinations.SearchPortalPage) {
+    if (name === uikitNavigationDestinations.WelcomePage) {
+        WelcomePage()
+    } else if (name == uikitNavigationDestinations.SearchPortalPage) {
         SearchPortalPage()
     } else if (name == uikitNavigationDestinations.ConversationPage) {
         ConversationPage()
@@ -247,6 +258,12 @@ export function UIKitPageMap(name: string) {
         ConferenceParticipantListPage()
     } else if (name === uikitNavigationDestinations.GroupJoinRequestListPage) {
         GroupJoinRequestListPage()
+    } else if (name === uikitNavigationDestinations.PickFavGroupPage) {
+        PickFavGroupPage()
+    } else if (name === uikitNavigationDestinations.PickGroupMemberPage) {
+        PickGroupMemberPage()
+    } else if (name === uikitNavigationDestinations.PickContactPage) {
+        PickContactPage()
     } else if (name === uikitNavigationDestinations.CreateCollectionPage) {
         CreateCollectionPage()
     } else if (name === uikitNavigationDestinations.CollectionDetailPage) {

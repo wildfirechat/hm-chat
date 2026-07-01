@@ -15,6 +15,7 @@ import appServer from '../../api/appServer';
 import GroupAnnouncement from '../../api/model/groupAnnouncement';
 import AppServerError from '../../api/appServerError';
 import { uikitNavigationDestinations } from '../uikitNavigationConfig';
+import { isWideScreen } from '../../util/navUtil';
 import EventType from '@wfc/client/src/main/ets/wfc/client/wfcEvent';
 import { imageThumbnail, imageThumbnailFile } from '../../helper/imageVideoHelper';
 import { selectImage } from '../../helper/mediaHelper';
@@ -211,35 +212,33 @@ export default struct GroupConversationInfoPage {
                                 Image($r('app.media.ic_add_team_member'))
                                     .width(48)
                                     .height(48)
-                                    .bindContentCover(this.showAddGroupMemberModal, this.addGroupMemberModal(), {
-                                        modalTransition: ModalTransition.DEFAULT,
-                                        onAppear: () => {
-                                        },
-
-                                        onDisappear: () => {
-                                            this.showAddGroupMemberModal = false
-                                            let localStorage = LocalStorage.getShared();
-                                            let pickUsers = localStorage.get<UserInfo[]>(AddGroupMemberModal.PICK_RESULT);
-                                            if (pickUsers?.length) {
-                                                localStorage.delete(AddGroupMemberModal.PICK_RESULT)
-                                                let uids = pickUsers.map(info => info.uid)
-
-                                                wfc.addGroupMembers(this.groupInfo.target, uids, '', [0], null, () => {
-                                                    this.groupMembers = wfc.getGroupMembers(this.conversationInfo!.conversation.target, false)
-                                                    showToast('添加新群成员成功')
-                                                }, (err: number) => {
-                                                    if (err === ErrorCode.JOIN_GROUP_FAILED_NEED_VERIFY) {
-                                                        this.pendingMemberIds = uids
-                                                        this.joinGroupRequestDialogController?.open()
-                                                    } else {
-                                                        showToast('添加新成员失败：' + err)
-                                                    }
-                                                })
-                                            }
-                                        }
-                                    })
                                     .onClick(() => {
-                                        this.showAddGroupMemberModal = true
+                                        if (isWideScreen()) {
+                                            let groupMemberIds = wfc.getGroupMemberIds(this.groupInfo!.target, false)
+                                            this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.PickMultiContactPage, {
+                                                'initialCheckedUserIds': groupMemberIds,
+                                                'uncheckableUserIds': groupMemberIds,
+                                                'showFavGroup': false,
+                                                'onCheckUser': (pickUsers: UserInfo[]) => {
+                                                    if (pickUsers?.length) {
+                                                        let uids = pickUsers.map(info => info.uid)
+                                                        wfc.addGroupMembers(this.groupInfo.target, uids, '', [0], null, () => {
+                                                            this.groupMembers = wfc.getGroupMembers(this.conversationInfo!.conversation.target, false)
+                                                            showToast('添加新群成员成功')
+                                                        }, (err: number) => {
+                                                            if (err === ErrorCode.JOIN_GROUP_FAILED_NEED_VERIFY) {
+                                                                this.pendingMemberIds = uids
+                                                                this.joinGroupRequestDialogController?.open()
+                                                            } else {
+                                                                showToast('添加新成员失败：' + err)
+                                                            }
+                                                        })
+                                                    }
+                                                }
+                                            } as Record<string, Object>)
+                                        } else {
+                                            this.showAddGroupMemberModal = true
+                                        }
                                     })
                             }
                             .padding(8)
@@ -251,28 +250,26 @@ export default struct GroupConversationInfoPage {
                                 Image($r('app.media.ic_remove_team_member'))
                                     .width(48)
                                     .height(48)
-                                    .bindContentCover(this.showRemoveGroupMemberModal, this.removeGroupMemberModal(), {
-                                        modalTransition: ModalTransition.DEFAULT,
-                                        onAppear: () => {
-                                        },
-
-                                        onDisappear: () => {
-                                            this.showRemoveGroupMemberModal = false
-                                            let localStorage = LocalStorage.getShared();
-                                            let pickUsers = localStorage.get<UserInfo[]>(PickGroupMemberModal.PICK_RESULT);
-                                            if (pickUsers?.length) {
-                                                localStorage.delete(PickGroupMemberModal.PICK_RESULT)
-                                                let uids = pickUsers.map(info => info.uid)
-                                                wfc.kickoffGroupMembers(this.groupInfo.target, uids, [0], null, () => {
-                                                    this.groupMembers = wfc.getGroupMembers(this.conversationInfo!.conversation.target, false)
-                                                }, (err: number) => {
-                                                    showToast('移除群成员失败：' + err)
-                                                })
-                                            }
-                                        }
-                                    })
                                     .onClick(() => {
-                                        this.showRemoveGroupMemberModal = true
+                                        if (isWideScreen()) {
+                                            this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.PickGroupMemberPage, {
+                                                'groupId': this.groupInfo.target,
+                                                'uncheckableUserIds': this.unremovableGroupMemberIds(),
+                                                'title': '移除群成员',
+                                                'onPickResult': (pickUsers: UserInfo[]) => {
+                                                    if (pickUsers?.length) {
+                                                        let uids = pickUsers.map(info => info.uid)
+                                                        wfc.kickoffGroupMembers(this.groupInfo.target, uids, [0], null, () => {
+                                                            this.groupMembers = wfc.getGroupMembers(this.conversationInfo!.conversation.target, false)
+                                                        }, (err: number) => {
+                                                            showToast('移除群成员失败：' + err)
+                                                        })
+                                                    }
+                                                }
+                                            } as Record<string, Object>)
+                                        } else {
+                                            this.showRemoveGroupMemberModal = true
+                                        }
                                     })
                             }
                             .padding(8)
@@ -574,7 +571,7 @@ export default struct GroupConversationInfoPage {
                                     ]
                                 }),
                                 autoCancel: true,
-                                alignment: DialogAlignment.Bottom,
+                                alignment: AppStorage.get<string>('widthBreakpoint') !== 'sm' ? DialogAlignment.Center : DialogAlignment.Bottom,
                                 gridCount: 4,
                                 customStyle: true
                             })
@@ -648,5 +645,46 @@ export default struct GroupConversationInfoPage {
         .title('会话详情')
         .height('100%')
         .width('100%')
+        .bindContentCover(!isWideScreen() && this.showAddGroupMemberModal, this.addGroupMemberModal(), {
+            modalTransition: ModalTransition.DEFAULT,
+            onDisappear: () => {
+                this.showAddGroupMemberModal = false
+                let localStorage = LocalStorage.getShared();
+                let pickUsers = localStorage.get<UserInfo[]>(AddGroupMemberModal.PICK_RESULT);
+                if (pickUsers?.length) {
+                    localStorage.delete(AddGroupMemberModal.PICK_RESULT)
+                    let uids = pickUsers.map(info => info.uid)
+
+                    wfc.addGroupMembers(this.groupInfo.target, uids, '', [0], null, () => {
+                        this.groupMembers = wfc.getGroupMembers(this.conversationInfo!.conversation.target, false)
+                        showToast('添加新群成员成功')
+                    }, (err: number) => {
+                        if (err === ErrorCode.JOIN_GROUP_FAILED_NEED_VERIFY) {
+                            this.pendingMemberIds = uids
+                            this.joinGroupRequestDialogController?.open()
+                        } else {
+                            showToast('添加新成员失败：' + err)
+                        }
+                    })
+                }
+            }
+        })
+        .bindContentCover(!isWideScreen() && this.showRemoveGroupMemberModal, this.removeGroupMemberModal(), {
+            modalTransition: ModalTransition.DEFAULT,
+            onDisappear: () => {
+                this.showRemoveGroupMemberModal = false
+                let localStorage = LocalStorage.getShared();
+                let pickUsers = localStorage.get<UserInfo[]>(PickGroupMemberModal.PICK_RESULT);
+                if (pickUsers?.length) {
+                    localStorage.delete(PickGroupMemberModal.PICK_RESULT)
+                    let uids = pickUsers.map(info => info.uid)
+                    wfc.kickoffGroupMembers(this.groupInfo.target, uids, [0], null, () => {
+                        this.groupMembers = wfc.getGroupMembers(this.conversationInfo!.conversation.target, false)
+                    }, (err: number) => {
+                        showToast('移除群成员失败：' + err)
+                    })
+                }
+            }
+        })
     }
 }

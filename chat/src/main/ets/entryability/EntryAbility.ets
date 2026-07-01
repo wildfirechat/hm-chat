@@ -24,6 +24,7 @@ import { copyFileUri, fileNameFromFileUri, fileSize } from '@wfc/uikit/src/main/
 import { isImage, isVideo } from '@wfc/uikit/src/main/ets/util/helper';
 import { ShareItem } from '@wfc/uikit/src/main/ets/common/Types';
 import waterMarkWindow from '@wfc/uikit/src/main/ets/common/watermark/waterMarkWindow';
+import { windowSizeManager } from '@wfc/uikit/src/main/ets/util/windowSizeManager';
 
 export default class EntryAbility extends UIAbility {
     private windowStage?: window.WindowStage
@@ -153,6 +154,8 @@ export default class EntryAbility extends UIAbility {
         // 获取应用主窗口
         let mainWin: window.Window = windowStage.getMainWindowSync();
         AppStorage.setOrCreate('window', mainWin)
+        // 跟踪窗口宽度/断点，供 Pad/宽屏自适应布局使用
+        windowSizeManager.init(mainWin)
         // 获取状态栏高度
         let statusArea = mainWin.getWindowAvoidArea(window.AvoidAreaType.TYPE_SYSTEM);
         AppStorage.setOrCreate('SafeAreaTopHeight', statusArea.topRect.height);
@@ -171,6 +174,7 @@ export default class EntryAbility extends UIAbility {
     onWindowStageDestroy() {
         // Main window is destroyed, release UI related resources
         hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onWindowStageDestroy');
+        windowSizeManager.destroy();
     }
 
     onForeground() {

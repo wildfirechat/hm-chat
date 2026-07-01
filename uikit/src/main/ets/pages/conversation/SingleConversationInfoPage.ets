@@ -10,6 +10,7 @@ import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo';
 import { uikitNavigationDestinations } from '../uikitNavigationConfig';
 import PickMultiContactModal from '../picker/PickMultiContactModal';
 import { Radius } from '../../common/design/Tokens'
+import { isWideScreen } from '../../util/navUtil'
 
 @Preview
 @Component
@@ -55,44 +56,42 @@ export default struct SingleConversationInfoPage {
                         .height(48)
                         .margin({ left: 20 })
                         .fillColor($r('app.color.wf_icon_color'))
-                        .bindContentCover(this.showPickContactModal, this.pickMultiContactModal(), {
-                            modalTransition: ModalTransition.DEFAULT,
-                            onAppear: () => {
-                            },
-
-                            onDisappear: () => {
-                                this.showPickContactModal = false
-                                let localStorage = LocalStorage.getShared();
-                                let pickUsers = localStorage.get<UserInfo[]>(PickMultiContactModal.PICK_RESULT);
-                                if (pickUsers?.length) {
-                                    showToast('创建群...')
-                                    localStorage.delete(PickMultiContactModal.PICK_RESULT)
-                                    let memberIds: string[] = pickUsers.map(userInfo => userInfo.uid)
-                                    memberIds.push(this.conversationInfo!.conversation.target)
-                                    let selfUserInfo = wfc.getUserInfo(wfc.getUserId())
-                                    pickUsers.splice(0, 0, selfUserInfo);
-                                    pickUsers.splice(1, 0, this.targetUserInfo);
-                                    let first5Members = pickUsers.slice(0, 5)
-                                    let groupName = ''
-                                    first5Members.forEach(userInfo => {
-                                        groupName += userInfo.displayName
-                                        groupName += '、'
-                                    })
-                                    groupName = groupName.substring(0, groupName.length - 1)
-                                    wfc.createGroup('', GroupType.Restricted, groupName, '', '', memberIds, '', [0], null, (groupId) => {
-                                        let conversation = new Conversation(ConversationType.Group, groupId, 0);
-                                        this.mainNavPathStack.popToName(uikitNavigationDestinations.ConversationPage)
-                                        this.mainNavPathStack.replacePathByName(uikitNavigationDestinations.ConversationPage, {
-                                            'conversation': conversation
-                                        } as Record<string, Object>)
-                                    }, err => {
-
-                                    })
-                                }
-                            }
-                        })
                         .onClick(() => {
-                            this.showPickContactModal = true
+                            if (isWideScreen()) {
+                                this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.PickMultiContactPage, {
+                                    'initialCheckedUserIds': [this.conversationInfo!.conversation.target],
+                                    'uncheckableUserIds': [this.conversationInfo!.conversation.target],
+                                    'showFavGroup': false,
+                                    'onCheckUser': (pickUsers: UserInfo[]) => {
+                                        if (pickUsers?.length) {
+                                            showToast('创建群...')
+                                            let memberIds: string[] = pickUsers.map(userInfo => userInfo.uid)
+                                            memberIds.push(this.conversationInfo!.conversation.target)
+                                            let selfUserInfo = wfc.getUserInfo(wfc.getUserId())
+                                            pickUsers.splice(0, 0, selfUserInfo);
+                                            pickUsers.splice(1, 0, this.targetUserInfo);
+                                            let first5Members = pickUsers.slice(0, 5)
+                                            let groupName = ''
+                                            first5Members.forEach(userInfo => {
+                                                groupName += userInfo.displayName
+                                                groupName += '、'
+                                            })
+                                            groupName = groupName.substring(0, groupName.length - 1)
+                                            wfc.createGroup('', GroupType.Restricted, groupName, '', '', memberIds, '', [0], null, (groupId) => {
+                                                let conversation = new Conversation(ConversationType.Group, groupId, 0);
+                                                this.mainNavPathStack.popToName(uikitNavigationDestinations.ConversationPage)
+                                                this.mainNavPathStack.replacePathByName(uikitNavigationDestinations.ConversationPage, {
+                                                    'conversation': conversation
+                                                } as Record<string, Object>)
+                                            }, err => {
+
+                                            })
+                                        }
+                                    }
+                                } as Record<string, Object>)
+                            } else {
+                                this.showPickContactModal = true
+                            }
                         })
                 }
                 .padding(20)
@@ -184,7 +183,7 @@ export default struct SingleConversationInfoPage {
                                     ]
                                 }),
                                 autoCancel: true,
-                                alignment: DialogAlignment.Bottom,
+                                alignment: AppStorage.get<string>('widthBreakpoint') !== 'sm' ? DialogAlignment.Center : DialogAlignment.Bottom,
                                 gridCount: 4,
                                 customStyle: true
                             })
@@ -226,8 +225,40 @@ export default struct SingleConversationInfoPage {
         }
         .backgroundColor($r('app.color.wf_primary_background_color'))
         .title('会话详情')
-        // .hideBackButton(false)
         .height('100%')
         .width('100%')
+        .bindContentCover(!isWideScreen() && this.showPickContactModal, this.pickMultiContactModal(), {
+            modalTransition: ModalTransition.DEFAULT,
+            onDisappear: () => {
+                this.showPickContactModal = false
+                let localStorage = LocalStorage.getShared();
+                let pickUsers = localStorage.get<UserInfo[]>(PickMultiContactModal.PICK_RESULT);
+                if (pickUsers?.length) {
+                    showToast('创建群...')
+                    localStorage.delete(PickMultiContactModal.PICK_RESULT)
+                    let memberIds: string[] = pickUsers.map(userInfo => userInfo.uid)
+                    memberIds.push(this.conversationInfo!.conversation.target)
+                    let selfUserInfo = wfc.getUserInfo(wfc.getUserId())
+                    pickUsers.splice(0, 0, selfUserInfo);
+                    pickUsers.splice(1, 0, this.targetUserInfo);
+                    let first5Members = pickUsers.slice(0, 5)
+                    let groupName = ''
+                    first5Members.forEach(userInfo => {
+                        groupName += userInfo.displayName
+                        groupName += '、'
+                    })
+                    groupName = groupName.substring(0, groupName.length - 1)
+                    wfc.createGroup('', GroupType.Restricted, groupName, '', '', memberIds, '', [0], null, (groupId) => {
+                        let conversation = new Conversation(ConversationType.Group, groupId, 0);
+                        this.mainNavPathStack.popToName(uikitNavigationDestinations.ConversationPage)
+                        this.mainNavPathStack.replacePathByName(uikitNavigationDestinations.ConversationPage, {
+                            'conversation': conversation
+                        } as Record<string, Object>)
+                    }, err => {
+
+                    })
+                }
+            }
+        })
     }
 }

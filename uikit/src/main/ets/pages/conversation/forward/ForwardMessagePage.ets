@@ -24,6 +24,8 @@ import CheckableConversationInfoItemView from '../../../view/CheckableConversati
 import ConversationPortraitView from '../../../view/ConversationPortraitView'
 import ConversationInfoDataSource from '../../../pages/datasource/ConversationInfoDataSource'
 import { FontSize, Radius } from '../../../common/design/Tokens'
+import { isWideScreen } from '../../../util/navUtil'
+import { uikitNavigationDestinations } from '../../uikitNavigationConfig'
 
 @Component
 @Preview
@@ -191,7 +193,7 @@ export default struct ForwardMessagePage {
                 }
             }),
             autoCancel: true,
-            alignment: DialogAlignment.Bottom,
+            alignment: AppStorage.get<string>('widthBreakpoint') !== 'sm' ? DialogAlignment.Center : DialogAlignment.Bottom,
             gridCount: 4,
             customStyle: true
         })
@@ -351,10 +353,40 @@ export default struct ForwardMessagePage {
                                             })
                                             .enabled(true)
                                             .onClick(() => {
-                                                this.showPickContactModal = true
+                                                if (isWideScreen()) {
+                                                    this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.PickMultiContactPage, {
+                                                        'onCheckUser': (users: UserInfo[]) => {
+                                                            if (users.length === 1) {
+                                                                let conversation = new Conversation(ConversationType.Single, users[0].uid, 0)
+                                                                this.forwardMessage([conversation])
+                                                            } else {
+                                                                let memberIds: string[] = users.map(userInfo => userInfo.uid)
+                                                                let first5Members = users.slice(0, 5)
+                                                                let groupName = ''
+                                                                first5Members.forEach(userInfo => {
+                                                                    groupName += userInfo.displayName
+                                                                    groupName += '、'
+                                                                })
+                                                                groupName = groupName.substring(0, groupName.length - 1)
+                                                                wfc.createGroup('', GroupType.Restricted, groupName, '', '', memberIds, '', [0], null, (groupId) => {
+                                                                    let conversation = new Conversation(ConversationType.Group, groupId, 0)
+                                                                    this.forwardMessage([conversation])
+                                                                }, err => {
+
+                                                                    })
+                                                            }
+                                                        },
+                                                        'onCheckFavGroup': (groupInfo: GroupInfo) => {
+                                                            let conversation = new Conversation(ConversationType.Group, groupInfo.target, 0)
+                                                            this.forwardMessage([conversation])
+                                                        }
+                                                    } as Record<string, Object>)
+                                                } else {
+                                                    this.showPickContactModal = true
+                                                }
                                             })
                                     }
-                                    .bindContentCover($$this.showPickContactModal, this.pickMultiContactModal(), {
+                                    .bindContentCover(!isWideScreen() && this.showPickContactModal, this.pickMultiContactModal(), {
                                         modalTransition: ModalTransition.DEFAULT,
                                         onAppear: () => {
                                         },

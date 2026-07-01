@@ -45,6 +45,7 @@ export default struct PickContactModal {
         .height('100%')
         .width('100%')
         .navBarPosition(NavBarPosition.Start)
+        .mode(NavigationMode.Stack)
 
         // .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.START])
     }

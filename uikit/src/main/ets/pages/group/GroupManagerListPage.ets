@@ -6,6 +6,8 @@ import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
 import PickGroupMemberModal from './PickGroupMemberModal'
 import BottomActionSheetDialog from '../../view/BottomActionSheetDialog'
 import { Radius } from '../../common/design/Tokens'
+import { isWideScreen } from '../../util/navUtil'
+import { uikitNavigationDestinations } from '../uikitNavigationConfig'
 
 @Component
 export default struct GroupManagerListPage {
@@ -117,7 +119,7 @@ export default struct GroupManagerListPage {
                                             ],
                                         }),
                                         autoCancel: true,
-                                        alignment: DialogAlignment.Bottom,
+                                        alignment: AppStorage.get<string>('widthBreakpoint') !== 'sm' ? DialogAlignment.Center : DialogAlignment.Bottom,
                                         gridCount: 4,
                                         customStyle: true
                                     })
@@ -146,7 +148,7 @@ export default struct GroupManagerListPage {
                             .fontColor($r('app.color.wf_primary_text'))
                     }
                     .margin({ top: 20 })
-                    .bindContentCover(this.showPickGroupMemberModal, this.pickGroupMemberModal((userInfos: UserInfo[]) => {
+                    .bindContentCover(!isWideScreen() && this.showPickGroupMemberModal, this.pickGroupMemberModal((userInfos: UserInfo[]) => {
                         this.showPickGroupMemberModal = false
                         let pickUsers = userInfos
                         if (pickUsers?.length) {
@@ -169,7 +171,28 @@ export default struct GroupManagerListPage {
                         }
                     })
                     .onClick(() => {
-                        this.showPickGroupMemberModal = true
+                        if (isWideScreen()) {
+                            let managerIds = this.groupManagerUserInfos.map(u => u.uid)
+                            this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.PickGroupMemberPage, {
+                                'groupId': this.groupInfo?.target,
+                                'uncheckableUserIds': managerIds,
+                                'excludeUserIds': [this.groupInfo!.owner],
+                                'title': '添加管理员',
+                                'onPickResult': (userInfos: UserInfo[]) => {
+                                    if (userInfos?.length) {
+                                        let uids = userInfos.map(info => info.uid)
+                                        wfc.setGroupManager(this.groupInfo!.target, true, uids, [0], null, () => {
+                                            let groupManagers = wfc.getGroupMembersByType(this.groupInfo!.target, GroupMemberType.Manager);
+                                            this.groupManagerUserInfos = wfc.getUserInfos(groupManagers.map(m => m.memberId), this.groupInfo!.target)
+                                        }, err => {
+                                            showToast('添加群管理员失败：' + err)
+                                        })
+                                    }
+                                }
+                            } as Record<string, Object>)
+                        } else {
+                            this.showPickGroupMemberModal = true
+                        }
                     })
                     .width('100%')
                     .stateStyles({

@@ -8,6 +8,7 @@ import { uikitNavigationDestinations } from '@wfc/uikit/src/main/ets/pages/uikit
 import { appNavigationDestinations } from './mainNavigationConfig'
 import BuildProfile from 'BuildProfile'
 import { FontSize, Radius, scaledSize } from '@wfc/uikit/src/main/ets/common/design/Tokens'
+import { isWideScreen, pushOrReplaceDetail } from '@wfc/uikit/src/main/ets/util/navUtil'
 
 @Component
 export default struct MeTab {
@@ -84,12 +85,13 @@ export default struct MeTab {
                 .padding({
                     left: 28,
                     right: 8,
-                    bottom: 20
+                    bottom: 20,
+                    top: isWideScreen() ? 20 : 0
                 })
                 .alignItems(VerticalAlign.Center)
                 .backgroundColor($r('app.color.wf_background'))
                 .onClick(() => {
-                    this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.UserInfoPage, {
+                    pushOrReplaceDetail(this.mainNavPathStack, uikitNavigationDestinations.UserInfoPage, {
                         'userInfo': this.userInfo,
                     } as Record<string, Object>)
                 })
@@ -98,24 +100,24 @@ export default struct MeTab {
                     OptionItemView({ icon: $r('app.media.ic_account'), title: '账号与安全' })
                         .margin({ top: 12 })
                         .onClick(() => {
-                            this.mainNavPathStack.pushPathByName(appNavigationDestinations.AccountPage, {} as Record<string, Object>)
+                            pushOrReplaceDetail(this.mainNavPathStack, appNavigationDestinations.AccountPage)
                         })
                 }
 
                 OptionItemView({ icon: $r('app.media.ic_notification'), title: '消息与通知' })
                     .margin({ top: 12 })
                     .onClick(() => {
-                        this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.NotificationPage, {} as Record<string, Object>)
+                        pushOrReplaceDetail(this.mainNavPathStack, uikitNavigationDestinations.NotificationPage)
                     })
 
                 Column() {
                     OptionItemView({ icon: $r('app.media.ic_settings_file'), title: '文件' })
                         .onClick(() => {
-                            this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.FileRecordPortalPage, {} as Record<string, Object>)
+                            pushOrReplaceDetail(this.mainNavPathStack, uikitNavigationDestinations.FileRecordPortalPage)
                         })
                     OptionItemView({ icon: $r('app.media.ic_star'), title: '收藏', showDivider: false })
                         .onClick(() => {
-                            this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.FavRecordPage, {} as Record<string, Object>)
+                            pushOrReplaceDetail(this.mainNavPathStack, uikitNavigationDestinations.FavRecordPage)
                         })
                 }
                 .margin({ top: 12 })
@@ -129,11 +131,11 @@ export default struct MeTab {
                         .visibility(Visibility.None)
                     OptionItemView({ icon: $r('app.media.ic_setting'), title: '设置' })
                         .onClick(() => {
-                            this.mainNavPathStack.pushPathByName(appNavigationDestinations.SettingPage, {} as Record<string, Object>)
+                            pushOrReplaceDetail(this.mainNavPathStack, appNavigationDestinations.SettingPage)
                         })
                     OptionItemView({ icon: $r('app.media.ic_settings_file'), title: '备份与恢复', showDivider: false })
                         .onClick(() => {
-                            this.mainNavPathStack.pushPathByName(appNavigationDestinations.BackupAndRestorePage, {} as Record<string, Object>)
+                            pushOrReplaceDetail(this.mainNavPathStack, appNavigationDestinations.BackupAndRestorePage)
                         })
                 }
                 .margin({ top: 12, bottom: 12 })
@@ -148,7 +150,7 @@ export default struct MeTab {
                             //     .catch((e: BusinessError) => {
                             //         console.log(e.message)
                             //     })
-                            this.mainNavPathStack.pushPathByName('testPage', {} as Record<string, object>)
+                            pushOrReplaceDetail(this.mainNavPathStack, 'testPage')
                         })
                 }
             }

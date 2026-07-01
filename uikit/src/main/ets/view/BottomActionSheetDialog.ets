@@ -54,19 +54,15 @@ export default struct BottomActionSheetDialog {
     }
 
     build() {
-        Column() {
-            // 标题 + 选项列表
+        if (AppStorage.get<string>('widthBreakpoint') !== 'sm') {
             Column() {
                 if (this.title) {
                     Text(this.title)
-                        .fontSize(FontSize.sm)
+                        .fontSize(FontSize.md)
                         .fontColor($r('app.color.wf_secondary_text'))
                         .textAlign(TextAlign.Center)
                         .width('100%')
-                        .padding({ top: 20,
-                            bottom: 20,
-                            left: 16,
-                            right: 16 })
+                        .padding({ top: 16, bottom: 16, left: 16, right: 16 })
                     Divider()
                         .color($r('app.color.wf_divider'))
                         .width('100%')
@@ -77,48 +73,87 @@ export default struct BottomActionSheetDialog {
                         this.dismiss?.()
                         sheet.action()
                     })
-                    if (index < this.sheets.length - 1) {
+                    Divider()
+                        .color($r('app.color.wf_divider'))
+                        .width('100%')
+                }, (sheet: SheetInfo, index: number) => index + '')
+
+                this.itemRow(this.cancel || this.fallbackCancel, () => {
+                    this.dismiss?.()
+                    this.cancel?.action()
+                })
+            }
+            .width(320)
+            .borderRadius(16)
+            .clip(true)
+            .backgroundColor($r('app.color.wf_background'))
+        } else {
+            Column() {
+                // 标题 + 选项列表
+                Column() {
+                    if (this.title) {
+                        Text(this.title)
+                            .fontSize(FontSize.sm)
+                            .fontColor($r('app.color.wf_secondary_text'))
+                            .textAlign(TextAlign.Center)
+                            .width('100%')
+                            .padding({ top: 20,
+                                bottom: 20,
+                                left: 16,
+                                right: 16 })
                         Divider()
                             .color($r('app.color.wf_divider'))
                             .width('100%')
                     }
-                }, (sheet: SheetInfo, index: number) => index + '')
-            }
-            .width('100%')
-            .backgroundColor($r('app.color.wf_background'))
 
-            Row()
-                .width('100%')
-                .backgroundColor($r('app.color.wf_secondary_background'))
-                .height(8)
-
-            // 取消项（默认显示，位于最下方，与上面分隔）
-            Column() {
-                Text('取消')
-                    .fontSize(FontSize.md)
-                    .height(56)
-                    .fontColor($r('app.color.wf_primary_text'))
-                    .textAlign(TextAlign.Center)
-            }
-            .width('100%')
-            .padding({ bottom: 32 })
-            .stateStyles({
-                pressed: {
-                    .backgroundColor($r('app.color.wf_item_pressed'))
-                },
-                normal: {
-                    .backgroundColor($r('app.color.wf_background'))
+                    ForEach(this.sheets, (sheet: SheetInfo, index: number) => {
+                        this.itemRow(sheet, () => {
+                            this.dismiss?.()
+                            sheet.action()
+                        })
+                        if (index < this.sheets.length - 1) {
+                            Divider()
+                                .color($r('app.color.wf_divider'))
+                                .width('100%')
+                        }
+                    }, (sheet: SheetInfo, index: number) => index + '')
                 }
-            })
-            .onClick(() => {
-                this.dismiss?.()
-                this.cancel?.action()
-            })
+                .width('100%')
+                .backgroundColor($r('app.color.wf_background'))
+
+                Row()
+                    .width('100%')
+                    .backgroundColor($r('app.color.wf_secondary_background'))
+                    .height(8)
+
+                // 取消项（默认显示，位于最下方，与上面分隔）
+                Column() {
+                    Text('取消')
+                        .fontSize(FontSize.md)
+                        .height(56)
+                        .fontColor($r('app.color.wf_primary_text'))
+                        .textAlign(TextAlign.Center)
+                }
+                .width('100%')
+                .padding({ bottom: 32 })
+                .stateStyles({
+                    pressed: {
+                        .backgroundColor($r('app.color.wf_item_pressed'))
+                    },
+                    normal: {
+                        .backgroundColor($r('app.color.wf_background'))
+                    }
+                })
+                .onClick(() => {
+                    this.dismiss?.()
+                    this.cancel?.action()
+                })
+            }
+            .width('100%')
+            .clip(true)
+            .borderRadius({ topLeft: 16, topRight: 16 })
+            .transition(TransitionEffect.move(TransitionEdge.BOTTOM)
+                .animation({ duration: 250, curve: Curve.Friction }))
         }
-        .width('100%')
-        .clip(true)
-        .borderRadius({ topLeft: 16, topRight: 16 })
-        .transition(TransitionEffect.move(TransitionEdge.BOTTOM)
-            .animation({ duration: 250, curve: Curve.Friction }))
     }
 }

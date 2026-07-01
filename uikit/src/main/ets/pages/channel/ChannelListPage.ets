@@ -45,7 +45,7 @@ export default struct ChannelListPage {
 
     build() {
         NavDestination() {
-            Navigation() {
+            Column() {
                 Text('我订阅的频道')
                     .width('100%')
                     .fontSize(FontSize.sm)
@@ -88,7 +88,7 @@ export default struct ChannelListPage {
                     }, (channelInfo: ChannelInfo) => channelInfo.channelId + '-' + channelInfo.updateDt)
                 }
                 .width('100%')
-                .height('100%')
+                .layoutWeight(1)
                 .backgroundColor($r('app.color.wf_primary_background_color'))
                 .divider({
                     strokeWidth: 1,
@@ -96,27 +96,23 @@ export default struct ChannelListPage {
                     startMargin: 60
                 })
             }
-            .title('频道列表')
-            .titleMode(NavigationTitleMode.Mini)
-            .hideBackButton(false)
-            .height('100%')
             .width('100%')
+            .height('100%')
             .backgroundColor($r('app.color.wf_primary_background_color'))
-            .navBarPosition(NavBarPosition.Start)
-            .menus([
-                {
-                    value: '',
-                    icon: "resources/base/media/ic_add.png",
-                    action: () => {
-                        this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.SearchPortalPage, {
-                            'channel': true
-                        } as Record<string, Object>)
-                    }
-                }
-            ])
         }
+        .title('频道列表')
         .width('100%')
         .height('100%')
-        .hideTitleBar(true)
+        .menus([
+            {
+                value: '',
+                icon: "resources/base/media/ic_add.png",
+                action: () => {
+                    this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.SearchPortalPage, {
+                        'channel': true
+                    } as Record<string, Object>)
+                }
+            }
+        ])
     }
 }

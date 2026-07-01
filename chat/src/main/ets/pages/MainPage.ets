@@ -20,7 +20,7 @@ import Config from '@wfc/client/src/main/ets/config'
 import { checkPermissions, requestPermissions } from '@wfc/uikit/src/main/ets/helper/permissionHelper'
 import { uikitNavigationDestinations } from '@wfc/uikit/src/main/ets/pages/uikitNavigationConfig'
 import { ShareItem } from '@wfc/uikit/src/main/ets/common/Types'
-import { MainPageMap } from './mainNavigationConfig'
+import { MainPageMap, appNavigationDestinations } from './mainNavigationConfig'
 import orgServer from '@wfc/uikit/src/main/ets/api/orgServer'
 import appServer from '@wfc/uikit/src/main/ets/api/appServer'
 import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
@@ -38,6 +38,10 @@ import pipHelper from '@wfc/uikit/src/main/ets/pages/voip/pipHelper'
 import window from '@ohos.window'
 import { FontSize, scaledSize } from '@wfc/uikit/src/main/ets/common/design/Tokens'
 import { deviceInfo } from '@kit.BasicServicesKit'
+import { WidthBreakpoint } from '@wfc/uikit/src/main/ets/util/windowSizeManager'
+import { tabNavRegistry, TabKey } from '@wfc/uikit/src/main/ets/util/tabNavRegistry'
+import { pushOrReplaceDetail } from '@wfc/uikit/src/main/ets/util/navUtil'
+import SplitTabPane from './SplitTabPane'
 
 const TAG = 'Main';
 
@@ -62,7 +66,11 @@ struct MainPage {
     @State meTabUnreadCount: number = 0
     @State showPickContactModal: boolean = false
     @State isMeTab: boolean = false
-    @Provide('mainNavPathStack') mainNavPathStack: NavPathStack = uikit.mainNavPathStack
+    // 外层导航栈：Stack 模式，承载全屏覆盖页（通话/分享/通知打开），并提供 id 给 PiP。
+    // allowOverride 让分栏 pane 可用同名 @Provide 遮蔽本栈，实现「每 tab 独立栈」。
+    @Provide({ allowOverride: 'mainNavPathStack' }) mainNavPathStack: NavPathStack = uikit.mainNavPathStack
+    // Pad/宽屏：断点 ≥ md（600vp）视为宽屏，驱动 手机(单栏) / 平板(每 tab 分栏) 分支
+    @StorageProp('widthBreakpoint') @Watch('onWidthBreakpointChange') widthBreakpoint: WidthBreakpoint = 'sm'
     @LocalStorageProp('wantParams') @Watch('onWantParams') wantParams?: Record<string, Object> = undefined
     @LocalStorageProp('shareParams') @Watch('onShareParams') shareParams?: ShareItem[] = undefined
     @StorageProp('currentColorMode') @Watch('onCurrentColorModeChange') currentColorMode: ConfigurationConstant.ColorMode = ConfigurationConstant.ColorMode.COLOR_MODE_NOT_SET;
@@ -77,20 +85,8 @@ struct MainPage {
         if (conversation && (!activeCallSession || activeCallSession.status === CallState.STATUS_IDLE)) {
             storage.delete('targetConversation')
             wfc.clearConversationUnreadStatus(conversation!)
-            // TODO
-            // FIXME
-            // https://developer.huawei.com/consumer/cn/doc/harmonyos-references-V5/js-apis-arkui-observer-V5?catalogVersion=V5
-            //  会话页面，监听 observer.on('navDestinationUpdate')
-            let index = this.mainNavPathStack.popToName(uikitNavigationDestinations.ConversationPage)
-            if (index >= 0) {
-                this.mainNavPathStack.replacePathByName(uikitNavigationDestinations.ConversationPage, {
-                    'conversation': conversation
-                } as Record<string, Object>)
-            } else {
-                this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ConversationPage, {
-                    'conversation': conversation
-                } as Record<string, Object>)
-            }
+            // 宽屏落到会话 tab 的独立栈，手机落外层栈全屏
+            this.openConversationFromGlobal(conversation)
         }
         let voip = this.wantParams?.continuousTaskLabel as string
         if (voip) {
@@ -128,9 +124,7 @@ struct MainPage {
 
     createConversation(users: UserInfo[]) {
         if (users.length === 1) {
-            this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ConversationPage, {
-                'conversation': new Conversation(ConversationType.Single, users[0].uid, 0)
-            } as Record<string, Object>)
+            this.openConversationFromGlobal(new Conversation(ConversationType.Single, users[0].uid, 0))
         } else {
             let memberIds: string[] = users.map(userInfo => userInfo.uid)
             let first5Members = users.slice(0, 5)
@@ -141,9 +135,7 @@ struct MainPage {
             })
             groupName = groupName.substring(0, groupName.length - 1)
             wfc.createGroup('', GroupType.Restricted, groupName, '', '', memberIds, '', [0], null, (groupId) => {
-                this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ConversationPage, {
-                    'conversation': new Conversation(ConversationType.Group, groupId, 0)
-                } as Record<string, Object>)
+                this.openConversationFromGlobal(new Conversation(ConversationType.Group, groupId, 0))
             }, err => {
                 showToast('创建群组失败：' + err)
             })
@@ -213,6 +205,37 @@ struct MainPage {
     aboutToDisappear(): void {
         wfc.eventEmitter?.off(EventType.ReceiveMessage, this.onReceiveMessage)
         wfc.eventEmitter?.off(EventType.FriendRequestUpdate, this.onFriendRequestUpdate)
+    }
+
+    // 宽屏(平板)：断点 ≥ md 视为宽屏，进入「每 tab 独立栈」的分栏布局
+    isWide(): boolean {
+        return this.widthBreakpoint !== 'sm'
+    }
+
+    onWidthBreakpointChange(): void {
+        // 断点变化触发 build 重算（Tabs.vertical / 各 tab 分支），无需额外处理
+    }
+
+    // 全局打开会话（点通知、新建群聊等，发生在 tab 子树之外）：
+    // 宽屏 → 切到会话 tab 并压入其独立栈；手机 → 压入外层栈全屏打开。
+    // 若目标栈已有会话页则 popToName 收敛后 replace，避免叠栈。
+    openConversationFromGlobal(conversation: Conversation): void {
+        let stack = this.mainNavPathStack
+        if (this.isWide()) {
+            let tabStack = tabNavRegistry.get(TabKey.Conversation)
+            if (tabStack) {
+                this.currentIndex = 0
+                this.tabsController.changeIndex(0)
+                stack = tabStack
+            }
+        }
+        let params: Record<string, Object> = { 'conversation': conversation }
+        let index = stack.popToName(uikitNavigationDestinations.ConversationPage)
+        if (index >= 0) {
+            stack.replacePathByName(uikitNavigationDestinations.ConversationPage, params)
+        } else {
+            stack.pushPathByName(uikitNavigationDestinations.ConversationPage, params)
+        }
     }
 
     onCurrentColorModeChange(): void {
@@ -369,6 +392,55 @@ struct MainPage {
         })
     }
 
+    // Pad/宽屏分栏：每个 tab 左栏底部的 Tab 栏单元（横向等分）
+    @Builder
+    PaneTabCell(title: string, targetIndex: number, selectedImg: Resource, normalImg: Resource) {
+        Column() {
+            Badge({
+                count: this.tabUnreadCount(targetIndex),
+                maxCount: 99,
+                position: BadgePosition.RightTop,
+                style: { badgeSize: scaledSize(14, this.fontScale), badgeColor: $r('app.color.wf_badge_color') }
+            }) {
+                Image(this.currentIndex === targetIndex ? selectedImg : normalImg)
+                    .size({ width: 20 })
+                    .objectFit(ImageFit.ScaleDown)
+            }
+
+            Text(title)
+                .fontColor(this.currentIndex === targetIndex ? $r('app.color.wf_tab_text_selected') : $r('app.color.wf_tab_text_normal'))
+                .fontSize(FontSize.sm)
+                .minFontScale(1)
+                .maxFontScale(1)
+                .padding({ top: 4, bottom: 4 })
+        }
+        .layoutWeight(1)
+        .height(56)
+        .justifyContent(FlexAlign.Center)
+        .onClick(() => {
+            this.currentIndex = targetIndex
+            this.tabsController.changeIndex(this.currentIndex)
+        })
+    }
+
+    // Pad/宽屏分栏：左栏底部的 Tab 栏（会话/联系人/[工作台]/发现/我的）
+    @Builder
+    PaneTabBar() {
+        Row() {
+            this.PaneTabCell(this.tabTitles[0], 0, $r('app.media.message_press'), $r('app.media.message_normal'))
+            this.PaneTabCell(this.tabTitles[1], 1, $r('app.media.contacts_press'), $r('app.media.contacts_normal'))
+            if (Config.getWorkspaceUrl()) {
+                this.PaneTabCell(this.tabTitles[2], 2, $r('app.media.work_press'), $r('app.media.work'))
+            }
+            this.PaneTabCell(this.tabTitles[3], 3, $r('app.media.discovery_press'), $r('app.media.discovery_normal'))
+            this.PaneTabCell(this.tabTitles[4], 4, $r('app.media.me_press'), $r('app.media.me_normal'))
+        }
+        .width('100%')
+        .height(56)
+        .backgroundColor($r('app.color.wf_tab_background'))
+        .border({ width: { top: 0.5 }, color: $r('app.color.wf_divider') })
+    }
+
     @Builder
     pickMultiContactModal() {
         PickMultiContactModal({
@@ -377,9 +449,7 @@ struct MainPage {
                 this.createConversation(users)
             },
             onCheckFavGroup: (groupInfo: GroupInfo) => {
-                this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ConversationPage, {
-                    'conversation': new Conversation(ConversationType.Group, groupInfo.target, 0)
-                } as Record<string, Object>)
+                this.openConversationFromGlobal(new Conversation(ConversationType.Group, groupInfo.target, 0))
             }
         })
             .height('100%')
@@ -505,71 +575,494 @@ struct MainPage {
         }
     }
 
-    build() {
-        Navigation(this.mainNavPathStack) {
-            Tabs({ barPosition: BarPosition.End, controller: this.tabsController }) {
-                TabContent() {
-                    ConversationListTab({ conversationListTabUnreadCount: $conversationListTabUnreadCount })
-                }
-                .tabBar(this.TabBuilder(this.tabTitles[0], 0, $r('app.media.message_press'), $r('app.media.message_normal')))
-
-                TabContent() {
-                    ContactListTab({ contactTabUnreadCount: $contactTabUnreadCount })
-                }
-                .tabBar(this.TabBuilder(this.tabTitles[1], 1, $r('app.media.contacts_press'), $r('app.media.contacts_normal')))
-
-                if (Config.getWorkspaceUrl()) {
-                    TabContent() {
-                        WorkSpaceTab()
+    @Builder
+    PaneSubMoreMenus(tabKey: string) {
+        Menu() {
+            MenuItem({ startIcon: $r('app.media.faqiqunliao_iconfont'), content: "创建群聊" })
+                .onClick(() => {
+                    let stack = tabNavRegistry.get(tabKey)
+                    if (stack) {
+                        stack.pushPathByName(uikitNavigationDestinations.PickMultiContactPage, {
+                            'onCheckUser': (users: UserInfo[]) => {
+                                this.createConversation(users)
+                            },
+                            'onCheckFavGroup': (groupInfo: GroupInfo) => {
+                                this.openConversationFromGlobal(new Conversation(ConversationType.Group, groupInfo.target, 0))
+                            }
+                        } as Record<string, Object>)
                     }
-                    .tabBar(this.TabBuilder(this.tabTitles[2], 2, $r('app.media.work_press'), $r('app.media.work')))
+                })
+            MenuItem({ startIcon: $r('app.media.faqiqunliao_iconfont'), content: "发起密聊" })
+                .enabled(false)
+                .onClick(() => {
+                    showToast('发起密聊')
+                })
+            MenuItem({ startIcon: $r('app.media.tianjiapengyou_iconfont'), content: "添加朋友" })
+                .onClick(() => {
+                    let stack = tabNavRegistry.get(tabKey)
+                    if (stack) {
+                        stack.pushPathByName(uikitNavigationDestinations.SearchUserPage, {} as Record<string, Object>)
+                    }
+                })
+            MenuItem({ startIcon: $r('app.media.saoyisao1_iconfont'), content: "扫一扫" })
+                .onClick(() => {
+                    showToast('扫一扫')
+                    let options: scanBarcode.ScanOptions = {
+                        scanTypes: [scanCore.ScanType.QR_CODE],
+                        enableMultiMode: true,
+                        enableAlbum: true
+                    };
+                    scanBarcode.startScanForResult(getContext(this), options).then((result: scanBarcode.ScanResult) => {
+                        let qrcode = result.originalValue;
+                        let stack = tabNavRegistry.get(tabKey)
+                        if (stack) {
+                            WfcScheme.handleQRCodeResult(stack, qrcode);
+                        }
+                    }).catch((error: BusinessError) => {
+                        // TODO
+                    });
+                })
+        }
+    }
 
-                    TabContent() {
-                        DiscoveryTab({ discoveryTabUnreadCount: $discoveryTabUnreadCount })
-                    }
-                    .tabBar(this.TabBuilder(this.tabTitles[3], 3, $r('app.media.discovery_press'), $r('app.media.discovery_normal')))
+    @Builder
+    TabHeaderBuilder(tabKey: string) {
+        if (tabKey === TabKey.Me) {
+            Row() {
+                Text('我')
+                    .padding({ left: 16 })
+                    .fontSize(FontSize.xl)
+                    .minFontScale(1)
+                    .maxFontScale(1)
+                    .fontColor($r('app.color.wf_primary_text'))
+                    .fontWeight(FontWeight.Bold)
+            }
+            .width('100%')
+            .height(56)
+            .alignItems(VerticalAlign.Center)
+            .backgroundColor($r('app.color.wf_primary_background_color'))
+            .border({ width: { bottom: 0.5 }, color: $r('app.color.wf_divider') })
+        } else {
+            Row() {
+                Text(tabKey === TabKey.Conversation ? '野火' : (tabKey === TabKey.Contact ? '通讯录' : (tabKey === 'workspace' ? '工作台' : '发现')))
+                    .padding({ left: 16 })
+                    .fontSize(FontSize.xl)
+                    .minFontScale(1)
+                    .maxFontScale(1)
+                    .fontColor($r('app.color.wf_primary_text'))
+                    .fontWeight(FontWeight.Bold)
 
-                    TabContent() {
-                        MeTab({ meTabUnreadCount: $meTabUnreadCount })
-                    }
-                    .tabBar(this.TabBuilder(this.tabTitles[4], 4, $r('app.media.me_press'), $r('app.media.me_normal')))
-                } else {
-                    TabContent() {
-                        DiscoveryTab({ discoveryTabUnreadCount: $discoveryTabUnreadCount })
-                    }
-                    .tabBar(this.TabBuilder(this.tabTitles[3], 3, $r('app.media.discovery_press'), $r('app.media.discovery_normal')))
+                Blank()
 
-                    TabContent() {
-                        MeTab({ meTabUnreadCount: $meTabUnreadCount })
+                if(!this.isWide || ([TabKey.Conversation, TabKey.Contact].indexOf(tabKey) >= 0)){
+                    Row() {
+                        if (deviceInfo.sdkApiVersion >= 18) {
+                            SymbolGlyph($r('sys.symbol.magnifyingglass'))
+                                .fontSize(FontSize.xxl)
+                                .fontColor([$r('app.color.wf_icon_color')])
+                                .minFontScale(1)
+                                .maxFontScale(1)
+                                .onClick(() => {
+                                    let stack = tabNavRegistry.get(tabKey) || this.mainNavPathStack
+                                    // push 到 Welcome 基座之上，若右栏已有详情则 replace——保留 Welcome 占位基座
+                                    pushOrReplaceDetail(stack, uikitNavigationDestinations.SearchPortalPage, {
+                                        'keyword': '1'
+                                    } as Record<string, Object>)
+                                })
+                        } else {
+                            SymbolGlyph($r('sys.symbol.magnifyingglass'))
+                                .fontSize(FontSize.xxl)
+                                .fontColor([$r('app.color.wf_icon_color')])
+                                .onClick(() => {
+                                    let stack = tabNavRegistry.get(tabKey) || this.mainNavPathStack
+                                    // push 到 Welcome 基座之上，若右栏已有详情则 replace——保留 Welcome 占位基座
+                                    pushOrReplaceDetail(stack, uikitNavigationDestinations.SearchPortalPage, {
+                                        'keyword': '1'
+                                    } as Record<string, Object>)
+                                })
+                        }
+
+                        if (deviceInfo.sdkApiVersion >= 18) {
+                            SymbolGlyph($r('sys.symbol.plus_circle'))
+                                .fontSize(FontSize.xxl)
+                                .fontColor([$r('app.color.wf_icon_color')])
+                                .minFontScale(1)
+                                .maxFontScale(1)
+                                .margin({ left: 16 })
+                                .bindMenu(this.PaneSubMoreMenus(tabKey))
+                        } else {
+                            SymbolGlyph($r('sys.symbol.plus_circle'))
+                                .fontSize(FontSize.xxl)
+                                .fontColor([$r('app.color.wf_icon_color')])
+                                .margin({ left: 16 })
+                                .bindMenu(this.PaneSubMoreMenus(tabKey))
+                        }
                     }
-                    .tabBar(this.TabBuilder(this.tabTitles[4], 4, $r('app.media.me_press'), $r('app.media.me_normal')))
+                    .margin({ right: 16 })
                 }
             }
-            .barOverlap(true)
-            .barBackgroundBlurStyle(BlurStyle.COMPONENT_THICK)
-            .barBackgroundColor($r('app.color.wf_tab_background'))
-            .onChange(index => {
-                this.currentIndex = index
-                this.title = this.isMeTab ? this.tabTitles[index - 1] : this.tabTitles[index]
-            })
-            .onAnimationStart((index: number, targetIndex: number) => {
-                const isMe = targetIndex === (Config.getWorkspaceUrl() ? 4 : 3)
-                this.isMeTab = isMe
-                this.setStatusBarColor(isMe)
-            })
-            .onAnimationEnd((index: number) => {
-                const isMe = index === (Config.getWorkspaceUrl() ? 4 : 3)
-                this.isMeTab = isMe
-                this.setStatusBarColor(isMe)
-            })
+            .width('100%')
+            .height(56)
+            .alignItems(VerticalAlign.Center)
+            .backgroundColor($r('app.color.wf_primary_background_color'))
+            .border({ width: { bottom: 0.5 }, color: $r('app.color.wf_divider') })
+        }
+    }
+
+    getGreeting(): string {
+        let hour = new Date().getHours()
+        if (hour < 6) {
+            return '夜深了'
+        }
+        if (hour < 12) {
+            return '早上好'
+        }
+        if (hour < 14) {
+            return '中午好'
+        }
+        if (hour < 18) {
+            return '下午好'
+        }
+        return '晚上好'
+    }
+
+    getFormattedDate(): string {
+        let date = new Date()
+        let year = date.getFullYear()
+        let month = date.getMonth() + 1
+        let day = date.getDate()
+        let dayOfWeek = date.getDay()
+        let weeks = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
+        return `${year}年${month}月${day}日 ${weeks[dayOfWeek]}`
+    }
+
+    getMyName(): string {
+        let uid = wfc.getUserId()
+        let info = wfc.getUserInfo(uid, false)
+        return info?.displayName || '用户'
+    }
+
+    getMyPortrait(): string {
+        let uid = wfc.getUserId()
+        let info = wfc.getUserInfo(uid, false)
+        return info?.portrait || ''
+    }
+
+    @Builder
+    ShortcutItem(title: string, symbol: Resource, action: () => void) {
+        Row() {
+            SymbolGlyph(symbol)
+                .fontSize(20)
+                .fontColor([$r('app.color.wf_primary')])
+                .margin({ right: 8 })
+                .minFontScale(1)
+                .maxFontScale(1)
+            Text(title)
+                .fontSize(FontSize.sm)
+                .fontColor($r('app.color.wf_primary_text'))
+                .fontWeight(FontWeight.Medium)
+                .minFontScale(1)
+                .maxFontScale(1)
+        }
+        .width('100%')
+        .height(44)
+        .padding({ left: 10, right: 10 })
+        .borderRadius(8)
+        .backgroundColor($r('app.color.wf_primary_background_color'))
+        .alignItems(VerticalAlign.Center)
+        .onClick(action)
+        .stateStyles({
+            pressed: {
+                .backgroundColor($r('app.color.wf_item_pressed'))
+            },
+            normal: {
+                .backgroundColor($r('app.color.wf_primary_background_color'))
+            }
+        })
+    }
+
+    // 工作台：左栏(个人助理控制面板 + 底部 Tab 栏) | 右栏(网页)
+    @Builder
+    WorkspacePane() {
+        Row() {
+            Column() {
+                // 1. Header (工作台)
+                this.TabHeaderBuilder('workspace')
+
+                // 2. Personal Assistant Dashboard
+                Column() {
+
+                    // Greeting（头像 + 问候语）
+                    Row() {
+                        Image(this.getMyPortrait())
+                            .width(44)
+                            .height(44)
+                            .borderRadius(22)
+                            .backgroundColor($r('app.color.wf_image_placeholder_bg'))
+                            .margin({ right: 12 })
+
+                        Column() {
+                            Text(`${this.getGreeting()}，${this.getMyName()}`)
+                                .fontSize(FontSize.lg)
+                                .fontWeight(FontWeight.Bold)
+                                .fontColor($r('app.color.wf_primary_text'))
+                                .maxLines(1)
+                                .textOverflow({ overflow: TextOverflow.Ellipsis })
+                                .minFontScale(1)
+                                .maxFontScale(1)
+                            Text('祝你有美好的一天')
+                                .fontSize(FontSize.xs)
+                                .fontColor($r('app.color.wf_tertiary_text'))
+                                .margin({ top: 2 })
+                                .minFontScale(1)
+                                .maxFontScale(1)
+                        }
+                        .alignItems(HorizontalAlign.Start)
+                        .layoutWeight(1)
+                    }
+                    .width('100%')
+                    .alignItems(VerticalAlign.Center)
+                    .margin({ bottom: 16 })
+
+                    // Date Card
+                    Column() {
+                        Row() {
+                            Column() {
+                                Text(new Date().getDate().toString())
+                                    .fontSize(36)
+                                    .fontWeight(FontWeight.Bold)
+                                    .fontColor($r('app.color.wf_primary'))
+                                    .minFontScale(1)
+                                    .maxFontScale(1)
+                            }
+                            .width(56)
+                            .height(56)
+                            .justifyContent(FlexAlign.Center)
+                            .backgroundColor($r('app.color.wf_secondary_background'))
+                            .borderRadius(12)
+                            .margin({ right: 16 })
+
+                            Column() {
+                                Text(this.getFormattedDate())
+                                    .fontSize(FontSize.sm)
+                                    .fontWeight(FontWeight.Bold)
+                                    .fontColor($r('app.color.wf_primary_text'))
+                                    .minFontScale(1)
+                                    .maxFontScale(1)
+                                Text('探索今天的高效工作吧')
+                                    .fontSize(FontSize.xs)
+                                    .fontColor($r('app.color.wf_tertiary_text'))
+                                    .margin({ top: 4 })
+                                    .minFontScale(1)
+                                    .maxFontScale(1)
+                            }
+                            .alignItems(HorizontalAlign.Start)
+                            .layoutWeight(1)
+                        }
+                        .alignItems(VerticalAlign.Center)
+                    }
+                    .width('100%')
+                    .padding(16)
+                    .backgroundColor($r('app.color.wf_background'))
+                    .borderRadius(16)
+                    .margin({ bottom: 16 })
+                    .shadow({ radius: 8, color: '#0d000000', offsetX: 0, offsetY: 2 })
+
+                    // Shortcut Tools Card
+                }
+                .layoutWeight(1)
+                .width('100%')
+                .padding(16)
+                .backgroundColor($r('app.color.wf_secondary_background'))
+
+                // 3. TabBar
+                this.PaneTabBar()
+            }
+            .width(300)
+            .height('100%')
+            .backgroundColor($r('app.color.wf_primary_background_color'))
+
+            Divider()
+                .vertical(true)
+                .height('100%')
+                .strokeWidth(0.5)
+                .color($r('app.color.wf_divider'))
+
+            Column() {
+                WorkSpaceTab()
+            }
+            .layoutWeight(1)
+            .height('100%')
+        }
+        .width('100%')
+        .height('100%')
+    }
+
+    // 手机：底部横排 Tab，每个 tab 整页列表，详情走外层栈全屏（与适配前一致）
+    @Builder
+    PhoneTabs() {
+        Tabs({ barPosition: BarPosition.End, index: this.currentIndex, controller: this.tabsController }) {
+            TabContent() {
+                ConversationListTab({ conversationListTabUnreadCount: $conversationListTabUnreadCount })
+            }
+            .tabBar(this.TabBuilder(this.tabTitles[0], 0, $r('app.media.message_press'), $r('app.media.message_normal')))
+
+            TabContent() {
+                ContactListTab({ contactTabUnreadCount: $contactTabUnreadCount })
+            }
+            .tabBar(this.TabBuilder(this.tabTitles[1], 1, $r('app.media.contacts_press'), $r('app.media.contacts_normal')))
+
+            if (Config.getWorkspaceUrl()) {
+                TabContent() {
+                    WorkSpaceTab()
+                }
+                .tabBar(this.TabBuilder(this.tabTitles[2], 2, $r('app.media.work_press'), $r('app.media.work')))
+
+                TabContent() {
+                    DiscoveryTab({ discoveryTabUnreadCount: $discoveryTabUnreadCount })
+                }
+                .tabBar(this.TabBuilder(this.tabTitles[3], 3, $r('app.media.discovery_press'), $r('app.media.discovery_normal')))
+
+                TabContent() {
+                    MeTab({ meTabUnreadCount: $meTabUnreadCount })
+                }
+                .tabBar(this.TabBuilder(this.tabTitles[4], 4, $r('app.media.me_press'), $r('app.media.me_normal')))
+            } else {
+                TabContent() {
+                    DiscoveryTab({ discoveryTabUnreadCount: $discoveryTabUnreadCount })
+                }
+                .tabBar(this.TabBuilder(this.tabTitles[3], 3, $r('app.media.discovery_press'), $r('app.media.discovery_normal')))
+
+                TabContent() {
+                    MeTab({ meTabUnreadCount: $meTabUnreadCount })
+                }
+                .tabBar(this.TabBuilder(this.tabTitles[4], 4, $r('app.media.me_press'), $r('app.media.me_normal')))
+            }
+        }
+        .barOverlap(true)
+        .barBackgroundBlurStyle(BlurStyle.COMPONENT_THICK)
+        .barBackgroundColor($r('app.color.wf_tab_background'))
+        .onChange(index => {
+            this.currentIndex = index
+            let titleIndex = index
+            if (!Config.getWorkspaceUrl() && index >= 2) {
+                titleIndex = index + 1
+            }
+            this.title = this.tabTitles[titleIndex]
+            const isMe = index === (Config.getWorkspaceUrl() ? 4 : 3)
+            this.isMeTab = isMe
+            this.setStatusBarColor(isMe)
+        })
+        .onAnimationStart((index: number, targetIndex: number) => {
+            const isMe = targetIndex === (Config.getWorkspaceUrl() ? 4 : 3)
+            this.isMeTab = isMe
+            this.setStatusBarColor(isMe)
+        })
+        .onAnimationEnd((index: number) => {
+            const isMe = index === (Config.getWorkspaceUrl() ? 4 : 3)
+            this.isMeTab = isMe
+            this.setStatusBarColor(isMe)
+        })
+    }
+
+    // 平板：一个 list tab 的分栏 pane（独立栈，左列表右详情），左栏底部挂 Tab 栏
+    @Builder
+    TabPane(tabKey: string) {
+        SplitTabPane({
+            tabKey: tabKey,
+            conversationListTabUnreadCount: $conversationListTabUnreadCount,
+            contactTabUnreadCount: $contactTabUnreadCount,
+            discoveryTabUnreadCount: $discoveryTabUnreadCount,
+            meTabUnreadCount: $meTabUnreadCount,
+            headerBar: () => {
+                this.TabHeaderBuilder(tabKey)
+            },
+            bottomBar: () => {
+                this.PaneTabBar()
+            }
+        })
+    }
+
+    // 平板：默认 Tab 栏隐藏（barHeight 0），改由每个 pane 左栏底部自绘 Tab 栏；
+    // 每个 list tab 用 SplitTabPane（独立栈）左列表右详情。Tabs 仅用于切换与保活。
+    @Builder
+    TabletTabs() {
+        Tabs({ barPosition: BarPosition.End, index: this.currentIndex, controller: this.tabsController }) {
+            TabContent() {
+                this.TabPane(TabKey.Conversation)
+            }
+
+            TabContent() {
+                this.TabPane(TabKey.Contact)
+            }
+
+            if (Config.getWorkspaceUrl()) {
+                TabContent() {
+                    this.WorkspacePane()
+                }
+
+                TabContent() {
+                    this.TabPane(TabKey.Discovery)
+                }
+
+                TabContent() {
+                    this.TabPane(TabKey.Me)
+                }
+            } else {
+                TabContent() {
+                    this.TabPane(TabKey.Discovery)
+                }
+
+                TabContent() {
+                    this.TabPane(TabKey.Me)
+                }
+            }
+        }
+        .barHeight(0)
+        // 平板由自绘 Tab 栏切换，禁用横滑换 tab（避免会话/列表内横向手势误触）
+        .scrollable(false)
+        .animationDuration(0)
+        .onChange(index => {
+            this.currentIndex = index
+            let titleIndex = index
+            if (!Config.getWorkspaceUrl() && index >= 2) {
+                titleIndex = index + 1
+            }
+            this.title = this.tabTitles[titleIndex]
+            const isMe = index === (Config.getWorkspaceUrl() ? 4 : 3)
+            this.isMeTab = isMe
+            this.setStatusBarColor(isMe)
+        })
+        .onAnimationStart((index: number, targetIndex: number) => {
+            const isMe = targetIndex === (Config.getWorkspaceUrl() ? 4 : 3)
+            this.isMeTab = isMe
+            this.setStatusBarColor(isMe)
+        })
+        .onAnimationEnd((index: number) => {
+            const isMe = index === (Config.getWorkspaceUrl() ? 4 : 3)
+            this.isMeTab = isMe
+            this.setStatusBarColor(isMe)
+        })
+    }
+
+    build() {
+        Navigation(this.mainNavPathStack) {
+            // 平板：每个 tab 左栏(列表+底部Tab栏) | 右栏(该 tab 独立详情栈)；手机：单栏底部 Tab。
+            if (this.isWide()) {
+                this.TabletTabs()
+            } else {
+                this.PhoneTabs()
+            }
         }
         .title(this.TitleBuilder(), {
             backgroundColor: this.isMeTab ? $r('app.color.wf_background') : $r('app.color.wf_primary_background_color')
         })
         .titleMode(NavigationTitleMode.Mini)
+        .hideTitleBar(this.isWide())
         .backgroundColor($r('app.color.wf_primary_background_color'))
         .hideBackButton(true)
         .menus(this.NavigationMenus())
+        // 外层栈只承载全屏覆盖页（通话/会议/分享/通知打开）；分栏发生在每个 tab 内部
         .mode(NavigationMode.Stack)
         // 要和 pipController 里面配置的 navigationId 一致
         .id(uikit.bundleName)

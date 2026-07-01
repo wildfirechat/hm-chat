@@ -226,10 +226,10 @@ export default struct UserInfoPage {
                                     ]
                                 }),
                                 autoCancel: true,
-                                alignment: DialogAlignment.Bottom,
+                                alignment: AppStorage.get<string>('widthBreakpoint') !== 'sm' ? DialogAlignment.Center : DialogAlignment.Bottom,
                                 gridCount: 4,
                                 customStyle: true
-                            })
+                             })
 
                             voipDialogController.open()
                         })

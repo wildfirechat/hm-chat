@@ -18,21 +18,29 @@ export default struct PickOrganizationMemberPage{
     @State checkedEmployees: Employee[] = []
     @State checkedOrganizations: Organization[] = []
     public static PICK_RESULT = 'pickOrganizationMemberResult';
+    onChecked?: (result: PickOrganizationMemberResult) => void
 
     aboutToAppear() {
-        // let params = this.mainNavPathStack.getParamByIndex(this.mainNavPathStack.size() - 1) as Record<string, Object>;
-        let params = router.getParams() as Record<string, Object>
-        this.curOrganization = params['organization'] as Organization
-        this.title = this.curOrganization.name;
-        if (this.curOrganization.parentId) {
-            this.loadOrganizationPath(this.curOrganization.id)
-        } else {
-            this.orgPath = [this.curOrganization]
-            setTimeout(() => {
-                this.scroller.scrollEdge(Edge.End)
-            })
+        let params = this.mainNavPathStack.getParamByIndex(this.mainNavPathStack.size() - 1) as Record<string, Object>;
+        if (!params) {
+            params = router.getParams() as Record<string, Object>
         }
-        this.loadOrganizationMembers(this.curOrganization.id)
+        if (params) {
+            this.curOrganization = params['organization'] as Organization
+            this.onChecked = params['onChecked'] as (result: PickOrganizationMemberResult) => void
+        }
+        if (this.curOrganization) {
+            this.title = this.curOrganization.name;
+            if (this.curOrganization.parentId) {
+                this.loadOrganizationPath(this.curOrganization.id)
+            } else {
+                this.orgPath = [this.curOrganization]
+                setTimeout(() => {
+                    this.scroller.scrollEdge(Edge.End)
+                })
+            }
+            this.loadOrganizationMembers(this.curOrganization.id)
+        }
     }
 
     async loadOrganizationPath(orgId: number) {
@@ -228,11 +236,16 @@ export default struct PickOrganizationMemberPage{
                 .fontSize(FontSize.sm)
                 .borderRadius(Radius.sm)// .backgroundColor(Color.Blue)
                 .onClick(() => {
+                    let result: PickOrganizationMemberResult = {
+                        employees: this.checkedEmployees,
+                        organizations: this.checkedOrganizations,
+                    };
                     LocalStorage.getShared()
-                        .setOrCreate<PickOrganizationMemberResult>(PickOrganizationMemberPage.PICK_RESULT, {
-                            employees: this.checkedEmployees,
-                            organizations: this.checkedOrganizations,
-                        });
+                        .setOrCreate<PickOrganizationMemberResult>(PickOrganizationMemberPage.PICK_RESULT, result);
+                    if (this.onChecked) {
+                        this.onChecked(result)
+                    }
+                    this.mainNavPathStack.pop(true)
                 })
         }
         .height('100%')

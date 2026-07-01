@@ -18,6 +18,7 @@ import { KeyboardAvoidMode, window } from '@kit.ArkUI'
 import MentionGroupMemberView from './mention/MentionGroupMemberView'
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType'
+import { isWideScreen } from '../../util/navUtil'
 import { preferences } from '@kit.ArkData'
 import { TextStyleToken, FontSize, Radius } from '../../common/design/Tokens'
 import avenginekit from '@wfc/avenginekit'
@@ -188,7 +189,7 @@ export default struct ConversationInputPanelView {
                         ]
                     }),
                     autoCancel: true,
-                    alignment: DialogAlignment.Bottom,
+                    alignment: AppStorage.get<string>('widthBreakpoint') !== 'sm' ? DialogAlignment.Center : DialogAlignment.Bottom,
                     gridCount: 4,
                     customStyle: true
                 })
@@ -254,8 +255,16 @@ export default struct ConversationInputPanelView {
             title: '名片',
             icon: $r('app.media.ic_user_card'),
             action: () => {
-                this.showExtContentCoverModal = true
-                this.extContentCoverBuilderParam = this.pickSingleContactModal
+                if (isWideScreen()) {
+                    this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.PickContactPage, {
+                        'onClickUser': (user: UserInfo) => {
+                            this.sendUserCard(user)
+                        }
+                    } as Record<string, Object>)
+                } else {
+                    this.showExtContentCoverModal = true
+                    this.extContentCoverBuilderParam = this.pickSingleContactModal
+                }
             }
         },
         {
@@ -339,7 +348,7 @@ export default struct ConversationInputPanelView {
                                     ]
                                 }),
                                 autoCancel: true,
-                                alignment: DialogAlignment.Bottom,
+                                alignment: AppStorage.get<string>('widthBreakpoint') !== 'sm' ? DialogAlignment.Center : DialogAlignment.Bottom,
                                 gridCount: 4,
                                 customStyle: true
                             })
@@ -388,7 +397,7 @@ export default struct ConversationInputPanelView {
                         ]
                     }),
                     autoCancel: true,
-                    alignment: DialogAlignment.Bottom,
+                    alignment: AppStorage.get<string>('widthBreakpoint') !== 'sm' ? DialogAlignment.Center : DialogAlignment.Bottom,
                     gridCount: 4,
                     customStyle: true
                 })
@@ -795,7 +804,7 @@ export default struct ConversationInputPanelView {
                 }
             }),
             autoCancel: true,
-            alignment: DialogAlignment.Bottom,
+            alignment: AppStorage.get<string>('widthBreakpoint') !== 'sm' ? DialogAlignment.Center : DialogAlignment.Bottom,
             gridCount: 4,
             customStyle: true
         })
@@ -1143,7 +1152,7 @@ export default struct ConversationInputPanelView {
                         // 面板靠容器高度动画+裁剪平滑展开，自身不要默认的「从右侧滑入」出现动画
                         .transition(TransitionEffect.IDENTITY)
                         .backgroundColor($r('app.color.wf_primary_background_color'))
-                        .bindContentCover(this.showExtContentCoverModal, this.extContentCoverBuilderParam, {
+                        .bindContentCover(!isWideScreen() && this.showExtContentCoverModal, this.extContentCoverBuilderParam, {
                             modalTransition: ModalTransition.DEFAULT,
                             onAppear: () => {
                             },

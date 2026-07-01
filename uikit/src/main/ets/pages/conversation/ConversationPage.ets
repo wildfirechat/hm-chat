@@ -48,6 +48,7 @@ import { RecentPhotoComponent, RecentPhotoOptions, PhotoSource, RecentPhotoCheck
 import { BaseItemInfo } from '@ohos.file.PhotoPickerComponent'
 import { FontSize, Radius, scaledSize } from '../../common/design/Tokens'
 import { STORAGE_KEY_VOICE_EARPIECE } from './audio/VoicePlayModeManager'
+import { conversationIdentity, STORAGE_KEY_ACTIVE_CONVERSATION } from '../../util/navUtil'
 
 // 「猜你想发送」：上次消失（发送/取消/其他操作）的时间。
 // API 12 的最近图片控件回调拿不到图片标识，故用「动态时间窗口」实现“同一张只提示一次”：
@@ -203,6 +204,11 @@ export default struct ConversationPage {
 
     aboutToDisappear() {
         clearTimeout(this.timer);
+        // 会话页销毁时清除高亮标识；仅当仍指向本会话才清（replace 到别的会话时，
+        // 新页已写入新标识，这里的判等避免把新标识误清掉，规避销毁/创建的时序竞态）。
+        if (this.conversation && AppStorage.get<string>(STORAGE_KEY_ACTIVE_CONVERSATION) === conversationIdentity(this.conversation)) {
+            AppStorage.setOrCreate(STORAGE_KEY_ACTIVE_CONVERSATION, '')
+        }
         this.audioPlayerManager.release()
 
         wfc.eventEmitter!.off(EventType.SendMessage, this.onSendMessage)
@@ -283,6 +289,9 @@ export default struct ConversationPage {
         }
 
         this.conversation = conversation;
+
+        // 记录当前展示的会话，供分栏下会话列表高亮当前项
+        AppStorage.setOrCreate(STORAGE_KEY_ACTIVE_CONVERSATION, conversationIdentity(conversation))
 
         // 重置归档消息分页状态
         this.archiveNextStartMid = 0;
@@ -412,8 +421,14 @@ export default struct ConversationPage {
      * 这里在内容布局稳定前重复贴底：每次贴底后比较滚动偏移，偏移不再变化即认为已稳定并停止。
      */
     scrollToBottomOnEnter(remaining: number) {
+        // 页面被 replace 重建时，旧页面延迟触发的本方法可能在 scroller 已与 List 解绑后执行，
+        // 此时 currentOffset() 运行时返回 undefined，直接读 .yOffset 会崩溃，这里做防御性判空。
         this.scroller.scrollEdge(Edge.Bottom)
-        let yOffset = this.scroller.currentOffset().yOffset
+        let offset = this.scroller.currentOffset()
+        if (!offset) {
+            return
+        }
+        let yOffset = offset.yOffset
         if (remaining > 0 && yOffset !== this.lastInitialScrollOffset) {
             this.lastInitialScrollOffset = yOffset
             setTimeout(() => {

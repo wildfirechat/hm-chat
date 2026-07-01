@@ -7,6 +7,8 @@ import ModifyGroupInfoType from '@wfc/client/src/main/ets/wfc/model/modifyGroupI
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo';
 import PickGroupMemberModal from './PickGroupMemberModal';
 import { Radius } from '../../common/design/Tokens'
+import { isWideScreen } from '../../util/navUtil'
+import { uikitNavigationDestinations } from '../uikitNavigationConfig'
 
 @Component
 export default struct GroupMemberMuteOrAllowListPage {
@@ -101,7 +103,7 @@ export default struct GroupMemberMuteOrAllowListPage {
                         // 添加黑名单
                     }
                 })
-                .bindContentCover(this.showPickGroupMemberModal, this.pickGroupMemberModal(), {
+                .bindContentCover(!isWideScreen() && this.showPickGroupMemberModal, this.pickGroupMemberModal(), {
                     modalTransition: ModalTransition.DEFAULT,
                     onAppear: () => {
                     },
@@ -134,7 +136,36 @@ export default struct GroupMemberMuteOrAllowListPage {
                     }
                 })
                 .onClick(() => {
-                    this.showPickGroupMemberModal = true
+                    if (isWideScreen()) {
+                        let uncheckableIds = (this.groupInfo?.mute === 0 ? this.mutedGroupMemberUsers : this.allowGroupMemberUsers).map(u => u.uid)
+                        this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.PickGroupMemberPage, {
+                            'groupId': this.groupInfo?.target,
+                            'uncheckableUserIds': uncheckableIds,
+                            'title': this.groupInfo?.mute === 0 ? '添加禁言成员' : '添加禁言豁免成员',
+                            'onPickResult': (pickUsers: UserInfo[]) => {
+                                if (pickUsers?.length) {
+                                    let uids = pickUsers.map(info => info.uid)
+                                    if (this.groupInfo?.mute === 1) {
+                                        wfc.allowGroupMembers(this.groupInfo.target, true, uids, [0], null, () => {
+                                            let userInfos = wfc.getUserInfos(uids, this.groupInfo!.target)
+                                            this.allowGroupMemberUsers = this.allowGroupMemberUsers.concat(userInfos)
+                                        }, err => {
+                                            showToast('添加白名单失败 ' + err)
+                                        })
+                                    } else {
+                                        wfc.muteGroupMembers(this.groupInfo!.target, true, uids, [0], null, () => {
+                                            let userInfos = wfc.getUserInfos(uids, this.groupInfo!.target)
+                                            this.mutedGroupMemberUsers = this.mutedGroupMemberUsers.concat(userInfos)
+                                        }, err => {
+                                            showToast('添加黑名单失败 ' + err)
+                                        })
+                                    }
+                                }
+                            }
+                        } as Record<string, Object>)
+                    } else {
+                        this.showPickGroupMemberModal = true
+                    }
                 })
 
                 List() {

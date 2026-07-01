@@ -8,6 +8,7 @@ import uikit from '@wfc/uikit'
 // 如果需要支持朋友圈时，请取消注释
 import { momentNavigationDestinations } from '@wfc/momentkit'
 import { fontSizeManager, scaledSize } from '@wfc/uikit/src/main/ets/common/design/Tokens'
+import { pushOrReplaceDetail, openConversation } from '@wfc/uikit/src/main/ets/util/navUtil'
 
 @Preview
 @Component
@@ -53,7 +54,7 @@ export default struct DiscoveryTab {
                             .onClick(() => {
                                 // showToast('当前版本不支持朋友圈功能')
                                 // 如果需要支持朋友圈时，请取消注释
-                                this.mainNavPathStack.pushPathByName(momentNavigationDestinations.FeedListPage, {} as Record<string, Object>)
+                                pushOrReplaceDetail(this.mainNavPathStack, momentNavigationDestinations.FeedListPage)
                             })
                             .padding({ left: 12, right: 12 })
                             .width('100%')
@@ -81,7 +82,7 @@ export default struct DiscoveryTab {
                                     .fontColor($r('app.color.wf_primary_text'))
                             }
                             .onClick(() => {
-                                this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ChatroomListPage, {} as Record<string, Object>)
+                                pushOrReplaceDetail(this.mainNavPathStack, uikitNavigationDestinations.ChatroomListPage)
                             })
                             .padding({ left: 12, right: 12 })
                             .width('100%')
@@ -109,9 +110,7 @@ export default struct DiscoveryTab {
                         }
                         .onClick(() => {
                             let conversation = new Conversation(ConversationType.Single, 'FireRobot', 0)
-                            this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ConversationPage, {
-                                'conversation': conversation
-                            } as Record<string, Object>)
+                            openConversation(this.mainNavPathStack, conversation)
                         })
                         .padding({ left: 12, right: 12 })
                         .width('100%')
@@ -138,7 +137,8 @@ export default struct DiscoveryTab {
                         }
                         .onClick(() => {
                             if (uikit.isSupportConference()) {
-                                this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ConferencePortalPage, {} as Record<string, Object>)
+                                // 会议全屏：推到外层主栈（平板分栏下也占满整屏，而非挤在发现 tab 右栏）
+                                uikit.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ConferencePortalPage, {} as Record<string, Object>)
                             } else {
                                 showToast('多人版音视频 SDK，不支持会议功能')
                             }
@@ -166,7 +166,7 @@ export default struct DiscoveryTab {
                                 .fontColor($r('app.color.wf_primary_text'))
                         }
                         .onClick(() => {
-                            this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.WebViewPage, {
+                            pushOrReplaceDetail(this.mainNavPathStack, uikitNavigationDestinations.WebViewPage, {
                                 'url': 'https://docs.wildfirechat.cn',
                                 'title': '野火IM 开发文档'
                             } as Record<string, Object>)

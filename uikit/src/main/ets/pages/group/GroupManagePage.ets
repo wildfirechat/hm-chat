@@ -8,6 +8,7 @@ import { showToast } from '../../common/utils/Toast'
 import GroupType from '@wfc/client/src/main/ets/wfc/model/groupType'
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
 import PickGroupMemberModal from './PickGroupMemberModal'
+import { isWideScreen } from '../../util/navUtil'
 
 @Component
 export default struct GroupManagePage {
@@ -128,17 +129,32 @@ export default struct GroupManagePage {
                             title: '转让群主',
                             showDivider: false,
                         })
-                            .bindContentCover($$this.showPickGroupMemberModal, this.pickNewOwnerModal((userInfos: UserInfo[]) => {
+                            .bindContentCover(!isWideScreen() && this.showPickGroupMemberModal, this.pickNewOwnerModal((userInfos: UserInfo[]) => {
                                 this.showPickGroupMemberModal = false
                                 if (userInfos?.length) {
                                     this.transferGroup(userInfos[0])
                                 }
-                            }), {
-                                modalTransition: ModalTransition.DEFAULT
-                            })
-                            .onClick(() => {
-                                this.showPickGroupMemberModal = true
-                            })
+                             }), {
+                                 modalTransition: ModalTransition.DEFAULT
+                             })
+                             .onClick(() => {
+                                 if (isWideScreen()) {
+                                     this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.PickGroupMemberPage, {
+                                         'groupId': this.groupInfo?.target,
+                                         'uncheckableUserIds': [],
+                                         'excludeUserIds': [this.groupInfo!.owner],
+                                         'singleCheck': true,
+                                         'title': '转让群主',
+                                         'onPickResult': (userInfos: UserInfo[]) => {
+                                             if (userInfos?.length) {
+                                                 this.transferGroup(userInfos[0])
+                                             }
+                                         }
+                                     } as Record<string, Object>)
+                                 } else {
+                                     this.showPickGroupMemberModal = true
+                                 }
+                             })
                     }
                 }
 
@@ -195,7 +211,7 @@ export default struct GroupManagePage {
                                         ]
                                     }),
                                     autoCancel: true,
-                                    alignment: DialogAlignment.Bottom,
+                                    alignment: AppStorage.get<string>('widthBreakpoint') !== 'sm' ? DialogAlignment.Center : DialogAlignment.Bottom,
                                     gridCount: 4,
                                     customStyle: true
                                 })
@@ -237,7 +253,7 @@ export default struct GroupManagePage {
                                     ]
                                 }),
                                 autoCancel: true,
-                                alignment: DialogAlignment.Bottom,
+                                alignment: AppStorage.get<string>('widthBreakpoint') !== 'sm' ? DialogAlignment.Center : DialogAlignment.Bottom,
                                 gridCount: 4,
                                 customStyle: true
                             })
@@ -278,7 +294,7 @@ export default struct GroupManagePage {
                                     ]
                                 }),
                                 autoCancel: true,
-                                alignment: DialogAlignment.Bottom,
+                                alignment: AppStorage.get<string>('widthBreakpoint') !== 'sm' ? DialogAlignment.Center : DialogAlignment.Bottom,
                                 gridCount: 4,
                                 customStyle: true
                             })

@@ -152,9 +152,9 @@ export default struct ForwardMessageDialog {
                 .margin({ top: 20 })
             }
         }
-        .width('100%')
+        .width(AppStorage.get<string>('widthBreakpoint') !== 'sm' ? 360 : '100%')
         .backgroundColor($r('app.color.wf_background'))
-        .borderRadius({ topLeft: 16, topRight: 16 })
+        .borderRadius(AppStorage.get<string>('widthBreakpoint') !== 'sm' ? 16 : { topLeft: 16, topRight: 16 })
         .padding(20)
         .justifyContent(FlexAlign.Start)
         .alignItems(HorizontalAlign.Start)

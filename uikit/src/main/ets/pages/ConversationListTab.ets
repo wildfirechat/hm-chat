@@ -296,7 +296,7 @@ export default struct ConversationListTab {
                             .bindContextMenu(this.MenuBuilder(info), ResponseType.LongPress, { preview: MenuPreviewMode.NONE })
                     }
                     // 分栏下高亮右栏当前会话
-                    .backgroundColor(this.isActiveConversation(info) ? $r('app.color.wf_item_pressed') : $r('app.color.wf_background'))
+                    .backgroundColor(this.isActiveConversation(info) ? $r('app.color.wf_item_pressed') : ( info.top ? $r('app.color.wf_conversation_top_background') : $r('app.color.wf_background')))
                     .stateStyles({
                         pressed: {
                             .backgroundColor($r('app.color.wf_item_pressed'))

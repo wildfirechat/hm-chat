@@ -163,6 +163,5 @@ export default struct ConversationInfoItemView {
                 .color(!this.basicMode && this.conversationInfo!.top ? $r('app.color.wf_divider') : Color.Transparent)
         }
         .width('100%')
-        .backgroundColor(!this.basicMode && this.conversationInfo!.top ? $r('app.color.wf_conversation_top_background') : Color.Transparent)
     }
 }

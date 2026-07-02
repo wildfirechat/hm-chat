@@ -327,6 +327,9 @@ export default struct ConversationListTab {
                 action: () => {
                     wfc.removeConversation(conversationInfo.conversation!, false);
                     this.conversationInfoDataSource.removeConversationInfo(conversationInfo)
+                    if (isWideScreen() && this.activeConversationKey === conversationIdentity(conversationInfo.conversation!)) {
+                        this.mainNavPathStack.popToName(uikitNavigationDestinations.WelcomePage)
+                    }
                 }
             }
         ]

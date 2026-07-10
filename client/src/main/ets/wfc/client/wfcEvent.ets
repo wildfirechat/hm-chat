@@ -56,4 +56,11 @@ export default class EventType {
     static SecretChatMessageBurned = 'secretChatMessageBurned';
     // function (targetId) {}
     static SecretChatStateChange = 'secretChatStateChange';
+
+    // function (send: number, recv: number) {}
+    static TrafficData = 'trafficData';
+    // function (errorType: number, errMsg: string) {}
+    static ErrorEvent = 'errorEvent';
+    // function (domainInfo: string) {}
+    static DomainInfoUpdate = 'domainInfoUpdate';
 }

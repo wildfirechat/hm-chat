@@ -167,6 +167,18 @@ class WfcImpl {
         self.eventEmitter!.emit(EventType.UserOnlineEvent, userOnlineStates);
     }
 
+    onTrafficData(send: number, recv: number) {
+        self.eventEmitter!.emit(EventType.TrafficData, send, recv);
+    }
+
+    onErrorEvent(errorType: number, errMsg: string) {
+        self.eventEmitter!.emit(EventType.ErrorEvent, errorType, errMsg);
+    }
+
+    onDomainInfoUpdate(domainInfoStr: string) {
+        self.eventEmitter!.emit(EventType.DomainInfoUpdate, domainInfoStr);
+    }
+
     _parseUserOnlineState(userOnlineStateStr: string) {
         let userOnlineStates = [] as UserOnlineState[];
         let states: Record<string, Object>[] = JSON.parse(userOnlineStateStr);
@@ -480,6 +492,22 @@ class WfcImpl {
         protoProxy.setPackageName(packageName);
     }
 
+    setDeviceName(deviceName: string) {
+        protoProxy.setDeviceName(deviceName);
+    }
+
+    setHeartBeatInterval(sec: number) {
+        protoProxy.setHeartBeatInterval(sec);
+    }
+
+    setAppDataPath(path: string) {
+        protoProxy.setAppDataPath(path);
+    }
+
+    setClientPrefix(prefix: string) {
+        protoProxy.setClientPrefix(prefix);
+    }
+
     setDeviceToken(pushType: number, token: string) {
         protoProxy.setDeviceToken(pushType, token);
     }
@@ -541,6 +569,10 @@ class WfcImpl {
 
     getConnectionStatus(): number {
         return protoProxy.getConnectionStatus();
+    }
+
+    getConnectedNetworkType(): number {
+        return protoProxy.getConnectedNetworkType();
     }
 
     setBackupAddressStrategy(strategy: number) {
@@ -637,6 +669,25 @@ class WfcImpl {
         return users;
     }
 
+    async getUserInfosEx(userIds: string[], groupId: string, successCB: CallbackWithValue_1<UserInfo[]>, failCB: FailCallback) {
+        protoProxy.getUserInfosEx(userIds, groupId, (result: string) => {
+            let userList: UserInfo[] = [];
+            if (result && result !== '') {
+                let userListStr = JSON.parse(result) as Record<string, Object>[];
+                userListStr.forEach(u => {
+                    userList.push(assign(new UserInfo(), u) as UserInfo);
+                });
+            }
+            if (successCB) {
+                successCB(userList);
+            }
+        }, (errorCode: number) => {
+            if (errorCode) {
+                failCB(errorCode);
+            }
+        });
+    }
+
     async getUserInfoEx(userId: string, refresh: boolean, successCB: CallbackWithValue_1<UserInfo>, failCB: FailCallback) {
         protoProxy.getUserInfoEx(userId, refresh, (userInfoStr: string) => {
             const userInfo = assign(new UserInfo(), JSON.parse(userInfoStr)) as UserInfo;
@@ -654,6 +705,26 @@ class WfcImpl {
 
     async searchUser(keyword: string, searchType: number, page: number, successCB: CallbackWithValue_2<string, UserInfo[]>, failCB: FailCallback) {
         protoProxy.searchUser(keyword, searchType, page, (result: string) => {
+            let userListStr = JSON.parse(result) as Record<string, Object>[];
+            let userList: UserInfo[] = [];
+            if (userListStr && userListStr.length > 0) {
+                userListStr.forEach(u => {
+                    userList.push(assign(new UserInfo(), u) as UserInfo);
+                });
+            }
+            if (successCB) {
+                successCB(keyword, userList);
+            }
+        }, (errorCode: number) => {
+            if (errorCode) {
+                failCB(errorCode);
+            }
+
+        });
+    }
+
+    async searchUserEx(domainId: string, keyword: string, searchType: number, page: number, successCB: CallbackWithValue_2<string, UserInfo[]>, failCB: FailCallback) {
+        protoProxy.searchUserEx(domainId, keyword, searchType, page, (result: string) => {
             let userListStr = JSON.parse(result) as Record<string, Object>[];
             let userList: UserInfo[] = [];
             if (userListStr && userListStr.length > 0) {
@@ -1140,6 +1211,32 @@ class WfcImpl {
             }
 
         });
+    }
+
+    getGroupMembersEx2(groupId: string, memberTypes: number[], offset: number, count: number): GroupMember[] {
+        let membersStr: string = protoProxy.getGroupMembersEx2(groupId, memberTypes, offset, count);
+        let members: GroupMember[] = [];
+        let arr = JSON.parse(membersStr) as Record<string, Object>[];
+        arr.forEach(e => {
+            members.push(assign(new GroupMember(), e) as GroupMember);
+        });
+        return members;
+    }
+
+    getGroupMembersCount(groupId: string, memberTypes: number[]): number {
+        return protoProxy.getGroupMembersCount(groupId, memberTypes);
+    }
+
+    getGroupMemberIdsByTypes(groupId: string, memberTypes: number[]): string[] {
+        let result: string = protoProxy.getGroupMemberIds(groupId, memberTypes);
+        if (result && result !== '') {
+            return JSON.parse(result) as string[];
+        }
+        return [];
+    }
+
+    loadGroupMemberFromRemote(groupId: string) {
+        protoProxy.loadGroupMemberFromRemote(groupId);
     }
 
     kickoffGroupMembers(groupId: string, memberIds: string[], notifyLines: number[], notifyMsg: MessageContent | null, successCB: SuccessCallback, failCB: FailCallback) {
@@ -3033,6 +3130,30 @@ class WfcImpl {
         return protoProxy.getAppPath();
     }
 
+    screenShot(): string {
+        return protoProxy.screenShot();
+    }
+
+    getDomainInfo(domainId: string, refresh: boolean = false): string {
+        return protoProxy.getDomainInfo(domainId, refresh);
+    }
+
+    async loadRemoteDomains(successCB: SuccessCallback, failCB: FailCallback) {
+        protoProxy.loadRemoteDomains(() => {
+            successCB && successCB();
+        }, (errorCode: number) => {
+            failCB && failCB(errorCode);
+        });
+    }
+
+    isEnableMesh(): boolean {
+        return protoProxy.isEnableMesh() === 1;
+    }
+
+    isEnableRemoteControl(): boolean {
+        return protoProxy.isEnableRemoteControl() === 1;
+    }
+
     isUserEnableSecretChat(): boolean {
         return protoProxy.isUserEnableSecretChat() === 1;
     }
@@ -3103,7 +3224,10 @@ class WfcImpl {
 
         protoProxy.setConferenceEventListener(self.onConferenceEvent);
         protoProxy.setOnlineEventListener(self.onOnlineEvent);
+        protoProxy.setTrafficDataListener(self.onTrafficData);
+        protoProxy.setErrorEventListener(self.onErrorEvent);
         protoProxy.setUserInfoUpdateListener(self.onUserInfoUpdate);
+        protoProxy.setDomainInfoCallback(self.onDomainInfoUpdate);
 
         protoProxy.setFriendUpdateListener(self.onFriendListUpdate);
 

@@ -282,6 +282,38 @@ export class WfcManager {
     }
 
     /**
+     * 设置设备名
+     * @param deviceName 设备名
+     */
+    setDeviceName(deviceName: string) {
+        impl.setDeviceName(deviceName);
+    }
+
+    /**
+     * 设置心跳间隔
+     * @param sec 间隔秒数
+     */
+    setHeartBeatInterval(sec: number) {
+        impl.setHeartBeatInterval(sec);
+    }
+
+    /**
+     * 设置应用数据路径
+     * @param path 路径
+     */
+    setAppDataPath(path: string) {
+        impl.setAppDataPath(path);
+    }
+
+    /**
+     * 设置客户端前缀
+     * @param prefix 前缀
+     */
+    setClientPrefix(prefix: string) {
+        impl.setClientPrefix(prefix);
+    }
+
+    /**
      * 获取日志文件的路径列表。只有startLog之后才会生成日志。
      * @returns 日志文件的路径列表
      */
@@ -327,6 +359,38 @@ export class WfcManager {
      */
     getConnectionStatus(): number {
         return impl.getConnectionStatus();
+    }
+
+    /**
+     * 获取当前网络类型
+     * @returns {number} 网络类型
+     */
+    getConnectedNetworkType(): number {
+        return impl.getConnectedNetworkType();
+    }
+
+    /**
+     * 设置流量数据监听
+     * @param {function (number, number)} callback 回调(send, recv)
+     */
+    setTrafficDataListener(callback: (send: number, recv: number) => void) {
+        this.eventEmitter?.on(EventType.TrafficData, callback);
+    }
+
+    /**
+     * 设置错误事件监听
+     * @param {function (number, string)} callback 回调(errorType, errMsg)
+     */
+    setErrorEventListener(callback: (errorType: number, errMsg: string) => void) {
+        this.eventEmitter?.on(EventType.ErrorEvent, callback);
+    }
+
+    /**
+     * 设置域信息更新监听
+     * @param {function (string)} callback 回调(domainInfoJson)
+     */
+    setDomainInfoCallback(callback: (domainInfo: string) => void) {
+        this.eventEmitter?.on(EventType.DomainInfoUpdate, callback);
     }
 
     /**
@@ -493,6 +557,24 @@ export class WfcManager {
     }
 
     /**
+     * 批量获取用户信息（含群维度）
+     * @param {[string]} userIds 用户ids
+     * @param {string} groupId 群组id
+     * @param {function ([UserInfo])} successCB
+     * @param {function (number)} failCB
+     */
+    async getUserInfosEx(userIds: string[], groupId: string, successCB: (userInfos: UserInfo[]) => void, failCB: (err: number) => void) {
+        impl.getUserInfosEx(userIds, groupId, (userInfos: UserInfo[]) => {
+            userInfos.forEach((u) => {
+                if (!u.portrait) {
+                    u.portrait = this.defaultUserPortrait(u)
+                }
+            });
+            successCB && successCB(userInfos);
+        }, failCB);
+    }
+
+    /**
      * 服务端搜索用户
      * @param {string} keyword 搜索关键字
      * @param {number} searchType 搜索类型，可选值参考{@link SearchType}
@@ -503,6 +585,26 @@ export class WfcManager {
      */
     async searchUser(keyword: string, searchType: number, page: number, successCB: (keyword: string, userInfos: UserInfo[]) => void, failCB: (err: number) => void) {
         impl.searchUser(keyword, searchType, page, (keyword: string, userInfos: UserInfo[]) => {
+            userInfos.forEach((u) => {
+                if (!u.portrait) {
+                    u.portrait = this.defaultUserPortrait(u)
+                }
+            });
+            successCB && successCB(keyword, userInfos);
+        }, failCB);
+    }
+
+    /**
+     * 在指定域内搜索用户
+     * @param {string} domainId 域id
+     * @param {string} keyword 搜索关键字
+     * @param {number} searchType 搜索类型
+     * @param {number} page 页数
+     * @param {function (keyword, [UserInfo])} successCB
+     * @param {function (number)} failCB
+     */
+    async searchUserEx(domainId: string, keyword: string, searchType: number, page: number, successCB: (keyword: string, userInfos: UserInfo[]) => void, failCB: (err: number) => void) {
+        impl.searchUserEx(domainId, keyword, searchType, page, (keyword: string, userInfos: UserInfo[]) => {
             userInfos.forEach((u) => {
                 if (!u.portrait) {
                     u.portrait = this.defaultUserPortrait(u)
@@ -917,6 +1019,46 @@ export class WfcManager {
      */
     getGroupMembersEx(groupId: string, fresh: boolean, successCB: CallbackWithValue_1<GroupMember[]>, failCB: FailCallback) {
         impl.getGroupMembersEx(groupId, fresh, successCB, failCB);
+    }
+
+    /**
+     * 按成员类型分页获取群成员
+     * @param {string} groupId 群id
+     * @param {[number]} memberTypes 成员类型列表
+     * @param {number} offset 偏移
+     * @param {number} count 数量
+     * @returns {[GroupMember]} 群成员列表
+     */
+    getGroupMembersEx2(groupId: string, memberTypes: number[], offset: number, count: number): GroupMember[] {
+        return impl.getGroupMembersEx2(groupId, memberTypes, offset, count);
+    }
+
+    /**
+     * 获取指定类型群成员数量
+     * @param {string} groupId 群id
+     * @param {[number]} memberTypes 成员类型列表
+     * @returns {number} 成员数量
+     */
+    getGroupMembersCount(groupId: string, memberTypes: number[]): number {
+        return impl.getGroupMembersCount(groupId, memberTypes);
+    }
+
+    /**
+     * 获取指定类型群成员id列表
+     * @param {string} groupId 群id
+     * @param {[number]} memberTypes 成员类型列表
+     * @returns {[string]} 群成员id列表
+     */
+    getGroupMemberIdsByTypes(groupId: string, memberTypes: number[]): string[] {
+        return impl.getGroupMemberIdsByTypes(groupId, memberTypes);
+    }
+
+    /**
+     * 从远端重新加载群成员
+     * @param {string} groupId 群id
+     */
+    loadGroupMemberFromRemote(groupId: string) {
+        impl.loadGroupMemberFromRemote(groupId);
     }
 
     /**
@@ -1372,6 +1514,49 @@ export class WfcManager {
      */
     getAppPath(): string {
         return impl.getAppPath();
+    }
+
+    /**
+     * 截图相关占位接口
+     * @returns {string}
+     */
+    screenShot(): string {
+        return impl.screenShot();
+    }
+
+    /**
+     * 获取域信息
+     * @param {string} domainId 域id
+     * @param {boolean} refresh 是否刷新
+     * @returns {string} 域信息JSON字符串
+     */
+    getDomainInfo(domainId: string, refresh: boolean = false): string {
+        return impl.getDomainInfo(domainId, refresh);
+    }
+
+    /**
+     * 加载远端域列表
+     * @param {function ()} successCB
+     * @param {function (number)} failCB
+     */
+    async loadRemoteDomains(successCB: SuccessCallback, failCB: FailCallback) {
+        impl.loadRemoteDomains(successCB, failCB);
+    }
+
+    /**
+     * 是否开启 Mesh
+     * @returns {boolean}
+     */
+    isEnableMesh(): boolean {
+        return impl.isEnableMesh();
+    }
+
+    /**
+     * 是否开启远程控制
+     * @returns {boolean}
+     */
+    isEnableRemoteControl(): boolean {
+        return impl.isEnableRemoteControl();
     }
 
     /**

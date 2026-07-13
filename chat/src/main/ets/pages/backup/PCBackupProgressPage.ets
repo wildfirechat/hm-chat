@@ -167,7 +167,13 @@ export default struct PCBackupProgressPage {
 
   onReceiveMessage = (messages: Message[], hasMore: boolean) => {
     if (this.isWaitingResponse) {
+      const currentUserId = wfc.getUserId()
       for (const msg of messages) {
+        // 校验发送者是否为自己，避免冒用攻击
+        if (msg.from !== currentUserId || msg.direction !== 1) {
+          continue
+        }
+
         // 检查是否是备份响应消息（类型612）
         if (msg.messageContent && msg.messageContent.type === 612) {
           const response = toBackupResponseContent(msg.messageContent as ESObject)

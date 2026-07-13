@@ -138,7 +138,13 @@ export default struct PCRestoreListPage {
 
   onReceiveMessage = (messages: Message[], hasMore: boolean) => {
     if (this.isWaitingResponse) {
+      const currentUserId = wfc.getUserId()
       for (const msg of messages) {
+        // 校验发送者是否为自己，避免冒用攻击
+        if (msg.from !== currentUserId || msg.direction !== 1) {
+          continue
+        }
+
         // 检查是否是恢复响应消息（类型611）
         if (msg.messageContent && msg.messageContent.type === 611) {
           const response = toRestoreResponseContent(msg.messageContent as ESObject)

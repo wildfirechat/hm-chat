@@ -36,6 +36,9 @@ export default class MessageContentType {
 
     static Mark_Unread_Sync = 31;
 
+    //更新消息类型，仅在服务端使用，客户端不使用
+    static Message_Content_Update = 32;
+
     static StartSecretChat_Notification = 40;
 
     //频道进出消息

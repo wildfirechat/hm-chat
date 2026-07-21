@@ -2830,6 +2830,16 @@ export class WfcManager {
     }
 
     /**
+     * 发送朋友圈相关请求
+     * @param path
+     * @param data
+     * @param callback
+     */
+    sendMomentsRequest(path: string, data: string, callback: CallbackWithValue_2<number, string | null>) {
+        impl.sendMomentsRequest(path, data, callback);
+    }
+
+    /**
      * 当前用户是否开启在线状态
      * @returns
      */

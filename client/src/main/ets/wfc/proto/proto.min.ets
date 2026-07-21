@@ -3012,6 +3012,16 @@ class WfcImpl {
             }, advance);
     }
 
+    sendMomentsRequest(path: string, data: string, callback: CallbackWithValue_2<number, string | null>) {
+        protoProxy.sendMomentsRequest(path, data,
+            (resp: string) => {
+                callback && callback(0, resp);
+            },
+            (errorCode: number) => {
+                callback && callback(errorCode, null)
+            });
+    }
+
     searchFiles(keyword: string, conversation: Conversation, fromUser: string, beforeMessageId: number, order: number, count: number, successCB: CallbackWithValue_1<FileRecord[]>,
         failCB: FailCallback) {
         protoProxy.searchFiles(keyword, conversation ? JSON.stringify(conversation) : '', fromUser, Long.fromValue(beforeMessageId)

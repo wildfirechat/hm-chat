@@ -39,6 +39,8 @@ export default class UserSettingScope {
     // 加好友不需要验证（反向语义："1"表示不需要验证）
     static AddFriendNoVerify = 28;
     static LockPC = 30;
+    // 会话级用户设置，DSH 会话状态通道（key 为 "{conversationType}-{line}-{target}_1"）
+    static Conversation_User_Setting = 31;
 
     // 用户自定义的scope需从1000开始，以防冲突
     static kUserSettingCustomBegin = 1000;

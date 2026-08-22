@@ -5,5 +5,12 @@ export default class CustomMessageContentType {
     // 1000 以下为内部消息保留，自定义消息需使用 1000 以上的数字
     static MESSAGE_CONTENT_TYPE_CUSTOM_MESSAGE_TEST = 1001;
     static MESSAGE_CONTENT_TYPE_CUSTOM_MESSAGE_TEST_NOTIFICATION = 1002;
+
+    // DSH 结构化交互消息，200-209 为官方预留 AI 交互段（与 PC 端/服务端协议对齐，不受上面 1000 的限制）
+    static MESSAGE_CONTENT_TYPE_DSH_QUESTION = 200;
+    static MESSAGE_CONTENT_TYPE_DSH_ANSWER = 201;
+    static MESSAGE_CONTENT_TYPE_DSH_APPROVAL = 202;
+    static MESSAGE_CONTENT_TYPE_DSH_APPROVAL_RESULT = 203;
+    static MESSAGE_CONTENT_TYPE_DSH_GOAL = 206;
     // 添加更多自定义消息
 }

@@ -3,6 +3,7 @@ import ChatroomListPage from './chatroom/ChatroomListPage'
 import FriendRequestListPage from './contact/FriendRequestListPage'
 import ChannelConversationInfoPage from './conversation/ChannelConversationInfoPage'
 import ConversationPage from './conversation/ConversationPage'
+import DshPlanDetailPage from './conversation/custom_message/DshPlanDetailPage'
 import ForwardMessagePage from './conversation/forward/ForwardMessagePage'
 import ShareToConversationPage from './conversation/share/ShareToConversationPage'
 import GroupConversationInfoPage from './conversation/GroupConversationInfoPage'
@@ -81,6 +82,7 @@ export class uikitNavigationDestinations {
     static PollListPage = UIKIT_NAV_DESTINATION_PREFIX + 'pollListPage'
     static SearchPortalPage = UIKIT_NAV_DESTINATION_PREFIX + 'searchPortalPage'
     static ConversationPage = UIKIT_NAV_DESTINATION_PREFIX + 'conversationPage'
+    static DshPlanDetailPage = UIKIT_NAV_DESTINATION_PREFIX + 'dshPlanDetailPage'
     static SingleConversationInfoPage = UIKIT_NAV_DESTINATION_PREFIX + 'singleConversationInfoPage'
     static GroupConversationInfoPage = UIKIT_NAV_DESTINATION_PREFIX + 'groupConversationInfo'
     static ChannelConversationInfoPage = UIKIT_NAV_DESTINATION_PREFIX + 'channelConversationInfoPage'
@@ -150,6 +152,8 @@ export function UIKitPageMap(name: string) {
         SearchPortalPage()
     } else if (name == uikitNavigationDestinations.ConversationPage) {
         ConversationPage()
+    } else if (name == uikitNavigationDestinations.DshPlanDetailPage) {
+        DshPlanDetailPage()
     } else if (name === uikitNavigationDestinations.SingleConversationInfoPage) {
         SingleConversationInfoPage()
     } else if (name === uikitNavigationDestinations.GroupConversationInfoPage) {

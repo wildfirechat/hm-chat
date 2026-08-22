@@ -4,6 +4,11 @@ import MessageContent from '../wfc/messages/messageContent';
 import PersistFlag from '../wfc/messages/persistFlag';
 import UnknownMessageContent from '../wfc/messages/unknownMessageContent';
 import CustomMessageContentType from "./customMessageContentType";
+import DshAnswerMessageContent from "./dshAnswerMessageContent";
+import DshApprovalMessageContent from "./dshApprovalMessageContent";
+import DshApprovalResultMessageContent from "./dshApprovalResultMessageContent";
+import DshGoalMessageContent from "./dshGoalMessageContent";
+import DshQuestionMessageContent from "./dshQuestionMessageContent";
 import MomentCommentMessageContent from "./momentCommentMessageContent";
 import MomentFeedMessageContent from "./momentFeedMessageContent";
 import TestCustomMessageContent from "./testCustomMessageContent";
@@ -31,6 +36,32 @@ export default class CustomMessageConfig {
             flag: PersistFlag.Persist,
             type: CustomMessageContentType.MESSAGE_CONTENT_TYPE_CUSTOM_MESSAGE_TEST_NOTIFICATION,
         },
+        // DSH 结构化交互消息（官方预留 AI 交互段 200-209），与 PC 端一致均用 Persist
+        {
+            name: 'dshQuestionMessage',
+            flag: PersistFlag.Persist,
+            type: CustomMessageContentType.MESSAGE_CONTENT_TYPE_DSH_QUESTION,
+        },
+        {
+            name: 'dshAnswerMessage',
+            flag: PersistFlag.Persist,
+            type: CustomMessageContentType.MESSAGE_CONTENT_TYPE_DSH_ANSWER,
+        },
+        {
+            name: 'dshApprovalMessage',
+            flag: PersistFlag.Persist,
+            type: CustomMessageContentType.MESSAGE_CONTENT_TYPE_DSH_APPROVAL,
+        },
+        {
+            name: 'dshApprovalResultMessage',
+            flag: PersistFlag.Persist,
+            type: CustomMessageContentType.MESSAGE_CONTENT_TYPE_DSH_APPROVAL_RESULT,
+        },
+        {
+            name: 'dshGoalMessage',
+            flag: PersistFlag.Persist,
+            type: CustomMessageContentType.MESSAGE_CONTENT_TYPE_DSH_GOAL,
+        },
         // 添加更多自定义消息
     ];
 
@@ -48,6 +79,21 @@ export default class CustomMessageConfig {
                 break;
             case CustomMessageContentType.MESSAGE_CONTENT_TYPE_CUSTOM_MESSAGE_TEST_NOTIFICATION:
                 content = new TestCustomNotificationMessageContent()
+                break;
+            case CustomMessageContentType.MESSAGE_CONTENT_TYPE_DSH_QUESTION:
+                content = new DshQuestionMessageContent();
+                break;
+            case CustomMessageContentType.MESSAGE_CONTENT_TYPE_DSH_ANSWER:
+                content = new DshAnswerMessageContent();
+                break;
+            case CustomMessageContentType.MESSAGE_CONTENT_TYPE_DSH_APPROVAL:
+                content = new DshApprovalMessageContent();
+                break;
+            case CustomMessageContentType.MESSAGE_CONTENT_TYPE_DSH_APPROVAL_RESULT:
+                content = new DshApprovalResultMessageContent();
+                break;
+            case CustomMessageContentType.MESSAGE_CONTENT_TYPE_DSH_GOAL:
+                content = new DshGoalMessageContent();
                 break;
              // 参考上面的逻辑，根据消息类型，创建其他自定义消息
             default:

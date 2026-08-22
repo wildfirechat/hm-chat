@@ -53,6 +53,13 @@ import PttTalkingDialog, { PttTalkingDialogState } from './ptt/PttTalkingDialog'
 import PttTalkingCallback from './ptt/PttTalkingCallback'
 import { pttEndReasonText, pttErrorText } from './ptt/pttHelper'
 import { STORAGE_KEY_PTT_ENABLED } from './ptt/PttManager'
+import { DshState } from '../../util/dshState'
+
+// DSH '/' 命令浮层条目
+interface DshCommand {
+    command: string
+    desc: string
+}
 
 const INPUT_ICON_WIDTH = 28
 // 说话剩余时间少于这个值时，浮层上改为显示倒计时
@@ -77,6 +84,11 @@ interface MultiCheckAction {
 export default struct ConversationInputPanelView {
     @Prop conversation: Conversation
     @Prop conversationInfo: ConversationInfo
+    // DSH 会话状态与类型（'single'/'group'/''，由 ConversationPage 统一维护；非 DSH 会话为 null/''）
+    @Prop dshState: DshState | null = null
+    @Prop dshConvKind: string = ''
+    // '/' 命令浮层：按输入实时前缀过滤后的候选命令
+    @State dshCommandCandidates: DshCommand[] = []
     @Link @Watch('onTextChange') text: string
     @State caretPosition: number = 0
     @State selectionStart: number = 0
@@ -560,6 +572,76 @@ export default struct ConversationInputPanelView {
         emoji.aliases.some(alias => alias !== 'sticker' && alias === trimmed)
         )
         this.onSuggestionsChange?.(matches)
+    }
+
+    // 单聊机器人命令集（/create-group 等私聊专属命令在群内会被插件拒绝；/stop 危险语义放最后）
+    private static DSH_SINGLE_COMMANDS: DshCommand[] = [
+        { command: '/help', desc: '命令帮助' },
+        { command: '/create-group', desc: '创建 DSH 工作区群' },
+        { command: '/workspaces', desc: '列出工作区' },
+        { command: '/goal', desc: '目标管理' },
+        { command: '/jobs', desc: '后台任务' },
+        { command: '/model', desc: '切换模型' },
+        { command: '/effort', desc: '推理等级' },
+        { command: '/plan', desc: '计划模式' },
+        { command: '/compact', desc: '压缩上下文' },
+        { command: '/cwd', desc: '切换工作目录' },
+        { command: '/ls', desc: '列出目录' },
+        { command: '/sandbox', desc: '沙箱模式' },
+        { command: '/stop', desc: '停止当前任务' },
+    ]
+    // DSH 群聊命令集（群内可用；/stop 危险语义放最后）
+    private static DSH_GROUP_COMMANDS: DshCommand[] = [
+        { command: '/help', desc: '命令帮助' },
+        { command: '/cwd', desc: '切换工作目录' },
+        { command: '/ls', desc: '列出目录' },
+        { command: '/model', desc: '切换模型' },
+        { command: '/effort', desc: '推理等级' },
+        { command: '/plan', desc: '计划模式' },
+        { command: '/compact', desc: '压缩上下文' },
+        { command: '/sandbox', desc: '沙箱模式' },
+        { command: '/reset', desc: '重置会话' },
+        { command: '/stop', desc: '停止当前任务' },
+    ]
+
+    private dshCommands(): DshCommand[] {
+        return this.dshConvKind === 'group' ? ConversationInputPanelView.DSH_GROUP_COMMANDS : ConversationInputPanelView.DSH_SINGLE_COMMANDS
+    }
+
+    // '/' 命令浮层：仅 DSH 会话启用；文本以 '/' 开头且还在输入命令本体（未输入空格）时，按前缀实时过滤
+    private updateDshCommandCandidates(value: string) {
+        if (!this.dshConvKind) {
+            if (this.dshCommandCandidates.length > 0) {
+                this.dshCommandCandidates = []
+            }
+            return
+        }
+        if (!value.startsWith('/') || value.indexOf(' ') >= 0) {
+            if (this.dshCommandCandidates.length > 0) {
+                this.dshCommandCandidates = []
+            }
+            return
+        }
+        this.dshCommandCandidates = this.dshCommands().filter(c => c.command.startsWith(value))
+    }
+
+    // 点选命令：把「命令+空格」填入输入框，不直接发送
+    private onSelectDshCommand(command: string) {
+        this.text = command + ' '
+        this.dshCommandCandidates = []
+    }
+
+    // 输入框占位：随 DSH 会话状态变化，非 DSH 会话恢复默认（空）
+    private dshInputPlaceholder(): string {
+        if (this.dshState) {
+            if (this.dshState.state === 'waiting_user') {
+                return '可直接输入文字回答，或点击上方卡片按钮'
+            }
+            if (this.dshState.state === 'running') {
+                return 'Agent 运行中…'
+            }
+        }
+        return ''
     }
 
     onMentionGroupMember = (userInfo: UserInfo) => {
@@ -1089,6 +1171,7 @@ export default struct ConversationInputPanelView {
         wfc.sendConversationMessage(this.conversation, textMessageContent, [], null, null, null, null, null);
         wfc.setConversationDraft(this.conversation, '')
         this.text = '';
+        this.dshCommandCandidates = []
         this.quotedMessage = null
     }
 
@@ -1221,6 +1304,43 @@ export default struct ConversationInputPanelView {
             .justifyContent(FlexAlign.SpaceAround)
         } else {
             Column() {
+                // DSH '/' 命令浮层：内联显示在输入面板上方（不跳页），按输入实时前缀过滤；
+                // 条目为「命令 + 简短中文说明」，点选把「命令+空格」填入输入框，不直接发送
+                if (this.dshCommandCandidates.length > 0) {
+                    Column() {
+                        ForEach(this.dshCommandCandidates, (cmd: DshCommand) => {
+                            Row() {
+                                Text(cmd.command)
+                                    .fontSize(FontSize.sm)
+                                    .fontFamily('monospace')
+                                    .fontColor($r('app.color.wf_primary_text'))
+                                Text(cmd.desc)
+                                    .fontSize(FontSize.xs)
+                                    .fontColor($r('app.color.wf_tertiary_text'))
+                                    .margin({ left: 12 })
+                            }
+                            .width('100%')
+                            .constraintSize({ minHeight: 40 })
+                            .padding({ left: 12, right: 12, top: 8, bottom: 8 })
+                            .stateStyles({
+                                pressed: {
+                                    .backgroundColor($r('app.color.wf_item_pressed'))
+                                },
+                                normal: {
+                                    .backgroundColor(Color.Transparent)
+                                }
+                            })
+                            .onClick(() => {
+                                this.onSelectDshCommand(cmd.command)
+                            })
+                        }, (cmd: DshCommand) => cmd.command)
+                    }
+                    .width('100%')
+                    .constraintSize({ maxHeight: 240 })
+                    .margin({ left: 10, right: 10, top: 4 })
+                    .borderRadius(Radius.md)
+                    .backgroundColor($r('app.color.wf_background'))
+                }
                 Row() {
                     if (this.conversation.type === ConversationType.Channel) {
                         Image(this.showChannelMenu ? $r('app.media.ic_chat_keyboard') : $r('app.media.ic_chat_menu'))
@@ -1300,6 +1420,8 @@ export default struct ConversationInputPanelView {
                         }
                         if (!this.showAudioRecorderButton && !this.showPttButton) {
                             Column() {
+                                // TextArea 在当前 SDK 无 placeholder 属性：用叠加层实现 DSH 状态占位提示
+                                // （文本为空且有占位文案时显示，不拦截点击，点击落到 TextArea 上）
                                 Stack({ alignContent: Alignment.BottomEnd }) {
                                     TextArea({ text: this.text, controller: this.textInputController })
                                         .id('textInput')
@@ -1311,6 +1433,8 @@ export default struct ConversationInputPanelView {
                                             } else {
                                                 this.text = value
                                             }
+                                            // DSH '/' 命令浮层（与 @ 检测并列，仅 DSH 会话有候选）
+                                            this.updateDshCommandCandidates(value)
                                         })// .caretPosition(this.caretPosition)
                                         .onFocus(() => {
                                             this.recentPhotoRequested = false
@@ -1366,6 +1490,14 @@ export default struct ConversationInputPanelView {
                                         .onClick(() => {
                                             this.onAsrIconClick()
                                         })
+                                    }
+                                    if (this.text.length === 0 && this.dshInputPlaceholder().length > 0) {
+                                        Text(this.dshInputPlaceholder())
+                                            .fontSize(TextStyleToken.inputText)
+                                            .fontColor($r('app.color.wf_tertiary_text'))
+                                            .width('100%')
+                                            .padding({ left: 12 })
+                                            .hitTestBehavior(HitTestMode.None)
                                     }
                                 }
                                 .width('100%')

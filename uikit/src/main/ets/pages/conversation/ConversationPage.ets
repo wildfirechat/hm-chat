@@ -3,10 +3,12 @@ import ConversationInfo from '@wfc/client/src/main/ets/wfc/model/conversationInf
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType'
 
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
+import TextMessageContent from '@wfc/client/src/main/ets/wfc/messages/textMessageContent'
 import { eq } from '@wfc/client/src/main/ets/wfc/util/longUtil'
 import EventType from '@wfc/client/src/main/ets/wfc/client/wfcEvent'
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
 import MessageContentType from '@wfc/client/src/main/ets/wfc/messages/messageContentType'
+import { DshState, dshConversationKind, dshStateColor, dshStateText, getDshState } from '../../util/dshState'
 import NormalMessageContentView from './message/NormalMessageContentView'
 import ConversationInputPanelView from './ConversationInputPanelView'
 import AudioPlayManager from './audio/AudioPlayManager'
@@ -102,6 +104,12 @@ export default struct ConversationPage {
     @State private panelHeight: number = 320
     @State private pageWidth: number = 0
     @State private pageHeight: number = 0
+    // DSH 会话状态（scope=31 用户设置）：标题栏副标题/停止按钮/输入框占位/斜杠命令浮层共用；非 DSH 会话为 null
+    @State dshState: DshState | null = null
+    // 'single'（单聊机器人）/ 'group'（DSH 群）/ ''（非 DSH 会话），命令集随其变化
+    @State dshConvKind: string = ''
+    // 标题栏「停止」按钮 1.5s 防重复点击
+    @State dshStopSending: boolean = false
     // 输入面板（含展开的加号/表情面板）的实际高度，用于把悬浮建议层定位到输入栏正上方
     @State private inputPanelHeight: number = 56
     // 「猜你想发送」：点加号时由输入面板置位；浮于输入栏上方（与表情建议同位置）。免权限的系统最近图片控件。
@@ -178,6 +186,7 @@ export default struct ConversationPage {
         wfc.eventEmitter!.on(EventType.ChannelInfosUpdate, this.onChannelInfosUpdate)
         wfc.eventEmitter!.on(EventType.ConversationInfoUpdate, this.onConversationInfoUpdate)
         wfc.eventEmitter!.on(EventType.GroupJoinRequestUpdate, this.onGroupJoinRequestUpdate)
+        wfc.eventEmitter!.on(EventType.SettingUpdate, this.onSettingUpdate)
 
         // 监听 observer.on('navDestinationUpdate')，处理重入问题
     }
@@ -231,6 +240,7 @@ export default struct ConversationPage {
         wfc.eventEmitter!.off(EventType.ChannelInfosUpdate, this.onChannelInfosUpdate)
         wfc.eventEmitter!.off(EventType.ConversationInfoUpdate, this.onConversationInfoUpdate)
         wfc.eventEmitter!.off(EventType.GroupJoinRequestUpdate, this.onGroupJoinRequestUpdate)
+        wfc.eventEmitter!.off(EventType.SettingUpdate, this.onSettingUpdate)
 
         this.unwatchOnlineState(this.conversation!)
     }
@@ -393,6 +403,36 @@ export default struct ConversationPage {
             this.showGroupMemberNickName = !wfc.isHiddenGroupMemberName(this.conversation.target)
             this.updateUnreadJoinGroupRequestCount()
         }
+
+        // DSH 会话判定/状态初始化；用户或群信息未缓存时判为非 DSH，待 UserInfosUpdate/GroupInfosUpdate 后重新判定
+        this.refreshDshState()
+    }
+
+    // DSH 会话状态：scope=31 用户设置变化时重读当前会话 key（事件驱动，无轮询）
+    onSettingUpdate = () => {
+        this.refreshDshState()
+    }
+
+    refreshDshState() {
+        if (!this.conversation) {
+            this.dshState = null
+            this.dshConvKind = ''
+            return
+        }
+        this.dshConvKind = dshConversationKind(this.conversation)
+        this.dshState = getDshState(this.conversation)
+    }
+
+    // 标题栏停止按钮：向当前 DSH 会话发送 /stop 命令文本，中断当前 Agent turn（1.5s 防重复点击）
+    stopDshAgent() {
+        if (this.dshStopSending || !this.conversation) {
+            return
+        }
+        this.dshStopSending = true
+        wfc.sendConversationMessage(this.conversation, new TextMessageContent('/stop'))
+        setTimeout(() => {
+            this.dshStopSending = false
+        }, 1500)
     }
 
     onGroupJoinRequestUpdate = () => {
@@ -666,6 +706,8 @@ export default struct ConversationPage {
         }
     }
     onUserInfosUpdate = (userInfos: UserInfo[]) => {
+        // 机器人用户信息拉取回来后，重新判定是否为 DSH 会话
+        this.refreshDshState()
         if (this.conversation?.type === ConversationType.Single) {
             let index = userInfos.findIndex(info => info.uid === this.conversation?.target)
             if (index >= 0) {
@@ -678,6 +720,8 @@ export default struct ConversationPage {
         // TODO 消息发送者的头像等可能也需要更新
     }
     onGroupInfosUpdate = (groupInfos: GroupInfo[]) => {
+        // 群信息（extra dsh 标记）拉取回来后，重新判定是否为 DSH 会话
+        this.refreshDshState()
         if (this.conversation?.type === ConversationType.Group) {
             let index = groupInfos.findIndex(info => info.target === this.conversation?.target)
             if (index >= 0) {
@@ -823,29 +867,56 @@ export default struct ConversationPage {
 
     @Builder
     ConversationTitleBuilder() {
-        Row() {
-            Text(this.title)
-                .fontSize(18)
-                .fontWeight(FontWeight.Medium)
-                .fontColor($r('app.color.wf_primary_text'))
-                .maxLines(1)
-                .textOverflow({ overflow: TextOverflow.Ellipsis })
-                // 标题过长时从中间截断，保证末尾的「耳朵」图标始终可见
-                .ellipsisMode(EllipsisMode.CENTER)
-                .constraintSize({ maxWidth: this.titleMaxWidth() })
-                .minFontScale(1)
-                .maxFontScale(1)
-            if (this.voiceEarpieceMode) {
-                Image($r('app.media.ic_voice_earpiece'))
-                    .width(18)
-                    .height(18)
-                    .fillColor($r('app.color.wf_secondary_text'))
-                    .margin({ left: 6 })
+        Column() {
+            Row() {
+                Text(this.title)
+                    .fontSize(18)
+                    .fontWeight(FontWeight.Medium)
+                    .fontColor($r('app.color.wf_primary_text'))
+                    .maxLines(1)
+                    .textOverflow({ overflow: TextOverflow.Ellipsis })
+                    // 标题过长时从中间截断，保证末尾的「耳朵」图标始终可见
+                    .ellipsisMode(EllipsisMode.CENTER)
+                    .constraintSize({ maxWidth: this.titleMaxWidth() })
+                    .minFontScale(1)
+                    .maxFontScale(1)
+                if (this.voiceEarpieceMode) {
+                    Image($r('app.media.ic_voice_earpiece'))
+                        .width(18)
+                        .height(18)
+                        .fillColor($r('app.color.wf_secondary_text'))
+                        .margin({ left: 6 })
+                }
+            }
+
+            // DSH 会话状态副标题（空闲/运行中/等待确认/已完成；phase=tool 时追加工具名），仅 DSH 会话显示
+            if (this.dshState) {
+                Row({ space: 6 }) {
+                    Text(dshStateText(this.dshState))
+                        .fontSize(FontSize.xs)
+                        .fontColor(dshStateColor(this.dshState!.state))
+                        .maxLines(1)
+                    if (this.dshState!.state === 'running') {
+                        Text('■ 停止')
+                            .fontSize(FontSize.xs)
+                            .fontColor($r('app.color.wf_danger'))
+                            .padding({ left: 6, right: 6, top: 1, bottom: 1 })
+                            .borderRadius(Radius.md)
+                            .border({ width: 1, color: $r('app.color.wf_danger') })
+                            .opacity(this.dshStopSending ? 0.5 : 1)
+                            .enabled(!this.dshStopSending)
+                            .onClick(() => {
+                                this.stopDshAgent()
+                            })
+                    }
+                }
+                .margin({ top: 2 })
             }
         }
         .height('100%')
         .margin({ left: 12 })
-        .alignItems(VerticalAlign.Center)
+        .alignItems(HorizontalAlign.Start)
+        .justifyContent(FlexAlign.Center)
     }
 
     build() {
@@ -1182,6 +1253,8 @@ export default struct ConversationPage {
                             text: this.toReeditText,
                             conversation: this.conversation,
                             conversationInfo: this.conversationInfo,
+                            dshState: this.dshState,
+                            dshConvKind: this.dshConvKind,
                             enableMultiCheck: $enableMultiCheck,
                             checkedMessages: $checkedMessages,
                             quotedMessage: $quotedMessage,

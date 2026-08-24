@@ -12,5 +12,6 @@ export default class CustomMessageContentType {
     static MESSAGE_CONTENT_TYPE_DSH_APPROVAL = 202;
     static MESSAGE_CONTENT_TYPE_DSH_APPROVAL_RESULT = 203;
     static MESSAGE_CONTENT_TYPE_DSH_GOAL = 206;
+    static MESSAGE_CONTENT_TYPE_DSH_TASK_PROGRESS = 208;
     // 添加更多自定义消息
 }

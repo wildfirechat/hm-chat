@@ -16,6 +16,8 @@ import ConversationInfoDataSource from './datasource/ConversationInfoDataSource'
 import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
 import { FontSize } from '../common/design/Tokens'
 import { pcPlatformSymbol, pcDeviceName } from '../common/utils/pcOnlineUtil'
+import UserOnlineState from '@wfc/client/src/main/ets/wfc/model/userOnlineState'
+import { dshConversationKind } from '../util/dshState'
 
 @Component
 @Preview
@@ -26,6 +28,8 @@ export default struct ConversationListTab {
     @State isMuteWhenPCOnline: boolean = false
     @Link conversationListTabUnreadCount: number
     private conversationInfoDataSource: ConversationInfoDataSource = new ConversationInfoDataSource()
+    // 会话列表已订阅在线状态的 AI 群群主（用于离开列表时取消订阅）
+    private watchedAiOwners: string[] = []
     private context?: Context
     private  _loadConversationInfoListDebouncer: number = 0
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
@@ -62,6 +66,12 @@ export default struct ConversationListTab {
     }
 
     aboutToDisappear() {
+        if (this.watchedAiOwners.length > 0) {
+            wfc.unwatchOnlineState(ConversationType.Single, this.watchedAiOwners, () => {
+            }, () => {
+            })
+            this.watchedAiOwners = []
+        }
         wfc.eventEmitter!.off(EventType.ReceiveMessage, this.onReceiveMessage)
         wfc.eventEmitter!.off(EventType.SendMessage, this.onSendMessage)
         wfc.eventEmitter!.off(EventType.RecallMessage, this.onRecallMessage)
@@ -81,7 +91,7 @@ export default struct ConversationListTab {
     }
 
     _loadConversationList = async () => {
-        let conversationInfos = wfc.getConversationInfoList([0, 1, 2, 3], [0]);
+        let conversationInfos = wfc.getConversationInfoList([0, 1, 2, 3], [0, 2]);
         this.conversationInfoDataSource.setConversationInfos(conversationInfos)
         let totalUnreadCount = 0
         conversationInfos.forEach(info => {
@@ -92,6 +102,35 @@ export default struct ConversationListTab {
         })
 
         this.conversationListTabUnreadCount = totalUnreadCount
+        this.watchAiOwners(conversationInfos)
+    }
+
+    // AI 群（line 2）：订阅群主（AI 机器人）在线状态，回调转发为 UserOnlineEvent
+    // 供列表项刷新在线判定（AI 不在线时状态圆点/徽标置灰）。
+    watchAiOwners(infos: ConversationInfo[]) {
+        let owners: string[] = []
+        infos.forEach((info: ConversationInfo) => {
+            let conv = info.conversation
+            if (conv && dshConversationKind(conv) === 'group') {
+                let g = wfc.getGroupInfo(conv.target)
+                if (g && g.owner && owners.indexOf(g.owner) < 0) {
+                    owners.push(g.owner)
+                }
+            }
+        })
+        if (this.watchedAiOwners.length > 0) {
+            wfc.unwatchOnlineState(ConversationType.Single, this.watchedAiOwners, () => {
+            }, () => {
+            })
+            this.watchedAiOwners = []
+        }
+        if (owners.length > 0 && wfc.isUserOnlineStateEnabled()) {
+            this.watchedAiOwners = owners
+            wfc.watchOnlineState(ConversationType.Single, owners, 1000, (states: UserOnlineState[]) => {
+                wfc.eventEmitter!.emit(EventType.UserOnlineEvent, states)
+            }, () => {
+            })
+        }
     }
 
     // TODO

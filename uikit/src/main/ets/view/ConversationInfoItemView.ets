@@ -1,11 +1,14 @@
 import Utils from '../common/Utils';
 import { timeFormat } from '../util/helper';
 import ConversationInfo from '@wfc/client/src/main/ets/wfc/model/conversationInfo';
+import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation';
 import MessageStatus from '@wfc/client/src/main/ets/wfc/messages/messageStatus';
 import { FontSize, Radius, scaledSize, LayoutScale } from '../common/design/Tokens';
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc';
 import EventType from '@wfc/client/src/main/ets/wfc/client/wfcEvent';
 import { DshState, dshConversationKind, dshStateColor, getDshState } from '../util/dshState';
+import UserOnlineState from '@wfc/client/src/main/ets/wfc/model/userOnlineState'
+import UserClientState from '@wfc/client/src/main/ets/wfc/model/userClientState'
 
 @Component
 @Preview
@@ -18,6 +21,8 @@ export default struct ConversationInfoItemView {
     // DSH 会话状态与类型（'single'/'group'/''，非 DSH 会话不显示圆点/徽标）
     @State dshState: DshState | null = null
     @State dshConvKind: string = ''
+    // AI 群（line 2）群主（AI 机器人）是否在线：不在线时状态圆点/徽标置灰
+    @State aiOwnerOnline: boolean = false
 
     /**
      * 仅显示头像和名称
@@ -38,6 +43,7 @@ export default struct ConversationInfoItemView {
             wfc.eventEmitter!.on(EventType.SettingUpdate, this.onDshRefresh)
             wfc.eventEmitter!.on(EventType.UserInfosUpdate, this.onDshRefresh)
             wfc.eventEmitter!.on(EventType.GroupInfosUpdate, this.onDshRefresh)
+            wfc.eventEmitter!.on(EventType.UserOnlineEvent, this.onUserOnline)
         }
     }
 
@@ -46,7 +52,36 @@ export default struct ConversationInfoItemView {
             wfc.eventEmitter!.off(EventType.SettingUpdate, this.onDshRefresh)
             wfc.eventEmitter!.off(EventType.UserInfosUpdate, this.onDshRefresh)
             wfc.eventEmitter!.off(EventType.GroupInfosUpdate, this.onDshRefresh)
+            wfc.eventEmitter!.off(EventType.UserOnlineEvent, this.onUserOnline)
         }
+    }
+
+    // 在线状态变化（服务端广播 / 列表页 watch 回调转发）：按群主匹配刷新在线判定
+    onUserOnline = (states?: UserOnlineState[]) => {
+        if (this.dshConvKind !== 'group' || !states) {
+            this.refreshDshState()
+            return
+        }
+        let owner = this.aiOwnerOf(this.conversationInfo?.conversation)
+        if (!owner) {
+            this.refreshDshState()
+            return
+        }
+        let mine = states.find((s: UserOnlineState) => s.userId === owner)
+        if (mine) {
+            this.aiOwnerOnline = mine.clientStates !== undefined
+                && mine.clientStates.length > 0
+                && mine.clientStates.some((s: UserClientState) => s.state === 0)
+        }
+    }
+
+    // AI 群（line 2）群主 ID；非 AI 群返回空
+    aiOwnerOf(conversation: Conversation | undefined): string {
+        if (!conversation || dshConversationKind(conversation) !== 'group') {
+            return ''
+        }
+        let groupInfo = wfc.getGroupInfo(conversation.target)
+        return groupInfo && groupInfo.owner ? groupInfo.owner : ''
     }
 
     onDshRefresh = () => {
@@ -58,6 +93,17 @@ export default struct ConversationInfoItemView {
         let conversation = this.conversationInfo?.conversation
         this.dshConvKind = dshConversationKind(conversation)
         this.dshState = getDshState(conversation)
+        // AI 群群主（AI 机器人）在线判定：clientStates 中存在 state===0；无状态/未取到视为不在线
+        let owner = this.aiOwnerOf(conversation)
+        if (owner) {
+            let uos = wfc.getUserOnlineState(owner)
+            this.aiOwnerOnline = uos !== undefined
+                && uos.clientStates !== undefined
+                && uos.clientStates.length > 0
+                && uos.clientStates.some((s: UserClientState) => s.state === 0)
+        } else {
+            this.aiOwnerOnline = false
+        }
     }
 
     conversationUnreadCount() {
@@ -143,23 +189,24 @@ export default struct ConversationInfoItemView {
                             .maxLines(1)
                             .layoutWeight(1)
                             .textOverflow({ overflow: TextOverflow.Ellipsis })
-                        // DSH 会话状态圆点（running=主色/waiting_user=#f59e0b/done=#22c55e/其他=#94a3b8）
+                        // DSH 会话状态圆点（running=主色/waiting_user=#f59e0b/idle·done=#22c55e/其他=#22c55e）；
+                        // AI 不在线时置灰（不显示运行态颜色）
                         if (!this.basicMode && this.dshState) {
                             Row()
                                 .width(8)
                                 .height(8)
                                 .borderRadius(Radius.full)
-                                .backgroundColor(dshStateColor(this.dshState!.state))
+                                .backgroundColor(this.aiOwnerOnline ? dshStateColor(this.dshState!.state) : $r('app.color.wf_tertiary_text'))
                                 .margin({ left: 6 })
                         }
-                        // DSH 群标题旁的描边小徽标
+                        // DSH 群标题旁的描边小徽标；AI 不在线时置灰
                         if (!this.basicMode && this.dshConvKind === 'group') {
                             Text('DSH')
                                 .fontSize(9)
-                                .fontColor($r('app.color.wf_primary'))
+                                .fontColor(this.aiOwnerOnline ? $r('app.color.wf_primary') : $r('app.color.wf_tertiary_text'))
                                 .padding({ left: 4, right: 4, top: 1, bottom: 1 })
                                 .borderRadius(Radius.xs)
-                                .border({ width: 1, color: $r('app.color.wf_primary') })
+                                .border({ width: 1, color: this.aiOwnerOnline ? $r('app.color.wf_primary') : $r('app.color.wf_tertiary_text') })
                                 .margin({ left: 6 })
                         }
                         if (!this.basicMode) {

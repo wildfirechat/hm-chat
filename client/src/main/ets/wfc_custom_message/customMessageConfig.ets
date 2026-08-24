@@ -9,6 +9,7 @@ import DshApprovalMessageContent from "./dshApprovalMessageContent";
 import DshApprovalResultMessageContent from "./dshApprovalResultMessageContent";
 import DshGoalMessageContent from "./dshGoalMessageContent";
 import DshQuestionMessageContent from "./dshQuestionMessageContent";
+import DshTaskProgressMessageContent from "./dshTaskProgressMessageContent";
 import MomentCommentMessageContent from "./momentCommentMessageContent";
 import MomentFeedMessageContent from "./momentFeedMessageContent";
 import TestCustomMessageContent from "./testCustomMessageContent";
@@ -62,6 +63,11 @@ export default class CustomMessageConfig {
             flag: PersistFlag.Persist,
             type: CustomMessageContentType.MESSAGE_CONTENT_TYPE_DSH_GOAL,
         },
+        {
+            name: 'dshTaskProgressMessage',
+            flag: PersistFlag.Persist,
+            type: CustomMessageContentType.MESSAGE_CONTENT_TYPE_DSH_TASK_PROGRESS,
+        },
         // 添加更多自定义消息
     ];
 
@@ -94,6 +100,9 @@ export default class CustomMessageConfig {
                 break;
             case CustomMessageContentType.MESSAGE_CONTENT_TYPE_DSH_GOAL:
                 content = new DshGoalMessageContent();
+                break;
+            case CustomMessageContentType.MESSAGE_CONTENT_TYPE_DSH_TASK_PROGRESS:
+                content = new DshTaskProgressMessageContent();
                 break;
              // 参考上面的逻辑，根据消息类型，创建其他自定义消息
             default:

@@ -8,9 +8,10 @@ import { eq } from '@wfc/client/src/main/ets/wfc/util/longUtil'
 import EventType from '@wfc/client/src/main/ets/wfc/client/wfcEvent'
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
 import MessageContentType from '@wfc/client/src/main/ets/wfc/messages/messageContentType'
-import { DshState, dshConversationKind, dshStateColor, dshStateText, getDshState } from '../../util/dshState'
+import { DshMetrics, DshState, dshConversationKind, dshMetricsText, dshStatusHint, dshStateColor, dshStateText, getDshMetrics, getDshState } from '../../util/dshState'
 import NormalMessageContentView from './message/NormalMessageContentView'
 import ConversationInputPanelView from './ConversationInputPanelView'
+import DshAgentPanelView from './DshAgentPanelView'
 import AudioPlayManager from './audio/AudioPlayManager'
 import { playRawSound } from '../../helper/soundEffectHelper'
 import NotificationMessageContent from '@wfc/client/src/main/ets/wfc/messages/notification/notificationMessageContent'
@@ -29,6 +30,7 @@ import { uikitNavigationDestinations } from '../uikitNavigationConfig'
 import TestCustomNotificationMessageContent from '@wfc/client/src/main/ets/wfc_custom_message/testCustomNotificationMessageContent'
 import TestCustomNotificationMessageContentView from './custom_message/TestCustomNotificationMessageContentView'
 import UserOnlineState from '@wfc/client/src/main/ets/wfc/model/userOnlineState'
+import UserClientState from '@wfc/client/src/main/ets/wfc/model/userClientState'
 import RecallNotificationMessageContentView from './message/RecallNotificationMessageContentView'
 import RecallMessageNotification from '@wfc/client/src/main/ets/wfc/messages/notification/recallMessageNotification'
 import GroupMemberType from '@wfc/client/src/main/ets/wfc/model/groupMemberType'
@@ -74,6 +76,8 @@ export default struct ConversationPage {
     @State collapseConversationInputPanelViewTimestamp: number = 0
     @State enableMultiCheck: boolean = false
     @State checkedMessages: Message[] = []
+    // AI 会话设置面板是否打开（由输入面板 AI 按钮经 @Link 置位，本页根 Stack 悬浮呈现）
+    @State showDshAgentPanel: boolean = false
     @State @Watch('onQuoteMessage') quotedMessage: Message | null = null
     private focusMessageId: number = 0
     private checkValueChangeTriggerByClick = false
@@ -104,10 +108,18 @@ export default struct ConversationPage {
     @State private panelHeight: number = 320
     @State private pageWidth: number = 0
     @State private pageHeight: number = 0
-    // DSH 会话状态（scope=31 用户设置）：标题栏副标题/停止按钮/输入框占位/斜杠命令浮层共用；非 DSH 会话为 null
+    // DSH 会话状态（scope=31 type=1 用户设置，键 ..._1）：标题栏副标题/停止按钮/输入框占位/斜杠命令浮层共用；非 DSH 会话为 null
     @State dshState: DshState | null = null
+    // DSH Token 统计（scope=31 type=2 用户设置，键 ..._2）：标题栏合并行展示；回合结束必推，独立于状态；非 DSH 会话为 null
+    @State dshMetrics: DshMetrics | null = null
     // 'single'（单聊机器人）/ 'group'（DSH 群）/ ''（非 DSH 会话），命令集随其变化
     @State dshConvKind: string = ''
+    // AI 群（line 2）群主（AI 机器人）的在线状态描述（如 "Web 在线"/"忙碌"），标题栏 "AI <描述>" 副标题；非 AI 群为空
+    @State aiOwnerOnlineStateDesc: string = ''
+    // AI 群（line 2）群主（AI 机器人）是否在线：不在线时去掉所有 AI 状态段，只显示 "AI 不在线"
+    @State aiOwnerOnline: boolean = false
+    // 已订阅在线状态的群主 ID（用于去重；进入 AI 群时群信息可能未就绪，待 GroupInfosUpdate 后补订）
+    private aiOwnerWatchedId: string = ''
     // 标题栏「停止」按钮 1.5s 防重复点击
     @State dshStopSending: boolean = false
     // 输入面板（含展开的加号/表情面板）的实际高度，用于把悬浮建议层定位到输入栏正上方
@@ -187,6 +199,8 @@ export default struct ConversationPage {
         wfc.eventEmitter!.on(EventType.ConversationInfoUpdate, this.onConversationInfoUpdate)
         wfc.eventEmitter!.on(EventType.GroupJoinRequestUpdate, this.onGroupJoinRequestUpdate)
         wfc.eventEmitter!.on(EventType.SettingUpdate, this.onSettingUpdate)
+        // 在线状态变化（含订阅推送）：刷新 AI 群群主在线状态标题
+        wfc.eventEmitter!.on(EventType.UserOnlineEvent, this.onUserOnlineEvent)
 
         // 监听 observer.on('navDestinationUpdate')，处理重入问题
     }
@@ -241,6 +255,7 @@ export default struct ConversationPage {
         wfc.eventEmitter!.off(EventType.ConversationInfoUpdate, this.onConversationInfoUpdate)
         wfc.eventEmitter!.off(EventType.GroupJoinRequestUpdate, this.onGroupJoinRequestUpdate)
         wfc.eventEmitter!.off(EventType.SettingUpdate, this.onSettingUpdate)
+        wfc.eventEmitter!.off(EventType.UserOnlineEvent, this.onUserOnlineEvent)
 
         this.unwatchOnlineState(this.conversation!)
     }
@@ -295,6 +310,86 @@ export default struct ConversationPage {
 
             })
         }
+        // AI 群（line 2，群主=AI 机器人）：离开时取消订阅群主在线状态，并清空标题显示
+        if (conversation.type === ConversationType.Group && conversation.line === 2) {
+            let owner = this.aiOwnerWatchedId || this.dshGroupOwnerOf(conversation)
+            if (owner && wfc.isUserOnlineStateEnabled()) {
+                wfc.unwatchOnlineState(ConversationType.Single, [owner], () => {
+
+                }, err => {
+
+                })
+            }
+            this.aiOwnerWatchedId = ''
+            this.aiOwnerOnlineStateDesc = ''
+        }
+    }
+
+    // AI 群（line 2）的群主 ID（=AI 机器人）；非 AI 群/群信息未就绪返回空
+    dshGroupOwnerOf(conversation: Conversation): string {
+        if (conversation.type !== ConversationType.Group || conversation.line !== 2) {
+            return ''
+        }
+        let groupInfo = wfc.getGroupInfo(conversation.target, false)
+        return groupInfo.owner ? groupInfo.owner : ''
+    }
+
+    // AI 群（line 2）：进入时订阅群主（AI 机器人）在线状态，状态变化刷新标题。
+    // 群信息未就绪（owner 为空）时暂不订阅，待 GroupInfosUpdate 后由 ensureAiOwnerOnlineStateWatched 补订。
+    ensureAiOwnerOnlineStateWatched() {
+        if (!this.conversation || !wfc.isUserOnlineStateEnabled()) {
+            return
+        }
+        let owner = this.dshGroupOwnerOf(this.conversation)
+        if (!owner) {
+            this.aiOwnerOnlineStateDesc = ''
+            return
+        }
+        if (this.aiOwnerWatchedId !== owner) {
+            // 防止换会话后重复订阅旧群主
+            if (this.aiOwnerWatchedId) {
+                wfc.unwatchOnlineState(ConversationType.Single, [this.aiOwnerWatchedId], () => {
+
+                }, err => {
+
+                })
+            }
+            this.aiOwnerWatchedId = owner
+            wfc.watchOnlineState(ConversationType.Single, [owner], 1000, (states: UserOnlineState[]) => {
+                this.refreshAiOwnerOnlineState()
+            }, err => {
+            })
+        }
+        this.refreshAiOwnerOnlineState()
+    }
+
+    // 读取群主（AI 机器人）在线状态描述并刷新标题；非 AI 群/无群主时清空
+    refreshAiOwnerOnlineState() {
+        if (!this.conversation
+            || this.conversation.type !== ConversationType.Group
+            || this.conversation.line !== 2) {
+            this.aiOwnerOnlineStateDesc = ''
+            this.aiOwnerOnline = false
+            return
+        }
+        let owner = this.dshGroupOwnerOf(this.conversation)
+        if (!owner) {
+            this.aiOwnerOnlineStateDesc = ''
+            this.aiOwnerOnline = false
+            return
+        }
+        let userOnlineState = wfc.getUserOnlineState(owner)
+        this.aiOwnerOnlineStateDesc = userOnlineState ? userOnlineState.desc() : ''
+        // 在线判定：clientStates 中存在 state===0（在线）；无状态/未取到视为不在线
+        this.aiOwnerOnline = userOnlineState !== undefined
+            && userOnlineState.clientStates !== undefined
+            && userOnlineState.clientStates.length > 0
+            && userOnlineState.clientStates.some((s: UserClientState) => s.state === 0)
+    }
+
+    // 在线状态变化（订阅推送/服务端广播）：刷新 AI 群群主在线状态标题（非 AI 群时为无害空操作）
+    onUserOnlineEvent = (states: UserOnlineState[]) => {
+        this.refreshAiOwnerOnlineState()
     }
 
     setupConversation(conversation: Conversation, title: string) {
@@ -350,6 +445,9 @@ export default struct ConversationPage {
             })
         }
 
+        // AI 群（line 2，群主=AI 机器人）：进入时订阅群主在线状态，状态变化刷新标题
+        this.ensureAiOwnerOnlineStateWatched()
+
         if (!title) {
             Utils.computeConversationItemPortraitAndName(this.conversation)
                 .then(value => {
@@ -404,11 +502,12 @@ export default struct ConversationPage {
             this.updateUnreadJoinGroupRequestCount()
         }
 
-        // DSH 会话判定/状态初始化；用户或群信息未缓存时判为非 DSH，待 UserInfosUpdate/GroupInfosUpdate 后重新判定
+        // DSH 会话判定/状态、Token 统计初始化；用户或群信息未缓存时判为非 DSH，待 UserInfosUpdate/GroupInfosUpdate 后重新判定
         this.refreshDshState()
     }
 
-    // DSH 会话状态：scope=31 用户设置变化时重读当前会话 key（事件驱动，无轮询）
+    // DSH 会话状态（type=1）与 Token 统计（type=2）：scope=31 用户设置变化时重读当前会话 key
+    // （type=2 变化也会触发同一事件，事件驱动，无轮询）
     onSettingUpdate = () => {
         this.refreshDshState()
     }
@@ -416,11 +515,64 @@ export default struct ConversationPage {
     refreshDshState() {
         if (!this.conversation) {
             this.dshState = null
+            this.dshMetrics = null
             this.dshConvKind = ''
             return
         }
         this.dshConvKind = dshConversationKind(this.conversation)
         this.dshState = getDshState(this.conversation)
+        this.dshMetrics = getDshMetrics(this.conversation)
+    }
+
+    // DSH 运行态提示（type=1 状态）：等待确认/审批、出错、已取消；无提示返回空字符串
+    private get dshStatusHintLine(): string {
+        return this.dshState ? dshStatusHint(this.dshState) : ''
+    }
+
+    // DSH Token 统计一行（type=2 计量，如 "上下文 0.8% · 缓存 98% · 70.5 tok/s · 本轮 179 tok · 累计 15992 tok"）；
+    // 无可展示统计字段时返回空字符串，标题栏不占位。
+    // sessionId 校验：统计属于当前会话才显示——type=2 统计带 sessionId 且与 type=1 状态（dshState）
+    // 的 sessionId 不一致时（切目录后旧会话统计残留）返回空，不显示统计段；AI 在线/运行提示/lastChange
+    // 仍正常显示。任一侧 sessionId 缺失（旧数据）时不拦截，按现状显示。（参考 PC 端 dshMetricsText computed）
+    private get dshMetricsLine(): string {
+        if (!this.dshMetrics) {
+            return ''
+        }
+        if (this.dshMetrics.sessionId && this.dshState && this.dshState.sessionId
+            && this.dshMetrics.sessionId !== this.dshState.sessionId) {
+            return ''
+        }
+        return dshMetricsText(this.dshMetrics)
+    }
+
+    // 标题下方状态行：AI 在线状态 + 运行态提示 + 最近变更 + Token 统计合并为一行
+    // （如 "AI Web 在线 · 🤔 等待确认 · 模型 → deepseek-official/deepseek-v4-pro · 上下文 0.8% · 缓存 98%"）。
+    // 各段非空时用 " · " 连接，为空跳过；全部为空返回空字符串（不渲染不占位）。
+    // 非 AI/DSH 会话均为空，不影响原有副标题逻辑（参考 PC 端 conversationStatusLine()）。
+    private get conversationStatusLine(): string {
+        // AI 群：群主（AI 机器人）不在线 → 去掉所有 AI 状态段（运行态提示/lastChange/Token 统计），只显示 "AI 不在线"
+        if (this.dshConvKind === 'group' && !this.aiOwnerOnline) {
+            return 'AI 不在线'
+        }
+        let online = this.aiOwnerOnlineStateDesc ? 'AI ' + this.aiOwnerOnlineStateDesc : ''
+        let hint = this.dshStatusHintLine
+        // 最近一次面板变更（type=1 lastChange，207 set 后插件写入，变更可见）
+        let lastChange = this.dshState && this.dshState.lastChange ? this.dshState.lastChange : ''
+        let metrics = this.dshMetricsLine
+        let parts: string[] = []
+        if (online) {
+            parts.push(online)
+        }
+        if (hint) {
+            parts.push(hint)
+        }
+        if (lastChange) {
+            parts.push(lastChange)
+        }
+        if (metrics) {
+            parts.push(metrics)
+        }
+        return parts.join(' · ')
     }
 
     // 标题栏停止按钮：向当前 DSH 会话发送 /stop 命令文本，中断当前 Agent turn（1.5s 防重复点击）
@@ -604,6 +756,10 @@ export default struct ConversationPage {
     }
 
     isDisplayMessage(message: Message) {
+        // DSH_Command (207) 是 AI 面板静默指令（透明消息，不落库、不显示在消息流）
+        if (message.messageContent.type === MessageContentType.DSH_COMMAND) {
+            return false;
+        }
         // return [PersistFlag.Persist, PersistFlag.Persist_And_Count].indexOf(MessageConfig.getMessageContentPersitFlag(message.messageContent.type)) > -1;
         return message.messageId !== 0 || message.messageContent.type === MessageContentType.Streaming_Text_Generating;
     }
@@ -722,6 +878,8 @@ export default struct ConversationPage {
     onGroupInfosUpdate = (groupInfos: GroupInfo[]) => {
         // 群信息（extra dsh 标记）拉取回来后，重新判定是否为 DSH 会话
         this.refreshDshState()
+        // AI 群：群信息（含群主 owner）就绪后，补订/刷新群主在线状态
+        this.ensureAiOwnerOnlineStateWatched()
         if (this.conversation?.type === ConversationType.Group) {
             let index = groupInfos.findIndex(info => info.target === this.conversation?.target)
             if (index >= 0) {
@@ -889,8 +1047,9 @@ export default struct ConversationPage {
                 }
             }
 
-            // DSH 会话状态副标题（空闲/运行中/等待确认/已完成；phase=tool 时追加工具名），仅 DSH 会话显示
-            if (this.dshState) {
+            // DSH 会话状态副标题（空闲/运行中/等待确认/已完成；phase=tool 时追加工具名），仅 DSH 会话显示；
+            // AI 群群主不在线时不显示任何 AI 状态（状态文本/停止按钮），由下方 "AI 不在线" 替代
+            if (this.dshState && !(this.dshConvKind === 'group' && !this.aiOwnerOnline)) {
                 Row({ space: 6 }) {
                     Text(dshStateText(this.dshState))
                         .fontSize(FontSize.xs)
@@ -911,6 +1070,18 @@ export default struct ConversationPage {
                     }
                 }
                 .margin({ top: 2 })
+            }
+
+            // AI 群（line 2）在线状态 + 运行态提示 + DSH Token 统计合并为一行
+            // （如 "AI Web 在线 · 🤔 等待确认 · 上下文 0.8% · 缓存 98%"）；
+            // 各段均无内容时不渲染（不占位）
+            if (this.conversationStatusLine) {
+                Text(this.conversationStatusLine)
+                    .fontSize(FontSize.xs)
+                    .fontColor($r('app.color.wf_secondary_text'))
+                    .maxLines(1)
+                    .textOverflow({ overflow: TextOverflow.Ellipsis })
+                    .margin({ top: 2 })
             }
         }
         .height('100%')
@@ -1257,6 +1428,8 @@ export default struct ConversationPage {
                             dshConvKind: this.dshConvKind,
                             enableMultiCheck: $enableMultiCheck,
                             checkedMessages: $checkedMessages,
+                            showDshAgentPanel: $showDshAgentPanel,
+                            aiOwnerOnline: this.aiOwnerOnline,
                             quotedMessage: $quotedMessage,
                             collapseConversationInputPanelViewTimestamp: $collapseConversationInputPanelViewTimestamp,
                             messageListScroller: this.scroller,
@@ -1382,6 +1555,19 @@ export default struct ConversationPage {
                     })
                     .position({ x: this.previewCardX(), y: this.previewCardY() })
                     .hitTestBehavior(HitTestMode.None)
+                }
+
+                // AI 会话设置面板：页面根 Stack 的悬浮覆盖层（全屏遮罩 + 居中卡片），
+                // 与输入面板布局完全隔离，不影响消息列表/输入栏；由输入面板 AI 按钮经 @Link 打开
+                if (this.showDshAgentPanel && this.conversation) {
+                    DshAgentPanelView({
+                        conversation: this.conversation!,
+                        dismiss: () => {
+                            this.showDshAgentPanel = false
+                        }
+                    })
+                        .width('100%')
+                        .height('100%')
                 }
 
             } // end Stack
@@ -1523,15 +1709,47 @@ class ConversationMessageDataSource extends BasicDataSource<Message> {
         if (index >= 0) {
             this.messages[index] = message;
             this.notifyDataChange(index)
-            return;
+        } else {
+            this.messages = this.messages.concat(message)
+            this.notifyDataReload();
         }
-        this.messages = this.messages.concat(message)
-        this.notifyDataReload();
+        // 收到新消息追加/自己发送消息追加/流式消息更新后，把生成中的流式消息（type 14）钉回列表末尾
+        this.pinStreamingGeneratingToBottom();
     }
 
     appendMessages(messages: Message[]) {
         this.messages = this.messages.concat(this.normalizeStreaming(messages))
         this.notifyDataReload();
+        this.pinStreamingGeneratingToBottom();
+    }
+
+    // 生成中的流式消息（type 14，Streaming_Text_Generating）必须固定在列表最新位置（视觉最底部）。
+    // 生成期间用户自己发消息、或其它消息插入/更新，都可能把它顶到中间。
+    // 这里在每次列表变更后把「最后一条生成中的消息」移到数组末尾，其余消息保持相对顺序；
+    // 本来就已在末尾则不动。移动后整体刷新 LazyForEach（与追加新消息时的刷新方式一致）。
+    pinStreamingGeneratingToBottom(): void {
+        if (this.messages.length <= 1) {
+            return
+        }
+        let last = this.messages[this.messages.length - 1]
+        if (last.messageContent.type === MessageContentType.Streaming_Text_Generating) {
+            return
+        }
+        let idx = -1
+        for (let i = this.messages.length - 1; i >= 0; i--) {
+            if (this.messages[i].messageContent.type === MessageContentType.Streaming_Text_Generating) {
+                idx = i
+                break
+            }
+        }
+        if (idx === -1) {
+            return
+        }
+        // 移到末尾，其余消息保持相对顺序
+        let generating = this.messages[idx]
+        this.messages.splice(idx, 1)
+        this.messages.push(generating)
+        this.notifyDataReload()
     }
 
     // 取消消息（20）：按 streamId 从消息列表删除对应的生成中(14)/已生成(15)消息，
@@ -1582,6 +1800,8 @@ class ConversationMessageDataSource extends BasicDataSource<Message> {
             if (index >= 0) {
                 this.messages[index] = message;
                 this.notifyDataChange(index);
+                // 消息更新/状态更新后，若生成中的流式消息（type 14）被顶到中间，移回列表末尾
+                this.pinStreamingGeneratingToBottom();
             }
         }
     }

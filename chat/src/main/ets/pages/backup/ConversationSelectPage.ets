@@ -30,7 +30,7 @@ export default struct ConversationSelectPage {
   aboutToAppear() {
     // 获取所有会话
     const types = [ConversationType.Single, ConversationType.Group, ConversationType.ChatRoom]
-    const conversationList = wfc.getConversationInfoList(types, [0])
+    const conversationList = wfc.getConversationInfoList(types, [0, 2])
     console.log(`Loaded ${conversationList.length} conversations`)
 
     this.conversationInfos = conversationList

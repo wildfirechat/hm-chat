@@ -1,6 +1,7 @@
 import CustomMessageContentType from './customMessageContentType'
 import MessageContent from '../wfc/messages/messageContent'
 import MessagePayload from '../wfc/messages/messagePayload'
+import { DshAnswerItem } from './dshAnswerMessageContent'
 
 /**
  * DSH 提问卡片消息，内容类型 200（机器人 -> 用户）
@@ -33,6 +34,8 @@ export class DshQuestionData {
     questions: DshQuestionItem[] = []
     // pending/answered/expired
     state: string = 'pending'
+    // 服务端 answered 后回填的用户选择（插件 updateMessage 写入，只读展示用）
+    answers: DshAnswerItem[] = []
 }
 
 export function summarizeDshQuestion(content: DshQuestionData): string {

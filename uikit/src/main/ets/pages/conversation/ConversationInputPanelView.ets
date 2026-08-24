@@ -69,7 +69,9 @@ const PANEL_ANIM_EXPAND = 400
 interface ConversationExt {
     title: string,
     icon: ResourceStr,
-    action: () => void
+    action: () => void,
+    // 置灰禁用（如 AI 不在线时的 "AI 会话设置" 入口）：icon 半透明、点击不响应
+    disabled?: boolean
 }
 
 interface MultiCheckAction {
@@ -105,6 +107,11 @@ export default struct ConversationInputPanelView {
     // avoidAreaChange 去重：本机会连续回调多次相同的键盘避让高度。
     private lastKbAvoidPx: number = -1
     @State showMentionSheet: boolean = false
+    // AI 会话设置面板（仅 DSH/AI 会话 line===2 显示入口）
+    // AI 会话设置面板是否打开（与 ConversationPage 双向绑定，面板由页面根 Stack 悬浮呈现）
+    @Link showDshAgentPanel: boolean
+    // AI 群群主（AI 机器人）是否在线：不在线时 "AI 会话设置" 入口置灰禁用
+    @Prop aiOwnerOnline: boolean = false
     @State @Watch('onKeyboardHeightChanged') keyboardHeight: number = 320
     @State showAudioRecorderButton: boolean = false
     // 对讲模式：输入框换成「按住 对讲」按钮
@@ -327,6 +334,27 @@ export default struct ConversationInputPanelView {
             }
         }
     ]
+
+    // 「+」扩展网格可见项：DSH/AI 会话（line===2）前置「AI 会话设置」入口，其余会话不显示
+    private visibleConversationExts(): ConversationExt[] {
+        if (this.dshConvKind) {
+            return [this.dshAgentExt(), ...this.conversationExts]
+        }
+        return this.conversationExts
+    }
+
+    // 「AI 会话设置」扩展项：点击弹出底部设置面板（选择式，不需要手输命令）
+    private dshAgentExt(): ConversationExt {
+        return {
+            title: 'AI 会话设置',
+            icon: $r('app.media.ic_robot'),
+            // AI 不在线：置灰禁用，点击不弹出面板
+            disabled: !this.aiOwnerOnline,
+            action: () => {
+                this.showDshAgentPanel = true
+            }
+        }
+    }
     private multiCheckAction: MultiCheckAction[] = [
         {
             title: '删除',
@@ -555,10 +583,10 @@ export default struct ConversationInputPanelView {
         this.onSuggestionsChange?.(matches)
     }
 
-    // 单聊机器人命令集（/create-group 等私聊专属命令在群内会被插件拒绝；/stop 危险语义放最后）
+    // 单聊机器人命令集（/create 等私聊专属命令在群内会被插件拒绝；/stop 危险语义放最后）
     private static DSH_SINGLE_COMMANDS: DshCommand[] = [
         { command: '/help', desc: '命令帮助' },
-        { command: '/create-group', desc: '创建 DSH 工作区群' },
+        { command: '/create', desc: '创建 DSH 工作区群' },
         { command: '/workspaces', desc: '列出工作区' },
         { command: '/goal', desc: '目标管理' },
         { command: '/jobs', desc: '后台任务' },
@@ -571,17 +599,16 @@ export default struct ConversationInputPanelView {
         { command: '/sandbox', desc: '沙箱模式' },
         { command: '/stop', desc: '停止当前任务' },
     ]
-    // DSH 群聊命令集（群内可用；/stop 危险语义放最后）
+    // DSH 群聊命令集（群内可用）：model/effort/cwd/sandbox/plan/compact/reset/ls 已由
+    // 「AI 会话设置」面板（207 静默指令 + type=3）覆盖，不再出现在命令菜单；
+    // 保留 help/stop/群管理（members/kick/invite/mute/unmute）；/stop 危险语义放最后
     private static DSH_GROUP_COMMANDS: DshCommand[] = [
         { command: '/help', desc: '命令帮助' },
-        { command: '/cwd', desc: '切换工作目录' },
-        { command: '/ls', desc: '列出目录' },
-        { command: '/model', desc: '切换模型' },
-        { command: '/effort', desc: '推理等级' },
-        { command: '/plan', desc: '计划模式' },
-        { command: '/compact', desc: '压缩上下文' },
-        { command: '/sandbox', desc: '沙箱模式' },
-        { command: '/reset', desc: '重置会话' },
+        { command: '/members', desc: '列成员' },
+        { command: '/kick', desc: '踢人' },
+        { command: '/invite', desc: '拉人' },
+        { command: '/mute', desc: '禁言' },
+        { command: '/unmute', desc: '解除禁言' },
         { command: '/stop', desc: '停止当前任务' },
     ]
 
@@ -1457,7 +1484,7 @@ export default struct ConversationInputPanelView {
                 Column() {
                     if (this.showExtPanel) {
                         Grid() {
-                            ForEach(this.conversationExts, (ext: ConversationExt) => {
+                            ForEach(this.visibleConversationExts(), (ext: ConversationExt) => {
                                 GridItem() {
                                     Column() {
                                         Image(ext.icon)
@@ -1465,6 +1492,7 @@ export default struct ConversationInputPanelView {
                                             .draggable(false)
                                             .height(60)
                                             .borderRadius(Radius.lg)
+                                            .opacity(ext.disabled ? 0.35 : 1)
                                             .stateStyles({
                                                 pressed: {
                                                     .backgroundColor($r('app.color.wf_item_pressed'))
@@ -1478,7 +1506,7 @@ export default struct ConversationInputPanelView {
                                         Text(ext.title)
                                             .margin({ top: 8 })
                                             .fontSize(FontSize.xs)
-                                            .fontColor($r('app.color.wf_secondary_text'))
+                                            .fontColor(ext.disabled ? $r('app.color.wf_tertiary_text') : $r('app.color.wf_secondary_text'))
                                             .width('100%')
                                             .textAlign(TextAlign.Center)
                                             .maxLines(1)
@@ -1488,7 +1516,12 @@ export default struct ConversationInputPanelView {
                                     .borderRadius(Radius.sm)
                                     .padding({ top: 8, bottom: 8 })
                                     .alignItems(HorizontalAlign.Center)
-                                    .onClick(ext.action)
+                                    .onClick(() => {
+                                        if (ext.disabled) {
+                                            return
+                                        }
+                                        ext.action()
+                                    })
                                 }
 
                             }, (ext: ConversationExt) => ext.title)

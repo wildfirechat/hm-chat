@@ -238,7 +238,7 @@ export class MessageBackupManager {
       if (backupConversations.length === 0 && this.wfc) {
         // 获取所有类型的会话
         const types = [ConversationType.Single, ConversationType.Group, ConversationType.ChatRoom, ConversationType.Channel];
-        backupConversations = this.wfc.getConversationInfoList(types, [0]);
+        backupConversations = this.wfc.getConversationInfoList(types, [0, 2]);
       }
 
       if (this.isCancelled) {

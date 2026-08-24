@@ -81,6 +81,7 @@ import PollMessageContent from '../messages/pollMessageContent';
 import PollResultMessageContent from '../messages/pollResultMessageContent';
 import MeetingMinutesMessageContent from '../messages/meetingMinutesMessageContent';
 import TranscriptionMessageContent from '../messages/transcriptionMessageContent';
+import DshCommandMessageContent from '../messages/dshCommandMessageContent';
 
 export type MessageContentFactory = (type: number) => MessageContent | undefined;
 
@@ -369,6 +370,9 @@ export default class MessageConfig {
                 break
             case MessageContentType.Transcription:
                 content = new TranscriptionMessageContent()
+                break
+            case MessageContentType.DSH_COMMAND:
+                content = new DshCommandMessageContent()
                 break
             default:
                 content = new UnknownMessageContent()
@@ -737,6 +741,11 @@ export default class MessageConfig {
             name: 'transcriptionMessageContent',
             flag: PersistFlag.Transparent,
             type: MessageContentType.Transcription,
+        },
+        {
+            name: 'dshCommandMessageContent',
+            flag: PersistFlag.Transparent,
+            type: MessageContentType.DSH_COMMAND,
         }
 
     ];

@@ -51,6 +51,25 @@ export default struct DshQuestionContentView {
         return ''
     }
 
+    // 服务端 answered 后回填的用户选择（插件 updateMessage 写入 content.answers）：
+    // 取每个答案的 selected.join('、') 或 custom 自定义文本，多个答案用「；」连接，
+    // 与 stateText 拼成「已作答（✅ 创建）」形式；未 answered 或无 answers 时返回空串。
+    private mySelectionText(): string {
+        if (this.content().state !== 'answered') {
+            return ''
+        }
+        let answers = this.content().answers ? this.content().answers : []
+        let parts: string[] = []
+        answers.forEach(a => {
+            if (a.selected && a.selected.length > 0) {
+                parts.push(a.selected.join('、'))
+            } else if (a.custom) {
+                parts.push(a.custom)
+            }
+        })
+        return parts.length > 0 ? `（${parts.join('；')}）` : ''
+    }
+
     private selectedCount(): number {
         let count = 0
         this.selectedMap.forEach(arr => {
@@ -281,7 +300,7 @@ export default struct DshQuestionContentView {
             }
 
             if (this.isLocked()) {
-                Text(this.stateText())
+                Text(this.stateText() + this.mySelectionText())
                     .fontSize(FontSize.xs)
                     .fontColor($r('app.color.wf_tertiary_text'))
                     .margin({ top: 6 })

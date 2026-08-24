@@ -43,7 +43,7 @@ export default struct ForwardMessagePage {
     private checkedUserListScroller: Scroller = new Scroller()
 
     aboutToAppear() {
-        let conversationInfos = wfc.getConversationInfoList([0, 1, 2, 3], [0]);
+        let conversationInfos = wfc.getConversationInfoList([0, 1, 2, 3], [0, 2]);
         this.conversationInfoDataSource.setConversationInfos(conversationInfos)
         let params = this.mainNavPathStack.getParamByIndex(this.mainNavPathStack.size() - 1) as Record<string, Object>;
         if (params) {
@@ -73,7 +73,7 @@ export default struct ForwardMessagePage {
     }
 
     private loadRecentConversations() {
-        let conversationInfos = wfc.getConversationInfoList([0, 1, 2, 3], [0]);
+        let conversationInfos = wfc.getConversationInfoList([0, 1, 2, 3], [0, 2]);
         this.conversationInfoDataSource.setConversationInfos(conversationInfos)
     }
 

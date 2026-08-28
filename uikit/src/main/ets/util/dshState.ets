@@ -282,7 +282,7 @@ export function getDshPanelData(conversation?: Conversation): DshPanelData | nul
     }
 }
 
-/** 状态文案：空闲/运行中/等待确认/已完成；phase 为 tool 时追加工具名。 */
+/** 状态文案：空闲/运行中/等待确认/已完成；运行中按 phase 追加思考中/工具名。 */
 export function dshStateText(state: DshState | null): string {
     if (!state || !state.state) {
         return ''
@@ -294,8 +294,10 @@ export function dshStateText(state: DshState | null): string {
         'done': '已完成'
     }
     let text = map[state.state] || ''
-    if (text && state.phase === 'tool') {
+    if (text && state.state === 'running' && state.phase === 'tool') {
         text += ` · ${state.toolName || '工具'}`
+    } else if (text && state.state === 'running' && state.phase === 'thinking') {
+        text += ' · 思考中'
     }
     return text
 }

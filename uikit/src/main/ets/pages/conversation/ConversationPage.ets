@@ -43,6 +43,11 @@ import ContextableNotificationMessageContentView from './message/ContextableNoti
 import StreamingTextGeneratingMessageContent from '@wfc/client/src/main/ets/wfc/messages/streamingTextGeneratingMessageContent'
 import StreamingTextGeneratedMessageContent from '@wfc/client/src/main/ets/wfc/messages/streamingTextGeneratedMessageContent'
 import StreamingTextCancelledMessageContent from '@wfc/client/src/main/ets/wfc/messages/streamingTextCancelledMessageContent'
+import CustomMessageContentType from '@wfc/client/src/main/ets/wfc_custom_message/customMessageContentType'
+import DshQuestionMessageContent from '@wfc/client/src/main/ets/wfc_custom_message/dshQuestionMessageContent'
+import DshApprovalMessageContent from '@wfc/client/src/main/ets/wfc_custom_message/dshApprovalMessageContent'
+import DshGoalMessageContent from '@wfc/client/src/main/ets/wfc_custom_message/dshGoalMessageContent'
+import DshTaskProgressMessageContent from '@wfc/client/src/main/ets/wfc_custom_message/dshTaskProgressMessageContent'
 import GroupType from '@wfc/client/src/main/ets/wfc/model/groupType'
 import archiveServer from '../../api/archiveServer'
 import ArchiveMessageResult from '../../api/model/archiveMessageResult'
@@ -1713,42 +1718,77 @@ class ConversationMessageDataSource extends BasicDataSource<Message> {
             this.messages = this.messages.concat(message)
             this.notifyDataReload();
         }
-        // 收到新消息追加/自己发送消息追加/流式消息更新后，把生成中的流式消息（type 14）钉回列表末尾
-        this.pinStreamingGeneratingToBottom();
+        // 收到新消息追加/自己发送消息追加/AI 消息更新后，把进行中的 AI 元素（流式生成中、
+        // 进度卡、选择/审批卡等）钉回列表末尾
+        this.pinLiveAIToBottom();
     }
 
     appendMessages(messages: Message[]) {
         this.messages = this.messages.concat(this.normalizeStreaming(messages))
         this.notifyDataReload();
-        this.pinStreamingGeneratingToBottom();
+        this.pinLiveAIToBottom();
     }
 
-    // 生成中的流式消息（type 14，Streaming_Text_Generating）必须固定在列表最新位置（视觉最底部）。
-    // 生成期间用户自己发消息、或其它消息插入/更新，都可能把它顶到中间。
-    // 这里在每次列表变更后把「最后一条生成中的消息」移到数组末尾，其余消息保持相对顺序；
-    // 本来就已在末尾则不动。移动后整体刷新 LazyForEach（与追加新消息时的刷新方式一致）。
-    pinStreamingGeneratingToBottom(): void {
+    // 判断消息是否为"进行中的 AI 交互元素"（需要固定在列表最新位置）：
+    // - 14 流式文本生成中（Streaming_Text_Generating）
+    // - 200 提问卡（state=pending，等待用户选择）
+    // - 202 审批卡（state=pending，等待用户审批）
+    // - 206 目标卡（phase 未 complete）
+    // - 208 任务进度卡（有运行中的子任务/后台任务）
+    isLiveAIMessage(message: Message): boolean {
+        let type = message.messageContent.type
+        if (type === MessageContentType.Streaming_Text_Generating) {
+            return true
+        }
+        if (type === CustomMessageContentType.MESSAGE_CONTENT_TYPE_DSH_QUESTION) {
+            return (message.messageContent as DshQuestionMessageContent).content.state === 'pending'
+        }
+        if (type === CustomMessageContentType.MESSAGE_CONTENT_TYPE_DSH_APPROVAL) {
+            return (message.messageContent as DshApprovalMessageContent).content.state === 'pending'
+        }
+        if (type === CustomMessageContentType.MESSAGE_CONTENT_TYPE_DSH_GOAL) {
+            return (message.messageContent as DshGoalMessageContent).content.phase !== 'complete'
+        }
+        if (type === CustomMessageContentType.MESSAGE_CONTENT_TYPE_DSH_TASK_PROGRESS) {
+            let tasks = (message.messageContent as DshTaskProgressMessageContent).content.tasks || []
+            return tasks.some(t => t.status === 'running')
+        }
+        return false
+    }
+
+    // 进行中的 AI 交互元素（流式生成中、进度卡、选择/审批卡等）固定在列表最新位置（视觉最底部）。
+    // 生成/等待期间用户自己发消息、或其它消息插入/更新，都可能把它们顶到中间；
+    // 这里在每次列表变更后把所有"进行中的 AI 元素"移到数组末尾（保持它们之间以及
+    // 其余消息的相对顺序），顺序未变则不动。移动后整体刷新 LazyForEach。
+    pinLiveAIToBottom(): void {
         if (this.messages.length <= 1) {
             return
         }
-        let last = this.messages[this.messages.length - 1]
-        if (last.messageContent.type === MessageContentType.Streaming_Text_Generating) {
+        let live: Message[] = []
+        let rest: Message[] = []
+        for (let m of this.messages) {
+            if (this.isLiveAIMessage(m)) {
+                live.push(m)
+            } else {
+                rest.push(m)
+            }
+        }
+        if (live.length === 0) {
             return
         }
-        let idx = -1
-        for (let i = this.messages.length - 1; i >= 0; i--) {
-            if (this.messages[i].messageContent.type === MessageContentType.Streaming_Text_Generating) {
-                idx = i
+        // 已是末尾连续一段（顺序未变）则无需移动/刷新
+        let tailStart = this.messages.length - live.length
+        let unchanged = true
+        for (let i = 0; i < live.length; i++) {
+            if (this.messages[tailStart + i] !== live[i]) {
+                unchanged = false
                 break
             }
         }
-        if (idx === -1) {
+        if (unchanged) {
             return
         }
-        // 移到末尾，其余消息保持相对顺序
-        let generating = this.messages[idx]
-        this.messages.splice(idx, 1)
-        this.messages.push(generating)
+        this.messages = rest.concat(live)
         this.notifyDataReload()
     }
 
@@ -1800,8 +1840,9 @@ class ConversationMessageDataSource extends BasicDataSource<Message> {
             if (index >= 0) {
                 this.messages[index] = message;
                 this.notifyDataChange(index);
-                // 消息更新/状态更新后，若生成中的流式消息（type 14）被顶到中间，移回列表末尾
-                this.pinStreamingGeneratingToBottom();
+                // 消息更新/状态更新后，若进行中的 AI 元素（流式生成中、进度卡、选择/审批卡等）
+                // 被顶到中间，移回列表末尾
+                this.pinLiveAIToBottom();
             }
         }
     }

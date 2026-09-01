@@ -25,6 +25,7 @@ import { isImage, isVideo } from '@wfc/uikit/src/main/ets/util/helper';
 import { ShareItem } from '@wfc/uikit/src/main/ets/common/Types';
 import waterMarkWindow from '@wfc/uikit/src/main/ets/common/watermark/waterMarkWindow';
 import { windowSizeManager } from '@wfc/uikit/src/main/ets/util/windowSizeManager';
+import { isWideScreen } from '@wfc/uikit/src/main/ets/util/navUtil';
 import { loadMomentModule } from '../util/momentModuleLoader';
 
 export default class EntryAbility extends UIAbility {
@@ -78,8 +79,8 @@ export default class EntryAbility extends UIAbility {
                     preference.clear()
                     preference.flush()
                 }
-                let url = 'pages/login/LoginPage'
-                this.loadContent(url)
+                // 宽屏(平板)走卡片式登录页（含扫码登录），手机维持原登录页
+                this.loadContent(this.loginPageUrl())
             }
         })
 
@@ -133,7 +134,7 @@ export default class EntryAbility extends UIAbility {
             fontSizeManager.apply(this.applicationContext);
         }
 
-        let url = 'pages/login/LoginPage';
+        let url = this.loginPageUrl();
         data_preferences.getPreferences(this.applicationContext, 'wfcstore', async (err, val) => {
             if (err) {
                 console.error("Failed to get preferences. code =" + err.code + ", message =" + err.message);
@@ -247,6 +248,11 @@ export default class EntryAbility extends UIAbility {
             clearTimeout(this.cancelIMShortTaskTimerID)
             this.cancelIMShortTaskTimerID = 0;
         }
+    }
+
+    // 未登录时进入的登录页：宽屏（平板）走卡片式登录页（含扫码登录），手机维持原登录页
+    private loginPageUrl(): string {
+        return isWideScreen() ? 'pages/login/PadLoginPage' : 'pages/login/LoginPage'
     }
 
     private loadContent(url: string) {

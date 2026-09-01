@@ -95,18 +95,37 @@ class AppServer {
     }
 
     /**
+     * 创建 PC 登录会话（本端为被扫码端）：token 拼成二维码内容 wildfirechat://pcsession/<token> 供手机端扫描。
+     * 与 Android/iOS 端 createPCLoginSession 保持一致（POST /pc_session）。
+     * @param deviceName 设备名，平板扫码登录传 'pad'
+     */
+    async createPCLoginSession(deviceName: string = 'pad'): Promise<QRLoginSession> {
+        let params = {
+            'flag': 1,
+            'device_name': deviceName,
+            'clientId': wfc.getClientId(),
+            'platform': Config.getWFCPlatform()
+        } as Record<string, Object>
+        let result = await this._post('/pc_session', params)
+        return result as object as QRLoginSession
+    }
+
+    /**
      * 二维码登录，创建二维码登录 session
      * @param userId
      * @returns
      */
     createQRLoginSession(userId: string, deviceName: string = 'wearable') {
-        let result = this._post('/pc_session', {
+        let params = {
             'flag': 1,
             'device_name': deviceName,
-            'userId': userId,
             'clientId': wfc.getClientId(),
             'platform': Config.getWFCPlatform()
-        } as Record<string, Object>)
+        } as Record<string, Object>
+        if (userId) {
+            params['userId'] = userId
+        }
+        let result = this._post('/pc_session', params)
         return result as object as QRLoginSession
     }
 
@@ -117,7 +136,7 @@ class AppServer {
      * @returns
      */
     async loginWithQRSession(token: string) {
-        let data = await this._post(`session_login/${token}`, '', true) as http.HttpResponse
+        let data = await this._post(`/session_login/${token}`, '', true) as http.HttpResponse
         const restResult = data.result as Record<string, Object>
         let code = restResult['code'] as number
         if (code === 0) {

@@ -1,5 +1,6 @@
 import wfc from "./wfc/client/wfc";
 import ConnectionStatus from "./wfc/client/connectionStatus";
+import { deviceInfo } from '@kit.BasicServicesKit';
 
 export default class Config {
     // 调试用
@@ -76,8 +77,22 @@ export default class Config {
     static SDK_PLATFORM_HARMONY_PAD = 11;
     static SDK_PLATFORM_HARMONY_PC = 12;
 
-    //当前的平台，只能是 SDK_PLATFORM_HARMONY SDK_PLATFORM_HARMONYPAD 和 SDK_PLATFORM_HARMONYPC中的一个
+    //当前的平台，默认是 SDK_PLATFORM_HARMONY；平板设备会自动按 Pad 平台(11)上报
     static CURRENT_PLATFORM = Config.SDK_PLATFORM_HARMONY;
+
+    /**
+     * 是否为平板设备（用于平台身份决策，如登录 platform）。
+     * 依据设备类型判定并保持稳定，与窗口宽度的布局决策（windowSizeManager 断点）无关：
+     * 用户拖拽分屏改变窗口宽度不应改变平台身份（token 与 clientId+platform 强绑定）。
+     */
+    static isPadDevice(): boolean {
+        try {
+            let type = deviceInfo.deviceType;
+            return type === 'tablet' || type === '2in1';
+        } catch (e) {
+            return false;
+        }
+    }
 
     // html5 audio 标签不能播放amr格式的音频，需要将amr格式转换为mp3格式
     // 本服务传入amr音频文件的地址，将音频文件转换为mp3格式，并以application/octet-stream的格式返回
@@ -144,6 +159,10 @@ export default class Config {
     static CUSTOM_USER_AGENT = "Mozilla/5.0 (Tablet; OpenHarmony 6.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36  ArkWeb/6.0.0.130 WF-DSBridge"
 
     static getWFCPlatform() {
+        // 平板设备自动按 Pad 平台（11）上报，手机保持手机平台（10），实现手机+平板多端同时在线
+        if (Config.CURRENT_PLATFORM === Config.SDK_PLATFORM_HARMONY && Config.isPadDevice()) {
+            return Config.SDK_PLATFORM_HARMONY_PAD;
+        }
         return Config.CURRENT_PLATFORM;
     }
 

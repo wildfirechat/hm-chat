@@ -1,6 +1,7 @@
 {
     "src": [
         "pages/login/LoginPage",
+        "pages/login/PadLoginPage",
         "pages/MainPage"
     ]
 }

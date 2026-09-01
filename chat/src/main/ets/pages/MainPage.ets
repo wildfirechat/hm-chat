@@ -344,6 +344,9 @@ struct MainPage {
 
     tabUnreadCount(tabIndex: number) {
         let unreadCount: number = 0
+        // 工作台(如有)无未读；「发现」「我的」的 tab 索引随工作台是否启用而偏移
+        let discoveryIndex = Config.getWorkspaceUrl() ? 3 : 2
+        let meIndex = Config.getWorkspaceUrl() ? 4 : 3
         switch (tabIndex) {
             case 0:
                 unreadCount = this.conversationListTabUnreadCount
@@ -351,12 +354,13 @@ struct MainPage {
             case 1:
                 unreadCount = this.contactTabUnreadCount
                 break
-            case 2:
-                unreadCount = this.discoveryTabUnreadCount
-            case 3:
-                unreadCount = this.meTabUnreadCount
-                break
             default:
+                if (tabIndex === discoveryIndex) {
+                    unreadCount = this.discoveryTabUnreadCount
+                } else if (tabIndex === meIndex) {
+                    unreadCount = this.meTabUnreadCount
+                }
+                break
         }
         return unreadCount
     }

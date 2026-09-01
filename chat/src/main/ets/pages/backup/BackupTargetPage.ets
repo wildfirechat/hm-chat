@@ -10,6 +10,7 @@ import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import OptionItemView from '@wfc/uikit/src/main/ets/view/OptionItemView'
 import { appNavigationDestinations } from '../mainNavigationConfig'
 import ConversationInfo from '@wfc/client/src/main/ets/wfc/model/conversationInfo'
+import PCOnlineInfo from '@wfc/client/src/main/ets/wfc/model/pcOnlineInfo'
 import { showToast } from '@wfc/uikit/src/main/ets/common/utils/Toast'
 import { FontSize } from '@wfc/uikit/src/main/ets/common/design/Tokens'
 
@@ -27,8 +28,9 @@ export default struct BackupTargetPage {
   }
 
   checkPCOnlineStatus() {
-    // 检查PC是否在线
-    const pcOnlineInfos = wfc.getPCOnlineInfos()
+    // 检查PC是否在线（过滤掉本机，平板自身不算 PC 在线）
+    const selfClientId = wfc.getClientId()
+    const pcOnlineInfos = wfc.getPCOnlineInfos().filter((info: PCOnlineInfo) => info.clientId !== selfClientId)
     this.isPCOnline = pcOnlineInfos && pcOnlineInfos.length > 0
   }
 

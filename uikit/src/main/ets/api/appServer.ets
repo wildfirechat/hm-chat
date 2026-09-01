@@ -106,7 +106,9 @@ class AppServer {
             'clientId': wfc.getClientId(),
             'platform': Config.getWFCPlatform()
         } as Record<string, Object>
+        console.log('[PadQR] createPCLoginSession url=' + this.baseUrl() + '/pc_session' + ', params=' + JSON.stringify(params))
         let result = await this._post('/pc_session', params)
+        console.log('[PadQR] createPCLoginSession response=' + JSON.stringify(result))
         return result as object as QRLoginSession
     }
 
@@ -136,9 +138,25 @@ class AppServer {
      * @returns
      */
     async loginWithQRSession(token: string) {
-        let data = await this._post(`/session_login/${token}`, '', true) as http.HttpResponse
-        const restResult = data.result as Record<string, Object>
+        // 注意：extraData 不能传空字符串 ''（Content-Type: application/json 下会被 http 模块
+        // 判为参数错误 401），传空对象 {}（序列化为 {}，服务端不解析该 body，等价 Android 的 null body）
+        let data = await this._post(`/session_login/${token}`, {} as Record<string, Object>, true) as http.HttpResponse
+        console.log('[PadQR] loginWithQRSession raw body=' + String(data.result))
+        if (!data || data.result === undefined || data.result === null || String(data.result).length === 0) {
+            // 空响应体：抛错让轮询走异常分支，避免解析空值
+            throw new AppServerError(-1, '返回数据为空')
+        }
+        // rawResponseData=true 时 expectDataType 为 STRING，data.result 是 JSON 字符串，
+        // 需要自行解析（code 9 需携带 result 里的扫码用户信息，走 ResultWrapper 会丢失）
+        let restResult: Record<string, Object>
+        try {
+            restResult = JSON.parse(data.result as string) as Record<string, Object>
+        } catch (e) {
+            console.error('[PadQR] loginWithQRSession JSON.parse failed, fallback to object', JSON.stringify(e))
+            restResult = data.result as Record<string, Object>
+        }
         let code = restResult['code'] as number
+        console.log('[PadQR] loginWithQRSession parsed code=' + code + ', result=' + JSON.stringify(restResult['result']))
         if (code === 0) {
             this._interceptResponseAuthToken(data)
             return restResult
@@ -378,22 +396,27 @@ class AppServer {
                     readTimeout: 60000, // 可选，默认为60000ms
                     usingProtocol: http.HttpProtocol.HTTP1_1, // 可选，协议类型默认值由系统自动指定
                 }, (err, data) => {
-                if (!err && data.responseCode == 200) {
+                if (!err && data && data.responseCode == 200) {
                     httpRequest.destroy();
                     console.log('response', data)
                     if (rawResponseData) {
                         resolve(data)
                     } else {
                         let result = data.result as Record<string, Object>
-                        if (result.code === 0) {
+                        if (result && result.code === 0) {
                             this._interceptResponseAuthToken(data)
                             resolve(result.result)
-                        } else {
+                        } else if (result) {
                             reject(new AppServerError(result.code as number, result.message as string))
+                        } else {
+                            // 200 但响应体为空/非 JSON：不能抛异常挂起 promise，按失败处理
+                            console.error('_post empty/invalid response body, path=' + path)
+                            reject(new AppServerError(-1, '返回数据为空'))
                         }
                     }
                 } else {
                     httpRequest.destroy();
+                    console.error('[PadQR] _post request failed, path=' + path + ', responseCode=' + (data ? data.responseCode : -1) + ', err=' + JSON.stringify(err))
                     reject(new AppServerError(-1, err?.message || '请求失败'))
                 }
             }

@@ -134,6 +134,22 @@ export default class EntryAbility extends UIAbility {
             fontSizeManager.apply(this.applicationContext);
         }
 
+        // 获取应用主窗口并初始化窗口尺寸/断点跟踪。
+        // 必须放在登录页路由决策（loginPageUrl 读取 widthBreakpoint）之前，
+        // 否则首次启动断点尚未写入，宽屏（平板）会错误地落到手机版登录页。
+        let mainWin: window.Window = windowStage.getMainWindowSync();
+        AppStorage.setOrCreate('window', mainWin)
+        windowSizeManager.init(mainWin)
+        // 获取状态栏高度
+        let statusArea = mainWin.getWindowAvoidArea(window.AvoidAreaType.TYPE_SYSTEM);
+        AppStorage.setOrCreate('SafeAreaTopHeight', statusArea.topRect.height);
+        // 获取导航栏高度
+        let navigationArea = mainWin.getWindowAvoidArea(window.AvoidAreaType.TYPE_NAVIGATION_INDICATOR);
+        AppStorage.setOrCreate('SafeAreaBottomHeight', navigationArea.bottomRect.height);
+        // 获取软键盘高度，但这儿获取到的软键盘高度无效，后续也没有使用
+        let keyboardArea = mainWin.getWindowAvoidArea(window.AvoidAreaType.TYPE_KEYBOARD);
+        AppStorage.setOrCreate('SafeAreaKeyboardHeight', keyboardArea.bottomRect.height);
+
         let url = this.loginPageUrl();
         data_preferences.getPreferences(this.applicationContext, 'wfcstore', async (err, val) => {
             if (err) {
@@ -154,21 +170,6 @@ export default class EntryAbility extends UIAbility {
             }
             this.loadContent(url);
         })
-
-        // 获取应用主窗口
-        let mainWin: window.Window = windowStage.getMainWindowSync();
-        AppStorage.setOrCreate('window', mainWin)
-        // 跟踪窗口宽度/断点，供 Pad/宽屏自适应布局使用
-        windowSizeManager.init(mainWin)
-        // 获取状态栏高度
-        let statusArea = mainWin.getWindowAvoidArea(window.AvoidAreaType.TYPE_SYSTEM);
-        AppStorage.setOrCreate('SafeAreaTopHeight', statusArea.topRect.height);
-        // 获取导航栏高度
-        let navigationArea = mainWin.getWindowAvoidArea(window.AvoidAreaType.TYPE_NAVIGATION_INDICATOR);
-        AppStorage.setOrCreate('SafeAreaBottomHeight', navigationArea.bottomRect.height);
-        // 获取软键盘高度，但这儿获取到的软键盘高度无效，后续也没有使用
-        let keyboardArea = mainWin.getWindowAvoidArea(window.AvoidAreaType.TYPE_KEYBOARD);
-        AppStorage.setOrCreate('SafeAreaKeyboardHeight', keyboardArea.bottomRect.height);
 
         // setConnectionStatusListener((value) => {
         //   hilog.info(0x0000, 'testTag', 'connection status changed: %{public}d', value);

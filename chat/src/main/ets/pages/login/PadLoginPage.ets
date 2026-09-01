@@ -1,6 +1,7 @@
 import common from '@ohos.app.ability.common';
 import router from '@ohos.router';
 import data_preferences from '@ohos.data.preferences';
+import hilog from '@ohos.hilog';
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc';
 import { showToast } from '@wfc/uikit/src/main/ets/common/utils/Toast';
 import { inputMethod } from '@kit.IMEKit';
@@ -10,9 +11,13 @@ import { FontSize, Radius } from '@wfc/uikit/src/main/ets/common/design/Tokens'
 import appServer from '@wfc/uikit/src/main/ets/api/appServer'
 import QRLoginSession from '@wfc/uikit/src/main/ets/api/model/qrLoginSession'
 import AppServerError from '@wfc/uikit/src/main/ets/api/appServerError'
+import { isWideScreen } from '@wfc/uikit/src/main/ets/util/navUtil'
 import { LAST_LOGIN_MOBILE_KEY } from './LoginPage'
 
 import('@wfc/uikit/src/main/ets/pages/misc/WebViewPageWithRouter') //引入共享包中的命名路由页面
+
+// 扫码登录流程日志 TAG，抓取：hdc hilog | grep PadQR
+const TAG = 'PadQR';
 
 // 登录方式三态（与 Android/iOS/PC 端 loginType 一致）：
 // 0 扫码登录（平板默认）：展示二维码，手机端扫码确认后自动登录；2s 轮询 + 60s 自动刷新
@@ -51,8 +56,9 @@ struct PadLoginPage {
     @State qrStatusText: string = ''
     @State qrScannedPortrait: string = ''
     @State qrScannedName: string = ''
+    @State qrScanned: boolean = false
     private pcSessionToken: string = ''
-    private qrScanned: boolean = false
+    private qrCreating: boolean = false
     private qrPollTimer: number = -1
     private qrRefreshTimer: number = -1
 
@@ -66,6 +72,8 @@ struct PadLoginPage {
     private countdownTimer: number = -1
 
     aboutToAppear(): void {
+        hilog.info(0x0000, TAG, 'PadLoginPage aboutToAppear, isPadDevice=%{public}s, platform=%{public}d, isWideScreen=%{public}s, appServer=%{public}s',
+            String(Config.isPadDevice()), Config.getWFCPlatform(), String(isWideScreen()), String(Config.getAppServer()))
         this.phoneNumber = this.lastLoginMobile
         // 平板默认扫码登录（参考 Android/iOS/PC 端）
         this.loginType = LOGIN_TYPE_QR
@@ -80,6 +88,10 @@ struct PadLoginPage {
     // ==================== 扫码登录 ====================
 
     private refreshQRCode() {
+        if (this.qrCreating) {
+            hilog.warn(0x0000, TAG, 'refreshQRCode: session creation in flight, skip')
+            return
+        }
         this.stopQRPolling()
         this.pcSessionToken = ''
         this.qrValue = ''
@@ -88,41 +100,88 @@ struct PadLoginPage {
         this.qrScannedName = ''
         this.qrStatusText = '正在生成二维码...'
         this.qrLoading = true
-        appServer.createPCLoginSession('pad')
+        this.qrCreating = true
+        hilog.info(0x0000, TAG, 'refreshQRCode: createPCLoginSession start')
+        this.createSessionWithTimeout()
             .then((session: QRLoginSession) => {
+                this.qrCreating = false
                 if (this.loginType !== LOGIN_TYPE_QR) {
+                    hilog.warn(0x0000, TAG, 'refreshQRCode: loginType changed, ignore session')
+                    return
+                }
+                if (!session.token) {
+                    // 服务端成功但未返回 token：按失败处理，进入可重试状态
+                    hilog.error(0x0000, TAG, 'createPCLoginSession success but token empty')
+                    this.qrLoading = false
+                    this.qrStatusText = '二维码生成失败，点击重试'
                     return
                 }
                 this.pcSessionToken = session.token
                 this.qrValue = Config.QR_CODE_PREFIX_PC_SESSION + session.token
                 this.qrLoading = false
                 this.qrStatusText = '请使用手机版野火IM扫一扫登录'
+                hilog.info(0x0000, TAG, 'createPCLoginSession success, token=%{public}s, qrValue=%{public}s', session.token, this.qrValue)
                 this.startQRPolling()
             })
             .catch((err: AppServerError) => {
+                this.qrCreating = false
                 if (this.loginType !== LOGIN_TYPE_QR) {
                     return
                 }
                 this.qrLoading = false
                 this.qrStatusText = '二维码生成失败，点击重试'
+                hilog.error(0x0000, TAG, 'createPCLoginSession failed, errorCode=%{public}d, message=%{public}s', err.errorCode, err.message)
             })
+    }
+
+    // 创建扫码会话并带超时保护：请求挂起（网络异常/服务端无响应）时 10s 后转入可重试的失败态，
+    // 避免界面一直停在「正在生成二维码」
+    private createSessionWithTimeout(): Promise<QRLoginSession> {
+        return new Promise((resolve, reject) => {
+            let settled = false
+            let timer = setTimeout(() => {
+                if (!settled) {
+                    settled = true
+                    hilog.error(0x0000, TAG, 'createPCLoginSession timeout(10s), treat as failure')
+                    reject(new AppServerError(-1, '创建会话超时'))
+                }
+            }, 10 * 1000)
+            appServer.createPCLoginSession('pad')
+                .then((session: QRLoginSession) => {
+                    if (!settled) {
+                        settled = true
+                        clearTimeout(timer)
+                        resolve(session)
+                    }
+                })
+                .catch((err: AppServerError) => {
+                    if (!settled) {
+                        settled = true
+                        clearTimeout(timer)
+                        reject(err)
+                    }
+                })
+        })
     }
 
     private startQRPolling() {
         if (this.qrPollTimer >= 0) {
             return
         }
-        // 2s 轮询扫码状态；60s 后自动刷新二维码（与 PC 端一致）
+        hilog.info(0x0000, TAG, 'startQRPolling: 1s poll + 60s refresh, token=%{public}s', this.pcSessionToken)
+        // 1s 轮询扫码状态（扫码后尽快更新为头像/已扫码态）；60s 后自动刷新二维码（与 PC 端一致）
         this.qrPollTimer = setInterval(() => {
             this.pollQRStatus()
-        }, 2000)
+        }, 1000)
         this.qrRefreshTimer = setTimeout(() => {
+            hilog.info(0x0000, TAG, '60s timer fired, auto refresh QR')
             this.refreshQRCode()
         }, 60 * 1000)
     }
 
     private stopQRPolling() {
         if (this.qrPollTimer >= 0) {
+            hilog.info(0x0000, TAG, 'stopQRPolling: clear poll timer')
             clearInterval(this.qrPollTimer)
             this.qrPollTimer = -1
         }
@@ -135,25 +194,36 @@ struct PadLoginPage {
     private pollQRStatus() {
         let token = this.pcSessionToken
         if (!token || this.loginType !== LOGIN_TYPE_QR) {
+            hilog.warn(0x0000, TAG, 'pollQRStatus: skip, token empty or loginType=%{public}d', this.loginType)
             return
         }
+        hilog.info(0x0000, TAG, 'poll: request session_login, token=%{public}s', token)
         appServer.loginWithQRSession(token)
             .then((res: Record<string, Object>) => {
                 if (token !== this.pcSessionToken || this.loginType !== LOGIN_TYPE_QR) {
                     // 二维码已刷新/已切换登录方式，丢弃过期结果
+                    hilog.warn(0x0000, TAG, 'poll: stale response, ignore (token changed or loginType=%{public}d)', this.loginType)
                     return
                 }
                 let code = res['code'] as number
+                hilog.info(0x0000, TAG, 'poll: code=%{public}d, result=%{public}s', code, JSON.stringify(res['result']))
                 if (code === 0) {
                     // 登录成功，拿到 userId + imToken
                     let result = res['result'] as Record<string, Object>
+                    if (!result) {
+                        hilog.warn(0x0000, TAG, 'poll: code 0 but result missing, ignore')
+                        return
+                    }
                     let userId = result['userId'] as string
                     let imToken = result['token'] as string
+                    hilog.info(0x0000, TAG, 'poll: login success, userId=%{public}s, imTokenLen=%{public}d', userId, imToken ? imToken.length : 0)
                     if (!userId || !imToken) {
+                        hilog.warn(0x0000, TAG, 'poll: code 0 but userId/token empty, ignore')
                         return
                     }
                     // 登录等于同意用户协议：未勾选时提示并刷新回新的二维码，不登录
                     if (!this.isAgreeUserAgreementAndPrivacyPolicy) {
+                        hilog.warn(0x0000, TAG, 'poll: agreement not checked, refresh QR')
                         showToast('请同意用户协议及隐私政策')
                         this.refreshQRCode()
                         return
@@ -168,14 +238,17 @@ struct PadLoginPage {
                         this.qrScannedPortrait = (result ? result['portrait'] as string : '') || ''
                         this.qrScannedName = (result ? result['userName'] as string : '') || ''
                         this.qrStatusText = this.qrScannedName ? `已扫码：${this.qrScannedName}，请在手机上确认` : '已扫码，请在手机上确认登录'
+                        hilog.info(0x0000, TAG, 'poll: scanned, userName=%{public}s, portrait=%{public}s', this.qrScannedName, this.qrScannedPortrait)
                     }
                 } else if (code === 18) {
                     // 手机端取消/拒绝登录，重新生成二维码
+                    hilog.info(0x0000, TAG, 'poll: canceled by phone, refresh QR')
                     this.refreshQRCode()
                 }
             })
             .catch((err: AppServerError) => {
                 // 网络波动等暂时性错误：继续轮询即可
+                hilog.error(0x0000, TAG, 'poll: session_login error, errorCode=%{public}d, message=%{public}s', err.errorCode, err.message)
             })
     }
 
@@ -240,17 +313,27 @@ struct PadLoginPage {
 
     // 登录成功：保存凭证、连接 IM、进入主界面（扫码 / 密码 / 验证码三种方式共用）
     private async loginSuccess(userId: string, token: string) {
-        let context = getContext(this) as common.UIAbilityContext;
-        let preference = await data_preferences.getPreferences(context.getApplicationContext(), 'wfcstore')
-        preference.putSync('userId', userId);
-        preference.putSync('token', token);
-        await preference.flush()
+        hilog.info(0x0000, TAG, 'loginSuccess: save credentials & connect, userId=%{public}s', userId)
+        try {
+            let context = getContext(this) as common.UIAbilityContext;
+            let preference = await data_preferences.getPreferences(context.getApplicationContext(), 'wfcstore')
+            preference.putSync('userId', userId);
+            preference.putSync('token', token);
+            await preference.flush()
 
-        wfc.connect(userId, token);
-        router.replaceUrl({
-            url: "pages/MainPage",
-            params: {}
-        }, router.RouterMode.Standard)
+            wfc.connect(userId, token);
+            router.replaceUrl({
+                url: "pages/MainPage",
+                params: {}
+            }, router.RouterMode.Standard)
+        } catch (e) {
+            hilog.error(0x0000, TAG, 'loginSuccess failed: %{public}s', JSON.stringify(e))
+            showToast('登录失败，请重试')
+            // 恢复可重试状态：扫码模式下重新生成二维码，表单模式下停留在表单
+            if (this.loginType === LOGIN_TYPE_QR) {
+                this.refreshQRCode()
+            }
+        }
     }
 
     // ==================== 验证码 ====================
@@ -313,6 +396,7 @@ struct PadLoginPage {
     // ==================== 登录方式切换 ====================
 
     private switchQRForm() {
+        hilog.info(0x0000, TAG, 'switchQRForm: %{public}d -> %{public}s', this.loginType, this.loginType === LOGIN_TYPE_QR ? 'form' : 'qr')
         if (this.loginType === LOGIN_TYPE_QR) {
             // 扫码 ⇄ 验证码登录（参考 Android/iOS：扫码切换回验证码）
             this.stopQRPolling()
@@ -397,14 +481,19 @@ struct PadLoginPage {
     QRLoginContent() {
         Column() {
             Stack() {
-                if (this.qrScanned && this.qrScannedPortrait) {
+                if (this.qrScanned) {
                     // 扫码后、手机端确认前：二维码区域换成扫码用户的头像（参考 Android/iOS/PC 端）
-                    Image(this.qrScannedPortrait)
+                    Image(this.qrScannedPortrait || Config.DEFAULT_PORTRAIT_URL)
                         .width(240)
                         .height(240)
                         .objectFit(ImageFit.Cover)
                         .borderRadius(12)
                         .backgroundColor(Color.White)
+                        .onError(() => {
+                            hilog.error(0x0000, TAG, 'avatar load failed, portrait=%{public}s, fallback to default', this.qrScannedPortrait)
+                            // 头像 URL 加载失败时回退默认头像，避免二维码区域空白
+                            this.qrScannedPortrait = Config.DEFAULT_PORTRAIT_URL
+                        })
                 } else if (this.qrValue) {
                     QRCode(this.qrValue)
                         .width(240)

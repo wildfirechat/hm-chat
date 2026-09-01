@@ -10,7 +10,7 @@ import ConversationInfoItemView from '../view/ConversationInfoItemView'
 import { showToast } from '../common/utils/Toast'
 import data_preferences from '@ohos.data.preferences'
 import { uikitNavigationDestinations } from './uikitNavigationConfig'
-import { openConversation, isWideScreen, conversationIdentity, STORAGE_KEY_ACTIVE_CONVERSATION } from '../util/navUtil'
+import { openConversation, isWideScreen, conversationIdentity, STORAGE_KEY_ACTIVE_CONVERSATION, pushUniqueDetail } from '../util/navUtil'
 import PCOnlineInfo from '@wfc/client/src/main/ets/wfc/model/pcOnlineInfo'
 import ConversationInfoDataSource from './datasource/ConversationInfoDataSource'
 import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
@@ -110,7 +110,10 @@ export default struct ConversationListTab {
     }
 
     loadPCOnlineInfos() {
-        this.pcOnlineInfos = wfc.getPCOnlineInfos();
+        // 多端在线列表过滤掉本机（按 clientId）：平板等新平台会把自身作为 Pad 在线写入列表，
+        // 顶部登录条不应显示自己
+        let selfClientId = wfc.getClientId()
+        this.pcOnlineInfos = wfc.getPCOnlineInfos().filter((info: PCOnlineInfo) => info.clientId !== selfClientId);
     }
 
     // 多端登录条文案：单端「XX平台已登录」，多端「X个设备已经登录」
@@ -307,7 +310,8 @@ export default struct ConversationListTab {
                     }
                     .width('100%')
                     .onClick(() => {
-                        this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.PCSessionPage, {
+                        // 保证多端详情页在栈中只有一份：重复点击收敛到已打开页面而非再次压入
+                        pushUniqueDetail(this.mainNavPathStack, uikitNavigationDestinations.PCSessionPage, {
                             'pcOnlineInfos': this.pcOnlineInfos
                         } as Record<string, object>)
                     })

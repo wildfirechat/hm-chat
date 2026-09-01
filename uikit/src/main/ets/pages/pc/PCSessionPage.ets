@@ -38,17 +38,24 @@ export default struct PCSessionPage {
                 }
             })
             if (result.length > 0) {
-                this.pcOnlineInfos = result
+                // 过滤掉本机（按 clientId），平板等新平台不会在已登录设备列表里看到自己
+                this.pcOnlineInfos = this.filterOutSelf(result)
             }
         }
         if (this.pcOnlineInfos.length === 0) {
             // 兼容旧参数（单设备）
             let info = params ? params['pcOnlineInfo'] : undefined
-            if (info instanceof PCOnlineInfo) {
+            if (info instanceof PCOnlineInfo && info.clientId !== wfc.getClientId()) {
                 this.pcOnlineInfos = [info]
             }
         }
         this.syncLockStates()
+    }
+
+    // 过滤掉本机（按 clientId）
+    private filterOutSelf(infos: PCOnlineInfo[]): PCOnlineInfo[] {
+        let selfClientId = wfc.getClientId()
+        return infos.filter((info: PCOnlineInfo) => info.clientId !== selfClientId)
     }
 
     onSettingUpdate = () => {
@@ -56,7 +63,8 @@ export default struct PCSessionPage {
     }
 
     checkPCOnlineStatus() {
-        let infos = wfc.getPCOnlineInfos()
+        // 过滤掉本机（按 clientId）：刷新后的列表也不应包含自己
+        let infos = this.filterOutSelf(wfc.getPCOnlineInfos())
         this.pcOnlineInfos = infos
         if (infos.length === 0) {
             this.mainNavPathStack.pop()

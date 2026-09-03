@@ -1390,6 +1390,11 @@ class WfcImpl {
         return JSON.parse(result) as UserSettingEntry[];
     }
 
+    getUserSettingsLike(scope: number, prefix: string): UserSettingEntry[] {
+        let result: string = protoProxy.getUserSettingsLike(scope, prefix);
+        return JSON.parse(result) as UserSettingEntry[];
+    }
+
     async setUserSetting(scope: number, key: string, value: string, successCB: SuccessCallback, failCB: FailCallback) {
         protoProxy.setUserSetting(scope, key, value, () => {
             if (successCB) {

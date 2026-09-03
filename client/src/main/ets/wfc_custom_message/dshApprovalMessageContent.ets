@@ -5,7 +5,7 @@ import MessagePayload from '../wfc/messages/messagePayload'
 /**
  * DSH 审批卡片消息，内容类型 202（机器人 -> 用户）
  */
-export class DshApprovalData {
+export class AgentApprovalData {
     aid: string = ''
     toolName: string = ''
     reason: string = ''
@@ -13,15 +13,15 @@ export class DshApprovalData {
     state: string = 'pending'
 }
 
-export function summarizeDshApproval(content: DshApprovalData): string {
+export function summarizeDshApproval(content: AgentApprovalData): string {
     return `🔐 工具审批：${content.toolName || '工具'}${content.reason ? `（${content.reason}）` : ''}`
 }
 
-export default class DshApprovalMessageContent extends MessageContent {
-    content: DshApprovalData = new DshApprovalData()
+export default class AgentApprovalMessageContent extends MessageContent {
+    content: AgentApprovalData = new AgentApprovalData()
 
     constructor() {
-        super(CustomMessageContentType.MESSAGE_CONTENT_TYPE_DSH_APPROVAL)
+        super(CustomMessageContentType.MESSAGE_CONTENT_TYPE_AGENT_APPROVAL)
     }
 
     digest(): string {
@@ -39,9 +39,9 @@ export default class DshApprovalMessageContent extends MessageContent {
         super.decode(payload)
         if (payload.content) {
             try {
-                this.content = JSON.parse(payload.content) as DshApprovalData
+                this.content = JSON.parse(payload.content) as AgentApprovalData
             } catch (e) {
-                console.error('decode DshApprovalMessageContent error', e)
+                console.error('decode AgentApprovalMessageContent error', e)
             }
         }
     }

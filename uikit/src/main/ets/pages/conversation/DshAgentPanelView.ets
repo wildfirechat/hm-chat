@@ -12,7 +12,7 @@
  */
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import EventType from '@wfc/client/src/main/ets/wfc/client/wfcEvent'
-import DshCommandMessageContent from '@wfc/client/src/main/ets/wfc/messages/dshCommandMessageContent'
+import AgentCommandMessageContent from '@wfc/client/src/main/ets/wfc/messages/dshCommandMessageContent'
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType'
 import { DshPanelData, getDshPanelData } from '../../util/dshState'
@@ -144,7 +144,7 @@ export default struct DshAgentPanelView {
     /** 发送 207 面板指令（透明消息，不显示在消息流）。 */
     sendCommand(op: string, cmd: string = '') {
         this.seq = (this.seq + 1) % 100000
-        wfc.sendConversationMessage(this.conversation, new DshCommandMessageContent(op, cmd, this.seq))
+        wfc.sendConversationMessage(this.conversation, new AgentCommandMessageContent(op, cmd, this.seq))
     }
 
     // ─── 操作：207 set（cmd=命令文本，插件执行后写 lastChange + 刷新 type=3） ───

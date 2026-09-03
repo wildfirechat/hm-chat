@@ -32,7 +32,7 @@ export default class MessageContentType {
 
     // DSH_Command（207）：用户→机器人 AI 面板静默指令（透明消息，不落库、不显示；
     // content 为 JSON：{"op":"query"} 组合查询 / {"op":"set","cmd":"/model xxx","seq":123} 更新）
-    static DSH_COMMAND = 207;
+    static AGENT_COMMAND = 207;
 
     // 接龙消息
     static Collection = 17;

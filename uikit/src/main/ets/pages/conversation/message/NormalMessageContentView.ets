@@ -21,10 +21,10 @@ import pasteboard from '@ohos.pasteboard'
 import CustomMessageContentType from '@wfc/client/src/main/ets/wfc_custom_message/customMessageContentType'
 import { PttMessageContentType } from '@wfc/ptt'
 import TestCustomMessageContentView from '../custom_message/testCustomMessageContentView'
-import DshQuestionContentView from '../custom_message/DshQuestionContentView'
-import DshApprovalContentView from '../custom_message/DshApprovalContentView'
-import DshGoalContentView from '../custom_message/DshGoalContentView'
-import DshTaskProgressContentView from '../custom_message/DshTaskProgressContentView'
+import AgentQuestionContentView from '../custom_message/DshQuestionContentView'
+import AgentApprovalContentView from '../custom_message/DshApprovalContentView'
+import AgentGoalContentView from '../custom_message/DshGoalContentView'
+import AgentTaskProgressContentView from '../custom_message/DshTaskProgressContentView'
 import { uikitNavigationDestinations } from '../../uikitNavigationConfig'
 import ConferenceInviteMessageContentView from './ConferenceInviteMessageContentView'
 import CardMessageContentView from './CardMessageContentView'
@@ -140,14 +140,14 @@ export default struct NormaMessageContentView {
             // 自定义消息配置 start
             else if (this.message!.messageContent.type === CustomMessageContentType.MESSAGE_CONTENT_TYPE_CUSTOM_MESSAGE_TEST) {
                 TestCustomMessageContentView({ message: $message })
-            } else if (this.message!.messageContent.type === CustomMessageContentType.MESSAGE_CONTENT_TYPE_DSH_QUESTION) {
-                DshQuestionContentView({ message: $message })
-            } else if (this.message!.messageContent.type === CustomMessageContentType.MESSAGE_CONTENT_TYPE_DSH_APPROVAL) {
-                DshApprovalContentView({ message: $message })
-            } else if (this.message!.messageContent.type === CustomMessageContentType.MESSAGE_CONTENT_TYPE_DSH_GOAL) {
-                DshGoalContentView({ message: $message })
-            } else if (this.message!.messageContent.type === CustomMessageContentType.MESSAGE_CONTENT_TYPE_DSH_TASK_PROGRESS) {
-                DshTaskProgressContentView({ message: $message })
+            } else if (this.message!.messageContent.type === CustomMessageContentType.MESSAGE_CONTENT_TYPE_AGENT_QUESTION) {
+                AgentQuestionContentView({ message: $message })
+            } else if (this.message!.messageContent.type === CustomMessageContentType.MESSAGE_CONTENT_TYPE_AGENT_APPROVAL) {
+                AgentApprovalContentView({ message: $message })
+            } else if (this.message!.messageContent.type === CustomMessageContentType.MESSAGE_CONTENT_TYPE_AGENT_GOAL) {
+                AgentGoalContentView({ message: $message })
+            } else if (this.message!.messageContent.type === CustomMessageContentType.MESSAGE_CONTENT_TYPE_AGENT_TASK_PROGRESS) {
+                AgentTaskProgressContentView({ message: $message })
             }
             // 自定义消息配置 end
 

@@ -4,12 +4,12 @@ import MessageContent from '../wfc/messages/messageContent';
 import PersistFlag from '../wfc/messages/persistFlag';
 import UnknownMessageContent from '../wfc/messages/unknownMessageContent';
 import CustomMessageContentType from "./customMessageContentType";
-import DshAnswerMessageContent from "./dshAnswerMessageContent";
-import DshApprovalMessageContent from "./dshApprovalMessageContent";
-import DshApprovalResultMessageContent from "./dshApprovalResultMessageContent";
-import DshGoalMessageContent from "./dshGoalMessageContent";
-import DshQuestionMessageContent from "./dshQuestionMessageContent";
-import DshTaskProgressMessageContent from "./dshTaskProgressMessageContent";
+import AgentAnswerMessageContent from "./dshAnswerMessageContent";
+import AgentApprovalMessageContent from "./dshApprovalMessageContent";
+import AgentApprovalResultMessageContent from "./dshApprovalResultMessageContent";
+import AgentGoalMessageContent from "./dshGoalMessageContent";
+import AgentQuestionMessageContent from "./dshQuestionMessageContent";
+import AgentTaskProgressMessageContent from "./dshTaskProgressMessageContent";
 import MomentCommentMessageContent from "./momentCommentMessageContent";
 import MomentFeedMessageContent from "./momentFeedMessageContent";
 import TestCustomMessageContent from "./testCustomMessageContent";
@@ -41,32 +41,32 @@ export default class CustomMessageConfig {
         {
             name: 'dshQuestionMessage',
             flag: PersistFlag.Persist,
-            type: CustomMessageContentType.MESSAGE_CONTENT_TYPE_DSH_QUESTION,
+            type: CustomMessageContentType.MESSAGE_CONTENT_TYPE_AGENT_QUESTION,
         },
         {
             name: 'dshAnswerMessage',
             flag: PersistFlag.Persist,
-            type: CustomMessageContentType.MESSAGE_CONTENT_TYPE_DSH_ANSWER,
+            type: CustomMessageContentType.MESSAGE_CONTENT_TYPE_AGENT_ANSWER,
         },
         {
             name: 'dshApprovalMessage',
             flag: PersistFlag.Persist,
-            type: CustomMessageContentType.MESSAGE_CONTENT_TYPE_DSH_APPROVAL,
+            type: CustomMessageContentType.MESSAGE_CONTENT_TYPE_AGENT_APPROVAL,
         },
         {
             name: 'dshApprovalResultMessage',
             flag: PersistFlag.Persist,
-            type: CustomMessageContentType.MESSAGE_CONTENT_TYPE_DSH_APPROVAL_RESULT,
+            type: CustomMessageContentType.MESSAGE_CONTENT_TYPE_AGENT_APPROVAL_RESULT,
         },
         {
             name: 'dshGoalMessage',
             flag: PersistFlag.Persist,
-            type: CustomMessageContentType.MESSAGE_CONTENT_TYPE_DSH_GOAL,
+            type: CustomMessageContentType.MESSAGE_CONTENT_TYPE_AGENT_GOAL,
         },
         {
             name: 'dshTaskProgressMessage',
             flag: PersistFlag.Persist,
-            type: CustomMessageContentType.MESSAGE_CONTENT_TYPE_DSH_TASK_PROGRESS,
+            type: CustomMessageContentType.MESSAGE_CONTENT_TYPE_AGENT_TASK_PROGRESS,
         },
         // 添加更多自定义消息
     ];
@@ -86,23 +86,23 @@ export default class CustomMessageConfig {
             case CustomMessageContentType.MESSAGE_CONTENT_TYPE_CUSTOM_MESSAGE_TEST_NOTIFICATION:
                 content = new TestCustomNotificationMessageContent()
                 break;
-            case CustomMessageContentType.MESSAGE_CONTENT_TYPE_DSH_QUESTION:
-                content = new DshQuestionMessageContent();
+            case CustomMessageContentType.MESSAGE_CONTENT_TYPE_AGENT_QUESTION:
+                content = new AgentQuestionMessageContent();
                 break;
-            case CustomMessageContentType.MESSAGE_CONTENT_TYPE_DSH_ANSWER:
-                content = new DshAnswerMessageContent();
+            case CustomMessageContentType.MESSAGE_CONTENT_TYPE_AGENT_ANSWER:
+                content = new AgentAnswerMessageContent();
                 break;
-            case CustomMessageContentType.MESSAGE_CONTENT_TYPE_DSH_APPROVAL:
-                content = new DshApprovalMessageContent();
+            case CustomMessageContentType.MESSAGE_CONTENT_TYPE_AGENT_APPROVAL:
+                content = new AgentApprovalMessageContent();
                 break;
-            case CustomMessageContentType.MESSAGE_CONTENT_TYPE_DSH_APPROVAL_RESULT:
-                content = new DshApprovalResultMessageContent();
+            case CustomMessageContentType.MESSAGE_CONTENT_TYPE_AGENT_APPROVAL_RESULT:
+                content = new AgentApprovalResultMessageContent();
                 break;
-            case CustomMessageContentType.MESSAGE_CONTENT_TYPE_DSH_GOAL:
-                content = new DshGoalMessageContent();
+            case CustomMessageContentType.MESSAGE_CONTENT_TYPE_AGENT_GOAL:
+                content = new AgentGoalMessageContent();
                 break;
-            case CustomMessageContentType.MESSAGE_CONTENT_TYPE_DSH_TASK_PROGRESS:
-                content = new DshTaskProgressMessageContent();
+            case CustomMessageContentType.MESSAGE_CONTENT_TYPE_AGENT_TASK_PROGRESS:
+                content = new AgentTaskProgressMessageContent();
                 break;
              // 参考上面的逻辑，根据消息类型，创建其他自定义消息
             default:

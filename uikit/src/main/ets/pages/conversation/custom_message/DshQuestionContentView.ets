@@ -1,7 +1,7 @@
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
-import DshQuestionMessageContent, { DshQuestionData, DshQuestionItem, DshQuestionOption } from '@wfc/client/src/main/ets/wfc_custom_message/dshQuestionMessageContent'
-import DshAnswerMessageContent, { DshAnswerData, DshAnswerItem } from '@wfc/client/src/main/ets/wfc_custom_message/dshAnswerMessageContent'
+import AgentQuestionMessageContent, { AgentQuestionData, AgentQuestionItem, AgentQuestionOption } from '@wfc/client/src/main/ets/wfc_custom_message/dshQuestionMessageContent'
+import AgentAnswerMessageContent, { AgentAnswerData, AgentAnswerItem } from '@wfc/client/src/main/ets/wfc_custom_message/dshAnswerMessageContent'
 import { FontSize, Radius } from '../../../common/design/Tokens'
 import { uikitNavigationDestinations } from '../../uikitNavigationConfig'
 
@@ -11,18 +11,18 @@ import { uikitNavigationDestinations } from '../../uikitNavigationConfig'
  * plan-review 时计划全文不内联，点「查看计划」打开全屏计划详情页。
  */
 @Component
-export default struct DshQuestionContentView {
+export default struct AgentQuestionContentView {
     @Link message: Message
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack
     @State locallyAnswered: boolean = false
     // 多选勾选状态：问题 id -> 已选中的选项 label 列表（重新赋值触发刷新）
     @State selectedMap: Map<string, string[]> = new Map()
 
-    private content(): DshQuestionData {
-        return (this.message.messageContent as DshQuestionMessageContent).content
+    private content(): AgentQuestionData {
+        return (this.message.messageContent as AgentQuestionMessageContent).content
     }
 
-    private questions(): DshQuestionItem[] {
+    private questions(): AgentQuestionItem[] {
         let questions = this.content().questions
         return questions ? questions : []
     }
@@ -78,11 +78,11 @@ export default struct DshQuestionContentView {
         return count
     }
 
-    private isPlanReview(q: DshQuestionItem): boolean {
+    private isPlanReview(q: AgentQuestionItem): boolean {
         return !!q.intent && q.intent.kind === 'plan-review'
     }
 
-    private isApproveOption(q: DshQuestionItem, label: string): boolean {
+    private isApproveOption(q: AgentQuestionItem, label: string): boolean {
         // plan-review：intent.approve 命中的选项为主按钮（批准），其余为次按钮（拒绝/修改）
         return !!q.intent && !!q.intent.approve && label === q.intent.approve
     }
@@ -92,7 +92,7 @@ export default struct DshQuestionContentView {
         return !!arr && arr.indexOf(label) >= 0
     }
 
-    private onClickOption(q: DshQuestionItem, label: string) {
+    private onClickOption(q: AgentQuestionItem, label: string) {
         if (this.isLocked()) {
             return
         }
@@ -113,18 +113,18 @@ export default struct DshQuestionContentView {
     }
 
     private sendSingleAnswer(questionId: string, label: string) {
-        let item = new DshAnswerItem()
+        let item = new AgentAnswerItem()
         item.id = questionId
         item.selected = [label]
         this.sendAnswer([item])
     }
 
     private sendSelected() {
-        let answers: DshAnswerItem[] = []
+        let answers: AgentAnswerItem[] = []
         this.questions().forEach(q => {
             let selected = this.selectedMap.get(q.id) || []
             if (selected.length > 0) {
-                let item = new DshAnswerItem()
+                let item = new AgentAnswerItem()
                 item.id = q.id
                 item.selected = selected
                 answers.push(item)
@@ -135,12 +135,12 @@ export default struct DshQuestionContentView {
         }
     }
 
-    private sendAnswer(answers: DshAnswerItem[]) {
+    private sendAnswer(answers: AgentAnswerItem[]) {
         if (this.isLocked()) {
             return
         }
-        let content = new DshAnswerMessageContent()
-        let data = new DshAnswerData()
+        let content = new AgentAnswerMessageContent()
+        let data = new AgentAnswerData()
         data.qid = this.content().qid
         data.answers = answers
         content.content = data
@@ -153,7 +153,7 @@ export default struct DshQuestionContentView {
         focusControl.requestFocus('textInput')
     }
 
-    private openPlanDetail(q: DshQuestionItem) {
+    private openPlanDetail(q: AgentQuestionItem) {
         // 拒绝标签取 intent.approve 之外的第一个选项，兜底「拒绝」
         let rejectLabel = '拒绝'
         if (q.options) {
@@ -187,7 +187,7 @@ export default struct DshQuestionContentView {
                     .width('100%')
             }
 
-            ForEach(this.questions(), (q: DshQuestionItem, qi: number) => {
+            ForEach(this.questions(), (q: AgentQuestionItem, qi: number) => {
                 Column() {
                     Text(`${qi + 1}. ${q.question}`)
                         .fontSize(FontSize.sm)
@@ -214,7 +214,7 @@ export default struct DshQuestionContentView {
                     }
                     if (q.options && q.options.length > 0) {
                         Column({ space: 6 }) {
-                            ForEach(q.options, (opt: DshQuestionOption, oi: number) => {
+                            ForEach(q.options, (opt: AgentQuestionOption, oi: number) => {
                                 if (this.isPlanReview(q)) {
                                     // plan-review：按钮样式，approve 命中的为主色主按钮
                                     Text(opt.label)
@@ -253,7 +253,7 @@ export default struct DshQuestionContentView {
                                         this.onClickOption(q, opt.label)
                                     })
                                 }
-                            }, (opt: DshQuestionOption, oi: number) => `${q.id}-${oi}`)
+                            }, (opt: AgentQuestionOption, oi: number) => `${q.id}-${oi}`)
                         }
                         .width('100%')
                         .margin({ top: 6 })
@@ -262,7 +262,7 @@ export default struct DshQuestionContentView {
                 .width('100%')
                 .alignItems(HorizontalAlign.Start)
                 .margin({ bottom: 8 })
-            }, (q: DshQuestionItem, qi: number) => `${q.id}-${qi}`)
+            }, (q: AgentQuestionItem, qi: number) => `${q.id}-${qi}`)
 
             if (!this.isLocked()) {
                 Row({ space: 8 }) {

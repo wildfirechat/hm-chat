@@ -1,7 +1,7 @@
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
-import DshQuestionMessageContent from '@wfc/client/src/main/ets/wfc_custom_message/dshQuestionMessageContent'
-import DshAnswerMessageContent, { DshAnswerData, DshAnswerItem } from '@wfc/client/src/main/ets/wfc_custom_message/dshAnswerMessageContent'
+import AgentQuestionMessageContent from '@wfc/client/src/main/ets/wfc_custom_message/dshQuestionMessageContent'
+import AgentAnswerMessageContent, { AgentAnswerData, AgentAnswerItem } from '@wfc/client/src/main/ets/wfc_custom_message/dshAnswerMessageContent'
 import { FontSize, Radius } from '../../../common/design/Tokens'
 
 /**
@@ -40,7 +40,7 @@ export default struct DshPlanDetailPage {
         if (!this.message) {
             return true
         }
-        let state = (this.message.messageContent as DshQuestionMessageContent).content.state
+        let state = (this.message.messageContent as AgentQuestionMessageContent).content.state
         return state === 'answered' || state === 'expired'
     }
 
@@ -48,10 +48,10 @@ export default struct DshPlanDetailPage {
         if (this.isLocked() || !this.message) {
             return
         }
-        let content = new DshAnswerMessageContent()
-        let data = new DshAnswerData()
+        let content = new AgentAnswerMessageContent()
+        let data = new AgentAnswerData()
         data.qid = this.payloadQid
-        let item = new DshAnswerItem()
+        let item = new AgentAnswerItem()
         item.id = this.questionId
         item.selected = [label]
         data.answers = [item]

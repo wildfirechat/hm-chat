@@ -10,7 +10,7 @@ import MessagePayload from "./messagePayload";
  *   op=query 组合查询（插件聚合面板数据写 scope=31 type=3，不回复消息）；
  *   op=set   更新（cmd 为命令文本，如 "/model deepseek-official/xxx"，插件执行后写 type=1 lastChange 并刷新 type=3）。
  */
-export default class DshCommandMessageContent extends MessageContent {
+export default class AgentCommandMessageContent extends MessageContent {
     // query / set
     op: string = ''
     // op=set 时的命令文本（如 "/model xxx"）
@@ -19,7 +19,7 @@ export default class DshCommandMessageContent extends MessageContent {
     seq: number = 0
 
     constructor(op: string = '', cmd: string = '', seq: number = 0) {
-        super(MessageContentType.DSH_COMMAND);
+        super(MessageContentType.AGENT_COMMAND);
         this.op = op;
         this.cmd = cmd;
         this.seq = seq;

@@ -3,7 +3,6 @@ import WfcWebView from '../workspace/WfcWebView'
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
 import DSBridge from '../workspace/dsBridge'
 import PickMultiContactModal from '../picker/PickMultiContactModal'
-import Config from '@wfc/client/src/main/ets/config'
 
 @Component
 export default struct WebViewPage {
@@ -23,10 +22,6 @@ export default struct WebViewPage {
             this.title = title
         }
         this.dsbridge = new DSBridge(this.url, this.webviewController, this.mainNavPathStack)
-        try {
-            this.webviewController.setCustomUserAgent(Config.CUSTOM_USER_AGENT)
-        } catch (error) {
-        }
     }
 
     onPageShow(): void {

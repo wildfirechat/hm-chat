@@ -51,7 +51,22 @@ export default struct WfcWebView {
                 .darkMode(this.darkMode)
                 .forceDarkAccess(true)
                 .javaScriptAccess(true)
-                .userAgent(Config.CUSTOM_USER_AGENT)
+                // 必须在 onControllerAttached 里设置 UA，此时 controller 才与 Web 组件绑定，
+                // 且早于首次加载；在 aboutToAppear 里调用会抛 17100001。
+                .onControllerAttached(() => {
+                    let controller = this.controller
+                    if (!controller) {
+                        return
+                    }
+                    try {
+                        controller.setCustomUserAgent(Config.buildWebUserAgent(controller.getUserAgent()))
+                    } catch (e) {
+                        console.log('setCustomUserAgent error', e)
+                    }
+                })
+                // UA 不含 "Mobile" 时 ArkWeb 默认不解析 <meta name="viewport">，页面会按桌面宽度布局，
+                // 这里显式打开，保证平板等设备上响应式页面也按 viewport 布局。
+                .metaViewport(true)
                 .textZoomRatio(this.fontScale * 100)
                 .javaScriptProxy({
                     object: this.dsBridge,

@@ -156,7 +156,33 @@ export default class Config {
     //  隐私协议地址
     static PRIVACY_AGREEMENT_URL = "https://example.com/user_privacy.html";
 
-    static CUSTOM_USER_AGENT = "Mozilla/5.0 (Tablet; OpenHarmony 6.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36  ArkWeb/6.0.0.130 WF-DSBridge"
+    // webview 的 UA 扩展标识，追加在系统默认 UA 之后，供 H5 页面识别本客户端。置空则不追加。
+    // 注意：不要整条替换系统默认 UA，默认 UA 里的设备类型/系统版本/内核版本是随设备变化的。
+    static WEB_USER_AGENT_SUFFIX = 'WF-DSBridge';
+
+    // webview 是否强制以移动端身份访问网页。
+    // ArkWeb 默认 UA 只有手机(Phone)才带 "Mobile" 字段，平板(Tablet)/2in1(PC) 不带；而网站普遍靠
+    // "Mobile" 判断是否返回移动版页面，ArkWeb 也靠它决定是否解析 <meta name="viewport">，
+    // 两者叠加会让平板上的 H5 页面按桌面版布局。置为 true 时在这些设备上补上 "Mobile"，
+    // 让工作台等页面统一使用移动版。如果希望平板加载桌面版页面，置为 false 即可。
+    static FORCE_MOBILE_WEB_UA = false;
+
+    /**
+     * 基于系统默认 UA 构造 webview 实际使用的 UA。
+     *
+     * @param defaultUserAgent 系统默认 UA，来自 WebviewController.getUserAgent()
+     * @returns 追加了移动端标识和应用标识之后的 UA
+     */
+    static buildWebUserAgent(defaultUserAgent: string): string {
+        let ua = defaultUserAgent;
+        if (Config.FORCE_MOBILE_WEB_UA && !ua.includes('Mobile')) {
+            ua += ' Mobile';
+        }
+        if (Config.WEB_USER_AGENT_SUFFIX && !ua.includes(Config.WEB_USER_AGENT_SUFFIX)) {
+            ua += ' ' + Config.WEB_USER_AGENT_SUFFIX;
+        }
+        return ua;
+    }
 
     static getWFCPlatform() {
         // 平板设备自动按 Pad 平台（11）上报，手机保持手机平台（10），实现手机+平板多端同时在线

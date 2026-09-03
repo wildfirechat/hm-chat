@@ -19,13 +19,6 @@ export default struct WorkSpaceTab {
         }
     }
 
-    aboutToAppear(): void {
-        try {
-            this.webviewController.setCustomUserAgent(Config.CUSTOM_USER_AGENT)
-        } catch (error) {
-        }
-    }
-
     build() {
         Column() {
             WfcWebView({

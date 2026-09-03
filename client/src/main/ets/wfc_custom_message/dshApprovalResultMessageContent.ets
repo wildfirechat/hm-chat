@@ -5,17 +5,17 @@ import MessagePayload from '../wfc/messages/messagePayload'
 /**
  * DSH 审批结果消息，内容类型 203（用户 -> 机器人）
  */
-export class DshApprovalResultData {
+export class AgentApprovalResultData {
     aid: string = ''
     // approve / reject
     action: string = 'reject'
 }
 
-export default class DshApprovalResultMessageContent extends MessageContent {
-    content: DshApprovalResultData = new DshApprovalResultData()
+export default class AgentApprovalResultMessageContent extends MessageContent {
+    content: AgentApprovalResultData = new AgentApprovalResultData()
 
     constructor() {
-        super(CustomMessageContentType.MESSAGE_CONTENT_TYPE_DSH_APPROVAL_RESULT)
+        super(CustomMessageContentType.MESSAGE_CONTENT_TYPE_AGENT_APPROVAL_RESULT)
     }
 
     digest(): string {
@@ -33,9 +33,9 @@ export default class DshApprovalResultMessageContent extends MessageContent {
         super.decode(payload)
         if (payload.content) {
             try {
-                this.content = JSON.parse(payload.content) as DshApprovalResultData
+                this.content = JSON.parse(payload.content) as AgentApprovalResultData
             } catch (e) {
-                console.error('decode DshApprovalResultMessageContent error', e)
+                console.error('decode AgentApprovalResultMessageContent error', e)
             }
         }
     }

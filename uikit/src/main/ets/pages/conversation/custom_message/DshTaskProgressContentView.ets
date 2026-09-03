@@ -1,7 +1,7 @@
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
-import DshTaskProgressMessageContent, {
-    DshTaskProgressData,
-    DshTaskProgressTask
+import AgentTaskProgressMessageContent, {
+    AgentTaskProgressData,
+    AgentTaskProgressTask
 } from '@wfc/client/src/main/ets/wfc_custom_message/dshTaskProgressMessageContent'
 import { FontSize, Radius } from '../../../common/design/Tokens'
 
@@ -11,14 +11,14 @@ import { FontSize, Radius } from '../../../common/design/Tokens'
  * 插件 updateMessage 原地更新时，消息对象被数据源整体替换，build 随 @Link message 自动刷新。
  */
 @Component
-export default struct DshTaskProgressContentView {
+export default struct AgentTaskProgressContentView {
     @Link message: Message
 
-    private content(): DshTaskProgressData {
-        return (this.message.messageContent as DshTaskProgressMessageContent).content
+    private content(): AgentTaskProgressData {
+        return (this.message.messageContent as AgentTaskProgressMessageContent).content
     }
 
-    private tasks(): DshTaskProgressTask[] {
+    private tasks(): AgentTaskProgressTask[] {
         let tasks = this.content().tasks
         return tasks ? tasks : []
     }
@@ -44,7 +44,7 @@ export default struct DshTaskProgressContentView {
         return failed > 0 ? `共 ${tasks.length} 个 · ${failed} 失败` : `共 ${tasks.length} 个 · 全部完成`
     }
 
-    private statusIcon(t: DshTaskProgressTask): string {
+    private statusIcon(t: AgentTaskProgressTask): string {
         let map: Record<string, string> = {
             'running': '⏳',
             'done': '✅',
@@ -55,7 +55,7 @@ export default struct DshTaskProgressContentView {
         return map[t.status] || '⚪'
     }
 
-    private statusText(t: DshTaskProgressTask): string {
+    private statusText(t: AgentTaskProgressTask): string {
         let map: Record<string, string> = {
             'running': '运行中',
             'done': '已完成',
@@ -67,7 +67,7 @@ export default struct DshTaskProgressContentView {
     }
 
     // 状态行文案：状态文字 + 失败原因
-    private statusMeta(t: DshTaskProgressTask): string {
+    private statusMeta(t: AgentTaskProgressTask): string {
         let text = this.statusText(t)
         if (t.reason) {
             text += ` · ${t.reason}`
@@ -75,12 +75,12 @@ export default struct DshTaskProgressContentView {
         return text
     }
 
-    private isErrorStatus(t: DshTaskProgressTask): boolean {
+    private isErrorStatus(t: AgentTaskProgressTask): boolean {
         return t.status === 'failed' || t.status === 'killed'
     }
 
     // 标签：优先 label，否则取 id 短前缀（超长时保留末 8 位）
-    private taskLabel(t: DshTaskProgressTask): string {
+    private taskLabel(t: AgentTaskProgressTask): string {
         if (t.label) {
             return t.label
         }
@@ -117,7 +117,7 @@ export default struct DshTaskProgressContentView {
                     .fontColor($r('app.color.wf_secondary_text'))
                     .width('100%')
             } else {
-                ForEach(this.tasks(), (t: DshTaskProgressTask, ti: number) => {
+                ForEach(this.tasks(), (t: AgentTaskProgressTask, ti: number) => {
                     Row() {
                         Text(this.statusIcon(t))
                             .fontSize(FontSize.sm)
@@ -145,7 +145,7 @@ export default struct DshTaskProgressContentView {
                             .color($r('app.color.wf_divider'))
                             .margin({ top: 1, bottom: 1 })
                     }
-                }, (t: DshTaskProgressTask, ti: number) => `${t.kind}-${t.id}-${ti}`)
+                }, (t: AgentTaskProgressTask, ti: number) => `${t.kind}-${t.id}-${ti}`)
             }
         }
         .width(280)

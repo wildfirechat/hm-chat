@@ -5,22 +5,22 @@ import MessagePayload from '../wfc/messages/messagePayload'
 /**
  * DSH 回答消息，内容类型 201（用户 -> 机器人）
  */
-export class DshAnswerItem {
+export class AgentAnswerItem {
     id: string = ''
     selected: string[] = []
     custom: string = ''
 }
 
-export class DshAnswerData {
+export class AgentAnswerData {
     qid: string = ''
-    answers: DshAnswerItem[] = []
+    answers: AgentAnswerItem[] = []
 }
 
-export default class DshAnswerMessageContent extends MessageContent {
-    content: DshAnswerData = new DshAnswerData()
+export default class AgentAnswerMessageContent extends MessageContent {
+    content: AgentAnswerData = new AgentAnswerData()
 
     constructor() {
-        super(CustomMessageContentType.MESSAGE_CONTENT_TYPE_DSH_ANSWER)
+        super(CustomMessageContentType.MESSAGE_CONTENT_TYPE_AGENT_ANSWER)
     }
 
     digest(): string {
@@ -47,9 +47,9 @@ export default class DshAnswerMessageContent extends MessageContent {
         super.decode(payload)
         if (payload.content) {
             try {
-                this.content = JSON.parse(payload.content) as DshAnswerData
+                this.content = JSON.parse(payload.content) as AgentAnswerData
             } catch (e) {
-                console.error('decode DshAnswerMessageContent error', e)
+                console.error('decode AgentAnswerMessageContent error', e)
             }
         }
     }

@@ -44,10 +44,10 @@ import StreamingTextGeneratingMessageContent from '@wfc/client/src/main/ets/wfc/
 import StreamingTextGeneratedMessageContent from '@wfc/client/src/main/ets/wfc/messages/streamingTextGeneratedMessageContent'
 import StreamingTextCancelledMessageContent from '@wfc/client/src/main/ets/wfc/messages/streamingTextCancelledMessageContent'
 import CustomMessageContentType from '@wfc/client/src/main/ets/wfc_custom_message/customMessageContentType'
-import DshQuestionMessageContent from '@wfc/client/src/main/ets/wfc_custom_message/dshQuestionMessageContent'
-import DshApprovalMessageContent from '@wfc/client/src/main/ets/wfc_custom_message/dshApprovalMessageContent'
-import DshGoalMessageContent from '@wfc/client/src/main/ets/wfc_custom_message/dshGoalMessageContent'
-import DshTaskProgressMessageContent from '@wfc/client/src/main/ets/wfc_custom_message/dshTaskProgressMessageContent'
+import AgentQuestionMessageContent from '@wfc/client/src/main/ets/wfc_custom_message/dshQuestionMessageContent'
+import AgentApprovalMessageContent from '@wfc/client/src/main/ets/wfc_custom_message/dshApprovalMessageContent'
+import AgentGoalMessageContent from '@wfc/client/src/main/ets/wfc_custom_message/dshGoalMessageContent'
+import AgentTaskProgressMessageContent from '@wfc/client/src/main/ets/wfc_custom_message/dshTaskProgressMessageContent'
 import GroupType from '@wfc/client/src/main/ets/wfc/model/groupType'
 import archiveServer from '../../api/archiveServer'
 import ArchiveMessageResult from '../../api/model/archiveMessageResult'
@@ -762,7 +762,7 @@ export default struct ConversationPage {
 
     isDisplayMessage(message: Message) {
         // DSH_Command (207) 是 AI 面板静默指令（透明消息，不落库、不显示在消息流）
-        if (message.messageContent.type === MessageContentType.DSH_COMMAND) {
+        if (message.messageContent.type === MessageContentType.AGENT_COMMAND) {
             return false;
         }
         // return [PersistFlag.Persist, PersistFlag.Persist_And_Count].indexOf(MessageConfig.getMessageContentPersitFlag(message.messageContent.type)) > -1;
@@ -1740,17 +1740,17 @@ class ConversationMessageDataSource extends BasicDataSource<Message> {
         if (type === MessageContentType.Streaming_Text_Generating) {
             return true
         }
-        if (type === CustomMessageContentType.MESSAGE_CONTENT_TYPE_DSH_QUESTION) {
-            return (message.messageContent as DshQuestionMessageContent).content.state === 'pending'
+        if (type === CustomMessageContentType.MESSAGE_CONTENT_TYPE_AGENT_QUESTION) {
+            return (message.messageContent as AgentQuestionMessageContent).content.state === 'pending'
         }
-        if (type === CustomMessageContentType.MESSAGE_CONTENT_TYPE_DSH_APPROVAL) {
-            return (message.messageContent as DshApprovalMessageContent).content.state === 'pending'
+        if (type === CustomMessageContentType.MESSAGE_CONTENT_TYPE_AGENT_APPROVAL) {
+            return (message.messageContent as AgentApprovalMessageContent).content.state === 'pending'
         }
-        if (type === CustomMessageContentType.MESSAGE_CONTENT_TYPE_DSH_GOAL) {
-            return (message.messageContent as DshGoalMessageContent).content.phase !== 'complete'
+        if (type === CustomMessageContentType.MESSAGE_CONTENT_TYPE_AGENT_GOAL) {
+            return (message.messageContent as AgentGoalMessageContent).content.phase !== 'complete'
         }
-        if (type === CustomMessageContentType.MESSAGE_CONTENT_TYPE_DSH_TASK_PROGRESS) {
-            let tasks = (message.messageContent as DshTaskProgressMessageContent).content.tasks || []
+        if (type === CustomMessageContentType.MESSAGE_CONTENT_TYPE_AGENT_TASK_PROGRESS) {
+            let tasks = (message.messageContent as AgentTaskProgressMessageContent).content.tasks || []
             return tasks.some(t => t.status === 'running')
         }
         return false

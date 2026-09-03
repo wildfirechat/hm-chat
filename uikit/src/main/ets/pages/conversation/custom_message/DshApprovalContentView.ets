@@ -1,7 +1,7 @@
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
-import DshApprovalMessageContent, { DshApprovalData } from '@wfc/client/src/main/ets/wfc_custom_message/dshApprovalMessageContent'
-import DshApprovalResultMessageContent, { DshApprovalResultData } from '@wfc/client/src/main/ets/wfc_custom_message/dshApprovalResultMessageContent'
+import AgentApprovalMessageContent, { AgentApprovalData } from '@wfc/client/src/main/ets/wfc_custom_message/dshApprovalMessageContent'
+import AgentApprovalResultMessageContent, { AgentApprovalResultData } from '@wfc/client/src/main/ets/wfc_custom_message/dshApprovalResultMessageContent'
 import { FontSize, Radius } from '../../../common/design/Tokens'
 
 /**
@@ -9,12 +9,12 @@ import { FontSize, Radius } from '../../../common/design/Tokens'
  * 点击发送 DSH_ApprovalResult 并立即本地置灰。
  */
 @Component
-export default struct DshApprovalContentView {
+export default struct AgentApprovalContentView {
     @Link message: Message
     @State locallyDecided: boolean = false
 
-    private content(): DshApprovalData {
-        return (this.message.messageContent as DshApprovalMessageContent).content
+    private content(): AgentApprovalData {
+        return (this.message.messageContent as AgentApprovalMessageContent).content
     }
 
     private isLocked(): boolean {
@@ -39,8 +39,8 @@ export default struct DshApprovalContentView {
         if (this.isLocked()) {
             return
         }
-        let content = new DshApprovalResultMessageContent()
-        let data = new DshApprovalResultData()
+        let content = new AgentApprovalResultMessageContent()
+        let data = new AgentApprovalResultData()
         data.aid = this.content().aid
         data.action = action
         content.content = data

@@ -8,7 +8,7 @@ import MessagePayload from '../wfc/messages/messagePayload'
  * content = JSON：{"tasks":[{"kind":"subagent|job","id":"...","label":"可选",
  *   "status":"running|done|failed|completed|killed","reason":"失败原因可选","updatedAt":123}],"updatedAt":123}
  */
-export class DshTaskProgressTask {
+export class AgentTaskProgressTask {
     // subagent | job
     kind: string = ''
     id: string = ''
@@ -20,13 +20,13 @@ export class DshTaskProgressTask {
     updatedAt: number = 0
 }
 
-export class DshTaskProgressData {
-    tasks: DshTaskProgressTask[] = []
+export class AgentTaskProgressData {
+    tasks: AgentTaskProgressTask[] = []
     updatedAt: number = 0
 }
 
 /** 摘要：无任务返回 "🧩 任务：无"；有运行中显示 "🧩 任务 N（M 运行中）"，否则 "🧩 任务 N（全部完成）"。 */
-export function summarizeDshTaskProgress(content: DshTaskProgressData): string {
+export function summarizeDshTaskProgress(content: AgentTaskProgressData): string {
     let tasks = content.tasks || []
     let running = 0
     tasks.forEach(t => {
@@ -40,11 +40,11 @@ export function summarizeDshTaskProgress(content: DshTaskProgressData): string {
     return running > 0 ? `🧩 任务 ${tasks.length}（${running} 运行中）` : `🧩 任务 ${tasks.length}（全部完成）`
 }
 
-export default class DshTaskProgressMessageContent extends MessageContent {
-    content: DshTaskProgressData = new DshTaskProgressData()
+export default class AgentTaskProgressMessageContent extends MessageContent {
+    content: AgentTaskProgressData = new AgentTaskProgressData()
 
     constructor() {
-        super(CustomMessageContentType.MESSAGE_CONTENT_TYPE_DSH_TASK_PROGRESS)
+        super(CustomMessageContentType.MESSAGE_CONTENT_TYPE_AGENT_TASK_PROGRESS)
     }
 
     digest(): string {
@@ -62,9 +62,9 @@ export default class DshTaskProgressMessageContent extends MessageContent {
         super.decode(payload)
         if (payload.content) {
             try {
-                this.content = JSON.parse(payload.content) as DshTaskProgressData
+                this.content = JSON.parse(payload.content) as AgentTaskProgressData
             } catch (e) {
-                console.error('decode DshTaskProgressMessageContent error', e)
+                console.error('decode AgentTaskProgressMessageContent error', e)
             }
         }
     }

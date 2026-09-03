@@ -4,11 +4,14 @@ import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType'
 
 /**
- * DSH 会话运行时数据（scope=31 会话级用户设置，两个独立通道）：
- * - type=1（键后缀 _1）「状态」：`<convType>-<line>-<target>_1` 存 {state, phase, toolName,
- *   model, reasoningEffort, cwd, reason, error, interaction, ...} JSON，运行态/面板值由此读取；
- * - type=2（键后缀 _2）「Token 统计」：`<convType>-<line>-<target>_2` 存 {usage, turn, context,
- *   cacheHitRatePct, speed, metricsAt} JSON，回合结束必推（含出错/取消），独立于状态推送。
+ * DSH 会话运行时数据（scope=31 会话级用户设置，三个独立通道）：
+ * - type=1（键后缀 _1）「状态」：`<convType>-<line>-<target>_1_<机器人uid>` 存 {state, phase,
+ *   toolName, model, reasoningEffort, cwd, reason, error, interaction, ...} JSON；
+ * - type=2（键后缀 _2）「Token 统计」：`<convType>-<line>-<target>_2_<机器人uid>` 存 {usage,
+ *   turn, context, cacheHitRatePct, speed, metricsAt} JSON，回合结束必推（含出错/取消）；
+ * - type=3（键后缀 _3）「AI 面板数据」：`<convType>-<line>-<target>_3_<机器人uid>`。
+ * 服务端 v2：key 末尾由 im-server 按写入请求的机器人身份追加其 uid；客户端不预知
+ * 机器人 uid，统一按「前缀 + 槽位」扫描 scope=31 设置表（后缀通配，多机器人兼容）。
  * 群成员均可收到该会话级用户设置。
  */
 /** context 计量：模型上下文窗口占用（usedPct 为百分比，可能带 1 位小数）。 */
@@ -84,18 +87,28 @@ const DSH_STATE_TYPE = 1 // 1=状态（业务约定）
 const DSH_METRICS_TYPE = 2 // 2=Token 统计（独立通道，回合结束必推）
 const DSH_PANEL_TYPE = 3 // 3=AI 面板数据（207 query 组合查询结果，面板打开/更新后刷新）
 
-export function dshStateKey(conversation: Conversation): string {
-    return `${conversation.type}-${conversation.line}-${conversation.target}_${DSH_STATE_TYPE}`
+/** scope=31 key 前缀：`<convType>-<line>-<target>_<type>_`（v2 服务端在其后追加机器人 uid）。 */
+function dshSlotPrefix(conversation: Conversation, slot: number): string {
+    return `${conversation.type}-${conversation.line}-${conversation.target}_${slot}_`
 }
 
-/** type=2 统计键：`<convType>-<line>-<target>_2`。 */
-export function dshMetricsKey(conversation: Conversation): string {
-    return `${conversation.type}-${conversation.line}-${conversation.target}_${DSH_METRICS_TYPE}`
-}
-
-/** type=3 面板数据键：`<convType>-<line>-<target>_3`。 */
-export function dshPanelKey(conversation: Conversation): string {
-    return `${conversation.type}-${conversation.line}-${conversation.target}_${DSH_PANEL_TYPE}`
+/** 扫描 scope=31 设置表，返回首个 key 以 prefix 开头的 value；无匹配返回空串。 */
+function findSettingByPrefix(prefix: string): string {
+    try {
+        let entries = wfc.getUserSettings(UserSettingScope.Conversation_User_Setting)
+        if (!entries) {
+            return ''
+        }
+        for (let i = 0; i < entries.length; i++) {
+            let key = entries[i].key
+            if (key && key.startsWith(prefix)) {
+                return entries[i].value
+            }
+        }
+    } catch (e) {
+        // 忽略：底层不可用时按"无状态"处理
+    }
+    return ''
 }
 
 /**
@@ -144,8 +157,7 @@ export function getDshState(conversation?: Conversation): DshState | null {
         return null
     }
     try {
-        let raw = wfc.getUserSetting(UserSettingScope.Conversation_User_Setting, dshStateKey(conversation))
-        console.info('[dsh-dbg] getDshState key=' + dshStateKey(conversation) + ' raw=' + String(raw))
+        let raw = findSettingByPrefix(dshSlotPrefix(conversation, DSH_STATE_TYPE))
         if (!raw) {
             return null
         }
@@ -156,14 +168,13 @@ export function getDshState(conversation?: Conversation): DshState | null {
     }
 }
 
-/** 读取会话的 DSH Token 统计（scope=31 type=2 计量，键 ..._2），未设置/非法时返回 null。 */
+/** 读取会话的 DSH Token 统计（scope=31 type=2 计量），未设置/非法时返回 null。 */
 export function getDshMetrics(conversation?: Conversation): DshMetrics | null {
     if (!conversation || !isDshConversation(conversation)) {
         return null
     }
     try {
-        let raw = wfc.getUserSetting(UserSettingScope.Conversation_User_Setting, dshMetricsKey(conversation))
-        console.info('[dsh-dbg] getDshMetrics key=' + dshMetricsKey(conversation) + ' raw=' + String(raw))
+        let raw = findSettingByPrefix(dshSlotPrefix(conversation, DSH_METRICS_TYPE))
         if (!raw) {
             return null
         }
@@ -228,8 +239,7 @@ export function getDshPanelData(conversation?: Conversation): DshPanelData | nul
         return null
     }
     try {
-        let raw = wfc.getUserSetting(UserSettingScope.Conversation_User_Setting, dshPanelKey(conversation))
-        console.info('[dsh-dbg] getDshPanelData key=' + dshPanelKey(conversation) + ' raw=' + String(raw))
+        let raw = findSettingByPrefix(dshSlotPrefix(conversation, DSH_PANEL_TYPE))
         if (!raw) {
             return null
         }

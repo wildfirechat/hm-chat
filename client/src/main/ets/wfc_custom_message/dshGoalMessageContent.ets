@@ -5,7 +5,7 @@ import MessagePayload from '../wfc/messages/messagePayload'
 /**
  * DSH 目标进度卡片消息，内容类型 206（机器人 -> 用户）
  */
-export class DshGoalData {
+export class AgentGoalData {
     gid: string = ''
     objective: string = ''
     // active/paused/blocked/complete
@@ -13,15 +13,15 @@ export class DshGoalData {
     roundsStarted: number = 0
 }
 
-export function summarizeDshGoal(content: DshGoalData): string {
+export function summarizeDshGoal(content: AgentGoalData): string {
     return `🎯 ${content.objective || '目标'}（${content.phase || ''}，round ${content.roundsStarted ?? 0}）`
 }
 
-export default class DshGoalMessageContent extends MessageContent {
-    content: DshGoalData = new DshGoalData()
+export default class AgentGoalMessageContent extends MessageContent {
+    content: AgentGoalData = new AgentGoalData()
 
     constructor() {
-        super(CustomMessageContentType.MESSAGE_CONTENT_TYPE_DSH_GOAL)
+        super(CustomMessageContentType.MESSAGE_CONTENT_TYPE_AGENT_GOAL)
     }
 
     digest(): string {
@@ -39,9 +39,9 @@ export default class DshGoalMessageContent extends MessageContent {
         super.decode(payload)
         if (payload.content) {
             try {
-                this.content = JSON.parse(payload.content) as DshGoalData
+                this.content = JSON.parse(payload.content) as AgentGoalData
             } catch (e) {
-                console.error('decode DshGoalMessageContent error', e)
+                console.error('decode AgentGoalMessageContent error', e)
             }
         }
     }

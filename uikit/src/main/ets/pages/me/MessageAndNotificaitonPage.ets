@@ -1,12 +1,14 @@
 import { showToast } from '../../common/utils/Toast';
 import OptionItemView from '../../view/OptionItemView'
 import ToggleItemView from '../../view/ToggleItemView'
+import { pttManager, STORAGE_KEY_PTT_ENABLED } from '../conversation/ptt/PttManager'
 
 @Preview
 @Component
 export default struct MessageAndNotificationPage {
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
     @State enableNewMessageNotification: boolean = true
+    @StorageProp(STORAGE_KEY_PTT_ENABLED) pttEnabled: boolean = true
 
     aboutToAppear() {
     }
@@ -64,10 +66,11 @@ export default struct MessageAndNotificationPage {
                 Column() {
                     ToggleItemView({
                         title: '开启对讲功能',
-                        isOn: true, // TODO
+                        isOn: this.pttEnabled,
                         showDivider: true,
                         onChange: (isOn) => {
-                            showToast('TODO')
+                            // 立即生效：打开时初始化对讲 SDK（此后任意界面都能收听），关闭时释放
+                            pttManager.setEnabled(isOn)
                         }
                     })
                 }

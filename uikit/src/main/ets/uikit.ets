@@ -9,6 +9,7 @@ import CollectionMessageContent from '@wfc/client/src/main/ets/wfc/messages/Coll
 import archiveServer from './api/archiveServer';
 import { fontSizeManager } from './common/design/Tokens';
 import { voicePlayModeManager } from './pages/conversation/audio/VoicePlayModeManager';
+import { pttManager } from './pages/conversation/ptt/PttManager';
 
 export { archiveServer };
 
@@ -22,6 +23,8 @@ export class UIKit {
         this.entryAbilityName = context.abilityInfo.name
         fontSizeManager.init(context.getApplicationContext())
         voicePlayModeManager.init(context.getApplicationContext())
+        // 对讲：开关打开时初始化对讲 SDK，之后在任意界面都能收听别人的对讲
+        pttManager.init(context)
         avenginekitImpl.setup(context, new AVEngineCallbackImpl(context, this.mainNavPathStack));
         avenginekit.SCREEN_SHARING_REPLACE_MODE = true;
         // 仅高级版音视频 SDK 支持

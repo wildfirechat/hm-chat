@@ -7,6 +7,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@wfc/client": "file:../client",
+    "@wfc/ptt": "file:./libs/ptt.har",
     "@wfc/avenginekit": "file:./libs/avenginekit.har",
     "@ohos/webrtc": "^1.0.0-rc3"
   },

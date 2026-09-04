@@ -46,8 +46,15 @@ import fileUri from '@ohos.file.fileuri'
 import { checkAndRequestPermission, checkPermissions } from '../../helper/permissionHelper'
 import AudioRecorderDialog, { AudioRecorderDialogState } from './audio/AudioRecorderDialog'
 import { playRawSound } from '../../helper/soundEffectHelper'
+import pttClient, { PttEventType } from '@wfc/ptt'
+import PttTalkingDialog, { PttTalkingDialogState } from './ptt/PttTalkingDialog'
+import PttTalkingCallback from './ptt/PttTalkingCallback'
+import { pttEndReasonText, pttErrorText } from './ptt/pttHelper'
+import { STORAGE_KEY_PTT_ENABLED } from './ptt/PttManager'
 
 const INPUT_ICON_WIDTH = 28
+// 说话剩余时间少于这个值时，浮层上改为显示倒计时
+const PTT_COUNT_DOWN_MILLIS = 10 * 1000
 // 软键盘与自定义面板显示/隐藏的过渡动画时间
 const PANEL_ANIM_COLLAPSE = 400
 const PANEL_ANIM_EXPAND = 400
@@ -88,6 +95,11 @@ export default struct ConversationInputPanelView {
     @State showMentionSheet: boolean = false
     @State @Watch('onKeyboardHeightChanged') keyboardHeight: number = 320
     @State showAudioRecorderButton: boolean = false
+    // 对讲模式：输入框换成「按住 对讲」按钮
+    @State showPttButton: boolean = false
+    // 会话里当前正在讲话的人（不含自己），用于在对讲按钮上给个提示
+    @State pttSpeakerName: string = ''
+    @StorageProp(STORAGE_KEY_PTT_ENABLED) pttEnabled: boolean = true
     @State showChannelMenu: boolean = false
     @State enable: boolean = false
     @State muted: boolean = false
@@ -106,6 +118,15 @@ export default struct ConversationInputPanelView {
     private _recordingActive: boolean = false
     private audioDialogState: AudioRecorderDialogState = new AudioRecorderDialogState()
     private audioDialogController?: CustomDialogController
+    private pttDialogState: PttTalkingDialogState = new PttTalkingDialogState()
+    private pttDialogController?: CustomDialogController
+    private pttTalkingCallback: PttTalkingCallback = new PttTalkingCallback()
+    // 已经按下对讲键，还没松手；用来过滤掉抬起早于回调到达的情况
+    private pttPressed: boolean = false
+    private pttTalking: boolean = false
+    private pttStartMillis: number = 0
+    private pttMaxDurationMillis: number = 60 * 1000
+    private pttTickTimer: number = -1
     private recorder?: AudioRecordManager
     private recordOutputAudioFile: string = ''
     private recordAudioStartMillis: number = 0
@@ -560,6 +581,16 @@ export default struct ConversationInputPanelView {
             autoCancel: false
         })
 
+        this.pttDialogController = new CustomDialogController({
+            builder: PttTalkingDialog({
+                controller: this.pttDialogController!,
+                dialogState: this.pttDialogState
+            }),
+            customStyle: true,
+            autoCancel: false
+        })
+        this.setupPttCallback()
+
         // 本机不回调 keyboardHeightChange；改用 avoidAreaChange(TYPE_KEYBOARD) 获取真实软键盘高度与显隐时机。
         window.getLastWindow(getContext(this)).then(currentWindow => {
             let preference = preferences.getPreferencesSync(getContext(this).getApplicationContext(), { name: 'wfcstore' })
@@ -613,6 +644,9 @@ export default struct ConversationInputPanelView {
         wfc.eventEmitter?.on(EventType.GroupInfosUpdate, this.onGroupInfosUpdate)
         wfc.eventEmitter?.on(EventType.ChannelInfosUpdate, this.onChannelInfoUpdate)
 
+        pttClient.eventEmitter?.on(PttEventType.userStartTalking, this.onPttUserStartTalking)
+        pttClient.eventEmitter?.on(PttEventType.userEndTalking, this.onPttUserEndTalking)
+
         let cfg = emojiConfig()
         this.allStickers = (cfg['emojis'] as Emoji[]).filter(e => e.category.startsWith('Sticker-'))
     }
@@ -642,6 +676,135 @@ export default struct ConversationInputPanelView {
         wfc.eventEmitter?.off(EventType.GroupMembersUpdate, this.onGroupMembersUpdate)
         wfc.eventEmitter?.off(EventType.GroupInfosUpdate, this.onGroupInfosUpdate)
         wfc.eventEmitter?.off(EventType.ChannelInfosUpdate, this.onChannelInfoUpdate)
+
+        pttClient.eventEmitter?.off(PttEventType.userStartTalking, this.onPttUserStartTalking)
+        pttClient.eventEmitter?.off(PttEventType.userEndTalking, this.onPttUserEndTalking)
+        this.exitPttMode()
+    }
+
+    // --- 对讲 -------------------------------------------------------------------------------
+
+    private setupPttCallback() {
+        this.pttTalkingCallback.onStart = (conversation: Conversation) => {
+            // 已经松手了，才回调可以说话，直接结束，不然会一直录到超时
+            if (!this.pttPressed) {
+                pttClient.releaseTalk(conversation)
+                return
+            }
+            this.pttTalking = true
+            this.pttStartMillis = new Date().getTime()
+            this.pttDialogState.updateCountDown(0)
+            this.pttDialogController?.open()
+            playRawSound(getContext(this), 'ptt_begin.mp3')
+            this.startPttTick()
+        }
+        this.pttTalkingCallback.onEnd = (conversation: Conversation, reason: number) => {
+            let wasTalking = this.pttTalking
+            this.stopPttTalkingUI()
+            if (wasTalking) {
+                playRawSound(getContext(this), 'ptt_end.mp3')
+            }
+            let tip = pttEndReasonText(reason)
+            if (tip) {
+                showToast(tip)
+            }
+        }
+        this.pttTalkingCallback.onFail = (conversation: Conversation, errorCode: number) => {
+            this.stopPttTalkingUI()
+            showToast(pttErrorText(errorCode))
+        }
+        this.pttTalkingCallback.onAmplitude = (conversation: Conversation, averageAmplitude: number) => {
+            this.pttDialogState.updateAmplitude(averageAmplitude)
+        }
+    }
+
+    private startPttTick() {
+        this.stopPttTick()
+        this.pttTickTimer = setInterval(() => {
+            if (!this.pttTalking) {
+                this.stopPttTick()
+                return
+            }
+            let elapsed = new Date().getTime() - this.pttStartMillis
+            let remaining = this.pttMaxDurationMillis - elapsed
+            // 最后 10 秒把音量图标换成倒计时，和 android 端一致
+            this.pttDialogState.updateCountDown(remaining <= PTT_COUNT_DOWN_MILLIS
+                ? Math.max(1, Math.ceil(remaining / 1000)) : 0)
+        }, 200)
+    }
+
+    private stopPttTick() {
+        if (this.pttTickTimer !== -1) {
+            clearInterval(this.pttTickTimer)
+            this.pttTickTimer = -1
+        }
+    }
+
+    private stopPttTalkingUI() {
+        this.pttPressed = false
+        this.pttTalking = false
+        this.stopPttTick()
+        this.pttDialogState.updateCountDown(0)
+        this.pttDialogController?.close()
+    }
+
+    private enterPttMode() {
+        this.showPttButton = true
+        this.showAudioRecorderButton = false
+        this.pttMaxDurationMillis = pttClient.getMaxSpeakTime(this.conversation) * 1000
+        // ENABLE_GLOBAL_PTT 为 false 时，只有显式开启的会话才能对讲
+        pttClient.setEnablePtt(this.conversation, true)
+        this.refreshPttSpeaker()
+    }
+
+    private exitPttMode() {
+        if (!this.showPttButton) {
+            return
+        }
+        this.showPttButton = false
+        if (this.pttPressed || this.pttTalking) {
+            pttClient.releaseTalk(this.conversation)
+        }
+        this.stopPttTalkingUI()
+        pttClient.setEnablePtt(this.conversation, false)
+    }
+
+    private async requestPttTalk() {
+        let deniedPermissions = await checkPermissions(getContext(this), ['ohos.permission.MICROPHONE'])
+        if (deniedPermissions.length > 0) {
+            this.pttPressed = false
+            checkAndRequestPermission(getContext(this), 'ohos.permission.MICROPHONE')
+            return
+        }
+        // 申请权限是异步的，回来时可能已经松手了
+        if (!this.pttPressed) {
+            return
+        }
+        pttClient.requestTalk(this.conversation, this.pttTalkingCallback)
+    }
+
+    private refreshPttSpeaker() {
+        let speakers = pttClient.getTalkingMembers(this.conversation)
+            .filter((userId: string) => userId !== wfc.getUserId())
+        if (speakers.length === 0) {
+            this.pttSpeakerName = ''
+            return
+        }
+        let name = this.conversation.type === ConversationType.Group ?
+            wfc.getGroupMemberDisplayName(this.conversation.target, speakers[0]) :
+            wfc.getUserDisplayName(speakers[0])
+        this.pttSpeakerName = speakers.length > 1 ? `${name} 等 ${speakers.length} 人正在讲话` : `${name} 正在讲话`
+    }
+
+    onPttUserStartTalking = (conversation: Conversation, userId: string) => {
+        if (Conversation.equal(conversation, this.conversation)) {
+            this.refreshPttSpeaker()
+        }
+    }
+    onPttUserEndTalking = (conversation: Conversation, userId: string) => {
+        if (Conversation.equal(conversation, this.conversation)) {
+            this.refreshPttSpeaker()
+        }
     }
 
     onGroupMembersUpdate = (groupId: string, groupMembers: GroupMember[]) => {
@@ -851,6 +1014,7 @@ export default struct ConversationInputPanelView {
                                 if (this.channelInfo!.menus.length > 0) {
                                     this.showChannelMenu = !this.showChannelMenu
                                     this.showAudioRecorderButton = false
+                                    this.exitPttMode()
                                     this.hidePanel()
                                 } else {
                                     showToast('频道暂未配置菜单')
@@ -892,10 +1056,28 @@ export default struct ConversationInputPanelView {
                             .margin({top: 6, bottom: 6})
                             .onClick(() => {
                                 this.recentPhotoRequested = false
+                                this.exitPttMode()
                                 this.showAudioRecorderButton = !this.showAudioRecorderButton
                                 this.hidePanel()
                             })
-                        if (!this.showAudioRecorderButton) {
+                        if (this.pttEnabled && this.conversation.type !== ConversationType.Channel) {
+                            Image($r('app.media.ic_chat_ptt'))
+                                .id('ptt')
+                                .draggable(false)
+                                .width(INPUT_ICON_WIDTH)
+                                .height(INPUT_ICON_WIDTH)
+                                .margin({ left: 8, top: 6, bottom: 6 })
+                                .onClick(() => {
+                                    this.recentPhotoRequested = false
+                                    if (this.showPttButton) {
+                                        this.exitPttMode()
+                                    } else {
+                                        this.enterPttMode()
+                                    }
+                                    this.hidePanel()
+                                })
+                        }
+                        if (!this.showAudioRecorderButton && !this.showPttButton) {
                             Column() {
                                 TextArea({ text: this.text, controller: this.textInputController })
                                     .id('textInput')
@@ -961,7 +1143,7 @@ export default struct ConversationInputPanelView {
                             }
                             .margin({ left: 12, right: 12 })
                             .layoutWeight(1)
-                        } else {
+                        } else if (this.showAudioRecorderButton) {
                             Button('按住录音')
                                 .layoutWeight(1)
                                 .margin({ left: 12, right: 12 })
@@ -1014,6 +1196,37 @@ export default struct ConversationInputPanelView {
                                         }
                                     }
                                 })
+                        } else {
+                            Button(this.pttSpeakerName ? this.pttSpeakerName : '按住 对讲')
+                                .id('pttButton')
+                                .layoutWeight(1)
+                                .margin({ left: 12, right: 12 })
+                                .borderRadius(Radius.sm)
+                                .fontColor($r('app.color.wf_secondary_text'))
+                                .type(ButtonType.Normal)
+                                .stateStyles({
+                                    pressed: {
+                                        .backgroundColor($r('app.color.wf_item_pressed'))
+                                    },
+                                    normal: {
+                                        .backgroundColor($r('app.color.wf_background'))
+                                    }
+                                })
+                                .onTouch(event => {
+                                    event.stopPropagation()
+                                    if (event.type === TouchType.Down) {
+                                        this.pttPressed = true
+                                        this.requestPttTalk()
+                                    } else if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
+                                        // 抢麦、申请权限都是异步的，可能还没开始说话就松手了，
+                                        // pttPressed 置 false 之后，回调里就不会再开录音
+                                        if (!this.pttPressed && !this.pttTalking) {
+                                            return
+                                        }
+                                        this.pttPressed = false
+                                        pttClient.releaseTalk(this.conversation)
+                                    }
+                                })
                         }
 
                         Image(this.textInputFocused || !this.showEmojiPanel ? $r('app.media.ic_chat_emo') : $r('app.media.ic_chat_keyboard'))
@@ -1034,6 +1247,7 @@ export default struct ConversationInputPanelView {
                                 }
                                 this.textInputFocused = false;
                                 this.showAudioRecorderButton = false
+                                this.exitPttMode()
                             })
                         if (this.text.trim().length > 0) {
                             Button('发送')
@@ -1088,6 +1302,7 @@ export default struct ConversationInputPanelView {
                                     // 切到加号面板（点击按钮已移走输入框焦点 → 软键盘落下）
                                     this.showPanel(false)
                                     this.showAudioRecorderButton = false
+                                    this.exitPttMode()
                                 })
                         }
                     }

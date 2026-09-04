@@ -6,6 +6,7 @@ import MessageStatus from '@wfc/client/src/main/ets/wfc/messages/messageStatus'
 import { Radius } from '../../../common/design/Tokens'
 import { voicePlayModeManager } from '../audio/VoicePlayModeManager'
 import { showTipToast } from '../../../common/utils/TipToast'
+import { PttMessageContentType } from '@wfc/ptt'
 
 @Component
 export default struct AudioMessageContentView {
@@ -61,7 +62,10 @@ export default struct AudioMessageContentView {
         let content = this.message.messageContent as SoundMessageContent
         this.startAudioPlayingAnimation()
         let url: string = content.remotePath;
-        if (this.message.direction === 1 || !content.localPath) {
+        // 对讲留底语音一定是 amr，且自己发出去的那条，本地文件在发送成功后就删掉了，
+        // 所以不管收发方向，都从服务器取转码后的音频
+        if (this.message.direction === 1 || !content.localPath
+            || content.type === PttMessageContentType.Ptt_Sound) {
             url = Config.getAmrToMp3ServerAddress() + content.remotePath;
         }
         // Immediate local feedback (hide red dot on this copy); the parent updates the
@@ -117,16 +121,20 @@ export default struct AudioMessageContentView {
         this.imageUrl = this.defaultAudioIndicatorImageUrl()
     }
 
+    duration(){
+        return Math.ceil(this.soundMessageContent().duration)
+    }
+
     build() {
         Row() {
             Row() {
                 Image(this.imageUrl)
                     .width(16)
                     .height(16)
-                Text(`${this.soundMessageContent().duration} ''`)
+                Text(`${this.duration() } ''`)
                     .margin({ left: 12 })
             }
-            .width(`${this.soundMessageContent().duration / 60 * 100}%`)
+            .width(`${this.duration() / 60 * 100}%`)
             .backgroundColor(this.message.direction === 0 ? $r('app.color.wf_sent_bubble_bg') : $r('app.color.wf_received_bubble_bg'))
             .alignItems(VerticalAlign.Center)
             .height(40)

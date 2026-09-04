@@ -82,7 +82,12 @@ import PollResultMessageContent from '../messages/pollResultMessageContent';
 import MeetingMinutesMessageContent from '../messages/meetingMinutesMessageContent';
 import TranscriptionMessageContent from '../messages/transcriptionMessageContent';
 
+export type MessageContentFactory = (type: number) => MessageContent | undefined;
+
 export default class MessageConfig {
+    // 由 client 之外的模块注册进来的消息内容工厂，参考 registerMessageContentFactory
+    private static messageContentFactories: MessageContentFactory[] = [];
+
     static getMessageContentFlag(type: number) {
         let flag = PersistFlag.No_Persist;
         for (const content of MessageConfig.MessageContents) {
@@ -114,6 +119,32 @@ export default class MessageConfig {
             }
         );
 
+    }
+
+    /**
+     * 注册一个消息内容工厂。
+     *
+     * 给独立的功能模块（比如对讲 SDK）用：这些模块依赖 client，client 不能反过来依赖它们，
+     * 所以由模块自己在初始化时把「消息类型 -> 消息内容」的构造方式注册进来。
+     * 应用自定义的消息，仍然走 {@link CustomMessageConfig}。
+     */
+    static registerMessageContentFactory(factory: MessageContentFactory) {
+        if (MessageConfig.messageContentFactories.indexOf(factory) < 0) {
+            MessageConfig.messageContentFactories.push(factory);
+        }
+    }
+
+    /**
+     * 用已注册的工厂创建消息内容，没有工厂认领这个类型时返回 undefined
+     */
+    static newExtensionMessageContent(type: number): MessageContent | undefined {
+        for (const factory of MessageConfig.messageContentFactories) {
+            let content = factory(type);
+            if (content) {
+                return content;
+            }
+        }
+        return undefined;
     }
 
     static newMessageContent(type: number): MessageContent {

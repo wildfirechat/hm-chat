@@ -10,6 +10,7 @@
         "@wfc/client": "file:../client",
         "@wfc/uikit": "file:../uikit",
         "@wfc/moment": "file:../moment",
+        "@wfc/ptt": "file:../uikit/libs/ptt.har",
         "@wfc/avenginekit": "file:../uikit/libs/avenginekit.har"
     }
 }

@@ -19,6 +19,7 @@ import GroupMember from '@wfc/client/src/main/ets/wfc/model/groupMember'
 import FileMessageContentView from './FileMessageContentView'
 import pasteboard from '@ohos.pasteboard'
 import CustomMessageContentType from '@wfc/client/src/main/ets/wfc_custom_message/customMessageContentType'
+import { PttMessageContentType } from '@wfc/ptt'
 import TestCustomMessageContentView from '../custom_message/testCustomMessageContentView'
 import { uikitNavigationDestinations } from '../../uikitNavigationConfig'
 import ConferenceInviteMessageContentView from './ConferenceInviteMessageContentView'
@@ -68,6 +69,12 @@ export default struct NormaMessageContentView {
         this.updateCurrentMessageContextMenu()
     }
 
+    // 普通语音消息和对讲留底语音消息，两者的展示和交互完全一致：点击播放、长按菜单里不能转发/多选/引用
+    isVoiceMessage(): boolean {
+        let type = this.message.messageContent.type
+        return type === MessageContentType.Voice || type === PttMessageContentType.Ptt_Sound
+    }
+
     updateCurrentMessageContextMenu(): void {
         this.currentMessageContextMenuItems = this.messageContextMenus()
         this.menuColumnCount = Math.min(this.currentMessageContextMenuItems.length, 5)
@@ -88,7 +95,8 @@ export default struct NormaMessageContentView {
                 ImageMessageContentView({ message: $message })
             } else if (this.message!.messageContent.type === MessageContentType.Video) {
                 VideoMessageContentView({ message: $message })
-            } else if (this.message!.messageContent.type === MessageContentType.Voice) {
+            } else if (this.isVoiceMessage()) {
+                // 对讲留底语音消息也是语音消息，展示、点击播放、连续播放都和普通语音消息一致
                 AudioMessageContentView({
                     message: $message,
                     audioPlayManager: this.audioPlayManager,
@@ -207,7 +215,7 @@ export default struct NormaMessageContentView {
                     showToast(earpiece ? '已切换为听筒播放' : '已切换为扬声器播放')
                 },
                 filter: () => {
-                    return this.message.messageContent.type === MessageContentType.Voice
+                    return this.isVoiceMessage()
                 }
             },
             {
@@ -259,9 +267,8 @@ export default struct NormaMessageContentView {
                     )
                 },
                 filter: () => {
-                    return [MessageContentType.VOIP_CONTENT_TYPE_START,
-                        MessageContentType.VOIP_CONTENT_TYPE_ADD_PARTICIPANT,
-                        MessageContentType.Voice].indexOf(this.message.messageContent.type) === -1
+                    return !this.isVoiceMessage() && [MessageContentType.VOIP_CONTENT_TYPE_START,
+                        MessageContentType.VOIP_CONTENT_TYPE_ADD_PARTICIPANT].indexOf(this.message.messageContent.type) === -1
                 }
             },
             {
@@ -272,8 +279,7 @@ export default struct NormaMessageContentView {
                     this.enableMultiCheck = true
                 },
                 filter: () => {
-                    return [MessageContentType.VOIP_CONTENT_TYPE_START,
-                        MessageContentType.Voice].indexOf(this.message.messageContent.type) === -1
+                    return !this.isVoiceMessage() && [MessageContentType.VOIP_CONTENT_TYPE_START].indexOf(this.message.messageContent.type) === -1
                 }
             },
             {
@@ -284,8 +290,7 @@ export default struct NormaMessageContentView {
                     this.quotedMessage = this.message;
                 },
                 filter: () => {
-                    return [MessageContentType.VOIP_CONTENT_TYPE_START,
-                        MessageContentType.Voice,
+                    return !this.isVoiceMessage() && [MessageContentType.VOIP_CONTENT_TYPE_START,
                         MessageContentType.VOIP_CONTENT_TYPE_ADD_PARTICIPANT].indexOf(this.message.messageContent.type) === -1
                 }
             },
@@ -300,7 +305,9 @@ export default struct NormaMessageContentView {
                         })
                 },
                 filter: () => {
-                    return [MessageContentType.VOIP_CONTENT_TYPE_START,
+                    // 对讲语音不支持收藏：FavItem 只处理内置消息类型，收藏后在收藏列表里还原不出来
+                    return this.message.messageContent.type !== PttMessageContentType.Ptt_Sound
+                        && [MessageContentType.VOIP_CONTENT_TYPE_START,
                         MessageContentType.VOIP_CONTENT_TYPE_ADD_PARTICIPANT,
                         MessageContentType.Sticker].indexOf(this.message.messageContent.type) === -1
                 }

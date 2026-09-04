@@ -49,6 +49,7 @@ import { RecentPhotoComponent, RecentPhotoOptions, PhotoSource, RecentPhotoCheck
 import { BaseItemInfo } from '@ohos.file.PhotoPickerComponent'
 import { FontSize, Radius, scaledSize } from '../../common/design/Tokens'
 import { STORAGE_KEY_VOICE_EARPIECE } from './audio/VoicePlayModeManager'
+import { PttMessageContentType } from '@wfc/ptt'
 import { conversationIdentity, STORAGE_KEY_ACTIVE_CONVERSATION } from '../../util/navUtil'
 
 // 「猜你想发送」：上次消失（发送/取消/其他操作）的时间。
@@ -250,8 +251,10 @@ export default struct ConversationPage {
             let foundCurrent = false
             for (let msg of messages) {
                 if (foundCurrent) {
+                    // 对讲留底语音消息也参与连续播放，和普通语音消息一样
+                    let type = msg.messageContent.type
                     if (msg.direction === 1
-                        && msg.messageContent.type === MessageContentType.Voice
+                        && (type === MessageContentType.Voice || type === PttMessageContentType.Ptt_Sound)
                         && msg.status !== MessageStatus.Played) {
                         // Continue the chain; keep proximity sensing active (no flicker).
                         this.autoPlayMessageId = msg.messageId

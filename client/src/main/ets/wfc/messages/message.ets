@@ -78,6 +78,9 @@ export default class Message {
             let payload = obj.content as MessagePayload
             let content = CustomMessageConfig.newCustomMessageContent(payload.type);
             if (!content) {
+                content = MessageConfig.newExtensionMessageContent(payload.type);
+            }
+            if (!content) {
                 content = MessageConfig.newMessageContent(payload.type);
             }
             let objConv = obj.conversation as Record<string, Object>
@@ -194,6 +197,9 @@ export default class Message {
 
     static messageContentFromMessagePayload(payload: MessagePayload, from: string) {
         let content = CustomMessageConfig.newCustomMessageContent(payload.type)
+        if (!content) {
+            content = MessageConfig.newExtensionMessageContent(payload.type)
+        }
         if(!content){
             content = MessageConfig.newMessageContent(payload.type)
         }

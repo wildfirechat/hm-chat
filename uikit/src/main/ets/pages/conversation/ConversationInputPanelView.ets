@@ -51,10 +51,10 @@ import PttTalkingDialog, { PttTalkingDialogState } from './ptt/PttTalkingDialog'
 import PttTalkingCallback from './ptt/PttTalkingCallback'
 import { pttEndReasonText, pttErrorText } from './ptt/pttHelper'
 import { STORAGE_KEY_PTT_ENABLED } from './ptt/PttManager'
-import { DshState } from '../../util/dshState'
+import { AgentState } from '../../util/agentState'
 
-// DSH '/' 命令浮层条目
-interface DshCommand {
+// Agent '/' 命令浮层条目
+interface AgentCommand {
     command: string
     desc: string
 }
@@ -84,11 +84,11 @@ interface MultiCheckAction {
 export default struct ConversationInputPanelView {
     @Prop conversation: Conversation
     @Prop conversationInfo: ConversationInfo
-    // DSH 会话状态与类型（'single'/'group'/''，由 ConversationPage 统一维护；非 DSH 会话为 null/''）
-    @Prop dshState: DshState | null = null
-    @Prop dshConvKind: string = ''
+    // Agent 会话状态与类型（'single'/'group'/''，由 ConversationPage 统一维护；非 Agent 会话为 null/''）
+    @Prop agentState: AgentState | null = null
+    @Prop agentConvKind: string = ''
     // '/' 命令浮层：按输入实时前缀过滤后的候选命令
-    @State dshCommandCandidates: DshCommand[] = []
+    @State agentCommandCandidates: AgentCommand[] = []
     @Link @Watch('onTextChange') text: string
     @State caretPosition: number = 0
     @State selectionStart: number = 0
@@ -107,9 +107,9 @@ export default struct ConversationInputPanelView {
     // avoidAreaChange 去重：本机会连续回调多次相同的键盘避让高度。
     private lastKbAvoidPx: number = -1
     @State showMentionSheet: boolean = false
-    // AI 会话设置面板（仅 DSH/AI 会话 line===2 显示入口）
+    // AI 会话设置面板（仅 Agent/AI 会话 line===2 显示入口）
     // AI 会话设置面板是否打开（与 ConversationPage 双向绑定，面板由页面根 Stack 悬浮呈现）
-    @Link showDshAgentPanel: boolean
+    @Link showAgentPanel: boolean
     // AI 群群主（AI 机器人）是否在线：不在线时 "AI 会话设置" 入口置灰禁用
     @Prop aiOwnerOnline: boolean = false
     @State @Watch('onKeyboardHeightChanged') keyboardHeight: number = 320
@@ -157,6 +157,9 @@ export default struct ConversationInputPanelView {
     @State showExtContentCoverModal: boolean = false
     // 「猜你想发送」：与表情建议一样由 ConversationPage 渲染于输入栏上方；此处仅控制其显隐
     @Link recentPhotoRequested: boolean
+    // 「AI 会话设置」点击回调：由 ConversationPage 提供（多机器人会话先列表选择目标机器人再打开面板）。
+    // 页面侧处理机器人选择/打开逻辑；未提供（缺省场景）时直接打开面板（空机器人 = 会话默认机器人）
+    onOpenAgentPanel?: () => void
     // Callbacks for ConversationPage-level overlays
     onPreviewChange?: (emoji: Emoji | null, col: number, colW: number, rowY: number) => void
     onSuggestionsChange?: (stickers: Emoji[]) => void
@@ -335,23 +338,29 @@ export default struct ConversationInputPanelView {
         }
     ]
 
-    // 「+」扩展网格可见项：DSH/AI 会话（line===2）前置「AI 会话设置」入口，其余会话不显示
+    // 「+」扩展网格可见项：Agent/AI 会话（line===2）前置「AI 会话设置」入口，其余会话不显示
     private visibleConversationExts(): ConversationExt[] {
-        if (this.dshConvKind) {
-            return [this.dshAgentExt(), ...this.conversationExts]
+        if (this.agentConvKind) {
+            return [this.agentExt(), ...this.conversationExts]
         }
         return this.conversationExts
     }
 
-    // 「AI 会话设置」扩展项：点击弹出底部设置面板（选择式，不需要手输命令）
-    private dshAgentExt(): ConversationExt {
+    // 「AI 会话设置」扩展项：点击弹出底部设置面板（选择式，不需要手输命令）；
+    // 多机器人会话由 ConversationPage 先弹机器人选择列表（openAgentPanel），再打开对应面板
+    private agentExt(): ConversationExt {
         return {
             title: 'AI 会话设置',
             icon: $r('app.media.ic_robot'),
             // AI 不在线：置灰禁用，点击不弹出面板
             disabled: !this.aiOwnerOnline,
             action: () => {
-                this.showDshAgentPanel = true
+                if (this.onOpenAgentPanel) {
+                    this.onOpenAgentPanel()
+                } else {
+                    // 页面未接管时直接打开（robotUid 为空 = 会话默认机器人，保持旧行为）
+                    this.showAgentPanel = true
+                }
             }
         }
     }
@@ -584,9 +593,9 @@ export default struct ConversationInputPanelView {
     }
 
     // 单聊机器人命令集（/create 等私聊专属命令在群内会被插件拒绝；/stop 危险语义放最后）
-    private static DSH_SINGLE_COMMANDS: DshCommand[] = [
+    private static AGENT_SINGLE_COMMANDS: AgentCommand[] = [
         { command: '/help', desc: '命令帮助' },
-        { command: '/create', desc: '创建 DSH 工作区群' },
+        { command: '/create', desc: '创建 Agent 工作区群' },
         { command: '/workspaces', desc: '列出工作区' },
         { command: '/goal', desc: '目标管理' },
         { command: '/jobs', desc: '后台任务' },
@@ -599,10 +608,10 @@ export default struct ConversationInputPanelView {
         { command: '/sandbox', desc: '沙箱模式' },
         { command: '/stop', desc: '停止当前任务' },
     ]
-    // DSH 群聊命令集（群内可用）：model/effort/cwd/sandbox/plan/compact/reset/ls 已由
+    // Agent 群聊命令集（群内可用）：model/effort/cwd/sandbox/plan/compact/reset/ls 已由
     // 「AI 会话设置」面板（207 静默指令 + type=3）覆盖，不再出现在命令菜单；
     // 保留 help/stop/群管理（members/kick/invite/mute/unmute）；/stop 危险语义放最后
-    private static DSH_GROUP_COMMANDS: DshCommand[] = [
+    private static AGENT_GROUP_COMMANDS: AgentCommand[] = [
         { command: '/help', desc: '命令帮助' },
         { command: '/members', desc: '列成员' },
         { command: '/kick', desc: '踢人' },
@@ -612,40 +621,40 @@ export default struct ConversationInputPanelView {
         { command: '/stop', desc: '停止当前任务' },
     ]
 
-    private dshCommands(): DshCommand[] {
-        return this.dshConvKind === 'group' ? ConversationInputPanelView.DSH_GROUP_COMMANDS : ConversationInputPanelView.DSH_SINGLE_COMMANDS
+    private agentCommands(): AgentCommand[] {
+        return this.agentConvKind === 'group' ? ConversationInputPanelView.AGENT_GROUP_COMMANDS : ConversationInputPanelView.AGENT_SINGLE_COMMANDS
     }
 
-    // '/' 命令浮层：仅 DSH 会话启用；文本以 '/' 开头且还在输入命令本体（未输入空格）时，按前缀实时过滤
-    private updateDshCommandCandidates(value: string) {
-        if (!this.dshConvKind) {
-            if (this.dshCommandCandidates.length > 0) {
-                this.dshCommandCandidates = []
+    // '/' 命令浮层：仅 Agent 会话启用；文本以 '/' 开头且还在输入命令本体（未输入空格）时，按前缀实时过滤
+    private updateAgentCommandCandidates(value: string) {
+        if (!this.agentConvKind) {
+            if (this.agentCommandCandidates.length > 0) {
+                this.agentCommandCandidates = []
             }
             return
         }
         if (!value.startsWith('/') || value.indexOf(' ') >= 0) {
-            if (this.dshCommandCandidates.length > 0) {
-                this.dshCommandCandidates = []
+            if (this.agentCommandCandidates.length > 0) {
+                this.agentCommandCandidates = []
             }
             return
         }
-        this.dshCommandCandidates = this.dshCommands().filter(c => c.command.startsWith(value))
+        this.agentCommandCandidates = this.agentCommands().filter(c => c.command.startsWith(value))
     }
 
     // 点选命令：把「命令+空格」填入输入框，不直接发送
-    private onSelectDshCommand(command: string) {
+    private onSelectAgentCommand(command: string) {
         this.text = command + ' '
-        this.dshCommandCandidates = []
+        this.agentCommandCandidates = []
     }
 
-    // 输入框占位：随 DSH 会话状态变化，非 DSH 会话恢复默认（空）
-    private dshInputPlaceholder(): string {
-        if (this.dshState) {
-            if (this.dshState.state === 'waiting_user') {
+    // 输入框占位：随 Agent 会话状态变化，非 Agent 会话恢复默认（空）
+    private agentInputPlaceholder(): string {
+        if (this.agentState) {
+            if (this.agentState.state === 'waiting_user') {
                 return '可直接输入文字回答，或点击上方卡片按钮'
             }
-            if (this.dshState.state === 'running') {
+            if (this.agentState.state === 'running') {
                 return 'Agent 运行中…'
             }
         }
@@ -1111,11 +1120,11 @@ export default struct ConversationInputPanelView {
             .justifyContent(FlexAlign.SpaceAround)
         } else {
             Column() {
-                // DSH '/' 命令浮层：内联显示在输入面板上方（不跳页），按输入实时前缀过滤；
+                // Agent '/' 命令浮层：内联显示在输入面板上方（不跳页），按输入实时前缀过滤；
                 // 条目为「命令 + 简短中文说明」，点选把「命令+空格」填入输入框，不直接发送
-                if (this.dshCommandCandidates.length > 0) {
+                if (this.agentCommandCandidates.length > 0) {
                     Column() {
-                        ForEach(this.dshCommandCandidates, (cmd: DshCommand) => {
+                        ForEach(this.agentCommandCandidates, (cmd: AgentCommand) => {
                             Row() {
                                 Text(cmd.command)
                                     .fontSize(FontSize.sm)
@@ -1138,9 +1147,9 @@ export default struct ConversationInputPanelView {
                                 }
                             })
                             .onClick(() => {
-                                this.onSelectDshCommand(cmd.command)
+                                this.onSelectAgentCommand(cmd.command)
                             })
-                        }, (cmd: DshCommand) => cmd.command)
+                        }, (cmd: AgentCommand) => cmd.command)
                     }
                     .width('100%')
                     .constraintSize({ maxHeight: 240 })
@@ -1225,7 +1234,7 @@ export default struct ConversationInputPanelView {
                         }
                         if (!this.showAudioRecorderButton && !this.showPttButton) {
                             Column() {
-                                // TextArea 在当前 SDK 无 placeholder 属性：用叠加层实现 DSH 状态占位提示
+                                // TextArea 在当前 SDK 无 placeholder 属性：用叠加层实现 Agent 状态占位提示
                                 // （文本为空且有占位文案时显示，不拦截点击，点击落到 TextArea 上）
                                 Stack() {
                                     TextArea({ text: this.text, controller: this.textInputController })
@@ -1237,8 +1246,8 @@ export default struct ConversationInputPanelView {
                                         } else {
                                             this.text = value
                                         }
-                                        // DSH '/' 命令浮层（与 @ 检测并列，仅 DSH 会话有候选）
-                                        this.updateDshCommandCandidates(value)
+                                        // Agent '/' 命令浮层（与 @ 检测并列，仅 Agent 会话有候选）
+                                        this.updateAgentCommandCandidates(value)
                                     })// .caretPosition(this.caretPosition)
                                     .onFocus(() => {
                                         this.recentPhotoRequested = false
@@ -1268,8 +1277,8 @@ export default struct ConversationInputPanelView {
                                     .fontColor($r('app.color.wf_primary_text'))
                                     .align(Alignment.Center)
                                     .alignSelf(ItemAlign.Center)
-                                    if (this.text.length === 0 && this.dshInputPlaceholder().length > 0) {
-                                        Text(this.dshInputPlaceholder())
+                                    if (this.text.length === 0 && this.agentInputPlaceholder().length > 0) {
+                                        Text(this.agentInputPlaceholder())
                                             .fontSize(TextStyleToken.inputText)
                                             .fontColor($r('app.color.wf_tertiary_text'))
                                             .width('100%')
@@ -1449,7 +1458,7 @@ export default struct ConversationInputPanelView {
                                     wfc.sendConversationMessage(this.conversation, textMessageContent, [], null, null, null, null, null);
                                     wfc.setConversationDraft(this.conversation, '')
                                     this.text = '';
-                                    this.dshCommandCandidates = []
+                                    this.agentCommandCandidates = []
                                     this.quotedMessage = null
                                 })
                         } else {

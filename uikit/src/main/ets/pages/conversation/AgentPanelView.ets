@@ -1,31 +1,31 @@
 /*
- * DshAgentPanelView.ets — AI 会话设置面板（第一层 Agent 可改属性，统一交互风格）。
- * 交互对齐 vue-pc-chat 的 DshAgentPanel.vue：
+ * AgentPanelView.ets — AI 会话设置面板（第一层 Agent 可改属性，统一交互风格）。
+ * 交互对齐 vue-pc-chat 的 AgentPanel.vue：
  *   模型/推理等级 = 下拉选择（Select）；沙箱模式 = 水平单选（Radio）；
  *   工作目录 = 「切换」弹出独立目录选择界面（bindSheet 二级弹窗）；计划模式 = 开关（Toggle）。
  * 展示方式：父组件以 Stack 内联覆盖呈现（遮罩 + 居中卡片），本面板为居中卡片（窗口样式）。
- * 静默通道：打开面板发 DSH_Command(207) query（组合查询）→ 插件聚合面板数据写
+ * 静默通道：打开面板发 AGENT_Command(207) query（组合查询）→ 插件聚合面板数据写
  * scope=31 type=3 → 本面板读 type=3 渲染（模型/推理等级/沙箱/计划/cwd/目录列表）。
- * 所有操作发 DSH_Command(207) set（cmd=命令文本），插件执行后写 type=1 lastChange
+ * 所有操作发 AGENT_Command(207) set（cmd=命令文本），插件执行后写 type=1 lastChange
  * （标题栏变更可见）+ 刷新 type=3；本面板监听 SettingUpdate 设置更新事件重读 type=3。
  * 207 为透明消息：不落库、不显示在消息流（digest 为空）。
  */
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import EventType from '@wfc/client/src/main/ets/wfc/client/wfcEvent'
-import AgentCommandMessageContent from '@wfc/client/src/main/ets/wfc/messages/dshCommandMessageContent'
+import AgentCommandMessageContent from '@wfc/client/src/main/ets/wfc/messages/agentCommandMessageContent'
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType'
-import { DshPanelData, getDshPanelData } from '../../util/dshState'
+import { AgentPanelData, agentRobotName, getAgentPanelDataFor } from '../../util/agentState'
 import { FontSize, Radius } from '../../common/design/Tokens'
 
 // 单选可选项（模型/推理等级）
-interface DshOption {
+interface AgentOption {
     value: string
     label: string
 }
 
 // 沙箱模式固定三项（type=3 sandbox.options 为空时的兜底，与插件 SANDBOX_MODES 一致）
-const SANDBOX_MODES: DshOption[] = [
+const SANDBOX_MODES: AgentOption[] = [
     { value: 'read-only', label: '只读' },
     { value: 'workspace-write', label: '仅写工作区' },
     { value: 'danger-full-access', label: '完全放开' }
@@ -41,8 +41,8 @@ function sandboxLabel(value: string): string {
     return value
 }
 
-// DshOption[] → Select 下拉选项（SelectOption 为接口，用对象字面量构造）
-function toSelectOptions(options: DshOption[]): SelectOption[] {
+// AgentOption[] → Select 下拉选项（SelectOption 为接口，用对象字面量构造）
+function toSelectOptions(options: AgentOption[]): SelectOption[] {
     let result: SelectOption[] = []
     for (const o of options) {
         let opt: SelectOption = { value: o.label }
@@ -52,13 +52,16 @@ function toSelectOptions(options: DshOption[]): SelectOption[] {
 }
 
 @Component
-export default struct DshAgentPanelView {
+export default struct AgentPanelView {
     // 面板所属会话（由父组件传入；默认值仅满足 ArkTS 必初始化约束）
     conversation: Conversation = new Conversation(ConversationType.Single, '', 0)
+    // 目标机器人（多机器人会话寻址；空 = 会话默认机器人）。面板数据按该机器人读取、
+    // 207 指令带 robotId；父组件切换目标时（@Watch）重读 type=3 并补发 query 刷新
+    @Prop @Watch('onRobotUidChanged') robotUid: string = ''
     // 关闭面板的回调（父组件 Stack 移除本组件，这里用于面板内「×」按钮与遮罩点击）
     dismiss?: () => void
     // type=3 面板数据（模型/推理等级/沙箱/计划/cwd/目录列表），赋值即触发重建
-    @State panelData: DshPanelData | null = null
+    @State panelData: AgentPanelData | null = null
     @State applying: boolean = false
     // 目录选择弹窗（bindSheet 二级弹窗）是否打开
     @State showCwdPicker: boolean = false
@@ -68,20 +71,23 @@ export default struct DshAgentPanelView {
 
     // ─── type=3 派生值：ArkTS getter 不响应 @State，改为 @State 字段由 refreshPanelData 填充 ───
     @State currentModel: string = ''
-    @State modelOptions: DshOption[] = []
+    @State modelOptions: AgentOption[] = []
     @State modelSelectOptions: SelectOption[] = []
     @State currentEffort: string = ''
-    @State effortOptions: DshOption[] = []
+    @State effortOptions: AgentOption[] = []
     @State effortSelectOptions: SelectOption[] = []
     @State currentCwd: string = ''
     @State currentSandbox: string = ''
-    @State sandboxOptions: DshOption[] = SANDBOX_MODES
+    @State sandboxOptions: AgentOption[] = SANDBOX_MODES
     @State planOn: boolean = false
     @State cwdCandidates: string[] = []
+    // 面板标题附注（多机器人时显示目标机器人名，如 "AI 会话设置 · 机器人名"）
+    @State robotTitleNote: string = ''
 
     aboutToAppear() {
         // 设置更新事件：插件执行更新/组合查询后写 type=3，重读刷新
         wfc.eventEmitter?.on(EventType.SettingUpdate, this.onSettingUpdate)
+        this.updateRobotTitleNote()
         // 先读已有面板数据（若有），再发组合查询刷新
         this.refreshPanelData()
         this.sendCommand('query')
@@ -92,18 +98,30 @@ export default struct DshAgentPanelView {
         clearTimeout(this.flashTimer)
     }
 
-    /** 设置更新（scope=31 会话级用户设置变化，type=3 刷新即触发）：重读面板数据。 */
+    /** 目标机器人（@Prop）变化：重读该机器人的 type=3 并补发组合查询（一般由父组件重新创建本面板触发）。 */
+    onRobotUidChanged() {
+        this.updateRobotTitleNote()
+        this.refreshPanelData()
+        this.sendCommand('query')
+    }
+
+    /** 面板标题附注：robotUid 非空时显示机器人显示名（名称缺失回退完整 uid，不截断）。 */
+    updateRobotTitleNote() {
+        this.robotTitleNote = this.robotUid ? agentRobotName(this.robotUid) : ''
+    }
+
+    /** 设置更新（scope=31 会话级用户设置变化，type=3 刷新即触发）：重读目标机器人的面板数据。 */
     onSettingUpdate = () => {
         this.refreshPanelData()
     }
 
     refreshPanelData() {
-        let data = getDshPanelData(this.conversation)
+        let data = getAgentPanelDataFor(this.conversation, this.robotUid)
         if (!data) {
             return
         }
         this.currentModel = data.model ? data.model.current : ''
-        let mopts: DshOption[] = []
+        let mopts: AgentOption[] = []
         if (data.model && data.model.options && data.model.options.length > 0) {
             for (const o of data.model.options) {
                 mopts.push({ value: o.value, label: o.label || o.value })
@@ -116,7 +134,7 @@ export default struct DshAgentPanelView {
         this.modelOptions = mopts
         this.modelSelectOptions = toSelectOptions(mopts)
         this.currentEffort = data.effort ? data.effort.current : ''
-        let eopts: DshOption[] = []
+        let eopts: AgentOption[] = []
         if (data.effort && data.effort.options && data.effort.options.length > 0) {
             for (const v of data.effort.options) {
                 eopts.push({ value: v, label: v })
@@ -130,7 +148,7 @@ export default struct DshAgentPanelView {
         this.effortSelectOptions = toSelectOptions(eopts)
         this.currentCwd = data.cwd ? data.cwd : ''
         this.currentSandbox = data.sandbox ? data.sandbox.current : ''
-        let sopts: DshOption[] = []
+        let sopts: AgentOption[] = []
         if (data.sandbox && data.sandbox.options && data.sandbox.options.length > 0) {
             for (const v of data.sandbox.options) {
                 sopts.push({ value: v, label: sandboxLabel(v) })
@@ -141,10 +159,11 @@ export default struct DshAgentPanelView {
         this.cwdCandidates = data.dirs ? data.dirs : []
     }
 
-    /** 发送 207 面板指令（透明消息，不显示在消息流）。 */
+    /** 发送 207 面板指令（透明消息，不显示在消息流）；带目标机器人 robotId（多机器人寻址）。 */
     sendCommand(op: string, cmd: string = '') {
         this.seq = (this.seq + 1) % 100000
-        wfc.sendConversationMessage(this.conversation, new AgentCommandMessageContent(op, cmd, this.seq))
+        wfc.sendConversationMessage(this.conversation,
+            new AgentCommandMessageContent(op, cmd, this.seq, this.robotUid))
     }
 
     // ─── 操作：207 set（cmd=命令文本，插件执行后写 lastChange + 刷新 type=3） ───
@@ -440,12 +459,14 @@ export default struct DshAgentPanelView {
 
             // 居中卡片
             Column() {
-                // 头部：标题 + 关闭按钮
+                // 头部：标题（多机器人时附目标机器人名）+ 关闭按钮
                 Row() {
-                    Text('🤖 AI 会话设置')
+                    Text(this.robotTitleNote ? `🤖 AI 会话设置 · ${this.robotTitleNote}` : '🤖 AI 会话设置')
                         .fontSize(FontSize.md)
                         .fontColor($r('app.color.wf_primary_text'))
                         .layoutWeight(1)
+                        .maxLines(1)
+                        .textOverflow({ overflow: TextOverflow.Ellipsis })
                     Text('×')
                         .fontSize(FontSize.lg)
                         .fontColor($r('app.color.wf_secondary_text'))
@@ -554,9 +575,9 @@ export default struct DshAgentPanelView {
                         // 4. 沙箱模式（水平单选）
                         this.sectionTitle('沙箱模式')
                         Row() {
-                            ForEach(this.sandboxOptions, (mode: DshOption) => {
+                            ForEach(this.sandboxOptions, (mode: AgentOption) => {
                                 Row() {
-                                    Radio({ value: mode.value, group: 'dshSandboxGroup' })
+                                    Radio({ value: mode.value, group: 'agentSandboxGroup' })
                                         .checked(this.currentSandbox === mode.value)
                                         .onChange((isChecked: boolean) => {
                                             if (isChecked) {
@@ -578,7 +599,7 @@ export default struct DshAgentPanelView {
                                 .onClick(() => {
                                     this.selectSandbox(mode.value)
                                 })
-                            }, (mode: DshOption) => mode.value)
+                            }, (mode: AgentOption) => mode.value)
                         }
                         .width('100%')
                         .padding({ left: 8, right: 8 })

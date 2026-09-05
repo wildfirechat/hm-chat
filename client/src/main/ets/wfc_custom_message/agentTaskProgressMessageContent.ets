@@ -3,7 +3,7 @@ import MessageContent from '../wfc/messages/messageContent'
 import MessagePayload from '../wfc/messages/messagePayload'
 
 /**
- * DSH 任务进度卡片消息，内容类型 208（机器人 -> 用户）。
+ * Agent 任务进度卡片消息，内容类型 208（机器人 -> 用户）。
  * 插件派生子任务/后台任务时首次 sendCard，之后 updateMessage 原地更新本卡片。
  * content = JSON：{"tasks":[{"kind":"subagent|job","id":"...","label":"可选",
  *   "status":"running|done|failed|completed|killed","reason":"失败原因可选","updatedAt":123}],"updatedAt":123}
@@ -26,7 +26,7 @@ export class AgentTaskProgressData {
 }
 
 /** 摘要：无任务返回 "🧩 任务：无"；有运行中显示 "🧩 任务 N（M 运行中）"，否则 "🧩 任务 N（全部完成）"。 */
-export function summarizeDshTaskProgress(content: AgentTaskProgressData): string {
+export function summarizeAgentTaskProgress(content: AgentTaskProgressData): string {
     let tasks = content.tasks || []
     let running = 0
     tasks.forEach(t => {
@@ -48,7 +48,7 @@ export default class AgentTaskProgressMessageContent extends MessageContent {
     }
 
     digest(): string {
-        return summarizeDshTaskProgress(this.content)
+        return summarizeAgentTaskProgress(this.content)
     }
 
     encode() {

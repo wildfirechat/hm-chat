@@ -3,7 +3,7 @@ import MessageContent from '../wfc/messages/messageContent'
 import MessagePayload from '../wfc/messages/messagePayload'
 
 /**
- * DSH 审批结果消息，内容类型 203（用户 -> 机器人）
+ * Agent 审批结果消息，内容类型 203（用户 -> 机器人）
  */
 export class AgentApprovalResultData {
     aid: string = ''

@@ -1,12 +1,12 @@
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
-import AgentQuestionMessageContent, { AgentQuestionData, AgentQuestionItem, AgentQuestionOption } from '@wfc/client/src/main/ets/wfc_custom_message/dshQuestionMessageContent'
-import AgentAnswerMessageContent, { AgentAnswerData, AgentAnswerItem } from '@wfc/client/src/main/ets/wfc_custom_message/dshAnswerMessageContent'
+import AgentQuestionMessageContent, { AgentQuestionData, AgentQuestionItem, AgentQuestionOption } from '@wfc/client/src/main/ets/wfc_custom_message/agentQuestionMessageContent'
+import AgentAnswerMessageContent, { AgentAnswerData, AgentAnswerItem } from '@wfc/client/src/main/ets/wfc_custom_message/agentAnswerMessageContent'
 import { FontSize, Radius } from '../../../common/design/Tokens'
 import { uikitNavigationDestinations } from '../../uikitNavigationConfig'
 
 /**
- * DSH 提问卡片：选项垂直排列整行可点；单选点击即答，多选勾选后点「提交」；
+ * Agent 提问卡片：选项垂直排列整行可点；单选点击即答，多选勾选后点「提交」；
  * 「自定义回答」聚焦会话主输入框（用户直接发的文本由服务端当作自定义回答）；
  * plan-review 时计划全文不内联，点「查看计划」打开全屏计划详情页。
  */
@@ -162,7 +162,7 @@ export default struct AgentQuestionContentView {
                 rejectLabel = other.label
             }
         }
-        this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.DshPlanDetailPage, {
+        this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.AgentPlanDetailPage, {
             'planText': q.detail,
             'title': q.header ? q.header : '计划详情',
             'message': this.message,

@@ -17,7 +17,7 @@ import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
 import { FontSize } from '../common/design/Tokens'
 import { pcPlatformSymbol, pcDeviceName } from '../common/utils/pcOnlineUtil'
 import UserOnlineState from '@wfc/client/src/main/ets/wfc/model/userOnlineState'
-import { dshConversationKind } from '../util/dshState'
+import { agentConversationKind } from '../util/agentState'
 
 @Component
 @Preview
@@ -111,7 +111,7 @@ export default struct ConversationListTab {
         let owners: string[] = []
         infos.forEach((info: ConversationInfo) => {
             let conv = info.conversation
-            if (conv && dshConversationKind(conv) === 'group') {
+            if (conv && agentConversationKind(conv) === 'group') {
                 let g = wfc.getGroupInfo(conv.target)
                 if (g && g.owner && owners.indexOf(g.owner) < 0) {
                     owners.push(g.owner)

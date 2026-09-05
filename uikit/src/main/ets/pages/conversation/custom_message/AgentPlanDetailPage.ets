@@ -1,15 +1,15 @@
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
-import AgentQuestionMessageContent from '@wfc/client/src/main/ets/wfc_custom_message/dshQuestionMessageContent'
-import AgentAnswerMessageContent, { AgentAnswerData, AgentAnswerItem } from '@wfc/client/src/main/ets/wfc_custom_message/dshAnswerMessageContent'
+import AgentQuestionMessageContent from '@wfc/client/src/main/ets/wfc_custom_message/agentQuestionMessageContent'
+import AgentAnswerMessageContent, { AgentAnswerData, AgentAnswerItem } from '@wfc/client/src/main/ets/wfc_custom_message/agentAnswerMessageContent'
 import { FontSize, Radius } from '../../../common/design/Tokens'
 
 /**
- * DSH plan-review 全屏计划详情页：等宽字体展示计划全文，底部固定 批准/拒绝 按钮。
- * 批准/拒绝等同点击卡片上对应选项（发送 DSH_ANSWER），回答后关闭本页并通知卡片本地置灰。
+ * Agent plan-review 全屏计划详情页：等宽字体展示计划全文，底部固定 批准/拒绝 按钮。
+ * 批准/拒绝等同点击卡片上对应选项（发送 AGENT_ANSWER），回答后关闭本页并通知卡片本地置灰。
  */
 @Component
-export default struct DshPlanDetailPage {
+export default struct AgentPlanDetailPage {
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack
     @State planText: string = ''
     @State pageTitle: string = '计划详情'

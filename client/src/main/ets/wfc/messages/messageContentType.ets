@@ -30,7 +30,7 @@ export default class MessageContentType {
     // 流式文本取消消息（生成无产出/失败时由机器人发送，客户端按 streamId 删除对应的 14/15 消息）
     static Streaming_Text_Cancelled = 20;
 
-    // DSH_Command（207）：用户→机器人 AI 面板静默指令（透明消息，不落库、不显示；
+    // AGENT_Command（207）：用户→机器人 AI 面板静默指令（透明消息，不落库、不显示；
     // content 为 JSON：{"op":"query"} 组合查询 / {"op":"set","cmd":"/model xxx","seq":123} 更新）
     static AGENT_COMMAND = 207;
 

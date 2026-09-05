@@ -15,10 +15,14 @@ export default struct GroupManagePage {
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
     @State groupInfo?: GroupInfo = undefined
     @State showPickGroupMemberModal: boolean = false
+    // 进入本页的会话 line（由 GroupConversationInfoPage 传入；AI 群 line=2，普通群 0），
+    // 群成员管理/群操作通知需发到当前会话的 line，逐层透传给子页面
+    private conversationLine: number = 0
 
     aboutToAppear() {
         let params = this.mainNavPathStack.getParamByIndex(this.mainNavPathStack.size() - 1) as Record<string, Object>;
         this.groupInfo = params['groupInfo'] as GroupInfo
+        this.conversationLine = params['conversationLine'] as number ?? 0
 
     }
 
@@ -103,7 +107,8 @@ export default struct GroupManagePage {
                     })
                         .onClick(() => {
                             this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.GroupManagerListPage, {
-                                'groupInfo': this.groupInfo
+                                'groupInfo': this.groupInfo,
+                                'conversationLine': this.conversationLine
                             } as Record<string, Object>)
                         })
                     OptionItemView({

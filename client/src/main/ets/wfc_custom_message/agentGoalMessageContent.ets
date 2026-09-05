@@ -3,7 +3,7 @@ import MessageContent from '../wfc/messages/messageContent'
 import MessagePayload from '../wfc/messages/messagePayload'
 
 /**
- * DSH 目标进度卡片消息，内容类型 206（机器人 -> 用户）
+ * Agent 目标进度卡片消息，内容类型 206（机器人 -> 用户）
  */
 export class AgentGoalData {
     gid: string = ''
@@ -13,7 +13,7 @@ export class AgentGoalData {
     roundsStarted: number = 0
 }
 
-export function summarizeDshGoal(content: AgentGoalData): string {
+export function summarizeAgentGoal(content: AgentGoalData): string {
     return `🎯 ${content.objective || '目标'}（${content.phase || ''}，round ${content.roundsStarted ?? 0}）`
 }
 
@@ -25,7 +25,7 @@ export default class AgentGoalMessageContent extends MessageContent {
     }
 
     digest(): string {
-        return summarizeDshGoal(this.content)
+        return summarizeAgentGoal(this.content)
     }
 
     encode() {

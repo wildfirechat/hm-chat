@@ -1,10 +1,10 @@
 import CustomMessageContentType from './customMessageContentType'
 import MessageContent from '../wfc/messages/messageContent'
 import MessagePayload from '../wfc/messages/messagePayload'
-import { AgentAnswerItem } from './dshAnswerMessageContent'
+import { AgentAnswerItem } from './agentAnswerMessageContent'
 
 /**
- * DSH 提问卡片消息，内容类型 200（机器人 -> 用户）
+ * Agent 提问卡片消息，内容类型 200（机器人 -> 用户）
  *
  * payload 约定（与 PC 端/服务端对齐）：
  *   payload.content           = JSON 字符串（结构化数据）
@@ -38,7 +38,7 @@ export class AgentQuestionData {
     answers: AgentAnswerItem[] = []
 }
 
-export function summarizeDshQuestion(content: AgentQuestionData): string {
+export function summarizeAgentQuestion(content: AgentQuestionData): string {
     let first = content.questions && content.questions.length > 0 ? content.questions[0] : null
     if (!first) {
         return '🤔 需要你确认'
@@ -54,7 +54,7 @@ export default class AgentQuestionMessageContent extends MessageContent {
     }
 
     digest(): string {
-        return summarizeDshQuestion(this.content)
+        return summarizeAgentQuestion(this.content)
     }
 
     encode() {

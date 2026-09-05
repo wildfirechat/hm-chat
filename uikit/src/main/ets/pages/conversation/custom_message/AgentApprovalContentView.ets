@@ -1,12 +1,12 @@
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
-import AgentApprovalMessageContent, { AgentApprovalData } from '@wfc/client/src/main/ets/wfc_custom_message/dshApprovalMessageContent'
-import AgentApprovalResultMessageContent, { AgentApprovalResultData } from '@wfc/client/src/main/ets/wfc_custom_message/dshApprovalResultMessageContent'
+import AgentApprovalMessageContent, { AgentApprovalData } from '@wfc/client/src/main/ets/wfc_custom_message/agentApprovalMessageContent'
+import AgentApprovalResultMessageContent, { AgentApprovalResultData } from '@wfc/client/src/main/ets/wfc_custom_message/agentApprovalResultMessageContent'
 import { FontSize, Radius } from '../../../common/design/Tokens'
 
 /**
- * DSH 审批卡片：「同意」（主色）/「拒绝」（红）并排各半宽；
- * 点击发送 DSH_ApprovalResult 并立即本地置灰。
+ * Agent 审批卡片：「同意」（主色）/「拒绝」（红）并排各半宽；
+ * 点击发送 AGENT_ApprovalResult 并立即本地置灰。
  */
 @Component
 export default struct AgentApprovalContentView {

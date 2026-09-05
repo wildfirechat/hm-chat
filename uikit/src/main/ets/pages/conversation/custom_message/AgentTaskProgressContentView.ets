@@ -2,11 +2,11 @@ import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import AgentTaskProgressMessageContent, {
     AgentTaskProgressData,
     AgentTaskProgressTask
-} from '@wfc/client/src/main/ets/wfc_custom_message/dshTaskProgressMessageContent'
+} from '@wfc/client/src/main/ets/wfc_custom_message/agentTaskProgressMessageContent'
 import { FontSize, Radius } from '../../../common/design/Tokens'
 
 /**
- * DSH 任务进度卡片（208）：标题「🧩 任务进度」+ 摘要角标 + 任务列表。
+ * Agent 任务进度卡片（208）：标题「🧩 任务进度」+ 摘要角标 + 任务列表。
  * 每行 = 状态图标 + label（或 id 短前缀）+ 状态文字（失败附原因）；空任务显示「暂无任务」。
  * 插件 updateMessage 原地更新时，消息对象被数据源整体替换，build 随 @Link message 自动刷新。
  */

@@ -8,10 +8,24 @@ import { eq } from '@wfc/client/src/main/ets/wfc/util/longUtil'
 import EventType from '@wfc/client/src/main/ets/wfc/client/wfcEvent'
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
 import MessageContentType from '@wfc/client/src/main/ets/wfc/messages/messageContentType'
-import { DshMetrics, DshState, dshConversationKind, dshMetricsText, dshStatusHint, dshStateColor, dshStateText, getDshMetrics, getDshState } from '../../util/dshState'
+import {
+    AgentMetrics,
+    AgentState,
+    agentConversationKind,
+    agentMetricsText,
+    agentRobotName,
+    agentRobotStatusText,
+    agentStateColor,
+    agentStateText,
+    agentStatusHint,
+    getAgentMetrics,
+    getAgentRobotStates,
+    getAgentState,
+    listAgentRobotUids
+} from '../../util/agentState'
 import NormalMessageContentView from './message/NormalMessageContentView'
 import ConversationInputPanelView from './ConversationInputPanelView'
-import DshAgentPanelView from './DshAgentPanelView'
+import AgentPanelView from './AgentPanelView'
 import AudioPlayManager from './audio/AudioPlayManager'
 import { playRawSound } from '../../helper/soundEffectHelper'
 import NotificationMessageContent from '@wfc/client/src/main/ets/wfc/messages/notification/notificationMessageContent'
@@ -44,10 +58,10 @@ import StreamingTextGeneratingMessageContent from '@wfc/client/src/main/ets/wfc/
 import StreamingTextGeneratedMessageContent from '@wfc/client/src/main/ets/wfc/messages/streamingTextGeneratedMessageContent'
 import StreamingTextCancelledMessageContent from '@wfc/client/src/main/ets/wfc/messages/streamingTextCancelledMessageContent'
 import CustomMessageContentType from '@wfc/client/src/main/ets/wfc_custom_message/customMessageContentType'
-import AgentQuestionMessageContent from '@wfc/client/src/main/ets/wfc_custom_message/dshQuestionMessageContent'
-import AgentApprovalMessageContent from '@wfc/client/src/main/ets/wfc_custom_message/dshApprovalMessageContent'
-import AgentGoalMessageContent from '@wfc/client/src/main/ets/wfc_custom_message/dshGoalMessageContent'
-import AgentTaskProgressMessageContent from '@wfc/client/src/main/ets/wfc_custom_message/dshTaskProgressMessageContent'
+import AgentQuestionMessageContent from '@wfc/client/src/main/ets/wfc_custom_message/agentQuestionMessageContent'
+import AgentApprovalMessageContent from '@wfc/client/src/main/ets/wfc_custom_message/agentApprovalMessageContent'
+import AgentGoalMessageContent from '@wfc/client/src/main/ets/wfc_custom_message/agentGoalMessageContent'
+import AgentTaskProgressMessageContent from '@wfc/client/src/main/ets/wfc_custom_message/agentTaskProgressMessageContent'
 import GroupType from '@wfc/client/src/main/ets/wfc/model/groupType'
 import archiveServer from '../../api/archiveServer'
 import ArchiveMessageResult from '../../api/model/archiveMessageResult'
@@ -66,6 +80,35 @@ import { conversationIdentity, STORAGE_KEY_ACTIVE_CONVERSATION } from '../../uti
 // 每次只查询「上次消失之后、且 5 分钟内」拍摄/截图的图片——老图必然落在窗口外，只有更新的截图才会再次出现。
 let lastRecentPhotoDismissMillis = 0
 
+// 取流式消息（14 生成中 / 15 已生成）的 streamId；非流式消息返回空串。
+// 多 agent（多机器人）并发时同一会话同时存在多条不同 streamId 的 14，所有按流聚合/去重/
+// 渲染 key 逻辑都以 streamId 为分组依据，绝不按「会话唯一一条在生成」处理。
+function streamingStreamIdOf(message: Message | undefined | null): string {
+    if (!message || !message.messageContent) {
+        return ''
+    }
+    let type = message.messageContent.type
+    if (type === MessageContentType.Streaming_Text_Generating) {
+        return (message.messageContent as StreamingTextGeneratingMessageContent).streamId
+    }
+    if (type === MessageContentType.Streaming_Text_Generated) {
+        return (message.messageContent as StreamingTextGeneratedMessageContent).streamId
+    }
+    return ''
+}
+
+// 多机器人（多 agent）标题栏逐列状态项：机器人显示名 + 状态文案 + 状态颜色
+interface AgentRobotStatusRow {
+    // 机器人完整 uid（robot_xxx_yyy，不截断；作列表 key 与悬浮提示）
+    uid: string
+    // 机器人显示名（用户信息接口/缓存；缺失回退完整 uid）
+    name: string
+    // 状态文案（运行中/等待确认/空闲…）
+    text: string
+    // 状态颜色
+    color: ResourceColor
+}
+
 @Component
 export default struct ConversationPage {
     @StorageProp('fontScale') fontScale: number = 1.0;
@@ -82,7 +125,16 @@ export default struct ConversationPage {
     @State enableMultiCheck: boolean = false
     @State checkedMessages: Message[] = []
     // AI 会话设置面板是否打开（由输入面板 AI 按钮经 @Link 置位，本页根 Stack 悬浮呈现）
-    @State showDshAgentPanel: boolean = false
+    @State showAgentPanel: boolean = false
+    // 多机器人（多 agent）会话：当前「AI 会话设置」面板的目标机器人 uid（空 = 会话默认机器人）
+    @State activeAgentRobotUid: string = ''
+    // 多机器人选择弹层：机器人列表（完整 uid）与是否打开；>1 个机器人时先选择目标机器人再打开面板
+    @State agentChooserOpen: boolean = false
+    @State agentChooserRobots: string[] = []
+    // 标题栏多 agent 状态列（机器人名:状态，按机器人分组读取 type=1/type=2）；仅 >1 个有状态机器人的群 AI 会话展示
+    @State agentRobotRows: AgentRobotStatusRow[] = []
+    // 机器人显示名缺失时后台拉取用户信息（5s 限频，防止状态频繁推送时重复请求）
+    private lastRobotNameWarmMillis: number = 0
     @State @Watch('onQuoteMessage') quotedMessage: Message | null = null
     private focusMessageId: number = 0
     private checkValueChangeTriggerByClick = false
@@ -113,12 +165,12 @@ export default struct ConversationPage {
     @State private panelHeight: number = 320
     @State private pageWidth: number = 0
     @State private pageHeight: number = 0
-    // DSH 会话状态（scope=31 type=1 用户设置，键 ..._1）：标题栏副标题/停止按钮/输入框占位/斜杠命令浮层共用；非 DSH 会话为 null
-    @State dshState: DshState | null = null
-    // DSH Token 统计（scope=31 type=2 用户设置，键 ..._2）：标题栏合并行展示；回合结束必推，独立于状态；非 DSH 会话为 null
-    @State dshMetrics: DshMetrics | null = null
-    // 'single'（单聊机器人）/ 'group'（DSH 群）/ ''（非 DSH 会话），命令集随其变化
-    @State dshConvKind: string = ''
+    // Agent 会话状态（scope=31 type=1 用户设置，键 ..._1）：标题栏副标题/停止按钮/输入框占位/斜杠命令浮层共用；非 Agent 会话为 null
+    @State agentState: AgentState | null = null
+    // Agent Token 统计（scope=31 type=2 用户设置，键 ..._2）：标题栏合并行展示；回合结束必推，独立于状态；非 Agent 会话为 null
+    @State agentMetrics: AgentMetrics | null = null
+    // 'single'（单聊机器人）/ 'group'（Agent 群）/ ''（非 Agent 会话），命令集随其变化
+    @State agentConvKind: string = ''
     // AI 群（line 2）群主（AI 机器人）的在线状态描述（如 "Web 在线"/"忙碌"），标题栏 "AI <描述>" 副标题；非 AI 群为空
     @State aiOwnerOnlineStateDesc: string = ''
     // AI 群（line 2）群主（AI 机器人）是否在线：不在线时去掉所有 AI 状态段，只显示 "AI 不在线"
@@ -126,7 +178,7 @@ export default struct ConversationPage {
     // 已订阅在线状态的群主 ID（用于去重；进入 AI 群时群信息可能未就绪，待 GroupInfosUpdate 后补订）
     private aiOwnerWatchedId: string = ''
     // 标题栏「停止」按钮 1.5s 防重复点击
-    @State dshStopSending: boolean = false
+    @State agentStopSending: boolean = false
     // 输入面板（含展开的加号/表情面板）的实际高度，用于把悬浮建议层定位到输入栏正上方
     @State private inputPanelHeight: number = 56
     // 「猜你想发送」：点加号时由输入面板置位；浮于输入栏上方（与表情建议同位置）。免权限的系统最近图片控件。
@@ -317,7 +369,7 @@ export default struct ConversationPage {
         }
         // AI 群（line 2，群主=AI 机器人）：离开时取消订阅群主在线状态，并清空标题显示
         if (conversation.type === ConversationType.Group && conversation.line === 2) {
-            let owner = this.aiOwnerWatchedId || this.dshGroupOwnerOf(conversation)
+            let owner = this.aiOwnerWatchedId || this.agentGroupOwnerOf(conversation)
             if (owner && wfc.isUserOnlineStateEnabled()) {
                 wfc.unwatchOnlineState(ConversationType.Single, [owner], () => {
 
@@ -331,7 +383,7 @@ export default struct ConversationPage {
     }
 
     // AI 群（line 2）的群主 ID（=AI 机器人）；非 AI 群/群信息未就绪返回空
-    dshGroupOwnerOf(conversation: Conversation): string {
+    agentGroupOwnerOf(conversation: Conversation): string {
         if (conversation.type !== ConversationType.Group || conversation.line !== 2) {
             return ''
         }
@@ -345,7 +397,7 @@ export default struct ConversationPage {
         if (!this.conversation || !wfc.isUserOnlineStateEnabled()) {
             return
         }
-        let owner = this.dshGroupOwnerOf(this.conversation)
+        let owner = this.agentGroupOwnerOf(this.conversation)
         if (!owner) {
             this.aiOwnerOnlineStateDesc = ''
             return
@@ -377,7 +429,7 @@ export default struct ConversationPage {
             this.aiOwnerOnline = false
             return
         }
-        let owner = this.dshGroupOwnerOf(this.conversation)
+        let owner = this.agentGroupOwnerOf(this.conversation)
         if (!owner) {
             this.aiOwnerOnlineStateDesc = ''
             this.aiOwnerOnline = false
@@ -507,63 +559,124 @@ export default struct ConversationPage {
             this.updateUnreadJoinGroupRequestCount()
         }
 
-        // DSH 会话判定/状态、Token 统计初始化；用户或群信息未缓存时判为非 DSH，待 UserInfosUpdate/GroupInfosUpdate 后重新判定
-        this.refreshDshState()
+        // Agent 会话判定/状态、Token 统计初始化；用户或群信息未缓存时判为非 Agent，待 UserInfosUpdate/GroupInfosUpdate 后重新判定
+        this.refreshAgentState()
     }
 
-    // DSH 会话状态（type=1）与 Token 统计（type=2）：scope=31 用户设置变化时重读当前会话 key
+    // Agent 会话状态（type=1）与 Token 统计（type=2）：scope=31 用户设置变化时重读当前会话 key
     // （type=2 变化也会触发同一事件，事件驱动，无轮询）
     onSettingUpdate = () => {
-        this.refreshDshState()
+        this.refreshAgentState()
     }
 
-    refreshDshState() {
+    refreshAgentState() {
         if (!this.conversation) {
-            this.dshState = null
-            this.dshMetrics = null
-            this.dshConvKind = ''
+            this.agentState = null
+            this.agentMetrics = null
+            this.agentConvKind = ''
+            this.agentRobotRows = []
+            this.agentChooserRobots = []
+            this.agentChooserOpen = false
             return
         }
-        this.dshConvKind = dshConversationKind(this.conversation)
-        this.dshState = getDshState(this.conversation)
-        this.dshMetrics = getDshMetrics(this.conversation)
+        this.agentConvKind = agentConversationKind(this.conversation)
+        this.agentState = getAgentState(this.conversation)
+        this.agentMetrics = getAgentMetrics(this.conversation)
+        // 多机器人（多 agent）：按机器人分组读取状态，标题栏逐列展示（仅群 AI 会话）
+        this.refreshAgentRobotRows()
     }
 
-    // DSH 运行态提示（type=1 状态）：等待确认/审批、出错、已取消；无提示返回空字符串
-    private get dshStatusHintLine(): string {
-        return this.dshState ? dshStatusHint(this.dshState) : ''
+    // 标题栏多 agent 状态列：读取会话内每个有状态机器人的 type=1/type=2 并按机器人分组；
+    // 名称缺失（回退 uid）时后台限频拉取用户信息，UserInfosUpdate 后本方法会被再次调用重算
+    refreshAgentRobotRows() {
+        const rows: AgentRobotStatusRow[] = []
+        if (this.conversation && this.agentConvKind === 'group') {
+            const states = getAgentRobotStates(this.conversation)
+            for (const r of states) {
+                const st = r.state
+                if (!st) {
+                    continue
+                }
+                const row: AgentRobotStatusRow = {
+                    uid: r.uid,
+                    name: agentRobotName(r.uid),
+                    text: agentRobotStatusText(st),
+                    color: agentStateColor(st.state)
+                }
+                rows.push(row)
+            }
+        }
+        this.agentRobotRows = rows
+        this.warmRobotNamesIfNeeded()
     }
 
-    // DSH Token 统计一行（type=2 计量，如 "上下文 0.8% · 缓存 98% · 70.5 tok/s · 本轮 179 tok · 累计 15992 tok"）；
+    // 机器人显示名缺失（agentRobotName 回退为完整 uid 时）后台批量拉取用户信息并限频；
+    // 拉取完成后客户端会触发 UserInfosUpdate → onUserInfosUpdate → refreshAgentState 重算名称
+    private warmRobotNamesIfNeeded() {
+        if (!this.conversation || this.agentConvKind !== 'group') {
+            return
+        }
+        const uids = listAgentRobotUids(this.conversation)
+        if (uids.length === 0) {
+            return
+        }
+        const missing: string[] = []
+        for (const uid of uids) {
+            // 名称等于完整 uid 说明缓存中没有该用户信息（可能恰好同名，重复拉取无害且限频）
+            if (agentRobotName(uid) === uid) {
+                missing.push(uid)
+            }
+        }
+        if (missing.length === 0) {
+            return
+        }
+        const now = Date.now()
+        if (now - this.lastRobotNameWarmMillis < 5000) {
+            return
+        }
+        this.lastRobotNameWarmMillis = now
+        wfc.getUserInfosEx(missing, this.conversation.target, (infos: UserInfo[]) => {
+            this.refreshAgentState()
+        }, (err: number) => {
+            // 拉取失败忽略：下次状态更新/用户信息事件再试
+        })
+    }
+
+    // Agent 运行态提示（type=1 状态）：等待确认/审批、出错、已取消；无提示返回空字符串
+    private get agentStatusHintLine(): string {
+        return this.agentState ? agentStatusHint(this.agentState) : ''
+    }
+
+    // Agent Token 统计一行（type=2 计量，如 "上下文 0.8% · 缓存 98% · 70.5 tok/s · 本轮 179 tok · 累计 15992 tok"）；
     // 无可展示统计字段时返回空字符串，标题栏不占位。
-    // sessionId 校验：统计属于当前会话才显示——type=2 统计带 sessionId 且与 type=1 状态（dshState）
+    // sessionId 校验：统计属于当前会话才显示——type=2 统计带 sessionId 且与 type=1 状态（agentState）
     // 的 sessionId 不一致时（切目录后旧会话统计残留）返回空，不显示统计段；AI 在线/运行提示/lastChange
-    // 仍正常显示。任一侧 sessionId 缺失（旧数据）时不拦截，按现状显示。（参考 PC 端 dshMetricsText computed）
-    private get dshMetricsLine(): string {
-        if (!this.dshMetrics) {
+    // 仍正常显示。任一侧 sessionId 缺失（旧数据）时不拦截，按现状显示。（参考 PC 端 agentMetricsText computed）
+    private get agentMetricsLine(): string {
+        if (!this.agentMetrics) {
             return ''
         }
-        if (this.dshMetrics.sessionId && this.dshState && this.dshState.sessionId
-            && this.dshMetrics.sessionId !== this.dshState.sessionId) {
+        if (this.agentMetrics.sessionId && this.agentState && this.agentState.sessionId
+            && this.agentMetrics.sessionId !== this.agentState.sessionId) {
             return ''
         }
-        return dshMetricsText(this.dshMetrics)
+        return agentMetricsText(this.agentMetrics)
     }
 
     // 标题下方状态行：AI 在线状态 + 运行态提示 + 最近变更 + Token 统计合并为一行
     // （如 "AI Web 在线 · 🤔 等待确认 · 模型 → deepseek-official/deepseek-v4-pro · 上下文 0.8% · 缓存 98%"）。
     // 各段非空时用 " · " 连接，为空跳过；全部为空返回空字符串（不渲染不占位）。
-    // 非 AI/DSH 会话均为空，不影响原有副标题逻辑（参考 PC 端 conversationStatusLine()）。
+    // 非 AI/Agent 会话均为空，不影响原有副标题逻辑（参考 PC 端 conversationStatusLine()）。
     private get conversationStatusLine(): string {
         // AI 群：群主（AI 机器人）不在线 → 去掉所有 AI 状态段（运行态提示/lastChange/Token 统计），只显示 "AI 不在线"
-        if (this.dshConvKind === 'group' && !this.aiOwnerOnline) {
+        if (this.agentConvKind === 'group' && !this.aiOwnerOnline) {
             return 'AI 不在线'
         }
         let online = this.aiOwnerOnlineStateDesc ? 'AI ' + this.aiOwnerOnlineStateDesc : ''
-        let hint = this.dshStatusHintLine
+        let hint = this.agentStatusHintLine
         // 最近一次面板变更（type=1 lastChange，207 set 后插件写入，变更可见）
-        let lastChange = this.dshState && this.dshState.lastChange ? this.dshState.lastChange : ''
-        let metrics = this.dshMetricsLine
+        let lastChange = this.agentState && this.agentState.lastChange ? this.agentState.lastChange : ''
+        let metrics = this.agentMetricsLine
         let parts: string[] = []
         if (online) {
             parts.push(online)
@@ -580,16 +693,49 @@ export default struct ConversationPage {
         return parts.join(' · ')
     }
 
-    // 标题栏停止按钮：向当前 DSH 会话发送 /stop 命令文本，中断当前 Agent turn（1.5s 防重复点击）
-    stopDshAgent() {
-        if (this.dshStopSending || !this.conversation) {
+    // 标题栏停止按钮：向当前 Agent 会话发送 /stop 命令文本，中断当前 Agent turn（1.5s 防重复点击）
+    stopAgent() {
+        if (this.agentStopSending || !this.conversation) {
             return
         }
-        this.dshStopSending = true
+        this.agentStopSending = true
         wfc.sendConversationMessage(this.conversation, new TextMessageContent('/stop'))
         setTimeout(() => {
-            this.dshStopSending = false
+            this.agentStopSending = false
         }, 1500)
+    }
+
+    // ─── AI 会话设置面板打开：多机器人先列表选择目标机器人再打开（对齐 PC 端 MessageInputView） ───
+    // 机器人列表来自 scope=31 type=1 条目后缀 + 群机器人成员兜底（listAgentRobotUids，完整 uid）
+    openAgentPanel() {
+        if (!this.conversation) {
+            return
+        }
+        const robots = listAgentRobotUids(this.conversation)
+        if (robots.length > 1) {
+            // 多机器人：先弹选择列表
+            this.agentChooserRobots = robots
+            this.agentChooserOpen = true
+            this.showAgentPanel = false
+            this.activeAgentRobotUid = ''
+            return
+        }
+        // 单机器人/无条目：直接打开（空 uid = 会话默认机器人）
+        this.activeAgentRobotUid = robots.length === 1 ? robots[0] : ''
+        this.agentChooserOpen = false
+        this.showAgentPanel = true
+    }
+
+    /** 机器人选择列表：选中目标机器人（完整 uid）后关闭列表并打开其面板。 */
+    pickAgentRobot(uid: string) {
+        this.activeAgentRobotUid = uid || ''
+        this.agentChooserOpen = false
+        this.showAgentPanel = true
+    }
+
+    /** 关闭机器人选择列表（不打开面板）。 */
+    closeAgentChooser() {
+        this.agentChooserOpen = false
     }
 
     onGroupJoinRequestUpdate = () => {
@@ -761,7 +907,7 @@ export default struct ConversationPage {
     }
 
     isDisplayMessage(message: Message) {
-        // DSH_Command (207) 是 AI 面板静默指令（透明消息，不落库、不显示在消息流）
+        // AGENT_Command (207) 是 AI 面板静默指令（透明消息，不落库、不显示在消息流）
         if (message.messageContent.type === MessageContentType.AGENT_COMMAND) {
             return false;
         }
@@ -867,8 +1013,8 @@ export default struct ConversationPage {
         }
     }
     onUserInfosUpdate = (userInfos: UserInfo[]) => {
-        // 机器人用户信息拉取回来后，重新判定是否为 DSH 会话
-        this.refreshDshState()
+        // 机器人用户信息拉取回来后，重新判定是否为 Agent 会话
+        this.refreshAgentState()
         if (this.conversation?.type === ConversationType.Single) {
             let index = userInfos.findIndex(info => info.uid === this.conversation?.target)
             if (index >= 0) {
@@ -881,8 +1027,8 @@ export default struct ConversationPage {
         // TODO 消息发送者的头像等可能也需要更新
     }
     onGroupInfosUpdate = (groupInfos: GroupInfo[]) => {
-        // 群信息（extra dsh 标记）拉取回来后，重新判定是否为 DSH 会话
-        this.refreshDshState()
+        // 群信息拉取回来后，刷新 Agent 会话状态（AI 会话判定仅依据 line，不再使用群 extra {"dsh":true} 标记）
+        this.refreshAgentState()
         // AI 群：群信息（含群主 owner）就绪后，补订/刷新群主在线状态
         this.ensureAiOwnerOnlineStateWatched()
         if (this.conversation?.type === ConversationType.Group) {
@@ -951,6 +1097,13 @@ export default struct ConversationPage {
         // receipt status： 已读、未读，不支持送达报告
 
         let key: string = message.messageContent.type + '-' + message.messageId + '-' + message.status + '-' + message.timestamp
+        // 流式消息（14/15）：把 streamId 并入 key。多 agent 并发多条流时，不同流的 14 更新
+        // 可能在同一接收批次里 messageId 同为 0、status/timestamp 相同，没有 streamId 会 key 冲突
+        // 导致气泡互相覆盖/错乱；加入 streamId 后每条流独立成泡、互不干扰。
+        let streamId = streamingStreamIdOf(message)
+        if (streamId) {
+            key += '-' + streamId
+        }
         if (this.enableReceipt && this.readEntries && this.readEntries.size > 0) {
             if (this.conversation!.type === ConversationType.Group) {
                 if (this.enableGroupReceipt) {
@@ -967,6 +1120,22 @@ export default struct ConversationPage {
             }
         }
         return key
+    }
+
+    // 消息行发送者显示名：多机器人（多 agent）会话（line=2 的群/单聊）里，流式消息/普通消息
+    // 均按发送机器人 uid 显示「用户信息显示名」，缺失时回退完整 uid（agentRobotName，不截断
+    // robot_xxx_yyy），保证多条机器人并发生成时每条气泡归属各自的机器人名，不与群成员昵称混用。
+    groupSenderDisplayName(fromUid: string): string {
+        if (!fromUid) {
+            return ''
+        }
+        if (this.conversation && this.conversation.line === 2) {
+            return agentRobotName(fromUid)
+        }
+        if (fromUid.startsWith('robot_') || fromUid.startsWith('robot-')) {
+            return agentRobotName(fromUid)
+        }
+        return wfc.getGroupMemberDisplayName(this.conversation!.target, fromUid)
     }
 
     resendMessage(message: Message) {
@@ -1028,6 +1197,47 @@ export default struct ConversationPage {
         return avail > 1 ? avail : 1
     }
 
+    // 机器人选择列表项：主行显示机器人显示名（用户信息接口/缓存，缺失回退完整 uid），
+    // 副行小字常驻展示完整 uid（ArkTS 无 title 悬浮提示，用副行代替「title=uid」），点选打开其面板
+    @Builder
+    agentRobotChoiceRow(uid: string) {
+        Row() {
+            Text('🤖')
+                .fontSize(FontSize.md)
+            Column() {
+                Text(agentRobotName(uid))
+                    .fontSize(FontSize.sm)
+                    .fontColor($r('app.color.wf_primary_text'))
+                    .maxLines(1)
+                    .textOverflow({ overflow: TextOverflow.Ellipsis })
+                Text(uid)
+                    .fontSize(FontSize.xs)
+                    .fontColor($r('app.color.wf_tertiary_text'))
+                    .maxLines(1)
+                    .textOverflow({ overflow: TextOverflow.Ellipsis })
+                    .margin({ top: 2 })
+            }
+            .alignItems(HorizontalAlign.Start)
+            .layoutWeight(1)
+            .margin({ left: 10 })
+        }
+        .width('100%')
+        .constraintSize({ minHeight: 50 })
+        .padding({ left: 12, right: 12, top: 6, bottom: 6 })
+        .borderRadius(Radius.md)
+        .stateStyles({
+            pressed: {
+                .backgroundColor($r('app.color.wf_item_pressed'))
+            },
+            normal: {
+                .backgroundColor($r('app.color.wf_background'))
+            }
+        })
+        .onClick(() => {
+            this.pickAgentRobot(uid)
+        })
+    }
+
     @Builder
     ConversationTitleBuilder() {
         Column() {
@@ -1052,41 +1262,75 @@ export default struct ConversationPage {
                 }
             }
 
-            // DSH 会话状态副标题（空闲/运行中/等待确认/已完成；phase=tool 时追加工具名），仅 DSH 会话显示；
-            // AI 群群主不在线时不显示任何 AI 状态（状态文本/停止按钮），由下方 "AI 不在线" 替代
-            if (this.dshState && !(this.dshConvKind === 'group' && !this.aiOwnerOnline)) {
-                Row({ space: 6 }) {
-                    Text(dshStateText(this.dshState))
-                        .fontSize(FontSize.xs)
-                        .fontColor(dshStateColor(this.dshState!.state))
-                        .maxLines(1)
-                    if (this.dshState!.state === 'running') {
+            // Agent 会话状态区：
+            // 多机器人（多 agent，>1 个有状态机器人）→ 逐列显示「🤖机器人名:状态」（颜色随状态），
+            // 默认机器人（会话默认，agentState）运行中时在末尾附「■ 停止」（/stop 语义同前）；
+            // 其余（单机器人/非 AI 群）沿用单行布局：状态副标题 + 停止按钮 + 状态/统计行
+            if (this.agentRobotRows.length > 1) {
+                Flex({ wrap: FlexWrap.Wrap, alignItems: ItemAlign.Center }) {
+                    ForEach(this.agentRobotRows, (row: AgentRobotStatusRow) => {
+                        Text(`🤖 ${row.name}:${row.text}`)
+                            .fontSize(FontSize.xs)
+                            .fontColor(row.color)
+                            .maxLines(1)
+                            .textOverflow({ overflow: TextOverflow.Ellipsis })
+                            .constraintSize({ maxWidth: 180 })
+                            .margin({ right: 10, bottom: 2 })
+                    }, (row: AgentRobotStatusRow) => row.uid)
+                    if (this.agentState && this.agentState.state === 'running') {
                         Text('■ 停止')
                             .fontSize(FontSize.xs)
                             .fontColor($r('app.color.wf_danger'))
                             .padding({ left: 6, right: 6, top: 1, bottom: 1 })
                             .borderRadius(Radius.md)
                             .border({ width: 1, color: $r('app.color.wf_danger') })
-                            .opacity(this.dshStopSending ? 0.5 : 1)
-                            .enabled(!this.dshStopSending)
+                            .opacity(this.agentStopSending ? 0.5 : 1)
+                            .enabled(!this.agentStopSending)
+                            .margin({ bottom: 2 })
                             .onClick(() => {
-                                this.stopDshAgent()
+                                this.stopAgent()
                             })
                     }
                 }
+                .width('100%')
                 .margin({ top: 2 })
-            }
-
-            // AI 群（line 2）在线状态 + 运行态提示 + DSH Token 统计合并为一行
-            // （如 "AI Web 在线 · 🤔 等待确认 · 上下文 0.8% · 缓存 98%"）；
-            // 各段均无内容时不渲染（不占位）
-            if (this.conversationStatusLine) {
-                Text(this.conversationStatusLine)
-                    .fontSize(FontSize.xs)
-                    .fontColor($r('app.color.wf_secondary_text'))
-                    .maxLines(1)
-                    .textOverflow({ overflow: TextOverflow.Ellipsis })
+            } else {
+                // Agent 会话状态副标题（空闲/运行中/等待确认/已完成；phase=tool 时追加工具名），仅 Agent 会话显示；
+                // AI 群群主不在线时不显示任何 AI 状态（状态文本/停止按钮），由下方 "AI 不在线" 替代
+                if (this.agentState && !(this.agentConvKind === 'group' && !this.aiOwnerOnline)) {
+                    Row({ space: 6 }) {
+                        Text(agentStateText(this.agentState))
+                            .fontSize(FontSize.xs)
+                            .fontColor(agentStateColor(this.agentState!.state))
+                            .maxLines(1)
+                        if (this.agentState!.state === 'running') {
+                            Text('■ 停止')
+                                .fontSize(FontSize.xs)
+                                .fontColor($r('app.color.wf_danger'))
+                                .padding({ left: 6, right: 6, top: 1, bottom: 1 })
+                                .borderRadius(Radius.md)
+                                .border({ width: 1, color: $r('app.color.wf_danger') })
+                                .opacity(this.agentStopSending ? 0.5 : 1)
+                                .enabled(!this.agentStopSending)
+                                .onClick(() => {
+                                    this.stopAgent()
+                                })
+                        }
+                    }
                     .margin({ top: 2 })
+                }
+
+                // AI 群（line 2）在线状态 + 运行态提示 + Agent Token 统计合并为一行
+                // （如 "AI Web 在线 · 🤔 等待确认 · 上下文 0.8% · 缓存 98%"）；
+                // 各段均无内容时不渲染（不占位）
+                if (this.conversationStatusLine) {
+                    Text(this.conversationStatusLine)
+                        .fontSize(FontSize.xs)
+                        .fontColor($r('app.color.wf_secondary_text'))
+                        .maxLines(1)
+                        .textOverflow({ overflow: TextOverflow.Ellipsis })
+                        .margin({ top: 2 })
+                }
             }
         }
         .height('100%')
@@ -1301,7 +1545,7 @@ export default struct ConversationPage {
                                                                     )
                                                                 Column() {
                                                                     if (this.showGroupMemberNickName) {
-                                                                        Text(wfc.getGroupMemberDisplayName(this.conversation!.target, msg.from))
+                                                                        Text(this.groupSenderDisplayName(msg.from))
                                                                             .fontSize(FontSize.xs)
                                                                             .fontColor($r('app.color.wf_tertiary_text'))
                                                                             .padding({ bottom: 2 })
@@ -1429,11 +1673,11 @@ export default struct ConversationPage {
                             text: this.toReeditText,
                             conversation: this.conversation,
                             conversationInfo: this.conversationInfo,
-                            dshState: this.dshState,
-                            dshConvKind: this.dshConvKind,
+                            agentState: this.agentState,
+                            agentConvKind: this.agentConvKind,
                             enableMultiCheck: $enableMultiCheck,
                             checkedMessages: $checkedMessages,
-                            showDshAgentPanel: $showDshAgentPanel,
+                            showAgentPanel: $showAgentPanel,
                             aiOwnerOnline: this.aiOwnerOnline,
                             quotedMessage: $quotedMessage,
                             collapseConversationInputPanelViewTimestamp: $collapseConversationInputPanelViewTimestamp,
@@ -1451,6 +1695,10 @@ export default struct ConversationPage {
                             },
                             onPanelHeightChange: (h) => {
                                 this.panelHeight = h
+                            },
+                            // 「AI 会话设置」入口：多机器人先列表选择目标机器人再打开面板（由本页接管）
+                            onOpenAgentPanel: () => {
+                                this.openAgentPanel()
                             }
                         })
                             .onAreaChange((_, area) => {
@@ -1562,13 +1810,79 @@ export default struct ConversationPage {
                     .hitTestBehavior(HitTestMode.None)
                 }
 
+                // 多机器人选择列表：页面根 Stack 的悬浮覆盖层（全屏遮罩 + 居中卡片）。
+                // 多机器人（>1）会话打开「AI 会话设置」时先选目标机器人，再打开该机器人的面板
+                if (this.agentChooserOpen && this.agentChooserRobots.length > 0) {
+                    Stack({ alignContent: Alignment.Center }) {
+                        // 半透明遮罩，点击关闭
+                        Column()
+                            .width('100%')
+                            .height('100%')
+                            .backgroundColor('#66000000')
+                            .onClick(() => {
+                                this.closeAgentChooser()
+                            })
+                        // 居中卡片
+                        Column() {
+                            Row() {
+                                Text('选择机器人')
+                                    .fontSize(FontSize.md)
+                                    .fontWeight(FontWeight.Medium)
+                                    .fontColor($r('app.color.wf_primary_text'))
+                                    .layoutWeight(1)
+                                Text('×')
+                                    .fontSize(FontSize.lg)
+                                    .fontColor($r('app.color.wf_secondary_text'))
+                                    .padding({ left: 8, right: 8 })
+                                    .onClick(() => {
+                                        this.closeAgentChooser()
+                                    })
+                            }
+                            .width('100%')
+                            .padding({ left: 16, right: 16, top: 14, bottom: 8 })
+
+                            Divider()
+                                .color($r('app.color.wf_divider'))
+                                .width('100%')
+
+                            Text('选择要设置的目标机器人')
+                                .fontSize(FontSize.xs)
+                                .fontColor($r('app.color.wf_tertiary_text'))
+                                .width('100%')
+                                .padding({ left: 16, right: 16, top: 10 })
+
+                            List({ space: 4 }) {
+                                ForEach(this.agentChooserRobots, (uid: string) => {
+                                    ListItem() {
+                                        this.agentRobotChoiceRow(uid)
+                                    }
+                                }, (uid: string) => uid)
+                            }
+                            .width('100%')
+                            .layoutWeight(1)
+                            .scrollBar(BarState.Off)
+                            .padding({ left: 12, right: 12, top: 8, bottom: 8 })
+                        }
+                        .width('88%')
+                        .constraintSize({ maxWidth: 380, maxHeight: '70%' })
+                        .borderRadius(Radius.xl)
+                        .backgroundColor($r('app.color.wf_background'))
+                        .shadow({ radius: 24, color: '#33000000', offsetY: 8 })
+                        .clip(true)
+                    }
+                    .width('100%')
+                    .height('100%')
+                }
+
                 // AI 会话设置面板：页面根 Stack 的悬浮覆盖层（全屏遮罩 + 居中卡片），
-                // 与输入面板布局完全隔离，不影响消息列表/输入栏；由输入面板 AI 按钮经 @Link 打开
-                if (this.showDshAgentPanel && this.conversation) {
-                    DshAgentPanelView({
+                // 与输入面板布局完全隔离，不影响消息列表/输入栏；由输入面板 AI 按钮经 @Link 打开；
+                // 多机器人会话经 openAgentPanel/pickAgentRobot 选中目标机器人（robotUid，完整 uid）
+                if (this.showAgentPanel && this.conversation) {
+                    AgentPanelView({
                         conversation: this.conversation!,
+                        robotUid: this.activeAgentRobotUid,
                         dismiss: () => {
-                            this.showDshAgentPanel = false
+                            this.showAgentPanel = false
                         }
                     })
                         .width('100%')
@@ -1634,12 +1948,17 @@ class ConversationMessageDataSource extends BasicDataSource<Message> {
     }
 
     insertMessages(index: number, messages: Message[]) {
-        this.messages.splice(0, 0, ...this.normalizeStreaming(messages))
+        // 历史消息插到列表头部后，对「整个合并列表」按 streamId 归一化去重：翻页加载到的
+        // 旧 14 片段若与列表尾部已有的同一流更新片段（14 新文本/15 最终结果）成组，旧片段整体
+        // 丢弃，保证任意时刻每个正在生成/已生成的 stream 在列表里只有一条（跨批去重）。
+        this.messages.splice(index, 0, ...messages)
+        this.messages = this.normalizeStreaming(this.messages)
         this.notifyDataReload();
     }
 
-    // 加载历史消息时对流式消息按 streamId 归一化去重，切换会话后不会重复显示：
-    // - 同 streamId 的多条「生成中(14)」只保留最新一条（机器人逐字推送，全部入库）；
+    // 对流式消息按 streamId 归一化去重（单批内 + 调用方传入合并后的整个列表，跨批同样生效）：
+    // - 同 streamId 的多条「生成中(14)」只保留最新一条（机器人逐字推送，全部入库），
+    //   多 agent 并发时多个不同 streamId 各自成组、互不折叠；
     // - 同 streamId 已有「已生成(15)」时，丢弃所有「生成中(14)」，只保留最终结果。
     private normalizeStreaming(messages: Message[]): Message[] {
         if (messages.length === 0) {
@@ -1694,22 +2013,18 @@ class ConversationMessageDataSource extends BasicDataSource<Message> {
     }
 
     appendOrUpdateMessage(message: Message) {
+        // 流式消息（14/15）：完全按 streamId 处理（见 applyStreamingMessage），同一流原地替换、
+        // 不同流互不影响；其余消息走通用的 messageId 匹配追加/更新。
+        let streamId = streamingStreamIdOf(message)
+        if (streamId) {
+            this.applyStreamingMessage(message, streamId)
+            // 收到新消息追加/AI 流式消息更新后，把进行中的 AI 元素（流式生成中、
+            // 进度卡、选择/审批卡等）钉回列表末尾
+            this.pinLiveAIToBottom();
+            return
+        }
         let index = this.messages.findIndex(m => {
-            if (m.messageId > 0) {
-                return m.messageId === message.messageId
-            } else if (m.messageContent.type === MessageContentType.Streaming_Text_Generating) {
-                let curStreamingTextMessageContent = m.messageContent as StreamingTextGeneratingMessageContent;
-                if (message.messageContent.type === MessageContentType.Streaming_Text_Generating) {
-                    let newStreamingTextMessageContent = message.messageContent as StreamingTextGeneratingMessageContent;
-                    return curStreamingTextMessageContent.streamId === newStreamingTextMessageContent.streamId;
-                } else if (message.messageContent.type === MessageContentType.Streaming_Text_Generated) {
-                    let newStreamingTextMessageContent = message.messageContent as StreamingTextGeneratedMessageContent;
-                    return curStreamingTextMessageContent.streamId === newStreamingTextMessageContent.streamId;
-                } else {
-                    return false;
-                }
-            }
-            return false;
+            return m.messageId > 0 && m.messageId === message.messageId
         });
         if (index >= 0) {
             this.messages[index] = message;
@@ -1723,8 +2038,83 @@ class ConversationMessageDataSource extends BasicDataSource<Message> {
         this.pinLiveAIToBottom();
     }
 
+    // 多 agent（多机器人）流式消息更新：同一会话同一时刻可能有多个 streamId 各自在生成。
+    // 语义（对齐 PC 端 vue 参考实现按「会话+streamId」处理）：
+    // - 每个 streamId 在列表里最多一条气泡，14 逐字更新原地替换该流气泡（15/20 不影响其它流）；
+    // - 15（完成）原地替换该流的 14 占位（若该流已完成且 15 已在列表，仅同 messageId 的重复 15 才更新）；
+    // - 已完成（15 已展示）之后迟到的 14 片段直接丢弃，避免把最终结果回退成生成中；
+    // - 收尾清理同 streamId 的其它残留气泡（如重开会话后列表里混入的旧 14 分片），自愈去重。
+    private applyStreamingMessage(message: Message, streamId: string) {
+        let incomingGenerated = message.messageContent.type === MessageContentType.Streaming_Text_Generated
+        let existingGeneratedIndex = -1
+        let existingGeneratingIndex = -1
+        for (let i = this.messages.length - 1; i >= 0; i--) {
+            let m = this.messages[i]
+            if (streamingStreamIdOf(m) !== streamId) {
+                continue
+            }
+            if (m.messageContent.type === MessageContentType.Streaming_Text_Generated && existingGeneratedIndex < 0) {
+                existingGeneratedIndex = i
+            } else if (m.messageContent.type === MessageContentType.Streaming_Text_Generating && existingGeneratingIndex < 0) {
+                existingGeneratingIndex = i
+            }
+        }
+        let keptIndex = -1
+        if (incomingGenerated) {
+            if (existingGeneratedIndex >= 0) {
+                // 该流最终结果已在列表：只有 messageId 相同的重复 15 才原地更新，否则忽略不重复加泡
+                let cur = this.messages[existingGeneratedIndex]
+                if (cur.messageId > 0 && cur.messageId === message.messageId) {
+                    this.messages[existingGeneratedIndex] = message
+                    this.notifyDataChange(existingGeneratedIndex)
+                    keptIndex = existingGeneratedIndex
+                }
+            } else if (existingGeneratingIndex >= 0) {
+                this.messages[existingGeneratingIndex] = message
+                this.notifyDataChange(existingGeneratingIndex)
+                keptIndex = existingGeneratingIndex
+            } else {
+                this.messages = this.messages.concat(message)
+                keptIndex = this.messages.length - 1
+                this.notifyDataReload()
+            }
+        } else {
+            // 生成中（14）：已完成（15 已展示）之后迟到的分片直接丢弃
+            if (existingGeneratedIndex >= 0) {
+                return
+            }
+            if (existingGeneratingIndex >= 0) {
+                this.messages[existingGeneratingIndex] = message
+                this.notifyDataChange(existingGeneratingIndex)
+                keptIndex = existingGeneratingIndex
+            } else {
+                this.messages = this.messages.concat(message)
+                keptIndex = this.messages.length - 1
+                this.notifyDataReload()
+            }
+        }
+        // 自愈：同一 streamId 的其它残留气泡（同流旧 14 分片等）全部移除，只保留刚更新的这条
+        if (keptIndex >= 0) {
+            let removed = 0
+            for (let i = this.messages.length - 1; i >= 0; i--) {
+                if (i === keptIndex) {
+                    continue
+                }
+                if (streamingStreamIdOf(this.messages[i]) === streamId) {
+                    this.messages.splice(i, 1)
+                    removed++
+                }
+            }
+            if (removed > 0) {
+                this.notifyDataReload()
+            }
+        }
+    }
+
     appendMessages(messages: Message[]) {
-        this.messages = this.messages.concat(this.normalizeStreaming(messages))
+        // 尾部追加后同样对合并后的整个列表归一化去重，避免同 streamId 的旧/新分片跨批重复
+        this.messages = this.messages.concat(messages)
+        this.messages = this.normalizeStreaming(this.messages)
         this.notifyDataReload();
         this.pinLiveAIToBottom();
     }
@@ -1733,8 +2123,7 @@ class ConversationMessageDataSource extends BasicDataSource<Message> {
     // - 14 流式文本生成中（Streaming_Text_Generating）
     // - 200 提问卡（state=pending，等待用户选择）
     // - 202 审批卡（state=pending，等待用户审批）
-    // - 206 目标卡（phase 未 complete）
-    // - 208 任务进度卡（有运行中的子任务/后台任务）
+    // （goal 206 / 任务 208 等其余消息按默认排序，不参与钉底）
     isLiveAIMessage(message: Message): boolean {
         let type = message.messageContent.type
         if (type === MessageContentType.Streaming_Text_Generating) {
@@ -1745,13 +2134,6 @@ class ConversationMessageDataSource extends BasicDataSource<Message> {
         }
         if (type === CustomMessageContentType.MESSAGE_CONTENT_TYPE_AGENT_APPROVAL) {
             return (message.messageContent as AgentApprovalMessageContent).content.state === 'pending'
-        }
-        if (type === CustomMessageContentType.MESSAGE_CONTENT_TYPE_AGENT_GOAL) {
-            return (message.messageContent as AgentGoalMessageContent).content.phase !== 'complete'
-        }
-        if (type === CustomMessageContentType.MESSAGE_CONTENT_TYPE_AGENT_TASK_PROGRESS) {
-            let tasks = (message.messageContent as AgentTaskProgressMessageContent).content.tasks || []
-            return tasks.some(t => t.status === 'running')
         }
         return false
     }
@@ -1793,16 +2175,30 @@ class ConversationMessageDataSource extends BasicDataSource<Message> {
     }
 
     // 取消消息（20）：按 streamId 从消息列表删除对应的生成中(14)/已生成(15)消息，
-    // 界面上的"生成中/已生成"气泡直接消失
+    // 界面上的"生成中/已生成"气泡直接消失。只影响被取消的这一条 stream——
+    // 同会话其它 agent 仍在生成的 14 不受影响（按各自 streamId 继续更新）。
+    // 同一 stream 若存在多条残留气泡（重开会话混入的旧分片等）一并移除。
     removeStreamingMessageByStreamId(streamId: string) {
-        let index = this.messages.findIndex(m =>
-            (m.messageContent.type === MessageContentType.Streaming_Text_Generating
+        let removed: number[] = []
+        for (let i = 0; i < this.messages.length; i++) {
+            let m = this.messages[i]
+            if ((m.messageContent.type === MessageContentType.Streaming_Text_Generating
                 || m.messageContent.type === MessageContentType.Streaming_Text_Generated)
-            && (m.messageContent as StreamingTextGeneratingMessageContent).streamId === streamId
-        );
-        if (index >= 0) {
-            this.messages.splice(index, 1)
-            this.notifyDataDelete(index)
+                && (m.messageContent as StreamingTextGeneratingMessageContent).streamId === streamId) {
+                removed.push(i)
+            }
+        }
+        if (removed.length === 0) {
+            return
+        }
+        if (removed.length === 1) {
+            this.messages.splice(removed[0], 1)
+            this.notifyDataDelete(removed[0])
+        } else {
+            for (let i = removed.length - 1; i >= 0; i--) {
+                this.messages.splice(removed[i], 1)
+            }
+            this.notifyDataReload()
         }
     }
 

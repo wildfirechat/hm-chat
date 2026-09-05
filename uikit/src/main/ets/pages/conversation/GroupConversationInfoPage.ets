@@ -43,6 +43,8 @@ export default struct GroupConversationInfoPage {
     @State userInfo?: UserInfo = undefined
     @State showGroupMemberNickName: boolean = false
     private conversationInfo?: ConversationInfo
+    // 进入本页的会话 line（AI 群 line=2）；成员管理/群操作通知必须发到当前会话的 line
+    private conversationLine: number = 0
     private groupMember?: GroupMember
     private enableAddMember: boolean = false
     private enableRemoveMember: boolean = false
@@ -79,6 +81,7 @@ export default struct GroupConversationInfoPage {
     aboutToAppear() {
         let params = this.mainNavPathStack.getParamByIndex(this.mainNavPathStack.size() - 1) as Record<string, Object>;
         this.conversationInfo = params['conversationInfo'] as ConversationInfo
+        this.conversationLine = this.conversationInfo.conversation.line
         this.groupInfo = wfc.getGroupInfo(this.conversationInfo.conversation.target)
         this.groupMembers = wfc.getGroupMembersByCount(this.conversationInfo.conversation.target, this.maxShowGroupMemberCount)
 
@@ -222,7 +225,7 @@ export default struct GroupConversationInfoPage {
                                                 'onCheckUser': (pickUsers: UserInfo[]) => {
                                                     if (pickUsers?.length) {
                                                         let uids = pickUsers.map(info => info.uid)
-                                                        wfc.addGroupMembers(this.groupInfo.target, uids, '', [0], null, () => {
+                                                        wfc.addGroupMembers(this.groupInfo.target, uids, '', [this.conversationLine], null, () => {
                                                             this.groupMembers = wfc.getGroupMembers(this.conversationInfo!.conversation.target, false)
                                                             showToast('添加新群成员成功')
                                                         }, (err: number) => {
@@ -259,7 +262,7 @@ export default struct GroupConversationInfoPage {
                                                 'onPickResult': (pickUsers: UserInfo[]) => {
                                                     if (pickUsers?.length) {
                                                         let uids = pickUsers.map(info => info.uid)
-                                                        wfc.kickoffGroupMembers(this.groupInfo.target, uids, [0], null, () => {
+                                                        wfc.kickoffGroupMembers(this.groupInfo.target, uids, [this.conversationLine], null, () => {
                                                             this.groupMembers = wfc.getGroupMembers(this.conversationInfo!.conversation.target, false)
                                                         }, (err: number) => {
                                                             showToast('移除群成员失败：' + err)
@@ -384,7 +387,8 @@ export default struct GroupConversationInfoPage {
                             })
                                 .onClick(() => {
                                     this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.GroupManagePage, {
-                                        'groupInfo': this.groupInfo
+                                        'groupInfo': this.groupInfo,
+                                        'conversationLine': this.conversationLine
                                     } as Record<string, Object>)
                                 })
                         }
@@ -655,7 +659,7 @@ export default struct GroupConversationInfoPage {
                     localStorage.delete(AddGroupMemberModal.PICK_RESULT)
                     let uids = pickUsers.map(info => info.uid)
 
-                    wfc.addGroupMembers(this.groupInfo.target, uids, '', [0], null, () => {
+                    wfc.addGroupMembers(this.groupInfo.target, uids, '', [this.conversationLine], null, () => {
                         this.groupMembers = wfc.getGroupMembers(this.conversationInfo!.conversation.target, false)
                         showToast('添加新群成员成功')
                     }, (err: number) => {
@@ -678,7 +682,7 @@ export default struct GroupConversationInfoPage {
                 if (pickUsers?.length) {
                     localStorage.delete(PickGroupMemberModal.PICK_RESULT)
                     let uids = pickUsers.map(info => info.uid)
-                    wfc.kickoffGroupMembers(this.groupInfo.target, uids, [0], null, () => {
+                    wfc.kickoffGroupMembers(this.groupInfo.target, uids, [this.conversationLine], null, () => {
                         this.groupMembers = wfc.getGroupMembers(this.conversationInfo!.conversation.target, false)
                     }, (err: number) => {
                         showToast('移除群成员失败：' + err)

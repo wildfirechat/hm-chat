@@ -3,7 +3,7 @@ import MessageContent from '../wfc/messages/messageContent'
 import MessagePayload from '../wfc/messages/messagePayload'
 
 /**
- * DSH 审批卡片消息，内容类型 202（机器人 -> 用户）
+ * Agent 审批卡片消息，内容类型 202（机器人 -> 用户）
  */
 export class AgentApprovalData {
     aid: string = ''
@@ -13,7 +13,7 @@ export class AgentApprovalData {
     state: string = 'pending'
 }
 
-export function summarizeDshApproval(content: AgentApprovalData): string {
+export function summarizeAgentApproval(content: AgentApprovalData): string {
     return `🔐 工具审批：${content.toolName || '工具'}${content.reason ? `（${content.reason}）` : ''}`
 }
 
@@ -25,7 +25,7 @@ export default class AgentApprovalMessageContent extends MessageContent {
     }
 
     digest(): string {
-        return summarizeDshApproval(this.content)
+        return summarizeAgentApproval(this.content)
     }
 
     encode() {

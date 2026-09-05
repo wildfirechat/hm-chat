@@ -1,9 +1,9 @@
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
-import AgentGoalMessageContent, { AgentGoalData } from '@wfc/client/src/main/ets/wfc_custom_message/dshGoalMessageContent'
+import AgentGoalMessageContent, { AgentGoalData } from '@wfc/client/src/main/ets/wfc_custom_message/agentGoalMessageContent'
 import { FontSize, Radius } from '../../../common/design/Tokens'
 
 /**
- * DSH 目标进度卡片：phase 彩色徽标 + objective + 已执行轮数，纯展示。
+ * Agent 目标进度卡片：phase 彩色徽标 + objective + 已执行轮数，纯展示。
  */
 @Component
 export default struct AgentGoalContentView {

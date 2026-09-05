@@ -6,7 +6,7 @@ import MessageStatus from '@wfc/client/src/main/ets/wfc/messages/messageStatus';
 import { FontSize, Radius, scaledSize, LayoutScale } from '../common/design/Tokens';
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc';
 import EventType from '@wfc/client/src/main/ets/wfc/client/wfcEvent';
-import { DshState, dshConversationKind, dshStateColor, getDshState } from '../util/dshState';
+import { AgentState, agentConversationKind, agentStateColor, getAgentState } from '../util/agentState';
 import UserOnlineState from '@wfc/client/src/main/ets/wfc/model/userOnlineState'
 import UserClientState from '@wfc/client/src/main/ets/wfc/model/userClientState'
 
@@ -18,9 +18,9 @@ export default struct ConversationInfoItemView {
     @State conversationItemPortrait: string = ''
     @State conversationItemName: string = ''
     @State unreadJoinGroupRequestCount: number = 0
-    // DSH 会话状态与类型（'single'/'group'/''，非 DSH 会话不显示圆点/徽标）
-    @State dshState: DshState | null = null
-    @State dshConvKind: string = ''
+    // Agent 会话状态与类型（'single'/'group'/''，非 Agent 会话不显示圆点/徽标）
+    @State agentState: AgentState | null = null
+    @State agentConvKind: string = ''
     // AI 群（line 2）群主（AI 机器人）是否在线：不在线时状态圆点/徽标置灰
     @State aiOwnerOnline: boolean = false
 
@@ -39,32 +39,32 @@ export default struct ConversationInfoItemView {
                 })
         }
         if (!this.basicMode) {
-            this.refreshDshState()
-            wfc.eventEmitter!.on(EventType.SettingUpdate, this.onDshRefresh)
-            wfc.eventEmitter!.on(EventType.UserInfosUpdate, this.onDshRefresh)
-            wfc.eventEmitter!.on(EventType.GroupInfosUpdate, this.onDshRefresh)
+            this.refreshAgentState()
+            wfc.eventEmitter!.on(EventType.SettingUpdate, this.onAgentRefresh)
+            wfc.eventEmitter!.on(EventType.UserInfosUpdate, this.onAgentRefresh)
+            wfc.eventEmitter!.on(EventType.GroupInfosUpdate, this.onAgentRefresh)
             wfc.eventEmitter!.on(EventType.UserOnlineEvent, this.onUserOnline)
         }
     }
 
     aboutToDisappear() {
         if (!this.basicMode) {
-            wfc.eventEmitter!.off(EventType.SettingUpdate, this.onDshRefresh)
-            wfc.eventEmitter!.off(EventType.UserInfosUpdate, this.onDshRefresh)
-            wfc.eventEmitter!.off(EventType.GroupInfosUpdate, this.onDshRefresh)
+            wfc.eventEmitter!.off(EventType.SettingUpdate, this.onAgentRefresh)
+            wfc.eventEmitter!.off(EventType.UserInfosUpdate, this.onAgentRefresh)
+            wfc.eventEmitter!.off(EventType.GroupInfosUpdate, this.onAgentRefresh)
             wfc.eventEmitter!.off(EventType.UserOnlineEvent, this.onUserOnline)
         }
     }
 
     // 在线状态变化（服务端广播 / 列表页 watch 回调转发）：按群主匹配刷新在线判定
     onUserOnline = (states?: UserOnlineState[]) => {
-        if (this.dshConvKind !== 'group' || !states) {
-            this.refreshDshState()
+        if (this.agentConvKind !== 'group' || !states) {
+            this.refreshAgentState()
             return
         }
         let owner = this.aiOwnerOf(this.conversationInfo?.conversation)
         if (!owner) {
-            this.refreshDshState()
+            this.refreshAgentState()
             return
         }
         let mine = states.find((s: UserOnlineState) => s.userId === owner)
@@ -77,22 +77,22 @@ export default struct ConversationInfoItemView {
 
     // AI 群（line 2）群主 ID；非 AI 群返回空
     aiOwnerOf(conversation: Conversation | undefined): string {
-        if (!conversation || dshConversationKind(conversation) !== 'group') {
+        if (!conversation || agentConversationKind(conversation) !== 'group') {
             return ''
         }
         let groupInfo = wfc.getGroupInfo(conversation.target)
         return groupInfo && groupInfo.owner ? groupInfo.owner : ''
     }
 
-    onDshRefresh = () => {
-        this.refreshDshState()
+    onAgentRefresh = () => {
+        this.refreshAgentState()
     }
 
-    // 用户/群信息未缓存时判为非 DSH，待 UserInfosUpdate/GroupInfosUpdate 后重新判定
-    refreshDshState() {
+    // 用户/群信息未缓存时判为非 Agent，待 UserInfosUpdate/GroupInfosUpdate 后重新判定
+    refreshAgentState() {
         let conversation = this.conversationInfo?.conversation
-        this.dshConvKind = dshConversationKind(conversation)
-        this.dshState = getDshState(conversation)
+        this.agentConvKind = agentConversationKind(conversation)
+        this.agentState = getAgentState(conversation)
         // AI 群群主（AI 机器人）在线判定：clientStates 中存在 state===0；无状态/未取到视为不在线
         let owner = this.aiOwnerOf(conversation)
         if (owner) {
@@ -189,19 +189,19 @@ export default struct ConversationInfoItemView {
                             .maxLines(1)
                             .layoutWeight(1)
                             .textOverflow({ overflow: TextOverflow.Ellipsis })
-                        // DSH 会话状态圆点（running=主色/waiting_user=#f59e0b/idle·done=#22c55e/其他=#22c55e）；
+                        // Agent 会话状态圆点（running=主色/waiting_user=#f59e0b/idle·done=#22c55e/其他=#22c55e）；
                         // AI 不在线时置灰（不显示运行态颜色）
-                        if (!this.basicMode && this.dshState) {
+                        if (!this.basicMode && this.agentState) {
                             Row()
                                 .width(8)
                                 .height(8)
                                 .borderRadius(Radius.full)
-                                .backgroundColor(this.aiOwnerOnline ? dshStateColor(this.dshState!.state) : $r('app.color.wf_tertiary_text'))
+                                .backgroundColor(this.aiOwnerOnline ? agentStateColor(this.agentState!.state) : $r('app.color.wf_tertiary_text'))
                                 .margin({ left: 6 })
                         }
-                        // DSH 群标题旁的描边小徽标；AI 不在线时置灰
-                        if (!this.basicMode && this.dshConvKind === 'group') {
-                            Text('DSH')
+                        // Agent 群标题旁的描边小徽标；AI 不在线时置灰
+                        if (!this.basicMode && this.agentConvKind === 'group') {
+                            Text('AI')
                                 .fontSize(9)
                                 .fontColor(this.aiOwnerOnline ? $r('app.color.wf_primary') : $r('app.color.wf_tertiary_text'))
                                 .padding({ left: 4, right: 4, top: 1, bottom: 1 })

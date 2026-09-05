@@ -4,12 +4,12 @@ import MessageContent from '../wfc/messages/messageContent';
 import PersistFlag from '../wfc/messages/persistFlag';
 import UnknownMessageContent from '../wfc/messages/unknownMessageContent';
 import CustomMessageContentType from "./customMessageContentType";
-import AgentAnswerMessageContent from "./dshAnswerMessageContent";
-import AgentApprovalMessageContent from "./dshApprovalMessageContent";
-import AgentApprovalResultMessageContent from "./dshApprovalResultMessageContent";
-import AgentGoalMessageContent from "./dshGoalMessageContent";
-import AgentQuestionMessageContent from "./dshQuestionMessageContent";
-import AgentTaskProgressMessageContent from "./dshTaskProgressMessageContent";
+import AgentAnswerMessageContent from "./agentAnswerMessageContent";
+import AgentApprovalMessageContent from "./agentApprovalMessageContent";
+import AgentApprovalResultMessageContent from "./agentApprovalResultMessageContent";
+import AgentGoalMessageContent from "./agentGoalMessageContent";
+import AgentQuestionMessageContent from "./agentQuestionMessageContent";
+import AgentTaskProgressMessageContent from "./agentTaskProgressMessageContent";
 import MomentCommentMessageContent from "./momentCommentMessageContent";
 import MomentFeedMessageContent from "./momentFeedMessageContent";
 import TestCustomMessageContent from "./testCustomMessageContent";
@@ -37,34 +37,34 @@ export default class CustomMessageConfig {
             flag: PersistFlag.Persist,
             type: CustomMessageContentType.MESSAGE_CONTENT_TYPE_CUSTOM_MESSAGE_TEST_NOTIFICATION,
         },
-        // DSH 结构化交互消息（官方预留 AI 交互段 200-209），与 PC 端一致均用 Persist
+        // Agent 结构化交互消息（官方预留 AI 交互段 200-209），与 PC 端一致均用 Persist
         {
-            name: 'dshQuestionMessage',
+            name: 'agentQuestionMessage',
             flag: PersistFlag.Persist,
             type: CustomMessageContentType.MESSAGE_CONTENT_TYPE_AGENT_QUESTION,
         },
         {
-            name: 'dshAnswerMessage',
+            name: 'agentAnswerMessage',
             flag: PersistFlag.Persist,
             type: CustomMessageContentType.MESSAGE_CONTENT_TYPE_AGENT_ANSWER,
         },
         {
-            name: 'dshApprovalMessage',
+            name: 'agentApprovalMessage',
             flag: PersistFlag.Persist,
             type: CustomMessageContentType.MESSAGE_CONTENT_TYPE_AGENT_APPROVAL,
         },
         {
-            name: 'dshApprovalResultMessage',
+            name: 'agentApprovalResultMessage',
             flag: PersistFlag.Persist,
             type: CustomMessageContentType.MESSAGE_CONTENT_TYPE_AGENT_APPROVAL_RESULT,
         },
         {
-            name: 'dshGoalMessage',
+            name: 'agentGoalMessage',
             flag: PersistFlag.Persist,
             type: CustomMessageContentType.MESSAGE_CONTENT_TYPE_AGENT_GOAL,
         },
         {
-            name: 'dshTaskProgressMessage',
+            name: 'agentTaskProgressMessage',
             flag: PersistFlag.Persist,
             type: CustomMessageContentType.MESSAGE_CONTENT_TYPE_AGENT_TASK_PROGRESS,
         },

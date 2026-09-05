@@ -17,10 +17,14 @@ export default struct GroupManagerListPage {
     @State groupManagerUserInfos: UserInfo[] = []
     @State showPickGroupMemberModal: boolean = false
     private groupInfo?: GroupInfo
+    // 进入本页的会话 line（由 GroupManagePage 透传；AI 群 line=2，普通群 0），
+    // 设置/取消管理员的通知需发到当前会话的 line
+    private conversationLine: number = 0
 
     aboutToAppear() {
         let params = this.mainNavPathStack.getParamByIndex(this.mainNavPathStack.size() - 1) as Record<string, Object>;
         this.groupInfo = params['groupInfo'] as GroupInfo;
+        this.conversationLine = params['conversationLine'] as number ?? 0
         let groupManagers = wfc.getGroupMembersByType(this.groupInfo.target, GroupMemberType.Manager)
         this.groupOwnerUerInfo = wfc.getUserInfo(this.groupInfo.owner, false, this.groupInfo.target);
         this.groupManagerUserInfos = wfc.getUserInfos(groupManagers.map(m => m.memberId), this.groupInfo.target)
@@ -108,7 +112,7 @@ export default struct GroupManagerListPage {
                                                 {
                                                     title: '移除管理员',
                                                     action: () => {
-                                                        wfc.setGroupManager(this.groupInfo!.target, false, [info.uid], [], null, () => {
+                                                        wfc.setGroupManager(this.groupInfo!.target, false, [info.uid], [this.conversationLine], null, () => {
                                                             this.groupManagerUserInfos = this.groupManagerUserInfos.filter(u => u.uid !== info.uid)
                                                         }, err => {
                                                             showToast('移除管理员失败 ' + err)
@@ -153,7 +157,7 @@ export default struct GroupManagerListPage {
                         let pickUsers = userInfos
                         if (pickUsers?.length) {
                             let uids = pickUsers.map(info => info.uid)
-                            wfc.setGroupManager(this.groupInfo!.target, true, uids, [0], null, () => {
+                            wfc.setGroupManager(this.groupInfo!.target, true, uids, [this.conversationLine], null, () => {
                                 let groupManagers = wfc.getGroupMembersByType(this.groupInfo!.target, GroupMemberType.Manager);
                                 this.groupManagerUserInfos = wfc.getUserInfos(groupManagers.map(m => m.memberId), this.groupInfo!.target)
                                 this.showPickGroupMemberModal = false
@@ -181,7 +185,7 @@ export default struct GroupManagerListPage {
                                 'onPickResult': (userInfos: UserInfo[]) => {
                                     if (userInfos?.length) {
                                         let uids = userInfos.map(info => info.uid)
-                                        wfc.setGroupManager(this.groupInfo!.target, true, uids, [0], null, () => {
+                                        wfc.setGroupManager(this.groupInfo!.target, true, uids, [this.conversationLine], null, () => {
                                             let groupManagers = wfc.getGroupMembersByType(this.groupInfo!.target, GroupMemberType.Manager);
                                             this.groupManagerUserInfos = wfc.getUserInfos(groupManagers.map(m => m.memberId), this.groupInfo!.target)
                                         }, err => {

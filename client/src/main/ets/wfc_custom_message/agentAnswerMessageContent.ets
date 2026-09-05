@@ -3,7 +3,7 @@ import MessageContent from '../wfc/messages/messageContent'
 import MessagePayload from '../wfc/messages/messagePayload'
 
 /**
- * DSH 回答消息，内容类型 201（用户 -> 机器人）
+ * Agent 回答消息，内容类型 201（用户 -> 机器人）
  */
 export class AgentAnswerItem {
     id: string = ''

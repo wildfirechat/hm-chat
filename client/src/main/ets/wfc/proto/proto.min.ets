@@ -20,6 +20,7 @@ import ConversationSearchResult from '../model/conversationSearchResult';
 import MessageStatus from '../messages/messageStatus';
 import GroupSearchResult from '../model/groupSearchResult';
 import FriendRequest from '../model/friendRequest';
+import ConversationLine from '../model/conversationLine';
 import ChatRoomMemberInfo from '../model/chatRoomMemberInfo';
 import ChannelInfo from '../model/channelInfo';
 import ConnectionStatus from '../client/connectionStatus';
@@ -1735,7 +1736,7 @@ class WfcImpl {
         self.eventEmitter!.emit(EventType.ConversationInfoUpdate, conversationInfo);
     }
 
-    getUnreadCount(types: number[], lines: number[] = [0]) {
+    getUnreadCount(types: number[], lines: number[] = [ConversationLine.Default]) {
         let unreadCountStr: string = protoProxy.getUnreadCount(types, lines);
         return assign(new UnreadCount(), JSON.parse(unreadCountStr)) as UnreadCount;
     }
@@ -3292,7 +3293,7 @@ class WfcImpl {
         let friendIds = self.getMyFriendList(false);
         friendIds.forEach(uid => userIdSet.add(uid));
 
-        let conversationInfoList = self.getConversationInfoList([0, 1, 3], [0, 1, 2]);
+        let conversationInfoList = self.getConversationInfoList([0, 1, 3], [ConversationLine.Default, ConversationLine.Moment, ConversationLine.Agent]);
         let groupIdIds: string[] = [];
         let channelIds: string[] = [];
         conversationInfoList.forEach(info => {

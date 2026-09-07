@@ -1,5 +1,6 @@
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType'
+import ConversationLine from '@wfc/client/src/main/ets/wfc/model/conversationLine'
 import EventType from '@wfc/client/src/main/ets/wfc/client/wfcEvent'
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import ConversationInfo from '@wfc/client/src/main/ets/wfc/model/conversationInfo'
@@ -91,7 +92,8 @@ export default struct ConversationListTab {
     }
 
     _loadConversationList = async () => {
-        let conversationInfos = wfc.getConversationInfoList([0, 1, 2, 3], [0, 2]);
+        // 会话列表展示 default 与 agent（AI）两条线路；朋友圈(moment=1)不展示
+        let conversationInfos = wfc.getConversationInfoList([0, 1, 2, 3], [ConversationLine.Default, ConversationLine.Agent]);
         this.conversationInfoDataSource.setConversationInfos(conversationInfos)
         let totalUnreadCount = 0
         conversationInfos.forEach(info => {

@@ -9,6 +9,7 @@
 
 import impl from '../proto/proto.min';
 import Config from "../../config";
+import ConversationLine from '../model/conversationLine';
 import Long from '../util/long'
 import { atob, btoa } from '../util/base64.min'
 // import avenginekit from "../av/engine/avenginekitproxy";
@@ -1800,7 +1801,7 @@ export class WfcManager {
      * @param {[number]} lines 获取未读数时，包含哪些会话线路，默认传[0]即可
      * @returns {UnreadCount}
      */
-    getUnreadCount(types = [0, 1, 2], lines = [0]): UnreadCount {
+    getUnreadCount(types = [0, 1, 2], lines = [ConversationLine.Default]): UnreadCount {
         return impl.getUnreadCount(types, lines);
     }
 

@@ -93,21 +93,28 @@ function agentSlotPrefix(conversation: Conversation, slot: number): string {
     return `${conversation.type}-${conversation.line}-${conversation.target}_${slot}_`
 }
 
-/** 扫描 scope=31 设置表，返回首个 key 以 prefix 开头的 value；无匹配返回空串。 */
-function findSettingByPrefix(prefix: string): string {
+/** 按 key 前缀查询 scope=31 设置表（SDK getUserSettingsLike，native 只返回 key 以 prefix 开头的条目，避免拉全量再筛选）。 */
+function settingEntriesByPrefix(prefix: string): UserSettingEntry[] {
     try {
-        let entries = wfc.getUserSettings(UserSettingScope.Conversation_User_Setting)
+        let entries = wfc.getUserSettingsLike(UserSettingScope.Conversation_User_Setting, prefix)
         if (!entries) {
-            return ''
+            return []
         }
-        for (let i = 0; i < entries.length; i++) {
-            let key = entries[i].key
-            if (key && key.startsWith(prefix)) {
-                return entries[i].value
-            }
-        }
+        return entries
     } catch (e) {
         // 忽略：底层不可用时按"无状态"处理
+        return []
+    }
+}
+
+/** 返回首个 key 以 prefix 开头的 value；无匹配返回空串。 */
+function findSettingByPrefix(prefix: string): string {
+    let entries = settingEntriesByPrefix(prefix)
+    for (let i = 0; i < entries.length; i++) {
+        let key = entries[i].key
+        if (key && key.startsWith(prefix)) {
+            return entries[i].value
+        }
     }
     return ''
 }
@@ -402,19 +409,6 @@ export class AgentRobotStateRow {
     metrics: AgentMetrics | null = null
 }
 
-/** 归一化读取 scope=31 会话级用户设置表（底层不可用时返回空数组）。 */
-function getAllSettings(): UserSettingEntry[] {
-    try {
-        let entries = wfc.getUserSettings(UserSettingScope.Conversation_User_Setting)
-        if (!entries) {
-            return []
-        }
-        return entries
-    } catch (e) {
-        return []
-    }
-}
-
 /** type=1 状态原始 JSON → AgentState（无有效状态返回 null，对齐 getAgentState 语义）。 */
 function parseAgentStateRaw(raw: string): AgentState | null {
     if (!raw) {
@@ -480,7 +474,7 @@ export function listAgentRobotUids(conversation?: Conversation): string[] {
     }
     const prefix = agentSlotPrefix(conversation, AGENT_STATE_TYPE)
     const uids: string[] = []
-    for (const e of getAllSettings()) {
+    for (const e of settingEntriesByPrefix(prefix)) {
         if (e.key && e.key.startsWith(prefix)) {
             addUnique(uids, e.key.slice(prefix.length))
         }
@@ -516,22 +510,25 @@ export function getAgentRobotStates(conversation?: Conversation): AgentRobotStat
     const keys: string[] = []
     const p1 = agentSlotPrefix(conversation, AGENT_STATE_TYPE)
     const p2 = agentSlotPrefix(conversation, AGENT_METRICS_TYPE)
-    for (const e of getAllSettings()) {
-        if (!e.key) {
+    // type=1 状态 / type=2 计量分别按前缀查询（native 已过滤，避免拉全量再筛选）
+    for (const e of settingEntriesByPrefix(p1)) {
+        if (!e.key || !e.key.startsWith(p1)) {
             continue
         }
-        if (e.key.startsWith(p1)) {
-            let uid = e.key.slice(p1.length)
-            if (uid) {
-                addUnique(keys, uid)
-                stateRaw.set(uid, e.value)
-            }
-        } else if (e.key.startsWith(p2)) {
-            let uid = e.key.slice(p2.length)
-            if (uid) {
-                addUnique(keys, uid)
-                metricsRaw.set(uid, e.value)
-            }
+        let uid = e.key.slice(p1.length)
+        if (uid) {
+            addUnique(keys, uid)
+            stateRaw.set(uid, e.value)
+        }
+    }
+    for (const e of settingEntriesByPrefix(p2)) {
+        if (!e.key || !e.key.startsWith(p2)) {
+            continue
+        }
+        let uid = e.key.slice(p2.length)
+        if (uid) {
+            addUnique(keys, uid)
+            metricsRaw.set(uid, e.value)
         }
     }
     const out: AgentRobotStateRow[] = []
@@ -561,16 +558,13 @@ export function getAgentPanelDataFor(conversation?: Conversation, robotUid: stri
     }
     const prefix = agentSlotPrefix(conversation, AGENT_PANEL_TYPE)
     if (robotUid) {
+        // 精确匹配：单键查询，避免全量读取再筛选
         try {
-            for (const e of getAllSettings()) {
-                if (e.key && e.key === prefix + robotUid) {
-                    return parseAgentPanelRaw(e.value)
-                }
-            }
+            let raw = wfc.getUserSetting(UserSettingScope.Conversation_User_Setting, prefix + robotUid)
+            return raw ? parseAgentPanelRaw(raw) : null
         } catch (e) {
             return null
         }
-        return null
     }
     try {
         let raw = findSettingByPrefix(prefix)

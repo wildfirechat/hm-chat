@@ -34,6 +34,10 @@ export default class MessageContentType {
     // content 为 JSON：{"op":"query"} 组合查询 / {"op":"set","cmd":"/model xxx","seq":123} 更新）
     static AGENT_COMMAND = 207;
 
+    // AGENT_Command_Result（209）：机器人→用户 207 指令的应答（透明消息，不落库、不显示、不计数；
+    // content 为 JSON：{"ver":1,"op":"dirs","seq":123,"robotId":"robot_x","cwd":"...","root":"...","dirs":[...]}）
+    static AGENT_COMMAND_RESULT = 209;
+
     // 接龙消息
     static Collection = 17;
 

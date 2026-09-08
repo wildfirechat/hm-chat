@@ -209,7 +209,7 @@ export class AgentPanelPlan {
 
 /**
  * AI 面板数据（scope=31 type=3，键 ..._3）：207 AGENT_Command query 组合查询结果。
- * 结构：model/effort/sandbox/plan/cwd/sessionId/dirs。
+ * 结构：model/effort/sandbox/plan/cwd/sessionId/dirs（dirs 已废弃，仅兼容老插件）。
  */
 export class AgentPanelData {
     model: AgentPanelModel | null = null
@@ -218,7 +218,9 @@ export class AgentPanelData {
     plan: AgentPanelPlan | null = null
     cwd: string = ''
     sessionId: string = ''
-    // 项目根目录子目录（cwd 切换候选）
+    // 项目根目录子目录（cwd 切换候选）。新插件已从 type=3 移除 dirs（改走 207 op=dirs +
+    // 209 AGENT_COMMAND_RESULT 按需应答，见 INTERACTION_DESIGN.md §10）；此字段仅用于
+    // 兼容老插件（仍内联 dirs 时直接用），新插件下通常为空
     dirs: string[] = []
 }
 

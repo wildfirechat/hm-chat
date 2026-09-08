@@ -5,18 +5,32 @@
  *   工作目录 = 「切换」弹出独立目录选择界面（bindSheet 二级弹窗）；计划模式 = 开关（Toggle）。
  * 展示方式：父组件以 Stack 内联覆盖呈现（遮罩 + 居中卡片），本面板为居中卡片（窗口样式）。
  * 静默通道：打开面板发 AGENT_Command(207) query（组合查询）→ 插件聚合面板数据写
- * scope=31 type=3 → 本面板读 type=3 渲染（模型/推理等级/沙箱/计划/cwd/目录列表）。
+ * scope=31 type=3 → 本面板读 type=3 渲染（模型/推理等级/沙箱/计划/cwd）。
  * 所有操作发 AGENT_Command(207) set（cmd=命令文本），插件执行后写 type=1 lastChange
  * （标题栏变更可见）+ 刷新 type=3；本面板监听 SettingUpdate 设置更新事件重读 type=3。
- * 207 为透明消息：不落库、不显示在消息流（digest 为空）。
+ * 目录列表按需获取（INTERACTION_DESIGN.md §10）：type=3 不再带 dirs；点「切换」时发 207
+ * {op:"dirs",seq,robotId}，插件用 209 AGENT_COMMAND_RESULT（透明消息）回传 dirs，本面板按
+ * seq 匹配 pending（超时 5s 重试 1 次，仍失败提示重试 + 手动输入路径兜底；老插件无应答时
+ * 回退读 type=3 的 dirs）。
+ * 207/209 均为透明消息：不落库、不显示在消息流（digest 为空）。
  */
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import EventType from '@wfc/client/src/main/ets/wfc/client/wfcEvent'
 import AgentCommandMessageContent from '@wfc/client/src/main/ets/wfc/messages/agentCommandMessageContent'
+import AgentCommandResultMessageContent from '@wfc/client/src/main/ets/wfc/messages/agentCommandResultMessageContent'
+import MessageContentType from '@wfc/client/src/main/ets/wfc/messages/messageContentType'
+import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType'
 import { AgentPanelData, agentRobotName, getAgentPanelDataFor } from '../../util/agentState'
 import { FontSize, Radius } from '../../common/design/Tokens'
+
+// 目录列表缓存 TTL（同一面板实例内；过期或目标机器人变化后重新请求 207 op=dirs）
+const DIRS_CACHE_TTL: number = 60 * 1000
+// 207 op=dirs 应答等待超时（5s 超时重试 1 次）
+const DIRS_TIMEOUT: number = 5000
+// 目录请求最大尝试次数（首次 + 重试 1 次）
+const DIRS_MAX_ATTEMPTS: number = 2
 
 // 单选可选项（模型/推理等级）
 interface AgentOption {
@@ -81,12 +95,29 @@ export default struct AgentPanelView {
     @State sandboxOptions: AgentOption[] = SANDBOX_MODES
     @State planOn: boolean = false
     @State cwdCandidates: string[] = []
+    // 目录列表加载态（207 op=dirs 已发出、等待 209 应答）
+    @State cwdLoading: boolean = false
+    // 目录列表失败提示（超时重试后仍无应答且无 type=3 回退时展示）
+    @State cwdError: string = ''
+    // 手动输入路径兜底（点「确定」发 207 set /cwd <路径>）
+    @State manualCwd: string = ''
     // 面板标题附注（多机器人时显示目标机器人名，如 "AI 会话设置 · 机器人名"）
     @State robotTitleNote: string = ''
+    // 目录列表缓存（同一面板实例内 TTL 60s；按目标机器人区分）
+    private dirsCache: string[] = []
+    private dirsCacheAt: number = 0
+    private dirsCacheRobot: string = ''
+    // pending 请求表：seq → 发起时间戳（同一会话可多个 pending；未匹配/已超时的应答丢弃）
+    private dirsPending: Map<number, number> = new Map<number, number>()
+    // 目录请求令牌：重试/切换机器人后旧超时回调失效（避免误判当前请求超时）
+    private dirsToken: number = 0
+    private dirsTimer: number = -1
 
     aboutToAppear() {
         // 设置更新事件：插件执行更新/组合查询后写 type=3，重读刷新
         wfc.eventEmitter?.on(EventType.SettingUpdate, this.onSettingUpdate)
+        // 209 应答（透明消息）：按 seq 匹配 pending 目录请求
+        wfc.eventEmitter?.on(EventType.ReceiveMessage, this.onReceiveMessage)
         this.updateRobotTitleNote()
         // 先读已有面板数据（若有），再发组合查询刷新
         this.refreshPanelData()
@@ -95,14 +126,36 @@ export default struct AgentPanelView {
 
     aboutToDisappear() {
         wfc.eventEmitter?.off(EventType.SettingUpdate, this.onSettingUpdate)
+        wfc.eventEmitter?.off(EventType.ReceiveMessage, this.onReceiveMessage)
         clearTimeout(this.flashTimer)
+        // 清空 pending 与超时定时器，避免面板关闭后回调持有引用（内存泄漏）
+        clearTimeout(this.dirsTimer)
+        this.dirsTimer = -1
+        this.dirsToken++
+        this.dirsPending.clear()
     }
 
     /** 目标机器人（@Prop）变化：重读该机器人的 type=3 并补发组合查询（一般由父组件重新创建本面板触发）。 */
     onRobotUidChanged() {
         this.updateRobotTitleNote()
+        // 目标机器人变了：目录缓存与在途请求全部作废（应答按 robotId 校验，不跨机器人复用）
+        this.resetDirsState()
         this.refreshPanelData()
         this.sendCommand('query')
+    }
+
+    /** 清空目录缓存/在途请求/加载态（切换目标机器人或面板重建时）。 */
+    resetDirsState() {
+        clearTimeout(this.dirsTimer)
+        this.dirsTimer = -1
+        this.dirsToken++
+        this.dirsPending.clear()
+        this.dirsCache = []
+        this.dirsCacheAt = 0
+        this.dirsCacheRobot = ''
+        this.cwdCandidates = []
+        this.cwdLoading = false
+        this.cwdError = ''
     }
 
     /** 面板标题附注：robotUid 非空时显示机器人显示名（名称缺失回退完整 uid，不截断）。 */
@@ -113,6 +166,124 @@ export default struct AgentPanelView {
     /** 设置更新（scope=31 会话级用户设置变化，type=3 刷新即触发）：重读目标机器人的面板数据。 */
     onSettingUpdate = () => {
         this.refreshPanelData()
+    }
+
+    /**
+     * 收到消息：挑出本会话的 209 AGENT_COMMAND_RESULT（透明消息）作为目录请求的应答。
+     * 只接受 op=dirs 且 seq 命中 pending 的应答；未匹配/已超时的应答丢弃；
+     * 应答带 robotId 且与当前面板目标机器人不一致时丢弃（多机器人会话串答保护）。
+     */
+    onReceiveMessage = (messages: Message[]) => {
+        if (!messages || messages.length === 0) {
+            return
+        }
+        for (const message of messages) {
+            if (!message || !message.messageContent) {
+                continue
+            }
+            if (message.messageContent.type !== MessageContentType.AGENT_COMMAND_RESULT) {
+                continue
+            }
+            if (!Conversation.equal(message.conversation, this.conversation)) {
+                continue
+            }
+            let content = message.messageContent as AgentCommandResultMessageContent
+            if (content.op !== 'dirs') {
+                continue
+            }
+            if (!this.dirsPending.has(content.seq)) {
+                continue
+            }
+            if (content.robotId && this.robotUid && content.robotId !== this.robotUid) {
+                continue
+            }
+            this.dirsPending.delete(content.seq)
+            this.onDirsResult(content.dirs)
+        }
+    }
+
+    /** 209 应答命中 pending：渲染目录候选并写入缓存（TTL 60s，按目标机器人区分）。 */
+    onDirsResult(dirs: string[]) {
+        let list: string[] = dirs ? dirs : []
+        this.cwdCandidates = list
+        this.dirsCache = list
+        this.dirsCacheAt = Date.now()
+        this.dirsCacheRobot = this.robotUid
+        this.cwdLoading = false
+        this.cwdError = ''
+        clearTimeout(this.dirsTimer)
+        this.dirsTimer = -1
+    }
+
+    /**
+     * 请求目录列表：发 207 {op:"dirs", seq, robotId}（透明消息），等 209 应答。
+     * attempt=1 为首次请求；超时 5s 仍无匹配应答则重试一次（attempt=2）；仍失败走 onDirsTimeout。
+     */
+    requestDirs(attempt: number) {
+        if (attempt <= 1) {
+            // 新的一轮目录请求：作废旧的在途请求（避免 pending 表堆积 / 旧应答串入）
+            this.dirsPending.clear()
+            this.cwdLoading = true
+            this.cwdError = ''
+        }
+        let seq = this.nextSeq()
+        this.dirsToken++
+        let token = this.dirsToken
+        this.dirsPending.set(seq, Date.now())
+        wfc.sendConversationMessage(this.conversation,
+            new AgentCommandMessageContent('dirs', '', seq, this.robotUid))
+        clearTimeout(this.dirsTimer)
+        this.dirsTimer = setTimeout(() => {
+            // 令牌不匹配 = 已被新请求/关闭/切换机器人作废，丢弃本次超时回调
+            if (token !== this.dirsToken) {
+                return
+            }
+            this.dirsPending.delete(seq)
+            if (attempt < DIRS_MAX_ATTEMPTS) {
+                this.requestDirs(attempt + 1)
+                return
+            }
+            this.onDirsTimeout()
+        }, DIRS_TIMEOUT)
+    }
+
+    /** 超时重试后仍无应答：回退读 type=3 的 dirs（老插件），为空则提示失败（保留手动输入路径兜底）。 */
+    onDirsTimeout() {
+        this.dirsTimer = -1
+        this.cwdLoading = false
+        this.dirsPending.clear()
+        let fallback = this.dirsFromType3()
+        if (fallback.length > 0) {
+            this.cwdCandidates = fallback
+            this.dirsCache = fallback
+            this.dirsCacheAt = Date.now()
+            this.dirsCacheRobot = this.robotUid
+            this.cwdError = ''
+            return
+        }
+        this.cwdCandidates = []
+        this.cwdError = '获取目录失败，请重试'
+    }
+
+    /** 兼容老插件：读 type=3 面板数据里可能仍内联的 dirs（新插件已移除，返回空列表）。 */
+    dirsFromType3(): string[] {
+        let data = getAgentPanelDataFor(this.conversation, this.robotUid)
+        if (data && data.dirs && data.dirs.length > 0) {
+            return data.dirs
+        }
+        return []
+    }
+
+    /** 「重新获取」：作废缓存与在途请求，重新发 207 op=dirs。 */
+    retryDirs() {
+        clearTimeout(this.dirsTimer)
+        this.dirsTimer = -1
+        this.dirsToken++
+        this.dirsPending.clear()
+        this.dirsCache = []
+        this.dirsCacheAt = 0
+        this.cwdError = ''
+        this.requestDirs(1)
     }
 
     refreshPanelData() {
@@ -156,14 +327,27 @@ export default struct AgentPanelView {
         }
         this.sandboxOptions = sopts.length > 0 ? sopts : SANDBOX_MODES
         this.planOn = data.plan ? !!data.plan.on : false
-        this.cwdCandidates = data.dirs ? data.dirs : []
+        // 目录列表：type=3 已不再内联 dirs（改走 207 op=dirs / 209 应答，见 §10）；
+        // 兼容老插件（仍带 dirs）直接使用并写入缓存，且不覆盖已拿到的 209 结果
+        let dirs = data.dirs ? data.dirs : []
+        if (dirs.length > 0) {
+            this.cwdCandidates = dirs
+            this.dirsCache = dirs
+            this.dirsCacheAt = Date.now()
+            this.dirsCacheRobot = this.robotUid
+        }
+    }
+
+    /** 207 请求序号（自增；防重/排查，并用于 209 应答关联）。 */
+    nextSeq(): number {
+        this.seq = (this.seq + 1) % 100000
+        return this.seq
     }
 
     /** 发送 207 面板指令（透明消息，不显示在消息流）；带目标机器人 robotId（多机器人寻址）。 */
     sendCommand(op: string, cmd: string = '') {
-        this.seq = (this.seq + 1) % 100000
         wfc.sendConversationMessage(this.conversation,
-            new AgentCommandMessageContent(op, cmd, this.seq, this.robotUid))
+            new AgentCommandMessageContent(op, cmd, this.nextSeq(), this.robotUid))
     }
 
     // ─── 操作：207 set（cmd=命令文本，插件执行后写 lastChange + 刷新 type=3） ───
@@ -199,15 +383,21 @@ export default struct AgentPanelView {
         this.flash()
     }
 
-    /** 点击「切换」：弹出独立目录选择界面（候选来自 type=3 dirs；为空可再发一次 query 刷新）。 */
+    /** 点击「切换」：弹出独立目录选择界面。缓存命中（同一面板实例、同一目标机器人、TTL 60s 内）
+     *  直接用；否则发 207 op=dirs 并显示加载态，等 209 应答。 */
     openCwdPicker() {
         if (this.applying) {
             return
         }
         this.showCwdPicker = true
-        if ((this.cwdCandidates ?? []).length === 0) {
-            this.sendCommand('query')
+        this.cwdError = ''
+        if (this.dirsCache.length > 0 && this.dirsCacheRobot === this.robotUid
+            && Date.now() - this.dirsCacheAt < DIRS_CACHE_TTL) {
+            this.cwdCandidates = this.dirsCache
+            this.cwdLoading = false
+            return
         }
+        this.requestDirs(1)
     }
 
     /** 点击候选目录：发 207 set /cwd 目录名，关闭弹窗；当前值随后由 type=3 刷新。 */
@@ -216,6 +406,18 @@ export default struct AgentPanelView {
             return
         }
         this.sendCommand('set', `/cwd ${dir}`)
+        this.showCwdPicker = false
+        this.flash()
+    }
+
+    /** 手动输入路径兜底：发 207 set /cwd <路径>（相对路径由插件按项目根解析）。 */
+    switchCwdManual() {
+        let path = this.manualCwd ? this.manualCwd.trim() : ''
+        if (!path || this.applying) {
+            return
+        }
+        this.sendCommand('set', `/cwd ${path}`)
+        this.manualCwd = ''
         this.showCwdPicker = false
         this.flash()
     }
@@ -391,6 +593,15 @@ export default struct AgentPanelView {
                     .fontSize(FontSize.md)
                     .fontColor($r('app.color.wf_primary_text'))
                     .layoutWeight(1)
+                // 重新获取：作废缓存，重发 207 op=dirs
+                Text('↻')
+                    .fontSize(FontSize.md)
+                    .fontColor($r('app.color.wf_primary'))
+                    .padding({ left: 8, right: 8 })
+                    .enabled(!this.cwdLoading)
+                    .onClick(() => {
+                        this.retryDirs()
+                    })
                 Text('×')
                     .fontSize(FontSize.lg)
                     .fontColor($r('app.color.wf_secondary_text'))
@@ -414,13 +625,29 @@ export default struct AgentPanelView {
 
             Scroll() {
                 Column() {
-                    if ((this.cwdCandidates ?? []).length === 0) {
+                    if (this.cwdLoading) {
+                        // 加载态：207 op=dirs 已发出，等待 209 应答
                         Column() {
-                            Text('未获取到目录列表')
+                            LoadingProgress()
+                                .width(32)
+                                .height(32)
+                                .color($r('app.color.wf_primary'))
+                            Text('正在获取目录列表…')
                                 .fontSize(FontSize.sm)
                                 .fontColor($r('app.color.wf_tertiary_text'))
+                                .margin({ top: 8 })
+                        }
+                        .width('100%')
+                        .constraintSize({ minHeight: 120 })
+                        .justifyContent(FlexAlign.Center)
+                        .alignItems(HorizontalAlign.Center)
+                    } else if ((this.cwdCandidates ?? []).length === 0) {
+                        Column() {
+                            Text(this.cwdError ? this.cwdError : '未获取到目录列表')
+                                .fontSize(FontSize.sm)
+                                .fontColor(this.cwdError ? $r('app.color.wf_danger') : $r('app.color.wf_tertiary_text'))
                                 .margin({ bottom: 4 })
-                            Text('可稍后重试或再次打开')
+                            Text('可点右上角 ↻ 重试，或在下方手动输入路径')
                                 .fontSize(FontSize.xs)
                                 .fontColor($r('app.color.wf_tertiary_text'))
                         }
@@ -439,6 +666,38 @@ export default struct AgentPanelView {
             }
             .layoutWeight(1)
             .scrollBar(BarState.Off)
+
+            // 手动输入路径兜底（207 set /cwd <路径>；相对路径由插件按项目根解析）
+            Divider()
+                .color($r('app.color.wf_divider'))
+                .width('100%')
+            Row() {
+                TextInput({ text: this.manualCwd, placeholder: '手动输入目录路径' })
+                    .layoutWeight(1)
+                    .height(40)
+                    .fontSize(FontSize.sm)
+                    .backgroundColor($r('app.color.wf_background'))
+                    .borderRadius(Radius.sm)
+                    .enabled(!this.applying)
+                    .onChange((value: string) => {
+                        this.manualCwd = value
+                    })
+                Button('确定')
+                    .type(ButtonType.Normal)
+                    .height(40)
+                    .margin({ left: 8 })
+                    .fontSize(FontSize.sm)
+                    .fontColor($r('app.color.wf_primary'))
+                    .backgroundColor($r('app.color.wf_background'))
+                    .border({ width: 1, color: $r('app.color.wf_primary') })
+                    .borderRadius(Radius.sm)
+                    .enabled(!this.applying)
+                    .onClick(() => {
+                        this.switchCwdManual()
+                    })
+            }
+            .width('100%')
+            .padding({ left: 12, right: 12, top: 8, bottom: 12 })
         }
         .width('100%')
         .height('100%')

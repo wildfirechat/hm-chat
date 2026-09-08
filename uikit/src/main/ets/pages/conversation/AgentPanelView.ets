@@ -461,7 +461,7 @@ export default struct AgentPanelView {
             Column() {
                 // 头部：标题（多机器人时附目标机器人名）+ 关闭按钮
                 Row() {
-                    Text(this.robotTitleNote ? `🤖 AI 会话设置 · ${this.robotTitleNote}` : '🤖 AI 会话设置')
+                    Text(this.robotTitleNote ? `🤖 AI 设置 · ${this.robotTitleNote}` : '🤖 AI 设置')
                         .fontSize(FontSize.md)
                         .fontColor($r('app.color.wf_primary_text'))
                         .layoutWeight(1)
@@ -695,8 +695,9 @@ export default struct AgentPanelView {
                 }
             }
             .width('92%')
-            .constraintSize({ maxWidth: 480 })
-            .height('86%')
+            // 高度按内容自适应（最高 86% 屏高）：原来固定 86% 会撑出大片上下留白；
+            // 内容超长时由内部 Scroll 滚动（与「选择机器人」卡片同一套约束写法）
+            .constraintSize({ maxWidth: 480, maxHeight: '86%' })
             .borderRadius(Radius.xl)
             .backgroundColor($r('app.color.wf_background'))
             .shadow({ radius: 24, color: '#33000000', offsetY: 8 })

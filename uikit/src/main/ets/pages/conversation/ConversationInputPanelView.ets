@@ -20,7 +20,7 @@ import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType'
 import { isWideScreen } from '../../util/navUtil'
 import { preferences } from '@kit.ArkData'
-import { TextStyleToken, FontSize, Radius } from '../../common/design/Tokens'
+import { TextStyleToken, FontSize, Radius, scaledSize, LayoutScale } from '../../common/design/Tokens'
 import avenginekit from '@wfc/avenginekit'
 import MessageContent from '@wfc/client/src/main/ets/wfc/messages/messageContent'
 import VideoMessageContent from '@wfc/client/src/main/ets/wfc/messages/videoMessageContent'
@@ -65,13 +65,30 @@ const PTT_COUNT_DOWN_MILLIS = 10 * 1000
 // 软键盘与自定义面板显示/隐藏的过渡动画时间
 const PANEL_ANIM_COLLAPSE = 400
 const PANEL_ANIM_EXPAND = 400
+// 「+」扩展面板分页：4 列 × 2 行 = 每页 8 项（与 Android/iOS 端一致），超过一页时左右滑动翻页
+const EXT_PAGE_COLUMNS = 4
+const EXT_PAGE_ROWS = 2
+const EXT_PER_PAGE = EXT_PAGE_COLUMNS * EXT_PAGE_ROWS
+// 扩展面板的竖向留白与行间距（面板高度按内容算，不再撑满软键盘高度）
+const EXT_PANEL_PADDING_TOP = 12
+const EXT_PANEL_PADDING_BOTTOM = 8
+const EXT_ROW_GAP = 10
+// 单个扩展项的固定高度部分 = 图标 60 + 上下 padding 8+8 + 文字上间距 8（不随字号变化）
+const EXT_ITEM_FIXED_HEIGHT = 84
+// 扩展项标签行高（随字号缩放，封顶 1.5 倍）
+const EXT_ITEM_TEXT_LINE = 18
+// 分页圆点行高度
+const EXT_PAGE_INDICATOR_HEIGHT = 18
 
 interface ConversationExt {
     title: string,
     icon: ResourceStr,
     action: () => void,
     // 置灰禁用（如 AI 不在线时的 "AI 会话设置" 入口）：icon 半透明、点击不响应
-    disabled?: boolean
+    disabled?: boolean,
+    // 图标在 60×60 格子内的额外内缩（vp）。AI 图标的字形几乎铺满画布，
+    // 与其他扩展图标（字形约占画布 44%）相比显得过大，需要内缩对齐
+    iconInset?: number
 }
 
 interface MultiCheckAction {
@@ -96,6 +113,10 @@ export default struct ConversationInputPanelView {
     @State @Watch('onFocusStateChanged') textInputFocused: boolean = false
     @State showEmojiPanel: boolean = false
     @State showExtPanel: boolean = false
+    // 「+」扩展面板当前页（每页 8 项，超过一页时 Swiper 左右滑动翻页；打开面板时回到第 1 页）
+    @State extPageIndex: number = 0
+    // 用户「字体大小」缩放（扩展项行高需随字号放大，见 FontScale.ets）
+    @StorageProp('fontScale') fontScale: number = 1.0
     // 底部表情/加号面板的「显示高度」，用 animateTo 改变它来模拟软键盘的缓慢顶起/落下。
     // 配合 List.stackFromEnd，消息列表随之平滑移动。
     @State bottomPanelHeight: number = 0
@@ -335,6 +356,15 @@ export default struct ConversationInputPanelView {
                     'groupId': this.conversation.target
                 } as Record<string, Object>)
             }
+        },
+        {
+            // 示例扩展项（对齐 Android 端 ExampleAudioInputExt）：用来验证「+」扩展区分页，
+            // 点击只弹提示；不需要时可整段删除
+            title: 'Example',
+            icon: $r('app.media.ic_func_voice'),
+            action: () => {
+                showToast('Example 扩展项')
+            }
         }
     ]
 
@@ -346,12 +376,45 @@ export default struct ConversationInputPanelView {
         return this.conversationExts
     }
 
+    // 「+」扩展项分页：每页 EXT_PER_PAGE 项（4 列 × 2 行），最后一页不足时留空位。
+    // 面板高度只等于软键盘高度，项数超过 8 个（含 AI 会话的「AI 设置」入口时常见）后，
+    // 单页放不下就会被裁掉；改为分页 + 左右滑动翻页 + 底部圆点指示。
+    private extPages(): Array<ConversationExt[]> {
+        let exts = this.visibleConversationExts()
+        let pages: Array<ConversationExt[]> = []
+        for (let i = 0; i < exts.length; i += EXT_PER_PAGE) {
+            pages.push(exts.slice(i, i + EXT_PER_PAGE))
+        }
+        return pages
+    }
+
+    // 「+」扩展面板高度 = 内容高度（每页最多 2 行，多页再加圆点行）+ 上下留白，
+    // 不再等于软键盘高度，避免内容下方一大片留白；内容比键盘还高时取键盘高度兜底。
+    private extPanelHeight(): number {
+        let pageCount = this.extPages().length
+        if (pageCount === 0) {
+            return 0
+        }
+        let rows = pageCount > 1
+            ? EXT_PAGE_ROWS
+            : Math.ceil(this.visibleConversationExts().length / EXT_PAGE_COLUMNS)
+        // 行高随字号缩放（封顶 1.5 倍，见 LayoutScale），避免大字号下标签被裁掉
+        let itemHeight = EXT_ITEM_FIXED_HEIGHT + scaledSize(EXT_ITEM_TEXT_LINE, this.fontScale, LayoutScale.row)
+        let height = EXT_PANEL_PADDING_TOP + rows * itemHeight + (rows - 1) * EXT_ROW_GAP + EXT_PANEL_PADDING_BOTTOM
+        if (pageCount > 1) {
+            height += EXT_PAGE_INDICATOR_HEIGHT
+        }
+        return Math.min(height, this.keyboardHeight)
+    }
+
     // 「AI 会话设置」扩展项：点击弹出底部设置面板（选择式，不需要手输命令）；
     // 多机器人会话由 ConversationPage 先弹机器人选择列表（openAgentPanel），再打开对应面板
     private agentExt(): ConversationExt {
         return {
-            title: 'AI 会话设置',
+            title: 'AI 设置',
             icon: $r('app.media.ic_robot'),
+            // AI 字形几乎铺满图标画布，内缩后与其他扩展图标视觉大小一致
+            iconInset: 14,
             // AI 不在线：置灰禁用，点击不弹出面板
             disabled: !this.aiOwnerOnline,
             action: () => {
@@ -498,9 +561,10 @@ export default struct ConversationInputPanelView {
         }, 100)
     }
 
-    // 面板高度 = 软键盘在内容区撑开的真实高度（来自 avoidAreaChange）。与键盘等高，互切时输入框基本不动。
-    private panelTargetHeight(): number {
-        return this.keyboardHeight
+    // 面板高度：表情面板 = 软键盘在内容区撑开的真实高度（来自 avoidAreaChange），与键盘等高互切时输入框基本不动；
+    // 「+」扩展面板按内容高度收缩（见 extPanelHeight），少留白。
+    private panelTargetHeight(emoji: boolean): number {
+        return emoji ? this.keyboardHeight : this.extPanelHeight()
     }
 
     // 软键盘显示与隐藏状态处理，配合 KeyboardAvoidMode.NONE 模式实现零抖动无缝切换
@@ -513,7 +577,13 @@ export default struct ConversationInputPanelView {
                 this.bottomPanelHeight = this.keyboardHeight
             })
         } else {
-            if (!this.showExtPanel && !this.showEmojiPanel) {
+            if (this.showExtPanel || this.showEmojiPanel) {
+                // 键盘收起、面板接管：高度改到该面板自己的目标高度
+                // （表情 = 键盘等高；扩展 = 内容高度，从键盘高度收缩下来，去掉下方留白）
+                animateTo({ duration: PANEL_ANIM_COLLAPSE, curve: Curve.Friction }, () => {
+                    this.bottomPanelHeight = this.panelTargetHeight(this.showEmojiPanel)
+                })
+            } else {
                 animateTo({ duration: PANEL_ANIM_COLLAPSE, curve: Curve.Friction }, () => {
                     this.bottomPanelHeight = 0
                 })
@@ -528,12 +598,16 @@ export default struct ConversationInputPanelView {
     private showPanel(emoji: boolean) {
         this.showExtPanel = !emoji
         this.showEmojiPanel = emoji
+        if (!emoji) {
+            // 打开「+」面板回到第 1 页（多页时避免停留在上次翻到的那页）
+            this.extPageIndex = 0
+        }
         this.onSuggestionsChange?.([])
         // 列表若不在最底部，先滚动到底，再升起面板（微信效果）
         this.scrollMessageListToBottom()
         if (!this.keyboardShown) {
             animateTo({ duration: PANEL_ANIM_EXPAND, curve: Curve.Friction }, () => {
-                this.bottomPanelHeight = this.panelTargetHeight()
+                this.bottomPanelHeight = this.panelTargetHeight(emoji)
             })
         }
     }
@@ -1028,6 +1102,70 @@ export default struct ConversationInputPanelView {
         }
     }
 
+    // 单个「+」扩展项（图标 + 标题；置灰项半透明且不响应点击）
+    @Builder
+    extItem(ext: ConversationExt) {
+        Column() {
+            Image(ext.icon)
+                .width(60)
+                .draggable(false)
+                .height(60)
+                .borderRadius(Radius.lg)
+                // 字形自带留白少时（如 AI 图标）内缩，视觉大小与其他扩展图标一致
+                .padding(ext.iconInset ?? 0)
+                .opacity(ext.disabled ? 0.35 : 1)
+                .stateStyles({
+                    pressed: {
+                        .backgroundColor($r('app.color.wf_item_pressed'))
+                    },
+                    normal: {
+                        .backgroundColor($r('app.color.wf_background'))
+                    }
+                })
+            // 标签宽度不影响格子大小：占满格宽、居中、单行省略，
+            // 避免「视频通话」等较长文案把扩展项撑得比别人大
+            Text(ext.title)
+                .margin({ top: 8 })
+                .fontSize(FontSize.xs)
+                .fontColor(ext.disabled ? $r('app.color.wf_tertiary_text') : $r('app.color.wf_secondary_text'))
+                .width('100%')
+                .textAlign(TextAlign.Center)
+                .maxLines(1)
+                .textOverflow({ overflow: TextOverflow.Ellipsis })
+        }
+        .width('100%')
+        .borderRadius(Radius.sm)
+        .padding({ top: 8, bottom: 8 })
+        .alignItems(HorizontalAlign.Center)
+        .onClick(() => {
+            if (ext.disabled) {
+                return
+            }
+            ext.action()
+        })
+    }
+
+    // 扩展面板底部分页圆点（仅多页时显示）
+    @Builder
+    extPageIndicator() {
+        Row({ space: 6 }) {
+            ForEach(this.extPages(), (pageExts: ConversationExt[], pageIndex: number) => {
+                Row()
+                    .width(this.extPageIndex === pageIndex ? 14 : 6)
+                    .height(6)
+                    .borderRadius(3)
+                    .backgroundColor(this.extPageIndex === pageIndex
+                        ? $r('app.color.wf_primary')
+                        : $r('app.color.wf_tertiary_text'))
+                    .opacity(this.extPageIndex === pageIndex ? 1 : 0.4)
+            }, (pageExts: ConversationExt[], pageIndex: number) => pageIndex + '')
+        }
+        .width('100%')
+        .height(18)
+        .justifyContent(FlexAlign.Center)
+        .alignItems(VerticalAlign.Center)
+    }
+
     @Builder
     dummyContentCoverBuilder() {
     }
@@ -1492,58 +1630,63 @@ export default struct ConversationInputPanelView {
                 // 让消息列表随之平滑移动。
                 Column() {
                     if (this.showExtPanel) {
-                        Grid() {
-                            ForEach(this.visibleConversationExts(), (ext: ConversationExt) => {
-                                GridItem() {
-                                    Column() {
-                                        Image(ext.icon)
-                                            .width(60)
-                                            .draggable(false)
-                                            .height(60)
-                                            .borderRadius(Radius.lg)
-                                            .opacity(ext.disabled ? 0.35 : 1)
-                                            .stateStyles({
-                                                pressed: {
-                                                    .backgroundColor($r('app.color.wf_item_pressed'))
-                                                },
-                                                normal: {
-                                                    .backgroundColor($r('app.color.wf_background'))
+                        // 「+」扩展面板：每页 8 项（4 列 × 2 行）。只有一页时保持原样；
+                        // 超过一页（如 AI 会话把「AI 设置」入口前置后共 9 项）用 Swiper 左右滑动翻页，
+                        // 底部圆点指示当前页，避免超出面板高度的项被裁掉点不到。
+                        Column() {
+                            if (this.extPages().length > 1) {
+                                Swiper() {
+                                    ForEach(this.extPages(), (pageExts: ConversationExt[], pageIndex: number) => {
+                                        Grid() {
+                                            ForEach(pageExts, (ext: ConversationExt) => {
+                                                GridItem() {
+                                                    this.extItem(ext)
                                                 }
-                                            })
-                                        // 标签宽度不影响格子大小：占满格宽、居中、单行省略，
-                                        // 避免「视频通话」等较长文案把扩展项撑得比别人大
-                                        Text(ext.title)
-                                            .margin({ top: 8 })
-                                            .fontSize(FontSize.xs)
-                                            .fontColor(ext.disabled ? $r('app.color.wf_tertiary_text') : $r('app.color.wf_secondary_text'))
-                                            .width('100%')
-                                            .textAlign(TextAlign.Center)
-                                            .maxLines(1)
-                                            .textOverflow({ overflow: TextOverflow.Ellipsis })
-                                    }
-                                    .width('100%')
-                                    .borderRadius(Radius.sm)
-                                    .padding({ top: 8, bottom: 8 })
-                                    .alignItems(HorizontalAlign.Center)
-                                    .onClick(() => {
-                                        if (ext.disabled) {
-                                            return
+                                            }, (ext: ConversationExt) => pageIndex + '-' + ext.title + (ext.disabled ? '-d' : ''))
                                         }
-                                        ext.action()
-                                    })
+                                        .columnsTemplate('1fr 1fr 1fr 1fr')
+                                        .columnsGap(10)
+                                        .rowsGap(10)
+                                        .margin(0)
+                                        .padding(0)
+                                        .width('100%')
+                                        .height('100%')
+                                    }, (pageExts: ConversationExt[], pageIndex: number) => pageIndex + '')
                                 }
+                                .layoutWeight(1)
+                                .width('100%')
+                                .loop(false)
+                                .index(this.extPageIndex)
+                                .indicator(false)
+                                // 面板靠容器高度动画+裁剪平滑展开，自身不要默认的「从右侧滑入」出现动画
+                                .transition(TransitionEffect.IDENTITY)
+                                .onChange((index: number) => {
+                                    this.extPageIndex = index
+                                })
 
-                            }, (ext: ConversationExt) => ext.title)
+                                this.extPageIndicator()
+                            } else {
+                                Grid() {
+                                    ForEach(this.visibleConversationExts(), (ext: ConversationExt) => {
+                                        GridItem() {
+                                            this.extItem(ext)
+                                        }
+                                    }, (ext: ConversationExt) => ext.title + (ext.disabled ? '-d' : ''))
+                                }
+                                .columnsTemplate('1fr 1fr 1fr 1fr')
+                                .columnsGap(10)
+                                .rowsGap(10)
+                                .margin(0)
+                                .padding(0)
+                                .width('100%')
+                                .height('100%')
+                                // 面板靠容器高度动画+裁剪平滑展开，自身不要默认的「从右侧滑入」出现动画
+                                .transition(TransitionEffect.IDENTITY)
+                            }
                         }
-                        .columnsTemplate('1fr 1fr 1fr 1fr')
-                        .columnsGap(10)
-                        .rowsGap(10)
-                        .margin(0)
-                        .padding(0)
                         .width('100%')
                         .height('100%')
-                        // 面板靠容器高度动画+裁剪平滑展开，自身不要默认的「从右侧滑入」出现动画
-                        .transition(TransitionEffect.IDENTITY)
+                        .padding({ top: EXT_PANEL_PADDING_TOP, bottom: EXT_PANEL_PADDING_BOTTOM })
                         .backgroundColor($r('app.color.wf_primary_background_color'))
                         .bindContentCover(!isWideScreen() && this.showExtContentCoverModal, this.extContentCoverBuilderParam, {
                             modalTransition: ModalTransition.DEFAULT,

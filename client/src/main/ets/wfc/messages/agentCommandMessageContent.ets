@@ -6,17 +6,18 @@ import MessagePayload from "./messagePayload";
 /**
  * AGENT_Command (207)：AI 面板静默指令消息（用户→机器人）。
  * 透明消息（Transparent）：不存储、不计未读、不在消息流显示（digest 为空）。
- * content = JSON.stringify({op: "query"|"set", cmd?, seq?, robotId?})：
+ * content = JSON.stringify({op: "query"|"set"|"dirs", cmd?, seq?, robotId?})：
  *   op=query 组合查询（插件聚合面板数据写 scope=31 type=3，不回复消息）；
  *   op=set   更新（cmd 为命令文本，如 "/model deepseek-official/xxx"，插件执行后写 type=1 lastChange 并刷新 type=3）；
+ *   op=dirs  目录列表按需获取（插件用 209 AGENT_COMMAND_RESULT 透明消息回传 dirs，见 §10）；
  *   robotId  目标机器人完整 uid（多机器人会话寻址；缺省/空 = 会话默认机器人，仅该机器人执行）。
  */
 export default class AgentCommandMessageContent extends MessageContent {
-    // query / set
+    // query / set / dirs
     op: string = ''
     // op=set 时的命令文本（如 "/model xxx"）
     cmd: string = ''
-    // 请求序号（防重/排查用）
+    // 请求序号（防重/排查用；op=dirs 时由插件在 209 应答里原样回显用于关联）
     seq: number = 0
     // 目标机器人 uid（多机器人会话寻址；空 = 会话默认机器人）
     robotId: string = ''

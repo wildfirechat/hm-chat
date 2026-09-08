@@ -911,6 +911,11 @@ export default struct ConversationPage {
         if (message.messageContent.type === MessageContentType.AGENT_COMMAND) {
             return false;
         }
+        // AGENT_Command_Result (209) 是 207 指令的应答（透明消息，不落库、不显示在消息流；
+        // 目录列表按需获取，由 AgentPanelView 监听 ReceiveMessage 消费）
+        if (message.messageContent.type === MessageContentType.AGENT_COMMAND_RESULT) {
+            return false;
+        }
         // return [PersistFlag.Persist, PersistFlag.Persist_And_Count].indexOf(MessageConfig.getMessageContentPersitFlag(message.messageContent.type)) > -1;
         return message.messageId !== 0 || message.messageContent.type === MessageContentType.Streaming_Text_Generating;
     }

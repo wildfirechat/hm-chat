@@ -82,6 +82,7 @@ import PollResultMessageContent from '../messages/pollResultMessageContent';
 import MeetingMinutesMessageContent from '../messages/meetingMinutesMessageContent';
 import TranscriptionMessageContent from '../messages/transcriptionMessageContent';
 import AgentCommandMessageContent from '../messages/agentCommandMessageContent';
+import AgentCommandResultMessageContent from '../messages/agentCommandResultMessageContent';
 
 export type MessageContentFactory = (type: number) => MessageContent | undefined;
 
@@ -373,6 +374,9 @@ export default class MessageConfig {
                 break
             case MessageContentType.AGENT_COMMAND:
                 content = new AgentCommandMessageContent()
+                break
+            case MessageContentType.AGENT_COMMAND_RESULT:
+                content = new AgentCommandResultMessageContent()
                 break
             default:
                 content = new UnknownMessageContent()
@@ -746,6 +750,11 @@ export default class MessageConfig {
             name: 'agentCommandMessageContent',
             flag: PersistFlag.Transparent,
             type: MessageContentType.AGENT_COMMAND,
+        },
+        {
+            name: 'agentCommandResultMessageContent',
+            flag: PersistFlag.Transparent,
+            type: MessageContentType.AGENT_COMMAND_RESULT,
         }
 
     ];

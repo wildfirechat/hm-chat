@@ -6,15 +6,18 @@ import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import ImageMessageContent from '@wfc/client/src/main/ets/wfc/messages/imageMessageContent'
 import TextMessageContent from '@wfc/client/src/main/ets/wfc/messages/textMessageContent'
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
-import AudioRecordManager from './audio/AudioRecordManager'
-import fs from '@ohos.file.fs'
 import SoundMessageContent from '@wfc/client/src/main/ets/wfc/messages/soundMessageContent'
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import BottomActionSheetDialog from '../../view/BottomActionSheetDialog'
 import EmojiInputPanelView from './emoji/EmojiInputPanelView'
 import { config as emojiConfig } from './emoji/EmojiAndStickerConfig'
 import { Emoji } from './emoji/emojis'
-import { KeyboardAvoidMode, window } from '@kit.ArkUI'
+// 起别名，避免和自定义弹窗选项里的全局 KeyboardAvoidMode 重名
+import { KeyboardAvoidMode as UIKeyboardAvoidMode, window } from '@kit.ArkUI'
+import { util } from '@kit.ArkTS'
+import AsrManager from '../../asr/AsrManager'
+import AudioRecorderPanel, { REASON_USER_CANCELED } from './audio/AudioRecorderPanel'
+import VoiceInputDialog, { VoiceInputState } from './audio/VoiceInputDialog'
 import MentionGroupMemberView from './mention/MentionGroupMemberView'
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType'
@@ -44,7 +47,6 @@ import ForwardMessageDialog from './forward/ForwardMessageDialog'
 import CardMessageContent from '@wfc/client/src/main/ets/wfc/messages/cardMessageContent'
 import fileUri from '@ohos.file.fileuri'
 import { checkAndRequestPermission, checkPermissions } from '../../helper/permissionHelper'
-import AudioRecorderDialog, { AudioRecorderDialogState } from './audio/AudioRecorderDialog'
 import { playRawSound } from '../../helper/soundEffectHelper'
 import pttClient, { PttEventType } from '@wfc/ptt'
 import PttTalkingDialog, { PttTalkingDialogState } from './ptt/PttTalkingDialog'
@@ -113,11 +115,27 @@ export default struct ConversationInputPanelView {
     messageListScroller?: Scroller
     private textInputBottomWhenBlur: number = 0
     private textInputController: TextInputController = new TextInputController()
-    private recordTouchDownY: number = 0
-    private _cancelRecording: boolean = false
-    private _recordingActive: boolean = false
-    private audioDialogState: AudioRecorderDialogState = new AudioRecorderDialogState()
-    private audioDialogController?: CustomDialogController
+    // 输入栏的 id，按住说话的浮层按它的位置只覆盖会话界面；平板上可能同时有多个会话界面，id 需要唯一
+    private inputPanelId: string = 'conversationInputPanel-' + util.generateRandomUUID(false)
+    // 按住说话的浮层
+    @State voiceInputState: VoiceInputState = new VoiceInputState()
+    private audioRecorderPanel?: AudioRecorderPanel
+    private voiceInputDialogController?: CustomDialogController
+    // 实时语音输入：配置了语音识别服务时，输入框右侧显示麦克风按钮
+    @State asrEnabled: boolean = false
+    @State asrRecording: boolean = false
+    // 麦克风图标混合主色调的比例，0 为原来的灰色，1 为主色调
+    @State asrIconTint: number = 0
+    @State asrIconAlpha: number = 1
+    private asrManager?: AsrManager
+    // 语音识别文本在输入框中的范围 [asrTextStart, asrTextEnd)，识别结果会替换这个范围内的文本
+    private asrTextStart: number = 0
+    private asrTextEnd: number = 0
+    // 最近一次写入识别结果后输入框的文本，用于区分用户自己的编辑
+    private asrExpectedText: string = ''
+    // 写入识别结果后正在把光标移到识别文本末尾，期间的光标变化不算用户移动光标
+    private asrSyncingCaret: boolean = false
+    private asrCaretTimer: number = -1
     private pttDialogState: PttTalkingDialogState = new PttTalkingDialogState()
     private pttDialogController?: CustomDialogController
     private pttTalkingCallback: PttTalkingCallback = new PttTalkingCallback()
@@ -127,9 +145,6 @@ export default struct ConversationInputPanelView {
     private pttStartMillis: number = 0
     private pttMaxDurationMillis: number = 60 * 1000
     private pttTickTimer: number = -1
-    private recorder?: AudioRecordManager
-    private recordOutputAudioFile: string = ''
-    private recordAudioStartMillis: number = 0
     private forwardMessageDialogController?: CustomDialogController
     private deleteMessageDialogController?: CustomDialogController
     private groupId = ''
@@ -530,6 +545,10 @@ export default struct ConversationInputPanelView {
     }
 
     private onTextChange() {
+        // 语音输入过程中，用户编辑文本（输入、插入表情、@ 等）时结束语音输入
+        if (this.text !== this.asrExpectedText && this.isAsrRecognizing()) {
+            this.cancelAsrRecognition()
+        }
         const trimmed = this.text.trim()
         // 不再用 showEmojiPanel/showExtPanel 抑制：建议已是悬浮于输入栏上方的浮层，
         // 不会与面板冲突；这样用过 emoji/加号面板后输入匹配文字仍能正常出现表情建议
@@ -572,13 +591,43 @@ export default struct ConversationInputPanelView {
     }
 
     aboutToAppear() {
-        this.audioDialogController = new CustomDialogController({
-            builder: AudioRecorderDialog({
-                controller: this.audioDialogController!,
-                dialogState: this.audioDialogState
+        this.asrEnabled = !!Config.getAsrStreamServerUrl()
+        let audioRecorderPanel = new AudioRecorderPanel(getContext(this), this.getUIContext(), this.voiceInputState,
+            this.inputPanelId)
+        this.audioRecorderPanel = audioRecorderPanel
+        // 配置了实时语音输入服务时，按住录音也可以滑动到「转文字」
+        audioRecorderPanel.setSpeechToTextEnabled(this.asrEnabled)
+        this.voiceInputDialogController = new CustomDialogController({
+            builder: VoiceInputDialog({
+                controller: this.voiceInputDialogController!,
+                state: this.voiceInputState,
+                delegate: audioRecorderPanel.delegate
             }),
             customStyle: true,
-            autoCancel: false
+            autoCancel: false,
+            maskColor: Color.Transparent,
+            openAnimation: { duration: 0 },
+            closeAnimation: { duration: 0 },
+            // 编辑文字时由 AudioRecorderPanel 自己把气泡和按钮顶到软键盘上方
+            keyboardAvoidMode: KeyboardAvoidMode.NONE,
+            onWillDismiss: (action: DismissDialogAction) => {
+                audioRecorderPanel.onDialogWillDismiss()
+            }
+        })
+        audioRecorderPanel.attach(this.voiceInputDialogController, {
+            onRecordSuccess: (audioFile: string, duration: number) => {
+                let content = new SoundMessageContent(audioFile, '', duration)
+                wfc.sendConversationMessage(this.conversation, content, [], null, null, null, null, null)
+            },
+            onRecordFail: (reason: string) => {
+                // 用户主动取消时不提示
+                if (reason !== REASON_USER_CANCELED) {
+                    showToast(reason)
+                }
+            },
+            onSendText: (text: string) => {
+                wfc.sendConversationMessage(this.conversation, new TextMessageContent(text), [], null, null, null, null, null)
+            }
         })
 
         this.pttDialogController = new CustomDialogController({
@@ -633,7 +682,7 @@ export default struct ConversationInputPanelView {
 
         // 软键盘不自动避让，通过占位高度手动避让以防抖动
         setTimeout(() => {
-            this.setKeyboardAvoidMode(KeyboardAvoidMode.NONE);
+            this.setKeyboardAvoidMode(UIKeyboardAvoidMode.NONE);
         }, 100)
 
         if (this.conversationInfo.draft) {
@@ -680,6 +729,8 @@ export default struct ConversationInputPanelView {
         pttClient.eventEmitter?.off(PttEventType.userStartTalking, this.onPttUserStartTalking)
         pttClient.eventEmitter?.off(PttEventType.userEndTalking, this.onPttUserEndTalking)
         this.exitPttMode()
+        this.cancelAsrRecognition()
+        this.audioRecorderPanel?.release()
     }
 
     // --- 对讲 -------------------------------------------------------------------------------
@@ -834,43 +885,211 @@ export default struct ConversationInputPanelView {
         }
     }
 
-    async startRecordAudio() {
-        if (!this.recorder) {
-            this.recorder = new AudioRecordManager()
+    // --- 实时语音输入 -------------------------------------------------------------------------
+
+    /**
+     * 麦克风按钮：点击开始/停止语音识别，识别结果写入输入框
+     */
+    private async onAsrIconClick() {
+        if (this.asrRecording) {
+            // 正在录音，停止识别
+            this.stopAsrRecognition()
+            return
         }
-
-        let cacheDir = getContext(this).getApplicationContext().cacheDir;
-        let audioDir = `${cacheDir}/audio`
-        try {
-            fs.mkdirSync(audioDir)
-        } catch (e) {
-
+        if (this.isAsrRecognizing()) {
+            // 已停止录音，正在等待剩余识别结果
+            return
         }
-
-        this.recordAudioStartMillis = new Date().getTime()
-
-        this.recordOutputAudioFile = audioDir + '/' + this.recordAudioStartMillis + '.m4a'
-        console.log('record audioFile', this.recordOutputAudioFile)
-
-        let fd = fs.openSync(this.recordOutputAudioFile, fs.OpenMode.READ_WRITE | fs.OpenMode.CREATE)
-        this.recorder.start(fd.fd);
-        // playRawSound(getContext(this), 'ptt_begin.mp3')
+        let granted = await checkAndRequestPermission(getContext(this), 'ohos.permission.MICROPHONE')
+        if (!granted) {
+            showToast('请授予麦克风权限')
+            return
+        }
+        this.startAsrRecognition()
     }
 
-    async stopRecordAudio(canceled: boolean) {
-        await this.recorder!.finish()
-        // playRawSound(getContext(this), 'ptt_end.mp3')
-        let stat = fs.statSync(this.recordOutputAudioFile)
-        console.log('AudioRecordManager', 'record file size', stat.size)
-
-        if (canceled || stat.size === 0) {
-            showToast('获取录音文件失败')
-            return;
+    private startAsrRecognition() {
+        let manager = this.asrManager ?? new AsrManager()
+        this.asrManager = manager
+        // 识别结果写入开始识别时的光标处，有选中的文本时替换选中的文本；输入框没有焦点时写到末尾
+        let length = this.text.length
+        if (this.textInputFocused) {
+            this.asrTextStart = Math.min(Math.max(Math.min(this.selectionStart, this.selectionEnd), 0), length)
+            this.asrTextEnd = Math.min(Math.max(this.selectionStart, this.selectionEnd, 0), length)
+        } else {
+            this.asrTextStart = length
+            this.asrTextEnd = length
         }
-        let audioMessageContent = new SoundMessageContent(this.recordOutputAudioFile, '', Math.round((new Date().getTime() - this.recordAudioStartMillis) / 1000))
-        wfc.sendConversationMessage(this.conversation, audioMessageContent, [], null, null, null, null, null)
-        playRawSound(getContext(this), 'audido_msg_send_success.mp3')
-        this.recordOutputAudioFile = ''
+        this.asrExpectedText = this.text
+        this.asrRecording = true
+        // 输入框获取焦点并弹出软键盘
+        focusControl.requestFocus('textInput')
+        this.syncAsrCaret()
+        // 麦克风图标变成主色调并闪烁
+        this.startAsrIconAnimation()
+        manager.startRecognition({
+            onPartialResult: (text: string) => {
+                this.updateAsrText(text)
+            },
+            onFinalResult: (text: string) => {
+                // 没有识别出文字时，保留原来选中的文本
+                if (text.length > 0) {
+                    this.updateAsrText(text)
+                }
+                this.resetAsrState()
+            },
+            onError: (message: string) => {
+                showToast('语音识别错误: ' + message)
+                this.resetAsrState()
+            },
+            onHotwordDetected: (hotword: string, text: string) => {
+                // 检测到热词（如 "Over"），识别已结束，填充文本（不包含热词）后自动发送
+                this.resetAsrState()
+                this.updateAsrText(text)
+                this.sendTextMessage()
+            }
+        })
+    }
+
+    /**
+     * 用识别文本替换输入框中语音识别的文本范围，并把光标移到识别文本末尾
+     */
+    private updateAsrText(text: string) {
+        let start = Math.min(this.asrTextStart, this.text.length)
+        let end = Math.min(Math.max(this.asrTextEnd, start), this.text.length)
+        let newText = this.text.substring(0, start) + text + this.text.substring(end)
+        this.asrTextStart = start
+        this.asrTextEnd = start + text.length
+        // 先记下期望的文本，text 的 @Watch 里据此判断不是用户的编辑
+        this.asrExpectedText = newText
+        this.text = newText
+        this.syncAsrCaret()
+    }
+
+    /**
+     * 输入框的文本更新之后，再把光标移到识别文本末尾，期间的光标变化不算用户移动光标
+     */
+    private syncAsrCaret() {
+        this.asrSyncingCaret = true
+        if (this.asrCaretTimer !== -1) {
+            clearTimeout(this.asrCaretTimer)
+        }
+        this.asrCaretTimer = setTimeout(() => {
+            let caret = Math.min(this.asrTextEnd, this.text.length)
+            this.textInputController.caretPosition(caret)
+            this.selectionStart = caret
+            this.selectionEnd = caret
+            this.caretPosition = caret
+            this.asrCaretTimer = setTimeout(() => {
+                this.asrCaretTimer = -1
+                this.asrSyncingCaret = false
+            }, 100)
+        }, 0)
+    }
+
+    private isAsrRecognizing(): boolean {
+        return this.asrManager !== undefined && this.asrManager.isRecognizing()
+    }
+
+    /**
+     * 停止语音识别，剩余识别结果返回后回调 onFinalResult
+     */
+    private stopAsrRecognition() {
+        let manager = this.asrManager
+        if (manager && manager.isRecognizing()) {
+            this.asrRecording = false
+            // 等待剩余识别结果时停止闪烁、保持主色调，识别结束后在 resetAsrState 中恢复
+            this.holdAsrIconAnimation()
+            manager.stopRecognition()
+        } else {
+            this.resetAsrState()
+        }
+    }
+
+    /**
+     * 取消语音识别，丢弃还没返回的识别结果，已写入输入框的文本保持不变
+     */
+    private cancelAsrRecognition() {
+        let manager = this.asrManager
+        if (manager && manager.isRecognizing()) {
+            manager.cancelRecognition()
+            this.resetAsrState()
+        }
+    }
+
+    /**
+     * 恢复麦克风按钮为未录音状态
+     */
+    private resetAsrState() {
+        this.asrRecording = false
+        this.resetAsrIconAnimation()
+    }
+
+    /**
+     * 开始录音：麦克风图标渐变成主色调，然后呼吸闪烁
+     */
+    private startAsrIconAnimation() {
+        animateTo({ duration: 200, curve: Curve.EaseOut }, () => {
+            this.asrIconTint = 1
+        })
+        // 颜色渐变完再开始闪烁，正弦缓动，明暗交替柔和
+        animateTo({ duration: 600, delay: 200, curve: Curve.EaseInOut, iterations: -1, playMode: PlayMode.Alternate }, () => {
+            this.asrIconAlpha = 0.3
+        })
+    }
+
+    /**
+     * 停止录音、等待剩余识别结果：麦克风图标停止闪烁，保持主色调
+     */
+    private holdAsrIconAnimation() {
+        animateTo({ duration: 200, curve: Curve.EaseOut }, () => {
+            this.asrIconAlpha = 1
+            this.asrIconTint = 1
+        })
+    }
+
+    /**
+     * 识别结束：麦克风图标渐变回原来的颜色
+     */
+    private resetAsrIconAnimation() {
+        animateTo({ duration: 250, curve: Curve.EaseOut }, () => {
+            this.asrIconAlpha = 1
+            this.asrIconTint = 0
+        })
+    }
+
+    private sendTextMessage() {
+        // 如果正在语音识别，取消识别，避免之后返回的识别结果写入已清空的输入框
+        this.cancelAsrRecognition()
+        this.recentPhotoRequested = false
+        if (this.text.trim().length === 0) {
+            return
+        }
+        let textMessageContent = new TextMessageContent(this.text.trim());
+        if (this.mentions.length > 0) {
+            for (const mention of this.mentions) {
+                if (this.text.indexOf(mention.text) >= 0) {
+                    if (mention.target === '@all') {
+                        textMessageContent.mentionedType = 2;
+                        break
+                    } else {
+                        if (textMessageContent.mentionedTargets.indexOf(mention.target) === -1) {
+                            textMessageContent.mentionedTargets.push(mention.target)
+                        }
+                        textMessageContent.mentionedType = 1;
+                    }
+                }
+            }
+            this.mentions = []
+        }
+
+        if (this.quotedMessage) {
+            textMessageContent.quoteInfo = QuoteInfo.initWithMessage(this.quotedMessage!)
+        }
+        wfc.sendConversationMessage(this.conversation, textMessageContent, [], null, null, null, null, null);
+        wfc.setConversationDraft(this.conversation, '')
+        this.text = '';
+        this.quotedMessage = null
     }
 
     openChannelMenu(menu: ChannelMenu) {
@@ -1056,6 +1275,7 @@ export default struct ConversationInputPanelView {
                             .margin({top: 6, bottom: 6})
                             .onClick(() => {
                                 this.recentPhotoRequested = false
+                                this.cancelAsrRecognition()
                                 this.exitPttMode()
                                 this.showAudioRecorderButton = !this.showAudioRecorderButton
                                 this.hidePanel()
@@ -1069,6 +1289,7 @@ export default struct ConversationInputPanelView {
                                 .margin({ left: 8, top: 6, bottom: 6 })
                                 .onClick(() => {
                                     this.recentPhotoRequested = false
+                                    this.cancelAsrRecognition()
                                     if (this.showPttButton) {
                                         this.exitPttMode()
                                     } else {
@@ -1079,44 +1300,76 @@ export default struct ConversationInputPanelView {
                         }
                         if (!this.showAudioRecorderButton && !this.showPttButton) {
                             Column() {
-                                TextArea({ text: this.text, controller: this.textInputController })
-                                    .id('textInput')
-                                    .fontSize(TextStyleToken.inputText)
-                                    .onChange(value => {
-                                        if (this.text + "@" === value) {
-                                            this.showMentionSheet = true;
-                                        } else {
-                                            this.text = value
+                                Stack({ alignContent: Alignment.BottomEnd }) {
+                                    TextArea({ text: this.text, controller: this.textInputController })
+                                        .id('textInput')
+                                        .width('100%')
+                                        .fontSize(TextStyleToken.inputText)
+                                        .onChange(value => {
+                                            if (this.text + "@" === value) {
+                                                this.showMentionSheet = true;
+                                            } else {
+                                                this.text = value
+                                            }
+                                        })// .caretPosition(this.caretPosition)
+                                        .onFocus(() => {
+                                            this.recentPhotoRequested = false
+                                            this.textInputFocused = true
+                                            // 列表若不在最底部，先滚动到底，再升起键盘（微信效果）
+                                            this.scrollMessageListToBottom()
+                                            // 面板→软键盘的收面板动画由 avoidAreaChange（键盘升起时）与键盘并行处理，这里无需另处理。
+                                        })
+                                        .focusable(this.collapseConversationInputPanelViewTimestamp === 0)
+                                        .onBlur(() => {
+                                            this.textInputFocused = false
+                                        })
+                                        .onClick((event) => {
+                                            // this.showExtPanel = false
+                                            // this.showEmojiPanel = false
+                                        })
+                                        .onTextSelectionChange((selectionStart, selectionEnd) => {
+                                            this.selectionStart = selectionStart;
+                                            this.selectionEnd = selectionEnd;
+                                            this.caretPosition = selectionStart;
+                                            // 语音输入过程中，用户移动光标时结束语音输入；光标仍在识别文本末尾时不算用户移动光标
+                                            if (!this.asrSyncingCaret && this.isAsrRecognizing()
+                                                && !(selectionStart === selectionEnd && selectionEnd === this.asrTextEnd)) {
+                                                this.cancelAsrRecognition()
+                                            }
+                                        })
+                                        .textOverflow(TextOverflow.Clip)
+                                        .wordBreak(WordBreak.BREAK_ALL)
+                                        .constraintSize({ maxHeight: 80, minHeight: 40})
+                                        .borderRadius(Radius.md)
+                                        .backgroundColor($r('app.color.wf_background'))
+                                        .fontColor($r('app.color.wf_primary_text'))
+                                        // 右侧给麦克风按钮留出位置
+                                        .padding({ left: 16, top: 8, bottom: 8, right: this.asrEnabled ? 40 : 16 })
+                                        .align(Alignment.Center)
+                                    if (this.asrEnabled) {
+                                        // 实时语音输入的麦克风按钮，覆盖在输入框右侧；录音时主色调闪烁，等待剩余识别结果时保持主色调
+                                        Stack() {
+                                            Image($r('app.media.ic_chat_asr_mic'))
+                                                .width(22)
+                                                .height(22)
+                                                .fillColor('#999999')
+                                                .opacity(1 - this.asrIconTint)
+                                            Image($r('app.media.ic_chat_asr_mic'))
+                                                .width(22)
+                                                .height(22)
+                                                .fillColor($r('app.color.wf_primary'))
+                                                .opacity(this.asrIconTint)
                                         }
-                                    })// .caretPosition(this.caretPosition)
-                                    .onFocus(() => {
-                                        this.recentPhotoRequested = false
-                                        this.textInputFocused = true
-                                        // 列表若不在最底部，先滚动到底，再升起键盘（微信效果）
-                                        this.scrollMessageListToBottom()
-                                        // 面板→软键盘的收面板动画由 avoidAreaChange（键盘升起时）与键盘并行处理，这里无需另处理。
-                                    })
-                                    .focusable(this.collapseConversationInputPanelViewTimestamp === 0)
-                                    .onBlur(() => {
-                                        this.textInputFocused = false
-                                    })
-                                    .onClick((event) => {
-                                        // this.showExtPanel = false
-                                        // this.showEmojiPanel = false
-                                    })
-                                    .onTextSelectionChange((selectionStart, selectionEnd) => {
-                                        this.selectionStart = selectionStart;
-                                        this.selectionEnd = selectionEnd;
-                                        this.caretPosition = selectionStart;
-                                    })
-                                    .textOverflow(TextOverflow.Clip)
-                                    .wordBreak(WordBreak.BREAK_ALL)
-                                    .constraintSize({ maxHeight: 80, minHeight: 40})
-                                    .borderRadius(Radius.md)
-                                    .backgroundColor($r('app.color.wf_background'))
-                                    .fontColor($r('app.color.wf_primary_text'))
-                                    .align(Alignment.Center)
-                                    .alignSelf(ItemAlign.Center)
+                                        .width(38)
+                                        .height(40)
+                                        .opacity(this.asrIconAlpha)
+                                        .onClick(() => {
+                                            this.onAsrIconClick()
+                                        })
+                                    }
+                                }
+                                .width('100%')
+                                .alignSelf(ItemAlign.Center)
                                 if (this.quotedMessage) {
                                     Row() {
                                         Text(this.quotedMessage.messageContent.digest(this.quotedMessage))
@@ -1158,43 +1411,9 @@ export default struct ConversationInputPanelView {
                                         .backgroundColor($r('app.color.wf_background'))
                                     }
                                 })
-                                .onTouch(async event => {
-                                    event.stopPropagation()
-                                    if (event.type === TouchType.Down) {
-                                        let deniedPermissions = await checkPermissions(getContext(this), ['ohos.permission.MICROPHONE'])
-                                        if (deniedPermissions.length === 0) {
-                                            this.startRecordAudio()
-                                            this._cancelRecording = false
-                                            this._recordingActive = true
-                                            this.audioDialogState.updateCancelIndicator(false)
-                                            this.audioDialogController?.open()
-                                            this.recordTouchDownY = event.touches[0].screenY
-                                        } else {
-                                            checkAndRequestPermission(getContext(this), 'ohos.permission.MICROPHONE')
-                                        }
-                                    } else {
-                                        if (!this._recordingActive) {
-                                            return
-                                        }
-                                        if (event.type === TouchType.Up) {
-                                            this._recordingActive = false
-                                            this.stopRecordAudio(this._cancelRecording)
-                                            this._cancelRecording = false
-                                            this.audioDialogController?.close()
-                                        } else if (event.type === TouchType.Move) {
-                                            let y = event.touches[0].screenY;
-                                            let shouldCancel = this.recordTouchDownY - y > 100
-                                            if (shouldCancel !== this._cancelRecording) {
-                                                this._cancelRecording = shouldCancel
-                                                this.audioDialogState.updateCancelIndicator(shouldCancel)
-                                            }
-                                        } else if (event.type === TouchType.Cancel) {
-                                            this._recordingActive = false
-                                            this.stopRecordAudio(false)
-                                            this._cancelRecording = false
-                                            this.audioDialogController?.close()
-                                        }
-                                    }
+                                .onTouch(event => {
+                                    // 按住说话：松开发送，滑到「取消」松开不发送，滑到「转文字」松开后编辑文字
+                                    this.audioRecorderPanel?.onTouch(event)
                                 })
                         } else {
                             Button(this.pttSpeakerName ? this.pttSpeakerName : '按住 对讲')
@@ -1262,32 +1481,7 @@ export default struct ConversationInputPanelView {
                                 .height(INPUT_ICON_WIDTH)
                                 .borderRadius(Radius.sm)
                                 .onClick(() => {
-                                    this.recentPhotoRequested = false
-                                    let textMessageContent = new TextMessageContent(this.text.trim());
-                                    if (this.mentions.length > 0) {
-                                        for (const mention of this.mentions) {
-                                            if (this.text.indexOf(mention.text) >= 0) {
-                                                if (mention.target === '@all') {
-                                                    textMessageContent.mentionedType = 2;
-                                                    break
-                                                } else {
-                                                    if (textMessageContent.mentionedTargets.indexOf(mention.target) === -1) {
-                                                        textMessageContent.mentionedTargets.push(mention.target)
-                                                    }
-                                                    textMessageContent.mentionedType = 1;
-                                                }
-                                            }
-                                        }
-                                        this.mentions = []
-                                    }
-
-                                    if (this.quotedMessage) {
-                                        textMessageContent.quoteInfo = QuoteInfo.initWithMessage(this.quotedMessage!)
-                                    }
-                                    wfc.sendConversationMessage(this.conversation, textMessageContent, [], null, null, null, null, null);
-                                    wfc.setConversationDraft(this.conversation, '')
-                                    this.text = '';
-                                    this.quotedMessage = null
+                                    this.sendTextMessage()
                                 })
                         } else {
                             Image($r('app.media.ic_chat_add'))
@@ -1398,6 +1592,7 @@ export default struct ConversationInputPanelView {
                 .height(this.bottomPanelHeight)
                 .clip(true)
             }
+            .id(this.inputPanelId)
             .enabled(this.enable)
             .onAppear(() => {
                 this.enable = true
@@ -1415,7 +1610,7 @@ export default struct ConversationInputPanelView {
         }
     }
 
-    setKeyboardAvoidMode(value: KeyboardAvoidMode) {
+    setKeyboardAvoidMode(value: UIKeyboardAvoidMode) {
         let windowStage = AppStorage.get<window.Window>('window')
         windowStage?.getUIContext().setKeyboardAvoidMode(value);
     }

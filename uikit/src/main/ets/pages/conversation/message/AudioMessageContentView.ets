@@ -3,7 +3,7 @@ import SoundMessageContent from '@wfc/client/src/main/ets/wfc/messages/soundMess
 import AudioPlayManager from '../audio/AudioPlayManager'
 import Config from '@wfc/client/src/main/ets/config'
 import MessageStatus from '@wfc/client/src/main/ets/wfc/messages/messageStatus'
-import { Radius } from '../../../common/design/Tokens'
+import { Radius, TextStyleToken } from '../../../common/design/Tokens'
 import { voicePlayModeManager } from '../audio/VoicePlayModeManager'
 import { showTipToast } from '../../../common/utils/TipToast'
 import { PttMessageContentType } from '@wfc/ptt'
@@ -18,6 +18,10 @@ export default struct AudioMessageContentView {
     onPlayStart?: (messageId: number) => void
     // Called when playback completes (or errors), used by parent to trigger next message
     onPlayComplete?: (messageId: number, err?: Error) => void
+    // 转文字识别出的文本，识别过程中逐段更新
+    @Prop speechToText: string = ''
+    // 是否正在转文字
+    @Prop speechToTextRecognizing: boolean = false
     private animatorInternal: number = 0
     private animatorImageIndex = 3;
     private outAudioPlayingImageUrl: Resource[] = [
@@ -126,34 +130,61 @@ export default struct AudioMessageContentView {
     }
 
     build() {
-        Row() {
+        Column() {
             Row() {
-                Image(this.imageUrl)
-                    .width(16)
-                    .height(16)
-                Text(`${this.duration() } ''`)
-                    .margin({ left: 12 })
-            }
-            .width(`${this.duration() / 60 * 100}%`)
-            .backgroundColor(this.message.direction === 0 ? $r('app.color.wf_sent_bubble_bg') : $r('app.color.wf_received_bubble_bg'))
-            .alignItems(VerticalAlign.Center)
-            .height(40)
-            .padding(4)
-            .borderRadius(Radius.sm)
-            .constraintSize({ minWidth: 60 })
-            .margin({ top: 4 }) // portrait 的高度是 48, (48 - 40) / 2
-            .onClick(() => {
-                this.startPlay()
-            })
+                Row() {
+                    Image(this.imageUrl)
+                        .width(16)
+                        .height(16)
+                    Text(`${this.duration() } ''`)
+                        .margin({ left: 12 })
+                }
+                .width(`${this.duration() / 60 * 100}%`)
+                .backgroundColor(this.message.direction === 0 ? $r('app.color.wf_sent_bubble_bg') : $r('app.color.wf_received_bubble_bg'))
+                .alignItems(VerticalAlign.Center)
+                .height(40)
+                .padding(4)
+                .borderRadius(Radius.sm)
+                .constraintSize({ minWidth: 60 })
+                .margin({ top: 4 }) // portrait 的高度是 48, (48 - 40) / 2
+                .onClick(() => {
+                    this.startPlay()
+                })
 
-            if (this.message.direction === 1 && this.message.status !== MessageStatus.Played) {
-                Text()
-                    .width(8)
-                    .height(8)
-                    .margin({ left: 8 })
-                    .backgroundColor($r('app.color.wf_danger'))
-                    .borderRadius(Radius.lg)
+                if (this.message.direction === 1 && this.message.status !== MessageStatus.Played) {
+                    Text()
+                        .width(8)
+                        .height(8)
+                        .margin({ left: 8 })
+                        .backgroundColor($r('app.color.wf_danger'))
+                        .borderRadius(Radius.lg)
+                }
+            }
+
+            // 转文字结果，识别中还没有文本时只显示加载动画
+            if (this.speechToText.length > 0 || this.speechToTextRecognizing) {
+                Row() {
+                    if (this.speechToText.length > 0) {
+                        Text(this.speechToText)
+                            .fontSize(TextStyleToken.messageText)
+                            .fontColor($r('app.color.wf_primary_text'))
+                            .flexShrink(1)
+                    }
+                    if (this.speechToTextRecognizing) {
+                        LoadingProgress()
+                            .width(20)
+                            .height(20)
+                            .margin({ left: this.speechToText.length > 0 ? 8 : 0 })
+                    }
+                }
+                .alignItems(VerticalAlign.Center)
+                .constraintSize({ minHeight: 40, maxWidth: 560 })
+                .padding({ left: 12, right: 12, top: 8, bottom: 8 })
+                .backgroundColor(this.message.direction === 0 ? $r('app.color.wf_sent_bubble_bg') : $r('app.color.wf_received_bubble_bg'))
+                .borderRadius(Radius.sm)
+                .margin({ top: 4 })
             }
         }
+        .alignItems(this.message.direction === 0 ? HorizontalAlign.End : HorizontalAlign.Start)
     }
 }

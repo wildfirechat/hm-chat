@@ -11,6 +11,8 @@
     "@wfc/avenginekit": "file:./libs/avenginekit.har",
     "@ohos/webrtc": "^1.0.0-rc3"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "libpttamr.so": "file:./types/libpttamr"
+  },
   "dynamicDependencies": {}
 }

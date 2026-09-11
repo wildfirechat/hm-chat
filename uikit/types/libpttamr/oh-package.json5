@@ -1,0 +1,6 @@
+{
+  "name": "libpttamr.so",
+  "types": "./index.d.ts",
+  "version": "1.0.0",
+  "description": "libpttamr.so（打包在 ptt.har 中）的类型声明"
+}

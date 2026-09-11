@@ -141,6 +141,13 @@
                 }
             },
             {
+                // 按住说话时的触感反馈
+                "name": "ohos.permission.VIBRATE",
+                "usedScene": {
+                    "when": "inuse"
+                }
+            },
+            {
                 "name": "ohos.permission.MEDIA_LOCATION",
                 "reason": "$string:reason_media_location",
                 "usedScene": {

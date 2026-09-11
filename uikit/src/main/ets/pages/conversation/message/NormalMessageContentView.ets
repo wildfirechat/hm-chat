@@ -39,6 +39,8 @@ import PollResultMessageContent from '@wfc/client/src/main/ets/wfc/messages/poll
 import MeetingMinutesMessageContentView from './MeetingMinutesMessageContentView'
 import { trustedAppService } from '@kit.DeviceSecurityKit'
 import { FontSize, Radius } from '../../../common/design/Tokens'
+import MessageStatus from '@wfc/client/src/main/ets/wfc/messages/messageStatus'
+import { speechToTextManager } from '../../../asr/SpeechToTextManager'
 
 @Component
 export default struct NormaMessageContentView {
@@ -57,6 +59,9 @@ export default struct NormaMessageContentView {
     @State textMessageSelectedText:string = ''
     // 语音播放模式（听筒/扬声器）全局开关；变化时重建上下文菜单以刷新「听筒播放/扬声器播放」项的文案与图标。
     @StorageProp(STORAGE_KEY_VOICE_EARPIECE) @Watch('updateCurrentMessageContextMenu') voiceEarpieceMode: boolean = false
+    // 语音消息转文字的结果。结果保存在 speechToTextManager 里，列表项重建之后也能恢复
+    @State speechToText: string = ''
+    @State speechToTextRecognizing: boolean = false
 
     enableReceipt: boolean = false
 
@@ -66,13 +71,43 @@ export default struct NormaMessageContentView {
 
     aboutToAppear(): void {
         this.updateMessageReadReceipt()
+        if (this.isVoiceMessage()) {
+            this.updateSpeechToText()
+            speechToTextManager.addListener(this.onSpeechToTextChanged)
+        }
         this.updateCurrentMessageContextMenu()
+    }
+
+    aboutToDisappear(): void {
+        speechToTextManager.removeListener(this.onSpeechToTextChanged)
     }
 
     // 普通语音消息和对讲留底语音消息，两者的展示和交互完全一致：点击播放、长按菜单里不能转发/多选/引用
     isVoiceMessage(): boolean {
         let type = this.message.messageContent.type
         return type === MessageContentType.Voice || type === PttMessageContentType.Ptt_Sound
+    }
+
+    onSpeechToTextChanged = (messageUid: string) => {
+        if (messageUid === this.message.messageUid.toString()) {
+            this.updateSpeechToText()
+            // 「转文字」「取消转文字」菜单项跟着转文字的状态变
+            this.updateCurrentMessageContextMenu()
+        }
+    }
+
+    updateSpeechToText(): void {
+        let result = speechToTextManager.getResult(this.message)
+        this.speechToText = result ? result.text : ''
+        this.speechToTextRecognizing = result ? result.recognizing : false
+    }
+
+    // 和点击播放一样，转文字也算听过了，去掉未读红点
+    markVoiceMessagePlayed(): void {
+        if (this.message.direction === 1 && this.message.status !== MessageStatus.Played) {
+            this.message.status = MessageStatus.Played
+            this.onVoicePlayStart?.(this.message.messageId)
+        }
     }
 
     updateCurrentMessageContextMenu(): void {
@@ -102,7 +137,9 @@ export default struct NormaMessageContentView {
                     audioPlayManager: this.audioPlayManager,
                     autoPlayMessageId: this.autoPlayMessageId,
                     onPlayStart: this.onVoicePlayStart,
-                    onPlayComplete: this.onVoicePlayComplete
+                    onPlayComplete: this.onVoicePlayComplete,
+                    speechToText: this.speechToText,
+                    speechToTextRecognizing: this.speechToTextRecognizing
                 })
             } else if (this.message!.messageContent.type === MessageContentType.VOIP_CONTENT_TYPE_START) {
                 CallStartMessageContentView({ message: $message })
@@ -216,6 +253,31 @@ export default struct NormaMessageContentView {
                 },
                 filter: () => {
                     return this.isVoiceMessage()
+                }
+            },
+            {
+                title: '转文字',
+                tag: 'speechToText',
+                icon: $r('app.media.ic_msg_speech_to_text'),
+                action: () => {
+                    this.markVoiceMessagePlayed()
+                    speechToTextManager.recognize(this.message)
+                },
+                filter: () => {
+                    // 需要配置 Config.ASR_SERVER_URL；已经转过或正在转时，显示「取消转文字」
+                    return this.isVoiceMessage() && speechToTextManager.canRecognize(this.message)
+                        && speechToTextManager.getResult(this.message) === undefined
+                }
+            },
+            {
+                title: '取消转文字',
+                tag: 'cancelSpeechToText',
+                icon: $r('app.media.ic_msg_speech_to_text'),
+                action: () => {
+                    speechToTextManager.cancel(this.message)
+                },
+                filter: () => {
+                    return this.isVoiceMessage() && speechToTextManager.getResult(this.message) !== undefined
                 }
             },
             {

@@ -18,6 +18,7 @@ import uikit from '@wfc/uikit'
 import { fontSizeManager } from '@wfc/uikit/src/main/ets/common/design/Tokens'
 import { LAST_LOGIN_MOBILE_KEY } from '../pages/login/LoginPage';
 import { backgroundTaskManager } from '@kit.BackgroundTasksKit';
+import { fileIo as fs } from '@kit.CoreFileKit';
 import { deviceInfo } from '@kit.BasicServicesKit';
 import { systemShare } from '@kit.ShareKit';
 import { copyFileUri, fileNameFromFileUri, fileSize } from '@wfc/uikit/src/main/ets/common/utils/FileUtil';
@@ -47,6 +48,26 @@ export default class EntryAbility extends UIAbility {
         AppStorage.setOrCreate('context', this.context);
         AppStorage.setOrCreate<ConfigurationConstant.ColorMode>('currentColorMode', this.context.config.colorMode);
         this.applicationContext = this.context.getApplicationContext()
+
+        // // 全WSS模式设置，必须在wfc.init(创建mars实例)之前调用
+        // // 使用websocket长连接，只有2026.9.11之后的服务才可以支持
+        // wfc.setUseWebsocket(true);
+        // // 使用TLS。域名连接走系统信任链校验公签证书；IP直连使用自签名证书，
+        // // 需要把证书文件路径传入（注意是文件路径不是证书内容）。rawfile不是真实文件路径，先拷贝到沙箱
+        // try {
+        //     let certData = this.context.resourceManager.getRawFileContentSync('ip.crt');
+        //     let certPath = this.context.filesDir + '/ip.crt';
+        //     let certFile = fs.openSync(certPath, fs.OpenMode.READ_WRITE | fs.OpenMode.CREATE | fs.OpenMode.TRUNC);
+        //     fs.writeSync(certFile.fd, certData.buffer);
+        //     fs.closeSync(certFile);
+        //     wfc.UseTls(false, [certPath]);
+        // } catch (err) {
+        //     hilog.error(0x0000, 'testTag', 'load self-signed cert failed: %{public}s', JSON.stringify(err));
+        //     wfc.UseTls(true, []);
+        // }
+        // // 双网：备选网络地址。策略0为自动选择，主网络不可用时切换到备选网络
+        // wfc.setBackupAddress('101.35.103.221', 443);
+        // wfc.setBackupAddressStrategy(1);
 
         wfc.init(this.applicationContext, this.context.eventHub, this.applicationContext.filesDir, Config.getWFCPlatform());
         CustomMessageConfig.registerCustomMessages();

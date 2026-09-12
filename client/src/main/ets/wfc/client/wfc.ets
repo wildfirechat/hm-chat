@@ -42,6 +42,16 @@ import PCOnlineInfo from '../model/pcOnlineInfo';
 import UserSettingEntry from '../model/userSettingEntry';
 import { JoinGroupRequest } from '../model/JoinGroupRequest';
 import fileIo from '@ohos.file.fs';
+import wfcAddon, { registerServerCertVerifier } from '@wfc/marswrapper';
+
+// 服务端证书链校验器：用系统信任库（cert kit）校验公网 CA 签发的证书，
+// 客户端不需要内置任何根证书；自签/私有化部署仍走 UseTls 传入证书的钉扎路径。
+//
+// 这里不要自己注册，SDK 侧已经处理：
+//   1. 导入 '@wfc/marswrapper' 时，HAR 的 Index.ets 会自动注册一次；
+//   2. 应用可能被"应用池（apppool）"预加载，预加载态创建的 napi 句柄会在 App 真正启动时
+//      随预加载运行时一起销毁。所以真正保证生效的是 {@link WfcManager.UseTls} 里紧挨着
+//      useTls 的那次兜底注册（{@link WfcManager.ensureCertVerifierRegistered}）。
 
 const textEncoder = new util.TextEncoder('utf-8')
 
@@ -221,13 +231,51 @@ export class WfcManager {
     }
 
     /**
+     * 使用 websocket 作为长连接。需要在 connect 之前调用，连接建立后切换不会生效
+     *
+     * @param useWebsocket 是否使用 websocket
+     */
+    setUseWebsocket(useWebsocket: boolean) {
+        impl.setUseWebsocket(useWebsocket);
+    }
+
+    /**
+     * 是否使用 websocket 长连接
+     * @returns 是否使用 websocket 长连接
+     */
+    isUseWebsocket(): boolean {
+        return impl.isUseWebsocket();
+    }
+
+    /**
      * 设置使用TLS，需要专业版IM服务，且开启TLS功能
      *
      * @param skipVerifyCert 是否跳过本地验证，一般自签名要跳过。
      * @param selfSignedCerts 自签名证书，如果是公签，传空。
      */
     UseTls(skipVerifyCert: boolean, selfSignedCerts: string[]) {
+        // 兜底注册（幂等）：确保在"当前正在运行的运行时"里注册好证书校验器。
+        // 只依赖模块加载时注册不够稳——应用被"应用池(apppool)"预加载时，预加载态创建的
+        // napi 句柄会在 App 真正启动时随预加载运行时一起被销毁，注册会丢失。
+        // 这里紧挨着 UseTls（CanVerifyServerCerts 就是在 UseTls 里求值的），最可靠。
+        this.ensureCertVerifierRegistered();
         impl.useTls(skipVerifyCert, selfSignedCerts);
+    }
+
+    /**
+     * 注册服务端证书链校验器（幂等，可重复调用）。
+     * 用系统信任库（cert kit）校验公网 CA 签发的证书，客户端不需要内置根证书；
+     * 注册成功后 mars 才会把证书校验委托给平台。
+     *
+     * 必须在 {@link UseTls} 之前调用。
+     * 注意：不能只依赖模块加载时注册——应用池（apppool）预加载态里创建的 napi 句柄，
+     * 会在 App 真正启动时随预加载运行时一起被销毁，导致注册丢失；
+     * 所以请在 Ability.onCreate（App 真正运行时）里再调一次。
+     *
+     * @returns 注册是否成功
+     */
+    ensureCertVerifierRegistered(): boolean {
+        return registerServerCertVerifier(wfcAddon);
     }
 
     /**

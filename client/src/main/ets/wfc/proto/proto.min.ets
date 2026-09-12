@@ -455,6 +455,20 @@ class WfcImpl {
         return protoProxy.isUseKcp();
     }
 
+    /**
+     * 使用 websocket 作为长连接。需要在 connect 之前调用，连接建立后切换不会生效
+     */
+    setUseWebsocket(useWebsocket: boolean) {
+        protoProxy.setUseWebsocket(useWebsocket);
+    }
+
+    /**
+     * 是否使用 websocket 长连接
+     */
+    isUseWebsocket(): boolean {
+        return protoProxy.isUseWebsocket() === 1;
+    }
+
     useTls(skipVerifyCert: boolean, selfSignedCerts: string[]) {
         protoProxy.useTls(skipVerifyCert, selfSignedCerts);
     }

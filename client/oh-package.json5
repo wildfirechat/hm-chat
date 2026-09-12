@@ -5,6 +5,11 @@
     "main": "Index.ets",
     "author": "",
     "license": "Apache-2.0",
+    "dependencies": {
+        // 原生 SDK（含 libmarswrapper.so / libc++_shared.so 与 ArkTS 层：证书链校验器注册等）
+        // 走 HAR 依赖后不再需要手工解压 .so 到 client/libs/ 下
+        "@wfc/marswrapper": "file:./libs/marswrapper.har"
+    },
     "devDependencies": {
     }
 }

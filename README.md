@@ -40,8 +40,10 @@
 ![](./assets/4.debug_button.png)
 
 ## 常见问题
-1. 找不到`@wfc/avengineki` 或 `@wfc/client`，导致有非常多的编译错误
-    项目根目录下执行`ohpm install`
+1. 找不到`@wfc/avengineki` 或 `@wfc/client`，导致有非常多的编译错误。
+    解决办法：到项目根目录下执行`ohpm install`。
+2. 替换`marswrapper.har`不生效。
+    解决办法：清理项目重新编译。
 
 ## 注意事项
 1. 野火IM要求客户端和服务器之间的时间差不能太大，有时模拟器的时间会不准，导致无法正常工作。所以必须确保手机或者模拟器时间准确。

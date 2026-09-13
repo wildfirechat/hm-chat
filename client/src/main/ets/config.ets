@@ -24,17 +24,17 @@ export default class Config {
     // 默认的app server使用端口是8888，注意端口号别忘记了。
     // 上线建议使用https，使用https更安全。
     //static APP_SERVER = 'http://app.wildfirechat.net:8888';
-    static APP_SERVER = 'https://app.wildfirechat.net';
+    static APP_SERVER = 'https://lt.wildfirechat.net/app';
     // 应用服务备选地址，双网环境下使用。
-    static APP_SERVER_BACKUP = null as string | null;
+    static APP_SERVER_BACKUP = 'https://101.35.103.221/app' as string | null;
 
     // 主网媒体地址前缀，双网环境下用于头像/媒体类消息的 URL 转换。
     // 只在双网环境下配置，不需要双网时保持为 null。
-    static MAIN_MEDIA_URL_PREFIX = null as string | null;
+    static MAIN_MEDIA_URL_PREFIX = 'https://lt.wildfirechat.net' as string | null;
 
     // 备网媒体地址前缀，双网环境下用于头像/媒体类消息的 URL 转换。
     // 只在双网环境下配置，不需要双网时保持为 null。
-    static BACKUP_MEDIA_URL_PREFIX = null as string | null;
+    static BACKUP_MEDIA_URL_PREFIX = 'https://101.35.103.221' as string | null;
 
     // 组织结构服务地址，如果没有部署组织结构服务，或者不需要组织结构的话，可置为 null
     // 组织结构项目：https://github.com/wildfirechat/organization-platform 或 https://gitee.com/wfchat/organization-platform

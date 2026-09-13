@@ -44,11 +44,12 @@ import { JoinGroupRequest } from '../model/JoinGroupRequest';
 import fileIo from '@ohos.file.fs';
 import wfcAddon, { registerServerCertVerifier } from '@wfc/marswrapper';
 
-// 服务端证书链校验器：用系统信任库（cert kit）校验公网 CA 签发的证书，
+// 服务端证书链校验器：用系统信任库（cert kit，API 20+）校验公网 CA 签发的证书，
 // 客户端不需要内置任何根证书；自签/私有化部署仍走 UseTls 传入证书的钉扎路径。
 //
 // 这里不要自己注册，SDK 侧已经处理：
-//   1. 导入 '@wfc/marswrapper' 时，HAR 的 Index.ets 会自动注册一次；
+//   1. 导入 '@wfc/marswrapper' 时，HAR 的 Index.ets 会自动注册一次。worker / taskpool 子线程
+//      重新加载该模块时也会执行注册，SDK 会忽略这类注册，校验回调留在主线程执行；
 //   2. 应用可能被"应用池（apppool）"预加载，预加载态创建的 napi 句柄会在 App 真正启动时
 //      随预加载运行时一起销毁。所以真正保证生效的是 {@link WfcManager.UseTls} 里紧挨着
 //      useTls 的那次兜底注册（{@link WfcManager.ensureCertVerifierRegistered}）。
@@ -250,11 +251,12 @@ export class WfcManager {
     /**
      * 设置使用TLS，需要专业版IM服务，且开启TLS功能
      *
-     * @param skipVerifyCert 是否跳过本地验证，一般自签名要跳过。
-     * @param selfSignedCerts 自签名证书，如果是公签，传空。
+     * @param skipVerifyCert 是否跳过证书校验。跳过后只加密不校验证书，有中间人攻击风险，仅用于测试；
+     *                       自签名证书请通过 selfSignedCerts 传入，不要跳过校验。
+     * @param selfSignedCerts 自签名证书文件路径，如果是公签，传空。
      */
     UseTls(skipVerifyCert: boolean, selfSignedCerts: string[]) {
-        // 兜底注册（幂等）：确保在"当前正在运行的运行时"里注册好证书校验器。
+        // 兜底注册（可重复调用）：确保在"当前正在运行的运行时"里注册好证书校验器。
         // 只依赖模块加载时注册不够稳——应用被"应用池(apppool)"预加载时，预加载态创建的
         // napi 句柄会在 App 真正启动时随预加载运行时一起被销毁，注册会丢失。
         // 这里紧挨着 UseTls（CanVerifyServerCerts 就是在 UseTls 里求值的），最可靠。
@@ -263,9 +265,9 @@ export class WfcManager {
     }
 
     /**
-     * 注册服务端证书链校验器（幂等，可重复调用）。
-     * 用系统信任库（cert kit）校验公网 CA 签发的证书，客户端不需要内置根证书；
-     * 注册成功后 mars 才会把证书校验委托给平台。
+     * 注册服务端证书链校验器（可重复调用：同一运行时内会用新回调替换旧回调，worker / taskpool 子线程里调用会被忽略）。
+     * 用系统信任库（cert kit，API 20+）校验公网 CA 签发的证书，客户端不需要内置根证书；
+     * 注册成功后 mars 才会把证书校验委托给平台。API 20 以下不会注册，返回 false。
      *
      * 必须在 {@link UseTls} 之前调用。
      * 注意：不能只依赖模块加载时注册——应用池（apppool）预加载态里创建的 napi 句柄，

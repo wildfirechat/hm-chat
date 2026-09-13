@@ -265,6 +265,16 @@ export class WfcManager {
     }
 
     /**
+     * 设置大文件上传信任的自签名证书，用于媒体服务器使用自签名证书的场景，与 {@link UseTls} 相互独立。
+     * 系统上传服务（request.uploadFile）不认应用内置的证书，设置后 PUT 上传改用 RCP，且只信任这些证书；公网 CA 证书不要设置。
+     *
+     * @param certPaths 证书文件路径（PEM 格式），需要是沙箱内的真实文件，例如 resfile 目录下的文件
+     */
+    setUploadServerCerts(certPaths: string[]) {
+        impl.setUploadServerCerts(certPaths);
+    }
+
+    /**
      * 注册服务端证书链校验器（可重复调用：同一运行时内会用新回调替换旧回调，worker / taskpool 子线程里调用会被忽略）。
      * 用系统信任库（cert kit，API 20+）校验公网 CA 签发的证书，客户端不需要内置根证书；
      * 注册成功后 mars 才会把证书校验委托给平台。API 20 以下不会注册，返回 false。

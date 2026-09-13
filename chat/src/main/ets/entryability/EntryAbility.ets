@@ -18,7 +18,6 @@ import uikit from '@wfc/uikit'
 import { fontSizeManager } from '@wfc/uikit/src/main/ets/common/design/Tokens'
 import { LAST_LOGIN_MOBILE_KEY } from '../pages/login/LoginPage';
 import { backgroundTaskManager } from '@kit.BackgroundTasksKit';
-import { fileIo as fs } from '@kit.CoreFileKit';
 import { deviceInfo } from '@kit.BasicServicesKit';
 import { systemShare } from '@kit.ShareKit';
 import { copyFileUri, fileNameFromFileUri, fileSize } from '@wfc/uikit/src/main/ets/common/utils/FileUtil';
@@ -55,19 +54,17 @@ export default class EntryAbility extends UIAbility {
         // // 使用TLS，按连接方式二选一：
         // // 1) 域名连接、公网CA签发的证书：走系统信任链校验。系统信任链需要API 20+，
         // //    更低版本的设备请用方式2传入证书，否则找不到根证书时SDK会关闭证书校验。
-        // wfc.UseTls(false, []);
-        // // 2) IP直连、自签名证书：需要把证书文件路径传入。rawfile不是真实文件路径，先拷贝到沙箱。
-        // //    ip.crt需要自行放到chat/src/main/resources/rawfile/目录下。
-        // //    证书加载失败时不要降级成UseTls(true, [])：那样只加密不校验证书，可被中间人攻击。
-        // let certData = this.context.resourceManager.getRawFileContentSync('ip.crt');
-        // let certPath = this.context.filesDir + '/ip.crt';
-        // let certFile = fs.openSync(certPath, fs.OpenMode.READ_WRITE | fs.OpenMode.CREATE | fs.OpenMode.TRUNC);
-        // fs.writeSync(certFile.fd, certData.buffer);
-        // fs.closeSync(certFile);
-        // wfc.UseTls(false, [certPath]);
+        // // wfc.UseTls(false, []);
+        // // // 2) IP直连、自签名证书：传入证书文件路径。证书放在chat/src/main/resources/resfile/目录下，resfile在沙箱里是真实文件，可直接用路径。
+        // // //    证书加载失败时不要降级成UseTls(true, [])：那样只加密不校验证书，可被中间人攻击。
+        // wfc.UseTls(false, [this.context.resourceDir + '/ip.crt']);
+        //
+        // // 媒体服务器用自签名证书时，指定大文件上传信任的证书（与UseTls互不影响），证书位置同上。
+        // wfc.setUploadServerCerts([this.context.resourceDir + '/ip.crt']);
+        //
         // // 双网：备选网络地址。策略0为自动选择，主网络不可用时切换到备选网络；1只用主网络；2只用备选网络
-        // wfc.setBackupAddress('备选网络的IP或域名', 443);
-        // wfc.setBackupAddressStrategy(0);
+        // wfc.setBackupAddress('101.35.103.221', 443);
+        // wfc.setBackupAddressStrategy(2);
 
         wfc.init(this.applicationContext, this.context.eventHub, this.applicationContext.filesDir, Config.getWFCPlatform());
         CustomMessageConfig.registerCustomMessages();

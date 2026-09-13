@@ -51,6 +51,7 @@ import Friend from '../model/friend';
 import MessageContent from '../messages/messageContent';
 import ModifyMyInfoEntry from '../model/modifyMyInfoEntry';
 import request from '@ohos.request';
+import { rcp } from '@kit.RemoteCommunicationKit';
 import { FailCallback, SuccessCallback, CallbackWithValue_1, CallbackWithValue_2, JSONArray, JSONObject } from '../type/types';
 import { uri } from '@kit.ArkTS';
 import { fileUri } from '@kit.CoreFileKit';
@@ -84,7 +85,10 @@ class WfcImpl {
     _startLog = false;
     eventEmitter?: common.EventHub;
     context?: common.ApplicationContext;
-    uploadingMap: Map<number, request.UploadTask> = new Map();
+    // 正在上传的任务，key 是 messageId，value 用来取消上传
+    uploadingMap: Map<number, () => void> = new Map();
+    // 大文件上传时信任的自签名证书（PEM），为空时走系统上传服务
+    uploadServerCa: string = '';
     userOnlineState: Map<string, UserOnlineState> = new Map()
 
     onConnectionChanged(status: number) {
@@ -467,6 +471,18 @@ class WfcImpl {
      */
     isUseWebsocket(): boolean {
         return protoProxy.isUseWebsocket() === 1;
+    }
+
+    setUploadServerCerts(certPaths: string[]) {
+        let pems: string[] = [];
+        certPaths.forEach((path: string) => {
+            try {
+                pems.push(fs.readTextSync(path));
+            } catch (e) {
+                console.error('read upload server cert failed', path, e);
+            }
+        });
+        this.uploadServerCa = pems.join('\n');
     }
 
     useTls(skipVerifyCert: boolean, selfSignedCerts: string[]) {
@@ -2458,11 +2474,11 @@ class WfcImpl {
     cancelSendingMessage(messageId: number): boolean {
         let canceled = protoProxy.cancelSendingMessage(messageId) === 1;
         if (!canceled) {
-            let task = this.uploadingMap.get(messageId);
-            if (task) {
+            let cancelUpload = this.uploadingMap.get(messageId);
+            if (cancelUpload) {
                 this.uploadingMap.delete(messageId)
                 try {
-                    task.delete()
+                    cancelUpload()
                     canceled = true;
                 } catch (e) {
                     console.log(e);
@@ -2585,6 +2601,11 @@ class WfcImpl {
                 };
             } else {
                 // 野火专业存储或阿里云
+                if (self.uploadServerCa) {
+                    // 系统上传服务不认应用内置的自签名证书，改用 RCP
+                    self._uploadFileWithRcp(message, uploadUrl, remoteUrl, filePath!, contentType, progressCB, successCB, failCB)
+                    return
+                }
                 // xhr = this._uploadXMLHttpRequest(message ? message.messageId : 0, fileName, remoteUrl, progressCB, successCB, failCB);
                 // xhr.open('PUT', uploadUrl);
                 //
@@ -2621,7 +2642,9 @@ class WfcImpl {
             // Upload the file.
             request.uploadFile(self.context, uploadRequestOptions).then((data: request.UploadTask) => {
                 if (message) {
-                    self.uploadingMap.set(message.messageId, data)
+                    self.uploadingMap.set(message.messageId, () => {
+                        data.delete()
+                    })
                 }
 
                 data.on('complete', (result: Array<request.TaskState>) => {
@@ -2653,6 +2676,56 @@ class WfcImpl {
 
         }, (e: number) => {
             console.log('getUploadMediaUrl e', e)
+        })
+    }
+
+    // 用 RCP 上传，只信任 setUploadServerCerts 设置的证书
+    _uploadFileWithRcp(message: Message | null, uploadUrl: string, remoteUrl: string, filePath: string, contentType: string,
+        progressCB: CallbackWithValue_2<number, number>, successCB: CallbackWithValue_1<string>, failCB: FailCallback) {
+        let session: rcp.Session
+        try {
+            session = rcp.createSession({
+                requestConfiguration: {
+                    transfer: {
+                        // 大文件上传耗时长，放宽总时长，靠 inactivityMs 发现卡住的连接
+                        timeout: { transferMs: 24 * 60 * 60 * 1000, inactivityMs: 60 * 1000 }
+                    },
+                    security: {
+                        remoteValidation: { content: self.uploadServerCa }
+                    },
+                    tracing: {
+                        httpEventsHandler: {
+                            onUploadProgress: (totalSize: number, transferredSize: number) => {
+                                progressCB && progressCB(transferredSize, totalSize)
+                            }
+                        }
+                    }
+                }
+            })
+        } catch (e) {
+            console.error('create rcp session failed', e)
+            failCB(-1)
+            return
+        }
+        let req = new rcp.Request(uploadUrl, 'PUT', { 'content-type': contentType }, new rcp.UploadFromFile(filePath))
+        if (message) {
+            self.uploadingMap.set(message.messageId, () => {
+                session.cancel(req)
+            })
+        }
+        session.fetch(req).then((response: rcp.Response) => {
+            if (response.statusCode >= 200 && response.statusCode < 300) {
+                successCB(remoteUrl)
+            } else {
+                console.error('upload file failed, statusCode', response.statusCode)
+                failCB(response.statusCode)
+            }
+        }).catch((err: Error) => {
+            console.error('upload File error', err)
+            failCB(-1)
+        }).finally(() => {
+            message && self.uploadingMap.delete(message.messageId)
+            session.close()
         })
     }
 

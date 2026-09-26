@@ -23,9 +23,9 @@
 
 ## 前置说明
 
-1. 本项目所使用的`libmarswrapper.so`是需要付费的，价格请参考[费用详情](https://docs.wildfirechat.cn/price/)
+1. 本项目所使用的`libmarswrapper.so`（打包在`client/libs/marswrapper.har`中）是需要付费的，价格请参考[费用详情](https://docs.wildfirechat.cn/price/)
 2. `libmarswrapper.so`支持试用，具体请看[试用说明](https://docs.wildfirechat.cn/trial/)
-3. 本项目默认只能连接到官方服务，购买或申请试用之后，替换`libmarswrapper.so`，即可连到自行部署的服务
+3. 本项目默认只能连接到官方服务，购买或申请试用之后，替换`client/libs/marswrapper.har`，即可连到自行部署的服务。替换方法见[client/libs/README.md](client/libs/README.md)
 
 ## 环境依赖
 鸿蒙集成开发环境```DevEco-Studio```。可以创建和编译鸿蒙原生项目。
@@ -43,7 +43,8 @@
 1. 找不到`@wfc/avengineki` 或 `@wfc/client`，导致有非常多的编译错误。
     解决办法：到项目根目录下执行`ohpm install`。
 2. 替换`marswrapper.har`不生效。
-    解决办法：清理项目重新编译。
+    原因：该依赖是`file:`本地依赖且版本号固定为`1.0.0`，ohpm 会把 har 安装到`oh_modules/.ohpm`缓存中，仅替换文件不会触发重新安装。
+    解决办法：删除各模块的`oh_modules`目录和根目录的`oh_modules/.ohpm`缓存，重新执行`ohpm install`（或在 DevEco Studio 中执行 File -> Sync and Refresh Project），再重新编译。详细步骤见[client/libs/README.md](client/libs/README.md)。
 
 ## 注意事项
 1. 野火IM要求客户端和服务器之间的时间差不能太大，有时模拟器的时间会不准，导致无法正常工作。所以必须确保手机或者模拟器时间准确。

@@ -222,6 +222,17 @@ export class AgentPanelApproval {
     options: AgentPanelModelOption[] = []
 }
 
+/**
+ * 面板会话模式段（mode，interrupt=后到打断先到 / queue=串行排队）：
+ * current 为当前模式；options 为 {value,label} 对象数组（与 model.options 同构，复用
+ * AgentPanelModelOption）。插件把该模式持久化在 wildfire-convmodes.json，面板据此回显；
+ * 字段缺失（老插件）时为 null，客户端保持本地默认值，不发请求、不报错。
+ */
+export class AgentPanelMode {
+    current: string = ''
+    options: AgentPanelModelOption[] = []
+}
+
 /** 面板计划模式段。 */
 export class AgentPanelPlan {
     on: boolean = false
@@ -229,13 +240,15 @@ export class AgentPanelPlan {
 
 /**
  * AI 面板数据（scope=31 type=3，键 ..._3）：207 AGENT_Command query 组合查询结果。
- * 结构：model/effort/sandbox/plan/preset/approval/cwd/sessionId/dirs（dirs 已废弃，仅兼容老插件）。
+ * 结构：model/effort/sandbox/plan/mode/preset/approval/cwd/sessionId/dirs（dirs 已废弃，仅兼容老插件）。
  */
 export class AgentPanelData {
     model: AgentPanelModel | null = null
     effort: AgentPanelEffort | null = null
     sandbox: AgentPanelSandbox | null = null
     plan: AgentPanelPlan | null = null
+    // 会话模式（mode，interrupt/queue）：字段缺失（老插件）时 null，客户端保持本地默认值
+    mode: AgentPanelMode | null = null
     // Agent 模式（preset）：options 可能为空数组（部署无 preset 服务）；缺失（老插件）时 null
     preset: AgentPanelPreset | null = null
     // 工具审批策略（approval）：缺失（老插件）时 null
@@ -267,12 +280,13 @@ export function getAgentPanelData(conversation?: Conversation): AgentPanelData |
     }
 }
 
-/** 选项段（model/preset/approval 同构）的 options 解析：{value,label}[] → AgentPanelModelOption[]；
- *  缺失/非法时返回空数组（调用方按「无可选值」容错处理，不报错）。 */
+/** 选项段（model/preset/approval/mode 同构）的 options 解析：{value,label}[] → AgentPanelModelOption[]；
+ *  缺失/非法时返回空数组（调用方按「无可选值」容错处理，不报错）。非数组（字段缺失/写错类型）
+ *  直接跳过：避免 for..of 抛错导致整个 type=3 面板解析失败（容错要求）。 */
 function parseValueLabelOptions(seg: Record<string, Object>): AgentPanelModelOption[] {
     let out: AgentPanelModelOption[] = []
     let options = seg['options'] as Record<string, Object>[]
-    if (options) {
+    if (options && Array.isArray(options)) {
         for (const opt of options) {
             let o = new AgentPanelModelOption()
             o.value = opt['value'] as string || ''
@@ -320,6 +334,15 @@ function parseAgentPanelRaw(raw: string): AgentPanelData | null {
             let p = new AgentPanelPlan()
             p.on = !!(plan['on'] as boolean)
             data.plan = p
+        }
+        // 会话模式（mode，interrupt/queue）：options 同 model/preset（{value,label}）；
+        // 字段缺失（老插件）时不赋值（保持 null），调用方按「用本地默认值」容错
+        let mode = parsed['mode'] as Record<string, Object>
+        if (mode) {
+            let md = new AgentPanelMode()
+            md.current = mode['current'] as string || ''
+            md.options = parseValueLabelOptions(mode)
+            data.mode = md
         }
         // Agent 模式（preset）：options 可能为空数组（部署未提供 preset 服务，客户端禁用选择器）
         let preset = parsed['preset'] as Record<string, Object>

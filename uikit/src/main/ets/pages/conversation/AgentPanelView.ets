@@ -5,7 +5,7 @@
  *   工作目录 = 「切换」弹出独立目录选择界面（bindSheet 二级弹窗）；计划模式 = 开关（Toggle）。
  * 展示方式：父组件以 Stack 内联覆盖呈现（遮罩 + 居中卡片），本面板为居中卡片（窗口样式）。
  * 静默通道：打开面板发 AGENT_Command(207) query（组合查询）→ 插件聚合面板数据写
- * scope=31 type=3 → 本面板读 type=3 渲染（模型/推理等级/沙箱/计划/preset/approval/cwd）。
+ * scope=31 type=3 → 本面板读 type=3 渲染（模型/推理等级/沙箱/计划/会话模式/preset/approval/cwd）。
  * 所有操作发 AGENT_Command(207) set（cmd=命令文本），插件执行后写 type=1 lastChange
  * （标题栏变更可见）+ 刷新 type=3；本面板监听 SettingUpdate 设置更新事件重读 type=3。
  * 目录列表按需获取（INTERACTION_DESIGN.md §10）：type=3 不再带 dirs；点「切换」时发 207
@@ -54,6 +54,15 @@ function sandboxLabel(value: string): string {
     }
     return value
 }
+
+// 会话模式固定两项（type=3 mode.options 为空/字段缺失时的兜底，与插件 CONV_MODES 一致）：
+// interrupt=后到打断先到（新消息打断运行中的回合）/ queue=串行排队（按到达顺序等待）
+const CONV_MODES: AgentOption[] = [
+    { value: 'interrupt', label: '打断（后到打断先到）' },
+    { value: 'queue', label: '排队（串行等待）' }
+]
+// 会话模式本地默认值：type=3 未下发 mode（老插件）时保持该值，与插件默认一致
+const DEFAULT_CONV_MODE: string = 'interrupt'
 
 // AgentOption[] → Select 下拉选项（SelectOption 为接口，用对象字面量构造）
 function toSelectOptions(options: AgentOption[]): SelectOption[] {
@@ -105,6 +114,11 @@ export default struct AgentPanelView {
     @State approvalSelectOptions: SelectOption[] = []
     @State approvalEnabled: boolean = false
     @State planOn: boolean = false
+    // 会话模式（mode，interrupt/queue）：本地默认 interrupt；type=3 带 mode.current 时以
+    // 服务端值为准回显（修复「切到 queue 后重开面板显示回 interrupt = 切换不生效」）
+    @State currentMode: string = DEFAULT_CONV_MODE
+    @State modeOptions: AgentOption[] = CONV_MODES
+    @State modeSelectOptions: SelectOption[] = toSelectOptions(CONV_MODES)
     @State cwdCandidates: string[] = []
     // 目录列表加载态（207 op=dirs 已发出、等待 209 应答）
     @State cwdLoading: boolean = false
@@ -379,6 +393,24 @@ export default struct AgentPanelView {
         this.approvalSelectOptions = toSelectOptions(aopts)
         this.approvalEnabled = approvalHasChoices
         this.planOn = data.plan ? !!data.plan.on : false
+        // 会话模式（mode）：服务端下发时以 type=3 为准回显（本地乐观更新只用于即时反馈，
+        // 插件执行 /mode 后刷新 type=3 会在此校正）；字段缺失（老插件）时保持本地默认值。
+        // options 同 sandbox：为空/缺失时回退硬编码两项
+        if (data.mode && data.mode.current) {
+            this.currentMode = data.mode.current
+        }
+        let modeOpts: AgentOption[] = []
+        if (data.mode && data.mode.options && data.mode.options.length > 0) {
+            for (const o of data.mode.options) {
+                modeOpts.push({ value: o.value, label: o.label || o.value })
+            }
+            // 当前模式不在候选时补入（保证可选中/显示）
+            if (this.currentMode && !modeOpts.some(x => x.value === this.currentMode)) {
+                modeOpts.unshift({ value: this.currentMode, label: this.currentMode + '（当前）' })
+            }
+        }
+        this.modeOptions = modeOpts.length > 0 ? modeOpts : CONV_MODES
+        this.modeSelectOptions = toSelectOptions(this.modeOptions)
         // 目录列表：type=3 已不再内联 dirs（改走 207 op=dirs / 209 应答，见 §10）；
         // 兼容老插件（仍带 dirs）直接使用并写入缓存，且不覆盖已拿到的 209 结果
         let dirs = data.dirs ? data.dirs : []
@@ -440,6 +472,16 @@ export default struct AgentPanelView {
             return
         }
         this.sendCommand('set', `/approval ${value}`)
+        this.flash()
+    }
+
+    selectMode(value: string) {
+        if (!value || this.applying || value === this.currentMode) {
+            return
+        }
+        // 本地乐观更新：先回显，等插件执行后写 type=3 再以服务端值校正（refreshPanelData）
+        this.currentMode = value
+        this.sendCommand('set', `/mode ${value}`)
         this.flash()
     }
 
@@ -608,6 +650,24 @@ export default struct AgentPanelView {
             }
         }
         return this.currentEffort || '未获取到推理等级'
+    }
+
+    modeSelectedIndex(): number {
+        for (let i = 0; i < this.modeOptions.length; i++) {
+            if (this.modeOptions[i].value === this.currentMode) {
+                return i
+            }
+        }
+        return 0
+    }
+
+    modeCurrentLabel(): string {
+        for (const o of this.modeOptions) {
+            if (o.value === this.currentMode) {
+                return o.label
+            }
+        }
+        return this.currentMode || DEFAULT_CONV_MODE
     }
 
     presetSelectedIndex(): number {
@@ -996,7 +1056,32 @@ export default struct AgentPanelView {
                             this.togglePlan(!this.planOn)
                         })
 
-                        // 6. Agent 模式（preset，下拉选择）：preset.options 为空（部署未提供 preset
+                        // 6. 会话模式（mode，下拉选择）：interrupt/queue 两项；type=3 下发时回显
+                        //    服务端当前值，缺失时显示本地默认 interrupt，始终可切换
+                        this.sectionTitle('会话模式')
+                        Select(this.modeSelectOptions)
+                            .selected(this.modeSelectedIndex())
+                            .value(this.modeCurrentLabel())
+                            .font({ size: FontSize.sm })
+                            .fontColor($r('app.color.wf_primary_text'))
+                            .selectedOptionFont({ size: FontSize.sm, weight: FontWeight.Medium })
+                            .selectedOptionFontColor($r('app.color.wf_primary'))
+                            .optionFont({ size: FontSize.sm })
+                            .optionFontColor($r('app.color.wf_primary_text'))
+                            .backgroundColor($r('app.color.wf_background'))
+                            .borderRadius(Radius.md)
+                            .width('100%')
+                            .height(44)
+                            .margin({ top: 4 })
+                            .enabled(!this.applying)
+                            .onSelect((index: number) => {
+                                let opt = this.modeOptions[index]
+                                if (opt) {
+                                    this.selectMode(opt.value)
+                                }
+                            })
+
+                        // 7. Agent 模式（preset，下拉选择）：preset.options 为空（部署未提供 preset
                         //    服务）或字段缺失（老插件）时禁用选择器，仍显示当前值，不隐藏整行
                         this.sectionTitle('Agent 模式')
                         Select(this.presetSelectOptions)
@@ -1021,7 +1106,7 @@ export default struct AgentPanelView {
                                 }
                             })
 
-                        // 7. 工具审批（approval，下拉选择）：options 为空/字段缺失时同上禁用
+                        // 8. 工具审批（approval，下拉选择）：options 为空/字段缺失时同上禁用
                         this.sectionTitle('工具审批')
                         Select(this.approvalSelectOptions)
                             .selected(this.approvalSelectedIndex())
@@ -1045,7 +1130,7 @@ export default struct AgentPanelView {
                                 }
                             })
 
-                        // 8. 操作按钮
+                        // 9. 操作按钮
                         Row() {
                             Button('压缩上下文')
                                 .type(ButtonType.Normal)

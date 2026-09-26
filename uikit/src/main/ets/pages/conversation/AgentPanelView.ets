@@ -1,11 +1,11 @@
 /*
  * AgentPanelView.ets — AI 会话设置面板（第一层 Agent 可改属性，统一交互风格）。
  * 交互对齐 vue-pc-chat 的 AgentPanel.vue：
- *   模型/推理等级 = 下拉选择（Select）；沙箱模式 = 水平单选（Radio）；
+ *   模型/推理等级/Agent 模式/工具审批 = 下拉选择（Select）；沙箱模式 = 水平单选（Radio）；
  *   工作目录 = 「切换」弹出独立目录选择界面（bindSheet 二级弹窗）；计划模式 = 开关（Toggle）。
  * 展示方式：父组件以 Stack 内联覆盖呈现（遮罩 + 居中卡片），本面板为居中卡片（窗口样式）。
  * 静默通道：打开面板发 AGENT_Command(207) query（组合查询）→ 插件聚合面板数据写
- * scope=31 type=3 → 本面板读 type=3 渲染（模型/推理等级/沙箱/计划/cwd）。
+ * scope=31 type=3 → 本面板读 type=3 渲染（模型/推理等级/沙箱/计划/preset/approval/cwd）。
  * 所有操作发 AGENT_Command(207) set（cmd=命令文本），插件执行后写 type=1 lastChange
  * （标题栏变更可见）+ 刷新 type=3；本面板监听 SettingUpdate 设置更新事件重读 type=3。
  * 目录列表按需获取（INTERACTION_DESIGN.md §10）：type=3 不再带 dirs；点「切换」时发 207
@@ -93,6 +93,17 @@ export default struct AgentPanelView {
     @State currentCwd: string = ''
     @State currentSandbox: string = ''
     @State sandboxOptions: AgentOption[] = SANDBOX_MODES
+    // Agent 模式（preset）：options 为空数组 = 部署未提供 preset 服务（选择器禁用，仅显示当前值）；
+    // 字段缺失（老插件）时同样按空处理，不发请求、不报错
+    @State currentPreset: string = ''
+    @State presetOptions: AgentOption[] = []
+    @State presetSelectOptions: SelectOption[] = []
+    @State presetEnabled: boolean = false
+    // 工具审批（approval，ask/never）：同上，缺失/为空时禁用选择器
+    @State currentApproval: string = ''
+    @State approvalOptions: AgentOption[] = []
+    @State approvalSelectOptions: SelectOption[] = []
+    @State approvalEnabled: boolean = false
     @State planOn: boolean = false
     @State cwdCandidates: string[] = []
     // 目录列表加载态（207 op=dirs 已发出、等待 209 应答）
@@ -326,6 +337,47 @@ export default struct AgentPanelView {
             }
         }
         this.sandboxOptions = sopts.length > 0 ? sopts : SANDBOX_MODES
+        this.currentPreset = data.preset ? data.preset.current : ''
+        let popts: AgentOption[] = []
+        // options 为空数组 = 部署未提供 preset 服务（老插件无 preset 字段时同样为空）：
+        // 选择器禁用（presetEnabled=false），仅显示 current，不发请求、不报错
+        let presetHasChoices = false
+        if (data.preset && data.preset.options && data.preset.options.length > 0) {
+            presetHasChoices = true
+            for (const o of data.preset.options) {
+                popts.push({ value: o.value, label: o.label || o.value })
+            }
+            // 当前 Agent 模式不在候选时补入（保证可选中/显示）
+            if (this.currentPreset && !popts.some(x => x.value === this.currentPreset)) {
+                popts.unshift({ value: this.currentPreset, label: this.currentPreset + '（当前）' })
+            }
+        }
+        // 无候选值时补入占位项，让禁用的 Select 仍显示当前值文本（不隐藏整行）
+        if (popts.length === 0) {
+            popts.push({ value: this.currentPreset, label: this.currentPreset ? this.currentPreset : '未提供' })
+        }
+        this.presetOptions = popts
+        this.presetSelectOptions = toSelectOptions(popts)
+        this.presetEnabled = presetHasChoices
+        this.currentApproval = data.approval ? data.approval.current : ''
+        let aopts: AgentOption[] = []
+        let approvalHasChoices = false
+        if (data.approval && data.approval.options && data.approval.options.length > 0) {
+            approvalHasChoices = true
+            for (const o of data.approval.options) {
+                aopts.push({ value: o.value, label: o.label || o.value })
+            }
+            // 当前审批策略不在候选时补入（保证可选中/显示）
+            if (this.currentApproval && !aopts.some(x => x.value === this.currentApproval)) {
+                aopts.unshift({ value: this.currentApproval, label: this.currentApproval + '（当前）' })
+            }
+        }
+        if (aopts.length === 0) {
+            aopts.push({ value: this.currentApproval, label: this.currentApproval ? this.currentApproval : '未提供' })
+        }
+        this.approvalOptions = aopts
+        this.approvalSelectOptions = toSelectOptions(aopts)
+        this.approvalEnabled = approvalHasChoices
         this.planOn = data.plan ? !!data.plan.on : false
         // 目录列表：type=3 已不再内联 dirs（改走 207 op=dirs / 209 应答，见 §10）；
         // 兼容老插件（仍带 dirs）直接使用并写入缓存，且不覆盖已拿到的 209 结果
@@ -372,6 +424,22 @@ export default struct AgentPanelView {
             return
         }
         this.sendCommand('set', `/sandbox ${value}`)
+        this.flash()
+    }
+
+    selectPreset(value: string) {
+        if (!value || this.applying || value === this.currentPreset) {
+            return
+        }
+        this.sendCommand('set', `/preset ${value}`)
+        this.flash()
+    }
+
+    selectApproval(value: string) {
+        if (!value || this.applying || value === this.currentApproval) {
+            return
+        }
+        this.sendCommand('set', `/approval ${value}`)
         this.flash()
     }
 
@@ -540,6 +608,42 @@ export default struct AgentPanelView {
             }
         }
         return this.currentEffort || '未获取到推理等级'
+    }
+
+    presetSelectedIndex(): number {
+        for (let i = 0; i < this.presetOptions.length; i++) {
+            if (this.presetOptions[i].value === this.currentPreset) {
+                return i
+            }
+        }
+        return 0
+    }
+
+    presetCurrentLabel(): string {
+        for (const o of this.presetOptions) {
+            if (o.value === this.currentPreset) {
+                return o.label
+            }
+        }
+        return this.currentPreset || '未提供'
+    }
+
+    approvalSelectedIndex(): number {
+        for (let i = 0; i < this.approvalOptions.length; i++) {
+            if (this.approvalOptions[i].value === this.currentApproval) {
+                return i
+            }
+        }
+        return 0
+    }
+
+    approvalCurrentLabel(): string {
+        for (const o of this.approvalOptions) {
+            if (o.value === this.currentApproval) {
+                return o.label
+            }
+        }
+        return this.currentApproval || '未提供'
     }
 
     // 目录候选行：点选后发送 /cwd
@@ -892,7 +996,56 @@ export default struct AgentPanelView {
                             this.togglePlan(!this.planOn)
                         })
 
-                        // 6. 操作按钮
+                        // 6. Agent 模式（preset，下拉选择）：preset.options 为空（部署未提供 preset
+                        //    服务）或字段缺失（老插件）时禁用选择器，仍显示当前值，不隐藏整行
+                        this.sectionTitle('Agent 模式')
+                        Select(this.presetSelectOptions)
+                            .selected(this.presetSelectedIndex())
+                            .value(this.presetCurrentLabel())
+                            .font({ size: FontSize.sm })
+                            .fontColor($r('app.color.wf_primary_text'))
+                            .selectedOptionFont({ size: FontSize.sm, weight: FontWeight.Medium })
+                            .selectedOptionFontColor($r('app.color.wf_primary'))
+                            .optionFont({ size: FontSize.sm })
+                            .optionFontColor($r('app.color.wf_primary_text'))
+                            .backgroundColor($r('app.color.wf_background'))
+                            .borderRadius(Radius.md)
+                            .width('100%')
+                            .height(44)
+                            .margin({ top: 4 })
+                            .enabled(!this.applying && this.presetEnabled)
+                            .onSelect((index: number) => {
+                                let opt = this.presetOptions[index]
+                                if (opt) {
+                                    this.selectPreset(opt.value)
+                                }
+                            })
+
+                        // 7. 工具审批（approval，下拉选择）：options 为空/字段缺失时同上禁用
+                        this.sectionTitle('工具审批')
+                        Select(this.approvalSelectOptions)
+                            .selected(this.approvalSelectedIndex())
+                            .value(this.approvalCurrentLabel())
+                            .font({ size: FontSize.sm })
+                            .fontColor($r('app.color.wf_primary_text'))
+                            .selectedOptionFont({ size: FontSize.sm, weight: FontWeight.Medium })
+                            .selectedOptionFontColor($r('app.color.wf_primary'))
+                            .optionFont({ size: FontSize.sm })
+                            .optionFontColor($r('app.color.wf_primary_text'))
+                            .backgroundColor($r('app.color.wf_background'))
+                            .borderRadius(Radius.md)
+                            .width('100%')
+                            .height(44)
+                            .margin({ top: 4 })
+                            .enabled(!this.applying && this.approvalEnabled)
+                            .onSelect((index: number) => {
+                                let opt = this.approvalOptions[index]
+                                if (opt) {
+                                    this.selectApproval(opt.value)
+                                }
+                            })
+
+                        // 8. 操作按钮
                         Row() {
                             Button('压缩上下文')
                                 .type(ButtonType.Normal)

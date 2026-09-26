@@ -202,6 +202,26 @@ export class AgentPanelSandbox {
     options: string[] = []
 }
 
+/**
+ * 面板 Agent 模式段（preset，能力档位，如 standard/minimal）：
+ * current 为当前 preset id；options 为 {value,label} 对象数组（与 model.options 同构，
+ * 复用 AgentPanelModelOption）。**options 可能为空数组**——部署未提供 preset 服务时
+ * 客户端只显示 current、禁用选择器；字段整体缺失（老插件）时为 null，按同样方式容错。
+ */
+export class AgentPanelPreset {
+    current: string = ''
+    options: AgentPanelModelOption[] = []
+}
+
+/**
+ * 面板工具审批策略段（approval，ask=弹卡片询问 / never=自动拒绝）：
+ * current 为当前策略；options 为 {value,label} 对象数组（与 model.options 同构）；缺失时为 null。
+ */
+export class AgentPanelApproval {
+    current: string = ''
+    options: AgentPanelModelOption[] = []
+}
+
 /** 面板计划模式段。 */
 export class AgentPanelPlan {
     on: boolean = false
@@ -209,13 +229,17 @@ export class AgentPanelPlan {
 
 /**
  * AI 面板数据（scope=31 type=3，键 ..._3）：207 AGENT_Command query 组合查询结果。
- * 结构：model/effort/sandbox/plan/cwd/sessionId/dirs（dirs 已废弃，仅兼容老插件）。
+ * 结构：model/effort/sandbox/plan/preset/approval/cwd/sessionId/dirs（dirs 已废弃，仅兼容老插件）。
  */
 export class AgentPanelData {
     model: AgentPanelModel | null = null
     effort: AgentPanelEffort | null = null
     sandbox: AgentPanelSandbox | null = null
     plan: AgentPanelPlan | null = null
+    // Agent 模式（preset）：options 可能为空数组（部署无 preset 服务）；缺失（老插件）时 null
+    preset: AgentPanelPreset | null = null
+    // 工具审批策略（approval）：缺失（老插件）时 null
+    approval: AgentPanelApproval | null = null
     cwd: string = ''
     sessionId: string = ''
     // 项目根目录子目录（cwd 切换候选）。新插件已从 type=3 移除 dirs（改走 207 op=dirs +
@@ -243,6 +267,22 @@ export function getAgentPanelData(conversation?: Conversation): AgentPanelData |
     }
 }
 
+/** 选项段（model/preset/approval 同构）的 options 解析：{value,label}[] → AgentPanelModelOption[]；
+ *  缺失/非法时返回空数组（调用方按「无可选值」容错处理，不报错）。 */
+function parseValueLabelOptions(seg: Record<string, Object>): AgentPanelModelOption[] {
+    let out: AgentPanelModelOption[] = []
+    let options = seg['options'] as Record<string, Object>[]
+    if (options) {
+        for (const opt of options) {
+            let o = new AgentPanelModelOption()
+            o.value = opt['value'] as string || ''
+            o.label = opt['label'] as string || o.value
+            out.push(o)
+        }
+    }
+    return out
+}
+
 /** type=3 原始 JSON → AgentPanelData（解析失败返回 null）。 */
 function parseAgentPanelRaw(raw: string): AgentPanelData | null {
     if (!raw) {
@@ -258,15 +298,7 @@ function parseAgentPanelRaw(raw: string): AgentPanelData | null {
         if (model) {
             let m = new AgentPanelModel()
             m.current = model['current'] as string || ''
-            let options = model['options'] as Record<string, Object>[]
-            if (options) {
-                for (const opt of options) {
-                    let o = new AgentPanelModelOption()
-                    o.value = opt['value'] as string || ''
-                    o.label = opt['label'] as string || o.value
-                    m.options.push(o)
-                }
-            }
+            m.options = parseValueLabelOptions(model)
             data.model = m
         }
         let effort = parsed['effort'] as Record<string, Object>
@@ -288,6 +320,22 @@ function parseAgentPanelRaw(raw: string): AgentPanelData | null {
             let p = new AgentPanelPlan()
             p.on = !!(plan['on'] as boolean)
             data.plan = p
+        }
+        // Agent 模式（preset）：options 可能为空数组（部署未提供 preset 服务，客户端禁用选择器）
+        let preset = parsed['preset'] as Record<string, Object>
+        if (preset) {
+            let pr = new AgentPanelPreset()
+            pr.current = preset['current'] as string || ''
+            pr.options = parseValueLabelOptions(preset)
+            data.preset = pr
+        }
+        // 工具审批策略（approval）
+        let approval = parsed['approval'] as Record<string, Object>
+        if (approval) {
+            let ap = new AgentPanelApproval()
+            ap.current = approval['current'] as string || ''
+            ap.options = parseValueLabelOptions(approval)
+            data.approval = ap
         }
         data.cwd = parsed['cwd'] as string || ''
         data.sessionId = parsed['sessionId'] as string || ''

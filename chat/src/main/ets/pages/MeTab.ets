@@ -1,5 +1,6 @@
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
+import Config from '@wfc/client/src/main/ets/config'
 import EventType from '@wfc/client/src/main/ets/wfc/client/wfcEvent'
 import ConnectionStatus from '@wfc/client/src/main/ets/wfc/client/connectionStatus'
 import OptionItemView from '@wfc/uikit/src/main/ets/view/OptionItemView'
@@ -122,6 +123,22 @@ export default struct MeTab {
                 }
                 .margin({ top: 12 })
                 .backgroundColor($r('app.color.wf_background'))
+
+                // 网盘 / 在线文档：仅在配置了网盘服务时显示（未配置则整组不渲染）
+                if (Config.isPanEnabled()) {
+                    Column() {
+                        OptionItemView({ icon: $r('app.media.ic_pan_drive'), title: '网盘' })
+                            .onClick(() => {
+                                pushOrReplaceDetail(this.mainNavPathStack, uikitNavigationDestinations.PanHomePage)
+                            })
+                        OptionItemView({ icon: $r('app.media.ic_pan_doc'), title: '在线文档', showDivider: false })
+                            .onClick(() => {
+                                pushOrReplaceDetail(this.mainNavPathStack, uikitNavigationDestinations.PanDocsPage)
+                            })
+                    }
+                    .margin({ top: 12 })
+                    .backgroundColor($r('app.color.wf_background'))
+                }
 
                 Column() {
                     OptionItemView({ icon: $r('app.media.ic_theme'), title: '主题' })

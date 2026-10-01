@@ -179,8 +179,57 @@ export function downloadMedia(context: Context, messageUid: Long, url: string, p
     })
 }
 
-export function saveMedia(context: Context, messageUid: Long, url: string, type: 'image' | 'video') {
-    downloadMedia(context, messageUid, url)
+/**
+ * 选择多个文件（网盘上传用），返回 uri 列表。
+ */
+export function selectFiles(maxSelectCount: number = 9): Promise<string[]> {
+    try {
+        let documentSelectOptions = new picker.DocumentSelectOptions();
+        documentSelectOptions.maxSelectNumber = maxSelectCount;
+        let documentPicker = new picker.DocumentViewPicker();
+        return documentPicker.select(documentSelectOptions).then((result: string[]) => {
+            return result ? result : [];
+        });
+    } catch (err) {
+        console.error(TAG, 'DocumentViewPicker failed with err: ' + err);
+        return Promise.reject(err);
+    }
+}
+
+/**
+ * 把任意地址下载到沙箱 cacheDir。用于网盘签名地址（已带签名，不需要额外 header）。
+ * @param fileName 期望的文件名，非法字符会被替换
+ */
+export function downloadUrlToCache(context: Context, url: string, fileName?: string, progressCB?: (receivedSize: number, totalSize: number) => void): Promise<string> {
+    return new Promise<string>((resolve, reject) => {
+        if (!url) {
+            reject(new Error('下载地址为空'));
+            return;
+        }
+        let safeName = fileName && fileName.length > 0 ? fileName.replace(new RegExp('[\\\\/:*?"<>|]', 'g'), '_') : ('pan_' + new Date().getTime());
+        let dir = context.getApplicationContext().cacheDir;
+        let filePath = dir + '/' + new Date().getTime() + '_' + safeName;
+        request.downloadFile(context, { url: url, filePath: filePath })
+            .then((data: request.DownloadTask) => {
+                let downloadTask: request.DownloadTask = data;
+                downloadTask.on('complete', async () => {
+                    let downloadInfo = await downloadTask.getTaskInfo();
+                    resolve(downloadInfo.filePath);
+                });
+                downloadTask.on('fail', (d) => {
+                    reject(new Error('download error: ' + d));
+                });
+                downloadTask.on('progress', (receivedSize: number, totalSize: number) => {
+                    progressCB?.(receivedSize, totalSize);
+                });
+            })
+            .catch((e: BusinessError) => {
+                reject(e.message);
+            });
+    });
+}
+
+export function saveMedia(context: Context, messageUid: Long, url: string, type: 'image' | 'video') {    downloadMedia(context, messageUid, url)
         .then(async filePath => {
             let helper = photoAccessHelper.getPhotoAccessHelper(context)
             let uri: string

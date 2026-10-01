@@ -79,6 +79,58 @@ export default class Config {
     // 开启后 wf-voice 会在说话过程中反复识别正在说的这句话，服务端 CPU 占用更高。旧版本 wf-voice 不支持，开启后效果和关闭一样。
     static ENABLE_ASR_PARTIAL_RESULT = true;
 
+    // 网盘部署形态：
+    //  'merged'     = 网盘并入 wf-app-server，API 在 {APP_SERVER}/api/pan，文档页在 {APP_SERVER}/doc/，鉴权 authToken
+    //  'standalone' = 独立 wf-pan-server，API 在 {PAN_SERVER_ADDRESS}/api/v1，文档页在 {PAN_SERVER_ADDRESS}/doc/，鉴权 authCode
+    // 当前按独立服务（standalone）实现。
+    static PAN_SERVER_KIND: string = 'standalone';
+    // 独立部署时的网盘入口根地址（含 nginx 前缀，如 'https://pan.example.com/pan'）。
+    // 置为 null / '' 即视为未配置，客户端不显示网盘入口与文件消息菜单（见 isPanEnabled）。
+    static PAN_SERVER_ADDRESS = 'https://pan.wildfirechat.net' as string | null;
+    // 网盘备选地址，双网环境下使用。
+    static PAN_SERVER_BACKUP_ADDRESS = null as string | null;
+
+    static getPanServerAddress(): string | null {
+        return Config.selectServer(Config.PAN_SERVER_ADDRESS, Config.PAN_SERVER_BACKUP_ADDRESS);
+    }
+
+    // 网盘业务 API 基址（已含版本段，之后直接拼 /spaces/list、/files/... ）
+    static getPanApiBase(): string | null {
+        if (Config.PAN_SERVER_KIND === 'standalone') {
+            let root = Config.getPanServerAddress();
+            if (!root) {
+                return null;
+            }
+            return (root.endsWith('/') ? root.substring(0, root.length - 1) : root) + '/api/v1';
+        }
+        let app = Config.getAppServer();
+        return app ? (app.endsWith('/') ? app.substring(0, app.length - 1) : app) + '/api/pan' : null;
+    }
+
+    // 在线文档 H5 根地址（以 / 结尾）。独立部署挂在网盘入口下；合并部署挂在应用服务根下。
+    static getPanDocBase(): string | null {
+        let root: string | null = null;
+        if (Config.PAN_SERVER_KIND === 'standalone') {
+            root = Config.getPanServerAddress();
+        } else {
+            root = Config.getAppServer();
+        }
+        if (!root) {
+            return null;
+        }
+        return (root.endsWith('/') ? root.substring(0, root.length - 1) : root) + '/doc/';
+    }
+
+    // 'authToken'（merged）| 'authCode'（standalone）
+    static getPanAuthMode(): string {
+        return Config.PAN_SERVER_KIND === 'standalone' ? 'authCode' : 'authToken';
+    }
+
+    // 网盘是否可用：API 基址与文档基址都能派生出来才启用；未配置时入口与菜单一律不显示。
+    static isPanEnabled(): boolean {
+        return !!Config.getPanApiBase() && !!Config.getPanDocBase();
+    }
+
     // 野火二维码 scheme，不要修改，如果需要修改的话，所有端都需要一起修改
     static QR_CODE_PREFIX_PC_SESSION = "wildfirechat://pcsession/";
 

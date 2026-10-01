@@ -6,6 +6,7 @@ import { showToast } from '../../../common/utils/Toast';
 import { isHttpUrl } from '../../../common/utils/TextLinkParser';
 import { common } from '@kit.AbilityKit';
 import { FontSize, Radius } from '../../../common/design/Tokens'
+import PanService from '../../../pan/panService'
 
 @Component
 export default struct LinkMessageContentView {
@@ -63,6 +64,11 @@ export default struct LinkMessageContentView {
     }
 
     openLink(url: string, title: string) {
+        // 自家在线文档链接需要内置带桥页面打开，不能被外部链接策略（提醒/禁止）挡掉
+        if (PanService.isDocUrl(url)) {
+            this.doOpenLink(url, title)
+            return
+        }
         if (Config.OPEN_LINK_POLICY === 2) {
             showToast('禁止打开外部链接')
             return
@@ -88,6 +94,13 @@ export default struct LinkMessageContentView {
     }
 
     doOpenLink(url: string, title: string) {
+        if (PanService.isDocUrl(url)) {
+            this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.PanDocWebPage, {
+                'url': url,
+                'name': title
+            } as Record<string, Object>)
+            return
+        }
         if (isHttpUrl(url)) {
             this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.WebViewPage, {
                 'url': url,

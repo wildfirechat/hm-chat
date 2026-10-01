@@ -17,6 +17,10 @@ import TextMessageContentView from './TextMessageContentView'
 import VideoMessageContentView from './VideoMessageContentView'
 import GroupMember from '@wfc/client/src/main/ets/wfc/model/groupMember'
 import FileMessageContentView from './FileMessageContentView'
+import FileMessageContent from '@wfc/client/src/main/ets/wfc/messages/fileMessageContent'
+import { downloadMedia } from '../../../helper/mediaHelper'
+import PanService from '../../../pan/panService'
+import { openLocalFile, saveFileMessageToMyPan } from '../../../pan/panSave'
 import pasteboard from '@ohos.pasteboard'
 import CustomMessageContentType from '@wfc/client/src/main/ets/wfc_custom_message/customMessageContentType'
 import { PttMessageContentType } from '@wfc/ptt'
@@ -238,6 +242,36 @@ export default struct NormaMessageContentView {
         }
     }
 
+    /** 文件消息：用内置在线文档页按链接只读打开 */
+    openFileOnline(file: FileMessageContent) {
+        this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.PanDocWebPage, {
+            'url': Config.urlRedirect(file.remotePath),
+            'name': file.name
+        } as Record<string, Object>)
+    }
+
+    /** 文件消息：存到我的网盘（可选存完直接打开） */
+    saveToPan(file: FileMessageContent, openAfter: boolean) {
+        saveFileMessageToMyPan(getContext(this), this.mainNavPathStack, {
+            name: file.name,
+            size: file.size,
+            storageUrl: Config.urlRedirect(file.remotePath),
+            openAfter: openAfter
+        })
+    }
+
+    /** 文件消息：走 IM 媒体通道下载后交给系统预览 */
+    downloadFileMessage(file: FileMessageContent) {
+        let context = getContext(this)
+        downloadMedia(context, this.message.messageUid, file.remotePath)
+            .then((path: string) => {
+                openLocalFile(context, path, file.name)
+            })
+            .catch(() => {
+                showToast('下载失败')
+            })
+    }
+
     // TODO
     // FIXME
     // filter 方法，需要根据 textMessageSelectedText 做一些判断
@@ -401,6 +435,51 @@ export default struct NormaMessageContentView {
                 }
             }
         ]
+
+        // 文件消息：网盘相关操作（未配置网盘时不显示任何一项）
+        let content = this.message.messageContent
+        if (Config.isPanEnabled() && content.type === MessageContentType.File) {
+            let file = content as FileMessageContent
+            let panOk = !!file.remotePath
+            let panMenus: MessageContextMenuItem[] = []
+            if (panOk && PanService.isOnlineDocName(file.name)) {
+                panMenus.push({
+                    title: '在线预览',
+                    tag: 'docOnlinePreview',
+                    icon: $r('app.media.ic_pan_preview'),
+                    action: () => {
+                        this.openFileOnline(file);
+                    }
+                })
+            }
+            if (panOk) {
+                panMenus.push({
+                    title: '存到网盘',
+                    tag: 'panSave',
+                    icon: $r('app.media.ic_pan_upload'),
+                    action: () => {
+                        this.saveToPan(file, false);
+                    }
+                })
+                panMenus.push({
+                    title: '存到网盘并打开',
+                    tag: 'panSaveOpen',
+                    icon: $r('app.media.ic_pan_save_open'),
+                    action: () => {
+                        this.saveToPan(file, true);
+                    }
+                })
+            }
+            panMenus.push({
+                title: '下载',
+                tag: 'fileDownload',
+                icon: $r('app.media.ic_msg_download'),
+                action: () => {
+                    this.downloadFileMessage(file);
+                }
+            })
+            menus = panMenus.concat(menus)
+        }
 
         // do filter
         return menus.filter(item => !item.filter || item.filter())

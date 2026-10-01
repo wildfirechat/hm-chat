@@ -8,10 +8,13 @@ import { downloadMedia } from '../../../helper/mediaHelper';
 import { fileUri } from '@kit.CoreFileKit';
 import { uniformTypeDescriptor } from '@kit.ArkData';
 import { FontSize, Radius } from '../../../common/design/Tokens'
+import { uikitNavigationDestinations } from '../../uikitNavigationConfig'
+import PanService from '../../../pan/panService'
 
 @Component
 export default struct FileMessageContentView {
     @Link message: Message
+    @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
 
     fileMessageContent() {
         return this.message.messageContent as FileMessageContent
@@ -43,6 +46,15 @@ export default struct FileMessageContentView {
         .borderRadius(Radius.sm)
         .justifyContent(FlexAlign.Start)
         .onClick(() => {
+            let content = this.fileMessageContent()
+            // 配置了网盘且是在线文档格式：优先进内置文档页只读预览
+            if (Config.isPanEnabled() && content.remotePath && PanService.isOnlineDocName(content.name)) {
+                this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.PanDocWebPage, {
+                    'url': Config.urlRedirect(content.remotePath),
+                    'name': content.name
+                } as Record<string, Object>)
+                return
+            }
             let ext = this.fileMessageContent().name.substring(this.fileMessageContent().name.lastIndexOf('.') + 1).toLowerCase()
             if (Config.DISABLED_RECEIVE_FILE_TYPES.includes(ext)) {
                 showToast('禁止打开此类型')

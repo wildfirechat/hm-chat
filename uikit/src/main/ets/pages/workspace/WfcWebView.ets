@@ -1,7 +1,6 @@
 import web_webview from '@ohos.web.webview'
 import { showToast } from '../../common/utils/Toast'
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
-import DSBridge from './dsBridge'
 import Config from '@wfc/client/src/main/ets/config'
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import data_preferences from '@ohos.data.preferences';
@@ -12,7 +11,8 @@ export default struct WfcWebView {
     controller?: web_webview.WebviewController
     url: string = ''
     onTitleReceive?: (title?: string) => void
-    dsBridge?: DSBridge
+    // JS 桥对象：工作台传 DSBridge，在线文档传 PanDocBridge，二者都只暴露 call(method,arg)
+    dsBridge?: Object
     @State progress: number = 0
     @State darkMode: WebDarkMode = WebDarkMode.Auto;
     @State @Watch('onPickUser') pickedUser: SubscribedAbstractProperty<UserInfo[]> = LocalStorage.getShared()

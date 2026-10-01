@@ -66,6 +66,13 @@ import PollHomePage from './poll/PollHomePage'
 import PollListPage from './poll/PollListPage'
 import MMPreviewPage from './mm/MMPreviewPage'
 import WelcomePage from './WelcomePage'
+import PanHomePage from '../pan/panHomePage'
+import PanFileListPage from '../pan/panFileListPage'
+import PanDocsPage from '../pan/panDocsPage'
+import PanDocWebPage from '../pan/panDocWebPage'
+import PanSharePage from '../pan/panSharePage'
+import PanDestinationPickPage from '../pan/panDestinationPickPage'
+import PickMultiGroupPage from './picker/PickMultiGroupPage'
 
 export const UIKIT_NAV_DESTINATION_PREFIX = 'uikit-';
 
@@ -138,6 +145,14 @@ export class uikitNavigationDestinations {
     static PickFavGroupPage = UIKIT_NAV_DESTINATION_PREFIX + 'pickFavGroupPage'
     static PickGroupMemberPage = UIKIT_NAV_DESTINATION_PREFIX + 'pickGroupMemberPage'
     static PickContactPage = UIKIT_NAV_DESTINATION_PREFIX + 'pickSingleContactPage'
+    // 网盘 / 在线文档
+    static PanHomePage = UIKIT_NAV_DESTINATION_PREFIX + 'panHomePage'
+    static PanFileListPage = UIKIT_NAV_DESTINATION_PREFIX + 'panFileListPage'
+    static PanDocsPage = UIKIT_NAV_DESTINATION_PREFIX + 'panDocsPage'
+    static PanDocWebPage = UIKIT_NAV_DESTINATION_PREFIX + 'panDocWebPage'
+    static PanSharePage = UIKIT_NAV_DESTINATION_PREFIX + 'panSharePage'
+    static PanDestinationPickPage = UIKIT_NAV_DESTINATION_PREFIX + 'panDestinationPickPage'
+    static PickMultiGroupPage = UIKIT_NAV_DESTINATION_PREFIX + 'pickMultiGroupPage'
 }
 
 @Builder
@@ -278,6 +293,20 @@ export function UIKitPageMap(name: string) {
         PollListPage()
     } else if (name === uikitNavigationDestinations.MMPreviewPage) {
         MMPreviewPage()
+    } else if (name === uikitNavigationDestinations.PanHomePage) {
+        PanHomePage()
+    } else if (name === uikitNavigationDestinations.PanFileListPage) {
+        PanFileListPage()
+    } else if (name === uikitNavigationDestinations.PanDocsPage) {
+        PanDocsPage()
+    } else if (name === uikitNavigationDestinations.PanDocWebPage) {
+        PanDocWebPage()
+    } else if (name === uikitNavigationDestinations.PanSharePage) {
+        PanSharePage()
+    } else if (name === uikitNavigationDestinations.PanDestinationPickPage) {
+        PanDestinationPickPage()
+    } else if (name === uikitNavigationDestinations.PickMultiGroupPage) {
+        PickMultiGroupPage()
     } else {
         NavDestination() {
             Column() {

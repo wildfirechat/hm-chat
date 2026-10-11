@@ -1,4 +1,5 @@
 import http from '@ohos.net.http';
+import selfSignedCertUtils from '@wfc/client/src/main/ets/wfc/util/selfSignedCertUtils';
 
 export function post(url: string, data: string | Object, header?: Object, expectDataType?: http.HttpDataType): Promise<Object> {
     return new Promise((resolve, reject) => {
@@ -17,6 +18,7 @@ export function post(url: string, data: string | Object, header?: Object, expect
                 priority: 1, // 可选，默认为1
                 connectTimeout: 60000, // 可选，默认为60000ms
                 readTimeout: 60000, // 可选，默认为60000ms
+                caPath: selfSignedCertUtils.getCaPath(), // 信任自签名证书
                 usingProtocol: http.HttpProtocol.HTTP1_1, // 可选，协议类型默认值由系统自动指定
             }, (err, data) => {
             if (!err) {
@@ -66,6 +68,7 @@ export function get(url: string, header?: Object, expectDataType?: http.HttpData
                 priority: 1, // 可选，默认为1
                 connectTimeout: 60000, // 可选，默认为60000ms
                 readTimeout: 60000, // 可选，默认为60000ms
+                caPath: selfSignedCertUtils.getCaPath(), // 信任自签名证书
                 usingProtocol: http.HttpProtocol.HTTP1_1, // 可选，协议类型默认值由系统自动指定
             }, (err, data) => {
             if (!err) {

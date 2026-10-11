@@ -11,6 +11,7 @@ import { uikitNavigationDestinations } from '../uikitNavigationConfig';
 import PickMultiContactModal from '../picker/PickMultiContactModal';
 import { Radius } from '../../common/design/Tokens'
 import { isWideScreen } from '../../util/navUtil'
+import { trustedMediaSrc } from '../../util/trustedMedia'
 
 @Preview
 @Component
@@ -47,7 +48,7 @@ export default struct SingleConversationInfoPage {
         NavDestination() {
             Column() {
                 Row() {
-                    Image(this.targetUserInfo.portrait)
+                    Image(trustedMediaSrc(this.targetUserInfo.portrait))
                         .width(48)
                         .height(48)
                         .borderRadius(Radius.sm)

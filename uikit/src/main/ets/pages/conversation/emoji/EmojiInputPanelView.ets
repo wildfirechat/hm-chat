@@ -5,6 +5,7 @@ import StickerMessageContent from '@wfc/client/src/main/ets/wfc/messages/sticker
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import { deviceInfo } from '@kit.BasicServicesKit'
 import { FontSize, Radius } from '../../../common/design/Tokens'
+import { trustedMediaSrc } from '../../../util/trustedMedia'
 
 const EMOJI_COLS = 8
 const STICKER_COLS = 5
@@ -270,7 +271,7 @@ export default struct EmojiInputPanelView {
                             Grid() {
                                 ForEach(this.emojiAndStickers.filter(e => e.category === category.name), (emoji: Emoji) => {
                                     GridItem() {
-                                        Image(emoji.data)
+                                        Image(trustedMediaSrc(emoji.data))
                                             .height(64)
                                             .width(64)
                                             .draggable(false)

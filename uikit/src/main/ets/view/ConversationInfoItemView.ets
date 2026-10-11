@@ -3,6 +3,7 @@ import { timeFormat } from '../util/helper';
 import ConversationInfo from '@wfc/client/src/main/ets/wfc/model/conversationInfo';
 import MessageStatus from '@wfc/client/src/main/ets/wfc/messages/messageStatus';
 import { FontSize, Radius, scaledSize, LayoutScale } from '../common/design/Tokens';
+import { trustedMediaSrc } from '../util/trustedMedia'
 
 @Component
 @Preview
@@ -58,7 +59,7 @@ export default struct ConversationInfoItemView {
             Row() {
                 Row() {
                     if (this.basicMode) {
-                        Image(this.conversationItemPortrait)
+                        Image(trustedMediaSrc(this.conversationItemPortrait))
                             .alt($r('app.media.avatar_def'))
                             .draggable(false)
                             .height(scaledSize(48, this.fontScale))
@@ -72,7 +73,7 @@ export default struct ConversationInfoItemView {
                             position: BadgePosition.RightTop,
                             style: { badgeSize: scaledSize(10, this.fontScale), badgeColor: $r('app.color.wf_badge_color') }
                         }) {
-                            Image(this.conversationItemPortrait)
+                            Image(trustedMediaSrc(this.conversationItemPortrait))
                                 .alt($r('app.media.avatar_def'))
                                 .draggable(false)
                                 .height(scaledSize(52, this.fontScale))
@@ -87,7 +88,7 @@ export default struct ConversationInfoItemView {
                             position: BadgePosition.RightTop,
                             style: { badgeSize: scaledSize(16, this.fontScale), badgeColor: $r('app.color.wf_badge_color') }
                         }) {
-                            Image(this.conversationItemPortrait)
+                            Image(trustedMediaSrc(this.conversationItemPortrait))
                                 .alt($r('app.media.avatar_def'))
                                 .draggable(false)
                                 .height(scaledSize(52, this.fontScale))

@@ -6,6 +6,7 @@ import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType'
 import { uikitNavigationDestinations } from '../uikitNavigationConfig'
 import { FontSize, Radius } from '../../common/design/Tokens'
+import { trustedMediaSrc } from '../../util/trustedMedia'
 
 @Component
 export default struct ChannelListPage {
@@ -57,7 +58,7 @@ export default struct ChannelListPage {
                     ForEach(this.channelList, (channelInfo: ChannelInfo) => {
                         ListItem() {
                             Row() {
-                                Image(channelInfo.portrait)
+                                Image(trustedMediaSrc(channelInfo.portrait))
                                     .alt($r('app.media.ic_channel_1'))
                                     .width(40)
                                     .height(40)

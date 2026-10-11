@@ -30,6 +30,7 @@ import SoundMessageContent from '@wfc/client/src/main/ets/wfc/messages/soundMess
 import AudioPlayManager from '../conversation/audio/AudioPlayManager'
 import http from '@ohos.net.http'
 import { FontSize, Radius } from '../../common/design/Tokens'
+import { trustedMediaSrc } from '../../util/trustedMedia'
 
 @Component
 export default struct FavRecordPage {
@@ -281,7 +282,7 @@ export default struct FavRecordPage {
                                             .objectFit(ImageFit.Cover)
                                             .borderRadius(Radius.sm)
                                     } else if (favItem.type === MessageContentType.Image) {
-                                        Image(favItem.url)
+                                        Image(trustedMediaSrc(favItem.url))
                                             .width(160)
                                             .height(160)
                                             .objectFit(ImageFit.Cover)
@@ -333,7 +334,7 @@ export default struct FavRecordPage {
                                             .margin({ right: 12 })
 
                                             if (favItem.url) {
-                                                Image(favItem.url)
+                                                Image(trustedMediaSrc(favItem.url))
                                                     .width(60)
                                                     .height(60)
                                                     .objectFit(ImageFit.Cover)

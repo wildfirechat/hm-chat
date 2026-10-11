@@ -2,6 +2,7 @@ import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
 import { showToast } from '@wfc/uikit/src/main/ets/common/utils/Toast'
 import { FontSize } from '@wfc/uikit/src/main/ets/common/design/Tokens'
+import { trustedMediaSrc } from '@wfc/uikit/src/main/ets/util/trustedMedia'
 
 @Preview
 @Component
@@ -46,7 +47,7 @@ export default struct BlackListPage {
                         ForEach(this.blackUserIds, (userId: string, index: number) => {
                             ListItem() {
                                 Row() {
-                                    Image(wfc.getUserInfo(userId).portrait)
+                                    Image(trustedMediaSrc(wfc.getUserInfo(userId).portrait))
                                         .width(40)
                                         .height(40)
                                         .borderRadius(4)

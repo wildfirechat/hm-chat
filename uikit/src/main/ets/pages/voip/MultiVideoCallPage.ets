@@ -16,6 +16,7 @@ import uikit from '../../uikit'
 import { BusinessError } from '@kit.BasicServicesKit'
 import { uikitNavigationDestinations } from '../uikitNavigationConfig'
 import { FontSize } from '../../common/design/Tokens'
+import { trustedMediaSrc } from '../../util/trustedMedia'
 
 @Component
 export default struct MultiVideoCallPage {
@@ -528,7 +529,7 @@ export default struct MultiVideoCallPage {
                                     controller?.setVideoTrack(this.callSession?.getParticipantVideoTrack(userInfo.uid))
                                 })
                             if (this.participantStatus(userInfo) !== 4) {
-                                Image(userInfo.portrait)
+                                Image(trustedMediaSrc(userInfo.portrait))
                                     .width('100%')
                                     .aspectRatio(1)
                             }

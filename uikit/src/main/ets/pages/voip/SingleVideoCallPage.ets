@@ -16,6 +16,7 @@ import { uikitNavigationDestinations } from '../uikitNavigationConfig'
 import WFCVideoRenderController from '@wfc/avenginekit/src/main/ets/wfc/av/xcomponent/WFCVideoRenderController'
 import VoipPiPNodeController from './VoipPiPNodeController'
 import { FontSize, Radius } from '../../common/design/Tokens'
+import { trustedMediaSrc } from '../../util/trustedMedia'
 
 @Component
 export default struct SingleVideoCallPage {
@@ -480,7 +481,7 @@ export default struct SingleVideoCallPage {
                         || this.callSession?.status === CallState.STATUS_INCOMING
                         || this.callSession?.status === CallState.STATUS_CONNECTING) {
                         Row() {
-                            Image(this.targetUserInfo?.portrait || Config.DEFAULT_PORTRAIT_URL)
+                            Image(trustedMediaSrc(this.targetUserInfo?.portrait) || Config.DEFAULT_PORTRAIT_URL)
                                 .draggable(false)
                                 .width(80)
                                 .height(80)

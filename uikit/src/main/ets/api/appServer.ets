@@ -1,4 +1,5 @@
 import http from '@ohos.net.http';
+import selfSignedCertUtils from '@wfc/client/src/main/ets/wfc/util/selfSignedCertUtils';
 import data_preferences from '@ohos.data.preferences';
 import wfc from '@wfc/client'
 import Config from '@wfc/client/src/main/ets/config';
@@ -350,6 +351,7 @@ class AppServer {
                 expectDataType: http.HttpDataType.OBJECT,
                 connectTimeout: 30000,
                 readTimeout: 30000,
+                caPath: selfSignedCertUtils.getCaPath(), // 信任自签名证书
             }, (err, data) => {
                 if (!err && data.responseCode == 200) {
                     httpRequest.destroy();
@@ -394,6 +396,7 @@ class AppServer {
                     priority: 1, // 可选，默认为1
                     connectTimeout: 60000, // 可选，默认为60000ms
                     readTimeout: 60000, // 可选，默认为60000ms
+                    caPath: selfSignedCertUtils.getCaPath(), // 信任自签名证书
                     usingProtocol: http.HttpProtocol.HTTP1_1, // 可选，协议类型默认值由系统自动指定
                 }, (err, data) => {
                 if (!err && data && data.responseCode == 200) {

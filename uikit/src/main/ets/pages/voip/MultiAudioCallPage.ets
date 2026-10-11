@@ -14,6 +14,7 @@ import uikit from '../../uikit'
 import { BusinessError } from '@kit.BasicServicesKit'
 import { uikitNavigationDestinations } from '../uikitNavigationConfig'
 import { FontSize, Radius } from '../../common/design/Tokens'
+import { trustedMediaSrc } from '../../util/trustedMedia'
 
 @Component
 export default struct MultiAudioCallPage {
@@ -153,7 +154,7 @@ export default struct MultiAudioCallPage {
     @Builder
     incomingView() {
         Column() {
-            Image(this.invitor!.portrait)
+            Image(trustedMediaSrc(this.invitor!.portrait))
                 .width(120)
                 .height(120)
                 .borderRadius(Radius.lg)
@@ -183,7 +184,7 @@ export default struct MultiAudioCallPage {
                 wrap: FlexWrap.Wrap
             }) {
                 ForEach(this.participantUserInfosExceptSelf, (userInfo: UserInfo) => {
-                    Image(userInfo.portrait)
+                    Image(trustedMediaSrc(userInfo.portrait))
                         .width(40)
                         .height(40)
                         .borderRadius(Radius.sm)
@@ -329,7 +330,7 @@ export default struct MultiAudioCallPage {
                     ForEach(this.targetUserInfos, (userInfo: UserInfo) => {
                         Column() {
                             Stack() {
-                                Image(userInfo.portrait)
+                                Image(trustedMediaSrc(userInfo.portrait))
                                     .width(100)
                                     .height(100)
                                     .borderRadius(Radius.sm)
@@ -354,7 +355,7 @@ export default struct MultiAudioCallPage {
                     if (this.selfUserInfo) {
                         Column() {
                             Stack() {
-                                Image(this.selfUserInfo.portrait)
+                                Image(trustedMediaSrc(this.selfUserInfo.portrait))
                                     .width(100)
                                     .height(100)
                                     .borderRadius(Radius.sm)

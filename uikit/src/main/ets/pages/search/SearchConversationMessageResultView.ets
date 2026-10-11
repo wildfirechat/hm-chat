@@ -13,6 +13,7 @@ import Utils from '../../common/Utils'
 import { drawing } from '@kit.ArkGraphics2D'
 import { timeFormat } from '../../util/helper'
 import { FontSize, Radius } from '../../common/design/Tokens'
+import { trustedMediaSrc } from '../../util/trustedMedia'
 
 @Component
 @Preview
@@ -73,7 +74,7 @@ export default struct SearchConversationMessageResultView {
         ForEach(this.conversationMessageSearchResults, (resultWrapper: MessageResultWrapper) => {
             ListItem() {
                 Row() {
-                    Image(resultWrapper.senderPortrait)
+                    Image(trustedMediaSrc(resultWrapper.senderPortrait))
                         .alt($r('app.media.avatar_def'))
                         .width(40)
                         .height(40)

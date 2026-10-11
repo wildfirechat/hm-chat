@@ -4,6 +4,7 @@ import ConversationInfo from '@wfc/client/src/main/ets/wfc/model/conversationInf
 import MessageStatus from '@wfc/client/src/main/ets/wfc/messages/messageStatus';
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation';
 import { FontSize, Radius, scaledSize } from '../common/design/Tokens'
+import { trustedMediaSrc } from '../util/trustedMedia'
 
 @Component
 @Preview
@@ -73,7 +74,7 @@ export default struct CheckableConversationInfoItemView {
                             .margin({ right: 8 })
                     }
                     if (this.basicMode) {
-                        Image(this.conversationItemPortrait)
+                        Image(trustedMediaSrc(this.conversationItemPortrait))
                             .alt($r('app.media.avatar_def'))
                             .draggable(false)
                             .height(scaledSize(48, this.fontScale))
@@ -88,7 +89,7 @@ export default struct CheckableConversationInfoItemView {
                             position: BadgePosition.RightTop,
                             style: { badgeSize: scaledSize(10, this.fontScale), badgeColor: $r('app.color.wf_badge_color') }
                         }) {
-                            Image(this.conversationItemPortrait)
+                            Image(trustedMediaSrc(this.conversationItemPortrait))
                                 .alt($r('app.media.avatar_def'))
                                 .draggable(false)
                                 .height(scaledSize(48, this.fontScale))
@@ -103,7 +104,7 @@ export default struct CheckableConversationInfoItemView {
                             position: BadgePosition.RightTop,
                             style: { badgeSize: scaledSize(16, this.fontScale), badgeColor: $r('app.color.wf_badge_color') }
                         }) {
-                            Image(this.conversationItemPortrait)
+                            Image(trustedMediaSrc(this.conversationItemPortrait))
                                 .alt($r('app.media.avatar_def'))
                                 .draggable(false)
                                 .height(scaledSize(48, this.fontScale))

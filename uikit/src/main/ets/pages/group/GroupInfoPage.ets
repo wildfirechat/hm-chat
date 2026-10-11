@@ -8,6 +8,7 @@ import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo';
 import { uikitNavigationDestinations } from '../uikitNavigationConfig';
 import JoinGroupRequestDialog from './JoinGroupRequestDialog';
 import { Radius } from '../../common/design/Tokens'
+import { trustedMediaSrc } from '../../util/trustedMedia'
 
 @Component
 export default struct GroupInfoPage {
@@ -77,7 +78,7 @@ export default struct GroupInfoPage {
         NavDestination() {
             if (this.groupInfo) {
                 Column() {
-                    Image(this.groupInfo?.portrait)
+                    Image(trustedMediaSrc(this.groupInfo?.portrait))
                         .width(100)
                         .height(100)
                         .borderRadius(Radius.sm)

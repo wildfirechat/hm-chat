@@ -51,6 +51,7 @@ import { FontSize, Radius, scaledSize } from '../../common/design/Tokens'
 import { STORAGE_KEY_VOICE_EARPIECE } from './audio/VoicePlayModeManager'
 import { PttMessageContentType } from '@wfc/ptt'
 import { conversationIdentity, STORAGE_KEY_ACTIVE_CONVERSATION } from '../../util/navUtil'
+import { trustedMediaSrc } from '../../util/trustedMedia'
 
 // 「猜你想发送」：上次消失（发送/取消/其他操作）的时间。
 // API 12 的最近图片控件回调拿不到图片标识，故用「动态时间窗口」实现“同一张只提示一次”：
@@ -971,7 +972,7 @@ export default struct ConversationPage {
                                                                 .layoutWeight(1)
                                                                 .margin({ left: 72 })
 
-                                                                Image(wfc.getUserInfo(msg.from).portrait)
+                                                                Image(trustedMediaSrc(wfc.getUserInfo(msg.from).portrait))
                                                                     .width(scaledSize(40, this.fontScale))
                                                                     .height(scaledSize(40, this.fontScale))
                                                                     .borderRadius(Radius.sm)
@@ -1035,7 +1036,7 @@ export default struct ConversationPage {
 
                                                                     // .alignSelf(ItemAlign.Center)
                                                                 }
-                                                                Image(wfc.getUserInfo(msg.from).portrait)
+                                                                Image(trustedMediaSrc(wfc.getUserInfo(msg.from).portrait))
                                                                     .width(scaledSize(40, this.fontScale))
                                                                     .height(scaledSize(40, this.fontScale))
                                                                     .margin(12)
@@ -1217,7 +1218,7 @@ export default struct ConversationPage {
                     Scroll() {
                         Row() {
                             ForEach(this.suggestedStickers, (sticker: Emoji) => {
-                                Image(sticker.data)
+                                Image(trustedMediaSrc(sticker.data))
                                     .width(60)
                                     .height(60)
                                     .objectFit(ImageFit.Contain)
@@ -1288,7 +1289,7 @@ export default struct ConversationPage {
                                 .maxFontScale(1)
                                 .fontSize(FontSize.huge)
                         } else {
-                            Image(this.previewEmoji!.data)
+                            Image(trustedMediaSrc(this.previewEmoji!.data))
                                 .width(this.previewCardSize() - 20)
                                 .height(this.previewCardSize() - 20)
                                 .objectFit(ImageFit.Contain)

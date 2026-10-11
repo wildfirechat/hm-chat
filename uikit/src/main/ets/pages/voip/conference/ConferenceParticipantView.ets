@@ -6,6 +6,7 @@ import wfc from "@wfc/client"
 import Config from '@wfc/client/src/main/ets/config'
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
 import WFCVideoRenderController, { ScalingMode } from '@wfc/avenginekit/src/main/ets/wfc/av/xcomponent/WFCVideoRenderController'
+import { trustedMediaSrc } from '../../../util/trustedMedia'
 
 @Component
 export default struct ConferenceParticipantView {
@@ -75,7 +76,7 @@ export default struct ConferenceParticipantView {
                     })
             } else {
                 Stack() {
-                    Image(this.participantUserInfo?.portrait || Config.DEFAULT_PORTRAIT_URL)
+                    Image(trustedMediaSrc(this.participantUserInfo?.portrait) || Config.DEFAULT_PORTRAIT_URL)
                         .width('100%')
                         .aspectRatio(1)
                     Text(this.participantUserInfo?.name)

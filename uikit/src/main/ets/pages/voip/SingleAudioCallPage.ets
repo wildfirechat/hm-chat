@@ -13,6 +13,7 @@ import { PiPWindow } from '@kit.ArkUI'
 import VoipPiPNodeController from './VoipPiPNodeController'
 import { uikitNavigationDestinations } from '../uikitNavigationConfig'
 import { FontSize, Radius } from '../../common/design/Tokens'
+import { trustedMediaSrc } from '../../util/trustedMedia'
 
 @Component
 export default struct SingleAudioCallPage {
@@ -208,7 +209,7 @@ export default struct SingleAudioCallPage {
                     .width(200)
                     .height(300)
                     .backgroundColor('#e0000000')
-                Image(this.targetUserInfo?.portrait)
+                Image(trustedMediaSrc(this.targetUserInfo?.portrait))
                     .draggable(false)
                     .width('100%')
                     .height('100%')
@@ -241,7 +242,7 @@ export default struct SingleAudioCallPage {
 
                     if (this.callSession?.status === CallState.STATUS_INCOMING || this.callSession?.status === CallState.STATUS_OUTGOING) {
                         Column() {
-                            Image(this.targetUserInfo?.portrait|| Config.DEFAULT_PORTRAIT_URL)
+                            Image(trustedMediaSrc(this.targetUserInfo?.portrait) || Config.DEFAULT_PORTRAIT_URL)
                                 .draggable(false)
                                 .borderRadius(Radius.md)
                                 .width(100)
@@ -304,7 +305,7 @@ export default struct SingleAudioCallPage {
                         .justifyContent(FlexAlign.SpaceAround)
                     } else {
                         Column() {
-                            Image(this.targetUserInfo?.portrait || Config.DEFAULT_PORTRAIT_URL)
+                            Image(trustedMediaSrc(this.targetUserInfo?.portrait) || Config.DEFAULT_PORTRAIT_URL)
                                 .draggable(false)
                                 .borderRadius(Radius.md)
                                 .width(100)

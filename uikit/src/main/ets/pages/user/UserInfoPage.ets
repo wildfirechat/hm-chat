@@ -16,6 +16,7 @@ import avenginekit from '@wfc/avenginekit';
 import { checkAndRequestPermission } from '../../helper/permissionHelper';
 import WfcScheme from '../../wfcScheme'
 import { FontSize, Radius } from '../../common/design/Tokens'
+import { trustedMediaSrc } from '../../util/trustedMedia'
 
 @Component
 export default struct UserInfoPage {
@@ -97,7 +98,7 @@ export default struct UserInfoPage {
         NavDestination() {
             Column() {
                 Row() {
-                    Image(this.userInfo!.portrait)
+                    Image(trustedMediaSrc(this.userInfo!.portrait))
                         .width(60)
                         .height(60)
                         .borderRadius(Radius.sm)

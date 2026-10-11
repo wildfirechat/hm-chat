@@ -52,6 +52,7 @@ import MessageContent from '../messages/messageContent';
 import ModifyMyInfoEntry from '../model/modifyMyInfoEntry';
 import request from '@ohos.request';
 import { rcp } from '@kit.RemoteCommunicationKit';
+import selfSignedCertUtils from '../util/selfSignedCertUtils';
 import { FailCallback, SuccessCallback, CallbackWithValue_1, CallbackWithValue_2, JSONArray, JSONObject } from '../type/types';
 import { uri } from '@kit.ArkTS';
 import { fileUri } from '@kit.CoreFileKit';
@@ -87,8 +88,6 @@ class WfcImpl {
     context?: common.ApplicationContext;
     // 正在上传的任务，key 是 messageId，value 用来取消上传
     uploadingMap: Map<number, () => void> = new Map();
-    // 大文件上传时信任的自签名证书（PEM），为空时走系统上传服务
-    uploadServerCa: string = '';
     userOnlineState: Map<string, UserOnlineState> = new Map()
 
     onConnectionChanged(status: number) {
@@ -471,18 +470,6 @@ class WfcImpl {
      */
     isUseWebsocket(): boolean {
         return protoProxy.isUseWebsocket() === 1;
-    }
-
-    setUploadServerCerts(certPaths: string[]) {
-        let pems: string[] = [];
-        certPaths.forEach((path: string) => {
-            try {
-                pems.push(fs.readTextSync(path));
-            } catch (e) {
-                console.error('read upload server cert failed', path, e);
-            }
-        });
-        this.uploadServerCa = pems.join('\n');
     }
 
     useTls(skipVerifyCert: boolean, selfSignedCerts: string[]) {
@@ -2601,9 +2588,10 @@ class WfcImpl {
                 };
             } else {
                 // 野火专业存储或阿里云
-                if (self.uploadServerCa) {
+                let caPath = selfSignedCertUtils.getCaPath()
+                if (caPath) {
                     // 系统上传服务不认应用内置的自签名证书，改用 RCP
-                    self._uploadFileWithRcp(message, uploadUrl, remoteUrl, filePath!, contentType, progressCB, successCB, failCB)
+                    self._uploadFileWithRcp(message, uploadUrl, remoteUrl, filePath!, contentType, caPath, progressCB, successCB, failCB)
                     return
                 }
                 // xhr = this._uploadXMLHttpRequest(message ? message.messageId : 0, fileName, remoteUrl, progressCB, successCB, failCB);
@@ -2679,9 +2667,10 @@ class WfcImpl {
         })
     }
 
-    // 用 RCP 上传，只信任 setUploadServerCerts 设置的证书
+    // 用 RCP 上传，信任 caPath 中的证书，即系统预置的 CA 证书和 selfSignedCertUtils 加载的自签名证书
     _uploadFileWithRcp(message: Message | null, uploadUrl: string, remoteUrl: string, filePath: string, contentType: string,
-        progressCB: CallbackWithValue_2<number, number>, successCB: CallbackWithValue_1<string>, failCB: FailCallback) {
+        caPath: string, progressCB: CallbackWithValue_2<number, number>,
+        successCB: CallbackWithValue_1<string>, failCB: FailCallback) {
         let session: rcp.Session
         try {
             session = rcp.createSession({
@@ -2691,7 +2680,7 @@ class WfcImpl {
                         timeout: { transferMs: 24 * 60 * 60 * 1000, inactivityMs: 60 * 1000 }
                     },
                     security: {
-                        remoteValidation: { content: self.uploadServerCa }
+                        remoteValidation: { filePath: caPath }
                     },
                     tracing: {
                         httpEventsHandler: {

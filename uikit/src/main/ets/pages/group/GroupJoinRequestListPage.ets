@@ -4,6 +4,7 @@ import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import { JoinGroupRequest } from '@wfc/client/src/main/ets/wfc/model/JoinGroupRequest'
 import { uikitNavigationDestinations } from '../uikitNavigationConfig'
 import { FontSize, Radius } from '../../common/design/Tokens'
+import { trustedMediaSrc } from '../../util/trustedMedia'
 
 @Component
 export default struct GroupJoinRequestListPage {
@@ -92,7 +93,7 @@ struct NewGroupJoinRequestsCard {
 
     build() {
         Row() {
-            Image(this.req.userInfo!!.portrait)
+            Image(trustedMediaSrc(this.req.userInfo!!.portrait))
                 .alt($r('app.media.avatar_def'))
                 .width(40)
                 .height(40)

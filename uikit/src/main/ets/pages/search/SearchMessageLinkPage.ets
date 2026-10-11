@@ -6,6 +6,7 @@ import LinkMessageContent from '@wfc/client/src/main/ets/wfc/messages/linkMessag
 import { uikitNavigationDestinations } from '../uikitNavigationConfig'
 import { timeFormat } from '../../util/helper'
 import { FontSize, Radius } from '../../common/design/Tokens'
+import { trustedMediaSrc } from '../../util/trustedMedia'
 
 @Component
 export default struct SearchMessageLinkPage {
@@ -114,7 +115,7 @@ export default struct SearchMessageLinkPage {
             .margin({ right: 12 })
 
             if (this.linkMessageContent(msg).thumbnail) {
-                Image(this.linkMessageContent(msg).thumbnail)
+                Image(trustedMediaSrc(this.linkMessageContent(msg).thumbnail))
                     .width(60)
                     .height(60)
                     .objectFit(ImageFit.Cover)

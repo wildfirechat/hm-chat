@@ -3,6 +3,7 @@ import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import { uikitNavigationDestinations } from '../../uikitNavigationConfig'
 import { FontSize, Radius } from '../../../common/design/Tokens'
+import { trustedMediaSrc } from '../../../util/trustedMedia'
 
 @Component
 export default struct ConferenceInviteMessageContentView {
@@ -26,7 +27,7 @@ export default struct ConferenceInviteMessageContentView {
     build() {
         Column() {
             Row() {
-                Image(this.hostPortrait)
+                Image(trustedMediaSrc(this.hostPortrait))
                     .width(52)
                     .height(52)
                     .margin(12)

@@ -3,6 +3,7 @@ import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
 import ModifyGroupInfoType from '@wfc/client/src/main/ets/wfc/model/modifyGroupInfoType'
 import { FontSize, Radius } from '../../common/design/Tokens'
+import { trustedMediaSrc } from '../../util/trustedMedia'
 
 @Component
 export default struct UpdateMyGroupAliasPage {
@@ -38,7 +39,7 @@ export default struct UpdateMyGroupAliasPage {
                     .color($r('app.color.wf_divider'))
 
                 Row() {
-                    Image(this.groupInfo.portrait)
+                    Image(trustedMediaSrc(this.groupInfo.portrait))
                         .draggable(false)
                         .backgroundColor($r('app.color.wf_secondary_background'))
                         .borderRadius(Radius.sm)

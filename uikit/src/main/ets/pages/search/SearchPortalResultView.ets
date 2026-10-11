@@ -14,6 +14,7 @@ import { drawing } from '@kit.ArkGraphics2D'
 import Employee from '../../api/model/employee'
 import orgServer from '../../api/orgServer'
 import { FontSize, Radius } from '../../common/design/Tokens'
+import { trustedMediaSrc } from '../../util/trustedMedia'
 
 @Component
 @Preview
@@ -137,7 +138,7 @@ export default struct SearchResultView {
         ForEach(this.expandUserSearchResult ? this.userSearchResults : this.userSearchResults.slice(0, 5), (userInfo: UserInfo) => {
             ListItem() {
                 Row() {
-                    Image(userInfo.portrait)
+                    Image(trustedMediaSrc(userInfo.portrait))
                         .alt($r('app.media.avatar_def'))
                         .width(40)
                         .height(40)
@@ -181,7 +182,7 @@ export default struct SearchResultView {
         ForEach(this.expandContactSearchResult ? this.contactSearchResults : this.contactSearchResults.slice(0, 5), (userInfo: UserInfo) => {
             ListItem() {
                 Row() {
-                    Image(userInfo.portrait)
+                    Image(trustedMediaSrc(userInfo.portrait))
                         .alt($r('app.media.avatar_def'))
                         .width(40)
                         .height(40)
@@ -225,7 +226,7 @@ export default struct SearchResultView {
         ForEach(this.expandGroupSearchResult ? this.groupSearchResults : this.groupSearchResults.slice(0, 5), (groupSearchResult: GroupSearchResult) => {
             ListItem() {
                 Row() {
-                    Image(groupSearchResult.groupInfo!.portrait)
+                    Image(trustedMediaSrc(groupSearchResult.groupInfo!.portrait))
                         .alt($r('app.media.avatar_def'))
                         .width(40)
                         .height(40)
@@ -280,7 +281,7 @@ export default struct SearchResultView {
         ForEach(this.expandChannelSearchResult ? this.channelSearchResults : this.channelSearchResults.slice(0, 5), (channelInfo: ChannelInfo) => {
             ListItem() {
                 Row() {
-                    Image(channelInfo.portrait)
+                    Image(trustedMediaSrc(channelInfo.portrait))
                         .alt($r('app.media.ic_channel_1'))
                         .width(40)
                         .height(40)
@@ -329,7 +330,7 @@ export default struct SearchResultView {
         ForEach(this.expandConversationSearchResults ? this.conversationSearchResults : this.conversationSearchResults.slice(0, 5), (resultWrapper: ConversationSearchResultWrapper) => {
             ListItem() {
                 Row() {
-                    Image(resultWrapper.portrait)
+                    Image(trustedMediaSrc(resultWrapper.portrait))
                         .alt($r('app.media.avatar_def'))
                         .width(40)
                         .height(40)
@@ -384,7 +385,7 @@ export default struct SearchResultView {
         ForEach(this.expandEmployeeSearchResult ? this.employeeSearchResults : this.employeeSearchResults.slice(0, 5), (employee: Employee) => {
             ListItem() {
                 Row() {
-                    Image(employee.portraitUrl)
+                    Image(trustedMediaSrc(employee.portraitUrl))
                         .alt($r('app.media.avatar_def'))
                         .width(40)
                         .height(40)

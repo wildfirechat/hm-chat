@@ -1,4 +1,5 @@
 import { MediaEntry } from '../../common/Types';
+import { trustedMediaSrc } from '../../util/trustedMedia'
 
 @Component
 export default struct MMPreviewPage {
@@ -20,7 +21,7 @@ export default struct MMPreviewPage {
                 Swiper() {
                     ForEach(this.mediaEntries, (entry: MediaEntry) => {
                         if (entry.type === 'image') {
-                            Image(entry.url)
+                            Image(trustedMediaSrc(entry.url))
                                 .alt(entry.thumbnail)
                                 .objectFit(ImageFit.Contain)
                                 .width('100%')
@@ -28,7 +29,7 @@ export default struct MMPreviewPage {
                         } else {
                             Video({
                                 previewUri: entry.thumbnail,
-                                src: entry.url
+                                src: trustedMediaSrc(entry.url)
                             })
                                 .objectFit(ImageFit.Contain)
                                 .width('100%')

@@ -10,6 +10,7 @@ import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
 import ConferenceInfo from "@wfc/avenginekit/src/main/ets/wfc/av/model/conferenceInfo";
 import { Radius } from '../../../common/design/Tokens'
+import { trustedMediaSrc } from '../../../util/trustedMedia'
 
 @Component
 export default struct ConferenceParticipantListPage {
@@ -22,7 +23,7 @@ export default struct ConferenceParticipantListPage {
             Column() {
                 ForEach(this.participantUserInfos, (userInfo: UserInfo, index: number) => {
                     Row() {
-                        Image(userInfo.portrait)
+                        Image(trustedMediaSrc(userInfo.portrait))
                             .width(40)
                             .height(40)
                             .borderRadius(Radius.sm)

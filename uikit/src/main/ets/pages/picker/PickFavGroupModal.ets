@@ -5,6 +5,7 @@ import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationTyp
 import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
 import { uikitNavigationDestinations } from '../uikitNavigationConfig'
 import { FontSize, Radius } from '../../common/design/Tokens'
+import { trustedMediaSrc } from '../../util/trustedMedia'
 
 @Component
 export default struct PickFavGroupModal {
@@ -39,7 +40,7 @@ export default struct PickFavGroupModal {
                 ForEach(this.favGroupList, (groupInfo: GroupInfo) => {
                     ListItem() {
                         Row() {
-                            Image(groupInfo.portrait)
+                            Image(trustedMediaSrc(groupInfo.portrait))
                                 .alt($r('app.media.ic_group_chat'))
                                 .width(40)
                                 .height(40)

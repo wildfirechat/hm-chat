@@ -3,6 +3,7 @@
  */
 
 import http from '@ohos.net.http';
+import selfSignedCertUtils from '@wfc/client/src/main/ets/wfc/util/selfSignedCertUtils';
 import wfc from '@wfc/client';
 import Config from '@wfc/client/src/main/ets/config';
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation';
@@ -248,6 +249,7 @@ class ArchiveServer {
                     priority: 1,
                     connectTimeout: 30000,
                     readTimeout: 30000,
+                    caPath: selfSignedCertUtils.getCaPath(), // 信任自签名证书
                     usingProtocol: http.HttpProtocol.HTTP1_1,
                 },
                 (err, data) => {

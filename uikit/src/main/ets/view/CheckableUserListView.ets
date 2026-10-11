@@ -14,6 +14,7 @@ import PickFavGroupModal from '../pages/picker/PickFavGroupModal'
 import { Radius, scaledSize } from '../common/design/Tokens'
 import { isWideScreen } from '../util/navUtil'
 import { PickOrganizationMemberResult } from '../pages/organization/PickOrganizationMemberPage'
+import { trustedMediaSrc } from '../util/trustedMedia'
 
 @Component
 export default struct CheckableUserListView {
@@ -161,7 +162,7 @@ export default struct CheckableUserListView {
                 List({ scroller: this.checkedUserListScroller }) {
                     ForEach(this.checkedUsers.filter(info => this.uncheckableUserIds.indexOf(info.uid) === -1), (info: UserInfo) => {
                         ListItem() {
-                            Image(info.portrait)
+                            Image(trustedMediaSrc(info.portrait))
                                 .width(scaledSize(40, this.fontScale))
                                 .height(scaledSize(40, this.fontScale))
                                 .borderRadius(Radius.sm)
@@ -174,7 +175,7 @@ export default struct CheckableUserListView {
 
                     ForEach(this.checkedOrganizations, (org: Organization) => {
                         ListItem() {
-                            Image(org.portraitUrl)
+                            Image(trustedMediaSrc(org.portraitUrl))
                                 .alt($r('app.media.ic_deparment'))
                                 .width(scaledSize(40, this.fontScale))
                                 .height(scaledSize(40, this.fontScale))
@@ -188,7 +189,7 @@ export default struct CheckableUserListView {
 
                     ForEach(this.checkedEmployees, (employee: Employee) => {
                         ListItem() {
-                            Image(employee.portraitUrl)
+                            Image(trustedMediaSrc(employee.portraitUrl))
                                 .alt($r('app.media.avatar_def'))
                                 .width(scaledSize(40, this.fontScale))
                                 .height(scaledSize(40, this.fontScale))
@@ -226,7 +227,7 @@ export default struct CheckableUserListView {
                             ForEach(this.organizations, (org: Organization, index: number) => {
                                 ListItem() {
                                     Row() {
-                                        Image(org.portraitUrl)
+                                        Image(trustedMediaSrc(org.portraitUrl))
                                             .alt($r('app.media.ic_organization'))
                                             .width(scaledSize(40, this.fontScale))
                                             .height(scaledSize(40, this.fontScale))

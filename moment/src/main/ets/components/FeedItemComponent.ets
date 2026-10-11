@@ -7,6 +7,7 @@ import wfc from '@wfc/client';
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo';
 import { display } from '@kit.ArkUI';
 import { FontSize } from '@wfc/uikit/src/main/ets/common/design/Tokens'
+import { trustedMediaSrc } from '@wfc/uikit/src/main/ets/util/trustedMedia'
 
 @Component
 export struct FeedItemComponent {
@@ -66,7 +67,7 @@ export struct FeedItemComponent {
         Column() {
             Row() {
                 // 左侧头像
-                Image(this.getUserInfo(this.feedViewModel.feed.sender).portrait || $r('app.media.icon'))
+                Image(trustedMediaSrc(this.getUserInfo(this.feedViewModel.feed.sender).portrait) || $r('app.media.icon'))
                     .width(MomentConstants.AVATAR_SIZE)
                     .height(MomentConstants.AVATAR_SIZE)
                     .borderRadius(MomentConstants.BORDER_RADIUS)

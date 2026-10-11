@@ -8,6 +8,7 @@ import BottomActionSheetDialog from '../../view/BottomActionSheetDialog'
 import { Radius } from '../../common/design/Tokens'
 import { isWideScreen } from '../../util/navUtil'
 import { uikitNavigationDestinations } from '../uikitNavigationConfig'
+import { trustedMediaSrc } from '../../util/trustedMedia'
 
 @Component
 export default struct GroupManagerListPage {
@@ -52,7 +53,7 @@ export default struct GroupManagerListPage {
                     .padding({ left: 12, top: 4, bottom: 4 })
                     .width('100%')
                 Row() {
-                    Image(this.groupOwnerUerInfo!.portrait)
+                    Image(trustedMediaSrc(this.groupOwnerUerInfo!.portrait))
                         .width(40)
                         .height(40)
                         .margin(12)
@@ -81,7 +82,7 @@ export default struct GroupManagerListPage {
                         ForEach(this.groupManagerUserInfos, (info: UserInfo) => {
                             ListItem() {
                                 Row() {
-                                    Image(info.portrait)
+                                    Image(trustedMediaSrc(info.portrait))
                                         .width(40)
                                         .height(40)
                                         .margin(12)

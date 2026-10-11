@@ -7,6 +7,7 @@ import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo';
 import promptAction from '@ohos.promptAction';
 import { NavigationMenu } from '../../view/BuilderHelper';
 import { FontSize, Radius } from '../../common/design/Tokens'
+import { trustedMediaSrc } from '../../util/trustedMedia'
 
 @Component
 export default struct CollectionDetailPage {
@@ -98,7 +99,7 @@ export default struct CollectionDetailPage {
                         ListItem() {
                             Column() {
                                 Row() {
-                                    Image(this.creatorInfo?.portrait || $r('app.media.avatar_def'))
+                                    Image(trustedMediaSrc(this.creatorInfo?.portrait) || $r('app.media.avatar_def'))
                                         .width(40)
                                         .height(40)
                                         .borderRadius(Radius.sm)

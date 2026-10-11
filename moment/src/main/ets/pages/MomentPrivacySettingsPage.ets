@@ -8,6 +8,7 @@ import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo';
 import wfc from '@wfc/client';
 import { promptAction } from '@kit.ArkUI';
 import { FontSize, Radius } from '@wfc/uikit/src/main/ets/common/design/Tokens'
+import { trustedMediaSrc } from '@wfc/uikit/src/main/ets/util/trustedMedia'
 
 // 正在选择联系人的目标
 enum PickTarget {
@@ -343,7 +344,7 @@ export struct MomentPrivacySettingsPage {
                 } else {
                     ForEach(isBlock ? this.blockListUsers : this.blackListUsers, (userId: string) => {
                         Row({ space: 10 }) {
-                            Image(wfc.getUserInfo(userId).portrait || $r('app.media.icon'))
+                            Image(trustedMediaSrc(wfc.getUserInfo(userId).portrait) || $r('app.media.icon'))
                                 .width(36)
                                 .height(36)
                                 .borderRadius(MomentConstants.BORDER_RADIUS)

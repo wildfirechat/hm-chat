@@ -42,6 +42,7 @@ import { WidthBreakpoint } from '@wfc/uikit/src/main/ets/util/windowSizeManager'
 import { tabNavRegistry, TabKey } from '@wfc/uikit/src/main/ets/util/tabNavRegistry'
 import { pushOrReplaceDetail } from '@wfc/uikit/src/main/ets/util/navUtil'
 import SplitTabPane from './SplitTabPane'
+import { trustedMediaSrc } from '@wfc/uikit/src/main/ets/util/trustedMedia'
 
 const TAG = 'Main';
 
@@ -798,7 +799,7 @@ struct MainPage {
 
                     // Greeting（头像 + 问候语）
                     Row() {
-                        Image(this.getMyPortrait())
+                        Image(trustedMediaSrc(this.getMyPortrait()))
                             .width(44)
                             .height(44)
                             .borderRadius(22)

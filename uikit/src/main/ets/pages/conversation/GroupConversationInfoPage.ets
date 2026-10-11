@@ -28,6 +28,7 @@ import JoinGroupRequestDialog from '../group/JoinGroupRequestDialog';
 import ErrorCode from '@wfc/client/src/main/ets/wfc/client/errorCode';
 import WfcScheme from '../../wfcScheme'
 import { FontSize, Radius } from '../../common/design/Tokens'
+import { trustedMediaSrc } from '../../util/trustedMedia'
 
 @Preview
 @Component
@@ -182,7 +183,7 @@ export default struct GroupConversationInfoPage {
                     }) {
                         ForEach(this.groupMembers.slice(0, this.toShowGroupMemberCount), (groupMember: GroupMember) => {
                             Column() {
-                                Image(groupMember.getPortrait())
+                                Image(trustedMediaSrc(groupMember.getPortrait()))
                                     .width(48)
                                     .height(48)
                                     .borderRadius(Radius.sm)

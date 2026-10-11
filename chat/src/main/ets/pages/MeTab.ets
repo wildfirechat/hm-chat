@@ -9,6 +9,7 @@ import { appNavigationDestinations } from './mainNavigationConfig'
 import BuildProfile from 'BuildProfile'
 import { FontSize, Radius, scaledSize } from '@wfc/uikit/src/main/ets/common/design/Tokens'
 import { isWideScreen, pushOrReplaceDetail } from '@wfc/uikit/src/main/ets/util/navUtil'
+import { trustedMediaSrc } from '@wfc/uikit/src/main/ets/util/trustedMedia'
 
 @Component
 export default struct MeTab {
@@ -53,7 +54,7 @@ export default struct MeTab {
         Scroll() {
             Column() {
                 Row() {
-                    Image(this.userInfo!.portrait)
+                    Image(trustedMediaSrc(this.userInfo!.portrait))
                         .width(scaledSize(60, this.fontScale))
                         .height(scaledSize(60, this.fontScale))
                         .borderRadius(Radius.sm)

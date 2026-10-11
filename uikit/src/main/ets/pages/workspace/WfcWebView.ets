@@ -5,6 +5,8 @@ import DSBridge from './dsBridge'
 import Config from '@wfc/client/src/main/ets/config'
 import wfc from '@wfc/client/src/main/ets/wfc/client/wfc'
 import data_preferences from '@ohos.data.preferences';
+import { deviceInfo } from '@kit.BasicServicesKit';
+import selfSignedCertUtils from '@wfc/client/src/main/ets/wfc/util/selfSignedCertUtils';
 
 @Component
 export default struct WfcWebView {
@@ -90,6 +92,21 @@ export default struct WfcWebView {
                     }
                 })
                 .domStorageAccess(true)
+                .onSslErrorEventReceive((event: OnSslErrorEventReceiveEvent) => {
+                    // 自建服务用的是 resfile 里的自签名证书时放行，其他证书错误仍按默认处理（取消加载）。
+                    // 证书链 API 15 才开始提供，更低版本按默认处理
+                    let certChainData: Array<Uint8Array> | undefined = undefined
+                    if (deviceInfo.sdkApiVersion >= 15) {
+                        certChainData = event.certChainData
+                    }
+                    selfSignedCertUtils.isTrustedBySelfSignedCerts(certChainData).then((trusted: boolean) => {
+                        if (trusted) {
+                            event.handler.handleConfirm()
+                        } else {
+                            event.handler.handleCancel()
+                        }
+                    })
+                })
                 .onPageEnd(url => {
                     console.log('loaded', url)
                 })

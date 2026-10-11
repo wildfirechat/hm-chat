@@ -1,4 +1,5 @@
 import { FontSize } from '@wfc/uikit/src/main/ets/common/design/Tokens'
+import { trustedMediaSrc } from '@wfc/uikit/src/main/ets/util/trustedMedia'
 @CustomDialog
 export struct FeedVideoPlayerDialog {
     controller?: CustomDialogController;
@@ -10,8 +11,8 @@ export struct FeedVideoPlayerDialog {
     build() {
         Stack({ alignContent: Alignment.TopEnd }) {
             Video({
-                src: this.videoUrl,
-                previewUri: this.thumbUrl,
+                src: trustedMediaSrc(this.videoUrl),
+                previewUri: trustedMediaSrc(this.thumbUrl),
                 controller: this.videoController
             })
                 .width('100%')

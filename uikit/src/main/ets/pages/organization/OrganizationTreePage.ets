@@ -5,6 +5,7 @@ import orgServer from '../../api/orgServer';
 import { showToast } from '../../common/utils/Toast';
 import { uikitNavigationDestinations } from '../uikitNavigationConfig';
 import { Radius } from '../../common/design/Tokens'
+import { trustedMediaSrc } from '../../util/trustedMedia'
 
 @Component
 export default struct OrganizationTreePage {
@@ -92,7 +93,7 @@ export default struct OrganizationTreePage {
                         ForEach(this.subOrganizations, (org: Organization, index: number) => {
                             ListItem() {
                                 Row() {
-                                    Image(org.portraitUrl)
+                                    Image(trustedMediaSrc(org.portraitUrl))
                                         .alt($r('app.media.ic_deparment'))
                                         .width(40)
                                         .height(40)
@@ -121,7 +122,7 @@ export default struct OrganizationTreePage {
                         ForEach(this.employees, (employee: Employee, index: number) => {
                             ListItem() {
                                 Row() {
-                                    Image(employee.portraitUrl)
+                                    Image(trustedMediaSrc(employee.portraitUrl))
                                         .alt($r('app.media.avatar_def'))
                                         .width(40)
                                         .height(40)

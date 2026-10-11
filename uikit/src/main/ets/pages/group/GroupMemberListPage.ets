@@ -5,6 +5,7 @@ import GroupMemberType from "@wfc/client/src/main/ets/wfc/model/groupMemberType"
 import { showToast } from "../../common/utils/Toast";
 import { uikitNavigationDestinations } from "../uikitNavigationConfig";
 import { FontSize, Radius } from '../../common/design/Tokens'
+import { trustedMediaSrc } from '../../util/trustedMedia'
 
 @Component
 export default struct GroupMemberListPage {
@@ -36,7 +37,7 @@ export default struct GroupMemberListPage {
                     }) {
                         ForEach(this.groupMembers, (groupMember: GroupMember) => {
                             Column() {
-                                Image(groupMember.getPortrait())
+                                Image(trustedMediaSrc(groupMember.getPortrait()))
                                     .width(48)
                                     .height(48)
                                     .borderRadius(Radius.sm)

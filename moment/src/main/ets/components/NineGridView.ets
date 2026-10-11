@@ -1,6 +1,7 @@
 import { FeedEntry } from '../model/MomentModel';
 import { MomentConstants } from '../utils/MomentConstants';
 import { FontSize } from '@wfc/uikit/src/main/ets/common/design/Tokens'
+import { trustedMediaSrc } from '@wfc/uikit/src/main/ets/util/trustedMedia'
 
 /**
  * 九宫格图片布局（微信朋友圈规则）：
@@ -78,7 +79,7 @@ export struct NineGridView {
     @Builder
     private buildSingleCell() {
         Stack({ alignContent: Alignment.Center }) {
-            Image(this.medias[0].thumbUrl || this.medias[0].mediaUrl)
+            Image(trustedMediaSrc(this.medias[0].thumbUrl || this.medias[0].mediaUrl))
                 .width('100%')
                 .height('100%')
                 .objectFit(ImageFit.Cover)
@@ -98,7 +99,7 @@ export struct NineGridView {
     @Builder
     private buildCell(entry: FeedEntry, index: number) {
         Stack({ alignContent: Alignment.Center }) {
-            Image(entry.thumbUrl || entry.mediaUrl)
+            Image(trustedMediaSrc(entry.thumbUrl || entry.mediaUrl))
                 .width('100%')
                 .height('100%')
                 .objectFit(ImageFit.Cover)

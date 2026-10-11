@@ -10,6 +10,7 @@ import GroupInfo from '@wfc/client/src/main/ets/wfc/model/groupInfo'
 import Config from '@wfc/client/src/main/ets/config'
 import { it } from '@ohos/hypium'
 import { FontSize, Radius } from '../common/design/Tokens'
+import { trustedMediaSrc } from '../util/trustedMedia'
 
 @Component
 export default struct MentionGroupMemberListView {
@@ -122,7 +123,7 @@ export default struct MentionGroupMemberListView {
                             .backgroundColor($r('app.color.wf_secondary_background'))
 
                             Row() {
-                                Image(this.groupInfo?.portrait)
+                                Image(trustedMediaSrc(this.groupInfo?.portrait))
                                     .alt($r('app.media.avatar_def'))
                                     .width(40)
                                     .height(40)

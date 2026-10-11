@@ -49,6 +49,29 @@
 ## 注意事项
 1. 野火IM要求客户端和服务器之间的时间差不能太大，有时模拟器的时间会不准，导致无法正常工作。所以必须确保手机或者模拟器时间准确。
 
+## 自签证书说明
+自建服务（IM 服务、应用服务、组织通讯录、对象存储等）使用自签名证书时，按以下步骤配置：
+
+1. **放置证书**：将证书放到`chat/src/main/resources/resfile`目录，可以放多个，文件名不限，后缀为`.crt`、`.pem`或`.cer`，如`server.crt`
+   - 放 CA 证书或服务端证书本身均可，只放证书，**不要放私钥**
+   - 必须是 PEM 格式，即以`-----BEGIN CERTIFICATE-----`开头的文本文件。DER 格式的证书请先转换：`openssl x509 -inform der -in server.der -out server.crt`
+   - 上层网络请求（应用服务、组织通讯录、投票、接龙、归档、语音识别、文件上传下载、工作台等 WebView）启动时自动加载这个目录下的证书（见`EntryAbility`中的`selfSignedCertUtils.init`），没有证书时全部使用系统默认配置
+   - `Image`、`Video`组件自己加载网络资源时不认应用内置的证书（`network_config.json`的`trust-anchors`对它们也不生效），头像、聊天图片、表情、预览中的图片和视频、朋友圈、收藏等处已改为先下载到缓存目录再显示，即`Image(trustedMediaSrc(url))`。新增显示网络图片、视频的地方也要这样处理
+
+2. **协议栈**：IM 连接要使用 TLS 时，需要打开`EntryAbility#onCreate`中被注释的`wfc.UseTls`代码，仅 2026.9.11 之后的 IM 服务支持。证书路径用`this.context.resourceDir + '/证书文件名'`
+
+3. **以 SDK 方式集成时**：调用`selfSignedCertUtils.init(context, 证书目录)`加载证书，自己创建的网络请求通过`selfSignedCertUtils`信任这些证书：
+   - Network Kit 的`http`、`webSocket`：请求参数中带上`caPath: selfSignedCertUtils.getCaPath()`
+   - RCP：`security.remoteValidation`设置为`{ filePath: selfSignedCertUtils.getCaPath() }`
+   - 系统上传下载服务（`request.uploadFile`、`request.downloadFile`）不认应用内置的证书，下载改用`selfSignedCertUtils.download`，参考`mediaHelper.ets`中的`downloadMedia`。SDK 的大文件上传已经处理
+   - Web 组件：在`onSslErrorEventReceive`中，`selfSignedCertUtils.isTrustedBySelfSignedCerts(event.certChainData)`返回`true`时才调用`handler.handleConfirm()`，否则调用`handler.handleCancel()`，参考`WfcWebView.ets`
+   - `Image`、`Video`组件：`Image(trustedMediaSrc(url))`，有自签名证书时先下载再显示，下载完成后组件自动刷新
+
+4. **注意事项**
+   - `getCaPath()`返回的证书文件中同时包含系统预置的 CA 证书和自签名证书，公网 CA 签发的证书不受影响
+   - 和 Android 不同，鸿蒙上的网络请求**不会**跳过域名校验，签发证书时必须把服务的域名和 IP 都写进 subjectAltName，否则会校验失败
+   - Web 组件和 Android 一样不校验域名，且只检查服务端证书本身，所以只支持服务端证书就是`resfile`中的证书，或者由其直接签发的情况；需要 API 15 及以上，更低版本的设备按默认处理（取消加载）
+
 ## 截图
 
 <img src="http://static.wildfirechat.cn/1_login_view.png" width = 50% height = 50% />

@@ -1,4 +1,5 @@
 import { FontSize, Radius } from '../../common/design/Tokens'
+import { trustedMediaSrc } from '../../util/trustedMedia'
 @Component
 export default struct QRCodePage {
     @Consume('mainNavPathStack') mainNavPathStack: NavPathStack;
@@ -21,7 +22,7 @@ export default struct QRCodePage {
         NavDestination() {
             Column() {
                 if (this.portraitUrl) {
-                    Image(this.portraitUrl)
+                    Image(trustedMediaSrc(this.portraitUrl))
                         .width(80)
                         .height(80)
                         .borderRadius(Radius.sm)

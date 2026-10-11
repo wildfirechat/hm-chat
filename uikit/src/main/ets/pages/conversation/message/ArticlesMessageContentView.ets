@@ -2,6 +2,7 @@ import ArticlesMessageContent, { Article } from "@wfc/client/src/main/ets/wfc/me
 import Message from "@wfc/client/src/main/ets/wfc/messages/message";
 import { uikitNavigationDestinations } from "../../uikitNavigationConfig";
 import { Radius } from '../../../common/design/Tokens'
+import { trustedMediaSrc } from '../../../util/trustedMedia'
 
 @Component
 export default struct ArticleMessageContentView {
@@ -21,7 +22,7 @@ export default struct ArticleMessageContentView {
     build() {
         Column() {
             Column() {
-                Image(this.articlesMessageContent().topArticle!.cover)
+                Image(trustedMediaSrc(this.articlesMessageContent().topArticle!.cover))
                     .enabled(false)
                     .width('100%')
                     .objectFit(ImageFit.CENTER)
@@ -45,7 +46,7 @@ export default struct ArticleMessageContentView {
                             .maxLines(2)
                             .layoutWeight(1)
                             .padding(12)
-                        Image(this.articlesMessageContent().topArticle!.cover)
+                        Image(trustedMediaSrc(this.articlesMessageContent().topArticle!.cover))
                             .enabled(false)
                             .height(60)
                             .width(60)

@@ -13,6 +13,7 @@ import { getImageSizeByOrgSizeToWeChat } from '../../../util/wechatImageUtil'
 import { mediaMessagePositionRegistry } from '../../../helper/mediaMessagePositionRegistry'
 import { stringValue } from '@wfc/client/src/main/ets/wfc/util/longUtil'
 import { Radius } from '../../../common/design/Tokens'
+import { trustedMediaSrc } from '../../../util/trustedMedia'
 
 @Component
 export default struct ImageMessageContentView {
@@ -52,7 +53,7 @@ export default struct ImageMessageContentView {
     }
 
     build() {
-        Image(this.imageUrl())
+        Image(trustedMediaSrc(this.imageUrl()))
             .alt(this.thumbnail())
             .backgroundColor($r('app.color.wf_image_placeholder_bg'))
             .draggable(false)

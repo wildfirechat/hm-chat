@@ -11,6 +11,7 @@ import MMMessagePreviewDialog from '../mm/MMMessagePreviewDialog'
 import { MMMediaEntry } from '../../common/Types'
 import { mediaEntry } from '../../helper/messageHelper'
 import { FontSize } from '../../common/design/Tokens'
+import { trustedMediaSrc } from '../../util/trustedMedia'
 
 @Component
 export default struct SearchMessagePictureVideoPage {
@@ -168,7 +169,7 @@ export default struct SearchMessagePictureVideoPage {
     buildItem(msg: Message) {
         Stack() {
             if (msg.messageContent.type === MessageContentType.Image) {
-                Image(this.imageUrl(msg))
+                Image(trustedMediaSrc(this.imageUrl(msg)))
                     .alt(this.thumbnail(msg))
                     .objectFit(ImageFit.Cover)
                     .draggable(false)

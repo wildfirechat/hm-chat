@@ -6,6 +6,7 @@ import { showToast } from '../../../common/utils/Toast';
 import { isHttpUrl } from '../../../common/utils/TextLinkParser';
 import { common } from '@kit.AbilityKit';
 import { FontSize, Radius } from '../../../common/design/Tokens'
+import { trustedMediaSrc } from '../../../util/trustedMedia'
 
 @Component
 export default struct LinkMessageContentView {
@@ -38,7 +39,7 @@ export default struct LinkMessageContentView {
                     .layoutWeight(1)
                     .textAlign(TextAlign.Start)
 
-                Image(this.linkMessageContent().thumbnail ? this.linkMessageContent().thumbnail : $r('app.media.ic_file_type_html'))
+                Image(trustedMediaSrc(this.linkMessageContent().thumbnail) || $r('app.media.ic_file_type_html'))
                     .alt($r('app.media.ic_file_type_html'))
                     .width(40)
                     .height(40)

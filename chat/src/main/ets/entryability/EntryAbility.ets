@@ -14,6 +14,7 @@ import { BusinessError } from '@ohos.base';
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation';
 import ConnectionStatus from '@wfc/client/src/main/ets/wfc/client/connectionStatus';
 import CustomMessageConfig from '@wfc/client/src/main/ets/wfc_custom_message/customMessageConfig';
+import selfSignedCertUtils from '@wfc/client/src/main/ets/wfc/util/selfSignedCertUtils';
 import uikit from '@wfc/uikit'
 import { fontSizeManager } from '@wfc/uikit/src/main/ets/common/design/Tokens'
 import { LAST_LOGIN_MOBILE_KEY } from '../pages/login/LoginPage';
@@ -59,12 +60,14 @@ export default class EntryAbility extends UIAbility {
         // // //    证书加载失败时不要降级成UseTls(true, [])：那样只加密不校验证书，可被中间人攻击。
         // wfc.UseTls(false, [this.context.resourceDir + '/ip.crt']);
         //
-        // // 媒体服务器用自签名证书时，指定大文件上传信任的证书（与UseTls互不影响），证书位置同上。
-        // wfc.setUploadServerCerts([this.context.resourceDir + '/ip.crt']);
-        //
         // // 双网：备选网络地址。策略0为自动选择，主网络不可用时切换到备选网络；1只用主网络；2只用备选网络
         // wfc.setBackupAddress('101.35.103.221', 443);
         // wfc.setBackupAddressStrategy(2);
+
+        // 上层网络请求（应用服务、组织通讯录、投票、接龙、归档、语音识别、上传下载、WebView 等）信任自签名证书：
+        // 加载chat/src/main/resources/resfile/目录下的证书（.crt、.pem、.cer，PEM 格式），和上面的协议栈共用同一份证书。
+        // 没有证书时使用系统默认配置。Image、Video组件见trustedMediaSrc，详见README的「自签证书说明」
+        selfSignedCertUtils.init(this.context, this.context.resourceDir);
 
         wfc.init(this.applicationContext, this.context.eventHub, this.applicationContext.filesDir, Config.getWFCPlatform());
         CustomMessageConfig.registerCustomMessages();

@@ -4,6 +4,7 @@ import OrganizationEx from '../../api/model/organizationEx';
 import orgServer from '../../api/orgServer';
 import { router } from '@kit.ArkUI';
 import { FontSize, Radius } from '../../common/design/Tokens'
+import { trustedMediaSrc } from '../../util/trustedMedia'
 
 @Component
 export default struct PickOrganizationMemberModal {
@@ -178,7 +179,7 @@ export default struct PickOrganizationMemberModal {
                                             width: 0,
                                             height: 0
                                         })
-                                    Image(employee.portraitUrl)
+                                    Image(trustedMediaSrc(employee.portraitUrl))
                                         .alt($r('app.media.avatar_def'))
                                         .width(40)
                                         .height(40)

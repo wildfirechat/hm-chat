@@ -9,6 +9,7 @@ import PickGroupMemberModal from './PickGroupMemberModal';
 import { Radius } from '../../common/design/Tokens'
 import { isWideScreen } from '../../util/navUtil'
 import { uikitNavigationDestinations } from '../uikitNavigationConfig'
+import { trustedMediaSrc } from '../../util/trustedMedia'
 
 @Component
 export default struct GroupMemberMuteOrAllowListPage {
@@ -172,7 +173,7 @@ export default struct GroupMemberMuteOrAllowListPage {
                     ForEach(this.groupInfo?.mute === 0 ? this.mutedGroupMemberUsers : this.allowGroupMemberUsers, (info: UserInfo, index: number) => {
                         ListItem() {
                             Row() {
-                                Image(info.portrait)
+                                Image(trustedMediaSrc(info.portrait))
                                     .width(40)
                                     .height(40)
                                     .margin(12)

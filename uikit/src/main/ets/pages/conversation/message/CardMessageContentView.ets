@@ -5,6 +5,7 @@ import CardMessageContent from '@wfc/client/src/main/ets/wfc/messages/cardMessag
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import { uikitNavigationDestinations } from '../../uikitNavigationConfig'
 import { FontSize, Radius } from '../../../common/design/Tokens'
+import { trustedMediaSrc } from '../../../util/trustedMedia'
 
 @Component
 export default struct CardMessageContentView {
@@ -63,7 +64,7 @@ export default struct CardMessageContentView {
     build() {
         Column() {
             Row() {
-                Image(this.cardMessageContent().portrait)
+                Image(trustedMediaSrc(this.cardMessageContent().portrait))
                     .width(52)
                     .height(52)
                     .margin(12)

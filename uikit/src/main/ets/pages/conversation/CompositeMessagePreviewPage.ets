@@ -10,6 +10,7 @@ import { eq, stringValue } from '@wfc/client/src/main/ets/wfc/util/longUtil'
 import CompositeMessageContentContainerView from './message/CompositeMessageContentContainerView'
 import { http } from '@kit.NetworkKit'
 import { FontSize, Radius } from '../../common/design/Tokens'
+import { trustedMediaSrc } from '../../util/trustedMedia'
 
 @Component
 export default struct CompositeMessagePreviewPage {
@@ -47,7 +48,7 @@ export default struct CompositeMessagePreviewPage {
                         ListItem() {
                             Column() {
                                 Row() {
-                                    Image(wfc.getUserInfo(msg.from).portrait)
+                                    Image(trustedMediaSrc(wfc.getUserInfo(msg.from).portrait))
                                         .width(40)
                                         .height(40)
                                         .margin(12)

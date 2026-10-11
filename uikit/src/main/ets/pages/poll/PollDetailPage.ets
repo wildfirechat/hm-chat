@@ -13,6 +13,7 @@ import wfc from '@wfc/client/src/main/ets/wfc/client/wfc';
 import { uikitNavigationDestinations } from '../uikitNavigationConfig';
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo';
 import { FontSize, Radius } from '../../common/design/Tokens'
+import { trustedMediaSrc } from '../../util/trustedMedia'
 
 interface PollCallback {
     onSuccess: (poll: Poll) => void;
@@ -456,7 +457,7 @@ export default struct PollDetailPage {
                             Column({ space: 12 }) {
                                 // 创建者信息
                                 Row({ space: 8 }) {
-                                    Image(this.creatorInfo?.portrait || $r('app.media.avatar_def'))
+                                    Image(trustedMediaSrc(this.creatorInfo?.portrait) || $r('app.media.avatar_def'))
                                         .width(24)
                                         .height(24)
                                         .borderRadius(Radius.xl)

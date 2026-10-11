@@ -3,6 +3,7 @@ import orgServer from '../../api/orgServer'
 import { showToast } from '../../common/utils/Toast'
 import { uikitNavigationDestinations } from '../uikitNavigationConfig'
 import { Radius } from '../../common/design/Tokens'
+import { trustedMediaSrc } from '../../util/trustedMedia'
 
 @Component
 export default struct SearchOrganizationEmployeePage {
@@ -76,7 +77,7 @@ export default struct SearchOrganizationEmployeePage {
                         ForEach(this.searchResults, (employee: Employee) => {
                             ListItem() {
                                 Row() {
-                                    Image(employee.portraitUrl)
+                                    Image(trustedMediaSrc(employee.portraitUrl))
                                         .alt($r('app.media.avatar_def'))
                                         .width(40)
                                         .height(40)

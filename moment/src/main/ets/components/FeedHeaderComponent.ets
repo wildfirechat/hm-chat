@@ -2,6 +2,7 @@ import { Profile } from '../model/MomentModel';
 import wfc from '@wfc/client';
 import { MomentConstants } from '../utils/MomentConstants';
 import { FontSize } from '@wfc/uikit/src/main/ets/common/design/Tokens'
+import { trustedMediaSrc } from '@wfc/uikit/src/main/ets/util/trustedMedia'
 
 @Component
 export struct FeedHeaderComponent {
@@ -17,7 +18,7 @@ export struct FeedHeaderComponent {
     build() {
         Stack({ alignContent: Alignment.Bottom }) {
             // 背景封面图
-            Image(this.profile?.backgroundUrl || $r('app.media.background'))
+            Image(trustedMediaSrc(this.profile?.backgroundUrl) || $r('app.media.background'))
                 .width('100%')
                 .height('100%')
                 .objectFit(ImageFit.Cover)
@@ -51,7 +52,7 @@ export struct FeedHeaderComponent {
                     .constraintSize({ maxWidth: '60%' })
 
                 // 头像（带阴影）
-                Image(wfc.getUserInfo(this.userId).portrait || $r('app.media.icon'))
+                Image(trustedMediaSrc(wfc.getUserInfo(this.userId).portrait) || $r('app.media.icon'))
                     .width(MomentConstants.AVATAR_SIZE_LARGE)
                     .height(MomentConstants.AVATAR_SIZE_LARGE)
                     .borderRadius(MomentConstants.BORDER_RADIUS)

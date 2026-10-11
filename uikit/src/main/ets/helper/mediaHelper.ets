@@ -16,6 +16,7 @@ import wfc from '@wfc/client/src/main/ets/wfc/client/wfc';
 import { fileIo } from '@kit.CoreFileKit';
 import { showToast } from '../common/utils/Toast';
 import { request } from '@kit.BasicServicesKit';
+import selfSignedCertUtils from '@wfc/client/src/main/ets/wfc/util/selfSignedCertUtils';
 import Long from '@wfc/client/src/main/ets/wfc/util/long';
 import { stringValue } from '@wfc/client/src/main/ets/wfc/util/longUtil';
 import { getImageSizeByOrgSizeToWeChat } from '../util/wechatImageUtil';
@@ -157,6 +158,17 @@ export function downloadMedia(context: Context, messageUid: Long, url: string, p
         let filePath = context.cacheDir + '/' + messageUid.toString() + suffix
         if (await fileIo.access(filePath)) {
             resolve(filePath)
+            return
+        }
+        if (selfSignedCertUtils.hasCerts()) {
+            // 系统下载服务不认应用内置的自签名证书，改用 RCP
+            selfSignedCertUtils.download(url, filePath, progressCB)
+                .then((path: string) => {
+                    resolve(path)
+                })
+                .catch((e: Error) => {
+                    reject(e)
+                })
             return
         }
         request.downloadFile(context, { url: url, filePath: filePath })

@@ -1,6 +1,7 @@
 import { UIUserInfo } from '../common/Types'
 import UserInfo from '@wfc/client/src/main/ets/wfc/model/userInfo'
 import { FontSize, Radius, scaledSize, LayoutScale } from '../common/design/Tokens'
+import { trustedMediaSrc } from '../util/trustedMedia'
 
 @Preview
 @Component
@@ -30,7 +31,7 @@ export default struct UserItemView {
                 .backgroundColor($r('app.color.wf_secondary_background'))
             }
             Row() {
-                Image(this.uiUserInfo.userInfo.portrait)
+                Image(trustedMediaSrc(this.uiUserInfo.userInfo.portrait))
                     .alt($r('app.media.avatar_def'))
                     .width(scaledSize(40, this.fontScale))
                     .height(scaledSize(40, this.fontScale))

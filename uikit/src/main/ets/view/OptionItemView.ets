@@ -1,4 +1,5 @@
 import { FontSize, Radius, scaledSize, LayoutScale } from '../common/design/Tokens'
+import { trustedMediaSrc } from '../util/trustedMedia'
 @Preview
 @Component
 export default struct OptionItemView {
@@ -64,7 +65,7 @@ export default struct OptionItemView {
                         .textOverflow({ overflow: TextOverflow.Ellipsis })
                 }
                 if (this.imgUrl) {
-                    Image(this.imgUrl)
+                    Image(trustedMediaSrc(this.imgUrl))
                         .width(20)
                         .height(20)
                         .borderRadius(Radius.sm)

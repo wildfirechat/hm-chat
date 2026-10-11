@@ -13,6 +13,7 @@ import QRLoginSession from '@wfc/uikit/src/main/ets/api/model/qrLoginSession'
 import AppServerError from '@wfc/uikit/src/main/ets/api/appServerError'
 import { isWideScreen } from '@wfc/uikit/src/main/ets/util/navUtil'
 import { LAST_LOGIN_MOBILE_KEY } from './LoginPage'
+import { trustedMediaSrc } from '@wfc/uikit/src/main/ets/util/trustedMedia'
 
 import('@wfc/uikit/src/main/ets/pages/misc/WebViewPageWithRouter') //引入共享包中的命名路由页面
 
@@ -483,7 +484,7 @@ struct PadLoginPage {
             Stack() {
                 if (this.qrScanned) {
                     // 扫码后、手机端确认前：二维码区域换成扫码用户的头像（参考 Android/iOS/PC 端）
-                    Image(this.qrScannedPortrait || Config.DEFAULT_PORTRAIT_URL)
+                    Image(trustedMediaSrc(this.qrScannedPortrait) || Config.DEFAULT_PORTRAIT_URL)
                         .width(240)
                         .height(240)
                         .objectFit(ImageFit.Cover)

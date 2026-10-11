@@ -12,6 +12,7 @@ import { showToast } from '../common/utils/Toast'
 import UserSettingScope from '@wfc/client/src/main/ets/wfc/client/userSettingScope'
 import { FontSize, Radius, scaledSize, LayoutScale } from '../common/design/Tokens'
 import { pushOrReplaceDetail } from '../util/navUtil'
+import { trustedMediaSrc } from '../util/trustedMedia'
 
 interface ContactListHeader {
     title: string,
@@ -299,7 +300,7 @@ export default struct ContactListTab {
                                     .backgroundColor($r('app.color.wf_secondary_background'))
                                 }
                                 Row() {
-                                    Image(groupedUserInfo.userInfo.portrait)
+                                    Image(trustedMediaSrc(groupedUserInfo.userInfo.portrait))
                                         .alt($r('app.media.avatar_def'))
                                         .draggable(false)
                                         .width(scaledSize(40, this.fontScale))

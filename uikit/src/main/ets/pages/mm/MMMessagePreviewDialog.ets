@@ -12,6 +12,7 @@ import { saveMedia } from '../../helper/mediaHelper';
 import { showToast } from '../../common/utils/Toast';
 import { stringValue } from '@wfc/client/src/main/ets/wfc/util/longUtil';
 import { mediaMessagePositionRegistry, MediaThumbRect } from '../../helper/mediaMessagePositionRegistry';
+import { trustedMediaSrc } from '../../util/trustedMedia'
 
 interface SizeVp {
     cw: number
@@ -335,7 +336,7 @@ export default struct MMMessagePreviewDialog {
             Swiper() {
                 ForEach(this.mediaEntries, (entry: MMMediaEntry, index: number) => {
                     if (entry.type === 'image') {
-                        Image(entry.url)
+                        Image(trustedMediaSrc(entry.url))
                             .alt(entry.thumbnail)
                             .objectFit(ImageFit.Contain)
                             .width('100%')
@@ -391,7 +392,7 @@ export default struct MMMessagePreviewDialog {
                             if (this.videoMounted && index === this.index) {
                                 Video({
                                     previewUri: entry.thumbnail,
-                                    src: entry.url,
+                                    src: trustedMediaSrc(entry.url),
                                     controller: entry.videoController
                                 })
                                     .autoPlay(true)

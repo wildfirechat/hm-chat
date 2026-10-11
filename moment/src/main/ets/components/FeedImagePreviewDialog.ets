@@ -1,5 +1,6 @@
 import { FeedEntry } from '../model/MomentModel';
 import { curves, display } from '@kit.ArkUI';
+import { trustedMediaSrc } from '@wfc/uikit/src/main/ets/util/trustedMedia'
 
 @CustomDialog
 export struct FeedImagePreviewDialog {
@@ -140,14 +141,14 @@ export struct FeedImagePreviewDialog {
                     Stack() {
                         // 缩略图兜底：原图未加载完成时先显示九宫格里的缩略图
                         if (entry.thumbUrl) {
-                            Image(entry.thumbUrl)
+                            Image(trustedMediaSrc(entry.thumbUrl))
                                 .objectFit(ImageFit.Contain)
                                 .width('100%')
                                 .height('100%')
                                 .draggable(false)
                         }
                         // 原图加载完成前透明，完成后淡入
-                        Image(entry.mediaUrl)
+                        Image(trustedMediaSrc(entry.mediaUrl))
                             .objectFit(ImageFit.Contain)
                             .width('100%')
                             .height('100%')

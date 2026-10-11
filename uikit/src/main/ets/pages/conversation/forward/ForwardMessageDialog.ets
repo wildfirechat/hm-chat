@@ -4,6 +4,7 @@ import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation'
 import { LengthUnit } from '@kit.ArkUI'
 import { flexButtonSpace } from '../../../common/Styles'
 import { FontSize, Radius } from '../../../common/design/Tokens'
+import { trustedMediaSrc } from '../../../util/trustedMedia'
 
 @Preview
 @CustomDialog
@@ -47,7 +48,7 @@ export default struct ForwardMessageDialog {
                 ForEach(this.targetConversationPortraitAndNames, (pn: PortraitAndName) => {
                     ListItem() {
                         Row() {
-                            Image(pn.portrait)
+                            Image(trustedMediaSrc(pn.portrait))
                                 .width(40)
                                 .height(40)
                                 .borderRadius(Radius.sm)
@@ -85,7 +86,7 @@ export default struct ForwardMessageDialog {
                     .textOverflow({ overflow: TextOverflow.Ellipsis })
                     .backgroundColor($r('app.color.wf_primary_background_color'))
             } else {
-                Image(this.forwardMessageImageUri)
+                Image(trustedMediaSrc(this.forwardMessageImageUri))
                     .width('100%')
                     .constraintSize({ maxHeight: 100 })
                     .objectFit(ImageFit.Contain)

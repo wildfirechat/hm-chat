@@ -5,6 +5,7 @@
 import { http } from '@kit.NetworkKit'
 import { BusinessError } from '@kit.BasicServicesKit'
 import { util } from '@kit.ArkTS'
+import selfSignedCertUtils from '@wfc/client/src/main/ets/wfc/util/selfSignedCertUtils'
 import AsrAuth from './AsrAuth'
 
 const TAG = 'AsrRecognizeClient'
@@ -94,7 +95,8 @@ export default class AsrRecognizeClient {
             extraData: JSON.stringify(body),
             usingCache: false,
             connectTimeout: CONNECT_TIMEOUT_MS,
-            readTimeout: READ_TIMEOUT_MS
+            readTimeout: READ_TIMEOUT_MS,
+            caPath: selfSignedCertUtils.getCaPath() // 信任自签名证书
         }).then((code: number) => {
             if (this.httpRequest !== request) {
                 return

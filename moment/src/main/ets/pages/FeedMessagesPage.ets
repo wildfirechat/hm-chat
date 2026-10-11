@@ -5,6 +5,7 @@ import wfc from '@wfc/client';
 import { MomentFeedMessageContent, MomentCommentMessageContent } from '@wfc/client';
 import Message from '@wfc/client/src/main/ets/wfc/messages/message';
 import { FontSize, Radius } from '@wfc/uikit/src/main/ets/common/design/Tokens'
+import { trustedMediaSrc } from '@wfc/uikit/src/main/ets/util/trustedMedia'
 
 const PAGE_COUNT = 100;
 
@@ -142,7 +143,7 @@ export struct FeedMessagesPage {
     private buildMessageItem(item: MessageItemData) {
         Row({ space: 10 }) {
             // 头像
-            Image(wfc.getUserInfo(item.sender).portrait || $r('app.media.icon'))
+            Image(trustedMediaSrc(wfc.getUserInfo(item.sender).portrait) || $r('app.media.icon'))
                 .width(46)
                 .height(46)
                 .borderRadius(MomentConstants.BORDER_RADIUS)
@@ -189,7 +190,7 @@ export struct FeedMessagesPage {
     @Builder
     private buildFeedPreview(item: MessageItemData) {
         if (item.feedThumb.length > 0) {
-            Image(item.feedThumb)
+            Image(trustedMediaSrc(item.feedThumb))
                 .width(56)
                 .height(56)
                 .objectFit(ImageFit.Cover)

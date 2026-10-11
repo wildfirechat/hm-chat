@@ -4,6 +4,7 @@
 
 import { webSocket } from '@kit.NetworkKit'
 import { BusinessError } from '@kit.BasicServicesKit'
+import selfSignedCertUtils from '@wfc/client/src/main/ets/wfc/util/selfSignedCertUtils'
 import AsrAuth from './AsrAuth'
 
 const TAG = 'AsrWebSocketClient'
@@ -102,7 +103,8 @@ export default class AsrWebSocketClient {
         if (authCode) {
             header[AsrAuth.HEADER_AUTH_CODE] = authCode
         }
-        let options: webSocket.WebSocketRequestOptions = { header: header }
+        // caPath 里同时有系统预置的 CA 证书和自签名证书
+        let options: webSocket.WebSocketRequestOptions = { header: header, caPath: selfSignedCertUtils.getCaPath() }
         ws.connect(address, options).catch((err: BusinessError) => {
             console.error(TAG, `connect failed, code=${err?.code}, message=${err?.message}`)
             if (this.ws === ws) {

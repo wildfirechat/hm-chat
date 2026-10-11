@@ -51,8 +51,8 @@ import Friend from '../model/friend';
 import MessageContent from '../messages/messageContent';
 import ModifyMyInfoEntry from '../model/modifyMyInfoEntry';
 import request from '@ohos.request';
-import { rcp } from '@kit.RemoteCommunicationKit';
 import selfSignedCertUtils from '../util/selfSignedCertUtils';
+import { RCP_SYSCAP, uploadFileWithRcp } from '../util/rcpTransfer';
 import { FailCallback, SuccessCallback, CallbackWithValue_1, CallbackWithValue_2, JSONArray, JSONObject } from '../type/types';
 import { uri } from '@kit.ArkTS';
 import { fileUri } from '@kit.CoreFileKit';
@@ -2589,8 +2589,8 @@ class WfcImpl {
             } else {
                 // 野火专业存储或阿里云
                 let caPath = selfSignedCertUtils.getCaPath()
-                if (caPath) {
-                    // 系统上传服务不认应用内置的自签名证书，改用 RCP
+                if (caPath && canIUse(RCP_SYSCAP)) {
+                    // 系统上传服务不认应用内置的自签名证书，改用 RCP。RCP 是 HarmonyOS 独有的，开源鸿蒙上仍走系统上传服务
                     self._uploadFileWithRcp(message, uploadUrl, remoteUrl, filePath!, contentType, caPath, progressCB, successCB, failCB)
                     return
                 }
@@ -2671,50 +2671,24 @@ class WfcImpl {
     _uploadFileWithRcp(message: Message | null, uploadUrl: string, remoteUrl: string, filePath: string, contentType: string,
         caPath: string, progressCB: CallbackWithValue_2<number, number>,
         successCB: CallbackWithValue_1<string>, failCB: FailCallback) {
-        let session: rcp.Session
-        try {
-            session = rcp.createSession({
-                requestConfiguration: {
-                    transfer: {
-                        // 大文件上传耗时长，放宽总时长，靠 inactivityMs 发现卡住的连接
-                        timeout: { transferMs: 24 * 60 * 60 * 1000, inactivityMs: 60 * 1000 }
-                    },
-                    security: {
-                        remoteValidation: { filePath: caPath }
-                    },
-                    tracing: {
-                        httpEventsHandler: {
-                            onUploadProgress: (totalSize: number, transferredSize: number) => {
-                                progressCB && progressCB(transferredSize, totalSize)
-                            }
-                        }
-                    }
-                }
-            })
-        } catch (e) {
-            console.error('create rcp session failed', e)
-            failCB(-1)
-            return
-        }
-        let req = new rcp.Request(uploadUrl, 'PUT', { 'content-type': contentType }, new rcp.UploadFromFile(filePath))
-        if (message) {
-            self.uploadingMap.set(message.messageId, () => {
-                session.cancel(req)
-            })
-        }
-        session.fetch(req).then((response: rcp.Response) => {
-            if (response.statusCode >= 200 && response.statusCode < 300) {
+        uploadFileWithRcp(uploadUrl, filePath, contentType, caPath, (uploaded: number, total: number) => {
+            progressCB && progressCB(uploaded, total)
+        }, (cancel: () => void) => {
+            if (message) {
+                self.uploadingMap.set(message.messageId, cancel)
+            }
+        }).then((statusCode: number) => {
+            if (statusCode >= 200 && statusCode < 300) {
                 successCB(remoteUrl)
             } else {
-                console.error('upload file failed, statusCode', response.statusCode)
-                failCB(response.statusCode)
+                console.error('upload file failed, statusCode', statusCode)
+                failCB(statusCode)
             }
         }).catch((err: Error) => {
             console.error('upload File error', err)
             failCB(-1)
         }).finally(() => {
             message && self.uploadingMap.delete(message.messageId)
-            session.close()
         })
     }
 

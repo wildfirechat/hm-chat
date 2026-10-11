@@ -5,8 +5,8 @@
 import { common } from '@kit.AbilityKit';
 import { fileIo as fs } from '@kit.CoreFileKit';
 import { cert } from '@kit.DeviceCertificateKit';
-import { rcp } from '@kit.RemoteCommunicationKit';
 import { util } from '@kit.ArkTS';
+import { downloadFileWithRcp, RCP_SYSCAP } from './rcpTransfer';
 
 const TAG = 'SelfSignedCertUtils'
 // 系统预置的 CA 证书
@@ -24,9 +24,8 @@ const PEM_END = '-----END CERTIFICATE-----'
  * 上层网络请求通过这里使用，共用同一份证书。上层分几种接入方式：
  * 1. Network Kit 的 http、webSocket：请求参数带上 caPath: selfSignedCertUtils.getCaPath()。应用服务、组织通讯录、
  *    投票、接龙、归档、语音识别等都已经接入，新增请求时也要记得带上。
- * 2. 系统上传下载服务（request.uploadFile、request.downloadFile）不认应用内置的证书，有自签名证书时改用 RCP，
- *    security.remoteValidation 设置为 { filePath: selfSignedCertUtils.getCaPath() }。下载直接用 {@link download}，
- *    见 mediaHelper 的 downloadMedia；上传见 proto.min.ets 的 _uploadFileWithRcp。
+ * 2. 系统上传下载服务（request.uploadFile、request.downloadFile）不认应用内置的证书，改用 RCP：下载用 {@link download}，
+ *    见 mediaHelper 的 downloadMedia；PUT 上传见 rcpTransfer。RCP 是 HarmonyOS 独有的，开源鸿蒙上仍走系统上传下载服务，不支持自签名证书。
  * 3. Web 组件：在 onSslErrorEventReceive 里调用 {@link isTrustedBySelfSignedCerts}，见 WfcWebView。
  * 4. Image、Video 组件自己加载网络资源时不认应用内置的证书，network_config.json 的 trust-anchors 对它们也不生效（实测），
  *    要先用 {@link download} 下载到本地再显示，见 uikit 的 trustedMediaSrc。
@@ -41,8 +40,6 @@ export class SelfSignedCertUtils {
     private caPath: string = ''
     // certPems 解析后的证书，Web 组件校验证书时才用到，用到时再解析
     private x509Certs?: cert.X509Cert[]
-    // download 共用的 RCP session，同时打开的 session 数量有限制，不能每次下载都创建
-    private downloadSession?: rcp.Session
 
     /**
      * 加载证书目录下的自签名证书，需要在发起网络请求之前调用
@@ -54,8 +51,6 @@ export class SelfSignedCertUtils {
         this.certPems = []
         this.caPath = ''
         this.x509Certs = undefined
-        this.downloadSession?.close()
-        this.downloadSession = undefined
         try {
             if (!fs.accessSync(certDir)) {
                 return
@@ -104,6 +99,13 @@ export class SelfSignedCertUtils {
     }
 
     /**
+     * 是否可以用 {@link download} 下载：有自签名证书，且设备支持 RCP（HarmonyOS 支持，开源鸿蒙不支持）
+     */
+    canDownload(): boolean {
+        return this.hasCerts() && canIUse(RCP_SYSCAP)
+    }
+
+    /**
      * 系统预置 CA 证书和自签名证书合并后的文件路径（PEM 格式），用于 http、webSocket 的 caPath 和 RCP 的 remoteValidation。
      * 没有自签名证书时返回 undefined，即使用系统默认配置
      */
@@ -143,34 +145,21 @@ export class SelfSignedCertUtils {
     }
 
     /**
-     * 用 RCP 下载文件，信任系统预置的 CA 证书和自签名证书，没有自签名证书时直接失败。
+     * 用 RCP 下载文件，信任系统预置的 CA 证书和自签名证书，{@link canDownload} 为 false 时直接失败。
      * 系统下载服务（request.downloadFile）、Image、Video 组件都不认应用内置的证书，有自签名证书时用这个代替。
      * 先下载到临时文件，成功后再改名，下载失败或者中途退出都不会留下不完整的文件。
      *
      * @returns 下载成功时返回 filePath
      */
     download(url: string, filePath: string, progressCB?: (receivedSize: number, totalSize: number) => void): Promise<string> {
-        if (!this.caPath) {
-            return Promise.reject(new Error('no self-signed certs'))
-        }
-        let session: rcp.Session
-        try {
-            if (!this.downloadSession) {
-                this.downloadSession = rcp.createSession({ requestConfiguration: this.downloadConfiguration() })
-            }
-            session = this.downloadSession
-        } catch (e) {
-            console.error(TAG, 'create rcp session failed', e)
-            return Promise.reject(e as Error)
+        if (!this.canDownload()) {
+            return Promise.reject(new Error('download with self-signed certs is not supported'))
         }
         // 每次下载用不同的临时文件，同一个文件同时下载多次时互不影响
         let tmpPath = filePath + '.' + util.generateRandomUUID(false) + '.download'
-        let req = new rcp.Request(url, 'GET')
-        req.configuration = this.downloadConfiguration(progressCB)
-        req.destination = { kind: 'file', file: tmpPath }
-        return session.fetch(req).then((response: rcp.Response) => {
-            if (response.statusCode < 200 || response.statusCode >= 300) {
-                throw new Error('download failed, statusCode: ' + response.statusCode)
+        return downloadFileWithRcp(url, tmpPath, this.caPath, progressCB).then((statusCode: number) => {
+            if (statusCode < 200 || statusCode >= 300) {
+                throw new Error('download failed, statusCode: ' + statusCode)
             }
             fs.renameSync(tmpPath, filePath)
             return filePath
@@ -178,28 +167,6 @@ export class SelfSignedCertUtils {
             removeFile(tmpPath)
             throw e
         })
-    }
-
-    private downloadConfiguration(progressCB?: (receivedSize: number, totalSize: number) => void): rcp.Configuration {
-        let configuration: rcp.Configuration = {
-            transfer: {
-                // 大文件下载耗时长，放宽总时长，靠 inactivityMs 发现卡住的连接
-                timeout: { transferMs: 24 * 60 * 60 * 1000, inactivityMs: 60 * 1000 }
-            },
-            security: {
-                remoteValidation: { filePath: this.caPath }
-            }
-        }
-        if (progressCB) {
-            configuration.tracing = {
-                httpEventsHandler: {
-                    onDownloadProgress: (totalSize: number, transferredSize: number) => {
-                        progressCB(transferredSize, totalSize)
-                    }
-                }
-            }
-        }
-        return configuration
     }
 
     private async getX509Certs(): Promise<cert.X509Cert[]> {

@@ -35,7 +35,7 @@ let notifyTimer: number = -1
  * Image、Video 组件自己加载网络资源时不认应用内置的自签名证书，network_config.json 的 trust-anchors 对它们也不生效。
  * 有自签名证书时，先用 RCP 下载到缓存目录，再把本地文件交给组件显示：`Image(trustedMediaSrc(url))`。
  *
- * 没有自签名证书、或者不是 https 地址时原样返回，url 为空时返回空字符串。下载完成之前返回空字符串，Image 显示 alt 设置的占位图，
+ * 没有自签名证书、不是 https 地址、或者设备不支持（开源鸿蒙）时原样返回，url 为空时返回空字符串。下载完成之前返回空字符串，Image 显示 alt 设置的占位图，
  * 需要占位图时也可以写成 `trustedMediaSrc(url) || $r('app.media.xxx')`；下载完成后组件自动刷新，换成本地文件。
  * 下载失败时返回原地址，交给组件自己加载。
  */
@@ -43,7 +43,7 @@ export function trustedMediaSrc(url: string | undefined | null): string {
     if (!url) {
         return ''
     }
-    if (!url.startsWith('https://') || !selfSignedCertUtils.hasCerts()) {
+    if (!url.startsWith('https://') || !selfSignedCertUtils.canDownload()) {
         return url
     }
     let src = cachedSrcs.get(url)

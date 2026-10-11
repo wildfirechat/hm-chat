@@ -63,14 +63,16 @@
 3. **以 SDK 方式集成时**：调用`selfSignedCertUtils.init(context, 证书目录)`加载证书，自己创建的网络请求通过`selfSignedCertUtils`信任这些证书：
    - Network Kit 的`http`、`webSocket`：请求参数中带上`caPath: selfSignedCertUtils.getCaPath()`
    - RCP：`security.remoteValidation`设置为`{ filePath: selfSignedCertUtils.getCaPath() }`
-   - 系统上传下载服务（`request.uploadFile`、`request.downloadFile`）不认应用内置的证书，下载改用`selfSignedCertUtils.download`，参考`mediaHelper.ets`中的`downloadMedia`。SDK 的大文件上传已经处理
+   - 系统上传下载服务（`request.uploadFile`、`request.downloadFile`）不认应用内置的证书，下载改用`selfSignedCertUtils.download`，参考`mediaHelper.ets`中的`downloadMedia`。SDK 的大文件上传已经处理（使用 RCP，见下面的注意事项）
    - Web 组件：在`onSslErrorEventReceive`中，`selfSignedCertUtils.isTrustedBySelfSignedCerts(event.certChainData)`返回`true`时才调用`handler.handleConfirm()`，否则调用`handler.handleCancel()`，参考`WfcWebView.ets`
    - `Image`、`Video`组件：`Image(trustedMediaSrc(url))`，有自签名证书时先下载再显示，下载完成后组件自动刷新
+   - 自己用`selfSignedCertUtils.download`下载前，先用`selfSignedCertUtils.canDownload()`判断，开源鸿蒙上返回`false`
 
 4. **注意事项**
    - `getCaPath()`返回的证书文件中同时包含系统预置的 CA 证书和自签名证书，公网 CA 签发的证书不受影响
    - 和 Android 不同，鸿蒙上的网络请求**不会**跳过域名校验，签发证书时必须把服务的域名和 IP 都写进 subjectAltName，否则会校验失败
    - Web 组件和 Android 一样不校验域名，且只检查服务端证书本身，所以只支持服务端证书就是`resfile`中的证书，或者由其直接签发的情况；需要 API 15 及以上，更低版本的设备按默认处理（取消加载）
+   - SDK（`client`模块）只使用开源鸿蒙也有的接口。自签证书下的文件上传下载、图片和视频加载需要用到 HarmonyOS 独有的 RCP（Remote Communication Kit），运行时按需加载；开源鸿蒙上这些仍走系统上传下载服务和组件自己的加载，不支持自签证书
 
 ## 截图
 

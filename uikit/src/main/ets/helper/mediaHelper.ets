@@ -160,7 +160,7 @@ export function downloadMedia(context: Context, messageUid: Long, url: string, p
             resolve(filePath)
             return
         }
-        if (selfSignedCertUtils.hasCerts()) {
+        if (selfSignedCertUtils.canDownload()) {
             // 系统下载服务不认应用内置的自签名证书，改用 RCP
             selfSignedCertUtils.download(url, filePath, progressCB)
                 .then((path: string) => {

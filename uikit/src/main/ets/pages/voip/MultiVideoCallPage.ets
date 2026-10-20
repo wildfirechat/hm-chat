@@ -212,8 +212,13 @@ export default struct MultiVideoCallPage {
         }
 
         sessionCallback.didCreateLocalVideoTrack = (videoTrack: VideoTrack, screenSharing: boolean) => {
-            this.focusVideoRenderController?.setVideoTrack(videoTrack)
-            this.focusVideoRenderController?.setScalingMode(ScalingMode.AspectFit)
+            if (this.focusUserId === this.selfUserInfo?.uid) {
+                this.focusVideoRenderController?.setVideoTrack(videoTrack)
+                this.focusVideoRenderController?.setScalingMode(ScalingMode.AspectFit)
+            } else {
+                // 本地视频已和焦点用户交换，渲染在该用户原来的位置（切换摄像头、回到前台重新采集时会回调）
+                this.participantVideoRenderControllerMap.get(this.focusUserId)?.setVideoTrack(videoTrack)
+            }
         }
 
         sessionCallback.didReceiveRemoteVideoTrack = (userId: string, videoTrack: VideoTrack, screenSharing: boolean) => {

@@ -88,6 +88,9 @@ class WfcImpl {
     context?: common.ApplicationContext;
     // 正在上传的任务，key 是 messageId，value 用来取消上传
     uploadingMap: Map<number, () => void> = new Map();
+    // 已被 cancelSendingMessage 取消的上传。上传完成和用户取消可能同时发生，
+    // 取消后上传回调不能再继续把消息发出去
+    canceledUploads: Set<number> = new Set();
     userOnlineState: Map<string, UserOnlineState> = new Map()
 
     onConnectionChanged(status: number) {
@@ -2350,14 +2353,15 @@ class WfcImpl {
                     }
                     successCB && successCB(insertedMsg.messageUid, insertedMsg.timestamp);
                 }, (err: number) => {
-                    message.status = MessageStatus.SendFailure
-                    if (message.conversation!.type !== ConversationType.ChatRoom) {
-                        self.eventEmitter!.emit(EventType.MessageStatusUpdate, message);
+                    insertedMsg.status = MessageStatus.SendFailure
+                    if (insertedMsg.conversation!.type !== ConversationType.ChatRoom) {
+                        self.eventEmitter!.emit(EventType.MessageStatusUpdate, insertedMsg);
                     }
                     failCB && failCB(err)
                 })
                 mediaMessageUploadCallback && mediaMessageUploadCallback(remoteUrl);
             }, (err: number) => {
+                this.updateMessageStatus(insertedMsg.messageId, MessageStatus.SendFailure);
                 insertedMsg.status = MessageStatus.SendFailure;
                 if (insertedMsg.conversation!.type !== ConversationType.ChatRoom) {
                     self.eventEmitter!.emit(EventType.MessageStatusUpdate, insertedMsg);
@@ -2459,19 +2463,30 @@ class WfcImpl {
     // }
 
     cancelSendingMessage(messageId: number): boolean {
-        let canceled = protoProxy.cancelSendingMessage(messageId) === 1;
-        if (!canceled) {
-            let cancelUpload = this.uploadingMap.get(messageId);
-            if (cancelUpload) {
-                this.uploadingMap.delete(messageId)
-                try {
-                    cancelUpload()
-                    canceled = true;
-                } catch (e) {
-                    console.log(e);
-                }
+        let canceled = false;
+
+        // 内置对象存储的大文件由本类直传（系统上传服务或 RCP），协议栈没有对应的上传任务，
+        // 所以不能只看协议栈的取消结果
+        let cancelUpload = this.uploadingMap.get(messageId);
+        if (cancelUpload) {
+            this.uploadingMap.delete(messageId)
+            // 先记录取消标记：上传可能刚好完成，回调里要靠它拦住后续发送
+            this.canceledUploads.add(messageId)
+            canceled = true;
+            try {
+                cancelUpload()
+            } catch (e) {
+                console.log(e);
             }
+            // 取消会走上传失败回调，这里先落库，避免消息一直停留在发送中
+            this.updateMessageStatus(messageId, MessageStatus.SendFailure);
         }
+
+        // 小文件由协议栈自己上传，或者消息已经交给协议栈发送时，需要协议栈来取消
+        if (protoProxy.cancelSendingMessage(messageId) === 1) {
+            canceled = true;
+        }
+
         return canceled;
     }
 
@@ -2636,7 +2651,16 @@ class WfcImpl {
                 }
 
                 data.on('complete', (result: Array<request.TaskState>) => {
+                    let canceled = false;
+                    if (message) {
+                        canceled = self.canceledUploads.delete(message.messageId);
+                    }
                     message && self.uploadingMap.delete(message!.messageId)
+                    if (canceled) {
+                        // 已被 cancelSendingMessage 取消，不能再把消息发出去
+                        failCB(-1)
+                        return
+                    }
                     if (result && result.length >= 1) {
                         if (result[0].responseCode === 0) {
                             successCB(remoteUrl)
@@ -2649,6 +2673,7 @@ class WfcImpl {
                     progressCB && progressCB(uploaded, total)
                 });
                 data.on('fail', (result: Array<request.TaskState>) => {
+                    message && self.canceledUploads.delete(message.messageId)
                     message && self.uploadingMap.delete(message.messageId)
                     if (result && result.length >= 1) {
                         // serverData.msg = '上传失败'
@@ -2678,6 +2703,11 @@ class WfcImpl {
                 self.uploadingMap.set(message.messageId, cancel)
             }
         }).then((statusCode: number) => {
+            if (message && self.canceledUploads.delete(message.messageId)) {
+                // 已被 cancelSendingMessage 取消，不能再把消息发出去
+                failCB(-1)
+                return
+            }
             if (statusCode >= 200 && statusCode < 300) {
                 successCB(remoteUrl)
             } else {
@@ -2686,6 +2716,7 @@ class WfcImpl {
             }
         }).catch((err: Error) => {
             console.error('upload File error', err)
+            message && self.canceledUploads.delete(message.messageId)
             failCB(-1)
         }).finally(() => {
             message && self.uploadingMap.delete(message.messageId)

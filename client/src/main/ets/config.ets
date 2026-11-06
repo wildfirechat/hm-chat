@@ -24,7 +24,7 @@ export default class Config {
     // 默认的app server使用端口是8888，注意端口号别忘记了。
     // 上线建议使用https，使用https更安全。
     //static APP_SERVER = 'http://app.wildfirechat.net:8888';
-    static APP_SERVER = 'https://im.aiwork.lgdg.cc/app';
+    static APP_SERVER = 'https://im.lgdg.cc/app';
     // 应用服务备选地址，双网环境下使用。
     static APP_SERVER_BACKUP = null as string | null;
 
@@ -38,7 +38,7 @@ export default class Config {
 
     // 组织结构服务地址，如果没有部署组织结构服务，或者不需要组织结构的话，可置为 null
     // 组织结构项目：https://github.com/wildfirechat/organization-platform 或 https://gitee.com/wfchat/organization-platform
-    static ORGANIZATION_SERVER = 'https://im.aiwork.lgdg.cc/org';
+    static ORGANIZATION_SERVER = 'https://im.lgdg.cc/org';
     // 组织结构服务备选地址，双网环境下使用。
     static ORGANIZATION_SERVER_BACKUP = null as string | null;
 
@@ -138,7 +138,7 @@ export default class Config {
 
     static SECRET_CHAT_MEDIA_DECODE_SERVER_PORT = 7982;
     // 如果不支持工作台，将其置空即可
-    static OPEN_PLATFORM_WORK_SPACE_URL = 'https://im.aiwork.lgdg.cc/open/work.html';
+    static OPEN_PLATFORM_WORK_SPACE_URL = 'https://im.lgdg.cc/open/work.html';
     // 工作台备选地址，双网环境下使用。
     static OPEN_PLATFORM_WORK_SPACE_URL_BACKUP = null as string | null;
     static OPEN_PLATFORM_SERVE_PORT = 7983;

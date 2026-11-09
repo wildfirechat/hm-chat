@@ -170,6 +170,28 @@ class OrgServer {
         list.forEach(item => this.fillDefaultPortrait(item));
     }
 
+
+    /**
+     * 单域名按路径承载多个服务时（如 https://域名/app 与 https://域名/org），
+     * 仅用 host-port 作为 key 会导致不同服务的 authToken 互相覆盖，
+     * 表现为 IM 登录正常但操作时提示"没有登录"。
+     * 这里把 URL 路径首段（app / org / open ...）纳入 key 加以区分。
+     */
+    private authTokenStorageKey(): string {
+        let prefix = '';
+        try {
+            let parsed = url.URL.parseURL(this.baseUrl());
+            let segments = parsed.pathname ? parsed.pathname.split('/').filter((s: string) => s.length > 0) : [];
+            if (segments.length > 0) {
+                prefix = segments[0];
+            }
+        } catch (e) {
+        }
+        return prefix.length > 0
+            ? `authToken:${this.currentHostPort}-${prefix}`
+            : `authToken:${this.currentHostPort}`;
+    }
+
     _init() {
         let context = AppStorage.get<common.UIAbilityContext>('context');
         let preference = data_preferences.getPreferencesSync(context?.getApplicationContext(), {
@@ -179,7 +201,11 @@ class OrgServer {
         // 兼容 Android 端迁移过来的数据
         let hostPort = parseHostAndPort(this.baseUrl())
         this.currentHostPort = `${hostPort.host}-${hostPort.port}`;
-        this.authToken = preference.getSync(`authToken:${this.currentHostPort}`, '') as string
+        this.authToken = preference.getSync(this.authTokenStorageKey(), '') as string
+        // 兼容旧版本仅按 host-port 保存的 token
+        if (!this.authToken) {
+            this.authToken = preference.getSync(`authToken:${this.currentHostPort}`, '') as string
+        }
     }
 
     private _ensureInitialized() {
@@ -241,7 +267,7 @@ class OrgServer {
                             let preference = data_preferences.getPreferencesSync(context?.getApplicationContext(), {
                                 name: 'wfcstore'
                             })
-                            preference.putSync(`authToken:${this.currentHostPort}`, this.authToken)
+                            preference.putSync(this.authTokenStorageKey(), this.authToken)
                         }
                         resolve(result.result)
                     } else {

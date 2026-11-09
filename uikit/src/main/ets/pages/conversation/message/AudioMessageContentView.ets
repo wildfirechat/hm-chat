@@ -7,6 +7,7 @@ import { Radius, TextStyleToken } from '../../../common/design/Tokens'
 import { voicePlayModeManager } from '../audio/VoicePlayModeManager'
 import { showTipToast } from '../../../common/utils/TipToast'
 import { PttMessageContentType } from '@wfc/ptt'
+import { showToast } from '../../../common/utils/Toast'
 
 @Component
 export default struct AudioMessageContentView {
@@ -84,10 +85,11 @@ export default struct AudioMessageContentView {
         this.audioPlayManager!.startProximitySensing(earpiece)
         this.audioPlayManager!.play(url, true, (err?: Error) => {
             this.stopAudioPlayingAnimation()
-            if (err && err.message === AudioPlayManager.INTERRUPTED) {
+            if (err) {
                 // Another voice message took over playback. Only stop this view's animation; the new
                 // playback now owns proximity sensing / the chain, so skip completion handling (don't
                 // release the screen lock or play the completion sound).
+                showToast('播放音频失败: ' + err.name + ' ' + err.message)
                 return
             }
             // Whether to stop proximity sensing / play the completion sound is decided by the

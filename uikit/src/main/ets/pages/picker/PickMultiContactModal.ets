@@ -130,8 +130,9 @@ export default struct PickMultiContactModal {
                     if (this.onCheckUser) {
                         this.onCheckUser(users)
                     } else {
+                        // 和 onCheckUser 一致，包含从组织结构选取/搜索到的员工，否则这些会被丢掉
                         LocalStorage.getShared()
-                            .setOrCreate<UserInfo[]>(PickMultiContactModal.PICK_RESULT, this.newlyCheckedUsers());
+                            .setOrCreate<UserInfo[]>(PickMultiContactModal.PICK_RESULT, users);
                     }
                 })
         }

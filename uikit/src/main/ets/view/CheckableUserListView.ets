@@ -331,6 +331,16 @@ export default struct CheckableUserListView {
                     strokeWidth: 1,
                     startMargin: scaledSize(80, this.fontScale),
                 })
+                // 不能和组织结构的 bindContentCover 绑在同一个组件上：全模态按宿主节点区分，同一节点上后一个
+                // bindContentCover(isShow=false) 会把前一个刚打开的模态关掉，导致点「组织结构」大概率没反应。
+                // 入口就在这个 List 里，绑在这里即可。
+                .bindContentCover(!isWideScreen() && this.showPickFavGroupModal,
+                    this.pickSingleFavGroupModal(),
+                    {
+                        modalTransition: ModalTransition.NONE,
+                        onDisappear: () => {
+                        }
+                    })
             } else {
                 Text('加载中..')
                     .fontColor($r('app.color.wf_tertiary_text'))
@@ -340,13 +350,6 @@ export default struct CheckableUserListView {
         .height('100%')
         .bindContentCover(!isWideScreen() && this.showPickOrganizationModal,
             this.pickOrganizationModal(this.activeOrg),
-            {
-                modalTransition: ModalTransition.NONE,
-                onDisappear: () => {
-                }
-            })
-        .bindContentCover(!isWideScreen() && this.showPickFavGroupModal,
-            this.pickSingleFavGroupModal(),
             {
                 modalTransition: ModalTransition.NONE,
                 onDisappear: () => {

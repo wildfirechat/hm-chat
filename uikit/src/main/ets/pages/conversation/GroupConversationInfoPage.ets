@@ -641,6 +641,25 @@ export default struct GroupConversationInfoPage {
             .scrollBar(BarState.Off)
             .width('100%')
             .height('100%')
+            // 不能和添加群成员的 bindContentCover 绑在同一个组件（NavDestination）上：全模态按宿主节点区分，
+            // 同一节点上后一个 bindContentCover(isShow=false) 会把前一个刚打开的模态关掉。
+            .bindContentCover(!isWideScreen() && this.showRemoveGroupMemberModal, this.removeGroupMemberModal(), {
+                modalTransition: ModalTransition.DEFAULT,
+                onDisappear: () => {
+                    this.showRemoveGroupMemberModal = false
+                    let localStorage = LocalStorage.getShared();
+                    let pickUsers = localStorage.get<UserInfo[]>(PickGroupMemberModal.PICK_RESULT);
+                    if (pickUsers?.length) {
+                        localStorage.delete(PickGroupMemberModal.PICK_RESULT)
+                        let uids = pickUsers.map(info => info.uid)
+                        wfc.kickoffGroupMembers(this.groupInfo.target, uids, [0], null, () => {
+                            this.groupMembers = wfc.getGroupMembers(this.conversationInfo!.conversation.target, false)
+                        }, (err: number) => {
+                            showToast('移除群成员失败：' + err)
+                        })
+                    }
+                }
+            })
         }
         .backgroundColor($r('app.color.wf_primary_background_color'))
         .title('会话详情')
@@ -666,23 +685,6 @@ export default struct GroupConversationInfoPage {
                         } else {
                             showToast('添加新成员失败：' + err)
                         }
-                    })
-                }
-            }
-        })
-        .bindContentCover(!isWideScreen() && this.showRemoveGroupMemberModal, this.removeGroupMemberModal(), {
-            modalTransition: ModalTransition.DEFAULT,
-            onDisappear: () => {
-                this.showRemoveGroupMemberModal = false
-                let localStorage = LocalStorage.getShared();
-                let pickUsers = localStorage.get<UserInfo[]>(PickGroupMemberModal.PICK_RESULT);
-                if (pickUsers?.length) {
-                    localStorage.delete(PickGroupMemberModal.PICK_RESULT)
-                    let uids = pickUsers.map(info => info.uid)
-                    wfc.kickoffGroupMembers(this.groupInfo.target, uids, [0], null, () => {
-                        this.groupMembers = wfc.getGroupMembers(this.conversationInfo!.conversation.target, false)
-                    }, (err: number) => {
-                        showToast('移除群成员失败：' + err)
                     })
                 }
             }

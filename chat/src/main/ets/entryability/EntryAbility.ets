@@ -51,11 +51,11 @@ export default class EntryAbility extends UIAbility {
 
         // // 全WSS模式设置，必须在wfc.init(创建mars实例)之前调用
         // // 使用websocket长连接，只有2026.9.11之后的服务才可以支持
-        // wfc.setUseWebsocket(true);
+        wfc.setUseWebsocket(true);
         // // 使用TLS，按连接方式二选一：
         // // 1) 域名连接、公网CA签发的证书：走系统信任链校验。系统信任链需要API 20+，
         // //    更低版本的设备请用方式2传入证书，否则找不到根证书时SDK会关闭证书校验。
-        // // wfc.UseTls(false, []);
+        wfc.UseTls(false, []);
         // // // 2) IP直连、自签名证书：传入证书文件路径。证书放在chat/src/main/resources/resfile/目录下，resfile在沙箱里是真实文件，可直接用路径。
         // // //    证书加载失败时不要降级成UseTls(true, [])：那样只加密不校验证书，可被中间人攻击。
         // wfc.UseTls(false, [this.context.resourceDir + '/ip.crt']);

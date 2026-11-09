@@ -87,8 +87,8 @@ export default class Config {
     // 上线时，请一定要切换为你们自己部署的服务
     // 格式: [uri, 用户名, 密码]，可以添加多个
     static ICE_SERVERS = [
-        ['turn:172.16.198.165:3478', 'wfchat', 'WFpocTurn8Pass'],
-        ['turn:172.16.198.169:3478', 'wfchat', 'WFpocTurn8Pass']
+        ['turn:aiwork-im.lgdg.cc:3478', 'wfchat', 'WFpocTurn8Pass'],
+        ['turn:aiwork-im.lgdg.cc:3479', 'wfchat', 'WFpocTurn8Pass']
     ];
     static LANGUAGE = 'zh_CN';
 

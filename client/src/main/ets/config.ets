@@ -43,12 +43,12 @@ export default class Config {
     static ORGANIZATION_SERVER_BACKUP = null as string | null;
 
     // 接龙服务地址，如果需要接龙功能，请部署接龙服务，然后这里填上接龙服务地址；如果不需要接龙功能，请置为 null
-    static COLLECTION_SERVER_ADDRESS = null as string | null;   // 未部署接龙服务
+    static COLLECTION_SERVER_ADDRESS = 'https://aiwork-im.lgdg.cc/collection' as string | null;
     // 接龙服务备选地址，双网环境下使用。
     static COLLECTION_SERVER_ADDRESS_BACKUP = null as string | null;
 
     // 投票服务地址，如果需要投票功能，请部署投票服务，然后这里填上投票服务地址；如果不需要投票功能，请置为 null
-    static POLL_SERVER_ADDRESS = null as string | null;         // 未部署投票服务
+    static POLL_SERVER_ADDRESS = 'https://aiwork-im.lgdg.cc/poll' as string | null;
     // 投票服务备选地址，双网环境下使用。
     static POLL_SERVER_ADDRESS_BACKUP = null as string | null;
 
@@ -63,7 +63,7 @@ export default class Config {
     // 关于语音识别服务请参考：https://gitee.com/wfchat/asr-api
     // 请求时会在 HTTP header authCode 中带上从 IM 服务获取的认证码，由 asr-api 校验。
     // 野火提供的测试服务会记录语音文件和识别出的文字，上线会有泄密风险，请务必部署自己的服务。
-    static ASR_SERVER_URL = null as string | null;              // 未部署语音转文字
+    static ASR_SERVER_URL = 'https://aiwork-im.lgdg.cc/asr/api/recognize' as string | null;
     // 语音消息转文字服务备选地址，双网环境下使用。
     static ASR_SERVER_BACKUP_URL = null as string | null;
 
@@ -72,7 +72,7 @@ export default class Config {
     // 请配置为 asr-api 的实时语音识别地址，例如 wss://example.com/asr/api/stream，连接时会在 HTTP header authCode 中带上从 IM 服务获取的认证码。
     // 内网测试时也可以直连 wf-voice 的 WebSocket 地址（默认端口 12436），例如 ws://192.168.1.100:12436。wf-voice 本身没有鉴权，也不支持 wss，请勿直接暴露到公网。
     // 野火提供的测试服务会记录语音和识别出的文字，上线会有泄密风险，请务必部署自己的服务。
-    static ASR_STREAM_SERVER_URL = null as string | null;       // 未部署语音转文字（流式）
+    static ASR_STREAM_SERVER_URL = 'wss://aiwork-im.lgdg.cc/asr/api/stream' as string | null;
     // 实时语音输入服务备选地址，双网环境下使用。
     static ASR_STREAM_SERVER_BACKUP_URL = null as string | null;
     // 实时语音输入是否边说边出字。开启时说话过程中实时显示正在说的这句话，说完后修正为这句的最终结果；关闭时每说完一句才显示这句话。

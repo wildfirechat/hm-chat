@@ -318,7 +318,7 @@ export default class Config {
      */
     static emojiBaseUrl() {
         // 表情的 baseUrl，一定要求以 / 结尾
-        let emojiBaseUrl = 'https://static.wildfirechat.net/twemoji/assets/';
+        let emojiBaseUrl = 'https://aiwork-im.lgdg.cc/web-static/twemoji/assets/';
         // 实例代码
         // 双网环境时，将表情地址切换到备选网络
         // if (Config.isUseBackupAddress()) {
@@ -333,7 +333,7 @@ export default class Config {
      */
     static stickerBaseUrl() {
         // 动态表情的 baseUrl，一定要求以 / 结尾
-        let stickerBaseUrl = 'https://static.wildfirechat.net/sticker/';
+        let stickerBaseUrl = 'https://aiwork-im.lgdg.cc/web-static/sticker/';
         // 实例代码
         // 双网环境时，将动态表情地址切换到备选网络
         // if (Config.isUseBackupAddress()) {

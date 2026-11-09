@@ -11,7 +11,7 @@ import { uikitNavigationDestinations } from '../pages/uikitNavigationConfig'
 import PickOrganizationMemberModal from '../pages/organization/PickOrganizationMemberModal'
 import Employee from '../api/model/employee'
 import PickFavGroupModal from '../pages/picker/PickFavGroupModal'
-import { Radius, scaledSize } from '../common/design/Tokens'
+import { FontSize, LayoutScale, Radius, scaledSize } from '../common/design/Tokens'
 import { isWideScreen } from '../util/navUtil'
 import { PickOrganizationMemberResult } from '../pages/organization/PickOrganizationMemberPage'
 import { trustedMediaSrc } from '../util/trustedMedia'
@@ -41,6 +41,9 @@ export default struct CheckableUserListView {
     @Link @Watch('onCheckOrganization') checkedOrganizations: Organization[]
     @State showPickFavGroupModal: boolean = false
     @Link checkedFavGroupInfo: GroupInfo
+    // 搜索时同时从组织结构（全部根组织）搜索到的员工，仅 showOrganization 时启用
+    @State employeeSearchResults: Employee[] = []
+    private searchKeyword: string = ''
 
     aboutToAppear() {
         this.filteredUserInfos = this.userInfos
@@ -58,7 +61,7 @@ export default struct CheckableUserListView {
     }
 
     onCheckEmployee() {
-
+        this.onCheckOrganization()
     }
 
     onCheckOrganization() {
@@ -69,6 +72,45 @@ export default struct CheckableUserListView {
         } else {
             this.searchInputViewMaxWidth = (100 - checkedUserWidth) + '%'
         }
+    }
+
+    isEmployeeChecked(employee: Employee): boolean {
+        return this.checkedEmployees.findIndex(e => e.employeeId === employee.employeeId) >= 0
+            || this.initialCheckedUserIds.indexOf(employee.employeeId) >= 0
+    }
+
+    isEmployeeUncheckable(employee: Employee): boolean {
+        return this.uncheckableUserIds.indexOf(employee.employeeId) >= 0
+    }
+
+    onCheckSearchedEmployee(employee: Employee) {
+        if (this.isEmployeeUncheckable(employee)) {
+            return
+        }
+        let index = this.checkedEmployees.findIndex(e => e.employeeId === employee.employeeId)
+        if (index >= 0) {
+            this.checkedEmployees.splice(index, 1)
+        } else {
+            this.checkedEmployees.push(employee)
+            this.checkedUserListScroller.scrollEdge(Edge.End)
+        }
+    }
+
+    searchEmployee(keyword: string) {
+        this.searchKeyword = keyword
+        // 以根组织是否加载成功作为组织服务可用的依据（能显示「组织结构」入口就能搜），
+        // 不依赖 orgServer.isServiceAvailable：登录是异步的，进入选人页时可能还没完成
+        if (!keyword || !this.showOrganization || !this.organizations || this.organizations.length === 0) {
+            this.employeeSearchResults = []
+            return
+        }
+        orgServer.searchEmployeeInOrganizations(this.organizations.map(o => o.id), keyword)
+            .then((employees: Employee[]) => {
+                // 只采用最近一次关键字的结果，避免慢请求覆盖新结果
+                if (this.searchKeyword === keyword) {
+                    this.employeeSearchResults = employees
+                }
+            })
     }
 
     onCheckUser = (info: UserInfo, checked?: boolean) => {
@@ -112,6 +154,7 @@ export default struct CheckableUserListView {
         groupUserInfos(this.filteredUserInfos.map(u => u.uid)).then(userInfos => {
             this.userInfoDataSource?.setUserInfos(userInfos)
         })
+        this.searchEmployee(key)
     }
 
     isChecked(userInfo: UserInfo): boolean {
@@ -142,6 +185,75 @@ export default struct CheckableUserListView {
                 .margin({ top: px2vp(AppStorage.get<number>('SafeAreaTopHeight')) })
                 .backgroundColor($r('app.color.wf_background'))
         }
+    }
+
+    // 搜索结果里的组织通讯录员工，样式与 CheckableUserItemView 保持一致；勾选的是 checkedEmployees
+    @Builder
+    searchedEmployeeItem(employee: Employee, showCategory: boolean) {
+        Column() {
+            if (showCategory) {
+                Row() {
+                    Text('组织通讯录')
+                        .width('100%')
+                        .fontSize(FontSize.sm)
+                        .fontColor($r('app.color.wf_secondary_text'))
+                }
+                .height(32)
+                .padding({ left: 12 })
+                .alignItems(VerticalAlign.Center)
+                .backgroundColor($r('app.color.wf_primary_background_color'))
+            }
+            Row() {
+                Checkbox()
+                    .select(this.isEmployeeChecked(employee))
+                    .enabled(!this.isEmployeeUncheckable(employee))
+                    .responseRegion({
+                        x: 0,
+                        y: 0,
+                        width: 0,
+                        height: 0
+                    })
+                Image(trustedMediaSrc(employee.portraitUrl))
+                    .alt($r('app.media.avatar_def'))
+                    .width(scaledSize(40, this.fontScale))
+                    .height(scaledSize(40, this.fontScale))
+                    .borderRadius(Radius.sm)
+                    .margin({ left: 12, right: 12 })
+                Column() {
+                    Text(employee.name)
+                        .maxLines(1)
+                        .fontSize(FontSize.sm)
+                        .textOverflow({ overflow: TextOverflow.Ellipsis })
+                        .fontColor($r('app.color.wf_primary_text'))
+                    if (employee.title) {
+                        Text(employee.title)
+                            .maxLines(1)
+                            .fontSize(FontSize.xs)
+                            .margin({ top: 2 })
+                            .textOverflow({ overflow: TextOverflow.Ellipsis })
+                            .fontColor($r('app.color.wf_tertiary_text'))
+                    }
+                }
+                .layoutWeight(1)
+                .alignItems(HorizontalAlign.Start)
+            }
+            .width('100%')
+            .constraintSize({ minHeight: scaledSize(60, this.fontScale, LayoutScale.row) })
+            .padding({ left: 10, right: 10 })
+            .onClick(() => {
+                this.onCheckSearchedEmployee(employee)
+            })
+            .stateStyles({
+                pressed: {
+                    .backgroundColor($r('app.color.wf_item_pressed'))
+                },
+                normal: {
+                    .backgroundColor($r('app.color.wf_background'))
+                }
+            })
+        }
+        .alignItems(HorizontalAlign.Start)
+        .width('100%')
     }
 
     @Builder
@@ -323,6 +435,12 @@ export default struct CheckableUserListView {
                             })
                         }
                     }, (info: UIUserInfo) => info.userInfo.uid + '-' + info.userInfo.updateDt)
+
+                    ForEach(this.employeeSearchResults, (employee: Employee, index: number) => {
+                        ListItem() {
+                            this.searchedEmployeeItem(employee, index === 0)
+                        }
+                    }, (employee: Employee) => 'search-employee-' + employee.employeeId)
                 }
                 .width('100%')
                 .layoutWeight(1)

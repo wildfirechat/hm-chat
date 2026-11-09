@@ -42,12 +42,16 @@ class OrgServer {
                     'authCode': code
                 } as Record<string, Object>)
                     .then((result: object) => {
+                        // 与 Android 端一致：登录组织服务成功后才视为可用，搜索等功能依赖这个标记
+                        this.isServiceAvailable = true
                         resolve()
                     })
                     .catch((err: OrgServerError) => {
+                        this.isServiceAvailable = false
                         reject(err)
                     })
             }, (err: number) => {
+                this.isServiceAvailable = false
                 reject(new Error('getAuthCode error' + err))
             })
         })
@@ -108,12 +112,39 @@ class OrgServer {
         return empEx;
     }
 
-    async searchEmployee(orgId: number, keyword: string): Promise<Employee[]> {
-        let result = await this._post('/api/employee/search', { 'organizationId': orgId, 'keyword': keyword } as Record<string, Object>);
+    // orgId 为 0 时搜索全部员工；count 不传时服务端默认 20 条
+    async searchEmployee(orgId: number, keyword: string, count?: number): Promise<Employee[]> {
+        let params: Record<string, Object> = { 'organizationId': orgId, 'keyword': keyword }
+        if (count) {
+            params['count'] = count
+            params['page'] = 0
+        }
+        let result = await this._post('/api/employee/search', params);
         let pageResponse = result as Record<string, Object>;
         let contents = pageResponse['contents'] as Employee[];
         this.fillDefaultPortraitList(contents);
         return contents;
+    }
+
+    // 在多个组织（通常是全部根组织）下并行搜索员工，按 employeeId 去重合并；单个组织搜索失败不影响其他组织的结果
+    async searchEmployeeInOrganizations(orgIds: number[], keyword: string): Promise<Employee[]> {
+        let resultList = await Promise.all(orgIds.map((orgId: number): Promise<Employee[]> => {
+            return this.searchEmployee(orgId, keyword, 50)
+                .then((employees: Employee[]): Employee[] => employees ?? [])
+                .catch((err: Error): Employee[] => {
+                    console.error('searchEmployee error', orgId, err)
+                    return []
+                })
+        }))
+        let employeeMap = new Map<string, Employee>()
+        resultList.forEach((employees: Employee[]) => {
+            employees.forEach((e: Employee) => {
+                if (!employeeMap.has(e.employeeId)) {
+                    employeeMap.set(e.employeeId, e)
+                }
+            })
+        })
+        return Array.from(employeeMap.values())
     }
 
     async getOrganizationPath(orgId: number): Promise<Organization[]> {

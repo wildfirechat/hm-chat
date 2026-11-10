@@ -9,6 +9,7 @@ import { startContinuousTask, stopContinuousTask } from './helper/continuousTask
 import ConversationType from '@wfc/client/src/main/ets/wfc/model/conversationType';
 import AVEngineCallback from '@wfc/avenginekit/src/main/ets/wfc/av/engine/avengineCallback';
 import media from '@ohos.multimedia.media';
+import { audio } from '@kit.AudioKit';
 
 import { uikitNavigationDestinations } from './pages/uikitNavigationConfig';
 import { common } from '@kit.AbilityKit';
@@ -20,11 +21,22 @@ import ('./pages/voip/SingleAudioCallPage')
 import ('./pages/voip/SingleVideoCallPage')
 import ('./pages/voip/MultiAudioCallPage')
 import ('./pages/voip/MultiVideoCallPage')
+
+// 去电回铃音的音频流类型。发起通话时引擎会立即 startPreview 开启麦克风采集（VoIP 通话场景），
+// 默认 usage（STREAM_USAGE_MUSIC）的铃声会跟随通话路由从听筒出声。VIDEO_COMMUNICATION 属于
+// 通话流、系统默认走扬声器，接入耳机/蓝牙时仍优先外设，且能跟随 AVCastPicker 的切换。
+const OUTGOING_RING_RENDERER_INFO: audio.AudioRendererInfo = {
+    usage: audio.StreamUsage.STREAM_USAGE_VIDEO_COMMUNICATION,
+    rendererFlags: 0
+}
+
 export default class AVEngineCallbackImpl extends AVEngineCallback {
     private context: common.UIAbilityContext
     private avSession?: AVSessionManager.AVSession
     private mainNavPathStack?: NavPathStack
     private ringPlayer?: media.AVPlayer
+    // 去电响铃时是否由我们强制把通话设备切到了扬声器；停止响铃时据此恢复，交还系统默认路由。
+    private ringForcedSpeaker: boolean = false
     // 记录本次通话 push 到导航栈的页面名。后台收到来电时页面虽被 push 但不会 mount，
     // 其 aboutToAppear/sessionCallback 不会执行，didCallEndWithReason 也就没机会 pop。
     // 通话结束时由全局回调 didCallEnded 按名字把这个残留页面移除，避免点击通知进入
@@ -114,10 +126,18 @@ export default class AVEngineCallbackImpl extends AVEngineCallback {
             this.ringPlayer = player
             player.on('stateChange', async (state: media.AVPlayerState) => {
                 if (state === 'initialized') {
+                    if (!isIncoming) {
+                        // audioRendererInfo 只能在 initialized 状态、prepare() 之前设置
+                        player.audioRendererInfo = OUTGOING_RING_RENDERER_INFO
+                    }
                     await player.prepare()
                 } else if (state === 'prepared') {
                     player.loop = true
                     await player.play()
+                } else if (state === 'playing') {
+                    if (!isIncoming && this.ringPlayer === player) {
+                        this.routeOutgoingRingToSpeaker()
+                    }
                 }
             })
             const rawFd = await this.context.resourceManager.getRawFd(fileName)
@@ -136,6 +156,41 @@ export default class AVEngineCallbackImpl extends AVEngineCallback {
                 console.error('shouldStopRing error', JSON.stringify(e))
             }
             this.ringPlayer = undefined
+        }
+        this.restoreRingRoute()
+    }
+
+    // 兜底：若系统仍把去电铃声路由到听筒（VoIP 场景下的默认通话设备），显式切到扬声器。
+    // 只在落到听筒时干预，接耳机/蓝牙等外设时保持外设出声。
+    private routeOutgoingRingToSpeaker() {
+        try {
+            const routingManager = audio.getAudioManager().getRoutingManager()
+            const devices = routingManager.getPreferredOutputDeviceForRendererInfoSync(OUTGOING_RING_RENDERER_INFO)
+            if (devices.length === 0 || devices[0].deviceType !== audio.DeviceType.EARPIECE) {
+                return
+            }
+            this.ringForcedSpeaker = true
+            routingManager.setCommunicationDevice(audio.CommunicationDeviceType.SPEAKER, true).catch((e: Error) => {
+                console.error('routeOutgoingRingToSpeaker error', JSON.stringify(e))
+            })
+        } catch (e) {
+            console.error('routeOutgoingRingToSpeaker error', JSON.stringify(e))
+        }
+    }
+
+    // 停止响铃（对方接听 / 通话结束）后撤销强制扬声器，通话本身仍按系统默认（语音通话为听筒）出声。
+    private restoreRingRoute() {
+        if (!this.ringForcedSpeaker) {
+            return
+        }
+        this.ringForcedSpeaker = false
+        try {
+            audio.getAudioManager().getRoutingManager()
+                .setCommunicationDevice(audio.CommunicationDeviceType.SPEAKER, false).catch((e: Error) => {
+                    console.error('restoreRingRoute error', JSON.stringify(e))
+                })
+        } catch (e) {
+            console.error('restoreRingRoute error', JSON.stringify(e))
         }
     }
 

@@ -43,7 +43,7 @@ export default class Config {
     static ORGANIZATION_SERVER_BACKUP = null as string | null;
 
     // 接龙服务地址，如果需要接龙功能，请部署接龙服务，然后这里填上接龙服务地址；如果不需要接龙功能，请置为 null
-    static COLLECTION_SERVER_ADDRESS = null as string | null;
+    static COLLECTION_SERVER_ADDRESS = 'https://lt.wildfirechat.net/collection' as string | null;
     // 接龙服务备选地址，双网环境下使用。
     static COLLECTION_SERVER_ADDRESS_BACKUP = null as string | null;
 

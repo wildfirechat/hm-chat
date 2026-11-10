@@ -24,7 +24,7 @@ export default class Config {
     // 默认的app server使用端口是8888，注意端口号别忘记了。
     // 上线建议使用https，使用https更安全。
     //static APP_SERVER = 'http://app.wildfirechat.net:8888';
-    static APP_SERVER = 'https://aiwork-im.lgdg.cc/app';
+    static APP_SERVER = 'https://lt.wildfirechat.net/app';
     // 应用服务备选地址，双网环境下使用。
     static APP_SERVER_BACKUP = null as string | null;
 
@@ -38,17 +38,17 @@ export default class Config {
 
     // 组织结构服务地址，如果没有部署组织结构服务，或者不需要组织结构的话，可置为 null
     // 组织结构项目：https://github.com/wildfirechat/organization-platform 或 https://gitee.com/wfchat/organization-platform
-    static ORGANIZATION_SERVER = 'https://aiwork-im.lgdg.cc/org';
+    static ORGANIZATION_SERVER = 'https://lt.wildfirechat.net/org';
     // 组织结构服务备选地址，双网环境下使用。
     static ORGANIZATION_SERVER_BACKUP = null as string | null;
 
     // 接龙服务地址，如果需要接龙功能，请部署接龙服务，然后这里填上接龙服务地址；如果不需要接龙功能，请置为 null
-    static COLLECTION_SERVER_ADDRESS = 'https://aiwork-im.lgdg.cc/collection' as string | null;
+    static COLLECTION_SERVER_ADDRESS = null as string | null;
     // 接龙服务备选地址，双网环境下使用。
     static COLLECTION_SERVER_ADDRESS_BACKUP = null as string | null;
 
     // 投票服务地址，如果需要投票功能，请部署投票服务，然后这里填上投票服务地址；如果不需要投票功能，请置为 null
-    static POLL_SERVER_ADDRESS = 'https://aiwork-im.lgdg.cc/poll' as string | null;
+    static POLL_SERVER_ADDRESS = 'https://lt.wildfirechat.net/poll' as string | null;
     // 投票服务备选地址，双网环境下使用。
     static POLL_SERVER_ADDRESS_BACKUP = null as string | null;
 
@@ -63,7 +63,7 @@ export default class Config {
     // 关于语音识别服务请参考：https://gitee.com/wfchat/asr-api
     // 请求时会在 HTTP header authCode 中带上从 IM 服务获取的认证码，由 asr-api 校验。
     // 野火提供的测试服务会记录语音文件和识别出的文字，上线会有泄密风险，请务必部署自己的服务。
-    static ASR_SERVER_URL = 'https://aiwork-im.lgdg.cc/asr/api/recognize' as string | null;
+    static ASR_SERVER_URL = null as string | null;
     // 语音消息转文字服务备选地址，双网环境下使用。
     static ASR_SERVER_BACKUP_URL = null as string | null;
 
@@ -72,7 +72,7 @@ export default class Config {
     // 请配置为 asr-api 的实时语音识别地址，例如 wss://example.com/asr/api/stream，连接时会在 HTTP header authCode 中带上从 IM 服务获取的认证码。
     // 内网测试时也可以直连 wf-voice 的 WebSocket 地址（默认端口 12436），例如 ws://192.168.1.100:12436。wf-voice 本身没有鉴权，也不支持 wss，请勿直接暴露到公网。
     // 野火提供的测试服务会记录语音和识别出的文字，上线会有泄密风险，请务必部署自己的服务。
-    static ASR_STREAM_SERVER_URL = 'wss://aiwork-im.lgdg.cc/asr/api/stream' as string | null;
+    static ASR_STREAM_SERVER_URL = null as string | null;
     // 实时语音输入服务备选地址，双网环境下使用。
     static ASR_STREAM_SERVER_BACKUP_URL = null as string | null;
     // 实时语音输入是否边说边出字。开启时说话过程中实时显示正在说的这句话，说完后修正为这句的最终结果；关闭时每说完一句才显示这句话。
@@ -87,9 +87,8 @@ export default class Config {
     // 上线时，请一定要切换为你们自己部署的服务
     // 格式: [uri, 用户名, 密码]，可以添加多个
     static ICE_SERVERS = [
-        ['turn:aiwork-im.lgdg.cc:3478', 'wfchat', 'WFpocTurn8Pass'],
-        ['turn:aiwork-im.lgdg.cc:3479', 'wfchat', 'WFpocTurn8Pass']
-    ];
+        ['turn:lt.wildfirechat.net:3478', 'wfchat', 'WFpocTurn8Pass'],
+            ];
     static LANGUAGE = 'zh_CN';
 
     static SDK_PLATFORM_WINDOWS = 3;
@@ -138,7 +137,7 @@ export default class Config {
 
     static SECRET_CHAT_MEDIA_DECODE_SERVER_PORT = 7982;
     // 如果不支持工作台，将其置空即可
-    static OPEN_PLATFORM_WORK_SPACE_URL = 'https://aiwork-im.lgdg.cc/open/work.html';
+    static OPEN_PLATFORM_WORK_SPACE_URL = null as string | null;
     // 工作台备选地址，双网环境下使用。
     static OPEN_PLATFORM_WORK_SPACE_URL_BACKUP = null as string | null;
     static OPEN_PLATFORM_SERVE_PORT = 7983;
@@ -318,7 +317,7 @@ export default class Config {
      */
     static emojiBaseUrl() {
         // 表情的 baseUrl，一定要求以 / 结尾
-        let emojiBaseUrl = 'https://aiwork-im.lgdg.cc/web-static/twemoji/assets/';
+        let emojiBaseUrl = 'https://lt.wildfirechat.net/web-static/twemoji/assets/';
         // 实例代码
         // 双网环境时，将表情地址切换到备选网络
         // if (Config.isUseBackupAddress()) {
@@ -333,7 +332,7 @@ export default class Config {
      */
     static stickerBaseUrl() {
         // 动态表情的 baseUrl，一定要求以 / 结尾
-        let stickerBaseUrl = 'https://aiwork-im.lgdg.cc/web-static/sticker/';
+        let stickerBaseUrl = 'https://lt.wildfirechat.net/web-static/sticker/';
         // 实例代码
         // 双网环境时，将动态表情地址切换到备选网络
         // if (Config.isUseBackupAddress()) {

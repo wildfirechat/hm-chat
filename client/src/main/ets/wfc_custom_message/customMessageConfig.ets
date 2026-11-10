@@ -9,8 +9,6 @@ import MomentCommentMessageContent from "./momentCommentMessageContent";
 import MomentFeedMessageContent from "./momentFeedMessageContent";
 import TestCustomMessageContent from "./testCustomMessageContent";
 import TestCustomNotificationMessageContent from "./testCustomNotificationMessageContent";
-import PollMessageContent from "../wfc/messages/pollMessageContent";
-import PollResultMessageContent from "../wfc/messages/pollResultMessageContent";
 
 export default class CustomMessageConfig {
     static CustomMessageContents: MessageContentConfig[] = [
@@ -34,16 +32,6 @@ export default class CustomMessageConfig {
             flag: PersistFlag.Persist,
             type: CustomMessageContentType.MESSAGE_CONTENT_TYPE_CUSTOM_MESSAGE_TEST_NOTIFICATION,
         },
-        {
-            name: 'poll',
-            flag: PersistFlag.Persist_And_Count,
-            type: MessageContentType.Poll,
-        },
-        {
-            name: 'pollResult',
-            flag: PersistFlag.Persist_And_Count,
-            type: MessageContentType.Poll_Result,
-        },
         // 添加更多自定义消息
     ];
 
@@ -61,12 +49,6 @@ export default class CustomMessageConfig {
                 break;
             case CustomMessageContentType.MESSAGE_CONTENT_TYPE_CUSTOM_MESSAGE_TEST_NOTIFICATION:
                 content = new TestCustomNotificationMessageContent()
-                break;
-            case MessageContentType.Poll:
-                content = new PollMessageContent()
-                break;
-            case MessageContentType.Poll_Result:
-                content = new PollResultMessageContent()
                 break;
              // 参考上面的逻辑，根据消息类型，创建其他自定义消息
             default:

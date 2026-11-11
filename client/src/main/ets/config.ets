@@ -149,6 +149,11 @@ export default class Config {
     // 是否开启滑动验证。如果关闭，需要在应用服务端也关闭滑动验证。
     static ENABLE_SLIDE_VERIFY = true;
 
+    // 验证码登录成功后，是否弹出「设置新密码」界面（app-server 返回 resetCode 时，用于把初始密码改成新密码）。
+    // 默认开启，和 android / ios 的默认值保持一致；不需要引导的部署改为 false 即可。
+    // 密码登录（用初始密码时）不受此开关影响。
+    static ENABLE_RESET_PASSWORD_AFTER_CODE_LOGIN = true;
+
     // 发送日志命令，当发送此文本消息时，会把协议栈日志发送到当前会话中，为空时关闭此功能。
     static SEND_LOG_COMMAND = '*#marslog#';
 

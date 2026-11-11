@@ -17,6 +17,8 @@ export default struct ResetPasswordPage {
     // 用户手机号码
     @State phoneNumber: string = ''
     @State verificationCode: string = ''
+    // 登录后引导改密码时，由登录流程带过来的 resetCode（有值时不用再收短信验证码）
+    @State resetCode: string = ''
     // 密码登陆
     @State password: string = ''
     @State confirmPassword: string = ''
@@ -35,38 +37,41 @@ export default struct ResetPasswordPage {
             Stack() {
                 // 原有的重置密码界面
                 Column() {
-                    Row() {
-                        Text($r('app.string.verification_code')).width(72)
-                            .fontColor($r('app.color.wf_primary_text'))
-                        TextInput({
-                            text: this.verificationCode,
-                            placeholder: $r('app.string.enter_verification_code'),
-                            controller: this.controller
-                        })
-                            .placeholderColor($r('app.color.wf_tertiary_text'))
-                            .placeholderFont({ size: 16, weight: 400 })
-                            .caretColor($r('app.color.wf_primary'))
-                            .layoutWeight(1)
-                            .height(40)
-                            .margin({ left: 20 })
-                            .fontSize(FontSize.sm)
-                            .borderRadius(Radius.sm)
-                            .type(InputType.Number)
-                            .fontColor($r('app.color.wf_primary_text'))
-                            .backgroundColor(Color.Transparent)
-                            .borderStyle(BorderStyle.Dashed)
-                            .onChange((value: string) => {
-                                this.verificationCode = value
+                    // 登录后引导改密码（带了 resetCode）时不需要再输入短信验证码
+                    if (this.resetCode.length === 0) {
+                        Row() {
+                            Text($r('app.string.verification_code')).width(72)
+                                .fontColor($r('app.color.wf_primary_text'))
+                            TextInput({
+                                text: this.verificationCode,
+                                placeholder: $r('app.string.enter_verification_code'),
+                                controller: this.controller
                             })
-                        Button($r('app.string.get_verification_code'))
-                            .fontSize(FontSize.xs)
-                            .type(ButtonType.Normal)
-                            .borderRadius(Radius.sm)
-                            .enabled(!this.isProgress)
-                            .margin({ left: 8 })
-                            .onClick(() => {
-                                this.requestResetPasswordAuthCode()
-                            })
+                                .placeholderColor($r('app.color.wf_tertiary_text'))
+                                .placeholderFont({ size: 16, weight: 400 })
+                                .caretColor($r('app.color.wf_primary'))
+                                .layoutWeight(1)
+                                .height(40)
+                                .margin({ left: 20 })
+                                .fontSize(FontSize.sm)
+                                .borderRadius(Radius.sm)
+                                .type(InputType.Number)
+                                .fontColor($r('app.color.wf_primary_text'))
+                                .backgroundColor(Color.Transparent)
+                                .borderStyle(BorderStyle.Dashed)
+                                .onChange((value: string) => {
+                                    this.verificationCode = value
+                                })
+                            Button($r('app.string.get_verification_code'))
+                                .fontSize(FontSize.xs)
+                                .type(ButtonType.Normal)
+                                .borderRadius(Radius.sm)
+                                .enabled(!this.isProgress)
+                                .margin({ left: 8 })
+                                .onClick(() => {
+                                    this.requestResetPasswordAuthCode()
+                                })
+                        }
                     }
 
                     Row() {
@@ -132,7 +137,8 @@ export default struct ResetPasswordPage {
                         .backgroundColor($r('app.color.wf_primary'))
                         .focusable(true)
                         .focusOnTouch(true)
-                        .enabled(!this.isProgress && this.verificationCode.length > 0 && this.password.length > 0 && this.confirmPassword.length > 0)
+                        .enabled(!this.isProgress && (this.resetCode.length > 0 || this.verificationCode.length > 0)
+                            && this.password.length > 0 && this.confirmPassword.length > 0)
                         .type(ButtonType.Normal)
                         .width('100%')
                         .height(40)
@@ -188,6 +194,13 @@ export default struct ResetPasswordPage {
             }
         }
         .title('设置新密码')
+        .onReady((context: NavDestinationContext) => {
+            // 登录后引导改密码时会带 resetCode 过来
+            const params = context.pathInfo.param as Record<string, Object>
+            if (params && params['resetCode']) {
+                this.resetCode = params['resetCode'] as string
+            }
+        })
         .height('100%')
         .width('100%')
         .backgroundColor($r('app.color.wf_primary_background_color'))
@@ -195,7 +208,7 @@ export default struct ResetPasswordPage {
 
     resetPassword() {
         this.isProgress = true
-        appServer.resetPassword(this.verificationCode, this.password)
+        appServer.resetPassword(this.resetCode.length > 0 ? this.resetCode : this.verificationCode, this.password)
             .then(async res => {
                 showToast($r('app.string.password_reset_success'))
                 this.isProgress = false

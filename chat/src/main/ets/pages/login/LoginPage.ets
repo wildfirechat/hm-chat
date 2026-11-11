@@ -276,7 +276,7 @@ struct LoginPage {
                                 appServer.loinWithPassword(this.phoneNumber, this.password)
                                     .then(async res => {
                                         this.isLogin = false
-                                        this.onLoginSuccess(res as Record<string, Object>)
+                                        this.onLoginSuccess(res as Record<string, Object>, false)
                                     })
                                     .catch((reason: Error) => {
                                         this.isLogin = false
@@ -379,7 +379,7 @@ struct LoginPage {
         appServer.loginWithAuthCode(this.phoneNumber, this.authCode)
             .then(async res => {
                 this.isLogin = false
-                this.onLoginSuccess(res as Record<string, Object>)
+                this.onLoginSuccess(res as Record<string, Object>, true)
             })
             .catch((reason: Error) => {
                 this.isLogin = false
@@ -388,10 +388,19 @@ struct LoginPage {
             })
     }
 
-    async onLoginSuccess(res: Record<string, Object>) {
+    async onLoginSuccess(res: Record<string, Object>, fromCodeLogin: boolean) {
         console.log('login success', res);
         //  记录手机号
         this.lastLoginMobile = this.phoneNumber
+
+        // 验证码登录 app-server 总会返回 resetCode；密码登录只有用初始密码时才返回。
+        // 和 android / ios 一致：验证码这条由配置决定要不要引导改密码，密码登录只要有就引导。
+        let resetCode = (res['resetCode'] as string) || ''
+        if (fromCodeLogin && !Config.ENABLE_RESET_PASSWORD_AFTER_CODE_LOGIN) {
+            resetCode = ''
+        }
+        // 交给 MainPage 在页面就绪后压入「设置新密码」页（登录页用的是 router，还没有导航栈）
+        AppStorage.setOrCreate<string>('pendingResetPasswordCode', resetCode)
 
         let context = getContext(this) as common.UIAbilityContext;
         let preference = await data_preferences.getPreferences(context.getApplicationContext(), 'wfcstore')
@@ -438,7 +447,7 @@ struct LoginPage {
                     appServer.loinWithPassword(this.page.phoneNumber, this.page.password, this.page.cachedSlideVerifyToken)
                         .then(async res => {
                             this.page.isLogin = false
-                            this.page.onLoginSuccess(res as Record<string, Object>)
+                            this.page.onLoginSuccess(res as Record<string, Object>, false)
                         })
                         .catch((reason: Error) => {
                             this.page.isLogin = false

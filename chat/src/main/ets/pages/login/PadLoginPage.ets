@@ -230,7 +230,7 @@ struct PadLoginPage {
                         return
                     }
                     this.stopQRPolling()
-                    this.loginSuccess(userId, imToken)
+                    this.loginSuccess(userId, imToken, '')
                 } else if (code === 9) {
                     // 已被手机端扫码，等手机端确认
                     if (!this.qrScanned) {
@@ -290,7 +290,8 @@ struct PadLoginPage {
                 this.isLogin = false
                 let result = res as Record<string, Object>
                 this.lastLoginMobile = this.phoneNumber
-                this.loginSuccess(result['userId'] as string, result['token'] as string)
+                this.loginSuccess(result['userId'] as string, result['token'] as string,
+                    (result['resetCode'] as string) || '')
             })
             .catch((reason: Error) => {
                 this.isLogin = false
@@ -304,7 +305,8 @@ struct PadLoginPage {
                 this.isLogin = false
                 let result = res as Record<string, Object>
                 this.lastLoginMobile = this.phoneNumber
-                this.loginSuccess(result['userId'] as string, result['token'] as string)
+                const resetCode = Config.ENABLE_RESET_PASSWORD_AFTER_CODE_LOGIN ? ((result['resetCode'] as string) || '') : ''
+                this.loginSuccess(result['userId'] as string, result['token'] as string, resetCode)
             })
             .catch((reason: Error) => {
                 this.isLogin = false
@@ -313,8 +315,10 @@ struct PadLoginPage {
     }
 
     // 登录成功：保存凭证、连接 IM、进入主界面（扫码 / 密码 / 验证码三种方式共用）
-    private async loginSuccess(userId: string, token: string) {
+    private async loginSuccess(userId: string, token: string, resetCode: string = '') {
         hilog.info(0x0000, TAG, 'loginSuccess: save credentials & connect, userId=%{public}s', userId)
+        // 登录后是否引导改密码交给 MainPage 处理（登录页用 router，还没有导航栈）
+        AppStorage.setOrCreate<string>('pendingResetPasswordCode', resetCode)
         try {
             let context = getContext(this) as common.UIAbilityContext;
             let preference = await data_preferences.getPreferences(context.getApplicationContext(), 'wfcstore')
@@ -442,7 +446,8 @@ struct PadLoginPage {
                             this.page.isLogin = false
                             let result = res as Record<string, Object>
                             this.page.lastLoginMobile = this.page.phoneNumber
-                            this.page.loginSuccess(result['userId'] as string, result['token'] as string)
+                            this.page.loginSuccess(result['userId'] as string, result['token'] as string,
+                                (result['resetCode'] as string) || '')
                         })
                         .catch((reason: Error) => {
                             this.page.isLogin = false

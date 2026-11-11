@@ -121,6 +121,23 @@ struct MainPage {
 
     onPageShow() {
         notificationManager.cancelAll()
+        this.showPendingResetPassword()
+    }
+
+    /**
+     * 登录时 app-server 返回了 resetCode（验证码登录总会返回；密码登录在用初始密码时返回），
+     * 登录后引导用户把初始密码改掉（对齐 android / ios 登录后打开修改密码页）。
+     * 登录页用的是 router、还没有导航栈，所以到 MainPage 就绪后再 push。
+     */
+    private showPendingResetPassword() {
+        let resetCode = AppStorage.get<string>('pendingResetPasswordCode') || ''
+        if (!resetCode) {
+            return
+        }
+        AppStorage.setOrCreate<string>('pendingResetPasswordCode', '')
+        this.mainNavPathStack.pushPathByName(appNavigationDestinations.ResetPasswordPage, {
+            'resetCode': resetCode
+        } as Record<string, Object>)
     }
 
     createConversation(users: UserInfo[]) {

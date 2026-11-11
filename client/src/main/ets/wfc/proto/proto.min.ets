@@ -143,6 +143,11 @@ class WfcImpl {
 
         let objMsgs: Record<string, Object>[] = JSON.parse(messages)
         let msgs: Message[] = []
+        // 同步过程中（hasMore 为 true）收到的音视频信令要单独以 hasMore=false 发一次：
+        // 音视频 SDK 收到 hasMore 为 true 的批次会直接丢弃（认为是还在同步的中间批次），
+        // 登录前打进来的通话就建立不了会话、弹不出接听界面。单独发一遍后 SDK 才能正常处理，
+        // 其他消息仍随原批次交给 UI，避免同一条消息被处理两次。
+        let voipMsgs: Message[] = []
         objMsgs.forEach(m => {
             let msg = Message.fromProtoMessage(m);
             if (!msg) {
@@ -154,10 +159,17 @@ class WfcImpl {
                 //protoProxy.setLastReceivedMessageUnRead(JSON.stringify(conversation), stringValue(markMsg.messageUid), stringValue(markMsg.timestamp));
                 protoProxy.setLastReceivedMessageUnRead(JSON.stringify(conversation));
             }
-            msgs.push(msg)
+            if (hasMore && msg.messageContent.type >= 400 && msg.messageContent.type < 500) {
+                voipMsgs.push(msg)
+            } else {
+                msgs.push(msg)
+            }
         });
         if (msgs.length > 0) {
             self.eventEmitter!.emit(EventType.ReceiveMessage, msgs, hasMore);
+        }
+        if (voipMsgs.length > 0) {
+            self.eventEmitter!.emit(EventType.ReceiveMessage, voipMsgs, false);
         }
     }
 

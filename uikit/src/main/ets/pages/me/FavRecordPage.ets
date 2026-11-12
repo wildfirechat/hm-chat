@@ -15,10 +15,8 @@ import { showToast } from '../../common/utils/Toast'
 import { MMMediaEntry } from '../../common/Types'
 import { mediaEntry } from '../../helper/messageHelper'
 import MMMessagePreviewDialog from '../mm/MMMessagePreviewDialog'
-import { downloadMedia } from '../../helper/mediaHelper'
-import { filePreview } from '@kit.PreviewKit'
-import { fileUri } from '@kit.CoreFileKit'
-import { uniformTypeDescriptor } from '@kit.ArkData'
+import { openFile } from '../../helper/fileOpenHelper'
+import common from '@ohos.app.ability.common'
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import LinkMessageContent from '@wfc/client/src/main/ets/wfc/messages/linkMessageContent'
 import CardMessageContent from '@wfc/client/src/main/ets/wfc/messages/cardMessageContent'
@@ -142,28 +140,9 @@ export default struct FavRecordPage {
             })
             this.mmPreviewDialogController.open()
         } else if (content.type === MessageContentType.File) {
-            // 文件消息：下载并预览
-            let context = getContext(this)
+            // 文件消息：和会话里的文件消息一样，交给系统预览打开
             let fileContent = content as FileMessageContent
-            downloadMedia(context, msg.messageUid, fileContent.remotePath)
-                .then(async filePath => {
-                    let canPreview = await filePreview.canPreview(context, fileUri.getUriFromPath(filePath))
-                    if (canPreview) {
-                        let title = fileContent.name
-                        let uri = fileUri.getUriFromPath(filePath)
-                        let typeId = uniformTypeDescriptor.getUniformDataTypeByFilenameExtension(filePath.substring(filePath.lastIndexOf('.')));
-                        let typeObj = uniformTypeDescriptor.getTypeDescriptor(typeId);
-                        let mimeTypes = typeObj.mimeTypes;
-                        filePreview.openPreview(context, {
-                            title: title,
-                            uri: uri,
-                            mimeType: mimeTypes[0],
-                        })
-                    }
-                })
-                .catch((err: Error) => {
-                    showToast('文件预览失败')
-                })
+            openFile(getContext(this) as common.UIAbilityContext, msg.messageUid, fileContent.remotePath, fileContent.name)
         } else if (content.type === MessageContentType.Voice) {
             // 语音消息：播放语音
             let voiceContent = content as SoundMessageContent

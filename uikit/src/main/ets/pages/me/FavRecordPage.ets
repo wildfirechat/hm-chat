@@ -16,8 +16,10 @@ import { MMMediaEntry } from '../../common/Types'
 import { mediaEntry } from '../../helper/messageHelper'
 import MMMessagePreviewDialog from '../mm/MMMessagePreviewDialog'
 import { openFile } from '../../helper/fileOpenHelper'
+import FileDownloadDialog from '../../view/FileDownloadDialog'
 import common from '@ohos.app.ability.common'
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
+import Long from '@wfc/client/src/main/ets/wfc/util/long'
 import LinkMessageContent from '@wfc/client/src/main/ets/wfc/messages/linkMessageContent'
 import CardMessageContent from '@wfc/client/src/main/ets/wfc/messages/cardMessageContent'
 import ArticlesMessageContent from '@wfc/client/src/main/ets/wfc/messages/articlesMessageContent'
@@ -114,6 +116,35 @@ export default struct FavRecordPage {
     }
 
     /**
+     * 下载并打开收藏里的文件，期间显示下载进度对话框
+     */
+    private openFileWithProgress(messageUid: Long, url: string, name: string) {
+        AppStorage.setOrCreate<string>('fileDownloadName', name)
+        AppStorage.setOrCreate<number>('fileDownloadPercent', 0)
+        let dialog = new CustomDialogController({
+            builder: FileDownloadDialog(),
+            autoCancel: false,
+            customStyle: true,
+        })
+        // 本地已有缓存时下载会立刻结束，延迟一点再弹进度，避免闪一下
+        let opened = false
+        let timer = setTimeout(() => {
+            opened = true
+            dialog.open()
+        }, 200)
+        openFile(getContext(this) as common.UIAbilityContext, messageUid, url, name,
+            (percent: number) => {
+                AppStorage.setOrCreate<number>('fileDownloadPercent', percent)
+            },
+            () => {
+                clearTimeout(timer)
+                if (opened) {
+                    dialog.close()
+                }
+            })
+    }
+
+    /**
      * 收藏项点击：文件走菜单（转发 / 下载后打开），其他类型直接预览
      */
     onFavItemClick(favItem: FavItem) {
@@ -181,9 +212,9 @@ export default struct FavRecordPage {
             })
             this.mmPreviewDialogController.open()
         } else if (content.type === MessageContentType.File) {
-            // 文件消息：和会话里的文件消息一样，交给系统预览打开
+            // 文件消息：和会话里的文件消息一样，交给系统预览打开，期间显示下载进度
             let fileContent = content as FileMessageContent
-            openFile(getContext(this) as common.UIAbilityContext, msg.messageUid, fileContent.remotePath, fileContent.name)
+            this.openFileWithProgress(msg.messageUid, fileContent.remotePath, fileContent.name)
         } else if (content.type === MessageContentType.Voice) {
             // 语音消息：播放语音
             let voiceContent = content as SoundMessageContent

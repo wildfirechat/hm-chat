@@ -113,6 +113,47 @@ export default struct FavRecordPage {
         return content.duration
     }
 
+    /**
+     * 收藏项点击：文件走菜单（转发 / 下载后打开），其他类型直接预览
+     */
+    onFavItemClick(favItem: FavItem) {
+        if (favItem.type === MessageContentType.File) {
+            return
+        }
+        this.previewMessage(favItem)
+    }
+
+    /**
+     * 收藏里的文件：点击弹出菜单（转发 / 下载后打开），其他类型仍是点击直接预览
+     */
+    @Builder
+    fileFavMenu(favItem: FavItem) {
+        Menu() {
+            MenuItem({ content: '转发' })
+                .onClick(() => {
+                    this.forwardFavFile(favItem)
+                })
+            MenuItem({ content: '下载后打开' })
+                .onClick(() => {
+                    this.previewMessage(favItem)
+                })
+        }
+    }
+
+    forwardFavFile(favItem: FavItem) {
+        let message = wfc.getMessageByUid(favItem.messageUid)
+        if (!message) {
+            message = FavItem.toMessage(favItem)
+        }
+        if (!message) {
+            showToast('消息不存在，无法转发')
+            return
+        }
+        this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ForwardMessagePage, {
+            'messages': [message]
+        } as Record<string, Object>)
+    }
+
     previewMessage(favItem: FavItem) {
         let msg = FavItem.toMessage(favItem)
         let content = msg.messageContent
@@ -254,6 +295,7 @@ export default struct FavRecordPage {
                                             .justifyContent(FlexAlign.Center)
                                             .alignItems(HorizontalAlign.Start)
                                         }
+                                        .bindMenu(this.fileFavMenu(favItem))
                                     } else if (favItem.type === MessageContentType.Video) {
                                         Image(this.videoThumbnail(favItem))
                                             .width(160)
@@ -396,7 +438,7 @@ export default struct FavRecordPage {
                                 .padding(16)
                                 .alignItems(HorizontalAlign.Start)
                                 .onClick(() => {
-                                    this.previewMessage(favItem)
+                                    this.onFavItemClick(favItem)
                                 })
                             }
                             .backgroundColor($r('app.color.wf_background'))

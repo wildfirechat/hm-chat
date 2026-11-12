@@ -15,6 +15,7 @@ import { FontSize } from '../../common/design/Tokens'
 import common from '@ohos.app.ability.common'
 import MessageContentType from '@wfc/client/src/main/ets/wfc/messages/messageContentType'
 import FileMessageContent from '@wfc/client/src/main/ets/wfc/messages/fileMessageContent'
+import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import { openFile } from '../../helper/fileOpenHelper'
 
 @Component
@@ -69,6 +70,48 @@ export default struct FileRecordPage {
         }, err => {
             showToast('加载文件记录失败: ' + err)
             this.isLoading = false
+        })
+    }
+
+    /**
+     * 点击文件记录弹出的菜单：转发 / 下载后打开
+     */
+    @Builder
+    fileRecordMenu(fileRecord: FileRecord) {
+        Menu() {
+            MenuItem({ content: '转发' })
+                .onClick(() => {
+                    this.forwardFileRecord(fileRecord)
+                })
+            MenuItem({ content: '下载后打开' })
+                .onClick(() => {
+                    this.openFileRecord(fileRecord)
+                })
+        }
+    }
+
+    /**
+     * 转发文件记录对应的消息：优先用本地消息，本地没有时从服务器拉一次
+     */
+    forwardFileRecord(fileRecord: FileRecord) {
+        let message = wfc.getMessageByUid(fileRecord.messageUid)
+        if (message) {
+            this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ForwardMessagePage, {
+                'messages': [message]
+            } as Record<string, Object>)
+            return
+        }
+        wfc.loadRemoteMessage(fileRecord.messageUid, (msg: Message) => {
+            if (msg) {
+                this.mainNavPathStack.pushPathByName(uikitNavigationDestinations.ForwardMessagePage, {
+                    'messages': [msg]
+                } as Record<string, Object>)
+            } else {
+                showToast('消息不存在，无法转发')
+            }
+        }, (err: number) => {
+            console.error('load remote message failed', err)
+            showToast('消息不存在，无法转发')
         })
     }
 
@@ -150,9 +193,7 @@ export default struct FileRecordPage {
                                 .width('100%')
                                 .justifyContent(FlexAlign.Start)
                                 .backgroundColor($r('app.color.wf_background'))
-                                .onClick(() => {
-                                    this.openFileRecord(fileRecord)
-                                })
+                                .bindMenu(this.fileRecordMenu(fileRecord))
                             }
                         }, (fileRecord: FileRecord) => stringValue(fileRecord.messageUid)
                         )

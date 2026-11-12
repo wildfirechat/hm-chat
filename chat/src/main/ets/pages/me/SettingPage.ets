@@ -1,7 +1,5 @@
 import { showToast } from '@wfc/uikit/src/main/ets/common/utils/Toast'
 import OptionItemView from '@wfc/uikit/src/main/ets/view/OptionItemView'
-import data_preferences from '@ohos.data.preferences'
-import wfc from '@wfc/client/src/main/ets/wfc/client/wfc';
 import { uikitNavigationDestinations } from '@wfc/uikit/src/main/ets/pages/uikitNavigationConfig';
 import { appNavigationDestinations } from '../mainNavigationConfig';
 import Conversation from '@wfc/client/src/main/ets/wfc/model/conversation';
@@ -10,6 +8,7 @@ import BuildProfile from 'BuildProfile';
 import appServer from '@wfc/uikit/src/main/ets/api/appServer';
 import { bundleManager } from '@kit.AbilityKit';
 import { Radius } from '@wfc/uikit/src/main/ets/common/design/Tokens'
+import { logout } from '@wfc/uikit/src/main/ets/helper/logoutHelper'
 
 @Preview
 @Component
@@ -134,10 +133,10 @@ export default struct SettingPage {
                     .borderRadius(Radius.sm)
                     .margin({ top: 32 })
                     .onClick(() => {
+                        let context = getContext(this).getApplicationContext()
                         showToast('正在退出登录，请稍后...')
-                        data_preferences.deletePreferences(getContext(this).getApplicationContext(), 'wfcstore')
-                        this.mainNavPathStack.clear(false)
-                        wfc.disconnect(true, false)
+                        // 清登录态、断开 IM 并主动回登录页（原来只等连接状态回调，手动断开时回调不一定来）
+                        logout(context)
                     })
             }
             .width('100%')

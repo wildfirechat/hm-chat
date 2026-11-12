@@ -12,6 +12,10 @@ import Long from '@wfc/client/src/main/ets/wfc/util/long'
 import { eq, stringValue } from '@wfc/client/src/main/ets/wfc/util/longUtil'
 import { uikitNavigationDestinations } from '../uikitNavigationConfig'
 import { FontSize } from '../../common/design/Tokens'
+import common from '@ohos.app.ability.common'
+import MessageContentType from '@wfc/client/src/main/ets/wfc/messages/messageContentType'
+import FileMessageContent from '@wfc/client/src/main/ets/wfc/messages/fileMessageContent'
+import { openFile } from '../../helper/fileOpenHelper'
 
 @Component
 export default struct FileRecordPage {
@@ -66,6 +70,22 @@ export default struct FileRecordPage {
             showToast('加载文件记录失败: ' + err)
             this.isLoading = false
         })
+    }
+
+    /**
+     * 点开一条文件记录：和会话里的文件消息一样，先下载再交给系统预览打开。
+     * 消息还在就用消息内容里的 remotePath（和聊天里完全一致），
+     * 消息已被删除时退化成文件记录自带的 url。
+     */
+    openFileRecord(fileRecord: FileRecord) {
+        let message = wfc.getMessageByUid(fileRecord.messageUid)
+        if (message && message.messageContent && message.messageContent.type === MessageContentType.File) {
+            let content = message.messageContent as FileMessageContent
+            openFile(getContext(this) as common.UIAbilityContext, message.messageUid, content.remotePath,
+                content.name ? content.name : fileRecord.name)
+            return
+        }
+        openFile(getContext(this) as common.UIAbilityContext, fileRecord.messageUid, fileRecord.url, fileRecord.name)
     }
 
     fileRecordIcon(fileRecord: FileRecord): ResourceStr {
@@ -130,6 +150,9 @@ export default struct FileRecordPage {
                                 .width('100%')
                                 .justifyContent(FlexAlign.Start)
                                 .backgroundColor($r('app.color.wf_background'))
+                                .onClick(() => {
+                                    this.openFileRecord(fileRecord)
+                                })
                             }
                         }, (fileRecord: FileRecord) => stringValue(fileRecord.messageUid)
                         )

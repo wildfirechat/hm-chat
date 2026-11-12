@@ -1,13 +1,11 @@
 import common from '@ohos.app.ability.common';
 import appServer from '@wfc/uikit/src/main/ets/api/appServer';
-import router from '@ohos.router';
-import data_preferences from '@ohos.data.preferences';
-import wfc from '@wfc/client/src/main/ets/wfc/client/wfc';
 import { showToast } from '@wfc/uikit/src/main/ets/common/utils/Toast';
 import { inputMethod } from '@kit.IMEKit';
 import { SlideVerifyView, SlideVerifyViewDelegate } from '@wfc/uikit/src/main/ets/view/SlideVerifyView';
 import Config from '@wfc/client/src/main/ets/config';
 import { FontSize, Radius } from '@wfc/uikit/src/main/ets/common/design/Tokens'
+import { logout } from '@wfc/uikit/src/main/ets/helper/logoutHelper'
 
 import('@wfc/uikit/src/main/ets/pages/misc/WebViewPageWithRouter') //引入共享包中的命名路由页面
 
@@ -155,10 +153,9 @@ export default struct DestroyAccountPage {
     }
 
     async onDestroySuccess(res: Record<string, Object>) {
-        console.log('login success', res);
-        data_preferences.deletePreferences(getContext(this).getApplicationContext(), 'wfcstore')
-        this.mainNavPathStack.clear(false)
-        wfc.disconnect(true, false)
+        console.log('destroy account success', res);
+        // 注销成功后和退出登录一样：清登录态、断开 IM 并主动回登录页
+        logout(getContext(this).getApplicationContext())
     }
 
     createSlideVerifyDelegate(): SlideVerifyViewDelegate {

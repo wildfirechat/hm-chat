@@ -17,6 +17,7 @@ import MessageContentType from '@wfc/client/src/main/ets/wfc/messages/messageCon
 import FileMessageContent from '@wfc/client/src/main/ets/wfc/messages/fileMessageContent'
 import Message from '@wfc/client/src/main/ets/wfc/messages/message'
 import { openFile } from '../../helper/fileOpenHelper'
+import FileDownloadDialog from '../../view/FileDownloadDialog'
 
 @Component
 export default struct FileRecordPage {
@@ -122,13 +123,43 @@ export default struct FileRecordPage {
      */
     openFileRecord(fileRecord: FileRecord) {
         let message = wfc.getMessageByUid(fileRecord.messageUid)
+        let context = getContext(this) as common.UIAbilityContext
         if (message && message.messageContent && message.messageContent.type === MessageContentType.File) {
             let content = message.messageContent as FileMessageContent
-            openFile(getContext(this) as common.UIAbilityContext, message.messageUid, content.remotePath,
+            this.openFileWithProgress(context, message.messageUid, content.remotePath,
                 content.name ? content.name : fileRecord.name)
             return
         }
-        openFile(getContext(this) as common.UIAbilityContext, fileRecord.messageUid, fileRecord.url, fileRecord.name)
+        this.openFileWithProgress(context, fileRecord.messageUid, fileRecord.url, fileRecord.name)
+    }
+
+    /**
+     * 下载并打开文件，期间显示下载进度对话框
+     */
+    private openFileWithProgress(context: common.UIAbilityContext, messageUid: Long, url: string, name: string) {
+        AppStorage.setOrCreate<string>('fileDownloadName', name)
+        AppStorage.setOrCreate<number>('fileDownloadPercent', 0)
+        let dialog = new CustomDialogController({
+            builder: FileDownloadDialog(),
+            autoCancel: false,
+            customStyle: true,
+        })
+        // 本地已有缓存时下载会立刻结束，延迟一点再弹进度，避免闪一下
+        let opened = false
+        let timer = setTimeout(() => {
+            opened = true
+            dialog.open()
+        }, 200)
+        openFile(context, messageUid, url, name,
+            (percent: number) => {
+                AppStorage.setOrCreate<number>('fileDownloadPercent', percent)
+            },
+            () => {
+                clearTimeout(timer)
+                if (opened) {
+                    dialog.close()
+                }
+            })
     }
 
     fileRecordIcon(fileRecord: FileRecord): ResourceStr {

@@ -17,18 +17,27 @@ import { downloadMedia } from './mediaHelper';
  * @param messageUid 消息 uid，作为本地缓存文件名
  * @param remoteUrl 文件的远端地址（消息里的 remotePath，文件记录里的 url）
  * @param name 文件名，用于后缀校验和预览标题
+ * @param onProgress 下载进度回调，参数是百分比（0~100），用于页面显示下载进度
+ * @param onDone 下载结束（成功、失败、提前返回都会调用）后回调，用于关闭进度提示
  */
-export function openFile(context: common.UIAbilityContext, messageUid: Long, remoteUrl: string, name: string): void {
+export function openFile(context: common.UIAbilityContext, messageUid: Long, remoteUrl: string, name: string,
+    onProgress?: (percent: number) => void, onDone?: () => void): void {
     if (!remoteUrl) {
         showToast('文件地址为空，无法打开');
+        onDone?.();
         return;
     }
     let ext = name.substring(name.lastIndexOf('.') + 1).toLowerCase();
     if (Config.DISABLED_RECEIVE_FILE_TYPES.includes(ext)) {
         showToast('禁止打开此类型');
+        onDone?.();
         return;
     }
-    downloadMedia(context, messageUid, remoteUrl)
+    downloadMedia(context, messageUid, remoteUrl, (receivedSize: number, totalSize: number) => {
+        if (totalSize > 0 && onProgress) {
+            onProgress(Math.min(100, receivedSize * 100 / totalSize));
+        }
+    })
         .then(async (filePath: string) => {
             let uri = fileUri.getUriFromPath(filePath);
             let canPreview = await filePreview.canPreview(context, uri);
@@ -48,5 +57,8 @@ export function openFile(context: common.UIAbilityContext, messageUid: Long, rem
         .catch((e: Error) => {
             console.error('open file failed', e);
             showToast('文件预览失败');
+        })
+        .finally(() => {
+            onDone?.();
         })
 }
